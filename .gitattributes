@@ -3,4 +3,5 @@
 makerelease.sh export-ignore
 images/unorganised export-ignore
 images/readme export-ignore
+RE.MACHINON export-ignore
 views export-ignore
