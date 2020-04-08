@@ -43,13 +43,6 @@ header.logo {
     background-color: #393B3E;
 }
 
-.ui-corner-all,
-.display .ui-widget-content,
-.ui-widget-content {
-    color: var(--main-text-color);
-    background-color: var(--main-bg-color) !important;
-}
-
 .ui-dialog .ui-dialog-buttonpane {
     background: var(--main-bg-color);
 }
@@ -87,6 +80,10 @@ header.logo {
     background-image: linear-gradient(to top, rgba(81,85,88, 0), rgba(81,85,88, 1) 90%);
 }
 
+#bigtext {
+    color: var(--main-text-color) !important;
+}
+
 #bigtext, .switch-cell {
     background: linear-gradient(to right, rgba(81,85,88, 0), rgba(81,85,88, 1) 15px) !important;
 }
@@ -95,3 +92,6 @@ header.logo {
     background: rgba(0,0, 0, 0.2) !important;
 }
 
+#type .dimslider, .input .dimslider, .statusNormal .dimslider, .statusProtected .dimslider {
+    background: var(--main-disabled-color);
+}
