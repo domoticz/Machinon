@@ -30,7 +30,7 @@ On your Raspberry Pi, in Domoticz theme directory :
 
 ```
 cd /home/${USER}/domoticz/www/styles
-git clone https://github.com/domoticz/machinon-domoticz_theme.git machinon
+git clone https://github.com/domoticz/machinon.git machinon
 sudo /etc/init.d/domoticz.sh restart
 ```
 
@@ -49,7 +49,7 @@ git pull
 ## Checking beta
 ```
 cd domoticz/www/styles
-git clone https://github.com/domoticz/machinon-domoticz_theme.git machinon-beta
+git clone https://github.com/domoticz/machinon.git machinon-beta
 cd machinon-beta
 git checkout beta
 ```
