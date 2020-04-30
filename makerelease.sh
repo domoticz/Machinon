@@ -5,7 +5,7 @@
 
 # Parameters
 NAME="machinon"
-REPOSITORY="EdddieN/machinon-domoticz_theme"
+REPOSITORY="domoticz/Machinon"
 GH_TOKEN="$1"
 
 if [ $# -eq 0 ]
