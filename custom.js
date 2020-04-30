@@ -124,20 +124,18 @@ function init_theme() {
     }, 100);
 
     $(document).ready(function() {
-        if (!isMobile) {
-            MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-            var observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    $("#main-view").children("div.container").removeClass("container").addClass("container-fluid");
-                    removeRowDivider();
-                });
+        MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                $("#main-view").children("div.container").removeClass("container").addClass("container-fluid");
+                removeRowDivider();
             });
-            var targetNode = document.getElementById("holder");
-            observer.observe(targetNode, {
-                childList: true,
-                subtree: true
-            });
-        }
+        });
+        var targetNode = document.getElementById("holder");
+        observer.observe(targetNode, {
+            childList: true,
+            subtree: true
+        });
         enableThemeFeatures();
         setLogo();
         setSearch();
