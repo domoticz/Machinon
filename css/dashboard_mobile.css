@@ -115,6 +115,7 @@ body.dashMobile table.mobileitem td.name a:after {
     color: inherit;
     font-size: 12px;
     text-align: center;
+    width: 18px;
 }
 
 body.dashMobile table.mobileitem td#status,
