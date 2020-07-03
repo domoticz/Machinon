@@ -11,6 +11,14 @@ function setDevicesNativeSelectorForMobile() {
     });
 }
 
+function setCorrectDashboardLinksforMobile() {
+    if (!isMobile) return;
+    $("table.mobileitem td#name > img").each(function() {
+        var script = $(this).attr("onclick");
+        $(this).wrap('<a onclick="' + script + '"></a>');
+    });
+}
+
 function setAllDevicesFeatures() {
     switchState = {
         on: $.t("On"),

@@ -129,6 +129,7 @@ function init_theme() {
             mutations.forEach(function(mutation) {
                 $("#main-view").children("div.container").removeClass("container").addClass("container-fluid");
                 removeRowDivider();
+                setCorrectDashboardLinksforMobile();
             });
         });
         var targetNode = document.getElementById("holder");
