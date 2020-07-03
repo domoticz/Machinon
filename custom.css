@@ -118,7 +118,7 @@ h4,
 #logdata,
 #logdata_status,
 #logdata_error {
-    background: var(--main-item-bg-color);
+    background: var(--main-navbar-bg-color);
 }
 
 .lognorm {
@@ -1175,7 +1175,7 @@ button.savebtn:disabled {
 
 .display .ui-widget-content {
     background: transparent;
-    color: black;
+    color: var(--main-text-color);
     border: none;
     border-bottom: 1px solid var(--main-blue-color);
 }
@@ -1216,7 +1216,10 @@ table.dataTable thead th {
 .dataTables_wrapper tr.even {
     height: 45px;
     color: var(--main-text-color) !important;
-    background-color: transparent;
+}
+
+.dataTables_wrapper tr.odd {
+    background-color: var(--main-disabled-color);
 }
 
 .dataTables_wrapper tr.even {
@@ -1406,8 +1409,13 @@ input#AcceptNewHardware:checked ~ button {
     border-radius: 0;
     border: none;
     border-bottom: 1px solid var(--main-blue-color);
+    color: var(--main-text-color);
     font-family: main-font;
 }
+select.ui-corner-all option {
+    background: var(--main-navbar-bg-color);
+}
+
 /* =Setup */
 /* Footer */
 /* =Footer */
