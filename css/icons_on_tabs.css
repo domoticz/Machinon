@@ -151,6 +151,11 @@
     margin-right: 10px;
     vertical-align: middle;
 }
+.span6 H2 [data-i18n="IFTTT"]::before {
+    content: url(../images/tabs/icons8-push-notifications-16.png);
+    margin-right: 10px;
+    vertical-align: middle;
+}
 
 .span6 H2 [data-i18n="Pushover (Android/iOs)"]::before {
     content: url(../images/tabs/icons8-push-notifications-16.png);
@@ -163,9 +168,30 @@
     margin-right: 10px;
     vertical-align: middle;
 }
+.span6 H2 [data-i18n="Pushbullet (iOS/Android/Windows)"]::before {
+    content: url(../images/tabs/icons8-push-notifications-16.png);
+    margin-right: 10px;
+    vertical-align: middle;
+}
+.span6 H2 [data-i18n="Pushsafer (iOS/Android/Windows)"]::before {
+    content: url(../images/tabs/icons8-push-notifications-16.png);
+    margin-right: 10px;
+    vertical-align: middle;
+}
+.span6 H2 [data-i18n="Telegram"]::before {
+    content: url(../images/tabs/icons8-push-notifications-16.png);
+    margin-right: 10px;
+    vertical-align: middle;
+}
 
 .span6 H2 [data-i18n="Clickatell SMS"]::before {
     content: url(../images/tabs/icons8-sms-16.png);
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.span12 H2 [data-i18n="Custom HTTP"]::before {
+    content: url(../images/tabs/icons8-website-16.png);
     margin-right: 10px;
     vertical-align: middle;
 }
