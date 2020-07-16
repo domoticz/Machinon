@@ -27,8 +27,7 @@ function setLogo() {
 }
 
 function setColorScheme() {
-    console.log(theme);
-    if (theme.features.custom_color_scheme) {
+    if (theme.features.custom_color_scheme.enabled) {
         $("body").get(0).style.setProperty('--main-bg-color', theme.color_scheme.background);
         $("body").get(0).style.setProperty('--main-blue-color',theme.color_scheme.main_color);
         $("body").get(0).style.setProperty('--main-navbar-bg-color',theme.color_scheme.navbar);
