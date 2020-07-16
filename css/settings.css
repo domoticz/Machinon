@@ -19,39 +19,39 @@ input#AcceptNewHardware:checked ~ button {
 /* Popups */
 
 /* Theme tab in Settings */
-input.parentrequiredchild {
-    margin-left: 16px;
+#settingscontent p.two_cols {
+    display: flex;
+    flex-flow: row wrap;
 }
 
-input.parentunrequiredchild {
-    margin-left: 16px;
+#settingscontent p > span {
+    display: block;
 }
+
+#settingscontent span.cols_span {
+    flex: 0 0 100%;
+}
+
+#settingscontent p.two_cols > span.option {
+    width: 50%;
+}
+
+#settingscontent p:not(.two_cols) > span.option {
+    margin-left: 2em;
+}
+
+#settingscontent span.option.label_right > label {
+    display: inline-block;
+    min-width: 100px;
+    text-align: right;
+    padding-right: 10px;
+}
+
 /* if a sub-setting needs the parent settings to be checked. */
-#settingscontent input.parentrequired:not(:checked) ~ input.parentrequiredchild,
-#settingscontent input.parentrequired:not(:checked) ~ textarea.parentrequiredchild,
-#settingscontent input.parentrequired:not(:checked) ~ input.parentrequiredchild + label {
+#settingscontent input.parentrequired:not(:checked) ~ span.option,
+#settingscontent input.parentrequired:not(:checked) ~ span.option > input.parentrequiredchild,
+#settingscontent input.parentrequired:not(:checked) ~ span.option > textarea.parentrequiredchild {
     color: var(--main-disabled-color);
-}
-
-#settingscontent input.parentrequired:checked ~ input.parentrequiredchild,
-#settingscontent input.parentrequired:checked ~ input.parentrequiredchild + label {
-    display: inline-block;
-    margin-right: 5px;
-}
-
-#settingscontent input.parentrequired:not(:checked) ~ .parentrequiredchild {
-    display: inline-block;
-}
-
-/* if a sub-setting needs the parent settings to be UNchecked. */
-#settingscontent input.parentunrequired:checked ~ input.parentunrequiredchild,
-#settingscontent input.parentunrequired:checked ~ input.parentunrequiredchild + label {
-    display: inline-block;
-}
-
-#settingscontent input.parentunrequired:not(:checked) ~ input.parentunrequiredchild,
-#settingscontent input.parentunrequired:not(:checked) ~ input.parentunrequiredchild + label {
-    display: inline-block;
 }
 
 /*System page*/
@@ -82,7 +82,7 @@ input.parentunrequiredchild {
     flex-grow: 1;
 }
 
-#settings input, #settings select, #settings textarea {
+#settings input:not([type=color]), #settings select, #settings textarea {
     width: auto !important;
 }
 
@@ -90,9 +90,15 @@ input.parentunrequiredchild {
     width: 100% !important;
 }
 
+#settings input[type=color] {
+    border: 0;
+    background: transparent;
+}
+
 #textareaIcons {
     resize: none;
     width: 100%;
+    margin: 1em 0;
 }
 
 .blocklyText {
