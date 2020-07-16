@@ -117,7 +117,7 @@
 }
 
 .span12 H2 [data-i18n="Image instead of icons"]::before {
-    content: url(../images/tabs/icons8-color-palette-16.png);
+    content: url(../images/tabs/icons8-display-16.png);
     margin-right: 10px;
     vertical-align: middle;
 }
@@ -128,8 +128,8 @@
     vertical-align: middle;
 }
 
-.span6 H2 [data-i18n="Logo"]::before {
-    content: url(../images/tabs/icons8-display-16.png);
+.span6 H2 [data-i18n="Colour Options"]::before {
+    content: url(../images/tabs/icons8-color-palette-16.png);
     margin-right: 10px;
     vertical-align: middle;
 }
