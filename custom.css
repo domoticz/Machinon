@@ -340,6 +340,26 @@ input[type="text"] {
     border-color: var(--main-blue-color);
 }
 
+input[type="checkbox"] {
+    display: none;
+}
+
+input[type="checkbox"] + label::before {
+    content:'';
+    border: 1px solid var(--main-text-color);
+    padding: 0 0.4rem;
+    margin-right: 0.3rem;
+    font-size: 0.6rem;
+}
+
+input[type="checkbox"]:disabled + label::before {
+    border: 1px solid var(--main-disabled-color);
+}
+
+input[type="checkbox"]:checked + label::before {
+    background-color: var(--main-blue-color);
+}
+
 /* common features */
 /*need ofix media screen*/
 #timesun {
