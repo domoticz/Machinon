@@ -31,7 +31,7 @@ function setColorScheme() {
         $("body").get(0).style.setProperty('--main-bg-color', theme.color_scheme.background);
         $("body").get(0).style.setProperty('--main-blue-color',theme.color_scheme.main_color);
         $("body").get(0).style.setProperty('--main-navbar-bg-color',theme.color_scheme.navbar);
-        $("body").get(0).style.setProperty('--main-item-bg-color',theme.color_scheme.navbar_item);
+        $("body").get(0).style.setProperty('--main-item-bg-color',theme.color_scheme.item);
         $("body").get(0).style.setProperty('--main-text-color',theme.color_scheme.main_text);
         $("body").get(0).style.setProperty('--secondary-text-color',theme.color_scheme.secondary_text);
         $("body").get(0).style.setProperty('--main-border-color',theme.color_scheme.border);
