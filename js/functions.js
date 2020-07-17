@@ -26,6 +26,19 @@ function setLogo() {
     $(containerLogo).insertBefore(".navbar-inner");
 }
 
+function setColorScheme() {
+    if (theme.features.custom_color_scheme.enabled) {
+        $("body").get(0).style.setProperty('--main-bg-color', theme.color_scheme.background);
+        $("body").get(0).style.setProperty('--main-blue-color',theme.color_scheme.main_color);
+        $("body").get(0).style.setProperty('--main-navbar-bg-color',theme.color_scheme.navbar);
+        $("body").get(0).style.setProperty('--main-item-bg-color',theme.color_scheme.item);
+        $("body").get(0).style.setProperty('--main-text-color',theme.color_scheme.main_text);
+        $("body").get(0).style.setProperty('--secondary-text-color',theme.color_scheme.secondary_text);
+        $("body").get(0).style.setProperty('--main-border-color',theme.color_scheme.border);
+        $("body").get(0).style.setProperty('--main-disabled-color',theme.color_scheme.disabled);
+    }
+}
+
 function setSearch() {
     $('<div id="search"><input type="text" id="searchInput" autocomplete="off" onkeyup="searchFunction()" placeholder="' + language.type_to_search + '" title="' + language.type_to_search + '"><i class="ion-md-search"></i></div>').appendTo(".container-logo");
     window.addEventListener("keydown",function (e) {

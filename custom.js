@@ -138,6 +138,7 @@ function init_theme() {
             subtree: true
         });
         enableThemeFeatures();
+        setColorScheme();
         setLogo();
         setSearch();
         setDevicesNativeSelectorForMobile();

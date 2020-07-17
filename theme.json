@@ -3,9 +3,9 @@
     "name": "Machinon",
     "description": "Machinon custom theme, simple and light",
     "license": "GNU General Public License v3.0",
-    "version":"1.15.5",
+    "version":"1.16",
     "author": "EdddieN",
-    "homepage": "https://www.machinon.com",
+    "homepage": "https://www.github.com/domoticz/Machinon",
     "wiki": "https://www.domoticz.com/wiki/Machinon_Theme",
     "standby_after": 10,
     "dashboard_camera_refresh": 10,
@@ -19,6 +19,16 @@
         ],
     "background_img":"",
     "background_type":"",
+    "color_scheme": {
+        "background":"",
+        "main_color": "",
+        "navbar":"",
+        "item":"",
+        "main_text":"",
+        "alt_text":"",
+        "border":"",
+        "disabled":""
+    },
     "features": {
         "dark_theme": {
             "id":10,
@@ -123,6 +133,11 @@
         "wind_direction": {
             "id":38,
             "enabled":true,
+            "files": []
+        },
+        "custom_color_scheme": {
+            "id":39,
+            "enabled":false,
             "files": []
         }
     }
