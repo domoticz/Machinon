@@ -28,14 +28,14 @@ function setLogo() {
 
 function setColorScheme() {
     if (theme.features.custom_color_scheme.enabled) {
-        $("body").get(0).style.setProperty('--main-bg-color', theme.color_scheme.background);
-        $("body").get(0).style.setProperty('--main-blue-color',theme.color_scheme.main_color);
-        $("body").get(0).style.setProperty('--main-navbar-bg-color',theme.color_scheme.navbar);
-        $("body").get(0).style.setProperty('--main-item-bg-color',theme.color_scheme.item);
-        $("body").get(0).style.setProperty('--main-text-color',theme.color_scheme.main_text);
-        $("body").get(0).style.setProperty('--secondary-text-color',theme.color_scheme.secondary_text);
-        $("body").get(0).style.setProperty('--main-border-color',theme.color_scheme.border);
-        $("body").get(0).style.setProperty('--main-disabled-color',theme.color_scheme.disabled);
+        $("body").get(0).style.setProperty('--main-bg-color', hexToRGB(theme.color_scheme.background));
+        $("body").get(0).style.setProperty('--main-blue-color',hexToRGB(theme.color_scheme.main_color));
+        $("body").get(0).style.setProperty('--main-navbar-bg-color',hexToRGB(theme.color_scheme.navbar));
+        $("body").get(0).style.setProperty('--main-item-bg-color',hexToRGB(theme.color_scheme.item));
+        $("body").get(0).style.setProperty('--main-text-color',hexToRGB(theme.color_scheme.main_text));
+        $("body").get(0).style.setProperty('--secondary-text-color',hexToRGB(theme.color_scheme.secondary_text));
+        $("body").get(0).style.setProperty('--main-border-color',hexToRGB(theme.color_scheme.border));
+        $("body").get(0).style.setProperty('--main-disabled-color',hexToRGB(theme.color_scheme.disabled));
     }
 }
 
@@ -265,4 +265,23 @@ function ajaxSuccessCallback(event, xhr, settings) {
             switcher.attr("checked", statusText == "On");
         }
     }
+}
+
+function hexToRGB(h) {
+    let r = 0, g = 0, b = 0;
+
+    // 3 digits
+    if (h.length == 4) {
+        r = "0x" + h[1] + h[1];
+        g = "0x" + h[2] + h[2];
+        b = "0x" + h[3] + h[3];
+
+    // 6 digits
+    } else if (h.length == 7) {
+        r = "0x" + h[1] + h[2];
+        g = "0x" + h[3] + h[4];
+        b = "0x" + h[5] + h[6];
+    }
+
+return "rgb("+ +r + "," + +g + "," + +b + ")";
 }
