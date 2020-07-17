@@ -54,6 +54,11 @@ input#AcceptNewHardware:checked ~ button {
     color: var(--main-disabled-color);
 }
 
+a.resetschemebtn {
+    font-size: 18px;
+    padding: 0 10px;
+}
+
 /*System page*/
 #settings .row-fluid {
     height: auto;
