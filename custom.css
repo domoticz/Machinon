@@ -360,6 +360,36 @@ input[type="checkbox"]:checked + label::before {
     background-color: var(--main-blue-color);
 }
 
+input[type="radio"] {
+    display: none;
+}
+
+input[type="radio"] + label {
+    position: relative;
+    padding-left: 1.3rem;
+}
+
+input[type="radio"] + label::before,
+input[type="radio"] + label::after {
+    display: block;
+    position: absolute;
+    box-sizing: border-box;
+    bottom: 0;
+    left: 0;
+    content:'';
+    width: 1rem;
+    height: 1rem; 
+    border-radius: 50%;
+}
+input[type="radio"] + label::before {
+    background-color: var(--main-text-color);
+  
+}
+input[type="radio"]:checked + label::after {
+    background-color: var(--main-blue-color);
+}
+
+
 /* common features */
 /*need ofix media screen*/
 #timesun {
