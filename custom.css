@@ -340,6 +340,56 @@ input[type="text"] {
     border-color: var(--main-blue-color);
 }
 
+input[type="checkbox"] {
+    display: none;
+}
+
+input[type="checkbox"] + label::before {
+    content:'';
+    border: 1px solid var(--main-text-color);
+    padding: 0 0.4rem;
+    margin-right: 0.3rem;
+    font-size: 0.6rem;
+}
+
+input[type="checkbox"]:disabled + label::before {
+    border: 1px solid var(--main-disabled-color);
+}
+
+input[type="checkbox"]:checked + label::before {
+    background-color: var(--main-blue-color);
+}
+
+input[type="radio"] {
+    display: none;
+}
+
+input[type="radio"] + label {
+    position: relative;
+    padding-left: 1.3rem;
+}
+
+input[type="radio"] + label::before,
+input[type="radio"] + label::after {
+    display: block;
+    position: absolute;
+    box-sizing: border-box;
+    bottom: 0;
+    left: 0;
+    content:'';
+    width: 1rem;
+    height: 1rem; 
+    border-radius: 50%;
+}
+input[type="radio"] + label::before {
+    background-color: var(--main-text-color);
+  
+}
+input[type="radio"]:checked + label::after {
+    background-color: var(--main-blue-color);
+}
+
+
 /* common features */
 /*need ofix media screen*/
 #timesun {

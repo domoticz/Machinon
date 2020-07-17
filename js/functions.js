@@ -93,6 +93,9 @@ function locationHashChanged() {
     if (location.hash == "#/CustomIcons") {
         setCustomIconsPage();
     }
+    if (location.hash == "#/Setup") {
+        showThemeSettings();
+    }
 }
 
 function notify(key, type) {
