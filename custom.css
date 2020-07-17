@@ -1201,7 +1201,7 @@ button.savebtn:disabled {
 
 table.dataTable thead th {
     background: var(--main-item-bg-color);
-    color: var(--secondary-text-color);
+    color: var(--main-text-color);
     height: 35px;
     padding-right: 10px;
     text-align: -webkit-left;
