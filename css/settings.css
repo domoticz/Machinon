@@ -133,7 +133,8 @@ a.resetschemebtn {
     margin: 0 0 3px 0;
     height: 30px;
     border-radius: 2px;
-    background-color: var(--main-border-color);
+    background-color: var(--main-item-bg-color);
+    border: 1px solid var(--main-text-color);
     cursor: pointer;
     display: flex;
     justify-content: flex-start;
@@ -141,7 +142,7 @@ a.resetschemebtn {
 }
 
 .mHeaderBtn li:hover {
-    background-color: rgba(169,169,169,0.5);
+    opacity: 0.5;
 }
 
 .mHeaderBtn li i {
@@ -274,12 +275,24 @@ ul.machinon_ul li {
 
     ul.machinon_ul {
         margin: 0 0 10px 5px;
-        display: block;
+        grid-template-columns: repeat(auto-fill, 100px);
     }
 
     ul.machinon_ul li {
-        padding-left: 40px;
+        display: block;
+        padding: 5px;
+        text-align: center;
     }
+
+    div.machinoText {
+        display: table-cell;
+        margin: 0;
+        font-size: 1em;
+        line-height: 1em;
+        height: 35px;
+        vertical-align: middle;
+        width: 100px;
+    }  
 
     code {
         white-space: normal;

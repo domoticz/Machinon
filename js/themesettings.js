@@ -227,7 +227,6 @@ function loadSettingsHTML() {
             $('input#themevar39_item').val(current_theme.item);
             $('input#themevar39_text').val(current_theme.text);
             $('input#themevar39_alt_text').val(current_theme.alt_text);
-            $('input#themevar39_border').val(current_theme.border);
             $('input#themevar39_disabled').val(current_theme.disabled);
             return false; 
     });

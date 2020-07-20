@@ -38,12 +38,12 @@ body.dashMobile table.mobileitem th {
     box-shadow: none;
     display: inline;
     text-shadow: none;
-    background: var(--main-border-color);
+    background: var(--main-blue-color);
     color: var(--main-text-color);
 }
 
 body.dashMobile table.mobileitem th:last-child a {
-    color: var(--main-border-color) !important;
+    color: var(--main-text-color) !important;
 }
 
 body.dashMobile table.mobileitem tr {
@@ -53,10 +53,6 @@ body.dashMobile table.mobileitem tr {
     flex-direction: row;
     justify-content: space-between;
     width: 100%;
-}
-
-body.dashMobile table.mobileitem tr:hover {
-    background: var(--main-item-bg-color);
 }
 
 body.dashMobile table.mobileitem td {
