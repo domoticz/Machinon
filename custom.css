@@ -477,6 +477,13 @@ div.bannercontent .row.divider {
     'favorite lastupdate lastupdate lastupdate tools tools';
 }
 
+#holder .row .span4 table[id="itemtabletrippleicon"] > tbody > tr,
+#holder .row .span4 table[id="itemtablesmalltrippleicon"] > tbody > tr {
+    grid-template-areas: 'name name bigtext bigtext bigtext options'
+    'img img2 img3 status status status'
+    'favorite lastupdate lastupdate lastupdate tools tools';
+}
+
 #holder #dashcontent .row .span4 .item table[id^="item"] > tbody > tr {
     grid-template-rows: 40px minmax(58px,1fr) 0;
 }
@@ -652,6 +659,7 @@ body table#itemtable tr > .options {
 .item #img2 {
     grid-area: img2;
     align-self: end;
+    text-align: center;
 }
 
 .item #img2 img {
@@ -660,11 +668,8 @@ body table#itemtable tr > .options {
 
 .item .img3,
 .item #img3 {
-    order: 1000;
-    margin-bottom: 0;
-    position: absolute;
-    left: 100px;
-    bottom: 30px;
+    grid-area: img3;
+    align-self: end;
 }
 
 .item .img3 img,
@@ -2089,4 +2094,15 @@ section.compact .row.divider {
     'img img2 status'
     'lastupdate lastupdate lastupdate';
     overflow: hidden;
+}
+
+#holder #dashcontent .row .span3 .item table[id="itemtablesmalltrippleicon"] > tbody > tr {
+    grid-template-columns: 58px 45px 58px;
+    grid-template-areas: 'name name name'
+    'img img2 img3'
+    'lastupdate lastupdate lastupdate';
+}
+
+#holder #dashcontent .row .span3 .item table[id="itemtablesmalltrippleicon"] > tbody > tr td#bigtext {
+    display: none !important;
 }
