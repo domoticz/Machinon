@@ -7,21 +7,8 @@
 This is a theme for Domoticz in machinon project. Theme in progress with project machinon:
 https://github.com/domoticz/machinon
 
-ToDo
-- [X]   In Progress
-- [X] 1.- Selector boxes, need update design
-- [X] 2.- Hardware page and devices need updating 
-- [X] 3.- Tiles with new text and bigger size values
-- [X] 4.- Settings page re-design -> Eddie 
-- [X] 5.- When a device is offline the tile should fade off, is this possible? -> Zeplin
-- [X] 6.- Timers screen -> Eddie -> Zeplin
-- [X] 7.- Charts screens -> Eddie -> Zeplin
-- [X] 8.- Remove go back button from design on settings -> Eddie  
-  
 Ideas (wish list)
-- [ ]   In Progress
 - [ ] 1.- Custom merge multiple metrics into one tile (ie: energy + trigger switch)
-- [X] 2.- Dark theme 
 
 
 ## Installing
