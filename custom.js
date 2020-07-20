@@ -3,6 +3,26 @@ generate_noty = void 0;
 isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 var msgCount = 0;
 var supported_lang = "en fr de sv nl pl";
+var light_theme = {
+    bg: "#f1f1f1",
+    main: "#0b96cd",
+    navbar: "#ffffff",
+    item: "#ffffff",
+    text: "#1a1a1a",
+    alt_text: "#808080",
+    border: "#dedede",
+    disabled: "#d3d3d3"
+};
+var dark_theme = {
+    bg: "#333639",
+    main: "#0b96cd",
+    navbar: "#232324",
+    item: "#515558",
+    text: "#ffffff",
+    alt_text: "#808080",
+    border: "#000000",
+    disabled: "#808080"
+};
 
 $.ajax({
     url: "acttheme/js/moment.js",

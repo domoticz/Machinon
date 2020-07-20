@@ -12,18 +12,7 @@
 /* ionicons */
 @import url("css/ionicons.min.css");
 
-/*var in way of change color*/
-:root {
-	/*use with var(--main-blue-color)*/
-    --main-bg-color: #f1f1f1;
-    --main-blue-color: #0b96cd;
-    --main-navbar-bg-color: white;
-    --main-item-bg-color: white;
-    --main-text-color: #1a1a1a;
-    --secondary-text-color: gray;
-    --main-border-color: #dedede;
-    --main-disabled-color: #d3d3d3;
-}
+/* vars are now managed in javascript */
 
 @font-face {
     font-family: main-font;
@@ -361,6 +350,11 @@ input[type="checkbox"] {
 input[type="checkbox"]:disabled, 
 input[type="radio"]:disabled {
     border: 1px solid var(--main-disabled-color);
+}
+
+input[type="checkbox"]:disabled + label, 
+input[type="radio"]:disabled + label {
+    color: var(--main-disabled-color);
 }
 
 input[type="checkbox"]:checked::before, 
@@ -763,7 +757,7 @@ body table#itemtable tr > .options {
 .input .dimslider .ui-slider-range,
 .statusNormal .dimslider .ui-slider-range,
 .statusProtected .dimslider .ui-slider-range {
-    background: rgba(11, 151, 205, 0.5);
+    background: rgba(var(--main-blue-color-values), 0.5);
 }
 
 #type .dimslider .ui-slider-handle,
