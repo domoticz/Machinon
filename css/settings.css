@@ -87,7 +87,7 @@ a.resetschemebtn {
     flex-grow: 1;
 }
 
-#settings input:not([type=color]), #settings select, #settings textarea {
+#settings input[type=input], #settings input[type=text], #settings select, #settings textarea {
     width: auto !important;
 }
 
