@@ -33,12 +33,20 @@
 }
 /* Bootbox */
 .bootbox.modal.fade.in {
-    background-color: white !important;
+    background-color: var(--main-item-bg-color) !important;
+}
+
+.modal-content {
+    background-color: var(--main-item-bg-color) !important;
+}
+
+.modal-title {
+    color: var(--main-text-color);
 }
 
 .modal-footer {
     border-top: 1px solid #f1f2f3 !important;
-    background-color: white !important;
+    background-color: var(--main-item-bg-color) !important;
 }
 /* Add fonts */
 .btnstylerev,
