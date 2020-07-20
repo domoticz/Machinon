@@ -134,8 +134,8 @@ function loadSettingsHTML() {
         } else {
             if ($(this).is(".parentrequired")) {
                 $(this).siblings("span.option").children().each(function() {
-                    if ($(this).is(".parentrequiredchild")) {
-                        $(this).attr("checked", false);
+                    if ($(this).hasClass("parentrequiredchild")) {
+                        $(this).prop("checked", false);
                         var childName = $(this).val();
                         if (typeof theme.features[childName] !== "undefined") {
                             unloadThemeFeatureFiles(childName);
@@ -217,33 +217,18 @@ function loadSettingsHTML() {
     });
     $('a.resetschemebtn').click(function(e) {
             e.preventDefault();
+            var current_theme = light_theme;
             if (theme.features.dark_theme.enabled) {
-                bg = "#333639";
-                main = "#0b96cd";
-                navbar = "#232324";
-                item ="#515558";
-                text = "#ffffff";
-                alt_text = "#808080";
-                border = "#000000";
-                disabled = "#808080";
-            } else {
-                bg = "#f1f1f1";
-                main = "#0b96cd";
-                navbar = "#ffffff";
-                item ="#ffffff";
-                text = "#1a1a1a";
-                alt_text = "#808080";
-                border = "#dedede";
-                disabled = "#d3d3d3";
+                current_theme = dark_theme;
             }
-            $('input#themevar39_bg').val(bg);
-            $('input#themevar39_main_color').val(main);
-            $('input#themevar39_navbar').val(navbar);
-            $('input#themevar39_item').val(item);
-            $('input#themevar39_text').val(text);
-            $('input#themevar39_alt_text').val(alt_text);
-            $('input#themevar39_border').val(border);
-            $('input#themevar39_disabled').val(disabled);
+            $('input#themevar39_bg').val(current_theme.bg);
+            $('input#themevar39_main_color').val(current_theme.main);
+            $('input#themevar39_navbar').val(current_theme.navbar);
+            $('input#themevar39_item').val(current_theme.item);
+            $('input#themevar39_text').val(current_theme.text);
+            $('input#themevar39_alt_text').val(current_theme.alt_text);
+            $('input#themevar39_border').val(current_theme.border);
+            $('input#themevar39_disabled').val(current_theme.disabled);
             return false; 
     });
 }
