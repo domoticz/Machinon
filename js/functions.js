@@ -101,7 +101,8 @@ function locationHashChanged() {
         $("#search").addClass("readonly");
     }
     if ((location.hash == "#/Dashboard") && theme.features.dashboard_camera.enabled) {
-        theme.features.dashboard_camera_section && cameraPreview(theme.features.dashboard_camera_section.enabled);
+        if (typeof cameraPreview === "function")
+            theme.features.dashboard_camera_section && cameraPreview(theme.features.dashboard_camera_section.enabled);
     }
     if (location.hash == "#/CustomIcons") {
         setCustomIconsPage();
