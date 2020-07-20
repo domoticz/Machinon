@@ -48,7 +48,6 @@ function setColorScheme() {
     $("body").get(0).style.setProperty('--main-item-bg-color',hexToRGB(theme.color_scheme.item));
     $("body").get(0).style.setProperty('--main-text-color',hexToRGB(theme.color_scheme.main_text));
     $("body").get(0).style.setProperty('--secondary-text-color',hexToRGB(theme.color_scheme.secondary_text));
-    $("body").get(0).style.setProperty('--main-border-color',hexToRGB(theme.color_scheme.border));
     $("body").get(0).style.setProperty('--main-disabled-color',hexToRGB(theme.color_scheme.disabled));
 }
 

@@ -10,7 +10,6 @@ var light_theme = {
     item: "#ffffff",
     text: "#1a1a1a",
     alt_text: "#808080",
-    border: "#dedede",
     disabled: "#d3d3d3"
 };
 var dark_theme = {
@@ -20,7 +19,6 @@ var dark_theme = {
     item: "#515558",
     text: "#ffffff",
     alt_text: "#808080",
-    border: "#000000",
     disabled: "#808080"
 };
 
