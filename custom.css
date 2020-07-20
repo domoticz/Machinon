@@ -489,7 +489,7 @@ div.bannercontent .row.divider {
 }
 
 .item:hover {
-    box-shadow: 0px 0px 0px 2px rgb(11, 150, 205);
+    box-shadow: 0px 0px 0px 2px var(--main-blue-color);
 }
 /* name */
 .item #name {
@@ -2018,8 +2018,9 @@ section.compact .row.divider {
 }
 
 .span3 td.input .btn-group {
+    display: flex !important;
+    flex-direction: row;
     white-space: normal;
-    margin-left: 2px;
     margin-top: 0 !important;
     height: 50px;
     width: 100%;
@@ -2032,29 +2033,15 @@ section.compact .row.divider {
 }
 
 .span3 td.input .btn-group button {
-    width: 100%;
-    display: none;
+    order: 2;
 }
 
 .span3 td.input .btn-group button.btn-selected {
-    display: block;
-    height: 100%;
-    border: 0 !important;
-    color: var(--main-blue-color) !important;
-    background: var(--main-item-bg-color) !important;
-    font-family: main-font;
-    font-size: 18px;
-    text-align: right;
-    padding-right: 0;
-}
-
-.span3 td.input .btn-group:hover button {
-    display: block;
-    margin-left: 0 !important;
-}
-
-.span3 td.input .btn-group:hover button.btn-selected {
-    display: none;
+    order: 1;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
 .span3 td.switch-cell~td.input {
