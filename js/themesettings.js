@@ -7,7 +7,7 @@ function showThemeSettings() {
     $("#emailsetup").appendTo("#notifications");
     $("#tabs li a[data-target='#tabemail']").parent().remove();
     if (!$("#tabtheme").length) {
-        $('<li id="themeTabButton"><a data-target="#tabtheme" data-toggle="tab" data-i18n="Theme">Theme</a></li>').appendTo("#tabs");
+        $('<li id="themeTabButton"><a data-target="#tabtheme" data-toggle="tab" data-i18n="Theme">Theme</a></li>').insertBefore("#tabs > li.pull-right");
         $("#tabs li:not(.pull-right)").click(function() {
             if ($(window).width() < 480) {
                 $(this).siblings().show();
