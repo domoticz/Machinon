@@ -13,7 +13,9 @@ Ideas (wish list)
 
 ## Installing
 
-On your Raspberry Pi, in Domoticz theme directory :
+We recommend you to use the [Theme manager plugin](https://github.com/galadril/domoticz-theme-manager) to install and keep up-to-date the theme.
+
+If you prefer, you can manually install it, on your Raspberry Pi, in Domoticz theme directory :
 
 ```
 cd /home/${USER}/domoticz/www/styles
@@ -71,3 +73,4 @@ Firefox: [control] [shift] p
 
 - restart domoticz
 - rename the location of the original installation and install the new version to an empty target directory. Next copy database and scripts from the old location and fire it up.
+!
