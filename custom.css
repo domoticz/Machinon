@@ -844,7 +844,7 @@ img.header__icon {
 div.menu-toggle {
     display: none;
     cursor: pointer;
-    z-index: 3;
+    z-index: 5;
     top: 0;
     left: 10px;
     width: 25px;
@@ -914,7 +914,9 @@ div.menu-toggle.scrolled {
 
 /* Navbar move abit to left */
 .navbar .nav {
-    float: left;
+    display: flex;
+    justify-content: space-between;
+    float: none;
 }
 
 .navbar .brand {
@@ -928,7 +930,7 @@ div.menu-toggle.scrolled {
 }
 
 .navbar .divider-vertical {
-    margin: 0 5px;
+    display: none !important;
 }
 
 .navbar .nav li a {
@@ -1547,20 +1549,20 @@ select.ui-corner-all option {
         margin-left: 90px;
         transform: translateX(0);
     }
+
+    .container, .navbar-static-top .container, .navbar-fixed-top .container, .navbar-fixed-bottom .container {
+        width: calc(100% - 50px);
+    }
 }
 
 @media (min-width: 1200px) {
     .container, .navbar-static-top .container, .navbar-fixed-top .container, .navbar-fixed-bottom .container {
-        width: 1270px;
+        width: 1200px;
     }
 
     #itemtablenostatus #type,
 #itemtabletrippleicon #type {
         height: auto;
-    }
-
-    .navbar .divider-vertical {
-        margin: 0 20px;
     }
 }
 
@@ -1820,6 +1822,7 @@ select.ui-corner-all option {
     }
 
     .navbar .nav {
+        display: block;
         margin: 0 !important;
         margin-top: 35px !important;
         float: none;
