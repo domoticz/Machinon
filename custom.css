@@ -915,7 +915,7 @@ div.menu-toggle.scrolled {
 /* Navbar move abit to left */
 .navbar .nav {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     float: none;
 }
 
@@ -1548,10 +1548,6 @@ select.ui-corner-all option {
         left: auto;
         margin-left: 90px;
         transform: translateX(0);
-    }
-
-    .container, .navbar-static-top .container, .navbar-fixed-top .container, .navbar-fixed-bottom .container {
-        width: calc(100% - 50px);
     }
 }
 
