@@ -91,10 +91,6 @@ a.resetschemebtn {
     flex-grow: 1;
 }
 
-#settings input[type=input], #settings input[type=text], #settings select, #settings textarea {
-    width: auto !important;
-}
-
 #settings textarea {
     width: 100% !important;
 }
@@ -242,10 +238,6 @@ ul.machinon_ul li {
     margin: -21px -21px 0 0;
 }
 
-#themesettings h1 {
-    display: inline
-}
-
 #themesettings p {
     margin: 2px 0;
 }
@@ -256,10 +248,6 @@ ul.machinon_ul li {
 
 #themesettings h4 {
     margin-top: 10px;
-}
-
-#themesettings a {
-    color: inherit
 }
 
 @media all and (max-width: 767px) {

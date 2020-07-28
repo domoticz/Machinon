@@ -324,17 +324,17 @@ h4,
 
 input[type="number"] {
     width: 30px;
-    background-color: transparent;
-    outline: 0;
-    border-width: 0 0 1px;
-    border-color: var(--main-blue-color);
 }
 
-input[type="text"] {
+input[type="text"],
+input[type="input"],
+input[type="number"],
+input[type="password"] {
     background-color: transparent;
     outline: 0;
     border-width: 0 0 1px;
     border-color: var(--main-blue-color);
+    color: var(--secondary-text-color);
 }
 
 input[type="checkbox"], input[type="radio"] {
@@ -1078,6 +1078,7 @@ a.btnstyle {
     position: relative;
     overflow: visible;
     margin-left: 16px;
+    color: var(--main-text-color);
 }
 
 
@@ -1125,14 +1126,14 @@ button.savebtn:disabled {
     border-radius: 1px;
 }
 
-.btn-primary {
+.btn-primary, .btn-primary[disabled] {
     background: none;
     border-color: var(--main-blue-color);
     color: var(--main-blue-color) !important;
     border-radius: 1px;
 }
 
-.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+.btn-primary:not([disabled]):hover, .btn-primary:focus, .btn-primary:active {
     background: none;
     background-color: var(--main-blue-color);
     border-color: var(--main-blue-color);
@@ -1218,13 +1219,6 @@ button.savebtn:disabled {
 #itemtabletrippleicon td:last-child .btnsmall-sel {
     border-radius: 0;
     height: auto;
-}
-
-.display .ui-widget-content {
-    background: transparent;
-    color: var(--main-text-color);
-    border: none;
-    border-bottom: 1px solid var(--main-blue-color);
 }
 
 /* Data Tables */
@@ -1322,7 +1316,7 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
 .devices-filters__group-title {
     border-color: var(--main-blue-color);
     background-color: var(--main-item-bg-color);
-    color: var(--main-secondary-text-color);
+    color: var(--secondary-text-color);
 }
 
 .label, .badge {
@@ -1342,6 +1336,7 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
 }
 
 .ui-dialog {
+    background: var(--main-bg-color) !important;
     z-index: 9999 !important;
 }
 
@@ -1456,9 +1451,11 @@ input#AcceptNewHardware:checked ~ button {
     border-radius: 0;
     border: none;
     border-bottom: 1px solid var(--main-blue-color);
-    color: var(--main-text-color);
+    color: var(--secondary-text-color);
     font-family: main-font;
+    outline: none;
 }
+
 select.ui-corner-all option {
     background: var(--main-navbar-bg-color);
 }
@@ -1469,10 +1466,13 @@ select.ui-corner-all option {
 /* Popups */
 
 .ui-widget-content {
-    background: transparent;
-    background-color: #f1f1f1;
-    color: #1a1a1a;
-    font-family: main-font;
+    color: var(--main-text-color);
+    background: var(--main-bg-color);
+}
+
+.list-group-item, .list-group-item:link {
+    background: var(--main-bg-color);
+    color: var(--main-text-color);
 }
 
 #offline {
