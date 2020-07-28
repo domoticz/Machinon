@@ -9,7 +9,7 @@ var light_theme = {
     navbar: "#ffffff",
     item: "#ffffff",
     text: "#1a1a1a",
-    alt_text: "#808080",
+    alt_text: "#6d6e6d",
     disabled: "#d3d3d3"
 };
 var dark_theme = {
@@ -18,7 +18,7 @@ var dark_theme = {
     navbar: "#232324",
     item: "#515558",
     text: "#ffffff",
-    alt_text: "#808080",
+    alt_text: "#cccccc",
     disabled: "#808080"
 };
 

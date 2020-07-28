@@ -13,10 +13,6 @@
     background-color: #393B3E;
 }
 
-.ui-dialog .ui-dialog-buttonpane {
-    background: var(--main-bg-color);
-}
-
 .mDropdown-Text,
 .machinoSettings h2,
 .machinoText {
