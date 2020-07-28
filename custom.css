@@ -335,6 +335,7 @@ input[type="password"] {
     border-width: 0 0 1px;
     border-color: var(--main-blue-color);
     color: var(--secondary-text-color);
+    max-width: 250px;
 }
 
 input[type="checkbox"], input[type="radio"] {
