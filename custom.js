@@ -89,6 +89,7 @@ function init_theme() {
                 if (theme.features.notification.enabled === true && $("#msg").length == 0) {
                     displayNotifications();
                 }
+                searchFunction();
                 if (data.Type === "Light/Switch") {
                     setDeviceOpacity(data.idx, data.Status);
                     if (theme.features.icon_image.enabled === true) {
