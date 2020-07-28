@@ -1555,17 +1555,6 @@ select.ui-corner-all option {
     }
 }
 
-@media (min-width: 1200px) {
-    .container, .navbar-static-top .container, .navbar-fixed-top .container, .navbar-fixed-bottom .container {
-        width: 1200px;
-    }
-
-    #itemtablenostatus #type,
-#itemtabletrippleicon #type {
-        height: auto;
-    }
-}
-
 #login:before {
     background: linear-gradient(to right, #0bcdc7 0%, var(--main-blue-color) 100%);
     text-align: center;
