@@ -6,7 +6,6 @@ if (mSettings && mSettings.length > 0) {
     mSettings.children("ul").remove();
 
     mSettings.click(function() {
-        document.location.assign('#/Custom/MachinonSetup');
         $("#machinoSettings").remove();
         $("#appnavbar li").removeClass("current_page_item");
         $("#mSettings").addClass("current_page_item");
