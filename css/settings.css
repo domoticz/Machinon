@@ -131,7 +131,7 @@ a.resetschemebtn {
     cursor: pointer;
     box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.2);
     list-style-type: none;
-    height: 75px;
+    min-height: 75px;
     flex: 1 0 15%;
     display: flex;
     justify-content: flex-start;
@@ -179,7 +179,7 @@ ul.machinon_ul li {
     display: none;
     background-color: var(--main-item-bg-color);
     min-width: 160px;
-    border: 1px solid var(--main-blue-color);
+    border: 1.5px solid var(--main-blue-color);
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     padding: 12px 16px;
     z-index: 1;
@@ -187,7 +187,7 @@ ul.machinon_ul li {
 }
 
 .dropdown-content a {
-    color: inherit;
+    color: var(--main-text-color);
 }
 
 .rectangle-8-dropdown:hover .dropdown-content {
@@ -270,7 +270,7 @@ ul.machinon_ul li {
     }
 }
 
-@media screen and (max-width: 992px) {
+@media screen and (max-width: 979px) {
     #settings .row-fluid {
         flex-wrap: wrap;
         font-size: 0.9em;

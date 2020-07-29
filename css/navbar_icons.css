@@ -13,7 +13,7 @@
     display: none !important;
 }
 
-@media screen and (max-width: 992px) {
+@media screen and (max-width: 979px) {
     .navbar .nav li a img {
         width: 24px;
         height: 24px;
@@ -38,7 +38,7 @@
     }
 }
 
-@media screen and (min-width: 992px) {
+@media screen and (min-width: 979px) {
     .events-editor {
         margin-top: 90px;
     }
