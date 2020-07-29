@@ -76,14 +76,9 @@ a.resetschemebtn {
     border: 1px solid var(--main-item-bg-color);
 }
 
-#settings .row-fluid > div:hover {
-    border-color: var(--main-blue-color);
-}
-
-#settings .row-fluid > .span4, #settings .row-fluid > .span6, #settings .row-fluid > .span12 {
-    height: auto;
-    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
-    border-radius: 6px;
+#settings .row-fluid > .span4,
+#settings .row-fluid > .span6,
+#settings .row-fluid > .span12 {
     margin: 20px;
     padding: 20px;
     flex-basis: 500px;
@@ -116,33 +111,10 @@ a.resetschemebtn {
 }
 
 /* Settings page CSS */
-#machinoSettings {
-    padding: 0 20px;
-}
-
 .mHeaderBtn {
     margin-left: calc(100% - 660px);
-    margin-top: -1.8%;
-    margin-bottom: 20px;
     display: flex;
     justify-content: space-around;
-}
-
-.mHeaderBtn li {
-    padding: 5px 20px;
-    margin: 0 0 3px 0;
-    height: 30px;
-    border-radius: 2px;
-    background-color: var(--main-item-bg-color);
-    border: 1px solid var(--main-text-color);
-    cursor: pointer;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-}
-
-.mHeaderBtn li:hover {
-    opacity: 0.5;
 }
 
 .mHeaderBtn li i {
@@ -153,23 +125,15 @@ a.resetschemebtn {
     font-size: 14px;
     letter-spacing: -0.5px;
     margin-left: 10px;
-    ;
 }
 
 .rectangle-8, .rectangle-8-dropdown {
-    border: 1.5px solid;
-    border-color: transparent;
-    border-radius: 6px;
-    background-color: var(--main-item-bg-color);
     cursor: pointer;
     box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.2);
     list-style-type: none;
     height: 75px;
-    margin-left: 20px;
-    margin-bottom: 20px;
     flex: 1 0 15%;
     display: flex;
-    padding: 20px;
     justify-content: flex-start;
     align-items: center;
 }
@@ -209,10 +173,6 @@ a.resetschemebtn {
 ul.machinon_ul li {
     padding: 5px 15px;
     margin: 15px 0;
-}
-
-.machinon_ul li:hover {
-    border-color: var(--main-blue-color);
 }
 
 .dropdown-content {

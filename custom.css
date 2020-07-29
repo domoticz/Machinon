@@ -290,37 +290,6 @@ h4,
 .msg span {
     color: var(--secondary-text-color);
 }
-/* standby screen */
-.standby {
-    background-image: none !important;
-    background-color: #313131 !important;
-}
-
-.standby .row {
-    opacity: 0.4;
-}
-
-.standbyClock {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translateX(-50%) translateY(-50%);
-    color: #fff;
-    font-size: 80px;
-    font-family: main-font-bold;
-    letter-spacing: 7px;
-}
-
-.standbyDate {
-    position: absolute;
-    top: 40%;
-    left: 50%;
-    transform: translateX(-50%) translateY(-50%);
-    color: #fff;
-    font-size: 60px;
-    font-family: main-font-bold;
-    letter-spacing: 7px;
-}
 
 input[type="number"] {
     width: 30px;
@@ -400,6 +369,10 @@ input[type="radio"]:checked::before {
     display: inline;
 }
 
+.page-header-small {
+    border-color: var(--main-blue-color);
+}
+
 div#floorplancontent {
     height: 87%;
 }
@@ -465,15 +438,28 @@ div.bannercontent .row.divider {
     width: 100%;
     height: 100%;
     min-height: 100%;
+}
+
+#holder .row .item table[id^="item"] > tbody > tr,
+.rectangle-8,
+.rectangle-8-dropdown,
+#settings .row-fluid > div {
     background: var(--main-item-bg-color);
+    border: 1.5px solid;
+    border-color: transparent;
     border-radius: 6px;
+    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
+}
+
+#holder .row .item table[id^="item"] > tbody > tr:hover,
+.rectangle-8:hover,
+.rectangle-8-dropdown:hover,
+#settings .row-fluid > div:hover {
+    box-shadow: 0px 0px 0px 2px var(--main-blue-color);
 }
 
 #holder .row .item table[id^="item"] > tbody > tr {
     display: grid;
-    box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.2);
-    min-height: 0;
-    min-width: 0;
 }
 
 #holder .row .span4 table[id^="item"] > tbody > tr {
@@ -497,9 +483,6 @@ div.bannercontent .row.divider {
     grid-template-rows: 40px minmax(58px,1fr) 0;
 }
 
-.item:hover {
-    box-shadow: 0px 0px 0px 2px var(--main-blue-color);
-}
 /* name */
 .item #name {
     padding: 10px 0 0 10px;
@@ -1132,6 +1115,7 @@ button.savebtn:disabled {
     border-color: var(--main-blue-color);
     color: var(--main-blue-color) !important;
     border-radius: 1px;
+    text-shadow: none;
 }
 
 .btn-primary:not([disabled]):hover, .btn-primary:focus, .btn-primary:active {
@@ -1516,7 +1500,7 @@ select.ui-corner-all option {
     box-shadow: 0px 0px 0px 2px rgb(199,67,67);
 }
 /* Switch is protected */
-.item.statusProtected {
+.item.statusProtected:hover {
     box-shadow: 0px 0px 10px 2px rgb(0, 0, 139, 0.4);
 }
 
