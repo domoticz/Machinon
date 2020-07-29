@@ -542,12 +542,16 @@ div.bannercontent .row.divider {
     scrollbar-color: var(--main-blue-color) var(--main-item-bg-color);
 }
 
+
+.btn-group::-webkit-scrollbar,
 .item #status::-webkit-scrollbar,
 .item .status::-webkit-scrollbar {
     width: 4px;
+    height: 4px;
     border-radius: 5px;
 }
 
+.btn-group::-webkit-scrollbar-thumb,
 .item #status::-webkit-scrollbar-thumb,
 .item .status::-webkit-scrollbar-thumb {
     background: var(--main-blue-color);
@@ -672,9 +676,7 @@ body table#itemtable tr > .options {
 /* item with button group */
 #type .btn-group,
 .input .btn-group {
-    background: var(--main-bg-color) !important;
     overflow-x: auto;
-    max-width: 100%;
 }
 
 .ui-selectmenu-button.ui-button {
@@ -738,7 +740,7 @@ body table#itemtable tr > .options {
     box-shadow: none;
     height: 5px;
     right: 20px;
-    width: 70% !important;
+    width: calc(100% - 100px) !important;
 }
 
 .span4 td#img2 ~ #type .dimslider,
@@ -1263,7 +1265,6 @@ tr.odd td.sorting_1, tr.even td.sorting_1 {
 
 .btnstyle3-dis, .btnstyle3, .btnstyle3-sel {
     background: var(--main-blue-color);
-    color: #fff;
     margin-top: 15px;
     border-radius: 2px;
 }
@@ -1449,11 +1450,6 @@ select.ui-corner-all option {
 /* =Footer */
 /* Popups */
 
-.ui-widget-content {
-    color: var(--main-text-color);
-    background: var(--main-bg-color);
-}
-
 .list-group-item, .list-group-item:link {
     background: var(--main-bg-color);
     color: var(--main-text-color);
@@ -1603,34 +1599,32 @@ select.ui-corner-all option {
 .btn-group .btn {
     margin: 0 0 0 -1px !important;
     text-shadow: none !important;
-    color: #ccccccff;
+    color: var(--main-text-color);
     font-family: main-font;
-    border-width: 1px !important;
-    border-color: #ccc !important;
-    border-style: solid !important;
+    border: none !important;
 }
 
-.btn-group > .btn:first-child {
+.btn-group > .btn:first-child,
+.btn-group > .btn:last-child {
     margin-left: 0 !important;
     border-radius: 0px !important;
 }
 
 .btn-default,
 .btn-group .btn-default {
-    text-shadow: none !important;
     background: var(--main-item-bg-color) !important;
     color: var(--main-blue-color) !important;
     border-color: var(--main-blue-color) !important;
-    border-radius: 1px !important;
 }
 
 .btn.btn-selected,
 .btn-group .btn-selected,
 .btn-default.active,
 .btn-group .btn-default.active {
-    color: var(--main-item-bg-color) !important;
-    background: var(--main-blue-color) !important;
-    border-color: var(--main-blue-color) !important;
+    color: var(--main-text-color) !important;
+    background: transparent !important;
+    border-color: transparent !important;
+    font-family: main-font-bold;
 }
 
 .btn-default:hover,
@@ -1671,18 +1665,6 @@ select.ui-corner-all option {
     border-color: var(--main-blue-color) !important;
 }
 
-.btn-group::-webkit-scrollbar {
-    margin-bottom: 10px;
-    height: 6px;
-    border-radius: 5px;
-    background-color: var(--main-bg-color);
-}
-
-.btn-group::-webkit-scrollbar-thumb {
-    background: var(--main-blue-color);
-    border-radius: 5px;
-}
-
 .btn-group {
     padding-bottom: 1px;
     scrollbar-width: thin;
@@ -1719,6 +1701,8 @@ select.ui-corner-all option {
 
 .selectorlevels-menu {
     border-color: var(--main-blue-color) !important;
+    color: var(--main-text-color);
+    background: var(--main-bg-color);
 }
 
 @media (max-width: 767px) {
@@ -1739,14 +1723,6 @@ select.ui-corner-all option {
 
     .events-editor {
         margin-top: -40px;
-    }
-
-    .standbyClock {
-        font-size: 60px;
-    }
-
-    .standbyDate {
-        font-size: 40px;
     }
 
     div.row {
@@ -1981,7 +1957,6 @@ section.compact .row.divider {
     padding: 10px 15px;
     width: calc(100% - 10px);
     max-width: 100px;
-    align-self: center;
     text-align: right;
 }
 
@@ -1989,17 +1964,9 @@ section.compact .row.divider {
      width: calc(100% - 60px);
 }
 
-.span3 td.input .dimslider, .span3 .statusNormal .dimslider, .span3 .statusProtected .dimslider {
-    width: 100% !important;
-    position: relative;
-    bottom: 0;
-    right: 0;
-    margin: 0 !important;
-}
-
 .span3 td.input .btn-group {
     display: flex !important;
-    flex-direction: row;
+    flex-direction: column;
     white-space: normal;
     margin-top: 0 !important;
     height: 50px;
@@ -2008,20 +1975,13 @@ section.compact .row.divider {
     background: var(--main-bg-item-color) !important;
 }
 
-.span3 td.input .btn-group::-webkit-scrollbar {
-    width: 3px;
-}
-
 .span3 td.input .btn-group button {
     order: 2;
+    border-radius: 0 !important;
 }
 
 .span3 td.input .btn-group button.btn-selected {
     order: 1;
-    border-top-left-radius: 4px;
-    border-bottom-left-radius: 4px;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
 }
 
 .span3 td.switch-cell~td.input {
