@@ -47,7 +47,7 @@
         "standby": {
             "id":13,
             "enabled":false,
-            "files": ["standby.js"]
+            "files": ["standby.js", "standby.css"]
         },
         "check_update": {
             "id":15,
