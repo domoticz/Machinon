@@ -9,10 +9,9 @@ img.header__icon {
 }
 
 .navbar-inverse .navbar-inner {
-    background-color: rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(2px);
+    background-color: var(--main-blue-color);
     width: 300px;
-    height: calc(100% - 20px);
+    height: 100%;
     transform: translateX(-150%);
     transition: transform 0.5s;
     margin-top: -40px;
@@ -21,6 +20,13 @@ img.header__icon {
     box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.2);
     position: fixed;
     z-index: 2;
+}
+
+@supports ((-webkit-backdrop-filter: none) or (backdrop-filter: none)) {            .navbar-inverse .navbar-inner {
+        background-color: transparent;
+        -webkit-backdrop-filter: blur(3px) opacity(.8);
+        backdrop-filter: blur(3px) opacity(.8);
+    }
 }
 
 .navbar.notext .navbar-inner {
@@ -55,13 +61,12 @@ img.header__icon {
 }
 
 .navbar .nav {
-    margin: 0 !important;
-    margin-top: 35px !important;
-    float: none;
+    flex-direction: column;   
+    margin-top: 35px;
 }
 
 .navbar .nav > li {
-    border-bottom: 1px solid #fff;
+    border-bottom: 1px solid var(--main-disabled-color);;
     float: none;
 }
 
@@ -73,24 +78,19 @@ img.header__icon {
     height: 0;
 }
 
-.navbar .nav > li > .dropdown-menu.pull-right li {
-    margin: 0;
-}
-
 .navbar .nav .dropdown-menu {
     padding: 0;
     box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.2);
 }
 
 .navbar .nav li a {
-    color: var(--main-text-color);
     font-size: 20px;
     text-align: left;
 }
 
 .navbar .nav li a:hover {
     background-color: transparent !important;
-    color: #000 !important;
+    color: var(--secondary-text-color) !important;
 }
 
 .nav li a img {
@@ -99,7 +99,7 @@ img.header__icon {
 
 .navbar .nav .current_page_item > a {
     text-align: left;
-    background-color: var(--main-bg-color);
+    background-color: transparent;
 }
 
 .navbar .nav li ul li ul {
@@ -127,28 +127,19 @@ img.header__icon {
     display: inline !important;
 }
 
-.navbar-inverse .nav li.dropdown.open > .dropdown-toggle,
-.navbar-inverse .nav li.dropdown.open > .dropdown-toggle:before {
-    background: rgba(0,0,0,0.2);
-    color: var(--main-text-color);
-}
-
 .navbar-inverse .nav li.dropdown > .dropdown-toggle .caret {
-    border-top-color: #fff;
-    border-bottom-color: #fff;
+    border-top-color: var(--main-text-color);
+    border-bottom-color: var(--main-text-color);
 }
 
 .navbar .pull-right > li > .dropdown-menu, .navbar .nav > li > .dropdown-menu.pull-right {
-    left: 0;
+    background: transparent;
+    box-shadow: none;
     width: 100%;
 }
 
 .navbar .nav ul.dropdown-menu li {
     line-height: 16px;
-}
-
-.navbar .nav ul.dropdown-menu li a {
-    font-size: 16px;
 }
 
 .navbar .nav ul.dropdown-menu li a span {
@@ -167,7 +158,6 @@ img.header__icon {
 .navbar .nav > li > .dropdown-menu.pull-right .dropdown-menu,
 .navbar .pull-right > li > .dropdown-menu .dropdown-menu,
 .navbar .nav > li > .dropdown-menu.pull-right .dropdown-menu {
-    background: rgba(0,0,0,0.4) !important;
     position: relative;
     font-size: 16px;
 }

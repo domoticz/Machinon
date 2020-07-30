@@ -210,6 +210,10 @@ ul.machinon_ul li {
     margin-top: 10px;
 }
 
+.norm-link, .norm-link a, .norm-link a:link, .norm-link a:active, .norm-link a:visited, .norm-link href {
+    color: var(--main-blue-color);
+}
+
 @media all and (max-width: 767px) {
     #machinoSettings {
         padding: 0;
