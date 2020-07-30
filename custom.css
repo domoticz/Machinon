@@ -925,7 +925,7 @@ div.menu-toggle.scrolled {
     background-color: transparent;
     color: var(--main-text-color);
     border: none;
-    border-radius: 0;
+    border-radius: 5px;
     position: relative;
 }
 
@@ -972,10 +972,9 @@ div.menu-toggle.scrolled {
     text-shadow: none;
     color: var(--main-text-color);
     background-image: none;
-    background-color: var(--main-blue-color);
+    background-color: rgba(var(--main-blue-color-values), 0.4);
     font-family: main-font-bold;
-    border: none;
-    border-radius: 0;
+    border: 1px solid var(--main-blue-color);
 }
 
 .nav li a img {
