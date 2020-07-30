@@ -215,7 +215,7 @@ ul.machinon_ul li {
     margin-top: 10px;
 }
 
-.norm-link, .norm-link a, .norm-link a:link, .norm-link a:active, .norm-link a:visited, .norm-link href, a:link {
+#settings .norm-link, #settings .norm-link a, #settings .norm-link a:link, #settings .norm-link a:active, #settings .norm-link a:visited, #settings .norm-link href, #settings a:link {
     color: var(--main-blue-color);
 }
 

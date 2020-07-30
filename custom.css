@@ -1481,24 +1481,21 @@ select.ui-corner-all option {
 	/*! background-color: transparent !important; */
 }
 
-.item.statusTimeout:hover {
-    box-shadow: 0px 0px 0px 2px rgb(199,67,67);
+.item.statusTimeout tr:hover {
+    box-shadow: 0px 0px 0px 2px rgb(199,67,67) !important;
 }
 /* Switch is protected */
-.item.statusProtected:hover {
-    box-shadow: 0px 0px 10px 2px rgb(0, 0, 139, 0.4);
+.item.statusProtected tr:hover {
+    box-shadow: 0px 0px 10px 2px rgb(0, 0, 139, 0.4) !important;
 }
 
-.item.statusProtected:hover {
-    box-shadow: 0px 0px 0px 2px rgb(0, 0, 139);
-}
 /* Device has low battery */
-.item.statusLowBattery {
-    box-shadow: 0px 0px 10px 2px rgb(255,255,0,0.4);
+.item.statusLowBattery tr {
+    box-shadow: 0px 0px 10px 2px rgb(255,255,0,0.4) !important;
 }
 
-.item.statusLowBattery:hover {
-    box-shadow: 0px 0px 0px 2px rgb(255,255,0);
+.item.statusLowBattery tr:hover {
+    box-shadow: 0px 0px 0px 2px rgb(255,255,0) !important;
 }
 
 .blink {
