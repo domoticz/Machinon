@@ -52,7 +52,7 @@
     display: none;
 }
 
-@media screen and (max-width: 992px) {
+@media screen and (max-width: 979px) {
     #iconsmain > table > tbody {
         top: 1%;
         right: 10px;

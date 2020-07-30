@@ -3,6 +3,24 @@ generate_noty = void 0;
 isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 var msgCount = 0;
 var supported_lang = "en fr de sv nl pl";
+var light_theme = {
+    bg: "#f1f1f1",
+    main: "#0b96cd",
+    navbar: "#ffffff",
+    item: "#ffffff",
+    text: "#1a1a1a",
+    alt_text: "#6d6e6d",
+    disabled: "#d3d3d3"
+};
+var dark_theme = {
+    bg: "#333639",
+    main: "#0b96cd",
+    navbar: "#232324",
+    item: "#515558",
+    text: "#ffffff",
+    alt_text: "#cccccc",
+    disabled: "#808080"
+};
 
 $.ajax({
     url: "acttheme/js/moment.js",
@@ -71,6 +89,7 @@ function init_theme() {
                 if (theme.features.notification.enabled === true && $("#msg").length == 0) {
                     displayNotifications();
                 }
+                searchFunction();
                 if (data.Type === "Light/Switch") {
                     setDeviceOpacity(data.idx, data.Status);
                     if (theme.features.icon_image.enabled === true) {
@@ -138,6 +157,8 @@ function init_theme() {
             subtree: true
         });
         enableThemeFeatures();
+        locationHashChanged();
+        setColorScheme();
         setLogo();
         setSearch();
         setDevicesNativeSelectorForMobile();

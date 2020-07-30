@@ -20,7 +20,7 @@ function setDeviceSwitch(idx, status) {
 
     /* Check if switch exists --> create or update */
     if (switcher.length == 0) {
-        $(tr).find("#status").hide();
+        $(tr).find("#status, #bigtext").hide();
         let string = '<td class="input"><label class="switch" title="' + title + '"><input type="checkbox"' + checked + '><span class="slider round"></span></label></td>';
         $(tr).append(string);
         $(tr).find(".switch").on("click", function(e) {
