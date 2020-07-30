@@ -7,26 +7,15 @@
 This is a theme for Domoticz in machinon project. Theme in progress with project machinon:
 https://github.com/domoticz/machinon
 
-ToDo
-- [X]   In Progress
-- [X] 1.- Selector boxes, need update design
-- [X] 2.- Hardware page and devices need updating 
-- [X] 3.- Tiles with new text and bigger size values
-- [X] 4.- Settings page re-design -> Eddie 
-- [X] 5.- When a device is offline the tile should fade off, is this possible? -> Zeplin
-- [X] 6.- Timers screen -> Eddie -> Zeplin
-- [X] 7.- Charts screens -> Eddie -> Zeplin
-- [X] 8.- Remove go back button from design on settings -> Eddie  
-  
 Ideas (wish list)
-- [ ]   In Progress
 - [ ] 1.- Custom merge multiple metrics into one tile (ie: energy + trigger switch)
-- [X] 2.- Dark theme 
 
 
-## Installing
+## Installing & Updating
 
-On your Raspberry Pi, in Domoticz theme directory :
+We recommend you to use the [Theme manager plugin](https://github.com/galadril/domoticz-theme-manager) to install and keep up-to-date the theme.
+
+You can also manually install it, in Domoticz theme directory :
 
 ```
 cd /home/${USER}/domoticz/www/styles
@@ -34,13 +23,7 @@ git clone https://github.com/domoticz/machinon.git machinon
 sudo /etc/init.d/domoticz.sh restart
 ```
 
-### Domoticz version previous 4.10393
-
-In Domoticz version before 4.10393 the tabs for switches, scenes and utility is width is not correct.
-There is modified html files in `../machinon/views` to replace files in `../www/views`
-
-
-## Updating
+Tu update it:
 ```
 cd /home/${USER}/domoticz/www/styles/machinon
 git pull
@@ -69,18 +52,21 @@ New setup layout
 
 ## Cache problems:
 
-A lot of the problems users experience after a domoticz update are gone when the browsercache and appcache are cleared. There are also quite a number of posts on this forum related to these kind of problems. 
+A lot of the problems users experience after a Domoticz update are gone when the browsercache and appcache are cleared. There are also quite a number of posts on this forum related to these kind of problems.
 
 To summarize and sorted from little effort to a bit more effort take these steps and check after each step if it address the issues you encounter.
 
-- clear browser cache and appcache 
+- First, go to Setup / Parameters / Theme and Click on Reset button and Clear Borwser Cache. If not enought, retry with the Reset Theme button.
+
+- Clear browser cache and appcache 
 Chrome: chrome://appcache-internals/#
 Firefox: https://support.mozilla.org/en-US/kb/storage 
 
-- in www/js look for domoticz.js.gz, if its there remove it, (KEEP domoticz.js !! )
-- use incognito mode using 
+- In www/js look for domoticz.js.gz, if its there remove it, (KEEP domoticz.js !! )
+- Use incognito mode using 
 Chrome [control] [shift] n
 Firefox: [control] [shift] p
 
-- restart domoticz
-- rename the location of the original installation and install the new version to an empty target directory. Next copy database and scripts from the old location and fire it up.
+- Restart domoticz
+- Rename the location of the original installation and install the new version to an empty target directory. Next copy database and scripts from the old location and fire it up.
+!

@@ -7,7 +7,7 @@ function showThemeSettings() {
     $("#emailsetup").appendTo("#notifications");
     $("#tabs li a[data-target='#tabemail']").parent().remove();
     if (!$("#tabtheme").length) {
-        $('<li id="themeTabButton"><a data-target="#tabtheme" data-toggle="tab" data-i18n="Theme">Theme</a></li>').appendTo("#tabs");
+        $('<li id="themeTabButton"><a data-target="#tabtheme" data-toggle="tab" data-i18n="Theme">Theme</a></li>').insertBefore("#tabs > li.pull-right");
         $("#tabs li:not(.pull-right)").click(function() {
             if ($(window).width() < 480) {
                 $(this).siblings().show();
@@ -76,7 +76,7 @@ function loadSettingsHTML() {
         $('label[for="themevar30"]').addClass("disabledText");
     }
     setupIcons();
-    $("#tabtheme input:checkbox").each(function() {
+    $('#tabtheme input[type="checkbox"]').each(function() {
         if (typeof theme.features[this.value] !== "undefined") {
             if (theme.features[this.value].enabled === true) {
                 $(this).prop("checked", true);
@@ -96,14 +96,14 @@ function loadSettingsHTML() {
             }
         }
         if ($(this).not(":checked") && $(this).is(".parentrequired")) {
-            $(this).siblings().each(function() {
+            $(this).siblings("span.option").children().each(function() {
                 if ($(this).is(".parentrequiredchild")) {
                     $(this).prop("disabled", true);
                 }
             });
         }
         if ($(this).is(":checked") && $(this).is(".parentrequired")) {
-            $(this).siblings().each(function() {
+            $(this).siblings("span.option").children().each(function() {
                 if ($(this).is(".parentrequiredchild")) {
                     $(this).prop("disabled", false);
                 }
@@ -114,23 +114,28 @@ function loadSettingsHTML() {
         var value = theme[this.name];
         $(this).val(value);
     });
-    $('#tabtheme input[type="text"]').each(function() {
-        var value = theme[this.name];
+    $('#tabtheme input[type="text"], #tabtheme input[type="color"]').each(function() {
+        if (this.name.indexOf('.') !== -1) {
+            const json = this.name.split('.');
+            value = theme[json[0]][json[1]];
+        } else {
+            var value = theme[this.name];
+        }
         $(this).val(value);
     });
     $("#tabtheme select").each(function() {
         var value = theme[this.name];
         $(this).val(value);
     });
-    $("#tabtheme input:checkbox").click(function() {
+    $('#tabtheme input[type="checkbox"]').click(function() {
         if ($(this).is(":checked")) {
             theme.features[this.value].enabled = true;
             loadThemeFeatureFiles(this.value);
         } else {
             if ($(this).is(".parentrequired")) {
-                $(this).siblings().each(function() {
-                    if ($(this).is(".parentrequiredchild")) {
-                        $(this).attr("checked", false);
+                $(this).siblings("span.option").children().each(function() {
+                    if ($(this).hasClass("parentrequiredchild")) {
+                        $(this).prop("checked", false);
                         var childName = $(this).val();
                         if (typeof theme.features[childName] !== "undefined") {
                             unloadThemeFeatureFiles(childName);
@@ -143,14 +148,14 @@ function loadSettingsHTML() {
             unloadThemeFeatureFiles(this.value);
         }
         if ($(this).not(":checked") && $(this).is(".parentrequired")) {
-            $(this).siblings().each(function() {
+            $(this).siblings("span.option").children().each(function() {
                 if ($(this).is(".parentrequiredchild")) {
                     $(this).prop("disabled", true);
                 }
             });
         }
         if ($(this).is(":checked") && $(this).is(".parentrequired")) {
-            $(this).siblings().each(function() {
+            $(this).siblings("span.option").children().each(function() {
                 if ($(this).is(".parentrequiredchild")) {
                     $(this).prop("disabled", false);
                 }
@@ -160,18 +165,14 @@ function loadSettingsHTML() {
         console.log(theme.name + " - theme settings saved");
     });
     $("#saveSettingsButton").click(function() {
-        $('#tabtheme input[type="number"]').each(function() {
+        $('#tabtheme input[type="number"], #tabtheme input[type="text"], #tabtheme input[type="color"], #tabtheme select').each(function() {
             var value = $(this).val();
-            theme[this.name] = value;
-        });
-        $('#tabtheme input[type="text"]').each(function() {
-            var value = $(this).val();
-            theme[this.name] = value;
-            console.log(value);
-        });
-        $("#tabtheme select").each(function() {
-            var value = $(this).val();
-            theme[this.name] = value;
+            if (this.name.indexOf('.') !== -1) {
+                const json = this.name.split('.');
+                theme[json[0]][json[1]] = value;
+            } else {
+                theme[this.name] = value;
+            }
         });
         localStorage.setObject(themeFolder + ".themeSettings", theme);
         storeUserVariableThemeSettings("update");
@@ -213,6 +214,21 @@ function loadSettingsHTML() {
                 }
             }
         });
+    });
+    $('a.resetschemebtn').click(function(e) {
+            e.preventDefault();
+            var current_theme = light_theme;
+            if (theme.features.dark_theme.enabled) {
+                current_theme = dark_theme;
+            }
+            $('input#themevar39_bg').val(current_theme.bg);
+            $('input#themevar39_main_color').val(current_theme.main);
+            $('input#themevar39_navbar').val(current_theme.navbar);
+            $('input#themevar39_item').val(current_theme.item);
+            $('input#themevar39_text').val(current_theme.text);
+            $('input#themevar39_alt_text').val(current_theme.alt_text);
+            $('input#themevar39_disabled').val(current_theme.disabled);
+            return false; 
     });
 }
 

@@ -19,39 +19,48 @@ input#AcceptNewHardware:checked ~ button {
 /* Popups */
 
 /* Theme tab in Settings */
-input.parentrequiredchild {
-    margin-left: 16px;
+#settingscontent #themeTabButton.active + li.pull-right {
+    display: none !important;
 }
 
-input.parentunrequiredchild {
-    margin-left: 16px;
+#settingscontent p.two_cols {
+    display: flex;
+    flex-flow: row wrap;
 }
+
+#settingscontent p > span {
+    display: block;
+}
+
+#settingscontent span.cols_span {
+    flex: 0 0 100%;
+}
+
+#settingscontent p.two_cols > span.option {
+    width: 50%;
+}
+
+#settingscontent p:not(.two_cols) > span.option {
+    margin-left: 2em;
+}
+
+#settingscontent span.option.label_right > label {
+    display: inline-block;
+    min-width: 100px;
+    text-align: right;
+    padding-right: 10px;
+}
+
 /* if a sub-setting needs the parent settings to be checked. */
-#settingscontent input.parentrequired:not(:checked) ~ input.parentrequiredchild,
-#settingscontent input.parentrequired:not(:checked) ~ textarea.parentrequiredchild,
-#settingscontent input.parentrequired:not(:checked) ~ input.parentrequiredchild + label {
+#settingscontent input.parentrequired:not(:checked) ~ span.option,
+#settingscontent input.parentrequired:not(:checked) ~ span.option > input.parentrequiredchild,
+#settingscontent input.parentrequired:not(:checked) ~ span.option > textarea.parentrequiredchild {
     color: var(--main-disabled-color);
 }
 
-#settingscontent input.parentrequired:checked ~ input.parentrequiredchild,
-#settingscontent input.parentrequired:checked ~ input.parentrequiredchild + label {
-    display: inline-block;
-    margin-right: 5px;
-}
-
-#settingscontent input.parentrequired:not(:checked) ~ .parentrequiredchild {
-    display: inline-block;
-}
-
-/* if a sub-setting needs the parent settings to be UNchecked. */
-#settingscontent input.parentunrequired:checked ~ input.parentunrequiredchild,
-#settingscontent input.parentunrequired:checked ~ input.parentunrequiredchild + label {
-    display: inline-block;
-}
-
-#settingscontent input.parentunrequired:not(:checked) ~ input.parentunrequiredchild,
-#settingscontent input.parentunrequired:not(:checked) ~ input.parentunrequiredchild + label {
-    display: inline-block;
+a.resetschemebtn {
+    font-size: 18px;
+    padding: 0 10px;
 }
 
 /*System page*/
@@ -67,14 +76,9 @@ input.parentunrequiredchild {
     border: 1px solid var(--main-item-bg-color);
 }
 
-#settings .row-fluid > div:hover {
-    border-color: var(--main-blue-color);
-}
-
-#settings .row-fluid > .span4, #settings .row-fluid > .span6, #settings .row-fluid > .span12 {
-    height: auto;
-    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
-    border-radius: 6px;
+#settings .row-fluid > .span4,
+#settings .row-fluid > .span6,
+#settings .row-fluid > .span12 {
     margin: 20px;
     padding: 20px;
     flex-basis: 500px;
@@ -82,17 +86,24 @@ input.parentunrequiredchild {
     flex-grow: 1;
 }
 
-#settings input, #settings select, #settings textarea {
-    width: auto !important;
-}
-
 #settings textarea {
     width: 100% !important;
+}
+
+#settings input[type=color] {
+    border: 0;
+    background: transparent;
+}
+
+#settings input[type="input"], #settings input[type="text"], #settings input[type="password"], #settings select {
+    width: auto !important;
+    max-width: 100px;
 }
 
 #textareaIcons {
     resize: none;
     width: 100%;
+    margin: 1em 0;
 }
 
 .blocklyText {
@@ -105,32 +116,10 @@ input.parentunrequiredchild {
 }
 
 /* Settings page CSS */
-#machinoSettings {
-    padding: 0 20px;
-}
-
 .mHeaderBtn {
     margin-left: calc(100% - 660px);
-    margin-top: -1.8%;
-    margin-bottom: 20px;
     display: flex;
     justify-content: space-around;
-}
-
-.mHeaderBtn li {
-    padding: 5px 20px;
-    margin: 0 0 3px 0;
-    height: 30px;
-    border-radius: 2px;
-    background-color: var(--main-border-color);
-    cursor: pointer;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-}
-
-.mHeaderBtn li:hover {
-    background-color: rgba(169,169,169,0.5);
 }
 
 .mHeaderBtn li i {
@@ -141,23 +130,15 @@ input.parentunrequiredchild {
     font-size: 14px;
     letter-spacing: -0.5px;
     margin-left: 10px;
-    ;
 }
 
 .rectangle-8, .rectangle-8-dropdown {
-    border: 1.5px solid;
-    border-color: transparent;
-    border-radius: 6px;
-    background-color: #ffffff;
     cursor: pointer;
     box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.2);
     list-style-type: none;
-    height: 75px;
-    margin-left: 20px;
-    margin-bottom: 20px;
+    min-height: 75px;
     flex: 1 0 15%;
     display: flex;
-    padding: 20px;
     justify-content: flex-start;
     align-items: center;
 }
@@ -199,15 +180,11 @@ ul.machinon_ul li {
     margin: 15px 0;
 }
 
-.machinon_ul li:hover {
-    border-color: var(--main-blue-color);
-}
-
 .dropdown-content {
     display: none;
-    background-color: #fff;
+    background-color: var(--main-item-bg-color);
     min-width: 160px;
-    border: 1px solid var(--main-blue-color);
+    border: 1.5px solid var(--main-blue-color);
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     padding: 12px 16px;
     z-index: 1;
@@ -215,7 +192,7 @@ ul.machinon_ul li {
 }
 
 .dropdown-content a {
-    color: inherit;
+    color: var(--main-text-color);
 }
 
 .rectangle-8-dropdown:hover .dropdown-content {
@@ -224,10 +201,6 @@ ul.machinon_ul li {
 
 .forkme {
     margin: -21px -21px 0 0;
-}
-
-#themesettings h1 {
-    display: inline
 }
 
 #themesettings p {
@@ -242,8 +215,8 @@ ul.machinon_ul li {
     margin-top: 10px;
 }
 
-#themesettings a {
-    color: inherit
+.norm-link, .norm-link a, .norm-link a:link, .norm-link a:active, .norm-link a:visited, .norm-link href, a:link {
+    color: var(--main-blue-color);
 }
 
 @media all and (max-width: 767px) {
@@ -263,12 +236,24 @@ ul.machinon_ul li {
 
     ul.machinon_ul {
         margin: 0 0 10px 5px;
-        display: block;
+        grid-template-columns: repeat(auto-fill, 100px);
     }
 
     ul.machinon_ul li {
-        padding-left: 40px;
+        display: block;
+        padding: 5px;
+        text-align: center;
     }
+
+    div.machinoText {
+        display: table-cell;
+        margin: 0;
+        font-size: 1em;
+        line-height: 1em;
+        height: 35px;
+        vertical-align: middle;
+        width: 100px;
+    }  
 
     code {
         white-space: normal;
@@ -278,20 +263,23 @@ ul.machinon_ul li {
         margin-bottom: 50px;
     }
 
-    #settings li.pull-right {
+    #settings li.pull-right, 
+    #settings div.pull-right {
         position: fixed;
         left: 0;
         bottom: 5px;
         width: 100%;
+        text-align: center;
+        z-index: 10;
     }
 
-    #settings li.pull-right a {
+    #settings .pull-right a {
         margin: 0 20px;
         box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
     }
 }
 
-@media screen and (max-width: 992px) {
+@media screen and (max-width: 979px) {
     #settings .row-fluid {
         flex-wrap: wrap;
         font-size: 0.9em;
