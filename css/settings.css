@@ -95,11 +95,6 @@ a.resetschemebtn {
     background: transparent;
 }
 
-#settings input[type="input"], #settings input[type="text"], #settings input[type="password"], #settings select {
-    width: auto !important;
-    max-width: 100px;
-}
-
 #textareaIcons {
     resize: none;
     width: 100%;
@@ -215,7 +210,7 @@ ul.machinon_ul li {
     margin-top: 10px;
 }
 
-.norm-link, .norm-link a, .norm-link a:link, .norm-link a:active, .norm-link a:visited, .norm-link href, a:link {
+#settings .norm-link, #settings .norm-link a, #settings .norm-link a:link, #settings .norm-link a:active, #settings .norm-link a:visited, #settings .norm-link href, #settings a:link {
     color: var(--main-blue-color);
 }
 
@@ -254,6 +249,11 @@ ul.machinon_ul li {
         vertical-align: middle;
         width: 100px;
     }  
+
+    #settings input[type="input"], #settings input[type="text"], #settings input[type="password"], #settings select {
+        max-width: 100px;
+        width: auto !important;
+    }
 
     code {
         white-space: normal;
