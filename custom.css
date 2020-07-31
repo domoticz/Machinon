@@ -1652,9 +1652,13 @@ select.ui-corner-all option {
 }
 
 .btn-group {
+    display: flex !important;
+    flex-flow: wrap;
+    justify-content: space-evenly;
     padding-bottom: 1px;
     scrollbar-width: thin;
     scrollbar-color: var(--main-blue-color) var(--main-bg-color);
+    width: 100%;
 }
 
 /* Selector */
@@ -1791,22 +1795,29 @@ section.compact .row.divider {
 }
 
 .span3 td.input .btn-group {
-    display: flex !important;
-    flex-direction: column;
+    flex-flow: column;
+    justify-content: start;
     white-space: normal;
     margin-top: 0 !important;
     height: 50px;
     width: 100%;
-    scrollbar-width: thin;
+    scroll-snap-type: y mandatory;
     background: var(--main-bg-item-color) !important;
 }
 
 .span3 td.input .btn-group button {
     order: 2;
     border-radius: 0 !important;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
 }
 
 .span3 td.input .btn-group button.btn-selected {
+    color: var(--main-blue-color) !important;
+    font-family: main-font-bold;
+    font-size: 1rem;
+    font-weight: 600;
+    min-height: 50px;
     order: 1;
 }
 
