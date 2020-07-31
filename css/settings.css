@@ -95,11 +95,6 @@ a.resetschemebtn {
     background: transparent;
 }
 
-#settings input[type="input"], #settings input[type="text"], #settings input[type="password"], #settings select {
-    width: auto !important;
-    max-width: 100px;
-}
-
 #textareaIcons {
     resize: none;
     width: 100%;
@@ -254,6 +249,11 @@ ul.machinon_ul li {
         vertical-align: middle;
         width: 100px;
     }  
+
+    #settings input[type="input"], #settings input[type="text"], #settings input[type="password"], #settings select {
+        max-width: 100px;
+        width: auto !important;
+    }
 
     code {
         white-space: normal;
