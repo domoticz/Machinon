@@ -316,6 +316,7 @@ function checkUserVariableThemeSettings() {
                 var didDomoticzHaveSettings = false;
                 var featuresVarName = "theme-" + themeFolder + "-features";
                 var customVarName = "theme-" + themeFolder + "-custom";
+                var colorsVarName = "theme-" + themeFolder + "-colors";
                 $.each(data.result, function(variable, value) {
                     if (value.Name == featuresVarName) {
                         console.log(themeName + " - found theme feature settings in Domoticz database (user variable Idx: " + value.idx + ")");
@@ -324,10 +325,16 @@ function checkUserVariableThemeSettings() {
                         getFeatureThemeSettings(value.idx);
                     }
                     if (value.Name == customVarName) {
-                        console.log(themeName + " - found theme feature settings in Domoticz database (user variable Idx: " + value.idx + ")");
+                        console.log(themeName + " - found theme custom settings in Domoticz database (user variable Idx: " + value.idx + ")");
                         didDomoticzHaveSettings = true;
                         theme.usercustomsvariable = value.idx;
                         getCustomThemeSettings(value.idx);
+                    }
+                    if (value.Name == colorsVarName) {
+                        console.log(themeName + " - found theme colors settings in Domoticz database (user variable Idx: " + value.idx + ")");
+                        didDomoticzHaveSettings = true;
+                        theme.usercolorsvariable = value.idx;
+                        getColorsThemeSettings(value.idx);
                     }
                 });
                 if (didDomoticzHaveSettings === false) {
@@ -380,6 +387,23 @@ function storeUserVariableThemeSettings(action) {
         custom.push(theme.background_img);
         custom.push(theme.background_type);
         variableURL = "json.htm?type=command&param=" + action + "uservariable&vname=theme-" + themeFolder + "-custom&vtype=2&vvalue=" + JSON.stringify(custom);
+        $.ajax({
+            url: variableURL,
+            async: false,
+            dataType: "json",
+            success: function(data) {
+                if (data.status == "ERR") {
+                    bootbox.alert("Unable to create or update theme settings uservariable, Try to reset the theme");
+                }
+                if (data.status == "OK") {
+                    console.log(themeName + " - theme settings uservariable is updated");
+                }
+            },
+            error: function() {
+                console.log(themeName + " - Ajax error wile creating or updating user variable in Domotcz.");
+            }
+        });
+        variableURL = "json.htm?type=command&param=" + action + "uservariable&vname=theme-" + themeFolder + "-colors&vtype=2&vvalue=" + encodeURIComponent(JSON.stringify(theme.color_scheme));
         $.ajax({
             url: variableURL,
             async: false,
@@ -463,6 +487,29 @@ function getCustomThemeSettings(idx) {
     });
 }
 
+function getColorsThemeSettings(idx) {
+    $.ajax({
+        url: "json.htm?type=command&param=getuservariable" + "&idx=" + idx,
+        async: true,
+        dataType: "json",
+        success: function(data) {
+            if (data.status == "ERR") {
+                console.log(themeName + " - Although they seem to exist, there was an error loading theme preferences from Domoticz");
+                $.get("json.htm?type=command&param=addlogmessage&message=Theme Error - The theme was unable to load your user variable.");
+                colorsVariableThemeLoaded = false;
+            }
+            if (data.status == "OK") {
+                theme.color_scheme = JSON.parse(data.result[0].Value)
+                localStorage.setObject(themeFolder + ".themeSettings", theme);
+                colorsVariableThemeLoaded = true;
+            }
+        },
+        error: function() {
+            console.log(themeName + " - ERROR reading colors settings from Domoticz for theme" + theme.name + "from user variable #" + idx);
+            colorsVariableThemeLoaded = false;
+        }
+    });
+}
 function resetTheme() {
     if (typeof theme.userfeaturesvariable !== "undefined") {
         var deleteFeaturesURL = "json.htm?type=command&param=deleteuservariable&idx=" + theme.userfeaturesvariable;
