@@ -925,7 +925,7 @@ div.menu-toggle.scrolled {
     background-color: transparent;
     color: var(--main-text-color);
     border: none;
-    border-radius: 0;
+    border-radius: 5px;
     position: relative;
 }
 
@@ -972,10 +972,9 @@ div.menu-toggle.scrolled {
     text-shadow: none;
     color: var(--main-text-color);
     background-image: none;
-    background-color: var(--main-blue-color);
+    background-color: rgba(var(--main-blue-color-values), 0.4);
     font-family: main-font-bold;
-    border: none;
-    border-radius: 0;
+    border: 1px solid var(--main-blue-color);
 }
 
 .nav li a img {
@@ -1481,24 +1480,21 @@ select.ui-corner-all option {
 	/*! background-color: transparent !important; */
 }
 
-.item.statusTimeout:hover {
-    box-shadow: 0px 0px 0px 2px rgb(199,67,67);
+.item.statusTimeout tr:hover {
+    box-shadow: 0px 0px 0px 2px rgb(199,67,67) !important;
 }
 /* Switch is protected */
-.item.statusProtected:hover {
-    box-shadow: 0px 0px 10px 2px rgb(0, 0, 139, 0.4);
+.item.statusProtected tr:hover {
+    box-shadow: 0px 0px 10px 2px rgb(0, 0, 139, 0.4) !important;
 }
 
-.item.statusProtected:hover {
-    box-shadow: 0px 0px 0px 2px rgb(0, 0, 139);
-}
 /* Device has low battery */
-.item.statusLowBattery {
-    box-shadow: 0px 0px 10px 2px rgb(255,255,0,0.4);
+.item.statusLowBattery tr {
+    box-shadow: 0px 0px 10px 2px rgb(255,255,0,0.4) !important;
 }
 
-.item.statusLowBattery:hover {
-    box-shadow: 0px 0px 0px 2px rgb(255,255,0);
+.item.statusLowBattery tr:hover {
+    box-shadow: 0px 0px 0px 2px rgb(255,255,0) !important;
 }
 
 .blink {
@@ -1656,9 +1652,13 @@ select.ui-corner-all option {
 }
 
 .btn-group {
+    display: flex !important;
+    flex-flow: wrap;
+    justify-content: space-evenly;
     padding-bottom: 1px;
     scrollbar-width: thin;
     scrollbar-color: var(--main-blue-color) var(--main-bg-color);
+    width: 100%;
 }
 
 /* Selector */
@@ -1795,22 +1795,29 @@ section.compact .row.divider {
 }
 
 .span3 td.input .btn-group {
-    display: flex !important;
-    flex-direction: column;
+    flex-flow: column;
+    justify-content: start;
     white-space: normal;
     margin-top: 0 !important;
     height: 50px;
     width: 100%;
-    scrollbar-width: thin;
+    scroll-snap-type: y mandatory;
     background: var(--main-bg-item-color) !important;
 }
 
 .span3 td.input .btn-group button {
     order: 2;
     border-radius: 0 !important;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
 }
 
 .span3 td.input .btn-group button.btn-selected {
+    color: var(--main-blue-color) !important;
+    font-family: main-font-bold;
+    font-size: 1rem;
+    font-weight: 600;
+    min-height: 50px;
     order: 1;
 }
 
