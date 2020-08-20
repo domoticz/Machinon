@@ -775,6 +775,7 @@ body table#itemtable tr > .options {
 }
 
 body {
+    height: 90% !important;
     background: var(--main-bg-color) !important;
     font-family: main-font;
     color: var(--main-text-color);
