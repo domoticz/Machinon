@@ -76,17 +76,19 @@ function setSearch() {
 
 function searchFunction() {
     var value = $("#searchInput").val().toLowerCase();
-    $("div .item").filter(function() {
+    $("div .item").each(function() {
         var element = $(this);
         if ($("#dashcontent").length || $("#weatherwidgets").length || $("#tempwidgets").length) {
             element = $(this).parent();
         }
-        element.toggle($(this).find("#name").html().toLowerCase().indexOf(value) > -1);
+        var visibility = $(this).find("#name").html().toLowerCase().indexOf(value) > -1;
+        element.toggle(visibility);
     });
-    $(".mobileitem tr").filter(function() {
-        $(this).toggle($(this).html().toLowerCase().indexOf(value) > -1);
-    });
-    removeEmptySectionDashboard();
+    $("div.row.divider").show();
+    $("section").show();
+    if (value.length) {
+        removeEmptySectionDashboard();
+    }
 }
 
 function locationHashChanged() {
