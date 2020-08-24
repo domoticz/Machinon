@@ -120,6 +120,7 @@ h4,
 #logdata_status,
 #logdata_error {
     background: var(--main-navbar-bg-color);
+    max-height: calc(100vh - 220px);
 }
 
 .lognorm {
@@ -555,7 +556,16 @@ div.bannercontent .row.divider {
     border-radius: 5px;
 }
 
-.btn-group::-webkit-scrollbar-thumb,
+.item .btn-group {
+    display: flex !important;
+    flex-flow: wrap;
+    justify-content: space-evenly;
+    scrollbar-width: thin;
+    scrollbar-color: var(--main-blue-color) var(--main-bg-color);
+    width: 100%;
+}
+
+.item .btn-group::-webkit-scrollbar-thumb,
 .item #status::-webkit-scrollbar-thumb,
 .item .status::-webkit-scrollbar-thumb {
     background: var(--main-blue-color);
@@ -1168,10 +1178,10 @@ button.savebtn:disabled {
 }
 
 .btn-danger {
-    background: none;
+    background: rgba(255, 255, 255, .4);
     border-color: #c74343;
-    color: #c74343;
     border-radius: 1px;
+    color: #c74343;
 }
 
 .btn-danger:hover {
@@ -1652,13 +1662,7 @@ select.ui-corner-all option {
 }
 
 .btn-group {
-    display: flex !important;
-    flex-flow: wrap;
-    justify-content: space-evenly;
     padding-bottom: 1px;
-    scrollbar-width: thin;
-    scrollbar-color: var(--main-blue-color) var(--main-bg-color);
-    width: 100%;
 }
 
 /* Selector */

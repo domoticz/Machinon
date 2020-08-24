@@ -199,8 +199,10 @@ function setDeviceLastUpdate(idx, lastupdate) {
                 $(this).find("#timeago > span").livestamp( moment(lastupdate).format());
             }
         } else {
+            var lastupd = moment(lastupdate);
+            lastupd.locale(window.navigator.language);
             $(this).find("#lastupdate").attr("title", $.t("Last Seen"));
-            $(this).find("#lastupdate").text(moment(lastupdate).format("L LT"));
+            $(this).find("#lastupdate").text(lastupd.format("L LT"));
             if ($(this).find("#lastSeen").length == 0) {
                 $(this).find("#lastupdate").prepend("<i id='lastSeen' class='ion-ios-pulse'></i> ");
             }
