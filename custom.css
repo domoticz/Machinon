@@ -1178,10 +1178,10 @@ button.savebtn:disabled {
 }
 
 .btn-danger {
-    background: none;
+    background: rgba(255, 255, 255, .4);
     border-color: #c74343;
-    color: #c74343;
     border-radius: 1px;
+    color: #c74343;
 }
 
 .btn-danger:hover {
