@@ -174,7 +174,7 @@ function init_theme() {
             }
             $("html").addClass(theme.background_type);
             $("html").css("background-image", "url(" + bg_url + ")");
-            $("body").css("cssText", "background: transparent !important");
+            $("body").attr('style', function(i,s) { return (s || '') + 'background: transparent !important;' });
         }
         $("#cSetup").click(function() {
             showThemeSettings();

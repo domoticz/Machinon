@@ -23,7 +23,7 @@ git clone https://github.com/domoticz/machinon.git machinon
 sudo /etc/init.d/domoticz.sh restart
 ```
 
-Tu update it:
+To update it:
 ```
 cd /home/${USER}/domoticz/www/styles/machinon
 git pull

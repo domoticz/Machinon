@@ -40,6 +40,12 @@ g text {
     fill: var(--main-text-color) !important;
 }
 
+g.selector .level-list .level path {
+    fill: var(--main-item-bg-color);
+    stroke: var(--main-item-bg-color);
+}
+
+
 image#twisty {
     display: none;
 }
