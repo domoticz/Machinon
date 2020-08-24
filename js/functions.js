@@ -76,14 +76,17 @@ function setSearch() {
 
 function searchFunction() {
     var value = $("#searchInput").val().toLowerCase();
+    $("div .item").each(function() {
+        var element = $(this);
+        if ($("#dashcontent").length || $("#weatherwidgets").length || $("#tempwidgets").length) {
+            element = $(this).parent();
+        }
+        var visibility = $(this).find("#name").html().toLowerCase().indexOf(value) > -1;
+        element.toggle(visibility);
+    });
+    $("div.row.divider").show();
+    $("section").show();
     if (value.length) {
-        $("div .item").filter(function() {
-            var element = $(this);
-            if ($("#dashcontent").length || $("#weatherwidgets").length || $("#tempwidgets").length) {
-                element = $(this).parent();
-            }
-            element.toggle($(this).find("#name").html().toLowerCase().indexOf(value) > -1);
-        });
         removeEmptySectionDashboard();
     }
 }
