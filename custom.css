@@ -555,7 +555,16 @@ div.bannercontent .row.divider {
     border-radius: 5px;
 }
 
-.btn-group::-webkit-scrollbar-thumb,
+.item .btn-group {
+    display: flex !important;
+    flex-flow: wrap;
+    justify-content: space-evenly;
+    scrollbar-width: thin;
+    scrollbar-color: var(--main-blue-color) var(--main-bg-color);
+    width: 100%;
+}
+
+.item .btn-group::-webkit-scrollbar-thumb,
 .item #status::-webkit-scrollbar-thumb,
 .item .status::-webkit-scrollbar-thumb {
     background: var(--main-blue-color);
@@ -1652,13 +1661,7 @@ select.ui-corner-all option {
 }
 
 .btn-group {
-    display: flex !important;
-    flex-flow: wrap;
-    justify-content: space-evenly;
     padding-bottom: 1px;
-    scrollbar-width: thin;
-    scrollbar-color: var(--main-blue-color) var(--main-bg-color);
-    width: 100%;
 }
 
 /* Selector */
