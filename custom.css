@@ -120,6 +120,7 @@ h4,
 #logdata_status,
 #logdata_error {
     background: var(--main-navbar-bg-color);
+    max-height: calc(100vh - 220px);
 }
 
 .lognorm {
