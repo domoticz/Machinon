@@ -1,0 +1,41 @@
+/* standby screen */
+.standby {
+    background-image: none !important;
+    background-color: #313131 !important;
+}
+
+.standby .row {
+    opacity: 0.4;
+}
+
+.standbyClock {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    color: #fff;
+    font-size: 80px;
+    font-family: main-font-bold;
+    letter-spacing: 7px;
+}
+
+.standbyDate {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    color: #fff;
+    font-size: 60px;
+    font-family: main-font-bold;
+    letter-spacing: 7px;
+}
+
+@media screen and (max-width: 979px) {
+    .standbyClock {
+        font-size: 60px;
+    }
+
+    .standbyDate {
+        font-size: 40px;
+    }
+}
