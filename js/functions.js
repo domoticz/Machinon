@@ -37,7 +37,7 @@ function setColorScheme() {
         theme.color_scheme.navbar = current_theme.navbar;
         theme.color_scheme.item = current_theme.item;
         theme.color_scheme.main_text = current_theme.text;
-        theme.color_scheme.secondary_text = current_theme.alt_text;
+        theme.color_scheme.alt_text = current_theme.alt_text;
         theme.color_scheme.border = current_theme.border;
         theme.color_scheme.disabled = current_theme.disabled;
     }
@@ -47,7 +47,7 @@ function setColorScheme() {
     $("body").get(0).style.setProperty('--main-navbar-bg-color',hexToRGB(theme.color_scheme.navbar));
     $("body").get(0).style.setProperty('--main-item-bg-color',hexToRGB(theme.color_scheme.item));
     $("body").get(0).style.setProperty('--main-text-color',hexToRGB(theme.color_scheme.main_text));
-    $("body").get(0).style.setProperty('--secondary-text-color',hexToRGB(theme.color_scheme.secondary_text));
+    $("body").get(0).style.setProperty('--secondary-text-color',hexToRGB(theme.color_scheme.alt_text));
     $("body").get(0).style.setProperty('--main-disabled-color',hexToRGB(theme.color_scheme.disabled));
 }
 
