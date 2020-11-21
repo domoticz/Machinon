@@ -1710,29 +1710,6 @@ select.ui-corner-all option {
     }
 }
 
-@media screen and (max-width: 979px) {
-    #timesun {
-        margin-top: 0px;
-    }
-
-    .events-editor {
-        margin-top: -40px;
-    }
-
-    div.row {
-        align-content: center;
-    }
-
-    .container-logo {
-        width: auto;
-    }
-
-    .container-fluid {
-        padding: 0 10px 20px 10px !important;
-        margin: 0 !important;
-    }
-}
-
 #copyright {
     background: var(--main-navbar-bg-color);
     opacity: 0.6;
