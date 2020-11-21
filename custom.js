@@ -23,12 +23,6 @@ var dark_theme = {
 };
 
 $.ajax({
-    url: "acttheme/js/moment.js",
-    async: false,
-    dataType: "script",
-});
-
-$.ajax({
     url: "acttheme/js/livestamp.js",
     async: false,
     dataType: "script"
