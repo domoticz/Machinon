@@ -22,6 +22,12 @@ var dark_theme = {
     disabled: "#808080"
 };
 
+$.ajax({	
+    url: "acttheme/js/moment.js",	
+    async: false,	
+    dataType: "script",	
+});
+
 $.ajax({
     url: "acttheme/js/livestamp.js",
     async: false,
