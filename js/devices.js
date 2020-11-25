@@ -243,7 +243,6 @@ var oldstates = [];
 function triggerChange(idx, value, device) {
     let textLowBattery = device.Name + " " + $.t("Battery Level") + " " + $.t("Low") + " " + device.BatteryLevel + "%";
     if (typeof oldstates[idx] !== "undefined" && value !== oldstates[idx]) {
-        getNotifications(idx, device.Data);
         if (device.BatteryLevel < 11) {
             notify(textLowBattery, 2);
         }
