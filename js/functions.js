@@ -162,38 +162,6 @@ function checkDomoticzUpdate(showdialog) {
     return false;
 }
 
-function getNotifications(idx, state) {
-    var msg;
-    $.ajax({
-        url: "json.htm?type=notifications&idx=" + idx + "",
-        cache: false,
-        async: false,
-        dataType: "json",
-        success: function(data) {
-            var message = data.result;
-            for (let r in data.result) {
-                if (typeof message !== "undefined") {
-                    var system = message[r].ActiveSystems;
-                    if (system.includes("browser")) {
-                        if (state == "On" || state == "Open" || state == "Locked") {
-                            if (message[r].Params == "S") {
-                                msg = message[r].CustomMessage;
-                                notify(msg, 1);
-                            }
-                        }
-                        if (state == "Off" || state == "Closed" || state == "Unlocked") {
-                            if (message[r].Params == "O") {
-                                msg = message[r].CustomMessage;
-                                notify(msg, 1);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    });
-}
-
 function displayNotifications() {
     var msg = localStorage.getItem(themeFolder + ".notify");
     msg = JSON.parse(msg);
