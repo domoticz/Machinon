@@ -103,11 +103,17 @@ function setAllDevicesIconsStatus() {
     });
     $("div.item.statusTimeout").each(function() {
         if ($(this).find("#name > i.ion-ios-wifi").length === 0) {
+            if (theme.features.notification.enabled === true) {
+                generate_noty('warning', "Sensor " + $(this).find('#name').text() + " " + language.is + " " + language.timedout, 4000);
+            }
             $(this).find("#name").prepend("<i class='ion-ios-wifi blink warning-text' title='" + $.t("Sensor Timeout") + "'></i>&nbsp;");
         }
     });
     $("div.item.statusLowBattery").each(function() {
         if ($(this).find("#name > i.ion-ios-battery-dead").length === 0) {
+            if (theme.features.notification.enabled === true) {
+                generate_noty('warning', $(this).find('#name').text() + ' ' + $.t("Battery Level") + ' ' + $.t("Low"), 4000)
+            }
             $(this).find("#name").prepend("<i class='ion-ios-battery-dead blink warning-text' title='" + $.t("Battery Low Level") + "'></i>&nbsp;");
         }
     });
@@ -228,24 +234,3 @@ function setDeviceOpacity(idx, status) {
     }
 }
 
-var timeOut = [];
-function timedOut(idx, value, device) {
-    let textmsg = "Sensor " + device.Name + " " + language.is + " " + language.timedout;
-    if (typeof timeOut[idx] !== "undefined" && value !== timeOut[idx]) {
-        if (device.HaveTimeout) {
-            notify(textmsg, 2);
-        }
-    }
-    timeOut[idx] = value;
-}
-
-var oldstates = [];
-function triggerChange(idx, value, device) {
-    let textLowBattery = device.Name + " " + $.t("Battery Level") + " " + $.t("Low") + " " + device.BatteryLevel + "%";
-    if (typeof oldstates[idx] !== "undefined" && value !== oldstates[idx]) {
-        if (device.BatteryLevel < 11) {
-            notify(textLowBattery, 2);
-        }
-    }
-    oldstates[idx] = value;
-}
