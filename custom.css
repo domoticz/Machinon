@@ -473,7 +473,7 @@ div.bannercontent .row.divider {
 .item #bigtext {
     color: var(--main-blue-color);
     background: var(--main-item-bg-color);
-    background: linear-gradient(to right, rgba(255,255,255,0), var(--main-item-bg-color) 15px);
+   /*  background: linear-gradient(to right, rgba(255,255,255,0), var(--main-item-bg-color) 15px); */
     font-size: 1.4em;
     line-height: 20px;
     grid-area: bigtext;
