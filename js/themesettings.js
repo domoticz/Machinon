@@ -14,10 +14,10 @@ function showThemeSettings() {
             }
         });
         $("#acceptnewhardwaretable > tbody > tr:nth-child(1) > td > button").click(function() {
-            notify(language.allow_new_hardware, 2);
+            generate_noty('success', language.allow_new_hardware, 2000);
         });
         $("#tabs > li.pull-right > a").click(function() {
-            notify(language.domoticz_settings_saved, 2);
+            generate_noty('success', language.domoticz_settings_saved, 2000)
         });
         $("#tabs").i18n();
         $("#my-tab-content").append('<div class="tab-pane" id="tabtheme"><section id="theme">Loading..</section></div>');
@@ -176,8 +176,8 @@ function loadSettingsHTML() {
         });
         localStorage.setObject(themeFolder + ".themeSettings", theme);
         storeUserVariableThemeSettings("update");
-        notify(language.theme_settings_saved, 2);
-        location.reload();
+        generate_noty('success', language.domoticz_settings_saved, 4000)
+        /* location.reload(); */
     });
     $("#themeResetButton").click(function() {
         bootbox.dialog({
@@ -197,18 +197,18 @@ function loadSettingsHTML() {
                     label: language.clear_localstorage,
                     className: "btn-warning",
                     callback: function() {
-                        notify(language.storage_removed, 2);
+                        generate_noty('warning', language.storage_removed, 2000)
                         if (typeof Storage !== "undefined") {
                             localStorage.removeItem(themeFolder + ".themeSettings");
                         }
-                        location.reload();
+                        /* location.reload(); */
                     }
                 },
                 ok: {
                     label: $.t("Reset"),
                     className: "btn-danger",
                     callback: function() {
-                        notify(language.theme_restored, 2);
+                        generate_noty('success', language.theme_restored, 2000)
                         resetTheme();
                     }
                 }
