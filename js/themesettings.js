@@ -14,10 +14,10 @@ function showThemeSettings() {
             }
         });
         $("#acceptnewhardwaretable > tbody > tr:nth-child(1) > td > button").click(function() {
-            generate_noty('success', language.allow_new_hardware, 2000);
+            generate_noty('success', language.allow_new_hardware, 4000);
         });
         $("#tabs > li.pull-right > a").click(function() {
-            generate_noty('success', language.domoticz_settings_saved, 2000)
+            generate_noty('success', language.domoticz_settings_saved, 4000)
         });
         $("#tabs").i18n();
         $("#my-tab-content").append('<div class="tab-pane" id="tabtheme"><section id="theme">Loading..</section></div>');
@@ -197,7 +197,7 @@ function loadSettingsHTML() {
                     label: language.clear_localstorage,
                     className: "btn-warning",
                     callback: function() {
-                        generate_noty('warning', language.storage_removed, 2000)
+                        generate_noty('warning', language.storage_removed, 4000)
                         if (typeof Storage !== "undefined") {
                             localStorage.removeItem(themeFolder + ".themeSettings");
                         }
@@ -208,7 +208,7 @@ function loadSettingsHTML() {
                     label: $.t("Reset"),
                     className: "btn-danger",
                     callback: function() {
-                        generate_noty('success', language.theme_restored, 2000)
+                        generate_noty('success', language.theme_restored, 4000)
                         resetTheme();
                     }
                 }
