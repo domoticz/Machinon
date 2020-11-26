@@ -113,102 +113,6 @@ function locationHashChanged() {
     }
 }
 
-function notify(key, type) {
-    if (theme.features.notification.enabled === true) {
-        if (type == 0 || type == 2) {
-            var existing = localStorage.getItem(themeFolder + ".notify");
-            existing = existing ? JSON.parse(existing) : {};
-            let d = new Date();
-            dd = d.getTime();
-            existing[key] = dd;
-            localStorage.setItem(themeFolder + ".notify", JSON.stringify(existing));
-            $("#notyIcon").show();
-        }
-        if (type == 1 || type == 2) {
-            if (type == 1) $("#notyIcon").show();
-            let width = window.innerWidth;
-            if (width > 767) {
-                $("#notyIcon").notify(key);
-            } else {
-                $("#notyIcon").notify(key, {
-                    position: "right",
-                    className: "info"
-                });
-            }
-            if (type == 1) $("#notyIcon").hide();
-        }
-    }
-}
-
-function clearNotify() {
-    if (typeof Storage !== "undefined") {
-        localStorage.removeItem(themeFolder + ".notify");
-        $("#notyIcon").hide();
-    }
-}
-
-function checkDomoticzUpdate(showdialog) {
-    $.ajax({
-        url: "json.htm?type=command&param=checkforupdate&forced=" + showdialog,
-        dataType: "json",
-        success: function(data) {
-            if (data.HaveUpdate == true) {
-                msgtxt = "Domoticz version #" + data.Revision + " " + language.is_available + "!";
-                msgtxt += ' <a onclick="CheckForUpdate(true);">' + language.update_now + "</a>";
-                notify(msgtxt, 0);
-            }
-        }
-    });
-    return false;
-}
-
-function getNotifications(idx, state) {
-    var msg;
-    $.ajax({
-        url: "json.htm?type=notifications&idx=" + idx + "",
-        cache: false,
-        async: false,
-        dataType: "json",
-        success: function(data) {
-            var message = data.result;
-            for (let r in data.result) {
-                if (typeof message !== "undefined") {
-                    var system = message[r].ActiveSystems;
-                    if (system.includes("browser")) {
-                        if (state == "On" || state == "Open" || state == "Locked") {
-                            if (message[r].Params == "S") {
-                                msg = message[r].CustomMessage;
-                                notify(msg, 1);
-                            }
-                        }
-                        if (state == "Off" || state == "Closed" || state == "Unlocked") {
-                            if (message[r].Params == "O") {
-                                msg = message[r].CustomMessage;
-                                notify(msg, 1);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    });
-}
-
-function displayNotifications() {
-    var msg = localStorage.getItem(themeFolder + ".notify");
-    msg = JSON.parse(msg);
-    var myObj = msg;
-    msgCount = 0;
-    $("#notify").append('<div id="msg" class="msg"><ul></ul><center><a class="btn btn-info" onclick="clearNotify();">' + (typeof $.t === "undefined" ? "Clear" : $.t("Clear")) + "</a></center></div>");
-    for (let x in myObj) {
-        $("#msg ul").append("<li>" + x + "<span> -- " + moment(myObj[x]).fromNow() + "</span></li>");
-        msgCount++;
-        $("#notyIcon").prop("title", language.you_have + " " + msgCount + " " + language.messages);
-        $("#notyIcon").attr("data-msg", msgCount);
-    }
-    $("#msg").hide();
-}
-
 function setPageTitle() {
     var pagedetect = window.location.href.split("#/")[1];
     var title = (typeof $.t !== "undefined" ? $.t(pagedetect) : pagedetect );
@@ -249,9 +153,7 @@ function setCustomIconsPage() {
 
 function ajaxSuccessCallback(event, xhr, settings) {
     setPageTitle();
-    if (theme.features.notification.enabled === true && $("#msg").length == 0) {
-        displayNotifications();
-    }
+    
     if (settings.url.startsWith("json.htm?type=devices") || settings.url.startsWith("json.htm?type=scenes")) {
         let counter = 0;
         let intervalId = setInterval(function() {

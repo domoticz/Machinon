@@ -10,7 +10,7 @@ function update() {
             gitVersion = data.version;
             if (theme.version !== gitVersion) {
                 newVersionText = "Machinon version " + data.version + " " + language.is_available + '! <a href="https://github.com/domoticz/machinon/tree/' + branch + '" target="_blank">' + language.click_here + "</a>";
-                notify(newVersionText, 0);
+                generate_noty('success', newVersionText, false);
             }
         }
     });
