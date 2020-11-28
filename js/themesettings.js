@@ -539,6 +539,20 @@ function resetTheme() {
             }
         });
     }
+    if (typeof theme.usercolorsvariable !== "undefined") {
+        var deleteCustomURL = "json.htm?type=command&param=deleteuservariable&idx=" + theme.usercolorsvariable;
+        $.ajax({
+            url: deleteCustomURL,
+            async: false,
+            dataType: "json",
+            success: function(data) {
+                console.log(themeName + " - server responded " + data.status + " while deleting user variable that stored custom settings");
+            },
+            error: function() {
+                console.log(themeName + " - The theme was unable to delete the user variable in Domoticz that holds the theme feature settings");
+            }
+        });
+    }
     if (typeof Storage !== "undefined") {
         localStorage.removeItem(themeFolder + ".themeSettings");
     }
