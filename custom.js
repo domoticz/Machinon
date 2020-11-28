@@ -1,5 +1,4 @@
 var theme = {}, themeName = "", baseURL = "", switchState = {}, isMobile, newVersionText = "", gitVersion, lang, user, themeFolder, checkUpdate, userVariableThemeLoaded = false;
-generate_noty = void 0;
 isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 var msgCount = 0;
 var supported_lang = "en fr de sv nl pl";
@@ -29,13 +28,26 @@ $.ajax({
 });
 
 $.ajax({
-    url: "acttheme/js/livestamp.js",
+    url: "/json.htm?type=command&param=getversion",
     async: false,
-    dataType: "script"
+    dataType: "json",
+    success: function(data) {
+        version = data.version
+        version = version.replace(')','')
+        version = version.replace(' (build ', '.');
+        if (version === '2020.2.11995'){
+            console.log('load moment.js')
+            $.ajax({	
+                url: "acttheme/js/moment.js",	
+                async: false,	
+                dataType: "script",	
+            });
+        }
+    }
 });
 
 $.ajax({
-    url: "acttheme/js/notify.js",
+    url: "acttheme/js/livestamp.js",
     async: false,
     dataType: "script"
 });
@@ -86,9 +98,6 @@ function init_theme() {
             $scope = angular.element(document.body).injector().get('$rootScope');
 
             $scope.$on('device_update', function (event, data) {
-                if (theme.features.notification.enabled === true && $("#msg").length == 0) {
-                    displayNotifications();
-                }
                 searchFunction();
                 if (data.Type === "Light/Switch") {
                     setDeviceOpacity(data.idx, data.Status);
@@ -164,8 +173,6 @@ function init_theme() {
         setDevicesNativeSelectorForMobile();
         $(document).ajaxSuccess(ajaxSuccessCallback);
 
-        if (checkUpdate != 0) checkDomoticzUpdate(true);
-
         if (theme.background_img && theme.background_img.length) {
             if (theme.background_img.startsWith("http")) {
                 bg_url = theme.background_img;
@@ -197,23 +204,6 @@ function init_theme() {
         });
         if (theme.features.navbar_icons_text.enabled !== false) {
             $(".navbar").addClass("notext");
-        }
-
-        if (theme.features.notification.enabled === true) {
-            $('<div id="notify"></div>').appendTo(".container-logo");
-            $('<i id="notyIcon" class="ion-ios-notifications-outline lcursor"></i>').appendTo("#notify").hide();
-            var existingNotes = localStorage.getItem(themeFolder + ".notify");
-            existingNotes && $("#notyIcon").show();
-            var state = false;
-            $("#notify").click(function() {
-                if (!state) {
-                    $("#msg").show();
-                } else {
-                    $("#msg").remove();
-                    msgCount = 0;
-                }
-                state = !state;
-            });
         }
     });
 }
