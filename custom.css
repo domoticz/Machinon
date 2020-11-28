@@ -52,6 +52,9 @@
     border-top: 1px solid #f1f2f3 !important;
     background-color: var(--main-item-bg-color) !important;
 }
+.help-block {
+    color: var(--main-text-color);
+}
 /* Add fonts */
 .btnstylerev,
 .btnstyle,
@@ -105,6 +108,10 @@ h4,
     height: 48px;
     border-radius: 50%;
     object-fit: cover;
+}
+
+.help-block {
+    color: var(--main-text-color);
 }
 
 .disabledText {
@@ -235,45 +242,6 @@ h4,
         position: absolute;
         right: 10px;
     }
-}
-
-#notify {
-    float: right;
-    padding: 5px 50px 8px 30px;
-    font-size: 12px;
-    color: #fff;
-}
-
-#notify #notyIcon {
-    font-size: 30px;
-    line-height: 30px;
-    position: relative;
-}
-
-#notify #notyIcon:after {
-    content: attr(data-msg);
-    position: absolute;
-    top: 13px;
-    right: 3px;
-    font-size: 8px;
-    color: white;
-    width: 14px;
-    height: 14px;
-    text-align: center;
-    line-height: 14px;
-    border-radius: 50%;
-}
-
-#notify ul {
-    list-style: none;
-}
-
-#notify li:before {
-    content: "•";
-    color: var(--main-blue-color);
-    display: inline-block;
-    width: 1em;
-    margin-left: -1em;
 }
 
 .msg {
@@ -505,7 +473,7 @@ div.bannercontent .row.divider {
 .item #bigtext {
     color: var(--main-blue-color);
     background: var(--main-item-bg-color);
-    background: linear-gradient(to right, rgba(255,255,255,0), var(--main-item-bg-color) 15px);
+   /*  background: linear-gradient(to right, rgba(255,255,255,0), var(--main-item-bg-color) 15px); */
     font-size: 1.4em;
     line-height: 20px;
     grid-area: bigtext;
@@ -1700,11 +1668,6 @@ select.ui-corner-all option {
 }
 
 @media (max-width: 767px) {
-    #notify {
-        float: left;
-        margin-left: 35px;
-    }
-
     .msg {
         left: 20px;
     }
