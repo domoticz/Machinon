@@ -4,8 +4,6 @@
 
 # WORK IN PROGRESS
 
-### If you are using Domoticz stable use Machinon master. If you are using Domoticz Beta use Machinon beta!!!
-### This is because moment.js is added to Domoticz Beta
 
 This is a theme for Domoticz in machinon project. Theme in progress with project machinon:
 https://github.com/domoticz/machinon
