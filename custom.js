@@ -22,25 +22,6 @@ var dark_theme = {
 };
 
 $.ajax({
-    url: "/json.htm?type=command&param=getversion",
-    async: false,
-    dataType: "json",
-    success: function(data) {
-        version = data.version
-        version = version.replace(')','')
-        version = version.replace(' (build ', '.');
-        if (version === '2020.2.11995'){
-            console.log('load moment.js')
-            $.ajax({	
-                url: "acttheme/js/moment.js",	
-                async: false,	
-                dataType: "script",	
-            });
-        }
-    }
-});
-
-$.ajax({
     url: "acttheme/js/livestamp.js",
     async: false,
     dataType: "script"
