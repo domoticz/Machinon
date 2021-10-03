@@ -16,10 +16,10 @@ function removeRowDivider() {
 function setLogo() {
     let containerLogo = '<header class="logo"><div class="container-logo">';
     if (theme.logo && theme.logo.length) {
-        containerLogo += '<img class="header__icon" src="acttheme/images/' + theme.logo + '"';
+        containerLogo += '<img class="header__icon" src="images/' + theme.logo + '"';
         $("<style>#login:before {content: url(../images/" + theme.logo + ") !important;}</style>").appendTo("head");
     } else {
-        containerLogo += '<img class="header__icon" src="acttheme/images/logo.png">';
+        containerLogo += '<img class="header__icon" src="images/logo.png">';
         $("<style>#login:before {content: url(../images/logo.png) !important;}</style>").appendTo("head");
     }
     containerLogo += "</div></header>";
