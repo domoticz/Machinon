@@ -22,7 +22,7 @@ var dark_theme = {
 };
 
 $.ajax({	
-    url: "acttheme/js/moment.js",	
+    url: "styles/machinon/js/moment.js",
     async: false,	
     dataType: "script",	
 });
@@ -38,7 +38,7 @@ $.ajax({
         if (version === '2020.2.11995'){
             console.log('load moment.js')
             $.ajax({	
-                url: "acttheme/js/moment.js",	
+                url: "styles/machinon/js/moment.js",
                 async: false,	
                 dataType: "script",	
             });
@@ -47,7 +47,7 @@ $.ajax({
 });
 
 $.ajax({
-    url: "acttheme/js/livestamp.js",
+    url: "styles/machinon/js/livestamp.js",
     async: false,
     dataType: "script"
 });
@@ -69,10 +69,10 @@ fetch('json.htm?type=settings', {
 
     /* Load required script files and then init the theme */
     $.when(
-        $.getScript("acttheme/js/themesettings.js"),
-        $.getScript("acttheme/js/functions.js"),
-        $.getScript("acttheme/js/devices.js"),
-        $.getScript("acttheme/lang/machinon." + lang + ".js"),
+        $.getScript("styles/machinon/js/themesettings.js"),
+        $.getScript("styles/machinon/js/functions.js"),
+        $.getScript("styles/machinon/js/devices.js"),
+        $.getScript("styles/machinon/lang/machinon." + lang + ".js"),
         $.Deferred(function(deferred) {
             $(deferred.resolve);
         })
