@@ -1,8 +1,9 @@
-# Machinon theme
+# Machinon theme & remote server access (RE.MACHINON)
 
 [![Join the chat at https://gitter.im/machinon-domoticz_theme/community](https://badges.gitter.im/machinon-domoticz_theme/community.svg)](https://gitter.im/machinon-domoticz_theme/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) ![alt tag](https://img.shields.io/badge/dynamic/json.svg?label=Version&url=https%3A%2F%2Fraw.githubusercontent.com%2Fdomoticz%2FMachinon%2Fmaster%2Ftheme.json&query=version&colorB=blue) [![DeepScan grade](https://deepscan.io/api/teams/5668/projects/7507/branches/77435/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5668&pid=7507&bid=77435)
 
 # WORK IN PROGRESS
+
 
 This is a theme for Domoticz in machinon project. Theme in progress with project machinon:
 https://github.com/domoticz/machinon

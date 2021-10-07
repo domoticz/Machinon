@@ -1,0 +1,64 @@
+
+// Fonts
+//@import url('https://fonts.googleapis.com/css?family=Nunito');
+//@import url('https://fonts.googleapis.com/css?family=Montserrat:400,300,700');
+
+// Variables
+//@import 'variables';
+// Bootswatch variables
+@import "~bootswatch/dist/spacelab/variables";
+
+// Bootstrap
+@import '~bootstrap/scss/bootstrap';
+
+// Bootswatch theme main CSS files
+@import "~bootswatch/dist/spacelab/bootswatch";
+
+// Bootstrap-Toggle (npm does not provide scss so... direct download)
+// @import url('https://gitcdn.github.io/bootstrap-toggle/2.2.0/css/bootstrap-toggle.min.css');
+
+// Font Awesome
+@import '~@fortawesome/fontawesome-free/scss/fontawesome';
+@import '~@fortawesome/fontawesome-free/scss/solid';
+@import '~@fortawesome/fontawesome-free/scss/regular';
+@import '~@fortawesome/fontawesome-free/scss/brands';
+
+//@import '~@fortawesome/fontawesome-free/css/all.min.css';
+
+.navbar-laravel {
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+body {
+  background: url('/images/background.jpg') no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  background-size: cover;
+  -o-background-size: cover;
+}
+
+.card .card-header img.card-icon {
+  height:50px;
+  width:50px;
+  margin-top:8px
+}
+
+/* Bootstrap Toggle v2.2.2 corrections for Bootsrtap 4*/
+.toggle-off,
+.toggle-off:hover {
+  box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
+}
+.toggle-on,
+.toggle-on:hover {
+  box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
+}
+.toggle.off {
+  border-color: rgba(0, 0, 0, .25);
+}
+
+.toggle-handle {
+  background-image: linear-gradient(#6d94bf, #446E9B 50%, #3e648d);
+  background-color: #6d94bf;
+  border: medium rgba(0, 0, 0, .25) solid;
+}
