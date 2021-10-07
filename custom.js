@@ -28,7 +28,7 @@ $.ajax({
 });
 
 $.ajax({
-    url: "acttheme/js/livestamp.js",
+    url: "styles/machinon/js/livestamp.js",
     async: false,
     dataType: "script"
 });
