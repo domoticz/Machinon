@@ -21,6 +21,12 @@ var dark_theme = {
     disabled: "#808080"
 };
 
+$.ajax({	
+    url: "styles/machinon/js/moment.js",
+    async: false,	
+    dataType: "script",	
+});
+
 $.ajax({
     url: "acttheme/js/livestamp.js",
     async: false,
@@ -44,10 +50,10 @@ fetch('json.htm?type=settings', {
 
     /* Load required script files and then init the theme */
     $.when(
-        $.getScript("acttheme/js/themesettings.js"),
-        $.getScript("acttheme/js/functions.js"),
-        $.getScript("acttheme/js/devices.js"),
-        $.getScript("acttheme/lang/machinon." + lang + ".js"),
+        $.getScript("styles/machinon/js/themesettings.js"),
+        $.getScript("styles/machinon/js/functions.js"),
+        $.getScript("styles/machinon/js/devices.js"),
+        $.getScript("styles/machinon/lang/machinon." + lang + ".js"),
         $.Deferred(function(deferred) {
             $(deferred.resolve);
         })
