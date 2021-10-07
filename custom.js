@@ -28,26 +28,7 @@ $.ajax({
 });
 
 $.ajax({
-    url: "/json.htm?type=command&param=getversion",
-    async: false,
-    dataType: "json",
-    success: function(data) {
-        version = data.version
-        version = version.replace(')','')
-        version = version.replace(' (build ', '.');
-        if (version === '2020.2.11995'){
-            console.log('load moment.js')
-            $.ajax({	
-                url: "styles/machinon/js/moment.js",
-                async: false,	
-                dataType: "script",	
-            });
-        }
-    }
-});
-
-$.ajax({
-    url: "styles/machinon/js/livestamp.js",
+    url: "acttheme/js/livestamp.js",
     async: false,
     dataType: "script"
 });
