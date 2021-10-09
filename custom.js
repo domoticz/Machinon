@@ -21,11 +21,11 @@ var dark_theme = {
     disabled: "#808080"
 };
 
-$.ajax({	
+/* $.ajax({	
     url: "styles/machinon/js/moment.js",
     async: false,	
     dataType: "script",	
-});
+}); */
 
 $.ajax({
     url: "styles/machinon/js/livestamp.js",
