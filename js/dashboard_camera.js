@@ -63,7 +63,6 @@ function refreshCamera(camId) {
     if (typeof workerId === "undefined") {
         workerId = new Worker('styles/machinon/js/camera_worker.js');
         workers[camId] = workerId;
-
         workerId.addEventListener('message', event => {
             const camera = event.data;
             const background = URL.createObjectURL(camera.blob);
