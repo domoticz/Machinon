@@ -75,3 +75,4 @@ function refreshCamera(camId) {
     }
     workerId.postMessage(camId);
 }
+ 
