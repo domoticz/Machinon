@@ -512,6 +512,7 @@ div.bannercontent .row.divider {
     text-align: right;
     max-height: 60px;
     overflow-y: auto;
+    white-space: normal;
     scrollbar-width: thin;
     scrollbar-color: var(--main-blue-color) var(--main-bg-color);
 }
