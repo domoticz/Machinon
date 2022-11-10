@@ -21,7 +21,7 @@ function showThemeSettings() {
         });
         $("#tabs").i18n();
         $("#my-tab-content").append('<div class="tab-pane" id="tabtheme"><section id="theme">Loading..</section></div>');
-        $("#my-tab-content #theme").load("styles/machinon/themesettings.html", loadSettingsHTML);
+        $("#my-tab-content #theme").load("styles/" + themeFolder + "/themesettings.html", loadSettingsHTML);
     }
 }
 
@@ -236,7 +236,7 @@ function loadSettings() {
     if (typeof Storage !== "undefined") {
         if (localStorage.getItem(themeFolder + ".themeSettings") === null) {
             $.ajax({
-                url: "styles/machinon/theme.json",
+                url: "styles/" + themeFolder + "/theme.json",
                 cache: false,
                 async: false,
                 dataType: "json",
@@ -276,11 +276,11 @@ function loadThemeFeatureFiles(featureName) {
     var arrayLength = files.length;
     for (var i = 0; i < arrayLength; i++) {
         if (files[i].split(".").pop() == "js") {
-            var getviarequire = "./styles/machinon/js/" +  files[i] + "?" + themeName;
+            var getviarequire = "./styles/" + themeFolder + "/js/" +  files[i] + "?" + themeName;
             requirejs([ getviarequire ]);
         }
         if (files[i].split(".").pop() == "css") {
-            var CSSfile = "styles/machinon/css/" + files[i] + "?" + themeName;
+            var CSSfile = "styles/" + themeFolder + "/css/" + files[i] + "?" + themeName;
             var fileref = document.createElement("link");
             fileref.setAttribute("rel", "stylesheet");
             fileref.setAttribute("type", "text/css");
