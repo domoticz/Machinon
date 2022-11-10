@@ -251,7 +251,7 @@ ul.machinon_ul li {
     }  
 
     #settings input[type="input"], #settings input[type="text"], #settings input[type="password"], #settings select {
-        max-width: 100px;
+        max-width: 1200px;
         width: auto !important;
     }
 
