@@ -511,8 +511,8 @@ div.bannercontent .row.divider {
     justify-self: right;
     text-align: right;
     max-height: 60px;
+	white-space: normal;
     overflow-y: auto;
-    white-space: normal;
     scrollbar-width: thin;
     scrollbar-color: var(--main-blue-color) var(--main-bg-color);
 }
@@ -1311,6 +1311,11 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
 }
 
 /* Charts */
+.highcharts-tooltip-container,
+.highcharts-legend.highcharts-no-tooltip > rect {
+	fill: var(--main-bg-color) !important;
+}
+	
 .highcharts-background {
     fill: var(--main-item-bg-color);
     stroke-width: 0;
