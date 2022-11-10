@@ -61,7 +61,7 @@ function cameraPreview(section) {
 function refreshCamera(camId) {
     let workerId = workers[camId];
     if (typeof workerId === "undefined") {
-        workerId = new Worker('styles/machinon/js/camera_worker.js');
+        workerId = new Worker('styles/' + themeFolder +'/js/camera_worker.js');
         workers[camId] = workerId;
 
         workerId.addEventListener('message', event => {
