@@ -38,13 +38,13 @@
     vertical-align: middle;
 }
 
-.span12 H2 [data-i18n="Light/Switch Protection"]::before {
+.span6 H2 [data-i18n="Light/Switch Protection"]::before {
     content: url(../images/tabs/lights.png);
     margin-right: 10px;
     vertical-align: middle;
 }
 
-.span6 H2 [data-i18n="LocalNetworks(no_username/password)"]::before {
+.span12 H2 [data-i18n="LocalNetworks(no_username/password)"]::before {
     content: url(../images/tabs/network.png);
     margin-right: 10px;
     vertical-align: middle;
@@ -116,14 +116,20 @@
     vertical-align: middle;
 }
 
-.span12 H2 [data-i18n="Image instead of icons"]::before {
-    content: url(../images/tabs/icons8-display-16.png);
+.span12 H2 [data-i18n="Images instead of Icons"]::before {
+    content: url(../images/tabs/icons8-camera-16.png);
     margin-right: 10px;
     vertical-align: middle;
 }
 
 .span6 H2 [data-i18n="Background"]::before {
     content: url(../images/tabs/icons8-camera-16.png);
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.span6 H2 [data-i18n="logo"]::before {
+    content: url(../images/tabs/icons8-display-16.png);
     margin-right: 10px;
     vertical-align: middle;
 }
