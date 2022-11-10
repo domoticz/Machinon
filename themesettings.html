@@ -20,8 +20,8 @@
             <p><input id="themevar25" class="parentrequired" name="themevar25" value="navbar_icons" type="checkbox"><label for="themevar25" data-i18n="Navbar Icons"> Navbar Icons</label>
             <span class="option"><input id="themevar27" class="parentrequiredchild" name="themevar27" value="navbar_icons_text" type="checkbox"><label for="themevar27" data-i18n="Disable Icons Text"> Disable Text</label></span></p>
             <p><input id="themevar19" class="parentrequired" name="themevar19" value="custom_page_menu" type="checkbox"><label for="themevar19" data-i18n="Custom Page"> Custom Page (Iframe)</label>
-            <span class="option"><label for="themevar23" data-i18n="Button Name">Button Name</label>:<br><input id="themevar23" class="parentrequiredchild ui-widget-content ui-corner-all" name="button_name" value="Name" type="text"></span>
-            <span class="option"><label for="themevar24" data-i18n="Iframe Url">Iframe Url</label>:<br><input id="themevar24" class="parentrequiredchild ui-widget-content ui-corner-all" name="custom_url" value="url" type="text"></span></p>
+            <span class="option"><label for="themevar23" data-i18n="Button Name">Button Name</label>:&nbsp;<input id="themevar23" class="parentrequiredchild ui-widget-content ui-corner-all" name="button_name" value="Name" type="text"></span>
+            <span class="option"><label for="themevar24" data-i18n="Iframe Url">Iframe Url</label>:&nbsp;<input id="themevar24" class="parentrequiredchild ui-widget-content ui-corner-all" name="custom_url" value="url" type="text"></span></p>
         </div>
     </div>
     <div class="row-fluid">
@@ -45,13 +45,13 @@
     <div class="row-fluid">
         <div class="span6">
             <h2><span data-i18n="Background">Background & Logo</span>:</h2>
-            <p data-i18n="Leave empty text">Leave empty for default background. Upload your background to images folder in machinon theme folder or set full URL.</p>
-            <p><label for="themevar34" data-i18n="background-image"> Background Image</label>:<br><input id="themevar34" class="ui-widget-content ui-corner-all" name="background_img" value="bg.png" type="text"></p>
-            <p><label for="themevar35" data-i18n="background-image-type"> Background Type</label>:<select id="themevar35" class="combobox ui-corner-all" name="background_type"><option value="cover">Cover</option><option value="pattern">Pattern</option></select></p>
+            <p data-i18n="Leave empty text">Leave empty for default background. Upload your background to images folder in machinon theme folder or set full URL.</p>(../styles/<span id="themefolder"></span>/images)<br>
+            <p><label for="themevar34" data-i18n="background-image"> Background Image</label>:&nbsp;<input id="themevar34" class="ui-widget-content ui-corner-all" name="background_img" value="bg.png" type="text"></p>
+            <p><label for="themevar35" data-i18n="background-image-type"> Background Type</label>:&nbsp;<select id="themevar35" class="combobox ui-corner-all" name="background_type"><option value="cover">Cover</option><option value="pattern">Pattern</option></select></p>
             <hr/>
 		<h2><span data-i18n="logo">Logo</span>:</h2>
-        <p data-i18n="Add logo text">Add your own logo. Leave empty for Machinon logo. Upload your logo to images folder in machinon theme folder (recommended size 200x30px).</p>
-        <p><label for="themevar17" data-i18n="logo"> Logo</label>:<br><input id="themevar17" class="ui-widget-content ui-corner-all" name="logo" value="logo.png" type="text"></p>
+        <p data-i18n="Add logo text">Add your own logo. Leave empty for Machinon logo. Upload your logo to images folder in machinon theme folder (recommended size 200x30px).</p><br>
+        <p><label for="themevar17" data-i18n="logo"> Logo</label>:&nbsp;<input id="themevar17" class="ui-widget-content ui-corner-all" name="logo" value="logo.png" type="text"></p>
     </div>
     <div class="span6">
         <h2><span data-i18n="Colour Options">Colour Options:</span></h2>
@@ -60,7 +60,7 @@
             <input id="themevar39" class="parentrequired" name="themevar39" value="custom_color_scheme" type="checkbox"><label for="themevar39" data-i18n="Custom Color Scheme"> Custom Color Scheme</label>
             <a href="" title="Reset Colors from the Selected Theme" class="resetschemebtn"><i class="ion-ios-color-fill"></i></a>
             <span class="option label_right"><label for="themevar39_bg" data-i18n="Background"> Background</label><input id="themevar39_bg" class="parentrequiredchild" name="color_scheme.background" type="color"></span>
-            <span class="option label_right"><label for="themevar39_main_color" data-i18n="Main color"> Main: </label><input id="themevar39_main_color" class="parentrequiredchild" name="color_scheme.main_color" type="color"></span>
+            <span class="option label_right"><label for="themevar39_main_color" data-i18n="Main color"> Main </label><input id="themevar39_main_color" class="parentrequiredchild" name="color_scheme.main_color" type="color"></span>
             <span class="option label_right"><label for="themevar39_navbar" data-i18n="Navbar"> Navbar</label><input id="themevar39_navbar" class="parentrequiredchild" name="color_scheme.navbar" type="color"></span>
             <span class="option label_right"><label for="themevar39_item" data-i18n="Item"> Item</label><input id="themevar39_item" class="parentrequiredchild" name="color_scheme.item" type="color"></span>
             <span class="option label_right"><label for="themevar39_text" data-i18n="Text"> Text</label><input id="themevar39_text" class="parentrequiredchild" name="color_scheme.main_text" type="color"></span>
@@ -73,7 +73,7 @@
     <div class="span12">
             <h2><span data-i18n="Images instead of Icons">Image instead of icons:</span></h2>
             <p data-i18n="image instead text">Change or add new <code>{"idx":"35","img":"IMG_0138.jpg"}</code> No comma at the end!</p>
-            <p data-i18n="image instead text2">Only works with light devices and lightbuld as icon.</p><p data-i18n="image instead text3">Upload your images to images folder in machinon theme folder</p>
+            <p data-i18n="image instead text2">Only works with light devices and lightbuld as icon.</p><p data-i18n="image instead text3">Upload your images to images folder in machinon theme folder</p><br>
             <p><input id="themevar32" name="themevar32" value="icon_image" type="checkbox" class="parentrequired"><label for="themevar32" data-i18n="Image Instead of Icon"> Images Instead of Icons</label>
             <span class="option"> <textarea rows="3" cols="50" id="textareaIcons" name="icons" class="parentrequiredchild textareaIcons ui-widget-content ui-corner-all"></textarea></span>
             <span class="option"><button type="button" class="parentrequiredchild savebtn" onclick="addImgInsteadofIcon()" data-i18n="Add"></button></span></p>
