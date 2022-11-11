@@ -158,7 +158,7 @@ function init_theme() {
             if (theme.background_img.startsWith("http")) {
                 bg_url = theme.background_img;
             } else {
-                bg_url = "../images/" + theme.background_img;
+                bg_url = "./images/" + theme.background_img;
             }
             $("html").addClass(theme.background_type);
             $("html").css("background-image", "url(" + bg_url + ")");
