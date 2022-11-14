@@ -44,6 +44,7 @@ function cameraPreview(section) {
                     }
                 }
             });
+			$("#dashCameras").i18n();
         }
     } else {
         $("#bigtext > span > a").each(function() {
