@@ -1,5 +1,5 @@
 self.addEventListener('message', async event => {
-  const cameraURL = "/camsnapshot.jpg?idx=" + event.data + "&t=" + Date.now();
+  const cameraURL = "../../../camsnapshot.jpg?idx=" + event.data + "&t=" + Date.now();
 
   fetch(cameraURL)
   .then(function(response) {
