@@ -175,7 +175,13 @@ h4,
     color: var(--main-item-color);
     border-bottom: none;
 }
-/* Search */
+
+/* Remove domoticz item search */
+#tbFiltSearch {
+    display: none;
+}
+
+/* Machinon item search */
 #search {
     float: right;
     margin-top: 5px;
