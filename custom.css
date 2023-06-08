@@ -126,7 +126,8 @@ h4,
 /* logpage */
 #logdata,
 #logdata_status,
-#logdata_error {
+#logdata_error,
+#logdata_debug {
     background: var(--main-navbar-bg-color);
     max-height: calc(100vh - 220px);
 }
