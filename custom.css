@@ -55,6 +55,7 @@
 .help-block {
     color: var(--main-text-color);
 }
+
 /* Add fonts */
 .btnstylerev,
 .btnstyle,
@@ -86,7 +87,7 @@ h4,
 .ui-widget,
 .item #status,
 .item #name {
-    font-family: main-font-bold;
+    font-family: main-font-bold !important;
 }
 
 #aboutcontent #canvas2 {
@@ -181,7 +182,7 @@ h4,
     display: none;
 }
 
-/* Machinon item search */
+/* Search */
 #search {
     float: right;
     margin-top: 5px;
@@ -1507,31 +1508,67 @@ select.ui-corner-all option {
         transform: translateX(0);
     }
 }
-
 #login:before {
-    background: linear-gradient(to right, #0bcdc7 0%, var(--main-blue-color) 100%);
+    background: linear-gradient(to right, #0bcdc7 0%, #0b96cd 100%);
     text-align: center;
     vertical-align: middle;
-    background-size: 100% 60px;
+    background-size: 100% 75px;
     background-repeat: no-repeat;
     border: none !important;
+	border-radius: 6px !important;
     top: 0% !important;
     bottom: 0% !important;
     left: 0% !important;
     right: 0% !important;
     padding-top: 15px;
+	content: url(images/logo.png) !important;
 }
+
+#login h1:after, #login h1:before {
+    content: none !important;
+}
+
 
 #login {
     width: 450px;
     height: auto !important;
     margin: auto;
     position: relative;
-    padding: 90px 30px 30px 30px !important;
+	padding: 90px 30px 30px 30px !important;
+	background: #fff;
+    border: 1.5px solid;
+    border-color: transparent;
+    border-radius: 6px !important;
+    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
 }
 
 #login h1 {
-    display: none
+	color:#fff !important;
+	font: bold 26px/1 Verdana, Helvetica !important;
+	display: none
+}
+
+#login input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -ms-appearance: none;
+    height: 14px;
+    width: 14px;
+    margin-right: 8px;
+    position: relative;
+    background: #fff;
+    border: 1px solid #0b96cd;
+    outline: none;
+}
+#login input[type="checkbox"]:checked::before {
+    background: #0b96cd;
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 8px;
+    height: 8px;
 }
 
 #login a {
@@ -1542,14 +1579,14 @@ select.ui-corner-all option {
     border: none;
     border-radius: none !important;
     box-shadow: none !important;
-    background: var(--main-bg-color);
+    background: #f1f1f1;
     border-bottom: 1px solid #ccc;
-    color: var(--main-text-color);
+    color: #1a1a1a;
 }
 
 #login #inputs input[type=text]:focus, #login #inputs input[type=password]:focus {
-    border-bottom: 1px solid var(--main-blue-color);
-    color: var(--main-text-color);
+    border-bottom: 1px solid #0b96cd;
+    color: #1a1a1a;
 }
 
 #login fieldset {
@@ -1560,12 +1597,12 @@ select.ui-corner-all option {
 
 #login {
     background-image: none !important;
-    background-color: var(--main-item-bg-color) !important;
+    background-color: #ffffff !important;
 }
 
 #login #submit {
     background-image: none;
-    background-color: var(--main-blue-color);
+    background-color: #0b96cd;
     color: #fff;
     border: none;
     text-shadow: none;
