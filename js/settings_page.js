@@ -18,6 +18,7 @@ if (mSettings && mSettings.length > 0) {
             $("#machinoSettings").append('<ul class="mHeaderBtn">').append('<div class="page-header-small"><h1 data-i18n="Settings">Settings</h2></div>').append('<ul class="machinon_ul">');
             $("#machinoSettings ul.mHeaderBtn").append('<li class="btn btn-danger" onclick="javascript:SwitchLayout(\'Restart\')"><i class="ion-ios-refresh"></i><div data-i18n="Restart System">Restart System</div></li><li class="btn btn-danger" onclick="javascript:SwitchLayout(\'Shutdown\')"><i class="ion-ios-power"></i><div data-i18n="Shutdown System">Shutdown System</div></li><li class="btn btn-danger" onclick="location.href=\'#Logout\'"><i class="ion-ios-log-out"></i><div data-i18n="Logout">Logout</div></li>');
             $("#machinoSettings ul.machinon_ul").append(
+				/*Hardware*/
 				'<li class="rectangle-8" onclick="location.href=\'#Hardware\'"><img src="images/settings/hardware.png"><div class="machinoText" data-i18n="Hardware">Hardware</div></li>');
 			$("#machinoSettings ul.machinon_ul").append(
 				'<li class="rectangle-8" onclick="location.href=\'#Devices\'"><img src="images/settings/devices.png"><div class="machinoText" data-i18n="Devices">Devices</div></li>');
@@ -32,21 +33,21 @@ if (mSettings && mSettings.length > 0) {
 			$("#machinoSettings ul.machinon_ul").append(	
 				'<li class="rectangle-8" onclick="location.href=\'#Events\'"><img src="images/settings/events.png"><div class="machinoText" data-i18n="Events">Events</div></li>');
 			$("#machinoSettings ul.machinon_ul").append(	
-				'<li class="rectangle-8" onclick="location.href=\'#CustomIcons\'"><img src="images/settings/icons.png"><div class="machinoText" data-i18n="Custom Icons">Custom Icons</div></li>');
+				'<li class="rectangle-8" onclick="location.href=\'#CustomIcons\'"><img src="images/settings/customicons.png"><div class="machinoText" data-i18n="Custom Icons">Custom Icons</div></li>');
 			$("#machinoSettings ul.machinon_ul").append(	
-				'<li class="rectangle-8" onclick="location.href=\'#Applications\'"><img src="images/settings/hardware.png"><div class="machinoText" data-i18n="Applications">Applications</div></li>');
+				'<li class="rectangle-8" onclick="location.href=\'#Applications\'"><img src="images/settings/app.png"><div class="machinoText" data-i18n="Applications">Applications</div></li>');
 			$("#machinoSettings ul.machinon_ul").append(	
 				'<li class="rectangle-8" onclick="location.href=\'#Mobile\'"><img src="images/settings/mobile.png"><div class="machinoText" data-i18n="Mobile Devices">Mobile Devices</div></li>');
 			$("#machinoSettings ul.machinon_ul").append(	
 				'<li class="rectangle-8-dropdown"><img src="images/settings/plan.png"><div class="machinoText" data-i18n="Roomplan">Roomplan</div></li>');
 			$("#machinoSettings ul.machinon_ul").append(	
-				'<li class="rectangle-8" onclick="location.href=\'#UserVariables\'"><img src="images/settings/uservariables.png"><div class="machinoText" data-i18n="User variables">Uservariables</div></li>');
+				'<li class="rectangle-8" onclick="location.href=\'#UserVariables\'"><img src="images/settings/variables.png"><div class="machinoText" data-i18n="User variables">Uservariables</div></li>');
 			$("#machinoSettings ul.machinon_ul").append(	
-				'<li class="rectangle-8" onclick="location.href=\'secpanel/index.html#{{config.language}}\'"><img src="images/settings/lock.png"><div class="machinoText" data-i18n="SecurityPanel">Security Panel</div></li>');
+				'<li class="rectangle-8" onclick="location.href=\'secpanel/index.html#{{config.language}}\'"><img src="images/settings/security.png"><div class="machinoText" data-i18n="SecurityPanel">Security Panel</div></li>');
 			$("#machinoSettings ul.machinon_ul").append(	
 				'<li class="rectangle-8" onclick="location.href=\'#Notification\'"><img src="images/settings/notification.png"><div class="machinoText" data-i18n="Send Notification">Send Notification</div></li>');
 			$("#machinoSettings ul.machinon_ul").append(	
-				'<li class="rectangle-8-dropdown"><img src="images/settings/datapush.png"><div class="machinoText" data-i18n="Data push">Data push</div></li>');
+				'<li class="rectangle-8-dropdown"><img src="images/settings/contact.png"><div class="machinoText" data-i18n="Data push">Data push</div></li>');
 			$("#machinoSettings ul.machinon_ul").append(	
 				'<li class="rectangle-8" onclick="location.href=\'#MyProfile\'"><img src="images/settings/userprofile.png"><div class="machinoText" data-i18n="My Profile">My Profile</div></li>');
 			$("#machinoSettings ul.machinon_ul").append(	
