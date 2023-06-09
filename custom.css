@@ -1533,10 +1533,8 @@ select.ui-corner-all option {
 #login {
     width: 450px;
     height: auto !important;
-    margin: auto;
-    position: relative;
-	padding: 90px 30px 30px 30px !important;
-	background: #fff;
+    padding: 90px 30px 30px 30px !important;
+    background: #fff;
     border: 1.5px solid;
     border-color: transparent;
     border-radius: 6px !important;
