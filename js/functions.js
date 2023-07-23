@@ -154,7 +154,7 @@ function setCustomIconsPage() {
 function ajaxSuccessCallback(event, xhr, settings) {
     setPageTitle();
     
-    if (settings.url.startsWith("json.htm?type=devices") || settings.url.startsWith("json.htm?type=scenes")) {
+    if (settings.url.startsWith("json.htm?type=command&param=getdevices") || settings.url.startsWith("json.htm?type=command&param=getscenes")) {
         let counter = 0;
         let intervalId = setInterval(function() {
             if ($("#main-view").find(".item").length > 0) {

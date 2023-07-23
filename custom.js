@@ -33,7 +33,7 @@ $.ajax({
     dataType: "script"
 });
 
-fetch('json.htm?type=settings', {
+fetch('json.htm?type=command&param=getsettings', {
     method: 'GET',
     headers: {
         Accept: 'application/json',
