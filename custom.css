@@ -919,7 +919,7 @@ div.menu-toggle.scrolled {
 
 .navbar .nav li a:hover {
     color: var(--main-text-color);
-    background: var(--main-bg-color);
+    background: var(--main-navbar-bg-color);
     border: none;
 }
 
@@ -951,7 +951,7 @@ div.menu-toggle.scrolled {
 
 .navbar .pull-right > li > .dropdown-menu .dropdown-menu,
 .navbar .nav > li > .dropdown-menu.pull-right .dropdown-menu {
-    background: #0bcdc7 !important;
+    background:  var(--main-bg-color) !important;
 }
 
 .navbar .nav .current_page_item > a,
@@ -1533,8 +1533,10 @@ select.ui-corner-all option {
 #login {
     width: 450px;
     height: auto !important;
-    padding: 90px 30px 30px 30px !important;
-    background: #fff;
+/*     margin: auto;
+    position: relative; */
+	padding: 90px 30px 30px 30px !important;
+	background: #fff;
     border: 1.5px solid;
     border-color: transparent;
     border-radius: 6px !important;
