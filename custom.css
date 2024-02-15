@@ -517,7 +517,7 @@ div.bannercontent .row.divider {
     padding-right: 20px;
     align-self: center;
     justify-self: right;
-    text-align: right;
+    text-align: left;
     max-height: 60px;
 	white-space: normal;
     overflow-y: auto;
@@ -1424,7 +1424,8 @@ input#AcceptNewHardware:checked ~ button {
 }
 
 textarea {
-	border: 1px solid var(--main-blue-color) !importan;
+	border-radius: 2px !important;
+	border: 1px solid var(--main-blue-color) !important;
 }
 
 select.ui-corner-all option {
