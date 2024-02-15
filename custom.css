@@ -1423,6 +1423,10 @@ input#AcceptNewHardware:checked ~ button {
     outline: none;
 }
 
+textarea {
+	border: 1px solid var(--main-blue-color) !importan;
+}
+
 select.ui-corner-all option {
     background: var(--main-navbar-bg-color);
 }
