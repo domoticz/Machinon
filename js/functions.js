@@ -81,8 +81,13 @@ function searchFunction() {
         if ($("#dashcontent").length || $("#weatherwidgets").length || $("#tempwidgets").length) {
             element = $(this).parent();
         }
-        var visibility = $(this).find("#name").attr('data-search').toLowerCase().indexOf(value) > -1;
-        element.toggle(visibility);
+		if ($("#dashcontent").length){
+			var visibility = $(this).find("#name").html().toLowerCase().indexOf(value) > -1;
+			element.toggle(visibility);
+		}else{
+			var visibility = $(this).find("#name").attr('data-search').toLowerCase().indexOf(value) > -1;
+			element.toggle(visibility);
+		}
     });
     $("div.row.divider").show();
     $("section").show();
