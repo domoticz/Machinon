@@ -415,9 +415,9 @@ div.bannercontent .row.divider {
 #holder .row .item table[id^="item"] > tbody > tr {
     position: relative;
     display: block;
-    margin: 0;
+	margin-left: 2px;
     padding: 0;
-    width: 100%;
+    width: 99%;
     height: 100%;
 }
 
@@ -445,7 +445,7 @@ div.bannercontent .row.divider {
 
 #holder .row .span4 table[id^="item"] > tbody > tr {
     grid-template-rows: 40px minmax(58px,1fr) minmax(0,20px);
-    grid-template-columns: 58px 48px minmax(0,.7fr) minmax(0,1fr) 25px 15px;
+    grid-template-columns: 48px 18px minmax(0,.7fr) minmax(0,1fr) 25px 15px;
     grid-gap: 10px;
     gap: 10px;
     grid-template-areas: 'name name bigtext bigtext bigtext options'
@@ -630,8 +630,8 @@ body table#itemtable tr > .options {
 
 .item .img img,
 .item #img img {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height:40px;
 }
 
 .item #img1 img {
@@ -661,8 +661,8 @@ body table#itemtable tr > .options {
 
 .item .img3 img,
 .item #img3 img {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
 }
 
 /* item with button group */
