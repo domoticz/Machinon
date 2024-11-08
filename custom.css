@@ -123,6 +123,12 @@ h4,
 .disabledBg {
     background: var(--main-disabled-color);
 }
+/* Energy dashboard */
+#emain {
+	width: calc(90vw - 50px)!important;
+    height: calc(90vh - 110px) !important;
+}
+
 
 /* logpage */
 #logdata,
@@ -1483,6 +1489,9 @@ select.ui-corner-all option {
     box-shadow: 0px 0px 0px 2px rgb(199,67,67) !important;
 }
 /* Switch is protected */
+.item.statusProtected tr {
+    box-shadow: 0px 0px 10px 2px rgb(0, 0, 139, 0.4) !important;
+}
 .item.statusProtected tr:hover {
     box-shadow: 0px 0px 10px 2px rgb(0, 0, 139, 0.4) !important;
 }
