@@ -24,6 +24,8 @@ if (mSettings && mSettings.length > 0) {
 				'<li class="rectangle-8" onclick="location.href=\'#Devices\'"><img src="images/settings/devices.png"><div class="machinoText" data-i18n="Devices">Devices</div></li>');
 			$("#machinoSettings ul.machinon_ul").append(	
 				'<li class="rectangle-8" onclick="location.href=\'#Setup\';showThemeSettings();"><img src="images/settings/setup.png"><div class="machinoText" data-i18n="Settings">Settings</div></li>');
+			$("#machinoSettings ul.machinon_ul").append(	
+				'<li class="rectangle-8" onclick="location.href=\'#Energy\'"><img src="images/settings/energy.png"><div class="machinoText" data-i18n="Energy Dashboard">Energy Dashboard</div></li>');
 			$("#machinoSettings ul.machinon_ul").append(
 				'<li class="rectangle-8" onclick="javascript:CheckForUpdate(true)"><img src="images/settings/update.png"><div class="machinoText" data-i18n="Check for Update">Check for Update</div></li>');
 			$("#machinoSettings ul.machinon_ul").append(
