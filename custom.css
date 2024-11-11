@@ -127,6 +127,11 @@ h4,
 #emain {
 	width: calc(90vw - 50px)!important;
     height: calc(90vh - 110px) !important;
+	background: var(--main-bg-color)!important;
+	border-color: var(--main-blue-color) !important;
+}
+#eicon {
+    fill: var(--main-text-color)!important;
 }
 
 
@@ -165,6 +170,7 @@ h4,
     color: var(--main-blue-color)!important;
     border-color: var(--main-item-bg-color)!important;
     background: var(--main-item-bg-color)!important;
+	border-color: var(--main-blue-color) !important;
 }
 
 .ui-close {
