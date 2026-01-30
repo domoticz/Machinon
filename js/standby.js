@@ -10,14 +10,14 @@ if (md.matches) {
     console.log(theme.name + " - Width smaller the 992px");
 } else {
     if (!isMobile) {
-        $("body").bind("mousemove", function(e) {
+        $("body").on("mousemove", function(e) {
             standbyTime = 0;
             disableStandby();
         });
     }
 }
 
-$("body").bind("touchend click", function(e) {
+$("body").on("touchend click", function(e) {
     setTimeout(function() {
         standbyTime = 0;
         disableStandby();
