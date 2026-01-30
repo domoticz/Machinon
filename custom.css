@@ -112,10 +112,6 @@ h4,
     object-fit: cover;
 }
 
-.help-block {
-    color: var(--main-text-color);
-}
-
 .disabledText {
     color: var(--main-disabled-color);
 }
@@ -156,7 +152,7 @@ h4,
 
 .logerror {
     font-family: main-font;
-    color: #c74343;
+    color: var(--color-error);
 }
 /* Setpoint popup */
 #setpoint_popup {
@@ -1058,8 +1054,8 @@ a.btnstyle {
 /* Reset/save theme button */ 
 .resetbtn,
 .resetbtn:hover {
-    background-color: #c74343;
-    border: 2px solid #c74343 !important;
+    background-color: var(--color-error);
+    border: 2px solid var(--color-error) !important;
     border-radius: 2px;
     color: #fff;
     padding: 10px 20px;
@@ -1120,30 +1116,30 @@ button.savebtn:disabled {
 
 .btn-success {
     background: none;
-    border-color: #5bb75b;
-    color: #5bb75b;
+    border-color: var(--color-success);
+    color: var(--color-success);
     border-radius: 1px;
 }
 
 .btn-success:hover {
     background: none;
-    background-color: #5bb75b;
-    border-color: #5bb75b;
+    background-color: var(--color-success);
+    border-color: var(--color-success);
     color: #fff !important;
     border-radius: 1px;
 }
 
 .btn-warning {
     background: none;
-    border-color: #FF8C00;
-    color: #FF8C00 !important;
+    border-color: var(--color-warning);
+    color: var(--color-warning) !important;
     border-radius: 1px;
 }
 
 .btn-warning:hover {
     background: none;
-    background-color: #FF8C00;
-    border-color: #FF8C00;
+    background-color: var(--color-warning);
+    border-color: var(--color-warning);
     color: #fff !important;
     border-radius: 1px;
 }
@@ -1170,15 +1166,15 @@ button.savebtn:disabled {
 
 .btn-danger {
     background: rgba(255, 255, 255, .4);
-    border-color: #c74343;
+    border-color: var(--color-error);
     border-radius: 1px;
-    color: #c74343;
+    color: var(--color-error);
 }
 
 .btn-danger:hover {
     background: none;
-    background-color: #c74343;
-    border-color: #c74343;
+    background-color: var(--color-error);
+    border-color: var(--color-error);
     color: #fff;
     border-radius: 1px;
 }
@@ -1558,6 +1554,8 @@ select.ui-corner-all option {
     position: relative; */
 	padding: 90px 30px 30px 30px !important;
 	background: #fff;
+    background-image: none !important;
+    background-color: #ffffff !important;
     border: 1.5px solid;
     border-color: transparent;
     border-radius: 6px !important;
@@ -1615,11 +1613,6 @@ select.ui-corner-all option {
     font-family: main-font;
     margin: auto !important;
     width: 25%;
-}
-
-#login {
-    background-image: none !important;
-    background-color: #ffffff !important;
 }
 
 #login #submit {
@@ -1680,14 +1673,14 @@ select.ui-corner-all option {
 
 .btn-group .btn-danger {
     background: none !important;
-    border-color: #c74343 !important;
-    color: #c74343;
+    border-color: var(--color-error) !important;
+    color: var(--color-error);
     border-radius: 1px !important;
 }
 
 .btn-group .btn-danger:hover {
-    background: #c74343 !important;
-    border-color: #c74343 !important;
+    background: var(--color-error) !important;
+    border-color: var(--color-error) !important;
     color: #fff;
 }
 
@@ -1761,7 +1754,7 @@ select.ui-corner-all option {
 }
 /* author at footer */
 #copyright p:after {
-    content: "  | 'Machinon' theme";
+    content: "  | 'Machinon-Dev' theme";
 }
 
 /* Compact mode */
@@ -1818,7 +1811,7 @@ section.compact .row.divider {
     height: 50px;
     width: 100%;
     scroll-snap-type: y mandatory;
-    background: var(--main-bg-item-color) !important;
+    background: var(--main-item-bg-color) !important;
 }
 
 .span3 td.input .btn-group button {
@@ -1885,4 +1878,21 @@ section.compact .row.divider {
 
 #holder #dashcontent .row .span3 .item table[id="itemtablesmalltrippleicon"] > tbody > tr td#bigtext {
     display: none !important;
+}
+
+/* Fix for .page-content-container introduced in Domoticz update */
+/* Override hardcoded dark blue background to use theme colors */
+.page-content-container {
+    background: var(--main-item-bg-color) !important;
+    border: 1px solid var(--main-blue-color) !important;
+    border-radius: 5px;
+    padding: 10px 0;
+    margin-top: 10px;
+    color: var(--main-text-color);
+}
+
+.page-content-container a,
+.page-content-container a:link,
+.page-content-container a:visited {
+    color: var(--main-blue-color);
 }
