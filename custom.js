@@ -9,7 +9,11 @@ var light_theme = {
     item: "#ffffff",
     text: "#1a1a1a",
     alt_text: "#6d6e6d",
-    disabled: "#d3d3d3"
+    border: "#d3d3d3",
+    disabled: "#d3d3d3",
+    error: "#c74343",
+    success: "#5bb75b",
+    warning: "#FF8C00"
 };
 var dark_theme = {
     bg: "#333639",
@@ -18,7 +22,11 @@ var dark_theme = {
     item: "#515558",
     text: "#ffffff",
     alt_text: "#cccccc",
-    disabled: "#808080"
+    border: "#6d6e6d",
+    disabled: "#808080",
+    error: "#e05555",
+    success: "#6dc96d",
+    warning: "#FFA033"
 };
 
 /* $.ajax({	

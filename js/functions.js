@@ -40,15 +40,27 @@ function setColorScheme() {
         theme.color_scheme.alt_text = current_theme.alt_text;
         theme.color_scheme.border = current_theme.border;
         theme.color_scheme.disabled = current_theme.disabled;
+        theme.color_scheme.error = current_theme.error;
+        theme.color_scheme.success = current_theme.success;
+        theme.color_scheme.warning = current_theme.warning;
     }
+    
+    // Determine which theme to use for fallback colors
+    var fallback_theme = theme.features.dark_theme && theme.features.dark_theme.enabled ? dark_theme : light_theme;
+    
     $("body").get(0).style.setProperty('--main-bg-color', hexToRGB(theme.color_scheme.background));
     $("body").get(0).style.setProperty('--main-blue-color',hexToRGB(theme.color_scheme.main_color));
     $("body").get(0).style.setProperty('--main-blue-color-values',hexToRGB(theme.color_scheme.main_color, true));
     $("body").get(0).style.setProperty('--main-navbar-bg-color',hexToRGB(theme.color_scheme.navbar));
     $("body").get(0).style.setProperty('--main-item-bg-color',hexToRGB(theme.color_scheme.item));
+    $("body").get(0).style.setProperty('--main-item-color',hexToRGB(theme.color_scheme.main_text));
     $("body").get(0).style.setProperty('--main-text-color',hexToRGB(theme.color_scheme.main_text));
     $("body").get(0).style.setProperty('--secondary-text-color',hexToRGB(theme.color_scheme.alt_text));
+    $("body").get(0).style.setProperty('--main-border-color',hexToRGB(theme.color_scheme.border || fallback_theme.border));
     $("body").get(0).style.setProperty('--main-disabled-color',hexToRGB(theme.color_scheme.disabled));
+    $("body").get(0).style.setProperty('--color-error',hexToRGB(theme.color_scheme.error || fallback_theme.error));
+    $("body").get(0).style.setProperty('--color-success',hexToRGB(theme.color_scheme.success || fallback_theme.success));
+    $("body").get(0).style.setProperty('--color-warning',hexToRGB(theme.color_scheme.warning || fallback_theme.warning));
 }
 
 function setSearch() {
@@ -190,6 +202,11 @@ function ajaxSuccessCallback(event, xhr, settings) {
 }
 
 function hexToRGB(h, values_only) {
+    // Handle undefined or invalid input
+    if (!h || typeof h !== 'string') {
+        return values_only ? "0,0,0" : "rgb(0,0,0)";
+    }
+    
     let r = 0, g = 0, b = 0;
 
     // 3 digits
