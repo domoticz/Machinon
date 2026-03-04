@@ -94,6 +94,19 @@ h4,
 #aboutcontent #canvas2 {
     display: none;
 }
+.glass-card {
+	background: var(--main-item-bg-color);
+	border-radius: 6px;
+}
+.version-badge {
+    color: var(--main-text-color) !important;
+}
+.section-title,
+.info-value,
+.btn-modern,
+.donation-text {
+	color: var(--main-text-color) !important;
+}
 
 .user {
     display: block;
@@ -144,18 +157,33 @@ h4,
     max-height: calc(100vh - 220px);
 }
 
-.lognorm {
-    font-family: main-font-bold;
+.log-console-container {
+		background: var(--main-item-bg-color);
+    border: 1.5px solid;
+    border-color: transparent;
+    border-radius: 6px;
+    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
+}
+
+.log-console {
+	font-family: main-font;
+}
+.log-toolbar {
+	background: var(--main-bg-item-color);
+}
+.log-statusbar {
+	background: var(--main-bg-item-color);
+}
+
+.log-level-norm {
     color: var(--main-text-color);
 }
 
-.logstatus {
-    font-family: main-font;
+.log-level-status {
     color: var(--main-blue-color);
 }
 
-.logerror {
-    font-family: main-font;
+.log-level-error {
     color: #c74343;
 }
 /* Setpoint popup */
@@ -471,6 +499,10 @@ div.bannercontent .row.divider {
     grid-template-areas: 'name name bigtext bigtext bigtext options'
     'img img2 img3 status status status'
     'favorite lastupdate lastupdate lastupdate tools tools';
+}
+
+#dashcontent {
+	background: none !important;
 }
 
 #holder #dashcontent .row .span4 .item table[id^="item"] > tbody > tr {
@@ -806,6 +838,13 @@ header.logo {
     margin: 0 auto;
     position: relative;
 }
+.page-content-container{
+		background: var(--main-item-bg-color);
+    border: 1.5px solid;
+    border-color: transparent;
+    border-radius: 6px;
+    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
+}
 
 .events-editor {
     margin-top: 40px;
@@ -1004,11 +1043,15 @@ div.menu-toggle.scrolled {
     padding: 90px 2% 0 2%;
 }
 
-.sub-tabs .sub-tabs-apply,
-.sub-tabs .sub-tabs-apply:hover {
-    background-color: var(--main-blue-color);
-    border: none !important;
+.sub-tabs .sub-tabs-apply {
+    background-color: #fff;
+	border: 1px solid #c74343 !important;
     border-radius: 2px;
+    color: #c74343 !important;
+}
+.sub-tabs .sub-tabs-apply:hover {
+    background: #c74343 !important;
+    border-color: #c74343 !important;
     color: #fff;
 }
 
@@ -1172,14 +1215,14 @@ button.savebtn:disabled {
     background: rgba(255, 255, 255, .4);
     border-color: #c74343;
     border-radius: 1px;
-    color: #c74343;
+    color: #c74343 !important;
 }
 
 .btn-danger:hover {
     background: none;
     background-color: #c74343;
     border-color: #c74343;
-    color: #fff;
+    color: #fff !important;
     border-radius: 1px;
 }
 
@@ -1199,6 +1242,12 @@ button.savebtn:disabled {
 }
 
 /* Data Tables */
+.dataTables_wrapper {
+		border: 1.5px solid;
+    border-color: transparent;
+    border-radius: 6px;
+    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
+}
 .dataTables_wrapper > div:first-child,
 .dataTables_wrapper > div:last-child {
     background: transparent;
@@ -1256,8 +1305,8 @@ tr.odd td.sorting_1, tr.even td.sorting_1 {
 
 .btnstyle3-dis, .btnstyle3, .btnstyle3-sel {
     background: var(--main-blue-color);
-    margin-top: 15px;
     border-radius: 2px;
+		color: #fff;
 }
 
 .btnstyle3:disabled {
