@@ -1417,6 +1417,10 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
     fill: var(--secondary-text-color) !important;
 }
 
+.highcharts-tooltip td {
+    color: var(--secondary-text-color) !important;
+}
+
 .highcharts-tooltip-box {
     fill: var(--main-bg-color);
     fill-opacity: 0.6;
