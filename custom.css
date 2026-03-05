@@ -1583,6 +1583,9 @@ select.ui-corner-all option {
         transform: translateX(0);
     }
 }
+/* Legacy login page styles (#login) - targets old Domoticz login HTML structure.
+   Can be removed once Domoticz versions before the glass-themed login redesign
+   are no longer supported. */
 #login:before {
     background: linear-gradient(to right, #0bcdc7 0%, #0b96cd 100%);
     text-align: center;
@@ -1683,6 +1686,11 @@ select.ui-corner-all option {
     text-shadow: none;
     border-radius: 2px;
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* New Domoticz login page (glass-themed redesign) */
+.remember-row {
+    color: var(--main-text-color) !important;
 }
 
 .btn-group .btn {
