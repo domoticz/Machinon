@@ -76,6 +76,10 @@ a.resetschemebtn {
     border: 1px solid var(--main-item-bg-color);
 }
 
+#settings .row-fluid > div:has(> #SoftwareUpdates.ng-hide) {
+    display: none;
+}
+
 #settings .row-fluid > .span4,
 #settings .row-fluid > .span6,
 #settings .row-fluid > .span12 {
