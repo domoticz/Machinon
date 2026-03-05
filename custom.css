@@ -16,7 +16,22 @@
 @import url("css/ionicons.min.css");
 
 
-/* vars are now managed in javascript */
+/* Light theme defaults - overridden by JavaScript setColorScheme() on body */
+:root {
+    --main-bg-color: rgb(241,241,241);
+    --main-blue-color: rgb(11,150,205);
+    --main-blue-color-values: 11,150,205;
+    --main-navbar-bg-color: rgb(255,255,255);
+    --main-item-bg-color: rgb(255,255,255);
+    --main-item-color: rgb(26,26,26);
+    --main-text-color: rgb(26,26,26);
+    --secondary-text-color: rgb(109,110,109);
+    --main-border-color: rgb(211,211,211);
+    --main-disabled-color: rgb(211,211,211);
+    --color-error: rgb(199,67,67);
+    --color-success: rgb(91,183,91);
+    --color-warning: rgb(255,140,0);
+}
 
 @font-face {
     font-family: main-font;
