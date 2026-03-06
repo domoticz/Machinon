@@ -116,7 +116,7 @@ a.resetschemebtn {
 
 /* Settings page CSS */
 .mHeaderBtn {
-    margin-left: calc(100% - 660px);
+    margin-left: calc(100% - 440px);
     display: flex;
     justify-content: space-around;
 }
