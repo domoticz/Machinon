@@ -859,12 +859,6 @@ header.logo {
     color: var(--main-text-color);
 }
 
-.page-content-container a,
-.page-content-container a:link,
-.page-content-container a:visited {
-    color: var(--main-blue-color);
-}
-
 .events-editor {
     margin-top: 40px;
 }
