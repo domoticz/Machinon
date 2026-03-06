@@ -851,7 +851,7 @@ header.logo {
 }
 .page-content-container {
     background: var(--main-item-bg-color) !important;
-    border: 1px solid var(--main-blue-color) !important;
+    border: 1.5 px solid transparent !important;
     border-radius: 5px;
     box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
     padding: 10px 0;
@@ -1582,6 +1582,17 @@ select.ui-corner-all option {
 .item.statusLowBattery tr:hover {
     box-shadow: 0px 0px 0px 2px rgb(255,255,0) !important;
 }
+
+/* Device is disabled */
+.item.statusDisabled tr {
+    box-shadow: 0px 0px 10px 2px rgb(199,67,67,0.5) !important;
+		opacity: 0.5;
+}
+
+.item.statusDisabled tr:hover {
+    box-shadow: 0px 0px 10px 2px rgb(199,67,67,0.5) !important;
+}
+
 
 .blink {
     animation: blinker 2s linear infinite;
