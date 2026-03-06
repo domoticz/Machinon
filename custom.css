@@ -105,7 +105,7 @@ h4,
 .item #name {
     font-family: main-font-bold !important;
 }
-
+#canvas-login,
 #aboutcontent #canvas2 {
     display: none;
 }
@@ -1204,7 +1204,8 @@ button.savebtn:disabled {
     border-radius: 1px;
 }
 
-.btn-info {
+.btn-info,
+.btn-modern {
     text-shadow: none;
     background: none;
     background-color: var(--main-blue-color);
@@ -1213,14 +1214,16 @@ button.savebtn:disabled {
     border-radius: 1px;
 }
 
-.btn-info:hover {
+.btn-info:hover,
+.btn-modern:hover {
     background: none;
     border-color: var(--main-blue-color);
     color: var(--main-blue-color) !important;
     border-radius: 1px;
 }
 
-.btn-info:visited {
+.btn-info:visited,
+.btn-modern:visited {
     color: #fff;
 }
 
@@ -1606,107 +1609,6 @@ select.ui-corner-all option {
         margin-left: 90px;
         transform: translateX(0);
     }
-}
-/* Legacy login page styles (#login) - targets old Domoticz login HTML structure.
-   Can be removed once Domoticz versions before the glass-themed login redesign
-   are no longer supported. */
-#login:before {
-    background: linear-gradient(to right, #0bcdc7 0%, #0b96cd 100%);
-    text-align: center;
-    vertical-align: middle;
-    background-size: 100% 75px;
-    background-repeat: no-repeat;
-    border: none !important;
-	border-radius: 6px !important;
-    top: 0% !important;
-    bottom: 0% !important;
-    left: 0% !important;
-    right: 0% !important;
-    padding-top: 15px;
-	content: url(images/logo.png) !important;
-}
-
-#login h1:after, #login h1:before {
-    content: none !important;
-}
-
-
-#login {
-    width: 450px;
-    height: auto !important;
-/*     margin: auto;
-    position: relative; */
-	padding: 90px 30px 30px 30px !important;
-	background: #fff;
-    background-image: none !important;
-    background-color: #ffffff !important;
-    border: 1.5px solid;
-    border-color: transparent;
-    border-radius: 6px !important;
-    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
-}
-
-#login h1 {
-	color:#fff !important;
-	font: bold 26px/1 Verdana, Helvetica !important;
-	display: none
-}
-
-#login input[type="checkbox"] {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    -ms-appearance: none;
-    height: 14px;
-    width: 14px;
-    margin-right: 8px;
-    position: relative;
-    background: #fff;
-    border: 1px solid #0b96cd;
-    outline: none;
-}
-#login input[type="checkbox"]:checked::before {
-    background: #0b96cd;
-    content: "";
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 8px;
-    height: 8px;
-}
-
-#login a {
-    display: none
-}
-
-#login #inputs input[type=text], #login #inputs input[type=password] {
-    border: none;
-    border-radius: none !important;
-    box-shadow: none !important;
-    background: #f1f1f1;
-    border-bottom: 1px solid #ccc;
-    color: #1a1a1a;
-}
-
-#login #inputs input[type=text]:focus, #login #inputs input[type=password]:focus {
-    border-bottom: 1px solid #0b96cd;
-    color: #1a1a1a;
-}
-
-#login fieldset {
-    font-family: main-font;
-    margin: auto !important;
-    width: 25%;
-}
-
-#login #submit {
-    background-image: none;
-    background-color: #0b96cd;
-    color: #fff;
-    border: none;
-    text-shadow: none;
-    border-radius: 2px;
-    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
 }
 
 /* New Domoticz login page (glass-themed redesign) */
