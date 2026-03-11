@@ -74,7 +74,7 @@ fetch('json.htm?type=command&param=getsettings', {
 
 function init_theme() {
     checkUserVariableThemeSettings();
-    loadSettings();
+    loadSettings().then(function() {
 
     window.onhashchange = locationHashChanged;
 
@@ -194,4 +194,5 @@ function init_theme() {
             $(".navbar").addClass("notext");
         }
     });
+    }); /* end loadSettings().then() */
 }
