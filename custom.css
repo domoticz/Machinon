@@ -411,13 +411,17 @@ div#floorplancontent {
     height: 87%;
 }
 
-div.bannercontent .row.divider:before,
-div.bannercontent .row.divider:after,
+div.bannercontent .row:before,
+div.bannercontent .row:after,
 div.clearfix {
     display: none;
 }
 
-div.bannercontent .row.divider {
+div.bannercontent .row.divider,
+.devicesList .row,
+SECTION.dashCategory .row,
+#tempwidgets,
+#weatherwidgets {
     padding: 15px 0;
     margin: 0 !important;
     display: grid;
@@ -431,7 +435,11 @@ div.bannercontent .row.divider {
 
 /*need to change this for all media screen...*/
 @media (max-width: 767px) {
-    div.bannercontent .row.divider {
+    div.bannercontent .row.divider,
+    .devicesList .row,
+    SECTION.dashCategory .row,
+    #tempwidgets,
+    #weatherwidgets {
         grid-template-columns: repeat(1,1fr);
     }
 
@@ -445,13 +453,21 @@ div.bannercontent .row.divider {
 }
 
 @media (min-width: 768px) and (max-width: 1199px) {
-    div.bannercontent .row.divider {
+    div.bannercontent .row.divider,
+    .devicesList .row,
+    SECTION.dashCategory .row,
+    #tempwidgets,
+    #weatherwidgets {
         grid-template-columns: repeat(3,1fr);
     }
 }
 
 @media (min-width: 1200px) {
-    div.bannercontent .row.divider {
+    div.bannercontent .row.divider,
+    .devicesList .row,
+    SECTION.dashCategory .row,
+    #tempwidgets,
+    #weatherwidgets {
         grid-template-columns: repeat(4,1fr);
     }
 }
@@ -516,8 +532,18 @@ div.bannercontent .row.divider {
 	background: none !important;
 }
 
-#holder #dashcontent .row .span4 .item table[id^="item"] > tbody > tr {
+#dashcontent .item {
+    overflow: hidden;
+}
+
+#dashcontent #lastupdate {
+    display: none;
+}
+
+#holder #dashcontent .row .span4 .item table[id^="item"] > tbody > tr,
+#holder #dashcontent .row .span4.item table[id^="item"] > tbody > tr {
     grid-template-rows: 40px minmax(58px,1fr) 0;
+    overflow: hidden;
 }
 
 /* name */
@@ -665,6 +691,46 @@ body table#itemtable tr > .options {
     justify-self: center;
 }
 
+/* CSS-only icon replacement for Log/Timer buttons.
+   Angular's i18n() re-sets button text after JS icon replacement,
+   so we use CSS to always hide text and show ionicon glyphs. */
+.btnsmall[data-i18n="Log"],
+.btnsmall-sel[data-i18n="Log"] {
+    font-size: 0 !important;
+    display: inline-block !important;
+    line-height: 16px;
+    padding: 0 5px !important;
+}
+
+.btnsmall[data-i18n="Log"]::before {
+    font-family: "Ionicons";
+    content: "\f21c";
+    font-size: 16px;
+    color: var(--main-blue-color);
+}
+
+.btnsmall[data-i18n="Timers"],
+.btnsmall-sel[data-i18n="Timers"] {
+    font-size: 0 !important;
+    display: inline-block !important;
+    line-height: 16px;
+    padding: 0 5px !important;
+}
+
+.btnsmall[data-i18n="Timers"]::before {
+    font-family: "Ionicons";
+    content: "\f4c1";
+    font-size: 16px;
+    color: var(--secondary-text-color);
+}
+
+.btnsmall-sel[data-i18n="Timers"]::before {
+    font-family: "Ionicons";
+    content: "\f4c1";
+    font-size: 16px;
+    color: var(--main-blue-color);
+}
+
 .timers_log .btnsmall,
 .timers_log .btnsmall-sel,
 .timers_log .btnsmall:hover,
@@ -678,7 +744,8 @@ body table#itemtable tr > .options {
 
 /* images */
 .item .img,
-.item #img {
+.item #img,
+.item #img1 {
     grid-area: img;
     align-self: end;
     padding: 0 10px;
@@ -931,6 +998,8 @@ div.menu-toggle.scrolled {
 .navbar-inverse .navbar-inner {
     border: none;
     background-color: var(--main-navbar-bg-color);
+    border-bottom: none;
+    box-shadow: none;
 }
 
 .navbar-inverse .nav li.dropdown > .dropdown-toggle .caret {
@@ -986,12 +1055,18 @@ div.menu-toggle.scrolled {
     border: none;
     border-radius: 5px;
     position: relative;
+    transition: none;
+    transform: none;
+    box-shadow: none;
 }
 
 .navbar .nav li a:hover {
     color: var(--main-text-color);
     background: var(--main-navbar-bg-color);
     border: none;
+    transition: none;
+    transform: none;
+    box-shadow: none;
 }
 
 .navbar .nav > li > .dropdown-menu:after {
@@ -1018,6 +1093,8 @@ div.menu-toggle.scrolled {
     border: none;
     background: var(--main-bg-color);
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
 }
 
 .navbar .pull-right > li > .dropdown-menu .dropdown-menu,
@@ -1034,6 +1111,9 @@ div.menu-toggle.scrolled {
     background-color: rgba(var(--main-blue-color-values), 0.4);
     font-family: main-font-bold;
     border: 1px solid var(--main-blue-color);
+    box-shadow: none;
+    transform: none;
+    transition: none;
 }
 
 .nav li a img {
@@ -1048,6 +1128,9 @@ div.menu-toggle.scrolled {
     border-bottom: 2px solid transparent;
     color: var(--main-text-color);
     cursor: pointer;
+    transition: none;
+    box-shadow: none;
+    text-shadow: none;
 }
 
 .sub-tabs > li > a:hover,
@@ -1055,6 +1138,7 @@ div.menu-toggle.scrolled {
 .nav-tabs > .active > a:hover {
     background: none;
     border-bottom: 2px solid var(--main-blue-color);
+    color: var(--main-text-color);
 }
 
 /* =Header */
@@ -1250,7 +1334,7 @@ button.savebtn:disabled {
     color: var(--secondary-text-color);
 }
 .btnsmall:hover {
-    font-style: italic;
+    opacity: 0.7;
 }
 
 #itemtabledoubleicon td:last-child .btnsmall-sel,
@@ -1850,7 +1934,8 @@ section.compact h2 {
     display: none;
 }
 
-section.compact .row.divider {
+section.compact .row.divider,
+section.compact .row {
     display: grid;
     grid-template-columns: repeat(auto-fill, 180px);
     grid-auto-flow: row dense;
@@ -1925,6 +2010,7 @@ section.compact .row.divider {
 }
 
 #dashSwitches .span3 #bigtext,
+#dashLights .span3 #bigtext,
 #dashWeather .span3 .status,
 #dashTemperature .span3 .status,
 #dashUtility .span3 .item:not(.Text):not(.Alert) .status {
@@ -1933,6 +2019,7 @@ section.compact .row.divider {
 
 #dashScenes .span3 #bigtext,
 #dashSwitches .span3 #bigtext,
+#dashLights .span3 #bigtext,
 #dashWeather .span3 #bigtext,
 #dashTemperature .span3 #bigtext,
 #dashUtility .span3 #bigtext {
@@ -1942,7 +2029,8 @@ section.compact .row.divider {
     font-size: 1.4em;
 }
 
-#holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr {
+#holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr,
+#holder #dashcontent .row .span3.item table[id^="item"] > tbody > tr {
     grid-template-rows: 20px 58px 0;
     grid-template-columns: 58px 5px 1fr;
     grid-gap: 2px;
@@ -1953,13 +2041,15 @@ section.compact .row.divider {
     overflow: hidden;
 }
 
-#holder #dashcontent .row .span3 .item table[id="itemtablesmalltrippleicon"] > tbody > tr {
+#holder #dashcontent .row .span3 .item table[id="itemtablesmalltrippleicon"] > tbody > tr,
+#holder #dashcontent .row .span3.item table[id="itemtablesmalltrippleicon"] > tbody > tr {
     grid-template-columns: 58px 45px 58px;
     grid-template-areas: 'name name name'
     'img img2 img3'
     'lastupdate lastupdate lastupdate';
 }
 
-#holder #dashcontent .row .span3 .item table[id="itemtablesmalltrippleicon"] > tbody > tr td#bigtext {
+#holder #dashcontent .row .span3 .item table[id="itemtablesmalltrippleicon"] > tbody > tr td#bigtext,
+#holder #dashcontent .row .span3.item table[id="itemtablesmalltrippleicon"] > tbody > tr td#bigtext {
     display: none !important;
 }

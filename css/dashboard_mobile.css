@@ -10,7 +10,7 @@ body.dashMobile .navbar-fixed-top {
     margin-right: -10px;
 }
 
-body.dashMobile section.dashCategory div.row.divider:first-of-type {
+body.dashMobile section.dashCategory div.row:first-of-type {
     display: none;
 }
 
