@@ -96,13 +96,11 @@ function searchFunction() {
         if ($("#dashcontent").length || $("#weatherwidgets").length || $("#tempwidgets").length) {
             element = $(this).parent();
         }
-		if ($("#dashcontent").length){
-			var visibility = $(this).find("#name").html().toLowerCase().indexOf(value) > -1;
-			element.toggle(visibility);
-		}else{
-			var visibility = $(this).find("#name").attr('data-search').toLowerCase().indexOf(value) > -1;
-			element.toggle(visibility);
-		}
+        /* Use data-search attribute with fallback to #name text content */
+        var nameEl = $(this).find("#name");
+        var searchText = nameEl.attr('data-search') || nameEl.text() || '';
+        var visibility = searchText.toLowerCase().indexOf(value) > -1;
+        element.toggle(visibility);
     });
     $("div.row").show();
     $("section").show();

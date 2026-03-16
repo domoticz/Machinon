@@ -29,41 +29,53 @@ function setAllDevicesFeatures() {
 
     /* Browse all items to apply themes features and styles */
     $("#main-view .item").each(function() {
-        /* Set idx on tr, for easy retrieval */
-        let idx = $(this).parent().attr('id');
-        if (typeof idx === "undefined") {
-            idx = $(this).attr('id');
-        } else {
-            idx = idx.replace( /^\D+/g, '');
+        /* Get device data from Angular scope (structural, future-proof) */
+        var elemScope = typeof angular !== 'undefined' && angular.element(this).scope();
+        var dev = null;
+        if (elemScope) {
+            dev = (elemScope.ctrl && (elemScope.ctrl.device || elemScope.ctrl.scene)) || elemScope.item;
         }
+
+        /* Get idx from Angular scope, fall back to DOM */
+        var idx = (dev && String(dev.idx)) ||
+                  $(this).attr('id') ||
+                  ($(this).parent().attr('id') || '').replace(/^\D+/g, '');
         $(this).find("tr").attr('data-idx', idx);
 
+        /* Get status from Angular scope, fall back to DOM text */
         let bigText = $(this).find("#bigtext");
-        let status = bigText.text();
-        if (status.length == 0) {
-            status = bigText.attr("data-status");
-        }
+        let status = (dev && (dev.Status || dev.Data || '')) || bigText.text().trim();
 
         /* Apply style and redefine options */
-        setDeviceOptions(idx);
+        setDeviceOptions(idx, dev);
 
         /* Feature - Fade off items */
         setDeviceOpacity(idx, status);
 
         /* Feature - Show timeago for last update */
         var lastupd;
-        if (theme.features.time_ago.enabled === true) {
-            lastupd = $(this).find("#lastupdate").text();
-        } else {
-            lastupd = moment($(this).find("#lastupdate").text(), [ "YYYY-MM-DD HH:mm:ss", "L LT" ]).format();
+        var lastUpdateRaw = (dev && dev.LastUpdate) || null;
+        /* Fallback: extract date from DOM text (handles "Last Seen: YYYY-MM-DD..." prefix) */
+        if (!lastUpdateRaw) {
+            var rawText = $(this).find("#lastupdate").text();
+            var dateMatch = rawText.match(/\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}/);
+            lastUpdateRaw = dateMatch ? dateMatch[0] : rawText;
         }
-        setDeviceLastUpdate(idx , lastupd);
+        if (theme.features.time_ago.enabled === true) {
+            lastupd = lastUpdateRaw;
+        } else {
+            lastupd = moment(lastUpdateRaw, [ "YYYY-MM-DD HH:mm:ss", "L LT" ]).format();
+        }
+        setDeviceLastUpdate(idx, lastupd);
 
         /* Feature - Switch instead of text */
-        if (((location.hash === "#/Dashboard") && $(this).parent().attr("id").startsWith("light")) || (location.hash === "#/LightSwitches")) {
-            if (bigText.siblings("#img").find("img").hasClass("lcursor") && 
-                ($(this).find(".dimslider").length == 0) && 
-                ($(this).find(".selectorlevels").length == 0) && 
+        var isDashboard = location.hash === "#/Dashboard";
+        var isLightSwitches = location.hash === "#/LightSwitches";
+        var parentId = $(this).parent().attr("id") || '';
+        if ((isDashboard && parentId.startsWith("light")) || isLightSwitches) {
+            if ($(this).find("#img img").hasClass("lcursor") &&
+                ($(this).find(".dimslider").length == 0) &&
+                ($(this).find(".selectorlevels").length == 0) &&
                 ($(this).find(".btn-group").length == 0)
             ) {
                 if (theme.features.switch_instead_of_bigtext.enabled && $(this).find("#img2").length == 0) {
@@ -76,11 +88,12 @@ function setAllDevicesFeatures() {
 
         /* Feature - Switch instead of text for scenes */
         if (theme.features.switch_instead_of_bigtext_scenes.enabled === true) {
-            if (($(this).parents("#scenecontent").length > 0) || ($(this).parents("#dashScenes").length > 0 && $(this).find("#itemtablesmalldoubleicon").length > 0)) {
+            var isScenePage = location.hash === "#/Scenes";
+            var isSceneOnDash = isDashboard && ($(this).parents("[id^='dashScene']").length > 0);
+            if ((isScenePage || isSceneOnDash) && $(this).find("table[id='itemtabledoubleicon'],table[id='itemtablesmalldoubleicon']").length > 0) {
                 setDeviceSwitch(idx, status);
                 bigText.hide();
             }
-            
         }
 
         /* Feature - Set custom icons */
@@ -90,9 +103,10 @@ function setAllDevicesFeatures() {
 
         /* Feature - Show wind direction */
         if (theme.features.wind_direction.enabled === true) {
-            setDeviceWindDirectionIcon(idx);
+            var windDir = (dev && dev.DirectionStr) || undefined;
+            setDeviceWindDirectionIcon(idx, windDir);
         }
-	});
+    });
 }
 
 function setAllDevicesIconsStatus() {
@@ -119,7 +133,7 @@ function setAllDevicesIconsStatus() {
     });
 }
 
-function setDeviceOptions(idx) {
+function setDeviceOptions(idx, dev) {
     let tr = "tr[data-idx='" + idx + "']";
     $(tr).each(function() {
         /* Create options menu */
@@ -144,7 +158,15 @@ function setDeviceOptions(idx) {
             $(timers).append($(this).find('.options .btnsmall[href*="Log"]:not(.btnsmall[data-i18n="Log"])').html("<i class='ion-ios-stats' title='" + $.t("Log") + "'></i>"));
             $(timers).append($(this).find('.options .btnsmall[data-i18n="Timers"]').html("<i class='ion-ios-timer disabledText' title='" + $.t("Timers") + "'></i>"));
             $(timers).append($(this).find('.options .btnsmall-sel[data-i18n="Timers"]').html("<i class='ion-ios-timer' title='" + $.t("Timers") + "'></i>"));
-            if ($(this).find('.options > img[src*="nofavorite"]:not(".ng-hide")').length === 0) {
+            var isFavorite = false;
+            if (dev && dev.Favorite !== undefined) {
+                isFavorite = dev.Favorite !== 0;
+            } else {
+                /* Fallback: check DOM for favorite state */
+                var noFavImg = $(this).find('.options span:not(.ng-hide) img[src*="nofavorite"]');
+                isFavorite = noFavImg.length === 0;
+            }
+            if (isFavorite) {
                 icon = '<i class="ion-ios-star lcursor" title="' + $.t("Remove from Dashboard") + '" onclick="MakeFavorite(' + idx + ',0);"></i></td>';
             } else {
                 icon = '<i class="ion-ios-star-outline lcursor" title="' + $.t("Add to Dashboard") + '" onclick="MakeFavorite(' + idx + ',1);"></i></td>';

@@ -26,7 +26,7 @@ function setDeviceSwitch(idx, status) {
         $(tr).find(".switch").on("click", function(e) {
             e.preventDefault();
 
-            if ($(tr).parents("#dashScenes").length > 0 || $(tr).parents("#scenecontent").length > 0) {
+            if (location.hash === "#/Scenes" || $(tr).parents("[id^='dashScene']").length > 0 || $(tr).parents("#scenecontent").length > 0) {
                 /* Scenes */
                 if ($(this).find("input").prop("checked")) {
                     $(tr).find("#img2 > img").click();
