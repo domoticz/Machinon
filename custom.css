@@ -536,10 +536,13 @@ SECTION.dashCategory .row,
     overflow: hidden;
 }
 
-/* Drag-and-drop: constrain card width when jQuery UI pulls it out of
-   the grid context, where width:99% would resolve to 99% of viewport */
+/* Drag-and-drop: constrain card width when jQuery UI clones it out of
+   the grid context, where width:99% would resolve to 99% of viewport.
+   Upstream uses .draggable({helper:'clone'}) which creates .ui-draggable-dragging */
+.ui-draggable-dragging,
 .ui-sortable-helper {
-    max-width: 350px !important;
+    max-width: 400px !important;
+    width: auto !important;
 }
 
 #holder #dashcontent .row .span4 .item table[id^="item"] > tbody > tr,
@@ -695,28 +698,34 @@ body table#itemtable tr > .options {
 
 /* CSS-only icon replacement for Log/Timer buttons.
    Angular's i18n() re-sets button text after JS icon replacement,
-   so we use CSS to always hide text and show ionicon glyphs. */
+   so we hide text via overflow and show ionicon glyphs via ::before.
+   Uses width/height/overflow instead of font-size:0 for cross-browser
+   compatibility (Firefox collapses font-size:0 elements). */
 .btnsmall[data-i18n="Log"],
-.btnsmall-sel[data-i18n="Log"] {
-    font-size: 0 !important;
+.btnsmall-sel[data-i18n="Log"],
+.btnsmall[data-i18n="Timers"],
+.btnsmall-sel[data-i18n="Timers"] {
     display: inline-block !important;
-    line-height: 16px;
-    padding: 0 5px !important;
+    width: 16px;
+    height: 16px;
+    overflow: hidden;
+    text-indent: -9999px;
+    padding: 0 3px !important;
+    vertical-align: middle;
+    position: relative;
 }
 
-.btnsmall[data-i18n="Log"]::before {
+.btnsmall[data-i18n="Log"]::before,
+.btnsmall-sel[data-i18n="Log"]::before {
     font-family: "Ionicons";
     content: "\f21c";
     font-size: 16px;
     color: var(--main-blue-color);
-}
-
-.btnsmall[data-i18n="Timers"],
-.btnsmall-sel[data-i18n="Timers"] {
-    font-size: 0 !important;
-    display: inline-block !important;
-    line-height: 16px;
-    padding: 0 5px !important;
+    text-indent: 0;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 .btnsmall[data-i18n="Timers"]::before {
@@ -724,6 +733,11 @@ body table#itemtable tr > .options {
     content: "\f4c1";
     font-size: 16px;
     color: var(--secondary-text-color);
+    text-indent: 0;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 .btnsmall-sel[data-i18n="Timers"]::before {
@@ -731,6 +745,11 @@ body table#itemtable tr > .options {
     content: "\f4c1";
     font-size: 16px;
     color: var(--main-blue-color);
+    text-indent: 0;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 .timers_log .btnsmall,
