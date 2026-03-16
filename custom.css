@@ -536,8 +536,10 @@ SECTION.dashCategory .row,
     overflow: hidden;
 }
 
-#dashcontent #lastupdate {
-    display: none;
+/* Drag-and-drop: constrain card width when jQuery UI pulls it out of
+   the grid context, where width:99% would resolve to 99% of viewport */
+.ui-sortable-helper {
+    max-width: 350px !important;
 }
 
 #holder #dashcontent .row .span4 .item table[id^="item"] > tbody > tr,

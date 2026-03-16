@@ -190,45 +190,27 @@ function ajaxSuccessCallback(event, xhr, settings) {
             setDevicesNativeSelectorForMobile();
         }, 100);
 
-        // Re-apply theme features when Angular re-renders widget content.
+        // Re-apply ALL theme features when Angular re-renders widget content.
         // Angular replaces content INSIDE existing .item divs (e.g. slider
-        // init), wiping data-idx and theme DOM additions. We debounce with
-        // a longer delay (1s) to let Angular finish all digest cycles, then
-        // re-process any items that lost their theme modifications.
+        // init, i18n), wiping data-idx, timeago, options-cell, timers_log,
+        // and all other jQuery DOM additions. We debounce and re-run the
+        // full feature pipeline when any item is found unprocessed.
         var mainView = document.getElementById('main-view');
         if (mainView && !mainView._machinonObserver) {
             var debounceTimer;
             mainView._machinonObserver = new MutationObserver(function() {
                 clearTimeout(debounceTimer);
                 debounceTimer = setTimeout(function() {
-                    var reprocessed = false;
-                    $("td.options").each(function() {
-                        var tr = $(this).closest('tr');
-                        if (tr.find(".options-cell").length === 0) {
-                            var item = tr.closest('.item');
-                            var idx = item.attr('id') || (item.parent().attr('id') || '').replace(/^\D+/g, '');
-                            if (idx) {
-                                tr.attr('data-idx', idx);
-                                setDeviceOptions(idx);
-                                reprocessed = true;
-                            }
+                    var unprocessed = false;
+                    $("#main-view .item").each(function() {
+                        if ($(this).find(".options").length > 0 && $(this).find(".options-cell").length === 0) {
+                            unprocessed = true;
+                            return false;
                         }
                     });
-                    // If we reprocessed items, check again after Angular settles
-                    if (reprocessed) {
-                        setTimeout(function() {
-                            $("td.options").each(function() {
-                                var tr = $(this).closest('tr');
-                                if (tr.find(".options-cell").length === 0) {
-                                    var item = tr.closest('.item');
-                                    var idx = item.attr('id') || (item.parent().attr('id') || '').replace(/^\D+/g, '');
-                                    if (idx) {
-                                        tr.attr('data-idx', idx);
-                                        setDeviceOptions(idx);
-                                    }
-                                }
-                            });
-                        }, 1000);
+                    if (unprocessed) {
+                        setAllDevicesFeatures();
+                        setAllDevicesIconsStatus();
                     }
                 }, 500);
             });
