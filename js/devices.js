@@ -30,18 +30,25 @@ function setAllDevicesFeatures() {
     /* Browse all items to apply themes features and styles */
     $("#main-view .item").each(function() {
         /* Set idx on tr, for easy retrieval */
-        let idx = $(this).parent().attr('id');
-        if (typeof idx === "undefined") {
-            idx = $(this).attr('id');
-        } else {
-            idx = idx.replace( /^\D+/g, '');
+        let idx = $(this).find("#name").attr('data-idx');
+        if (typeof idx === "undefined" || idx === "") {
+            /* Fallback: try parent id (dashboard items like light_37, temp_1) */
+            idx = $(this).parent().attr('id');
+            if (typeof idx === "undefined") {
+                idx = $(this).attr('id');
+            } else {
+                idx = idx.replace(/^\D+/g, '');
+            }
         }
         $(this).find("tr").attr('data-idx', idx);
 
+        /* Remove native title tooltip — our CSS ::after tooltip handles it */
+        $(this).find("#name").removeAttr("title");
+
         let bigText = $(this).find("#bigtext");
-        let status = bigText.text();
+        let status = bigText.text().trim();
         if (status.length == 0) {
-            status = bigText.attr("data-status");
+            status = bigText.attr("data-status")?.trim();
         }
 
         /* Apply style and redefine options */
@@ -52,12 +59,18 @@ function setAllDevicesFeatures() {
 
         /* Feature - Show timeago for last update */
         var lastupd;
-        if (theme.features.time_ago.enabled === true) {
-            lastupd = $(this).find("#lastupdate").text();
+        var lastupdateEl = $(this).find("#lastupdate");
+        var alreadyProcessed = lastupdateEl.find("i.ion-ios-pulse").length > 0;
+        if (alreadyProcessed) {
+            /* Already processed by setDeviceLastUpdate — skip to avoid overwriting
+               livestamp text like "18 hours ago" which moment can't parse */
+        } else if (theme.features.time_ago.enabled === true) {
+            lastupd = lastupdateEl.text();
+            setDeviceLastUpdate(idx, lastupd);
         } else {
-            lastupd = moment($(this).find("#lastupdate").text(), [ "YYYY-MM-DD HH:mm:ss", "L LT" ]).format();
+            lastupd = moment(lastupdateEl.text(), [ "YYYY-MM-DD HH:mm:ss", "L LT" ]).format();
+            setDeviceLastUpdate(idx, lastupd);
         }
-        setDeviceLastUpdate(idx , lastupd);
 
         /* Feature - Switch instead of text */
         if (((location.hash === "#/Dashboard") && $(this).parent().attr("id").startsWith("light")) || (location.hash === "#/LightSwitches")) {
@@ -144,12 +157,36 @@ function setDeviceOptions(idx) {
             $(timers).append($(this).find('.options .btnsmall[href*="Log"]:not(.btnsmall[data-i18n="Log"])').html("<i class='ion-ios-stats' title='" + $.t("Log") + "'></i>"));
             $(timers).append($(this).find('.options .btnsmall[data-i18n="Timers"]').html("<i class='ion-ios-timer disabledText' title='" + $.t("Timers") + "'></i>"));
             $(timers).append($(this).find('.options .btnsmall-sel[data-i18n="Timers"]').html("<i class='ion-ios-timer' title='" + $.t("Timers") + "'></i>"));
-            if ($(this).find('.options > img[src*="nofavorite"]:not(".ng-hide")').length === 0) {
-                icon = '<i class="ion-ios-star lcursor" title="' + $.t("Remove from Dashboard") + '" onclick="MakeFavorite(' + idx + ',0);"></i></td>';
+            /* Check favorite state from Angular scope (ng-hide timing unreliable) */
+            var itemEl = $(this).closest('.item')[0] || $(this).parents('.item')[0];
+            var scope = (typeof angular !== "undefined" && itemEl) ? angular.element(itemEl).scope() : null;
+            var device = scope?.device || scope?.ctrl?.device || scope?.item;
+            var isFavorite = device ? device.Favorite !== 0 : false;
+            if (isFavorite) {
+                icon = '<i class="ion-ios-star lcursor" title="' + $.t("Remove from Dashboard") + '"></i>';
             } else {
-                icon = '<i class="ion-ios-star-outline lcursor" title="' + $.t("Add to Dashboard") + '" onclick="MakeFavorite(' + idx + ',1);"></i></td>';
+                icon = '<i class="ion-ios-star-outline lcursor" title="' + $.t("Add to Dashboard") + '"></i>';
             }
-            $(this).append('<td class="favorite">' + icon + "</td>");
+            var favTd = $('<td class="favorite">' + icon + "</td>");
+            favTd.on("click", function() {
+                /* Re-read current state at click time, not creation time */
+                var currentScope = angular.element(itemEl).scope();
+                var currentDevice = currentScope?.device || currentScope?.ctrl?.device || currentScope?.item;
+                var currentlyFav = currentDevice ? currentDevice.Favorite !== 0 : false;
+                /* Find favorite toggle — spans (Switches) or bare imgs (Weather/Temperature) */
+                var clickTarget = currentlyFav
+                    ? $(tr).find('.options span[ng-show*="Favorite != 0"] img, .options > img[ng-show*="Favorite != 0"]')
+                    : $(tr).find('.options span[ng-show*="Favorite == 0"] img, .options > img[ng-show*="Favorite == 0"]');
+                if (clickTarget.length) clickTarget.click();
+                /* Update star icon after toggle */
+                var $icon = $(this).find("i");
+                if (currentlyFav) {
+                    $icon.removeClass("ion-ios-star").addClass("ion-ios-star-outline").attr("title", $.t("Add to Dashboard"));
+                } else {
+                    $icon.removeClass("ion-ios-star-outline").addClass("ion-ios-star").attr("title", $.t("Remove from Dashboard"));
+                }
+            });
+            $(this).append(favTd);
         }
     });
 }
@@ -190,27 +227,34 @@ function setDeviceWindDirectionIcon(idx, direction) {
 function setDeviceLastUpdate(idx, lastupdate) {
     let tr = "tr[data-idx='" + idx + "']";
 
+    /* Strip "Last Seen:" or similar prefix — extract date portion */
+    if (typeof lastupdate === "string") {
+        var dateMatch = lastupdate.match(/\d{4}[-/]\d{2}[-/]\d{2}[\sT]\d{2}:\d{2}:\d{2}/);
+        if (dateMatch) lastupdate = dateMatch[0];
+    }
+
     /* If browser is a bit late, avoid future date */
     if (moment(lastupdate).isAfter(moment()))
         lastupdate = moment();
 
     $(tr).each(function() {
+        let lastupdateEl = $(this).find("#lastupdate");
         if (theme.features.time_ago.enabled === true) {
-            let lastupdated = $(this).find("#timeago");
-            if (lastupdated.length == 0) {
-                $(this).append('<td id="timeago" class="timeago" title="' + $.t("Last Seen") + '"><i class="ion-ios-pulse"></i> <span data-livestamp="' + moment(lastupdate).format() + '" title="' + moment(lastupdate).format("L LT") + '"></span></td>');
-                $(this).find("#lastupdate").hide();
+            /* Modify existing #lastupdate in-place instead of creating new #timeago */
+            let livestampSpan = lastupdateEl.find("span[data-livestamp]");
+            if (livestampSpan.length === 0) {
+                lastupdateEl.html('<i class="ion-ios-pulse"></i> <span data-livestamp="' + moment(lastupdate).format() + '" title="' + moment(lastupdate).format("L LT") + '"></span>');
             } else {
-                $(this).find("#timeago > span").attr("title", moment(lastupdate).format("L LT"));
-                $(this).find("#timeago > span").livestamp( moment(lastupdate).format());
+                livestampSpan.attr("title", moment(lastupdate).format("L LT"));
+                livestampSpan.livestamp(moment(lastupdate).format());
             }
         } else {
             var lastupd = moment(lastupdate);
             lastupd.locale(window.navigator.language);
-            $(this).find("#lastupdate").attr("title", $.t("Last Seen"));
-            $(this).find("#lastupdate").text(lastupd.format("L LT"));
-            if ($(this).find("#lastSeen").length == 0) {
-                $(this).find("#lastupdate").prepend("<i id='lastSeen' class='ion-ios-pulse'></i> ");
+            lastupdateEl.attr("title", $.t("Last Seen"));
+            lastupdateEl.text(lastupd.format("L LT"));
+            if (lastupdateEl.find("#lastSeen").length === 0) {
+                lastupdateEl.prepend("<i id='lastSeen' class='ion-ios-pulse'></i> ");
             }
         }
     });

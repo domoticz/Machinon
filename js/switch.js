@@ -8,12 +8,14 @@ function setDeviceSwitch(idx, status) {
 
     let tr = "tr[data-idx='" + idx + "']";
     let switcher = $(tr).find(".switch");
+    /* Trim whitespace — Angular templates include newlines in text nodes */
+    if (typeof status === "string") status = status.trim();
     if ($(tr).find(".dimslider").length > 0) {
         status = (status == switchState.off ? switchState.off : switchState.on);
         $(tr).find(".input").css("margin-top", "20px");
     }
     var checked = title = "";
-    if (status === switchState.off  || status === 'Off' || status === switchState.closed || status === 'Closed')
+    if (!status || status === switchState.off || status === 'Off' || status === switchState.closed || status === 'Closed')
         checked = "";
     else
         checked = "checked";
@@ -29,13 +31,13 @@ function setDeviceSwitch(idx, status) {
             if ($(tr).parents("#dashScenes").length > 0 || $(tr).parents("#scenecontent").length > 0) {
                 /* Scenes */
                 if ($(this).find("input").prop("checked")) {
-                    $(tr).find("#img2 > img").click();
+                    $(tr).find("#img2 img").click();
                 } else {
-                    $(tr).find("#img1 > img").click();
+                    $(tr).find("#img1 img").click();
                 }
             } else {
-                /* Switches */
-                $(tr).find("#img > img").click();
+                /* Switches — use descendant selector, upstream wraps img in div */
+                $(tr).find("#img img").click();
             }
         });
     } else {
