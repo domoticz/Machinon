@@ -101,7 +101,7 @@ function searchFunction() {
 			element.toggle(visibility);
 		}
     });
-    $("div.row.divider").show();
+    $("div.row.divider, #dashcontent div.row").show();
     $("section").show();
     if (value.length) {
         removeEmptySectionDashboard();

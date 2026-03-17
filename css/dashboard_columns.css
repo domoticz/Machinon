@@ -2,6 +2,14 @@
 @media (min-width: 1200px) {
     #dashcontent {
         padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    #dashcontent > section {
+        flex: 1 1 0;
+        min-width: 200px;
     }
 
     #dashcontent > section > h2 {
@@ -9,14 +17,9 @@
         height: 50px;
     }
 
-    #dashcontent > section {
-        width: calc(100% / 6 - 20px);
-        float: left;
-        margin-left: 10px;
-        margin-right: 10px;
-    }
-
-    #dashcontent > section:not(.compact) > div.row.divider {
-        grid-template-columns: none !important;
+    #dashcontent > section:not(.compact) > div.row.divider,
+    #dashcontent > section:not(.compact) > div.row:not(.divider) {
+        grid-template-columns: minmax(0, 500px) !important;
+        justify-content: center;
     }
 }

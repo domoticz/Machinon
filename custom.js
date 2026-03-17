@@ -122,6 +122,12 @@ function init_theme() {
                     let lastupd = moment(data.LastUpdate, ["YYYY-MM-DD HH:mm:ss", "L LT"]).format();
                     setDeviceLastUpdate(data.idx, lastupd);
                     setAllDevicesIconsStatus();
+                    /* Blue border pulse on updated card (if Domoticz flash setting enabled) */
+                    if ($scope.config && $scope.config.ShowUpdatedEffect === true) {
+                        var tr = $("tr[data-idx='" + data.idx + "']");
+                        tr.addClass("update-pulse");
+                        setTimeout(function() { tr.removeClass("update-pulse"); }, 800);
+                    }
                 }, 10);
             }, function errorCallback(response) {
                 console.error("Cannot connect to websocket");
@@ -142,12 +148,73 @@ function init_theme() {
 
     $(document).ready(function() {
         MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+        var mutationTimer = null;
         var observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
+            /* Debounce: wait for Angular digest to settle */
+            if (mutationTimer) clearTimeout(mutationTimer);
+            mutationTimer = setTimeout(function() {
                 $("#main-view").children("div.container").removeClass("container").addClass("container-fluid");
                 removeRowDivider();
                 setCorrectDashboardLinksforMobile();
-            });
+
+                /* Re-apply progressive enhancements if device cards are present */
+                if ($("#main-view").find(".item").length > 0) {
+                    /* Initialize unprocessed items (no data-idx = setAllDevicesFeatures hasn't run) */
+                    var hasUnprocessed = $("#main-view .item tr:not([data-idx])").length > 0;
+                    if (hasUnprocessed && typeof setAllDevicesFeatures === "function") {
+                        setAllDevicesFeatures();
+                        setAllDevicesIconsStatus();
+                    }
+
+                    var switchEnabled = theme.features.switch_instead_of_bigtext.enabled === true ||
+                        theme.features.switch_instead_of_bigtext_scenes.enabled === true;
+                    $("#main-view .item").each(function() {
+                        let tr = $(this).find("tr[data-idx]");
+                        if (!tr.length) return;
+                        let idx = tr.attr("data-idx");
+                        if (!idx) return;
+
+                        /* Re-apply options menu if wiped */
+                        if (tr.find(".options-cell").length === 0) {
+                            setDeviceOptions(idx);
+                        }
+
+                        /* Re-apply switch toggle if enabled and wiped — same guards as setAllDevicesFeatures() */
+                        if (switchEnabled && tr.find(".switch").length === 0) {
+                            let item = $(this);
+                            let bigText = item.find("#bigtext");
+                            let isSwitch = bigText.siblings("#img").find("img").hasClass("lcursor") &&
+                                item.find(".dimslider").length === 0 &&
+                                item.find(".selectorlevels").length === 0 &&
+                                item.find(".btn-group").length === 0 &&
+                                item.find("#img2").length === 0;
+                            if (isSwitch) {
+                                let isLightSwitch = (location.hash === "#/Dashboard" && item.parent().attr("id") && item.parent().attr("id").startsWith("light")) ||
+                                    location.hash === "#/LightSwitches";
+                                let isScene = item.parents("#scenecontent").length > 0 ||
+                                    (item.parents("#dashScenes").length > 0 && item.find("#itemtablesmalldoubleicon").length > 0);
+                                if (isLightSwitch && theme.features.switch_instead_of_bigtext.enabled === true) {
+                                    /* Read status from bigtext, or detect from icon src if bigtext is hidden */
+                                    let status = bigText.text().trim();
+                                    if (!status) {
+                                        let imgSrc = bigText.siblings("#img").find("img").attr("src") || "";
+                                        status = imgSrc.indexOf("_On") > -1 ? "On" : "Off";
+                                    }
+                                    setDeviceSwitch(idx, status);
+                                } else if (isScene && theme.features.switch_instead_of_bigtext_scenes.enabled === true) {
+                                    let status = bigText.text().trim();
+                                    if (!status) {
+                                        let imgSrc = bigText.siblings("#img").find("img").attr("src") || "";
+                                        status = imgSrc.indexOf("_On") > -1 ? "On" : "Off";
+                                    }
+                                    setDeviceSwitch(idx, status);
+                                    bigText.hide();
+                                }
+                            }
+                        }
+                    });
+                }
+            }, 50);
         });
         var targetNode = document.getElementById("holder");
         observer.observe(targetNode, {
@@ -161,6 +228,13 @@ function init_theme() {
         setSearch();
         setDevicesNativeSelectorForMobile();
         $(document).ajaxSuccess(ajaxSuccessCallback);
+
+        /* Set drag clone width to match the actual card width */
+        $(document).on("dragstart drag", ".ui-draggable", function(e, ui) {
+            if (ui && ui.helper) {
+                ui.helper.width($(this).width());
+            }
+        });
 
         if (theme.background_img && theme.background_img.length) {
             if (theme.background_img.startsWith("http")) {
