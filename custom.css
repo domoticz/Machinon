@@ -746,13 +746,22 @@ table.mobileitem td.name {
     border-radius: 5px;
 }
 
+/* Button groups in device cards: pills with gap */
 .item .btn-group {
     display: flex !important;
-    flex-flow: wrap;
-    justify-content: space-evenly;
+    flex-flow: row wrap;
+    gap: 3px;
+    justify-content: center;
     scrollbar-width: thin;
     scrollbar-color: var(--main-blue-color) var(--main-bg-color);
     width: 100%;
+}
+
+.item .btn-group > .btn,
+.item .btn-group > .btn:first-child,
+.item .btn-group > .btn:last-child {
+    border-radius: 5px !important;
+    margin: 0 !important;
 }
 
 .item .btn-group::-webkit-scrollbar-thumb,
@@ -2297,17 +2306,26 @@ tr.update-pulse {
     color: var(--main-text-color) !important;
 }
 
+/* Button groups in toolbars/dialogs: connected */
 .btn-group .btn {
     margin: 0 0 0 -1px !important;
     color: var(--main-text-color);
     font-family: main-font;
-    border: none !important;
+    border: 1px solid var(--main-blue-color) !important;
 }
 
-.btn-group > .btn:first-child,
+.btn-group > .btn:first-child {
+    margin-left: 0 !important;
+    border-radius: 5px 0 0 5px !important;
+}
+
 .btn-group > .btn:last-child {
     margin-left: 0 !important;
-    border-radius: 0px !important;
+    border-radius: 0 5px 5px 0 !important;
+}
+
+.btn-group > .btn:not(:first-child):not(:last-child) {
+    border-radius: 0 !important;
 }
 
 .btn-default,
