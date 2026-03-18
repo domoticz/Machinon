@@ -1513,12 +1513,13 @@ button.savebtn:disabled {
 }
 
 .btn-primary {
-    background: var(--main-blue-color);
-    border: none;
+    background: var(--main-blue-color) !important;
+    border: none !important;
     color: #fff !important;
     border-radius: 5px;
     font-size: 12px;
     padding: 6px 12px;
+    box-shadow: none !important;
 }
 
 .btn-primary:hover {
@@ -1526,10 +1527,11 @@ button.savebtn:disabled {
 }
 
 .btn-success {
-    background: var(--color-success);
-    border: none;
+    background: var(--color-success) !important;
+    border: none !important;
     color: #fff !important;
     border-radius: 5px;
+    box-shadow: none !important;
 }
 
 .btn-success:hover {
@@ -1537,12 +1539,13 @@ button.savebtn:disabled {
 }
 
 .btn-warning {
-    background: var(--color-warning);
-    border: none;
+    background: var(--color-warning) !important;
+    border: none !important;
     color: #fff !important;
     border-radius: 5px;
     font-size: 12px;
     padding: 6px 12px;
+    box-shadow: none !important;
 }
 
 .btn-warning:hover {
@@ -1550,12 +1553,13 @@ button.savebtn:disabled {
 }
 
 .btn-info {
-    background: var(--main-blue-color);
-    border: none;
+    background: var(--main-blue-color) !important;
+    border: none !important;
     color: #fff !important;
     border-radius: 5px;
     font-size: 12px;
     padding: 6px 12px;
+    box-shadow: none !important;
 }
 
 .btn-info:hover {
@@ -1567,12 +1571,13 @@ button.savebtn:disabled {
 }
 
 .btn-danger {
-    background: var(--color-error);
-    border: none;
+    background: var(--color-error) !important;
+    border: none !important;
     color: #fff !important;
     border-radius: 5px;
     font-size: 12px;
     padding: 6px 12px;
+    box-shadow: none !important;
 }
 
 .btn-danger:hover {
@@ -1683,8 +1688,8 @@ button.savebtn:disabled {
 
 /* Size: extra small */
 .btn-xs {
-    padding: 1px 5px;
-    font-size: 10px;
+    padding: 4px 8px;
+    font-size: 11px;
 }
 
 /* Size: large */
