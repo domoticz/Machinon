@@ -1454,6 +1454,27 @@ button.savebtn:disabled {
 .btn-small {
     padding: 2px 5px;
 }
+/* Universal button reset — kills Bootstrap 2.x gradients */
+.btn-info,
+.btn-success,
+.btn-warning,
+.btn-danger,
+.btn-primary,
+.btn-default,
+.btn-mini,
+.btnstyle3,
+.btnstyle3-sel,
+.btnstyle3-dis,
+.savebtn,
+.resetbtn,
+.allow5min {
+    text-shadow: none;
+    background-image: none;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, filter 0.15s ease;
+    cursor: pointer;
+    font-family: main-font;
+}
+
 .btn-mini {
     background: none;
     border-color: var(--main-blue-color);
@@ -1466,7 +1487,6 @@ button.savebtn:disabled {
     border-color: var(--main-blue-color);
     color: var(--main-blue-color) !important;
     border-radius: 1px;
-    text-shadow: none;
 }
 
 .btn-primary:not([disabled]):hover, .btn-primary:focus, .btn-primary:active {
@@ -1508,7 +1528,6 @@ button.savebtn:disabled {
 }
 
 .btn-info {
-    text-shadow: none;
     background: none;
     background-color: var(--main-blue-color);
     border-color: var(--main-blue-color);
@@ -1742,7 +1761,7 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
 }
 
 .ui-dialog-buttonset button {
-    font-family: main-font-bold;
+    font-family: main-font;
     background: var(--main-blue-color) !important;
     color: white !important;
     border: none !important;
@@ -2153,7 +2172,6 @@ tr.update-pulse {
 
 .btn-group .btn {
     margin: 0 0 0 -1px !important;
-    text-shadow: none !important;
     color: var(--main-text-color);
     font-family: main-font;
     border: none !important;
@@ -2170,7 +2188,6 @@ tr.update-pulse {
     background: var(--main-item-bg-color) !important;
     border-color: var(--main-blue-color) !important;
     color: var(--main-blue-color) !important;
-    text-shadow: none;
 }
 
 .btn.btn-selected,
@@ -2180,7 +2197,6 @@ tr.update-pulse {
     color: var(--main-text-color) !important;
     background: transparent !important;
     border-color: transparent !important;
-    font-family: main-font-bold;
 }
 
 .btn-default:hover,
@@ -2350,9 +2366,7 @@ section.compact .row:not(.divider) {
 
 .span3 td.input .btn-group button.btn-selected {
     color: var(--main-blue-color) !important;
-    font-family: main-font-bold;
     font-size: 1rem;
-    font-weight: 600;
     min-height: 50px;
     order: 1;
 }
