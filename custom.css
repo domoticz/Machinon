@@ -1131,6 +1131,14 @@ header.logo {
 .page-content-container .btnstyle3-sel {
     border-radius: 5px;
     padding: 4px 12px;
+    color: #fff;
+}
+
+/* Ensure btnstyle3 link color overrides page-content-container a color */
+.page-content-container a.btnstyle3,
+.page-content-container a.btnstyle3:link,
+.page-content-container a.btnstyle3:visited {
+    color: #fff;
 }
 
 .events-editor {
@@ -1477,7 +1485,8 @@ button.savebtn:disabled {
 
 /* Panels */
 .btn-small {
-    padding: 2px 5px;
+    padding: 4px 8px !important;
+    font-size: 11px !important;
 }
 /* Universal button reset — kills Bootstrap 2.x gradients */
 .btn-info,
