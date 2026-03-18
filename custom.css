@@ -1741,6 +1741,7 @@ button.savebtn:disabled {
 		border: 1.5px solid;
     border-color: transparent;
     border-radius: 6px;
+    margin-bottom: 10px;
     box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
 }
 table.dataTable {
