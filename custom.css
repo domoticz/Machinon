@@ -1414,36 +1414,38 @@ a.btnstyle {
 }
 
 
-/* Reset/save theme button */ 
-.resetbtn,
+/* Reset/save theme button */
+.resetbtn {
+    background: var(--color-error);
+    border: 1px solid var(--color-error);
+    border-radius: 5px;
+    color: #fff;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
 .resetbtn:hover {
-    background-color: var(--color-error);
-    border: 2px solid var(--color-error) !important;
+    filter: brightness(0.85);
+}
+
+.savebtn {
+    background: var(--main-blue-color);
+    border: 1px solid var(--main-blue-color);
     border-radius: 5px;
     color: #fff;
     padding: 10px 20px;
+    cursor: pointer;
 }
 
-button.resetbtn:active {
-    border: 2px solid #fff !important;
-}
-
-.savebtn,
 .savebtn:hover {
-    background-color: var(--main-blue-color);
-    border: 2px solid var(--main-blue-color) !important;
-    border-radius: 5px;
-    color: #fff;
-    padding: 10px 20px;
-}
-
-button.savebtn:active {
-    border: 2px solid #fff !important;
+    filter: brightness(0.85);
 }
 
 button.savebtn:disabled {
-    background-color: var(--main-disabled-color);
-    border-color: var(--main-disabled-color) !important;
+    background: var(--main-disabled-color);
+    border-color: var(--main-disabled-color);
+    color: var(--secondary-text-color);
+    cursor: not-allowed;
 }
 /* Settings button, z-wave etc. */
 .label-info[href], .badge-info[href] {
@@ -1498,39 +1500,30 @@ button.savebtn:disabled {
 }
 
 .btn-success {
-    background: none;
-    border-color: var(--color-success);
-    color: var(--color-success);
+    background: var(--color-success);
+    border: 1px solid var(--color-success);
+    color: #fff !important;
     border-radius: 5px;
 }
 
 .btn-success:hover {
-    background: none;
-    background-color: var(--color-success);
-    border-color: var(--color-success);
-    color: #fff !important;
-    border-radius: 5px;
+    filter: brightness(0.85);
 }
 
 .btn-warning {
-    background: none;
-    border-color: var(--color-warning);
-    color: var(--color-warning) !important;
+    background: var(--color-warning);
+    border: 1px solid var(--color-warning);
+    color: #fff !important;
     border-radius: 5px;
 }
 
 .btn-warning:hover {
-    background: none;
-    background-color: var(--color-warning);
-    border-color: var(--color-warning);
-    color: #fff !important;
-    border-radius: 5px;
+    filter: brightness(0.85);
 }
 
 .btn-info {
-    background: none;
-    background-color: var(--main-blue-color);
-    border-color: var(--main-blue-color);
+    background: var(--main-blue-color);
+    border: 1px solid var(--main-blue-color);
     color: #fff !important;
     border-radius: 5px;
     font-size: 12px;
@@ -1538,10 +1531,7 @@ button.savebtn:disabled {
 }
 
 .btn-info:hover {
-    background: none;
-    border-color: var(--main-blue-color);
-    color: var(--main-blue-color) !important;
-    border-radius: 5px;
+    filter: brightness(0.85);
 }
 
 .btn-info:visited {
@@ -1549,18 +1539,14 @@ button.savebtn:disabled {
 }
 
 .btn-danger {
-    background: rgba(255, 255, 255, .4);
-    border-color: var(--color-error);
+    background: var(--color-error);
+    border: 1px solid var(--color-error);
+    color: #fff !important;
     border-radius: 5px;
-    color: var(--color-error) !important;
 }
 
 .btn-danger:hover {
-    background: none;
-    background-color: var(--color-error);
-    border-color: var(--color-error);
-    color: #fff !important;
-    border-radius: 5px;
+    filter: brightness(0.85);
 }
 
 .btnsmall,
@@ -1647,8 +1633,9 @@ tr.odd td.sorting_1, tr.even td.sorting_1 {
     opacity: .75;
 }
 
-.btnstyle3-dis, .btnstyle3, .btnstyle3-sel {
+.btnstyle3, .btnstyle3-sel {
     background: var(--main-blue-color);
+    border: none;
     border-radius: 5px;
     color: #fff;
     text-align: center;
@@ -1659,16 +1646,24 @@ tr.odd td.sorting_1, tr.even td.sorting_1 {
     justify-content: center;
 }
 
+.btnstyle3:hover, .btnstyle3-sel:hover {
+    filter: brightness(0.85);
+}
+
+.btnstyle3-dis,
 .btnstyle3:disabled {
-    cursor: not-allowed;
     background: var(--main-disabled-color);
+    border: none;
     border-radius: 5px;
+    color: var(--secondary-text-color);
+    text-align: center;
+    padding: 6px 12px;
+    line-height: 1;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 6px 12px;
-    line-height: 1;
-    color: var(--secondary-text-color);
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 h1,
@@ -1764,14 +1759,18 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
     font-family: main-font;
     background: var(--main-blue-color) !important;
     color: white !important;
-    border: none !important;
+    border: 1px solid var(--main-blue-color) !important;
     border-radius: 5px !important;
+}
+
+.ui-dialog-buttonset button:hover {
+    filter: brightness(0.85);
 }
 
 #getlatlong {
     background: var(--main-blue-color) !important;
     color: white !important;
-    border: none !important;
+    border: 1px solid var(--main-blue-color) !important;
     border-radius: 5px !important;
     padding: 8px 15px;
 }
@@ -1937,13 +1936,15 @@ input#AcceptNewHardware:checked ~ button {
     display: none
 }
 
-.allow5min,
-.allow5min:hover {
-    background: none;
-    background-color: var(--main-blue-color);
+.allow5min {
+    background: var(--main-blue-color);
+    border: 1px solid var(--main-blue-color);
     color: #fff;
     border-radius: 5px;
-    border: none;
+}
+
+.allow5min:hover {
+    filter: brightness(0.85);
 }
 
 .ui-corner-all {
@@ -2194,9 +2195,10 @@ tr.update-pulse {
 .btn-group .btn-selected,
 .btn-default.active,
 .btn-group .btn-default.active {
-    color: var(--main-text-color) !important;
-    background: transparent !important;
-    border-color: transparent !important;
+    color: #fff !important;
+    background: var(--main-blue-color) !important;
+    border-color: var(--main-blue-color) !important;
+    font-family: main-font;
 }
 
 .btn-default:hover,
@@ -2214,16 +2216,14 @@ tr.update-pulse {
 }
 
 .btn-group .btn-danger {
-    background: none !important;
+    background: var(--color-error) !important;
     border-color: var(--color-error) !important;
-    color: var(--color-error);
+    color: #fff;
     border-radius: 5px !important;
 }
 
 .btn-group .btn-danger:hover {
-    background: var(--color-error) !important;
-    border-color: var(--color-error) !important;
-    color: #fff;
+    filter: brightness(0.85);
 }
 
 .btn-group .btn-info {
