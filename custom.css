@@ -1141,6 +1141,12 @@ header.logo {
     color: #fff;
 }
 
+.page-content-container a.btnstyle3-dis,
+.page-content-container a.btnstyle3-dis:link,
+.page-content-container a.btnstyle3-dis:visited {
+    color: var(--secondary-text-color);
+}
+
 .events-editor {
     margin-top: 40px;
 }
