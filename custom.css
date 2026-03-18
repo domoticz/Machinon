@@ -824,6 +824,7 @@ body table#itemtable tr > .options {
 .options .btnsmall,
 .options .btnsmall-sel {
     display: block;
+    background: transparent;
 }
 
 .options .btnsmall-sel {
