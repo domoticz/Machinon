@@ -154,12 +154,11 @@ body.dashMobile table.mobileitem .btn-group .btn {
 body.dashMobile table.mobileitem .btn-mini {
     margin-left: 2px;
     font-family: main-font;
-    text-shadow: none;
     background: var(--main-item-bg-color) !important;
     background-image: none !important;
     border: 1px solid var(--main-blue-color);
     border-radius: 5px;
-    color: var(--main-blue-color) !important;
+    color: var(--main-text-color) !important;
     padding: 4px 10px !important;
     font-size: 12px;
     min-width: 40px;
