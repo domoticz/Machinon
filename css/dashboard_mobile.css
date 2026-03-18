@@ -144,7 +144,7 @@ body.dashMobile table.mobileitem .btn-group {
 body.dashMobile table.mobileitem .btn-group .btn {
     padding-top: 0 !important;
     padding-bottom: 0 !important;
-    font-family: main-font-bold;
+    font-family: main-font;
     font-size: 10pt;
     margin-left: 2px !important;
     margin-bottom: 2px !important;
@@ -153,7 +153,7 @@ body.dashMobile table.mobileitem .btn-group .btn {
 
 body.dashMobile table.mobileitem .btn-mini {
     margin-left: 2px;
-    font-family: main-font-bold;
+    font-family: main-font;
     text-shadow: none;
     background: var(--main-item-bg-color) !important;
     background-image: none !important;
