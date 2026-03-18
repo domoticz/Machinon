@@ -436,8 +436,9 @@ input[type="radio"]:checked::before {
     color: var(--secondary-text-color);
 }
 
-#tbSunGroup #tbIconSun {
-    color: var(--color-warning);
+#tbSunGroup #tbIconSun,
+#tbTimeSun .fa-sun {
+    color: #ff8c00;
 }
 
 .page-header-small {
