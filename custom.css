@@ -118,7 +118,6 @@ h4,
 }
 .section-title,
 .info-value,
-.btn-modern,
 .donation-text {
 	color: var(--main-text-color) !important;
 }
@@ -812,7 +811,7 @@ body table#itemtable tr > .options {
 .options .btnsmall-sel {
     width: auto;
     background: transparent;
-    color: green;
+    color: var(--main-blue-color);
 }
 
 .options .btnsmall {
@@ -1495,7 +1494,7 @@ button.savebtn:disabled {
     color: #fff;
 }
 
-.btn-primary, .btn-primary[disabled] {
+.btn-primary {
     background: transparent;
     border: 1px solid var(--main-blue-color);
     color: var(--main-text-color) !important;
@@ -1560,12 +1559,136 @@ button.savebtn:disabled {
 }
 
 .btnsmall,
-.options .btnsmall:hover,
-.options .btnsmall-sel:hover {
+.btnsmall-sel {
     color: var(--main-blue-color);
     background: rgba(var(--main-blue-color-values), 0.1);
+    border: none;
     border-radius: 5px;
+    padding: 4px 8px;
     font-style: normal;
+    cursor: pointer;
+}
+
+.btnsmall:hover,
+.btnsmall-sel:hover {
+    background: rgba(var(--main-blue-color-values), 0.2);
+}
+
+/* Ghost: disabled small button */
+.btnsmall-dis {
+    color: var(--main-disabled-color);
+    background: transparent;
+    border: none;
+    border-radius: 5px;
+    padding: 4px 8px;
+    cursor: not-allowed;
+    pointer-events: none;
+    font-style: normal;
+}
+
+/* Ghost: icon-only buttons */
+.btn-icon {
+    background: transparent;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 5px;
+}
+
+.btn-icon:hover {
+    background: rgba(var(--main-blue-color-values), 0.1);
+}
+
+/* Ghost: link-styled button */
+.btn-link {
+    background: transparent;
+    border: none;
+    color: var(--main-blue-color);
+    cursor: pointer;
+    text-decoration: none;
+    padding: 0;
+    font-family: main-font;
+    font-size: 12px;
+}
+
+.btn-link:hover {
+    text-decoration: underline;
+}
+
+/* Filled: modern login/wizard button */
+.btn-modern {
+    background: var(--main-blue-color);
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    padding: 10px 20px;
+    font-family: main-font-bold;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+.btn-modern:hover {
+    filter: brightness(0.85);
+    color: #fff;
+    text-decoration: none;
+}
+
+/* Filled: modern danger button */
+.btn-modern-warning {
+    background: var(--color-error);
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    padding: 10px 20px;
+    font-family: main-font-bold;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-modern-warning:hover {
+    filter: brightness(0.85);
+    color: #fff;
+    text-decoration: none;
+}
+
+/* Size: extra small */
+.btn-xs {
+    padding: 1px 5px;
+    font-size: 10px;
+}
+
+/* Size: large */
+.btn-large {
+    padding: 10px 20px;
+    font-size: 14px;
+}
+
+/* Unified disabled states */
+.btn-info[disabled],
+.btn-success[disabled],
+.btn-warning[disabled],
+.btn-danger[disabled] {
+    background: var(--main-disabled-color);
+    border-color: var(--main-disabled-color);
+    color: var(--secondary-text-color);
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.btn-primary[disabled] {
+    border-color: var(--main-disabled-color);
+    color: var(--main-disabled-color);
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 #itemtabledoubleicon td:last-child .btnsmall-sel,
@@ -2006,11 +2129,6 @@ select.ui-corner-all option {
 
 .ui-widget-header {
     color: var(--secondary-text-color);
-}
-
-.btnsmall,.btnsmall-sel {
-    display: block;
-    background: none;
 }
 
 /* Device update pulse */
