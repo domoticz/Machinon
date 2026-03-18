@@ -1419,7 +1419,7 @@ a.btnstyle {
 .resetbtn:hover {
     background-color: var(--color-error);
     border: 2px solid var(--color-error) !important;
-    border-radius: 2px;
+    border-radius: 5px;
     color: #fff;
     padding: 10px 20px;
 }
@@ -1432,7 +1432,7 @@ button.resetbtn:active {
 .savebtn:hover {
     background-color: var(--main-blue-color);
     border: 2px solid var(--main-blue-color) !important;
-    border-radius: 2px;
+    border-radius: 5px;
     color: #fff;
     padding: 10px 20px;
 }
@@ -1479,14 +1479,14 @@ button.savebtn:disabled {
     background: none;
     border-color: var(--main-blue-color);
     color: var(--main-blue-color);
-    border-radius: 1px;
+    border-radius: 5px;
 }
 
 .btn-primary, .btn-primary[disabled] {
     background: none;
     border-color: var(--main-blue-color);
     color: var(--main-blue-color) !important;
-    border-radius: 1px;
+    border-radius: 5px;
 }
 
 .btn-primary:not([disabled]):hover, .btn-primary:focus, .btn-primary:active {
@@ -1494,14 +1494,14 @@ button.savebtn:disabled {
     background-color: var(--main-blue-color);
     border-color: var(--main-blue-color);
     color: #fff !important;
-    border-radius: 1px;
+    border-radius: 5px;
 }
 
 .btn-success {
     background: none;
     border-color: var(--color-success);
     color: var(--color-success);
-    border-radius: 1px;
+    border-radius: 5px;
 }
 
 .btn-success:hover {
@@ -1509,14 +1509,14 @@ button.savebtn:disabled {
     background-color: var(--color-success);
     border-color: var(--color-success);
     color: #fff !important;
-    border-radius: 1px;
+    border-radius: 5px;
 }
 
 .btn-warning {
     background: none;
     border-color: var(--color-warning);
     color: var(--color-warning) !important;
-    border-radius: 1px;
+    border-radius: 5px;
 }
 
 .btn-warning:hover {
@@ -1524,7 +1524,7 @@ button.savebtn:disabled {
     background-color: var(--color-warning);
     border-color: var(--color-warning);
     color: #fff !important;
-    border-radius: 1px;
+    border-radius: 5px;
 }
 
 .btn-info {
@@ -1541,7 +1541,7 @@ button.savebtn:disabled {
     background: none;
     border-color: var(--main-blue-color);
     color: var(--main-blue-color) !important;
-    border-radius: 1px;
+    border-radius: 5px;
 }
 
 .btn-info:visited {
@@ -1551,7 +1551,7 @@ button.savebtn:disabled {
 .btn-danger {
     background: rgba(255, 255, 255, .4);
     border-color: var(--color-error);
-    border-radius: 1px;
+    border-radius: 5px;
     color: var(--color-error) !important;
 }
 
@@ -1560,7 +1560,7 @@ button.savebtn:disabled {
     background-color: var(--color-error);
     border-color: var(--color-error);
     color: #fff !important;
-    border-radius: 1px;
+    border-radius: 5px;
 }
 
 .btnsmall,
@@ -1568,7 +1568,7 @@ button.savebtn:disabled {
 .options .btnsmall-sel:hover {
     color: var(--main-blue-color);
     background: rgba(var(--main-blue-color-values), 0.1);
-    border-radius: 3px;
+    border-radius: 5px;
     font-style: normal;
 }
 
@@ -1765,14 +1765,14 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
     background: var(--main-blue-color) !important;
     color: white !important;
     border: none !important;
-    border-radius: 0 !important;
+    border-radius: 5px !important;
 }
 
 #getlatlong {
     background: var(--main-blue-color) !important;
     color: white !important;
     border: none !important;
-    border-radius: 0 !important;
+    border-radius: 5px !important;
     padding: 8px 15px;
 }
 
@@ -1867,7 +1867,7 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
     color: var(--main-blue-color);
     background: transparent;
     border: 1px solid var(--main-blue-color);
-    border-radius: 3px;
+    border-radius: 5px;
     padding: 2px 8px;
     cursor: pointer;
 }
@@ -1942,7 +1942,7 @@ input#AcceptNewHardware:checked ~ button {
     background: none;
     background-color: var(--main-blue-color);
     color: #fff;
-    border-radius: 2px;
+    border-radius: 5px;
     border: none;
 }
 
@@ -2161,7 +2161,7 @@ tr.update-pulse {
     color: #fff;
     border: none;
     text-shadow: none;
-    border-radius: 2px;
+    border-radius: 5px;
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
 }
 
@@ -2210,14 +2210,14 @@ tr.update-pulse {
     background: var(--main-item-bg-color) !important;
     color: var(--main-blue-color) !important;
     border-color: var(--main-blue-color) !important;
-    border-radius: 1px !important;
+    border-radius: 5px !important;
 }
 
 .btn-group .btn-danger {
     background: none !important;
     border-color: var(--color-error) !important;
     color: var(--color-error);
-    border-radius: 1px !important;
+    border-radius: 5px !important;
 }
 
 .btn-group .btn-danger:hover {

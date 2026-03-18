@@ -148,7 +148,7 @@ body.dashMobile table.mobileitem .btn-group .btn {
     font-size: 10pt;
     margin-left: 2px !important;
     margin-bottom: 2px !important;
-    border-radius: 1px !important;
+    border-radius: 5px !important;
 }
 
 body.dashMobile table.mobileitem .btn-mini {
