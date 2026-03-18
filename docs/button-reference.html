@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Machinon Button Reference</title>
+<style>
+  :root, .theme-light {
+    --main-bg-color: rgb(241,241,241);
+    --main-blue-color: rgb(11,150,205);
+    --main-blue-color-values: 11,150,205;
+    --main-item-bg-color: rgb(255,255,255);
+    --main-text-color: rgb(26,26,26);
+    --secondary-text-color: rgb(109,110,109);
+    --main-border-color: rgb(211,211,211);
+    --main-disabled-color: rgb(211,211,211);
+    --color-error: rgb(199,67,67);
+    --color-success: rgb(91,183,91);
+    --color-warning: rgb(255,140,0);
+  }
+
+  .theme-dark {
+    --main-bg-color: rgb(51,54,57);
+    --main-blue-color: rgb(11,150,205);
+    --main-blue-color-values: 11,150,205;
+    --main-item-bg-color: rgb(81,85,88);
+    --main-text-color: rgb(255,255,255);
+    --secondary-text-color: rgb(204,204,204);
+    --main-border-color: rgb(109,110,109);
+    --main-disabled-color: rgb(128,128,128);
+    --color-error: rgb(224,85,85);
+    --color-success: rgb(109,201,109);
+    --color-warning: rgb(255,160,51);
+  }
+
+  @font-face {
+    font-family: main-font;
+    font-style: normal;
+    font-weight: 400;
+    src: local('Open Sans Regular'), local('OpenSans-Regular');
+  }
+  @font-face {
+    font-family: main-font-bold;
+    font-style: normal;
+    font-weight: 600;
+    src: local('Open Sans SemiBold'), local('OpenSans-SemiBold');
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: main-font, 'Open Sans', sans-serif;
+    background: var(--main-bg-color);
+    color: var(--main-text-color);
+    padding: 30px 40px;
+    line-height: 1.5;
+  }
+
+  h1 {
+    font-family: main-font-bold, 'Open Sans', sans-serif;
+    font-size: 28px;
+    margin-bottom: 8px;
+    color: var(--main-blue-color);
+  }
+  h1 span { color: var(--main-text-color); font-family: main-font, 'Open Sans', sans-serif; font-size: 16px; }
+
+  h2 {
+    font-family: main-font-bold, 'Open Sans', sans-serif;
+    font-size: 20px;
+    margin: 40px 0 6px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--main-blue-color);
+    color: var(--main-text-color);
+  }
+
+  h3 {
+    font-family: main-font-bold, 'Open Sans', sans-serif;
+    font-size: 15px;
+    margin: 24px 0 10px;
+    color: var(--secondary-text-color);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .intro {
+    color: var(--secondary-text-color);
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
+
+  .card {
+    background: var(--main-item-bg-color);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 12px 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  .button-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 8px 0;
+  }
+
+  .label-col {
+    min-width: 180px;
+    font-size: 12px;
+    color: var(--secondary-text-color);
+  }
+  .label-col code {
+    font-size: 11px;
+    background: rgba(var(--main-blue-color-values), 0.08);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--main-blue-color);
+  }
+  .label-col .where {
+    display: block;
+    font-size: 10px;
+    color: var(--main-disabled-color);
+    margin-top: 2px;
+    font-style: italic;
+  }
+
+  .sep {
+    width: 1px;
+    height: 28px;
+    background: var(--main-border-color);
+    margin: 0 4px;
+  }
+
+  .state-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--main-disabled-color);
+    text-align: center;
+    min-width: 60px;
+  }
+
+  .state-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* ========================================
+     BUTTON STYLES — copied from theme
+     ======================================== */
+
+  /* --- Shared --- */
+  .btn-transition {
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, filter 0.15s ease;
+  }
+
+  /* --- FILLED: .btn-info --- */
+  .demo-btn-info {
+    text-shadow: none;
+    background-color: var(--main-blue-color);
+    border: 1px solid var(--main-blue-color);
+    color: #fff;
+    border-radius: 5px;
+    font-size: 12px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-family: main-font, 'Open Sans', sans-serif;
+  }
+  .demo-btn-info:hover { filter: brightness(0.85); }
+  .demo-btn-info.disabled {
+    background-color: var(--main-disabled-color);
+    border-color: var(--main-disabled-color);
+    color: var(--secondary-text-color);
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* --- FILLED: .btnstyle3 --- */
+  .demo-btnstyle3 {
+    background: var(--main-blue-color);
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    text-align: center;
+    padding: 6px 12px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-family: main-font, 'Open Sans', sans-serif;
+    font-size: 12px;
+  }
+  .demo-btnstyle3:hover { filter: brightness(0.85); }
+  .demo-btnstyle3.disabled,
+  .demo-btnstyle3-dis {
+    background: var(--main-disabled-color);
+    border-radius: 5px;
+    color: var(--secondary-text-color);
+    text-align: center;
+    padding: 6px 12px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: not-allowed;
+    pointer-events: none;
+    font-family: main-font, 'Open Sans', sans-serif;
+    font-size: 12px;
+    border: none;
+  }
+
+  /* --- FILLED: .savebtn --- */
+  .demo-savebtn {
+    background-color: var(--main-blue-color);
+    border: 2px solid var(--main-blue-color);
+    border-radius: 5px;
+    color: #fff;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-family: main-font, 'Open Sans', sans-serif;
+    font-size: 14px;
+  }
+  .demo-savebtn:hover { filter: brightness(0.85); }
+  .demo-savebtn.disabled {
+    background-color: var(--main-disabled-color);
+    border-color: var(--main-disabled-color);
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* --- FILLED: .resetbtn --- */
+  .demo-resetbtn {
+    background-color: var(--color-error);
+    border: 2px solid var(--color-error);
+    border-radius: 5px;
+    color: #fff;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-family: main-font, 'Open Sans', sans-serif;
+    font-size: 14px;
+  }
+  .demo-resetbtn:hover { filter: brightness(0.85); }
+
+  /* --- FILLED: .allow5min --- */
+  .demo-allow5min {
+    background-color: var(--main-blue-color);
+    color: #fff;
+    border-radius: 5px;
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-family: main-font, 'Open Sans', sans-serif;
+    font-size: 12px;
+  }
+  .demo-allow5min:hover { filter: brightness(0.85); }
+
+  /* --- FILLED: .btn-modern --- */
+  .demo-btn-modern {
+    background-color: var(--main-blue-color);
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    padding: 10px 20px;
+    font-family: main-font-bold, 'Open Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+  }
+  .demo-btn-modern:hover { filter: brightness(0.85); color: #fff; text-decoration: none; }
+
+  /* --- FILLED: .btn-modern-warning --- */
+  .demo-btn-modern-warning {
+    background-color: var(--color-error);
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    padding: 10px 20px;
+    font-family: main-font-bold, 'Open Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+  }
+  .demo-btn-modern-warning:hover { filter: brightness(0.85); color: #fff; text-decoration: none; }
+
+  /* --- FILLED: .log-filter-btn-active --- */
+  .demo-log-active {
+    background: var(--main-blue-color);
+    border: 1px solid var(--main-blue-color);
+    color: #fff;
+    border-radius: 5px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-family: main-font, 'Open Sans', sans-serif;
+    font-size: 12px;
+  }
+  .demo-log-active:hover { filter: brightness(0.85); }
+  .demo-log-active .count {
+    background: rgba(255,255,255,0.25);
+    border-radius: 3px;
+    padding: 1px 6px;
+    margin-left: 6px;
+    font-size: 11px;
+  }
+
+  /* --- FILLED: dialog buttons --- */
+  .demo-dialog-btn {
+    font-family: main-font-bold, 'Open Sans', sans-serif;
+    background: var(--main-blue-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .demo-dialog-btn:hover { filter: brightness(0.85); }
+
+  /* --- FILLED: .btn-selected (active toggle) --- */
+  .demo-btn-selected {
+    background: var(--main-blue-color);
+    border: 1px solid var(--main-blue-color);
+    color: #fff;
+    border-radius: 5px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-family: main-font, 'Open Sans', sans-serif;
+    font-size: 12px;
+  }
+
+  /* --- FILLED: .btn-primary --- */
+  .demo-btn-primary {
+    background: var(--main-blue-color);
+    border: 1px solid var(--main-blue-color);
+    color: #fff;
+    border-radius: 5px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-family: main-font, 'Open Sans', sans-serif;
+    font-size: 12px;
+  }
+  .demo-btn-primary:hover {
+    filter: brightness(0.85);
+  }
+  .demo-btn-primary.disabled {
+    background: var(--main-disabled-color);
+    border-color: var(--main-disabled-color);
+    color: var(--secondary-text-color);
+    cursor: not-allowed;
+    pointer-events: none;
+    filter: none;
+  }
+
+  /* --- FILLED: .btn-success --- */
+  .demo-btn-success {
+    background: var(--color-success);
+    border: 1px solid var(--color-success);
+    color: #fff;
+    border-radius: 5px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-family: main-font, 'Open Sans', sans-serif;
+    font-size: 12px;
+  }
+  .demo-btn-success:hover { filter: brightness(0.85); }
+  .demo-btn-success.disabled {
+    background: var(--main-disabled-color);
+    border-color: var(--main-disabled-color);
+    color: var(--secondary-text-color);
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* --- FILLED: .btn-warning --- */
+  .demo-btn-warning {
+    background: var(--color-warning);
+    border: 1px solid var(--color-warning);
+    color: #fff;
+    border-radius: 5px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-family: main-font, 'Open Sans', sans-serif;
+    font-size: 12px;
+  }
+  .demo-btn-warning:hover { filter: brightness(0.85); }
+  .demo-btn-warning.disabled {
+    background: var(--main-disabled-color);
+    border-color: var(--main-disabled-color);
+    color: var(--secondary-text-color);
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* --- FILLED: .btn-danger --- */
+  .demo-btn-danger {
+    background: var(--color-error);
+    border: 1px solid var(--color-error);
+    color: #fff;
+    border-radius: 5px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-family: main-font, 'Open Sans', sans-serif;
+    font-size: 12px;
+  }
+  .demo-btn-danger:hover { filter: brightness(0.85); }
+  .demo-btn-danger.disabled {
+    background: var(--main-disabled-color);
+    border-color: var(--main-disabled-color);
+    color: var(--secondary-text-color);
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* --- OUTLINE: .btn-default --- */
+  .demo-btn-default {
+    background: var(--main-item-bg-color);
+    border: 1px solid var(--main-blue-color);
+    color: var(--main-blue-color);
+    border-radius: 5px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-family: main-font, 'Open Sans', sans-serif;
+    font-size: 12px;
+  }
+  .demo-btn-default:hover {
+    background: var(--main-blue-color);
+    color: var(--main-item-bg-color);
+  }
+
+  /* --- OUTLINE: .btn-mini --- */
+  .demo-btn-mini {
+    background: transparent;
+    border: 1px solid var(--main-blue-color);
+    color: var(--main-blue-color);
+    border-radius: 5px;
+    padding: 4px 10px;
+    font-size: 12px;
+    min-width: 40px;
+    text-align: center;
+    text-shadow: none;
+    cursor: pointer;
+    font-family: main-font, 'Open Sans', sans-serif;
+  }
+  .demo-btn-mini:hover {
+    background: var(--main-blue-color);
+    color: #fff;
+  }
+  .demo-btn-mini.active {
+    background: var(--main-blue-color);
+    color: #fff;
+  }
+
+  /* --- OUTLINE: .zoom-button --- */
+  .demo-zoom {
+    font-family: main-font, 'Open Sans', sans-serif;
+    font-size: 11px;
+    color: var(--main-blue-color);
+    background: transparent;
+    border: 1px solid var(--main-blue-color);
+    border-radius: 5px;
+    padding: 2px 8px;
+    cursor: pointer;
+  }
+  .demo-zoom:hover {
+    background: var(--main-blue-color);
+    color: #fff;
+  }
+
+  /* --- OUTLINE: .zoom-reset --- */
+  .demo-zoom-reset {
+    font-family: main-font, 'Open Sans', sans-serif;
+    font-size: 11px;
+    color: var(--color-error);
+    background: transparent;
+    border: 1px solid var(--color-error);
+    border-radius: 5px;
+    padding: 2px 8px;
+    cursor: pointer;
+  }
+  .demo-zoom-reset:hover {
+    background: var(--color-error);
+    color: #fff;
+  }
+
+  /* --- OUTLINE: .log-filter-btn --- */
+  .demo-log-filter {
+    background: transparent;
+    border: 1px solid var(--main-blue-color);
+    color: var(--main-blue-color);
+    border-radius: 5px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-family: main-font, 'Open Sans', sans-serif;
+    font-size: 12px;
+  }
+  .demo-log-filter:hover {
+    background: var(--main-blue-color);
+    color: #fff;
+  }
+  .demo-log-filter .count {
+    background: rgba(var(--main-blue-color-values), 0.2);
+    border-radius: 3px;
+    padding: 1px 6px;
+    margin-left: 6px;
+    font-size: 11px;
+  }
+
+  /* --- SIZE: .btn-xs --- */
+  .demo-btn-xs {
+    padding: 1px 5px;
+    font-size: 10px;
+    border-radius: 5px;
+    background-color: var(--main-blue-color);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-family: main-font, 'Open Sans', sans-serif;
+  }
+  .demo-btn-xs:hover { filter: brightness(0.85); }
+
+  /* --- SIZE: .btn-large --- */
+  .demo-btn-large {
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 5px;
+    background: transparent;
+    border: 1px solid var(--main-blue-color);
+    color: var(--main-blue-color);
+    cursor: pointer;
+    font-family: main-font, 'Open Sans', sans-serif;
+  }
+  .demo-btn-large:hover {
+    background: var(--main-blue-color);
+    color: #fff;
+  }
+
+  /* --- GHOST: .btnsmall --- */
+  .demo-btnsmall {
+    color: var(--main-blue-color);
+    background: rgba(var(--main-blue-color-values), 0.1);
+    border-radius: 5px;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-family: main-font, 'Open Sans', sans-serif;
+    font-size: 12px;
+    font-style: normal;
+  }
+  .demo-btnsmall:hover {
+    background: rgba(var(--main-blue-color-values), 0.2);
+  }
+  .demo-btnsmall.disabled {
+    color: var(--main-disabled-color);
+    background: transparent;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* --- GHOST: .btn-icon --- */
+  .demo-btn-icon {
+    background: transparent;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 5px;
+  }
+  .demo-btn-icon:hover {
+    background: rgba(var(--main-blue-color-values), 0.1);
+  }
+  .demo-btn-icon img {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* --- GHOST: .btn-link --- */
+  .demo-btn-link {
+    background: transparent;
+    border: none;
+    color: var(--main-blue-color);
+    cursor: pointer;
+    text-decoration: none;
+    padding: 0;
+    font-family: main-font, 'Open Sans', sans-serif;
+    font-size: 12px;
+  }
+  .demo-btn-link:hover {
+    text-decoration: underline;
+  }
+
+  /* --- GHOST: .btnstyle / .btnstylerev (nav arrows) --- */
+  .demo-nav-arrow {
+    background: none;
+    border: none;
+    color: var(--main-text-color);
+    position: relative;
+    padding: 0 1.2em;
+    cursor: pointer;
+    font-family: main-font, 'Open Sans', sans-serif;
+    font-size: 12px;
+    text-decoration: none;
+    display: inline-block;
+    line-height: 2;
+  }
+  .demo-nav-arrow.next::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 8px;
+    height: 8px;
+    background: transparent;
+    border-top: 1.5px solid var(--main-text-color);
+    border-right: 1.5px solid var(--main-text-color);
+    transform: translate(0, -50%) rotate(45deg);
+  }
+  .demo-nav-arrow.prev::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    background: transparent;
+    border-top: 1.5px solid var(--main-text-color);
+    border-right: 1.5px solid var(--main-text-color);
+    transform: translate(0, -50%) rotate(-135deg);
+  }
+
+  /* --- BUTTON GROUP --- */
+  /* Device card button groups: pills */
+  .demo-btn-group {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 3px;
+  }
+  .demo-btn-group button {
+    background: var(--main-item-bg-color);
+    border: 1px solid var(--main-blue-color);
+    color: var(--main-blue-color);
+    padding: 6px 12px;
+    cursor: pointer;
+    font-family: main-font, 'Open Sans', sans-serif;
+    font-size: 12px;
+    border-radius: 5px;
+  }
+  .demo-btn-group button:hover {
+    background: var(--main-blue-color);
+    color: #fff;
+  }
+  .demo-btn-group button.selected {
+    background: var(--main-blue-color);
+    color: #fff;
+  }
+
+  /* Toolbar button groups: connected */
+  .demo-btn-group-connected {
+    display: inline-flex;
+    gap: 0;
+  }
+  .demo-btn-group-connected button {
+    background: var(--main-item-bg-color);
+    border: 1px solid var(--main-blue-color);
+    color: var(--main-blue-color);
+    padding: 6px 12px;
+    cursor: pointer;
+    font-family: main-font, 'Open Sans', sans-serif;
+    font-size: 12px;
+    margin-left: -1px;
+  }
+  .demo-btn-group-connected button:first-child {
+    border-radius: 5px 0 0 5px;
+    margin-left: 0;
+  }
+  .demo-btn-group-connected button:last-child {
+    border-radius: 0 5px 5px 0;
+  }
+  .demo-btn-group-connected button:not(:first-child):not(:last-child) {
+    border-radius: 0;
+  }
+  .demo-btn-group-connected button:hover {
+    background: var(--main-blue-color);
+    color: #fff;
+  }
+  .demo-btn-group-connected button.selected {
+    background: var(--main-blue-color);
+    color: #fff;
+  }
+
+  /* transition on all demos */
+  .card button, .card a.demo-btn-modern, .card a.demo-btn-modern-warning, .card a.demo-nav-arrow {
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, filter 0.15s ease;
+  }
+
+  /* --- Legend table --- */
+  table.legend {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin: 12px 0;
+  }
+  table.legend th {
+    text-align: left;
+    padding: 6px 12px;
+    background: rgba(var(--main-blue-color-values), 0.06);
+    border-bottom: 1px solid var(--main-border-color);
+    font-family: main-font-bold, 'Open Sans', sans-serif;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: var(--secondary-text-color);
+  }
+  table.legend td {
+    padding: 6px 12px;
+    border-bottom: 1px solid rgba(var(--main-blue-color-values), 0.06);
+    vertical-align: top;
+  }
+  table.legend td code {
+    font-size: 11px;
+    background: rgba(var(--main-blue-color-values), 0.08);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--main-blue-color);
+  }
+  table.legend td.where {
+    color: var(--secondary-text-color);
+    font-size: 11px;
+  }
+
+  .type-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-family: main-font-bold, 'Open Sans', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .type-badge.filled { background: var(--main-blue-color); color: #fff; }
+  .type-badge.outline { background: transparent; border: 1px solid var(--main-blue-color); color: var(--main-blue-color); }
+  .type-badge.ghost { background: rgba(var(--main-blue-color-values), 0.1); color: var(--main-blue-color); }
+
+  .note {
+    background: rgba(var(--main-blue-color-values), 0.05);
+    border-left: 3px solid var(--main-blue-color);
+    padding: 10px 14px;
+    margin: 16px 0;
+    font-size: 12px;
+    color: var(--secondary-text-color);
+    border-radius: 0 5px 5px 0;
+  }
+  .note strong { color: var(--main-text-color); }
+
+  /* Theme toggle */
+  .theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 30px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--main-item-bg-color);
+    padding: 6px 14px;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    font-size: 12px;
+    color: var(--main-text-color);
+  }
+  .theme-toggle-track {
+    width: 40px;
+    height: 22px;
+    background: var(--main-border-color);
+    border-radius: 11px;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.2s ease;
+  }
+  .theme-dark .theme-toggle-track {
+    background: var(--main-blue-color);
+  }
+  .theme-toggle-thumb {
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: left 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .theme-dark .theme-toggle-thumb {
+    left: 20px;
+  }
+</style>
+</head>
+<body class="theme-light">
+
+<div class="theme-toggle">
+  <span>Light</span>
+  <div class="theme-toggle-track" onclick="document.body.classList.toggle('theme-light'); document.body.classList.toggle('theme-dark');">
+    <div class="theme-toggle-thumb"></div>
+  </div>
+  <span>Dark</span>
+</div>
+
+<h1>Machinon Button Reference <span>Design System v1.0</span></h1>
+<p class="intro">All button styles in the Machinon Domoticz theme. Hover over buttons to see their interactive states.</p>
+
+<div class="note">
+  <strong>Convention:</strong> All Bootstrap semantic button classes (<code>.btn-info</code>, <code>.btn-primary</code>, <code>.btn-success</code>, <code>.btn-warning</code>, <code>.btn-danger</code>) are <strong>filled</strong> — colored background, white text. This matches Bootstrap's original design. Outline is reserved for toggle states (<code>.btn-default</code>, <code>.btn-mini</code>) and utility buttons (zoom, log-filter). Color differentiates meaning, not visual weight.
+</div>
+
+<!-- ============================================ -->
+<h2>Filled Buttons</h2>
+<p class="intro">Colored background, white text. Used for standalone action buttons. Hover darkens via <code>filter: brightness(0.85)</code>. All semantic color variants (success, warning, danger) are filled — color differentiates meaning, not visual weight.</p>
+
+<div class="card">
+  <h3>Default color (blue)</h3>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>.btn-info</code>
+      <span class="where">Setup > Switches, Temperature top bar, action buttons</span>
+    </div>
+    <div class="state-col"><div class="state-label">Default</div><button class="demo-btn-info btn-transition">Action</button></div>
+    <div class="state-col"><div class="state-label">Hover it</div><button class="demo-btn-info btn-transition">Hover me</button></div>
+    <div class="state-col"><div class="state-label">Disabled</div><button class="demo-btn-info btn-transition disabled">Disabled</button></div>
+  </div>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>.btn-primary</code>
+      <span class="where">Dialog confirms, form actions (Save, Import)</span>
+    </div>
+    <div class="state-col"><div class="state-label">Default</div><button class="demo-btn-primary btn-transition">Primary</button></div>
+    <div class="state-col"><div class="state-label">Hover it</div><button class="demo-btn-primary btn-transition">Hover me</button></div>
+    <div class="state-col"><div class="state-label">Disabled</div><button class="demo-btn-primary btn-transition disabled">Disabled</button></div>
+  </div>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>.btnstyle3</code>
+      <span class="where">Switches > device action buttons (On, Off, Open, Close)</span>
+    </div>
+    <div class="state-col"><div class="state-label">Default</div><button class="demo-btnstyle3 btn-transition">On</button></div>
+    <div class="state-col"><div class="state-label">Hover it</div><button class="demo-btnstyle3 btn-transition">Off</button></div>
+    <div class="state-col"><div class="state-label">Disabled</div><button class="demo-btnstyle3-dis">Disabled</button></div>
+  </div>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>.btn-selected</code>
+      <span class="where">Button groups — active/selected toggle state</span>
+    </div>
+    <div class="state-col"><div class="state-label">Selected</div><button class="demo-btn-selected">Selected</button></div>
+  </div>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>.log-filter-btn-active</code>
+      <span class="where">Setup > Log — active filter toggle</span>
+    </div>
+    <div class="state-col"><div class="state-label">Active</div><button class="demo-log-active btn-transition">Normal <span class="count">42</span></button></div>
+  </div>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>.allow5min</code>
+      <span class="where">Setup > System — accept hardware button</span>
+    </div>
+    <div class="state-col"><div class="state-label">Default</div><button class="demo-allow5min btn-transition">Allow 5 minutes</button></div>
+  </div>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>dialog buttons</code>
+      <span class="where">All jQuery UI dialogs (edit device, confirm, etc.)</span>
+    </div>
+    <div class="state-col"><div class="state-label">Default</div><button class="demo-dialog-btn btn-transition">OK</button></div>
+    <div class="sep"></div>
+    <div class="state-col"><div class="state-label">Default</div><button class="demo-dialog-btn btn-transition">Cancel</button></div>
+  </div>
+
+  <h3>Semantic colors</h3>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>.btn-success</code>
+      <span class="where">Scenes — Add Device</span>
+    </div>
+    <div class="state-col"><div class="state-label">Default</div><button class="demo-btn-success btn-transition">Add Device</button></div>
+    <div class="state-col"><div class="state-label">Hover it</div><button class="demo-btn-success btn-transition">Hover me</button></div>
+    <div class="state-col"><div class="state-label">Disabled</div><button class="demo-btn-success btn-transition disabled">Disabled</button></div>
+  </div>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>.btn-warning</code>
+      <span class="where">User Variables, Hardware, Users — Update/Edit</span>
+    </div>
+    <div class="state-col"><div class="state-label">Default</div><button class="demo-btn-warning btn-transition">Update</button></div>
+    <div class="state-col"><div class="state-label">Hover it</div><button class="demo-btn-warning btn-transition">Hover me</button></div>
+    <div class="state-col"><div class="state-label">Disabled</div><button class="demo-btn-warning btn-transition disabled">Disabled</button></div>
+  </div>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>.btn-danger</code>
+      <span class="where">User Variables, Hardware, Users — Delete/Clear/Reset</span>
+    </div>
+    <div class="state-col"><div class="state-label">Default</div><button class="demo-btn-danger btn-transition">Delete</button></div>
+    <div class="state-col"><div class="state-label">Hover it</div><button class="demo-btn-danger btn-transition">Hover me</button></div>
+    <div class="state-col"><div class="state-label">Disabled</div><button class="demo-btn-danger btn-transition disabled">Disabled</button></div>
+  </div>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>.resetbtn</code>
+      <span class="where">Setup > Theme — reset theme button</span>
+    </div>
+    <div class="state-col"><div class="state-label">Default</div><button class="demo-resetbtn btn-transition">Reset Theme</button></div>
+  </div>
+
+  <div class="note" style="margin-top: 16px;">
+    <strong>Real-world example:</strong> On the User Variables page, <button class="demo-btn-info btn-transition" style="font-size:11px; padding:4px 10px;">Add</button> <button class="demo-btn-warning btn-transition" style="font-size:11px; padding:4px 10px;">Update</button> <button class="demo-btn-danger btn-transition" style="font-size:11px; padding:4px 10px;">Delete</button> — all three are peer actions on the same form. Equal visual weight, differentiated by color.
+  </div>
+
+  <h3>Large size</h3>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>.savebtn</code>
+      <span class="where">Setup > Theme — save settings</span>
+    </div>
+    <div class="state-col"><div class="state-label">Default</div><button class="demo-savebtn btn-transition">Save Settings</button></div>
+    <div class="state-col"><div class="state-label">Disabled</div><button class="demo-savebtn btn-transition disabled">Saved</button></div>
+  </div>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>.btn-modern</code>
+      <span class="where">Login page, Setup Wizard, About page</span>
+    </div>
+    <div class="state-col"><div class="state-label">Default</div><a class="demo-btn-modern btn-transition" href="#">Login</a></div>
+  </div>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>.btn-modern-warning</code>
+      <span class="where">Setup > Backup/Restore</span>
+    </div>
+    <div class="state-col"><div class="state-label">Default</div><a class="demo-btn-modern-warning btn-transition" href="#">Upload &amp; Restore</a></div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<h2>Outline Buttons</h2>
+<p class="intro">Transparent background, colored border and text. Hover fills with color. Used for toggle states, selections, and cancel/dismiss actions.</p>
+
+<div class="card">
+  <h3>Toggle / Neutral</h3>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>.btn-default</code>
+      <span class="where">Cancel/dismiss, inactive toggle state in button groups</span>
+    </div>
+    <div class="state-col"><div class="state-label">Default</div><button class="demo-btn-default btn-transition">Default</button></div>
+    <div class="state-col"><div class="state-label">Hover it</div><button class="demo-btn-default btn-transition">Hover me</button></div>
+  </div>
+
+  <h3>Small size</h3>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>.btn-mini</code>
+      <span class="where">Mobile dashboard — On/Off toggles</span>
+    </div>
+    <div class="state-col"><div class="state-label">Default</div><button class="demo-btn-mini btn-transition">Off</button></div>
+    <div class="state-col"><div class="state-label">Active</div><button class="demo-btn-mini btn-transition active">On</button></div>
+  </div>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>.zoom-button</code>
+      <span class="where">Device log — chart zoom controls</span>
+    </div>
+    <div class="state-col"><div class="state-label">Default</div><button class="demo-zoom btn-transition">Day</button></div>
+    <div class="state-col"><div class="state-label">Default</div><button class="demo-zoom btn-transition">Week</button></div>
+    <div class="state-col"><div class="state-label">Default</div><button class="demo-zoom btn-transition">Month</button></div>
+    <div class="sep"></div>
+    <div class="state-col"><div class="state-label">Reset</div><button class="demo-zoom-reset btn-transition">Reset</button></div>
+  </div>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>.log-filter-btn</code>
+      <span class="where">Setup > Log — inactive filter toggle</span>
+    </div>
+    <div class="state-col"><div class="state-label">Inactive</div><button class="demo-log-filter btn-transition">Error <span class="count">3</span></button></div>
+    <div class="state-col"><div class="state-label">Hover it</div><button class="demo-log-filter btn-transition">Status <span class="count">15</span></button></div>
+  </div>
+
+  <h3>Size variants</h3>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>.btn-xs</code>
+      <span class="where">Top bar custom links, Event viewer</span>
+    </div>
+    <div class="state-col"><div class="state-label">Extra Small</div><button class="demo-btn-xs btn-transition">Link</button></div>
+  </div>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>.btn-large</code>
+      <span class="where">Mobile scenes — large touch On/Off</span>
+    </div>
+    <div class="state-col"><div class="state-label">Large</div><button class="demo-btn-large btn-transition">On</button></div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<h2>Ghost Buttons</h2>
+<p class="intro">No border, minimal background. Hover shows tinted background. Use for tertiary/inline actions.</p>
+
+<div class="card">
+  <div class="button-row">
+    <div class="label-col">
+      <code>.btnsmall</code>
+      <span class="where">Switches — device Timers/Log links at card bottom</span>
+    </div>
+    <div class="state-col"><div class="state-label">Default</div><button class="demo-btnsmall btn-transition">Timers</button></div>
+    <div class="state-col"><div class="state-label">Default</div><button class="demo-btnsmall btn-transition">Log</button></div>
+    <div class="state-col"><div class="state-label">Disabled</div><button class="demo-btnsmall disabled">Reset</button></div>
+  </div>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>.btn-icon</code>
+      <span class="where">Devices page — toggle, rename, log, delete icons</span>
+    </div>
+    <div class="state-col"><div class="state-label">Default</div><button class="demo-btn-icon btn-transition" title="Toggle">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="var(--main-blue-color)" stroke-width="1.5"/><line x1="8" y1="3" x2="8" y2="8" stroke="var(--main-blue-color)" stroke-width="1.5"/></svg>
+    </button></div>
+    <div class="state-col"><div class="state-label">Default</div><button class="demo-btn-icon btn-transition" title="Log">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="var(--main-blue-color)" stroke-width="1.5"/><line x1="5" y1="6" x2="11" y2="6" stroke="var(--main-blue-color)" stroke-width="1"/><line x1="5" y1="8.5" x2="11" y2="8.5" stroke="var(--main-blue-color)" stroke-width="1"/><line x1="5" y1="11" x2="9" y2="11" stroke="var(--main-blue-color)" stroke-width="1"/></svg>
+    </button></div>
+    <div class="state-col"><div class="state-label">Default</div><button class="demo-btn-icon btn-transition" title="Delete">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><line x1="4" y1="4" x2="12" y2="12" stroke="var(--color-error)" stroke-width="1.5"/><line x1="12" y1="4" x2="4" y2="12" stroke="var(--color-error)" stroke-width="1.5"/></svg>
+    </button></div>
+  </div>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>.btn-link</code>
+      <span class="where">Devices filter collapse, Hardware setup labels</span>
+    </div>
+    <div class="state-col"><div class="state-label">Default</div><button class="demo-btn-link btn-transition">Setup</button></div>
+    <div class="state-col"><div class="state-label">Hover it</div><button class="demo-btn-link btn-transition">Hover me</button></div>
+  </div>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>.btnstyle</code> / <code>.btnstylerev</code>
+      <span class="where">Device log — prev/next page navigation</span>
+    </div>
+    <div class="state-col"><div class="state-label">Prev</div><a class="demo-nav-arrow prev btn-transition" href="#">Previous</a></div>
+    <div class="state-col"><div class="state-label">Next</div><a class="demo-nav-arrow next btn-transition" href="#">Next</a></div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<h2>Button Groups</h2>
+<p class="intro">Two styles based on context. Device cards use pills (wraps gracefully). Toolbars use connected groups (full-width, no wrapping).</p>
+
+<div class="card">
+  <h3>Device cards (pills)</h3>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>.item .btn-group</code>
+      <span class="where">Switches/Dashboard — selector levels (e.g. HVAC modes)</span>
+    </div>
+    <div class="demo-btn-group">
+      <button>Off</button>
+      <button>Heat</button>
+      <button class="selected">Cool</button>
+      <button>Auto</button>
+      <button>Fan Only</button>
+    </div>
+  </div>
+
+  <h3>Toolbars and dialogs (connected)</h3>
+
+  <div class="button-row">
+    <div class="label-col">
+      <code>.btn-group</code>
+      <span class="where">Event editor, device edit dialog, device list toolbar</span>
+    </div>
+    <div class="demo-btn-group-connected">
+      <button>Auto</button>
+      <button class="selected">Comfort</button>
+      <button>Economy</button>
+      <button>Away</button>
+    </div>
+  </div>
+
+  <div class="button-row" style="margin-top: 16px;">
+    <div class="label-col">
+      <code>.log-filter-btn</code> group
+      <span class="where">Setup > Log — filter bar</span>
+    </div>
+    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+      <button class="demo-log-active btn-transition">Normal <span class="count">42</span></button>
+      <button class="demo-log-active btn-transition">Status <span class="count">15</span></button>
+      <button class="demo-log-filter btn-transition">Error <span class="count">3</span></button>
+    </div>
+  </div>
+
+  <div class="button-row" style="margin-top: 16px;">
+    <div class="label-col">
+      <code>.btn-mini</code> group
+      <span class="where">Mobile dashboard — On/Off toggles</span>
+    </div>
+    <div style="display: flex; gap: 4px;">
+      <button class="demo-btn-mini btn-transition active">On</button>
+      <button class="demo-btn-mini btn-transition">Off</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<h2>Complete Reference Table</h2>
+
+<div class="card" style="overflow-x: auto;">
+<table class="legend">
+  <thead>
+    <tr>
+      <th>Class</th>
+      <th>Preview</th>
+      <th>Type</th>
+      <th>Size</th>
+      <th>Where to find it</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><code>.btn-info</code></td><td><button class="demo-btn-info btn-transition">Action</button></td><td><span class="type-badge filled">Filled</span></td><td>Default</td><td class="where">Switches/Temperature/Weather action buttons</td></tr>
+    <tr><td><code>.btnstyle3</code></td><td><button class="demo-btnstyle3 btn-transition">On</button></td><td><span class="type-badge filled">Filled</span></td><td>Default</td><td class="where">Switches > device On/Off/Open/Close buttons</td></tr>
+    <tr><td><code>.btnstyle3-dis</code></td><td><button class="demo-btnstyle3-dis">Disabled</button></td><td><span class="type-badge filled">Filled</span></td><td>Default</td><td class="where">Switches > disabled action buttons</td></tr>
+    <tr><td><code>.btn-selected</code></td><td><button class="demo-btn-selected">Selected</button></td><td><span class="type-badge filled">Filled</span></td><td>Default</td><td class="where">Button groups — active toggle</td></tr>
+    <tr><td><code>.savebtn</code></td><td><button class="demo-savebtn btn-transition">Save</button></td><td><span class="type-badge filled">Filled</span></td><td>Large</td><td class="where">Setup > Theme</td></tr>
+    <tr><td><code>.resetbtn</code></td><td><button class="demo-resetbtn btn-transition">Reset</button></td><td><span class="type-badge filled">Filled</span></td><td>Large</td><td class="where">Setup > Theme</td></tr>
+    <tr><td><code>.allow5min</code></td><td><button class="demo-allow5min btn-transition">Allow</button></td><td><span class="type-badge filled">Filled</span></td><td>Default</td><td class="where">Setup > System (hardware accept)</td></tr>
+    <tr><td><code>.log-filter-btn-active</code></td><td><button class="demo-log-active btn-transition">Normal <span class="count">42</span></button></td><td><span class="type-badge filled">Filled</span></td><td>Default</td><td class="where">Setup > Log filter bar</td></tr>
+    <tr><td><code>.btn-modern</code></td><td><a class="demo-btn-modern btn-transition" href="#" onclick="return false">Login</a></td><td><span class="type-badge filled">Filled</span></td><td>Large</td><td class="where">Login, Setup Wizard, About page</td></tr>
+    <tr><td><code>.btn-modern-warning</code></td><td><a class="demo-btn-modern-warning btn-transition" href="#" onclick="return false">Restore</a></td><td><span class="type-badge filled">Filled</span></td><td>Large</td><td class="where">Setup > Backup/Restore</td></tr>
+    <tr><td><code>dialog buttons</code></td><td><button class="demo-dialog-btn btn-transition">OK</button></td><td><span class="type-badge filled">Filled</span></td><td>Default</td><td class="where">All jQuery UI dialogs</td></tr>
+    <tr><td><code>.btn-primary</code></td><td><button class="demo-btn-primary btn-transition">Primary</button></td><td><span class="type-badge filled">Filled</span></td><td>Default</td><td class="where">Dialog confirms, form actions (Save, Import)</td></tr>
+
+    <tr><td><code>.btn-success</code></td><td><button class="demo-btn-success btn-transition">Add Device</button></td><td><span class="type-badge filled">Filled</span></td><td>Default</td><td class="where">Scenes — Add Device</td></tr>
+    <tr><td><code>.btn-warning</code></td><td><button class="demo-btn-warning btn-transition">Update</button></td><td><span class="type-badge filled">Filled</span></td><td>Default</td><td class="where">User Variables, Hardware, Users — Update/Edit</td></tr>
+    <tr><td><code>.btn-danger</code></td><td><button class="demo-btn-danger btn-transition">Delete</button></td><td><span class="type-badge filled">Filled</span></td><td>Default</td><td class="where">User Variables, Hardware, Users — Delete/Clear/Reset</td></tr>
+
+    <tr><td colspan="5" style="height:8px; background: var(--main-bg-color);"></td></tr>
+
+    <tr><td><code>.btn-default</code></td><td><button class="demo-btn-default btn-transition">Default</button></td><td><span class="type-badge outline">Outline</span></td><td>Default</td><td class="where">Cancel/dismiss, inactive toggle in button groups</td></tr>
+    <tr><td><code>.btn-mini</code></td><td><button class="demo-btn-mini btn-transition">Off</button></td><td><span class="type-badge outline">Outline</span></td><td>Small</td><td class="where">Mobile dashboard On/Off toggles</td></tr>
+    <tr><td><code>.zoom-button</code></td><td><button class="demo-zoom btn-transition">Day</button></td><td><span class="type-badge outline">Outline</span></td><td>Small</td><td class="where">Device log charts — zoom controls</td></tr>
+    <tr><td><code>.zoom-reset</code></td><td><button class="demo-zoom-reset btn-transition">Reset</button></td><td><span class="type-badge outline">Outline</span></td><td>Small</td><td class="where">Device log charts — reset zoom</td></tr>
+    <tr><td><code>.log-filter-btn</code></td><td><button class="demo-log-filter btn-transition">Error <span class="count">3</span></button></td><td><span class="type-badge outline">Outline</span></td><td>Default</td><td class="where">Setup > Log — inactive filter</td></tr>
+    <tr><td><code>.btn-xs</code></td><td><button class="demo-btn-xs btn-transition">Link</button></td><td><span class="type-badge outline">Outline</span></td><td>XS</td><td class="where">Top bar links, Event viewer</td></tr>
+    <tr><td><code>.btn-large</code></td><td><button class="demo-btn-large btn-transition">On</button></td><td><span class="type-badge outline">Outline</span></td><td>Large</td><td class="where">Mobile scenes On/Off</td></tr>
+
+    <tr><td colspan="5" style="height:8px; background: var(--main-bg-color);"></td></tr>
+
+    <tr><td><code>.btnsmall</code></td><td><button class="demo-btnsmall btn-transition">Timers</button></td><td><span class="type-badge ghost">Ghost</span></td><td>—</td><td class="where">Switches — device Timers/Log links</td></tr>
+    <tr><td><code>.btnsmall-dis</code></td><td><button class="demo-btnsmall disabled">Reset</button></td><td><span class="type-badge ghost">Ghost</span></td><td>—</td><td class="where">Smoke sensor — disabled Reset</td></tr>
+    <tr><td><code>.btn-icon</code></td><td><button class="demo-btn-icon btn-transition"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="var(--main-blue-color)" stroke-width="1.5"/></svg></button></td><td><span class="type-badge ghost">Ghost</span></td><td>—</td><td class="where">Devices page — action icons</td></tr>
+    <tr><td><code>.btn-link</code></td><td><button class="demo-btn-link btn-transition">Setup</button></td><td><span class="type-badge ghost">Ghost</span></td><td>—</td><td class="where">Devices filter, Hardware setup</td></tr>
+    <tr><td><code>.btnstyle</code> / <code>.btnstylerev</code></td><td><a class="demo-nav-arrow prev btn-transition" href="#" onclick="return false">Prev</a> <a class="demo-nav-arrow next btn-transition" href="#" onclick="return false">Next</a></td><td><span class="type-badge ghost">Ghost</span></td><td>—</td><td class="where">Device log — prev/next navigation</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ============================================ -->
+<h2>Design Tokens</h2>
+
+<div class="card">
+  <table class="legend">
+    <thead><tr><th>Property</th><th>Value</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td><code>border-radius</code></td><td>5px</td><td>All buttons, no exceptions</td></tr>
+      <tr><td><code>transition</code></td><td>background, color, border-color, filter — 0.15s ease</td><td>All interactive buttons</td></tr>
+      <tr><td><code>font</code></td><td>main-font — no bold on selected</td><td>Filled background is sufficient indicator; bold causes layout shift</td></tr>
+      <tr><td><code>cursor</code></td><td>pointer (normal) / not-allowed (disabled)</td><td></td></tr>
+      <tr><td><code>filled hover</code></td><td><code>filter: brightness(0.85)</code></td><td>Darkens any color uniformly</td></tr>
+      <tr><td><code>outline hover</code></td><td>Fill with color, text goes white</td><td></td></tr>
+      <tr><td><code>ghost hover</code></td><td><code>rgba(color, 0.1)</code> background</td><td></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Sizes</h3>
+  <table class="legend">
+    <thead><tr><th>Size</th><th>Padding</th><th>Font Size</th><th>Classes</th></tr></thead>
+    <tbody>
+      <tr><td>Extra Small</td><td>1px 5px</td><td>10px</td><td><code>.btn-xs</code></td></tr>
+      <tr><td>Small</td><td>2px 8px</td><td>11px</td><td><code>.zoom-button</code>, <code>.zoom-reset</code></td></tr>
+      <tr><td>Default</td><td>6px 12px</td><td>12px</td><td>Most buttons</td></tr>
+      <tr><td>Large</td><td>10px 20px</td><td>14px</td><td><code>.savebtn</code>, <code>.resetbtn</code>, <code>.btn-modern</code>, <code>.btn-large</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Colors</h3>
+  <table class="legend">
+    <thead><tr><th>Semantic</th><th>Variable</th><th>Value</th><th style="width:40px;">Swatch</th></tr></thead>
+    <tbody>
+      <tr><td>Default</td><td><code>--main-blue-color</code></td><td>rgb(11, 150, 205)</td><td><div style="width:28px;height:28px;border-radius:5px;background:var(--main-blue-color);"></div></td></tr>
+      <tr><td>Success</td><td><code>--color-success</code></td><td>rgb(91, 183, 91)</td><td><div style="width:28px;height:28px;border-radius:5px;background:var(--color-success);"></div></td></tr>
+      <tr><td>Warning</td><td><code>--color-warning</code></td><td>rgb(255, 140, 0)</td><td><div style="width:28px;height:28px;border-radius:5px;background:var(--color-warning);"></div></td></tr>
+      <tr><td>Danger</td><td><code>--color-error</code></td><td>rgb(199, 67, 67)</td><td><div style="width:28px;height:28px;border-radius:5px;background:var(--color-error);"></div></td></tr>
+      <tr><td>Disabled</td><td><code>--main-disabled-color</code></td><td>rgb(211, 211, 211)</td><td><div style="width:28px;height:28px;border-radius:5px;background:var(--main-disabled-color);border:1px solid #ccc;"></div></td></tr>
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>
