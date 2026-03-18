@@ -187,11 +187,15 @@ h4,
 }
 
 .log-filter-btn {
-    background: var(--main-item-bg-color) !important;
+    background: transparent !important;
     border: 1px solid var(--main-blue-color) !important;
     color: var(--main-text-color) !important;
     border-radius: 5px !important;
-    opacity: 0.6;
+}
+
+.log-filter-btn:hover {
+    background: var(--main-blue-color) !important;
+    color: #fff !important;
 }
 
 .log-filter-btn-active {
@@ -1478,22 +1482,28 @@ button.savebtn:disabled {
 }
 
 .btn-mini {
-    background: none;
-    border-color: var(--main-blue-color);
-    color: var(--main-blue-color);
+    background: transparent;
+    border: 1px solid var(--main-blue-color);
+    color: var(--main-text-color);
     border-radius: 5px;
+    padding: 2px 8px;
+    font-size: 11px;
+}
+
+.btn-mini:hover {
+    background: var(--main-blue-color);
+    color: #fff;
 }
 
 .btn-primary, .btn-primary[disabled] {
-    background: none;
-    border-color: var(--main-blue-color);
-    color: var(--main-blue-color) !important;
+    background: transparent;
+    border: 1px solid var(--main-blue-color);
+    color: var(--main-text-color) !important;
     border-radius: 5px;
 }
 
 .btn-primary:not([disabled]):hover, .btn-primary:focus, .btn-primary:active {
-    background: none;
-    background-color: var(--main-blue-color);
+    background: var(--main-blue-color);
     border-color: var(--main-blue-color);
     color: #fff !important;
     border-radius: 5px;
@@ -1863,7 +1873,7 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
 .zoom-reset {
     font-family: main-font;
     font-size: 11px;
-    color: var(--main-blue-color);
+    color: var(--main-text-color);
     background: transparent;
     border: 1px solid var(--main-blue-color);
     border-radius: 5px;
@@ -1871,15 +1881,13 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
     cursor: pointer;
 }
 
-.zoom-button:hover,
-.zoom-reset:hover {
+.zoom-button:hover {
     background: var(--main-blue-color);
     color: #fff;
 }
 
 .zoom-reset {
     border-color: var(--color-error);
-    color: var(--color-error);
 }
 
 .zoom-reset:hover {
@@ -2186,9 +2194,9 @@ tr.update-pulse {
 
 .btn-default,
 .btn-group .btn-default {
-    background: var(--main-item-bg-color) !important;
-    border-color: var(--main-blue-color) !important;
-    color: var(--main-blue-color) !important;
+    background: transparent !important;
+    border: 1px solid var(--main-blue-color) !important;
+    color: var(--main-text-color) !important;
 }
 
 .btn.btn-selected,
@@ -2201,18 +2209,22 @@ tr.update-pulse {
     font-family: main-font;
 }
 
-.btn-default:hover,
-.btn-group .btn-primary {
-    color: var(--main-item-bg-color) !important;
+.btn-default:hover {
+    color: #fff !important;
     background: var(--main-blue-color) !important;
     border-color: var(--main-blue-color) !important;
 }
 
+.btn-group .btn-primary {
+    background: transparent !important;
+    border: 1px solid var(--main-blue-color) !important;
+    color: var(--main-text-color) !important;
+}
+
 .btn-group .btn-primary:hover {
-    background: var(--main-item-bg-color) !important;
-    color: var(--main-blue-color) !important;
+    background: var(--main-blue-color) !important;
+    color: #fff !important;
     border-color: var(--main-blue-color) !important;
-    border-radius: 5px !important;
 }
 
 .btn-group .btn-danger {
