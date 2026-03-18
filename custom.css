@@ -1513,17 +1513,16 @@ button.savebtn:disabled {
 }
 
 .btn-primary {
-    background: transparent;
-    border: 1px solid var(--main-blue-color);
-    color: var(--main-text-color) !important;
-    border-radius: 5px;
-}
-
-.btn-primary:not([disabled]):hover, .btn-primary:focus, .btn-primary:active {
     background: var(--main-blue-color);
-    border-color: var(--main-blue-color);
+    border: none;
     color: #fff !important;
     border-radius: 5px;
+    font-size: 12px;
+    padding: 6px 12px;
+}
+
+.btn-primary:hover {
+    filter: brightness(0.85);
 }
 
 .btn-success {
@@ -1707,8 +1706,9 @@ button.savebtn:disabled {
 }
 
 .btn-primary[disabled] {
+    background: var(--main-disabled-color);
     border-color: var(--main-disabled-color);
-    color: var(--main-disabled-color);
+    color: var(--secondary-text-color);
     cursor: not-allowed;
     pointer-events: none;
 }
@@ -2365,15 +2365,13 @@ tr.update-pulse {
 }
 
 .btn-group .btn-primary {
-    background: transparent !important;
-    border: 1px solid var(--main-blue-color) !important;
-    color: var(--main-text-color) !important;
+    background: var(--main-blue-color) !important;
+    border-color: var(--main-blue-color) !important;
+    color: #fff !important;
 }
 
 .btn-group .btn-primary:hover {
-    background: var(--main-blue-color) !important;
-    color: #fff !important;
-    border-color: var(--main-blue-color) !important;
+    filter: brightness(0.85);
 }
 
 .btn-group .btn-danger {
