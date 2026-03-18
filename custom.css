@@ -19,8 +19,8 @@
 /* Light theme defaults - overridden by JavaScript setColorScheme() on body */
 :root {
     --main-bg-color: rgb(241,241,241);
-    --main-blue-color: rgb(11,150,205);
-    --main-blue-color-values: 11,150,205;
+    --main-blue-color: rgb(9,127,174);
+    --main-blue-color-values: 9,127,174;
     --main-navbar-bg-color: rgb(255,255,255);
     --main-item-bg-color: rgb(255,255,255);
     --main-item-color: rgb(26,26,26);
@@ -28,9 +28,9 @@
     --secondary-text-color: rgb(109,110,109);
     --main-border-color: rgb(211,211,211);
     --main-disabled-color: rgb(211,211,211);
-    --color-error: rgb(199,67,67);
-    --color-success: rgb(91,183,91);
-    --color-warning: rgb(255,140,0);
+    --color-error: rgb(196,59,59);
+    --color-success: rgb(59,134,59);
+    --color-warning: rgb(179,98,0);
 }
 
 @font-face {
@@ -2048,7 +2048,7 @@ tr.update-pulse {
    Can be removed once Domoticz versions before the glass-themed login redesign
    are no longer supported. */
 #login:before {
-    background: linear-gradient(to right, #0bcdc7 0%, #0b96cd 100%);
+    background: linear-gradient(to right, #0bcdc7 0%, var(--main-blue-color) 100%);
     text-align: center;
     vertical-align: middle;
     background-size: 100% 75px;
@@ -2099,11 +2099,11 @@ tr.update-pulse {
     margin-right: 8px;
     position: relative;
     background: #fff;
-    border: 1px solid #0b96cd;
+    border: 1px solid var(--main-blue-color);
     outline: none;
 }
 #login input[type="checkbox"]:checked::before {
-    background: #0b96cd;
+    background: var(--main-blue-color);
     content: "";
     position: absolute;
     top: 2px;
@@ -2126,7 +2126,7 @@ tr.update-pulse {
 }
 
 #login #inputs input[type=text]:focus, #login #inputs input[type=password]:focus {
-    border-bottom: 1px solid #0b96cd;
+    border-bottom: 1px solid var(--main-blue-color);
     color: #1a1a1a;
 }
 
@@ -2138,7 +2138,7 @@ tr.update-pulse {
 
 #login #submit {
     background-image: none;
-    background-color: #0b96cd;
+    background-color: var(--main-blue-color);
     color: #fff;
     border: none;
     text-shadow: none;

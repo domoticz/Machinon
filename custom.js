@@ -4,20 +4,20 @@ var msgCount = 0;
 var supported_lang = "en fr de sv nl pl";
 var light_theme = {
     bg: "#f1f1f1",
-    main: "#0b96cd",
+    main: "#097fae",
     navbar: "#ffffff",
     item: "#ffffff",
     text: "#1a1a1a",
     alt_text: "#6d6e6d",
     border: "#d3d3d3",
     disabled: "#d3d3d3",
-    error: "#c74343",
-    success: "#5bb75b",
-    warning: "#FF8C00"
+    error: "#c43b3b",
+    success: "#3b863b",
+    warning: "#b36200"
 };
 var dark_theme = {
     bg: "#333639",
-    main: "#0b96cd",
+    main: "#0b9eda",
     navbar: "#232324",
     item: "#515558",
     text: "#ffffff",
@@ -25,8 +25,8 @@ var dark_theme = {
     border: "#6d6e6d",
     disabled: "#808080",
     error: "#e05555",
-    success: "#6dc96d",
-    warning: "#FFA033"
+    success: "#4aa84a",
+    warning: "#df7b00"
 };
 
 /* $.ajax({	
