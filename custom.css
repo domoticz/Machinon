@@ -764,6 +764,10 @@ table.mobileitem td.name {
     margin: 0 !important;
 }
 
+.item .btn-group > .btn:not(:first-child):not(:last-child) {
+    border-radius: 5px !important;
+}
+
 .item .btn-group::-webkit-scrollbar-thumb,
 .item #status::-webkit-scrollbar-thumb,
 .item .status::-webkit-scrollbar-thumb {
@@ -814,6 +818,11 @@ body table#itemtable tr > .options {
 }
 
 .options > span[has-permission] {
+    display: block;
+}
+
+.options .btnsmall,
+.options .btnsmall-sel {
     display: block;
 }
 
@@ -1429,7 +1438,7 @@ a.btnstyle {
 /* Reset/save theme button */
 .resetbtn {
     background: var(--color-error);
-    border: 1px solid var(--color-error);
+    border: none;
     border-radius: 5px;
     color: #fff;
     padding: 10px 20px;
@@ -1442,7 +1451,7 @@ a.btnstyle {
 
 .savebtn {
     background: var(--main-blue-color);
-    border: 1px solid var(--main-blue-color);
+    border: none;
     border-radius: 5px;
     color: #fff;
     padding: 10px 20px;
@@ -1519,7 +1528,7 @@ button.savebtn:disabled {
 
 .btn-success {
     background: var(--color-success);
-    border: 1px solid var(--color-success);
+    border: none;
     color: #fff !important;
     border-radius: 5px;
 }
@@ -1530,9 +1539,11 @@ button.savebtn:disabled {
 
 .btn-warning {
     background: var(--color-warning);
-    border: 1px solid var(--color-warning);
+    border: none;
     color: #fff !important;
     border-radius: 5px;
+    font-size: 12px;
+    padding: 6px 12px;
 }
 
 .btn-warning:hover {
@@ -1541,7 +1552,7 @@ button.savebtn:disabled {
 
 .btn-info {
     background: var(--main-blue-color);
-    border: 1px solid var(--main-blue-color);
+    border: none;
     color: #fff !important;
     border-radius: 5px;
     font-size: 12px;
@@ -1558,9 +1569,11 @@ button.savebtn:disabled {
 
 .btn-danger {
     background: var(--color-error);
-    border: 1px solid var(--color-error);
+    border: none;
     color: #fff !important;
     border-radius: 5px;
+    font-size: 12px;
+    padding: 6px 12px;
 }
 
 .btn-danger:hover {
@@ -2078,7 +2091,7 @@ input#AcceptNewHardware:checked ~ button {
 
 .allow5min {
     background: var(--main-blue-color);
-    border: 1px solid var(--main-blue-color);
+    border: none;
     color: #fff;
     border-radius: 5px;
 }
