@@ -1479,8 +1479,10 @@ button.savebtn:disabled {
     cursor: not-allowed;
 }
 /* Settings button, z-wave etc. */
-.label-info[href], .badge-info[href] {
+.label-info[href], .badge-info[href],
+.label-info.lcursor {
     background-color: var(--main-blue-color);
+    color: #fff;
 }
 
 /* Panels */
