@@ -2234,6 +2234,7 @@ tr.update-pulse {
 
 .btn-group .btn-info:hover {
     border-color: var(--main-blue-color) !important;
+    filter: brightness(0.85);
 }
 
 .btn-group {
@@ -2365,7 +2366,7 @@ section.compact .row:not(.divider) {
 }
 
 .span3 td.input .btn-group button.btn-selected {
-    color: var(--main-blue-color) !important;
+    color: #fff !important;
     font-size: 1rem;
     min-height: 50px;
     order: 1;
