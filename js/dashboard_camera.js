@@ -11,15 +11,10 @@ function cameraPreview(section) {
 
     if (section === true) {
         if ($("#dashCameras").length == 0) {
-            $.ajax({
-                url: "json.htm?type=command&param=getcameras",
-                async: false,
-                dataType: "json",
-                success: function(data) {
-                    var compact = false;
-                    if ($("section.compact").length > 0) {
-                        compact = true;
-                    }
+            fetch("json.htm?type=command&param=getcameras", { credentials: 'include' })
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    var compact = $("section.compact").length > 0;
                     var html = "<section class='dashCategory" + (compact ? " compact" : "") + "' id='dashCameras'><h2 data-i18n='Cameras'>Cameras:</h2><div class='row divider'>";
                     var activeCam = false;
                     data.result && data.result.forEach(function(cam){
@@ -32,7 +27,6 @@ function cameraPreview(section) {
                             html += "</tr></tbody></table>";
                             html += "</div></div>";
                             refreshCamera(camId);
-
                         }
                     });
                     if (activeCam) {
@@ -42,9 +36,11 @@ function cameraPreview(section) {
                             ShowCameraLiveStream($(this).children("td#name").text(), $(this).attr("data-cam"));
                         });
                     }
-                }
-            });
-			$("#dashCameras").i18n();
+                    $("#dashCameras").i18n();
+                })
+                .catch(function(error) {
+                    console.log("Machinon - camera list fetch failed:", error);
+                });
         }
     } else {
         $("#bigtext > span > a").each(function() {
@@ -67,8 +63,14 @@ function refreshCamera(camId) {
 
         workerId.addEventListener('message', event => {
             const camera = event.data;
+            const $row = $("tr[data-cam='" + camera.cameraId + "']");
+            /* Revoke previous blob URL to prevent memory leak */
+            const prevBg = $row.css("background-image");
+            if (prevBg && prevBg.startsWith("url(\"blob:")) {
+                URL.revokeObjectURL(prevBg.slice(5, -2));
+            }
             const background = URL.createObjectURL(camera.blob);
-            $("tr[data-cam='" + camera.cameraId + "']").css("background-image", "url(" + background + ")");
+            $row.css("background-image", "url(" + background + ")");
             if (location.hash == "#/Dashboard") {
                 setTimeout(refreshCamera, theme.dashboard_camera_refresh*1000, camId);
             }

@@ -29,18 +29,6 @@ var dark_theme = {
     warning: "#FFA033"
 };
 
-/* $.ajax({	
-    url: "styles/machinon/js/moment.js",
-    async: false,	
-    dataType: "script",	
-}); */
-
-$.ajax({
-    url: "styles/machinon/js/livestamp.js",
-    async: false,
-    dataType: "script"
-});
-
 fetch('json.htm?type=command&param=getsettings', {
     method: 'GET',
     headers: {
@@ -67,7 +55,18 @@ fetch('json.htm?type=command&param=getsettings', {
         })
     ).done(function() {
         moment.locale(lang);
-        init_theme();
+        /* Load livestamp after moment is available (livestamp requires moment at parse time).
+           Use fetch+eval instead of $.getScript to avoid RequireJS intercepting
+           livestamp's anonymous define() call (causes "Mismatched anonymous define" error). */
+        fetch("styles/machinon/js/livestamp.js").then(function(r) { return r.text(); }).then(function(src) {
+            var _define = window.define;
+            window.define = undefined;
+            try { (0, eval)(src); } finally { window.define = _define; }
+            init_theme();
+        }).catch(function() {
+            console.log("Machinon - livestamp.js failed to load, continuing without it");
+            init_theme();
+        });
     });
 }).catch(error => {
     console.error(error);
@@ -75,7 +74,7 @@ fetch('json.htm?type=command&param=getsettings', {
 
 function init_theme() {
     checkUserVariableThemeSettings();
-    loadSettings();
+    loadSettings().then(function() {
 
     window.onhashchange = locationHashChanged;
 
@@ -195,4 +194,5 @@ function init_theme() {
             $(".navbar").addClass("notext");
         }
     });
+    }); /* end loadSettings().then() */
 }
