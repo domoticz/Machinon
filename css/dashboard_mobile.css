@@ -10,8 +10,16 @@ body.dashMobile .navbar-fixed-top {
     margin-right: -10px;
 }
 
-body.dashMobile section.dashCategory div.row.divider:first-of-type {
+body.dashMobile section.dashCategory div.row.divider:first-of-type,
+body.dashMobile section.dashCategory div.row:not(.divider):first-of-type {
     display: none;
+}
+
+/* Sun rise/set visibility on mobile */
+body.dashMobile .tbSun,
+body.dashMobile #tbSunGroup,
+body.dashMobile #tbSunGroup * {
+    color: var(--main-text-color) !important;
 }
 
 body.dashMobile section:first-of-type table.mobileitem {
@@ -39,11 +47,11 @@ body.dashMobile table.mobileitem th {
     display: inline;
     text-shadow: none;
     background: var(--main-blue-color);
-    color: var(--main-text-color);
+    color: #fff;
 }
 
 body.dashMobile table.mobileitem th:last-child a {
-    color: var(--main-text-color) !important;
+    color: #fff !important;
 }
 
 body.dashMobile table.mobileitem tr {
@@ -136,20 +144,38 @@ body.dashMobile table.mobileitem .btn-group {
 body.dashMobile table.mobileitem .btn-group .btn {
     padding-top: 0 !important;
     padding-bottom: 0 !important;
-    font-family: main-font-bold;
+    font-family: main-font;
     font-size: 10pt;
     margin-left: 2px !important;
     margin-bottom: 2px !important;
-    border-radius: 1px !important;
+    border-radius: 5px !important;
 }
 
 body.dashMobile table.mobileitem .btn-mini {
     margin-left: 2px;
-    font-family: main-font-bold;
-    text-shadow: none;
+    font-family: main-font;
+    background: var(--main-item-bg-color) !important;
+    background-image: none !important;
+    border: 1px solid var(--main-blue-color);
+    border-radius: 5px;
+    color: var(--main-text-color) !important;
+    padding: 4px 10px !important;
+    font-size: 12px;
+    min-width: 40px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+body.dashMobile table.mobileitem .btn-mini.btn-info,
+body.dashMobile table.mobileitem .btn-mini.active,
+body.dashMobile table.mobileitem .btn-mini:active {
+    background: var(--main-blue-color) !important;
+    color: #fff !important;
+    padding: 4px 10px !important;
 }
 
 body.dashMobile table.mobileitem .dimslider {
+    background: rgba(0, 0, 0, 0.26);
     border: none;
     border-radius: 3px;
     box-shadow: none;
