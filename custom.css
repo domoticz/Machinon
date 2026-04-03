@@ -2588,14 +2588,13 @@ section.compact .row:not(.divider) {
 
 #holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr,
 #holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr {
-    grid-template-rows: 28px 30px 24px 12px;
+    grid-template-rows: 28px 50px 12px;
     grid-template-columns: 58px 5px 1fr;
     grid-gap: 2px;
     gap: 2px;
     grid-template-areas:
         'name name name'
         'img img2 bigtext'
-        'img img2 status'
         'lastupdate lastupdate lastupdate';
     overflow: hidden;
 }
@@ -2605,21 +2604,15 @@ section.compact .row:not(.divider) {
     grid-area: bigtext;
     font-size: 1.3em;
     font-family: main-font-bold;
-    padding: 2px 8px 0 0;
+    padding: 2px 8px 0 0;S
     text-align: right;
-    align-self: end;
+    align-self: center;
     color: var(--main-blue-color);
 }
 
 #holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr td#status,
 #holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr td#status {
-    grid-area: status;
-    padding: 0 8px 2px 0;
-    text-align: right;
-    align-self: start;
-    font-size: 0.72em;
-    color: var(--secondary-text-color);
-    max-height: unset;
+    display:none;
 }
 
 #holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr td#lastupdate,
@@ -2627,10 +2620,21 @@ section.compact .row:not(.divider) {
     grid-area: lastupdate;
     padding: 0 8px 2px 0;
     text-align: right;
-    align-self: start;
+    align-self: center;
     font-size: 0.72em;
     color: var(--secondary-text-color);
     max-height: unset;
+}
+
+#holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr td.input,
+#holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr td.input {
+    grid-area: bigtext;
+    align-self: center;
+}
+
+#holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr:has(td.input) td#bigtext,
+#holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr:has(td.input) td#bigtext {
+    display: none;
 }
 
 #holder #dashcontent .row .span3 .item table[id="itemtablesmalltrippleicon"] > tbody > tr,
@@ -2645,3 +2649,4 @@ section.compact .row:not(.divider) {
 #holder #dashcontent .row .item.span3 table[id="itemtablesmalltrippleicon"] > tbody > tr td#bigtext {
     display: none !important;
 }
+
