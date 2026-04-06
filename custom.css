@@ -977,7 +977,7 @@ body table#itemtable tr > .options {
 
 /* Time Ago */
 #dashcontent #timeago {
-    display: none;
+    display: inline-table;
     grid-area: lastupdate / lastupdate / tools / tools;
     padding-right: 20px;
 }
@@ -993,7 +993,7 @@ body table#itemtable tr > .options {
 /* dashboard items - hide last seen by default, dashboard_show_last_update.css reveals it */
 #dashcontent .lastupdate,
 #dashcontent #lastupdate {
-    display: none;
+    display: inline-table;
 }
 
 #type .dimslider,
@@ -2588,14 +2588,53 @@ section.compact .row:not(.divider) {
 
 #holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr,
 #holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr {
-    grid-template-rows: 20px 58px 0;
+    grid-template-rows: 28px 50px 12px;
     grid-template-columns: 58px 5px 1fr;
     grid-gap: 2px;
     gap: 2px;
-    grid-template-areas: 'name name name'
-    'img img2 status'
-    'lastupdate lastupdate lastupdate';
+    grid-template-areas:
+        'name name name'
+        'img img2 bigtext'
+        'lastupdate lastupdate lastupdate';
     overflow: hidden;
+}
+
+#holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr td#bigtext,
+#holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr td#bigtext {
+    grid-area: bigtext;
+    font-size: 1.3em;
+    font-family: main-font-bold;
+    padding: 2px 8px 0 0;S
+    text-align: right;
+    align-self: center;
+    color: var(--main-blue-color);
+}
+
+#holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr td#status,
+#holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr td#status {
+    display:none;
+}
+
+#holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr td#lastupdate,
+#holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr td#lastupdate {
+    grid-area: lastupdate;
+    padding: 0 8px 2px 0;
+    text-align: right;
+    align-self: center;
+    font-size: 0.72em;
+    color: var(--secondary-text-color);
+    max-height: unset;
+}
+
+#holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr td.input,
+#holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr td.input {
+    grid-area: bigtext;
+    align-self: center;
+}
+
+#holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr:has(td.input) td#bigtext,
+#holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr:has(td.input) td#bigtext {
+    display: none;
 }
 
 #holder #dashcontent .row .span3 .item table[id="itemtablesmalltrippleicon"] > tbody > tr,
@@ -2610,3 +2649,4 @@ section.compact .row:not(.divider) {
 #holder #dashcontent .row .item.span3 table[id="itemtablesmalltrippleicon"] > tbody > tr td#bigtext {
     display: none !important;
 }
+
