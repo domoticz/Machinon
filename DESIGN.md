@@ -121,6 +121,7 @@ components:
     textColor: "{colors.light-text-secondary}"
     rounded: "{rounded.interactive}"
     cursor: "not-allowed"
+    # Contrast: 3.42:1 light, 2.46:1 dark (below AA 4.5:1, but WCAG exempts disabled controls)
   device-card:
     backgroundColor: "{colors.light-surface}"
     border: "1.5px solid transparent"
@@ -579,6 +580,7 @@ Toggled via `theme.json` features object. Each feature has an `enabled` boolean 
 - Status glow colors (timeout red, protected blue, low battery yellow) are hardcoded `rgb()`, not mapped to the semantic color system
 - Login page has hardcoded light-mode colors (`#fff`, `#f1f1f1`, `#ccc`, `#1a1a1a`) that do not respond to dark mode custom properties
 - `--main-border-color` and `--main-disabled-color` share the same value (`#d3d3d3`) in light mode, making them visually indistinguishable
+- Disabled button contrast below WCAG AA: light theme `#6d6e6d` on `#d3d3d3` is 3.42:1, dark theme `#cccccc` on `#808080` is 2.46:1. WCAG exempts disabled controls, but readability would benefit from dedicated `--disabled-text-color` and `--disabled-bg-color` variables for buttons. The global `--main-disabled-color` is shared with odd table rows, header gradient, and input borders, so it cannot be changed in isolation.
 - Navbar shadow uses `10px 2px` spread instead of `10px 1px` (should be normalized to card tier)
 
 ## Iteration Guide
