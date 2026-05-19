@@ -1,0 +1,594 @@
+---
+version: alpha
+name: Machinon
+description: Clean, card-based Domoticz home automation theme. Dual light/dark color scheme driven by CSS custom properties, responsive grid layout, Open Sans typography, single teal-blue accent color against neutral surfaces. Optional feature modules for compact dashboard, toggle switches, navbar icons, sidemenu, and more.
+
+colors:
+  # Light theme
+  light-bg: "#f1f1f1"
+  light-primary: "#097fae"
+  light-navbar: "#ffffff"
+  light-surface: "#ffffff"
+  light-text: "#1a1a1a"
+  light-text-secondary: "#6d6e6d"
+  light-border: "#d3d3d3"
+  light-disabled: "#d3d3d3"
+  light-error: "#c43b3b"
+  light-success: "#3b863b"
+  light-warning: "#b36200"
+
+  # Dark theme
+  dark-bg: "#333639"
+  dark-primary: "#0b9eda"
+  dark-navbar: "#232324"
+  dark-surface: "#515558"
+  dark-text: "#ffffff"
+  dark-text-secondary: "#cccccc"
+  dark-border: "#6d6e6d"
+  dark-disabled: "#808080"
+  dark-error: "#e05555"
+  dark-success: "#4aa84a"
+  dark-warning: "#df7b00"
+
+  # Fixed (both themes)
+  on-primary: "#ffffff"
+  sun-icon: "#ff8c00"
+  label-important: "#b94a48"
+  gradient-start: "#0bcdc7"
+  gradient-dark-start: "#103c68"
+
+typography:
+  body:
+    fontFamily: main-font (Open Sans Regular)
+    fontWeight: 400
+  bold:
+    fontFamily: main-font-bold (Open Sans SemiBold)
+    fontWeight: 600
+  micro:
+    fontSize: 11px
+  xs:
+    fontSize: 12px
+  sm:
+    fontSize: 14px
+  md:
+    fontSize: 16px
+  display:
+    fontSize: 26px
+
+rounded:
+  xs: 2px
+  sm: 3px
+  interactive: 5px
+  container: 6px
+  circle: 50%
+
+spacing:
+  # Current clusters (legacy)
+  xxs: 4px
+  xs: 8px
+  sm: 10px
+  md: 15px
+  lg: 20px
+  # Target 4px grid (migration)
+  # sm: 10px -> 12px
+  # md: 15px -> 16px
+  # xl: 24px (future)
+  # xxl: 32px (future)
+
+elevation:
+  card: "0 0 10px 1px rgba(0,0,0,0.2)"
+  popup: "-2px 2px 20px rgba(0,0,0,0.2)"
+  button: "0 2px 4px rgba(0,0,0,0.2)"
+  overlay: "0 5px 10px rgba(0,0,0,0.5)"
+  drag: "0 8px 24px rgba(0,0,0,0.3)"
+
+components:
+  button-filled-primary:
+    backgroundColor: "{colors.light-primary}"
+    textColor: "{colors.on-primary}"
+    typography: "{typography.xs}"
+    rounded: "{rounded.interactive}"
+    padding: "6px 12px"
+  button-filled-semantic-success:
+    backgroundColor: "{colors.light-success}"
+    textColor: "{colors.on-primary}"
+    rounded: "{rounded.interactive}"
+    padding: "6px 12px"
+  button-filled-semantic-warning:
+    backgroundColor: "{colors.light-warning}"
+    textColor: "{colors.on-primary}"
+    rounded: "{rounded.interactive}"
+    padding: "6px 12px"
+  button-filled-semantic-danger:
+    backgroundColor: "{colors.light-error}"
+    textColor: "{colors.on-primary}"
+    rounded: "{rounded.interactive}"
+    padding: "6px 12px"
+  button-outlined:
+    backgroundColor: "transparent"
+    textColor: "{colors.light-text}"
+    border: "1px solid {colors.light-primary}"
+    rounded: "{rounded.interactive}"
+    padding: "6px 12px"
+  button-ghost:
+    backgroundColor: "rgba({colors.light-primary}, 0.1)"
+    textColor: "{colors.light-primary}"
+    border: "none"
+    rounded: "{rounded.interactive}"
+    padding: "4px 8px"
+  button-disabled:
+    backgroundColor: "{colors.light-disabled}"
+    textColor: "{colors.light-text-secondary}"
+    rounded: "{rounded.interactive}"
+    cursor: "not-allowed"
+  device-card:
+    backgroundColor: "{colors.light-surface}"
+    border: "1.5px solid transparent"
+    rounded: "{rounded.container}"
+    elevation: "{elevation.card}"
+    gap: "{spacing.sm}"
+  device-card-hover:
+    boxShadow: "0 0 0 2px {colors.light-primary}"
+  text-input:
+    backgroundColor: "transparent"
+    textColor: "{colors.light-text-secondary}"
+    border: "0 0 1px {colors.light-primary}"
+    maxWidth: "250px"
+  checkbox:
+    size: "14px"
+    border: "1px solid {colors.light-primary}"
+    rounded: "{rounded.xs}"
+    checkSize: "8px"
+    checkColor: "{colors.light-primary}"
+  toggle-switch:
+    trackWidth: "40px"
+    trackHeight: "15px"
+    handleSize: "20px"
+    offTrack: "rgba({colors.light-primary}, 0.2)"
+    offHandle: "{colors.light-text-secondary}"
+    onTrack: "rgba({colors.light-primary}, 0.5)"
+    onHandle: "{colors.light-primary}"
+  slider-dimmer:
+    trackHeight: "5px"
+    trackColor: "rgba(0,0,0,0.26)"
+    trackRadius: "3px"
+    rangeColor: "rgba({colors.light-primary}, 0.5)"
+    handleSize: "15px"
+    handleColor: "{colors.light-primary}"
+  data-table:
+    rounded: "{rounded.container}"
+    elevation: "{elevation.card}"
+    headerHeight: "35px"
+    headerBg: "{colors.light-surface}"
+    oddRowBg: "{colors.light-disabled}"
+    evenRowBg: "{colors.light-surface}"
+    rowBorder: "1px solid {colors.light-border}"
+  navbar:
+    backgroundColor: "{colors.light-navbar}"
+    elevation: "0 0 10px 2px rgba(0,0,0,0.2)"
+    linkFont: "{typography.bold}"
+    linkSize: "{typography.sm}"
+    activeBg: "rgba({colors.light-primary}, 0.4)"
+    activeBorder: "1px solid {colors.light-primary}"
+  dropdown-menu:
+    backgroundColor: "{colors.light-bg}"
+    rounded: "{rounded.container}"
+    elevation: "{elevation.overlay}"
+    hoverBg: "rgba({colors.light-primary}, 0.15)"
+  dialog:
+    backgroundColor: "{colors.light-bg}"
+    maxWidth: "calc(100vw - 20px)"
+    maxHeight: "calc(100vh - 20px)"
+    buttonGap: "5px"
+---
+
+# Machinon Design System
+
+## Overview
+
+Machinon is a clean, card-based theme for the Domoticz home automation dashboard. It replaces Domoticz's default Bootstrap 2.x UI with a modern CSS grid layout, CSS custom properties for theming, and a dual light/dark color scheme. The design centers on a single teal-blue accent color against neutral surfaces, with device cards displayed in a responsive grid. The theme supports optional feature modules (compact dashboard, toggle switches, navbar icons, sidemenu, and more), all toggled via a settings UI stored in `theme.json`.
+
+**Key characteristics:**
+- Single accent color (`{colors.light-primary}` / `{colors.dark-primary}`) used for all interactive elements
+- Card-based device layout with CSS grid, not Bootstrap's float grid
+- Two font weights only: Open Sans Regular (body) and SemiBold (headings/emphasis)
+- Dual theme support via CSS custom properties swapped at runtime by JavaScript
+- Feature modules that layer additional CSS/JS without altering the base theme
+
+## Colors
+
+> Colors are defined in `custom.js` as `light_theme` and `dark_theme` objects, then applied to CSS custom properties on `:root` by `setColorScheme()`. Users can override individual colors via the theme settings UI when `custom_color_scheme` is enabled.
+
+### CSS Custom Property Mapping
+
+| Property | Light | Dark | Role |
+|----------|-------|------|------|
+| `--main-bg-color` | `{colors.light-bg}` | `{colors.dark-bg}` | Page background |
+| `--main-blue-color` | `{colors.light-primary}` | `{colors.dark-primary}` | Accent/primary; CTAs, active states, links, sliders |
+| `--main-navbar-bg-color` | `{colors.light-navbar}` | `{colors.dark-navbar}` | Top navigation bar |
+| `--main-item-bg-color` | `{colors.light-surface}` | `{colors.dark-surface}` | Card/panel surfaces |
+| `--main-text-color` | `{colors.light-text}` | `{colors.dark-text}` | Primary text |
+| `--secondary-text-color` | `{colors.light-text-secondary}` | `{colors.dark-text-secondary}` | Captions, timestamps, labels |
+| `--main-border-color` | `{colors.light-border}` | `{colors.dark-border}` | Table/row borders |
+| `--main-disabled-color` | `{colors.light-disabled}` | `{colors.dark-disabled}` | Disabled controls, odd table rows |
+| `--color-error` | `{colors.light-error}` | `{colors.dark-error}` | Destructive actions, timeout status |
+| `--color-success` | `{colors.light-success}` | `{colors.dark-success}` | Success state buttons |
+| `--color-warning` | `{colors.light-warning}` | `{colors.dark-warning}` | Warning state buttons |
+| `--main-blue-color-values` | `9,127,174` | `11,158,218` | Raw RGB for `rgba()` usage |
+
+### Fixed Colors (theme-independent)
+
+- **On primary** (`{colors.on-primary}`): white text on filled buttons and accent backgrounds
+- **Sun icon** (`{colors.sun-icon}`): `#ff8c00` orange for sunrise/sunset icon
+- **Label important** (`{colors.label-important}`): `#b94a48` for critical badges
+- **Header gradient**: `{colors.gradient-start}` to `{colors.light-primary}` (light), `{colors.gradient-dark-start}` to `#0073a7` (dark)
+
+### Status Glow Colors (hardcoded, not yet mapped to custom properties)
+
+| Status | Glow color | Card opacity |
+|--------|-----------|-------------|
+| Timeout | `rgb(199,67,67)` | 0.5 |
+| Protected | `rgb(0,0,139)` | 1.0 |
+| Low Battery | `rgb(255,255,0)` | 1.0 |
+| Off (fade) | default card shadow | 0.5 |
+
+## Typography
+
+### Font Families
+
+- **main-font**: Open Sans Regular (weight 400). Self-hosted woff2/woff. Used for body text, UI controls, secondary labels, timestamps.
+- **main-font-bold**: Open Sans SemiBold (weight 600). Self-hosted woff2/woff. Used for headings (`h1`-`h4`), nav links, device names, status text, form labels.
+
+### Size Scale
+
+| Token | Size | Usage |
+|-------|------|-------|
+| `{typography.micro}` | 11px | Extra-small buttons (`.btn-mini`, `.btn-xs`), chart zoom buttons |
+| `{typography.xs}` | 12px | Standard buttons (`.btn-primary`, `.btn-info`), chart menu items, `.btn-link` |
+| `{typography.sm}` | 14px | Navbar links, options menu items, `.btn-modern`, settings dropdowns |
+| `{typography.md}` | 16px | Base body text, settings panel text |
+| `{typography.display}` | 26px | Login page heading |
+
+### Device Card Typography (relative units)
+
+| Element | Size | Font | Color |
+|---------|------|------|-------|
+| Name | inherited | `main-font-bold` | `--main-text-color` |
+| Bigtext (value) | `1.4em` | `main-font` | `--main-blue-color` |
+| Status | inherited | `main-font-bold` | `--main-text-color` |
+| Last update | `80%` | `main-font` | `--secondary-text-color` |
+| Name icon | `110%` | inherited | inherited |
+| Compact bigtext | `1.3em` | `main-font-bold` | `--main-blue-color` |
+| Compact last update | `0.72em` | inherited | `--secondary-text-color` |
+
+## Spacing
+
+### Current Clusters (legacy)
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `{spacing.xxs}` | 4px | Button group gaps, timer mode margins, checkbox `margin-right` |
+| `{spacing.xs}` | 8px | Popup padding, control padding, button internal padding, dialog button gap |
+| `{spacing.sm}` | 10px | Container padding, table cell padding, card name padding, card grid gap (as 15px) |
+| `{spacing.md}` | 15px | Card grid gap, form list margins, settings list item margins |
+| `{spacing.lg}` | 20px | Section spacing, large button padding, settings panel padding |
+
+### Target Scale (4px grid migration)
+
+| Token | Current | Target | Status |
+|-------|---------|--------|--------|
+| `xxs` | 4px | 4px | Aligned |
+| `xs` | 8px | 8px | Aligned |
+| `sm` | 10px | 12px | Needs migration |
+| `md` | 15px | 16px | Needs migration |
+| `lg` | 20px | 20px | Aligned |
+| `xl` | - | 24px | Future |
+| `xxl` | - | 32px | Future |
+
+When adding new spacing, use the current cluster values (4/8/10/15/20px) for consistency. Do not introduce values outside these clusters until the 4px grid migration.
+
+## Layout
+
+### Responsive Grid
+
+Device cards use CSS grid with responsive column count. Cards have a max-width of 500px and are centered via `justify-content: center`.
+
+| Columns | Breakpoint | Applies to |
+|---------|-----------|------------|
+| 1 | default | All device grids |
+| 2 | min-width: 720px | All device grids |
+| 3 | min-width: 1060px | All device grids |
+| 4 | min-width: 1500px | All device grids |
+| 5 | min-width: 1900px | All device grids |
+
+Grid gap: `{spacing.md}` (15px). Applied to dashboard (`.bannercontent .row`), switches, temperature (`#tempwidgets`), and weather (`#weatherwidgets`) tabs.
+
+### Compact Dashboard Grid
+
+- `grid-template-columns: repeat(auto-fill, 180px)`
+- `row-gap: 20px`
+- `justify-content: space-evenly`
+- Cards are fixed 180px tiles with condensed internal layout
+
+### Page Content Container
+
+Settings pages, timer/log forms, and detail views use `.page-content-container`: card surface background, `1px solid blue` border, `{rounded.interactive}` radius, card-tier shadow, `10px` padding top/bottom, `10px` top margin.
+
+## Border Radius
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `{rounded.xs}` | 2px | Checkboxes, `.label`, `.badge`, textarea |
+| `{rounded.sm}` | 3px | Slider track, timer mode blocks, log toggle count |
+| `{rounded.interactive}` | 5px | All buttons, nav links, input select borders, login submit |
+| `{rounded.container}` | 6px | Device cards, DataTables, dropdown menus, popups, dialogs, log console, settings panels |
+| `{rounded.circle}` | 50% | Radio buttons, slider handle, user avatars |
+
+## Elevation
+
+| Level | Name | Shadow | Usage |
+|-------|------|--------|-------|
+| 0 | flat | none | Default state, transparent backgrounds |
+| 1 | card | `{elevation.card}` | Device cards, DataTables, log console, page-content containers |
+| 2 | popup | `{elevation.popup}` | Options popup, message toast, setpoint popup |
+| 3 | button | `{elevation.button}` | Login submit, `.btn-modern` |
+| 4 | overlay | `{elevation.overlay}` | Dropdown menus |
+| 5 | drag | `{elevation.drag}` | Drag ghost during card reorder |
+
+### Interactive States
+
+- **Card hover**: replaces card shadow with `0 0 0 2px var(--main-blue-color)` (blue outline ring)
+- **Update pulse**: keyframe animation that flashes the blue outline ring over 0.8s
+- **Drag target (active)**: `2px dashed rgba(blue, 0.3)` outline, `3px` offset
+- **Drag target (hover)**: `2px solid blue` outline, `3px` offset, `rgba(blue, 0.08)` background tint, `0.15s ease` transition
+
+## Components
+
+### Buttons
+
+**Hierarchy (4 visual tiers):**
+
+| Tier | Background | Text | Border | Usage |
+|------|-----------|------|--------|-------|
+| **Filled primary** | `var(--main-blue-color)` | `{colors.on-primary}` | none | Primary actions, save, active toggles |
+| **Filled semantic** | respective semantic color | `{colors.on-primary}` | none | Success, warning, destructive actions |
+| **Outlined** | transparent | `var(--main-text-color)` | `1px solid var(--main-blue-color)` | Secondary actions, filters, zoom buttons |
+| **Ghost** | transparent or `rgba(blue, 0.1)` | `var(--main-blue-color)` | none | Tertiary actions, icon buttons, inline links |
+
+**Size tiers:**
+
+| Size | Padding | Font size | Classes |
+|------|---------|-----------|---------|
+| `xs` | `2px 8px` | `{typography.micro}` | `.btn-mini`, `.zoom-button` |
+| `sm` | `4px 8px` | `{typography.micro}` | `.btn-small`, `.btnsmall`, `.btn-icon`, `.btn-xs` |
+| `md` | `6px 12px` | `{typography.xs}` | `.btnstyle3`, `.btn-primary`, `.btn-info`, `.btn-warning`, `.btn-danger` |
+| `lg` | `10px 20px` | `{typography.sm}` | `.savebtn`, `.resetbtn`, `.btn-modern`, `.btn-large` |
+
+**States:**
+- Hover (filled): `filter: brightness(0.85)`
+- Hover (outlined): fill with `var(--main-blue-color)`, text switches to `{colors.on-primary}`
+- Hover (ghost `.btnsmall`): tint deepens to `rgba(blue, 0.2)`
+- Disabled: `background: var(--main-disabled-color)`, `color: var(--secondary-text-color)`, `cursor: not-allowed`, `pointer-events: none`
+- Transition: `background 0.15s ease, color 0.15s ease, border-color 0.15s ease, filter 0.15s ease`
+
+### Button Groups
+
+**In device cards**: flex row wrap with `3px` gap, each button gets `{rounded.interactive}` (pill-with-gap style).
+
+**In toolbars/dialogs**: connected segments. First child: `5px 0 0 5px` radius. Last child: `0 5px 5px 0` radius. Middle children: `0` radius. `1px solid blue` border, `-1px` left margin to collapse borders.
+
+### Device Cards
+
+Cards are `<table>` rows styled as CSS grid containers. The card surface uses `{colors.light-surface}` background, `1.5px solid transparent` border, `{rounded.container}` radius, and `{elevation.card}` shadow.
+
+**Standard card (`.span4`):**
+```
+grid-template-areas:
+  'name    name    name    bigtext bigtext options'
+  'img     img2    status  status  status  status'
+  'favorite lastupdate ... lastupdate tools tools'
+
+Rows: auto | minmax(58px, 1fr) | minmax(0, 20px)
+Columns: 48px 18px minmax(0,1fr) minmax(0,auto) minmax(0,auto) 15px
+Gap: 10px
+```
+
+**Dashboard card**: hides third row (`grid-template-rows: 40px minmax(58px,1fr) 0`, `overflow: hidden`).
+
+**Compact card (`.span3`):**
+```
+grid-template-areas:
+  'name       name    name'
+  'img        img2    bigtext'
+  'lastupdate lastupdate lastupdate'
+
+Rows: 28px 50px 12px
+Columns: 58px 5px 1fr
+Gap: 2px
+Fixed tile width: 180px
+```
+
+**Double/triple icon variants**: wider icon columns (48px + 48px for double, adds `img3` area for triple).
+
+### Form Inputs
+
+- **Text/number/password**: transparent background, bottom-border only (`1px solid var(--main-blue-color)`), secondary text color, max-width 250px
+- **Checkbox**: custom-drawn, 14x14px, `{rounded.xs}` radius, `1px solid blue` border, 8x8px blue inner fill when checked
+- **Radio**: same as checkbox but `{rounded.circle}` on both outer and inner
+- **Textarea**: `{rounded.xs}` radius, `1px solid blue` border, full width
+- **Select (jQuery UI)**: bottom-border only, blue text, `main-font-bold`
+
+### Toggle Switch (feature: `switch_instead_of_bigtext`)
+
+Material-style slider. Track: 40x15px, `{rounded.container}` radius. Handle: 20x20px circle.
+
+| State | Track | Handle | Handle shadow |
+|-------|-------|--------|--------------|
+| Off | `rgba(blue, 0.2)` | `var(--secondary-text-color)` | `0 2px 3px rgba(0,0,0,0.7)` |
+| On | `rgba(blue, 0.5)` | `var(--main-blue-color)` | same |
+
+Handle translates `34px` right on toggle, `0.4s` transition.
+
+### Navigation
+
+**Top navbar**: `var(--main-navbar-bg-color)` background with `0 0 10px 2px rgba(0,0,0,0.2)` shadow. Links distributed via `display: flex; justify-content: space-around`. Link style: `main-font-bold`, `{typography.sm}`, `var(--main-text-color)`, `{rounded.interactive}` radius.
+
+- **Active page**: `rgba(blue, 0.4)` background, `1px solid blue` border
+- **Dropdown hover**: `rgba(blue, 0.15)` background
+- **Dropdown menu**: `var(--main-bg-color)` background, `{rounded.container}` radius, `{elevation.overlay}` shadow
+
+**Sub-tabs / Nav-tabs**: underline style. Inactive: transparent bottom border. Active/hover: `2px solid var(--main-blue-color)` bottom border, blue text color. No background change.
+
+**Mobile hamburger** (max-width: 979px): fixed-position 25x25px toggle. Three 4px bars animate to X via `rotate(135deg)` / `rotate(-135deg)` transforms, `0.2s ease-in-out`. Gets blue background pill with `{rounded.container}` bottom corners after 50px scroll.
+
+### Data Tables
+
+Wrapped in a container with `{elevation.card}` shadow and `{rounded.container}` radius.
+
+| Element | Style |
+|---------|-------|
+| Header | `var(--main-item-bg-color)` background, 35px height, no border |
+| Odd rows | `var(--main-disabled-color)` background |
+| Even rows | `var(--main-item-bg-color)` background |
+| Row border | `1px solid var(--main-border-color)` |
+| Selected row | `var(--main-blue-color)` background, 75% opacity |
+| Filter/info text | `var(--secondary-text-color)` |
+| Bottom margin | 10px |
+
+### Charts (Highcharts)
+
+| Element | Style |
+|---------|-------|
+| Background | `var(--main-item-bg-color)` |
+| Text (titles, labels, legends) | `var(--secondary-text-color)`, `main-font` |
+| Tooltip box | `var(--main-bg-color)` fill, 60% opacity, no stroke |
+| Grid lines | `var(--main-bg-color)` |
+| Export button | card surface, `4px` radius, blue icon stroke |
+| Export menu | card surface, `{rounded.container}` radius, `{elevation.card}` shadow |
+| Zoom buttons | outlined style, `{rounded.interactive}` radius |
+| Zoom reset | outlined with `var(--color-error)` border |
+
+### Dialogs (jQuery UI)
+
+- Background: `var(--main-bg-color)`
+- Max: `calc(100vw - 20px)` x `calc(100vh - 20px)`
+- Content max height: `calc(100vh - 150px)` with `overflow-y: auto`
+- Button pane: flex wrap, `5px` gap
+- Dialog buttons: filled primary style
+- Mobile (max-width: 767px): tables forced to `100%` width with `table-layout: fixed`
+
+### Dimmer Slider
+
+- Track: `rgba(0,0,0,0.26)`, 5px height, `{rounded.sm}` radius
+- Range fill: `rgba(blue, 0.5)`
+- Handle: 15px circle, solid `var(--main-blue-color)`, positioned -5px top
+- Width: `calc(100% - 100px)`, narrower (50%) when double-icon cards, 55% on wide screens (1200px+)
+
+## Feature Modules
+
+Toggled via `theme.json` features object. Each feature has an `enabled` boolean and optional `files` array of CSS/JS to load.
+
+| Feature | Key | Default | Files | Effect |
+|---------|-----|---------|-------|--------|
+| Dark theme | `dark_theme` | off | `dark_theme.css` | Swaps to dark palette via CSS custom properties. Overrides login gradient, bigtext color, camera preview overlay. |
+| Compact dashboard | `dashboard_columns` | off | `dashboard_columns.css` | 180px fixed-width tile grid with condensed 3-row card layout. Hides status text. |
+| Toggle switches | `switch_instead_of_bigtext` | on | `switch.js`, `switch.css` | Replaces On/Off bigtext with Material-style slider on Light/Switch devices. |
+| Scene switches | `switch_instead_of_bigtext_scenes` | on | (none) | Extends toggle switch behavior to scene devices. |
+| Navbar icons | `navbar_icons` | off | `navbar_icons.css` | Adds icons above nav link text. |
+| Hide nav text | `navbar_icons_text` | off | (none) | Hides nav link labels, icons only. Requires `navbar_icons`. |
+| Sidemenu | `sidemenu` | off | `sidemenu.css` | Vertical side navigation on narrow viewports (max-width: 979px). |
+| Hide footer | `footer_text_disabled` | on | `footer.css` | Hides the copyright footer bar. |
+| Center popups | `center_popups` | off | `center_popups.css` | Centers jQuery UI dialogs on screen. |
+| Dashboard camera | `dashboard_camera` | on | `dashboard_camera.js`, `dashboard_camera.css` | Embeds camera preview on dashboard cards. |
+| Show last update | `dashboard_show_last_update` | off | `dashboard_show_last_update.css` | Shows last-update timestamp on dashboard cards. |
+| Fade off items | `fade_off_items` | off | (none) | Reduces opacity to 0.5 on "Off" status devices. |
+| Time ago | `time_ago` | on | (none) | Converts timestamps to relative format via livestamp.js/moment.js. |
+| Standby | `standby` | off | `standby.js`, `standby.css` | Screen dimming after configurable idle timeout. |
+| Wind direction | `wind_direction` | on | (none) | Custom wind direction arrow icons on weather devices. |
+| Custom colors | `custom_color_scheme` | off | (none) | Enables user-defined color overrides via settings UI. |
+| Custom icons | `icon_image` | off | (none) | Per-device custom icon images from `theme.json` icons array. |
+| Check update | `check_update` | on | `check_update.js` | Checks for Domoticz software updates. |
+| Custom pages | `custom_page_menu` | on | `custom_page.js` | Adds custom page entries to navigation. |
+| Settings menu | `custom_settings_menu` | on | `settings_page.js` | Theme settings panel in Domoticz settings. |
+
+## Animations
+
+| Animation | Duration | Easing | Trigger |
+|-----------|----------|--------|---------|
+| Update pulse | 0.8s | ease | Device WebSocket update (if `ShowUpdatedEffect` enabled) |
+| Blink | 2s | linear, infinite | `.blink` class (alarm/alert state) |
+| Button transitions | 0.15s | ease | Hover/focus on all buttons |
+| Switch toggle | 0.4s | default | Slider handle translate on toggle |
+| Hamburger to X | 0.2s | ease-in-out | Menu toggle open/close |
+| Scroll pill | 1s | ease | Menu toggle background after 50px scroll |
+| Tooltip delay | 0s + 0.4s delay | linear | Device name description hover |
+| Drop target tint | 0.15s | ease | Background tint on droppable hover |
+
+## Do's
+
+- Use CSS custom properties for all colors; never hardcode hex values outside the `light_theme`/`dark_theme` definitions in `custom.js`
+- Use `filter: brightness(0.85)` for filled button hover states; it works across both light and dark themes
+- Use the card grid gap (`{spacing.md}`, 15px) for spacing between device cards
+- Use `main-font` for body text and `main-font-bold` for headings and emphasis
+- Keep device cards as CSS grid layouts; the `grid-template-areas` pattern is the foundation of the card system
+- Use the outlined button style for secondary/toggle actions and filled for primary actions
+- Apply `{elevation.card}` for any new card-like container
+- Use the blue outline ring (`0 0 0 2px var(--main-blue-color)`) for card hover/focus states
+- Test all changes in both light and dark mode
+- Use the current spacing clusters (4/8/10/15/20px) until the 4px grid migration
+
+## Don'ts
+
+- Don't use Bootstrap 2.x gradients (`background-image`) on buttons; they are globally reset to `none`
+- Don't use `text-shadow` on interactive elements; it is globally cleared
+- Don't add new hardcoded colors; extend the CSS custom property system instead
+- Don't use `box-shadow` and `border` together for card containers; the theme uses transparent borders with box-shadow
+- Don't set fixed heights on device cards; rows use `minmax()` to accommodate variable content
+- Don't use `pt` units; normalize to `px` (the `11pt` on navbar links is legacy debt)
+- Don't introduce spacing values outside the documented clusters until the 4px grid migration
+- Don't add `!important` unless overriding upstream Domoticz styles that cannot be beaten by specificity
+- Don't rely on Bootstrap class semantics (`.btn-info` = blue, `.btn-danger` = red); the theme remaps these to its own palette
+
+## Responsive Behavior
+
+### Breakpoints
+
+| Name | Width | Key changes |
+|------|-------|-------------|
+| Mobile | < 720px | Single column cards. Hamburger menu. Search expands full-width on focus. Dialog tables fixed-layout. |
+| Tablet | 720 - 1059px | 2-column card grid. |
+| Desktop | 1060 - 1499px | 3-column card grid. Navbar fully visible. |
+| Wide | 1500 - 1899px | 4-column card grid. Dimmer slider narrows to 55%. |
+| Ultra-wide | 1900px+ | 5-column card grid. |
+
+### Mobile Adaptations
+
+- Hamburger menu replaces horizontal navbar (max-width: 979px)
+- Search input collapses to icon, expands on focus with blue background pill
+- Message toast repositions to left edge
+- Settings buttons become fixed bottom bar
+- Dialog content tables switch to `table-layout: fixed` with word-wrap
+- Settings grid tiles shrink to `100px` with hidden labels
+- Compact card button groups become vertical scroll-snap columns
+
+## Known Gaps
+
+- No formal `:focus-visible` styles for keyboard navigation / accessibility
+- No CSS custom properties for shadows (hardcoded `rgba` values)
+- No typography scale as CSS custom properties
+- Status glow colors (timeout red, protected blue, low battery yellow) are hardcoded `rgb()`, not mapped to the semantic color system
+- Login page has hardcoded light-mode colors (`#fff`, `#f1f1f1`, `#ccc`, `#1a1a1a`) that do not respond to dark mode custom properties
+- `--main-border-color` and `--main-disabled-color` share the same value (`#d3d3d3`) in light mode, making them visually indistinguishable
+- Navbar shadow uses `10px 2px` spread instead of `10px 1px` (should be normalized to card tier)
+
+## Iteration Guide
+
+1. Focus on ONE component at a time
+2. Reference component names and design tokens directly
+3. Always check both light and dark mode after changes
+4. Add new button variants following the 4-tier hierarchy (filled/semantic/outlined/ghost) and 4-size system (xs/sm/md/lg)
+5. New spacing values must come from the current clusters (4/8/10/15/20px) or the target 4px grid
+6. New containers use `{rounded.container}` (6px) and `{elevation.card}`
+7. New interactive elements use `{rounded.interactive}` (5px)
+8. Test on mobile (< 720px) and desktop (1060px+) at minimum
+9. Check upstream Domoticz source before fixing styling issues
