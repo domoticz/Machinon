@@ -188,7 +188,9 @@ function init_theme() {
                                 item.find(".btn-group").length === 0 &&
                                 item.find("#img2").length === 0;
                             if (isSwitch) {
-                                let isLightSwitch = (location.hash === "#/Dashboard" && item.parent().attr("id") && item.parent().attr("id").startsWith("light")) ||
+                                let dash2Status = bigText.text().trim();
+                                let inDash2 = item.closest(".dd-dz-inner").length > 0 && (dash2Status === "On" || dash2Status === "Off");
+                                let isLightSwitch = (location.hash === "#/Dashboard" && ((item.parent().attr("id") && item.parent().attr("id").startsWith("light")) || inDash2)) ||
                                     location.hash === "#/LightSwitches";
                                 let isScene = item.parents("#scenecontent").length > 0 ||
                                     (item.parents("#dashScenes").length > 0 && item.find("#itemtablesmalldoubleicon").length > 0);

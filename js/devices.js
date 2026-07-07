@@ -73,7 +73,11 @@ function setAllDevicesFeatures() {
         }
 
         /* Feature - Switch instead of text */
-        if (((location.hash === "#/Dashboard") && $(this).parent().attr("id").startsWith("light")) || (location.hash === "#/LightSwitches")) {
+        var parentId = $(this).parent().attr("id") || "";
+        /* Dash2 tiles have no light_ parent id, so also require a binary On/Off status
+           to avoid toggling sensors (e.g. temperature) that pass the icon heuristics. */
+        var inDash2 = $(this).closest(".dd-dz-inner").length > 0 && (status === "On" || status === "Off");
+        if (((location.hash === "#/Dashboard") && (parentId.startsWith("light") || inDash2)) || (location.hash === "#/LightSwitches")) {
             if (bigText.siblings("#img").find("img").hasClass("lcursor") && 
                 ($(this).find(".dimslider").length == 0) && 
                 ($(this).find(".selectorlevels").length == 0) && 
