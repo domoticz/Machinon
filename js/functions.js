@@ -27,40 +27,53 @@ function setLogo() {
 }
 
 function setColorScheme() {
-    if (theme.features.custom_color_scheme.enabled !== true) {
-        var current_theme = light_theme;
-        if (theme.features.dark_theme.enabled) {
-            current_theme = dark_theme;
+    var html = document.documentElement;
+    if (theme.features.custom_color_scheme && theme.features.custom_color_scheme.enabled === true) {
+        clearCustomColorScheme();
+        applyCustomColorScheme(theme.color_scheme);
+        html.setAttribute('data-dz-scheme', 'custom');
+    } else {
+        clearCustomColorScheme();
+        if (theme.features.dark_theme && theme.features.dark_theme.enabled) {
+            html.setAttribute('data-dz-scheme', 'dark');
+        } else {
+            html.removeAttribute('data-dz-scheme');
         }
-        theme.color_scheme.background = current_theme.bg; 
-        theme.color_scheme.main_color = current_theme.main;
-        theme.color_scheme.navbar = current_theme.navbar;
-        theme.color_scheme.item = current_theme.item;
-        theme.color_scheme.main_text = current_theme.text;
-        theme.color_scheme.alt_text = current_theme.alt_text;
-        theme.color_scheme.border = current_theme.border;
-        theme.color_scheme.disabled = current_theme.disabled;
-        theme.color_scheme.error = current_theme.error;
-        theme.color_scheme.success = current_theme.success;
-        theme.color_scheme.warning = current_theme.warning;
     }
-    
-    // Determine which theme to use for fallback colors
-    var fallback_theme = theme.features.dark_theme && theme.features.dark_theme.enabled ? dark_theme : light_theme;
-    
-    $("body").get(0).style.setProperty('--main-bg-color', hexToRGB(theme.color_scheme.background));
-    $("body").get(0).style.setProperty('--main-blue-color',hexToRGB(theme.color_scheme.main_color));
-    $("body").get(0).style.setProperty('--main-blue-color-values',hexToRGB(theme.color_scheme.main_color, true));
-    $("body").get(0).style.setProperty('--main-navbar-bg-color',hexToRGB(theme.color_scheme.navbar));
-    $("body").get(0).style.setProperty('--main-item-bg-color',hexToRGB(theme.color_scheme.item));
-    $("body").get(0).style.setProperty('--main-item-color',hexToRGB(theme.color_scheme.main_text));
-    $("body").get(0).style.setProperty('--main-text-color',hexToRGB(theme.color_scheme.main_text));
-    $("body").get(0).style.setProperty('--secondary-text-color',hexToRGB(theme.color_scheme.alt_text));
-    $("body").get(0).style.setProperty('--main-border-color',hexToRGB(theme.color_scheme.border || fallback_theme.border));
-    $("body").get(0).style.setProperty('--main-disabled-color',hexToRGB(theme.color_scheme.disabled));
-    $("body").get(0).style.setProperty('--color-error',hexToRGB(theme.color_scheme.error || fallback_theme.error));
-    $("body").get(0).style.setProperty('--color-success',hexToRGB(theme.color_scheme.success || fallback_theme.success));
-    $("body").get(0).style.setProperty('--color-warning',hexToRGB(theme.color_scheme.warning || fallback_theme.warning));
+}
+
+// --dz-* tokens the custom colour scheme may override (used to clear them on a scheme switch).
+var DZ_CUSTOM_TOKENS = [
+    '--dz-body-bg', '--dz-body-text', '--dz-nav-bg', '--dz-widget-bg', '--dz-widget-text',
+    '--dz-accent-color', '--dz-input-border', '--dz-status-disabled', '--dz-accent-red',
+    '--dz-btn-success-bg', '--dz-btn-warning-bg', '--secondary-text-color', '--main-blue-color-values'
+];
+
+// Apply the user's custom colours as --dz-* overrides on <html> via setProperty.
+// setProperty validates the value and cannot break out of the property, and hexToRGB reduces
+// input to a numeric rgb(n,n,n), so untrusted theme.color_scheme values (settings -> DB) cannot
+// inject CSS rules. Never compose a <style> element's text from these values.
+function applyCustomColorScheme(cs) {
+    var s = document.documentElement.style;
+    var set = function (token, val) { if (val) { s.setProperty(token, hexToRGB(val)); } };
+    set('--dz-body-bg', cs.background);
+    set('--dz-body-text', cs.main_text);
+    set('--dz-nav-bg', cs.navbar);
+    set('--dz-widget-bg', cs.item);
+    set('--dz-widget-text', cs.main_text);
+    set('--dz-accent-color', cs.main_color);
+    set('--dz-input-border', cs.border);
+    set('--dz-status-disabled', cs.disabled);
+    set('--dz-accent-red', cs.error);
+    set('--dz-btn-success-bg', cs.success);
+    set('--dz-btn-warning-bg', cs.warning);
+    set('--secondary-text-color', cs.alt_text);
+    if (cs.main_color) { s.setProperty('--main-blue-color-values', hexToRGB(cs.main_color, true)); }
+}
+
+function clearCustomColorScheme() {
+    var s = document.documentElement.style;
+    for (var i = 0; i < DZ_CUSTOM_TOKENS.length; i++) { s.removeProperty(DZ_CUSTOM_TOKENS[i]); }
 }
 
 function setSearch() {
