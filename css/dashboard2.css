@@ -1,0 +1,39 @@
+/*
+  dashboard2.css - styling specific to the dynamic GridStack dashboard ("Dash2").
+  Loaded via custom.css. Device-card visuals live in custom.css (shared with the classic
+  dashboard); this file holds Dash2-only chrome + fixes. Colours come from --dz-* tokens.
+*/
+
+/* Edit-mode widget header (shown only while editing the board) */
+.dd-widget-header {
+    background: var(--dz-nav-bg);
+    color: var(--dz-panel-text);
+    border-radius: 6px 6px 0 0;
+}
+.dd-widget-header .dd-widget-btn {
+    background: transparent;
+    color: inherit;
+}
+
+/* Edit-mode grid guide lines */
+.dd-grid.grid-stack .grid-stack-item > .grid-stack-item-content {
+    outline-color: var(--dz-dd-grid-line);
+}
+
+/* Skeleton loader placeholder */
+.dd-skeleton {
+    background: var(--dz-dd-skeleton-mid);
+}
+
+/* Small breathing room around device tiles so cards do not crowd the grid cell */
+.dd-widget--dz-device {
+    padding: 2px;
+}
+
+/* Keep the last-seen row inside the card instead of overflowing the bottom edge */
+.dd-widget-body .item table[id^="item"] > tbody > tr td#lastupdate {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    min-height: 0;
+}

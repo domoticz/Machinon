@@ -15,6 +15,7 @@
 @import url("css/iconsupload.css");
 @import url("css/floorplan.css");
 @import url("css/animate.css");
+@import url("css/dashboard2.css");
 
 /* Display sidemenu on low resolution devices */
 @import url("css/sidemenu.css") (max-width: 979px);
