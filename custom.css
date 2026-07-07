@@ -641,6 +641,15 @@ div.bannercontent .row:not(.divider) {
     overflow: hidden;
 }
 
+/* Dash2: tighten the tile row gaps so the Machinon card fits the fixed-height GridStack cell
+   (default gs-h=2 = 120px). At the classic 10px gap the card is ~128px and its bottom border /
+   rounded corners get clipped by the cell's overflow:hidden. Placed after the span4 grid rule
+   so it wins by source order (no !important). */
+.dd-widget-body .item.itemBlock table[id^="item"] > tbody > tr {
+    grid-gap: 4px;
+    gap: 4px;
+}
+
 /* name */
 .item #name,
 div.item.statusNormal td#name,
