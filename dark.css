@@ -1,0 +1,25 @@
+/*
+  dark.css - Machinon dark color scheme.
+
+  Attribute-scoped: dark applies only under html[data-dz-scheme="dark"], so Machinon is
+  light-by-default and future schemes slot in as sibling blocks. Imported directly by
+  custom.css (Machinon imports nothing from core). Overrides the --dz-* / aux tokens that
+  differ from the light contract in dz-tokens.css. Values match custom.js dark_theme / DESIGN.md.
+*/
+html[data-dz-scheme="dark"] {
+  --dz-body-bg:         #333639;
+  --dz-body-text:       #ffffff;
+  --dz-nav-bg:          #232324;
+  --dz-widget-bg:       #515558;
+  --dz-widget-text:     #ffffff;
+  --dz-accent-color:    #0b9eda;
+  --dz-input-border:    #6d6e6d;
+  --dz-status-disabled: #808080;
+  --dz-accent-red:      #e05555;
+  --dz-btn-success-bg:  #4aa84a;
+  --dz-btn-warning-bg:  #df7b00;
+
+  /* Machinon aux tokens (no core --dz-* equivalent) */
+  --secondary-text-color:   #cccccc;
+  --main-blue-color-values: 11,158,218;
+}

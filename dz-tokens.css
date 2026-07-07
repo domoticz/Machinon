@@ -1,0 +1,46 @@
+/*
+  dz-tokens.css - Machinon's --dz-* design-token contract (light / default scheme).
+
+  Machinon opts into the core --dz-* token *contract* (variable names) and publishes its own
+  values here, rather than importing core's legacy.css/base.css (whose #itemtable* layout and
+  common.css utilities clash with Machinon's own CSS). Core's globally-linked dashboard.css /
+  style.css read these tokens; Machinon's component CSS stays authoritative over its look.
+
+  Dark and future schemes override these under html[data-dz-scheme="..."] (see dark.css).
+  Values match custom.js light_theme / DESIGN.md.
+
+  Phase 1 defines the mapped token set the --main-* aliases point to (feeds Machinon's existing
+  rules once setColorScheme stops painting --main-*). Widget/status/Dash2 token families are
+  added in Phase 2, when core dashboard.css (their only consumer) is tuned.
+*/
+:root {
+    /* Core --dz-* tokens mapped from Machinon's palette (light) */
+    --dz-body-bg:         #f1f1f1;
+    --dz-body-text:       #1a1a1a;
+    --dz-nav-bg:          #ffffff;
+    --dz-widget-bg:       #ffffff;
+    --dz-widget-text:     #1a1a1a;
+    --dz-accent-color:    #097fae;
+    --dz-input-border:    #d3d3d3;
+    --dz-status-disabled: #d3d3d3;
+    --dz-accent-red:      #c43b3b;
+    --dz-btn-success-bg:  #3b863b;
+    --dz-btn-warning-bg:  #b36200;
+
+    /* Machinon aux tokens (no core --dz-* equivalent) */
+    --secondary-text-color:   #6d6e6d;
+    --main-blue-color-values: 9,127,174;
+
+    /* Back-compat aliases: existing --main-* rules now source from --dz-* */
+    --main-bg-color:        var(--dz-body-bg);
+    --main-text-color:      var(--dz-body-text);
+    --main-navbar-bg-color: var(--dz-nav-bg);
+    --main-item-bg-color:   var(--dz-widget-bg);
+    --main-item-color:      var(--dz-widget-text);
+    --main-blue-color:      var(--dz-accent-color);
+    --main-border-color:    var(--dz-input-border);
+    --main-disabled-color:  var(--dz-status-disabled);
+    --color-error:          var(--dz-accent-red);
+    --color-success:        var(--dz-btn-success-bg);
+    --color-warning:        var(--dz-btn-warning-bg);
+}

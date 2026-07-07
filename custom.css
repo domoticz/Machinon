@@ -1,6 +1,13 @@
 /**** ./custom.css ***/
 @charset "UTF-8";
 
+/* Machinon --dz-* token contract (must stay first, before component rules).
+   dz-tokens.css: light :root --dz-* + --main-* aliases. dark.css: dark scheme block.
+   Machinon imports NOTHING from core (no legacy.css/base.css) - its #itemtable* layout /
+   common.css utilities clash with Machinon's own CSS. See spec 2026-07-07 4.1. */
+@import url("dz-tokens.css");
+@import url("dark.css");
+
 /* import css files */
 @import url("css/dashboard_mobile.css");
 @import url("css/settings.css");
@@ -15,23 +22,6 @@
 /* ionicons */
 @import url("css/ionicons.min.css");
 
-
-/* Light theme defaults - overridden by JavaScript setColorScheme() on body */
-:root {
-    --main-bg-color: rgb(241,241,241);
-    --main-blue-color: rgb(9,127,174);
-    --main-blue-color-values: 9,127,174;
-    --main-navbar-bg-color: rgb(255,255,255);
-    --main-item-bg-color: rgb(255,255,255);
-    --main-item-color: rgb(26,26,26);
-    --main-text-color: rgb(26,26,26);
-    --secondary-text-color: rgb(109,110,109);
-    --main-border-color: rgb(211,211,211);
-    --main-disabled-color: rgb(211,211,211);
-    --color-error: rgb(196,59,59);
-    --color-success: rgb(59,134,59);
-    --color-warning: rgb(179,98,0);
-}
 
 @font-face {
     font-family: main-font;
