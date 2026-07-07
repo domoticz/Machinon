@@ -589,14 +589,16 @@ div.bannercontent .row:not(.divider) {
     transition: background-color 0.15s ease;
 }
 
-#holder .row .item table[id^="item"] > tbody > tr {
+#holder .row .item table[id^="item"] > tbody > tr,
+.dd-widget-body .item.itemBlock table[id^="item"] > tbody > tr {
     display: grid;
 }
 
 
 
 #holder .row .span4 table[id^="item"] > tbody > tr,
-#holder .row .item.span4 table[id^="item"] > tbody > tr {
+#holder .row .item.span4 table[id^="item"] > tbody > tr,
+.dd-widget-body .item.itemBlock table[id^="item"] > tbody > tr {
     grid-template-rows: auto minmax(58px,1fr) minmax(0,20px);
     grid-template-columns: 48px 18px minmax(0,1fr) minmax(0, auto) minmax(0, auto) 15px;
     grid-gap: 10px;
@@ -609,7 +611,9 @@ div.bannercontent .row:not(.divider) {
 #holder .row .span4 table[id="itemtabledoubleicon"] > tbody > tr,
 #holder .row .span4 table[id="itemtablesmalldoubleicon"] > tbody > tr,
 #holder .row .item.span4 table[id="itemtabledoubleicon"] > tbody > tr,
-#holder .row .item.span4 table[id="itemtablesmalldoubleicon"] > tbody > tr {
+#holder .row .item.span4 table[id="itemtablesmalldoubleicon"] > tbody > tr,
+.dd-widget-body .item.itemBlock table[id="itemtabledoubleicon"] > tbody > tr,
+.dd-widget-body .item.itemBlock table[id="itemtablesmalldoubleicon"] > tbody > tr {
     grid-template-columns: 48px 48px minmax(0,1fr) minmax(0, auto) minmax(0, auto) 15px;
     grid-template-areas: 'name name name bigtext bigtext options'
     'img img2 status status status status'
@@ -619,7 +623,9 @@ div.bannercontent .row:not(.divider) {
 #holder .row .span4 table[id="itemtabletrippleicon"] > tbody > tr,
 #holder .row .span4 table[id="itemtablesmalltrippleicon"] > tbody > tr,
 #holder .row .item.span4 table[id="itemtabletrippleicon"] > tbody > tr,
-#holder .row .item.span4 table[id="itemtablesmalltrippleicon"] > tbody > tr {
+#holder .row .item.span4 table[id="itemtablesmalltrippleicon"] > tbody > tr,
+.dd-widget-body .item.itemBlock table[id="itemtabletrippleicon"] > tbody > tr,
+.dd-widget-body .item.itemBlock table[id="itemtablesmalltrippleicon"] > tbody > tr {
     grid-template-areas: 'name name name bigtext bigtext options'
     'img img2 img3 status status status'
     'favorite lastupdate lastupdate lastupdate tools tools';
