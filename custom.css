@@ -2604,7 +2604,7 @@ section.compact .row:not(.divider) {
     grid-area: bigtext;
     font-size: 1.3em;
     font-family: main-font-bold;
-    padding: 2px 8px 0 0;S
+    padding: 2px 8px 0 0;
     text-align: right;
     align-self: center;
     color: var(--main-blue-color);
