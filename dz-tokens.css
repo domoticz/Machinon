@@ -31,6 +31,18 @@
     --secondary-text-color:   #6d6e6d;
     --main-blue-color-values: 9,127,174;
 
+    /* Dash2 (dynamic GridStack dashboard) chrome tokens (light).
+       Consumed by core dashboard.css; device-card bg comes from --dz-widget-bg above.
+       Special-widget tokens (--dz-widget-accent/amber/energy/weather/moon) are NOT set here:
+       dashboard.css self-defines them in its own :root (loaded after the theme), so a plain
+       :root override loses the source-order tie. Those are recoloured at higher specificity
+       in Task 4. */
+    --dz-panel-bg:             #ffffff;
+    --dz-panel-text:           var(--dz-body-text);
+    --dz-border-color:         var(--dz-input-border);
+    --dz-dd-grid-line:         rgba(9,127,174,0.12);
+    --dz-dd-skeleton-mid:      #eef2f5;
+
     /* Back-compat aliases: existing --main-* rules now source from --dz-* */
     --main-bg-color:        var(--dz-body-bg);
     --main-text-color:      var(--dz-body-text);
