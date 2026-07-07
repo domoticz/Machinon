@@ -43,6 +43,16 @@
     --dz-dd-grid-line:         rgba(9,127,174,0.12);
     --dz-dd-skeleton-mid:      #eef2f5;
 
+    /* Table (DataTables) tokens - consumed by the DataTables block in custom.css. */
+    --dz-table-header-bg:       var(--dz-widget-bg);
+    --dz-table-header-text:     var(--dz-body-text);
+    --dz-table-row-even-bg:     var(--dz-widget-bg);
+    --dz-table-row-odd-bg:      #d3d3d3;
+    --dz-table-row-text:        var(--dz-body-text);
+    --dz-table-border:          var(--dz-input-border);
+    --dz-table-row-selected-bg: var(--dz-accent-color);
+    --dz-table-control-text:    var(--secondary-text-color);
+
     /* Back-compat aliases: existing --main-* rules now source from --dz-* */
     --main-bg-color:        var(--dz-body-bg);
     --main-text-color:      var(--dz-body-text);

@@ -1770,23 +1770,23 @@ table.dataTable {
     border: none !important;
 }
 
-.dataTables_wrapper .dataTables_length, 
+.dataTables_wrapper .dataTables_length,
 .dataTables_wrapper .dataTables_filter,
 .dataTables_wrapper .dataTables_info {
-    color: var(--secondary-text-color);
+    color: var(--dz-table-control-text);
 }
 
 .dataTables_wrapper .ui-widget-header .ui-state-default {
     background: transparent;
     border: none !important;
-    color: var(--main-text-color) !important;
+    color: var(--dz-table-header-text) !important;
 }
 
 table.dataTable thead th,
 table.dataTable thead th.ui-state-default {
-    background: var(--main-item-bg-color) !important;
+    background: var(--dz-table-header-bg) !important;
     background-image: none !important;
-    color: var(--main-text-color);
+    color: var(--dz-table-header-text);
     height: 35px;
     padding-right: 10px;
     text-align: -webkit-left;
@@ -1794,21 +1794,21 @@ table.dataTable thead th.ui-state-default {
 }
 
 .dataTables_wrapper .dataTable tr {
-    border: 1px solid var(--main-border-color);
+    border: 1px solid var(--dz-table-border);
 }
 
 .dataTables_wrapper tr.odd,
 .dataTables_wrapper tr.even {
     height: 45px;
-    color: var(--main-text-color) !important;
+    color: var(--dz-table-row-text) !important;
 }
 
 .dataTables_wrapper tr.odd {
-    background-color: var(--main-disabled-color);
+    background-color: var(--dz-table-row-odd-bg);
 }
 
 .dataTables_wrapper tr.even {
-    background-color: var(--main-item-bg-color);
+    background-color: var(--dz-table-row-even-bg);
 }
 
 tr.odd td.sorting_1, tr.even td.sorting_1 {
@@ -1817,7 +1817,7 @@ tr.odd td.sorting_1, tr.even td.sorting_1 {
 
 .dataTables_wrapper table tbody tr.odd.row_selected td,
 .dataTables_wrapper table tbody tr.even.row_selected td {
-    background: var(--main-blue-color) !important;
+    background: var(--dz-table-row-selected-bg) !important;
     opacity: .75;
 }
 

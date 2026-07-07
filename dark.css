@@ -27,4 +27,7 @@ html[data-dz-scheme="dark"] {
   --dz-panel-bg:             #515558;
   --dz-dd-grid-line:         rgba(11,158,218,0.15);
   --dz-dd-skeleton-mid:      #444a4e;
+
+  /* Table zebra stripe (decoupled from --main-disabled-color) */
+  --dz-table-row-odd-bg: #808080;
 }
