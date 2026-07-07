@@ -540,6 +540,7 @@ div.bannercontent .row:not(.divider) {
 }
 
 #holder .row .item table[id^="item"] > tbody > tr,
+.dd-widget-body .item table[id^="item"] > tbody > tr,
 .rectangle-8,
 .rectangle-8-dropdown,
 #settings .row-fluid > div {
@@ -551,6 +552,7 @@ div.bannercontent .row:not(.divider) {
 }
 
 #holder .row .item table[id^="item"] > tbody > tr:hover,
+.dd-widget-body .item table[id^="item"] > tbody > tr:hover,
 .rectangle-8:hover,
 .rectangle-8-dropdown:hover,
 #settings .row-fluid > div:hover {
