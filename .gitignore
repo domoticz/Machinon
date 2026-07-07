@@ -7,3 +7,5 @@ machinon-*.tar.gz
 !makerelease.sh
 # JPEG images
 images/*.[jJ][pP][gG]
+# Claude-generated working documents (local-only: specs, plans, brainstorms)
+docs/superpowers/
