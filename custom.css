@@ -636,8 +636,7 @@ div.bannercontent .row:not(.divider) {
 }
 
 #holder #dashcontent .row .span4 .item table[id^="item"] > tbody > tr,
-#holder #dashcontent .row .item.span4 table[id^="item"] > tbody > tr,
-.dd-widget-body .item.itemBlock table[id^="item"] > tbody > tr {
+#holder #dashcontent .row .item.span4 table[id^="item"] > tbody > tr {
     grid-template-rows: 40px minmax(58px,1fr) 0;
     overflow: hidden;
 }

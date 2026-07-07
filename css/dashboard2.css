@@ -37,3 +37,10 @@
     text-overflow: ellipsis;
     min-height: 0;
 }
+
+/* Last-seen hidden by default on Dash2 (matches classic: dashboard_show_last_update = off).
+   Hidden via display:none rather than an overflow:hidden row-collapse, so the device icon
+   is never clipped. dashboard_show_last_update.css reveals it when the feature is enabled. */
+.dd-widget-body .item.itemBlock td#lastupdate {
+    display: none;
+}

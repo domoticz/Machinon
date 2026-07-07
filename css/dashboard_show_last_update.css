@@ -4,9 +4,9 @@
     grid-template-rows: 40px minmax(58px,1fr) 20px !important;
 }
 
-/* Dash2: same feature behavior on the dynamic dashboard */
-.dd-widget-body .item.itemBlock table[id^="item"] > tbody > tr {
-    grid-template-rows: 40px minmax(58px,1fr) 20px !important;
+/* Dash2: same feature behavior on the dynamic dashboard - reveal the last-seen cell */
+.dd-widget-body .item.itemBlock td#lastupdate {
+    display: block !important;
 }
 
 #holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr,
