@@ -56,3 +56,14 @@
     --color-success:        var(--dz-btn-success-bg);
     --color-warning:        var(--dz-btn-warning-bg);
 }
+
+/*
+  Dash2 special-widget recolour. dashboard.css self-defines --dz-widget-accent (and the
+  energy/weather/moon/stat tokens) in its own :root, loaded after the theme, so a plain :root
+  override loses the source-order tie. html:root (specificity 0,1,1) beats :root (0,1,0) in
+  both schemes; var(--dz-accent-color) resolves per-scheme. Only the brand accent is
+  Machinon-ised - the energy/weather/moon colours are semantic and stay at core defaults.
+*/
+html:root {
+    --dz-widget-accent: var(--dz-accent-color);
+}
