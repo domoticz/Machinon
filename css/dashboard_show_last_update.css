@@ -4,6 +4,11 @@
     grid-template-rows: 40px minmax(58px,1fr) 20px !important;
 }
 
+/* Dash2: same feature behavior on the dynamic dashboard */
+.dd-widget-body .item.itemBlock table[id^="item"] > tbody > tr {
+    grid-template-rows: 40px minmax(58px,1fr) 20px !important;
+}
+
 #holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr,
 #holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr {
     grid-template-rows: 20px 58px 20px !important;
