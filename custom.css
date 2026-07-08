@@ -33,11 +33,12 @@
    Direction for contributors: when you touch a rule that belongs to an existing feature file,
    migrate it there. Do NOT bulk-reorder rules into feature files (cascade-regression risk); the
    safe move is later/join-existing, and verify with the sort-permutation + computed-style snapshot.
-   Extracted feature files: buttons, nav, cards (device tile/dashboard system), tables (DataTables), charts (Highcharts + zoom), login
+   Extracted feature files: buttons, nav, cards (device tile/dashboard system), compact, tables (DataTables), charts (Highcharts + zoom), login
    (glass-login + legacy #login), energy, logpage, setpoint, search, device-status. */
 @import url("css/buttons.css");
 @import url("css/nav.css");
 @import url("css/cards.css");
+@import url("css/compact.css");
 @import url("css/tables.css");
 @import url("css/charts.css");
 @import url("css/login.css");
@@ -555,171 +556,5 @@ select.ui-corner-all option {
 /* author at footer */
 #copyright p:after {
     content: "  | 'Machinon-Dev' theme";
-}
-
-/* Compact mode */
-section.compact {
-    margin-bottom: 20px;
-}
-
-section.compact h2 {
-    display: none;
-}
-
-section.compact .row.divider,
-section.compact .row:not(.divider) {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, 180px);
-    grid-auto-flow: row dense;
-    justify-content: space-evenly;
-    row-gap: 20px;
-    padding: 0;
-}
-
-.span3 {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-}
-
-.span3 #name {
-    padding: 2px 10px;
-    line-height: 14px;
-    text-overflow: ellipsis;
-    overflow: hidden;
-}
-
-.span3 #status {
-    color: var(--dz-accent-color);
-}
-
-.span3 td.input {
-    padding: 10px 15px;
-    width: calc(100% - 10px);
-    max-width: 100px;
-    text-align: right;
-}
-
-.span3 td#img2 ~ td.input {
-     width: calc(100% - 60px);
-}
-
-.span3 td.input .btn-group {
-    flex-flow: column;
-    justify-content: start;
-    white-space: normal;
-    margin-top: 0 !important;
-    height: 50px;
-    width: 100%;
-    scroll-snap-type: y mandatory;
-    background: var(--dz-widget-bg) !important;
-}
-
-.span3 td.input .btn-group button {
-    order: 2;
-    border-radius: 0 !important;
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
-}
-
-.span3 td.input .btn-group button.btn-selected {
-    color: #fff !important;
-    font-size: 1rem;
-    min-height: 50px;
-    order: 1;
-}
-
-.span3 td.switch-cell~td.input {
-    align-self: end;
-}
-
-.span3 .switch-cell {
-    grid-area: status;
-    align-self: start;
-    padding: 0 10px;
-}
-
-#dashSwitches .span3 #bigtext,
-#dashLights .span3 #bigtext,
-#dashWeather .span3 .status,
-#dashTemperature .span3 .status,
-#dashUtility .span3 .item:not(.Text):not(.Alert) .status {
-    display: none;
-}
-
-#dashScenes .span3 #bigtext,
-#dashSwitches .span3 #bigtext,
-#dashLights .span3 #bigtext,
-#dashWeather .span3 #bigtext,
-#dashTemperature .span3 #bigtext,
-#dashUtility .span3 #bigtext {
-    grid-area: status;
-    padding: 0 10px;
-    align-self: center;
-    font-size: 1.4em;
-}
-
-#holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr,
-#holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr {
-    grid-template-rows: 28px 50px 12px;
-    grid-template-columns: 58px 5px 1fr;
-    grid-gap: 2px;
-    gap: 2px;
-    grid-template-areas:
-        'name name name'
-        'img img2 bigtext'
-        'lastupdate lastupdate lastupdate';
-    overflow: hidden;
-}
-
-#holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr td#bigtext,
-#holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr td#bigtext {
-    grid-area: bigtext;
-    font-size: 1.3em;
-    font-family: main-font-bold;
-    padding: 2px 8px 0 0;
-    text-align: right;
-    align-self: center;
-    color: var(--dz-accent-color);
-}
-
-#holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr td#status,
-#holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr td#status {
-    display:none;
-}
-
-#holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr td#lastupdate,
-#holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr td#lastupdate {
-    grid-area: lastupdate;
-    padding: 0 8px 2px 0;
-    text-align: right;
-    align-self: center;
-    font-size: 0.72em;
-    color: var(--secondary-text-color);
-    max-height: unset;
-}
-
-#holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr td.input,
-#holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr td.input {
-    grid-area: bigtext;
-    align-self: center;
-}
-
-#holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr:has(td.input) td#bigtext,
-#holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr:has(td.input) td#bigtext {
-    display: none;
-}
-
-#holder #dashcontent .row .span3 .item table[id="itemtablesmalltrippleicon"] > tbody > tr,
-#holder #dashcontent .row .item.span3 table[id="itemtablesmalltrippleicon"] > tbody > tr {
-    grid-template-columns: 58px 45px 58px;
-    grid-template-areas: 'name name name'
-    'img img2 img3'
-    'lastupdate lastupdate lastupdate';
-}
-
-#holder #dashcontent .row .span3 .item table[id="itemtablesmalltrippleicon"] > tbody > tr td#bigtext,
-#holder #dashcontent .row .item.span3 table[id="itemtablesmalltrippleicon"] > tbody > tr td#bigtext {
-    display: none !important;
 }
 
