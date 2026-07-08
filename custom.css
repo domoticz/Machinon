@@ -1504,7 +1504,17 @@ button.savebtn:disabled {
     padding: 4px 8px !important;
     font-size: 11px !important;
 }
-/* Universal button reset — kills Bootstrap 2.x gradients */
+/* Universal button reset — kills Bootstrap 2.x gradients.
+
+   Load-bearing !important: Bootstrap 2 (css/bootstrap.css, loaded globally before this theme and
+   NOT removable per theme) styles .btn-* with gradients, and its STATE rules carry higher
+   specificity than our base rules: .btn-primary:hover / :active / [disabled] are (0,2,0) and set
+   background-color/color. Our .btn-* base rules are only (0,1,0), so without !important a hover
+   would flip the button to Bootstrap blue (#0044cc) and active/disabled would show Bootstrap
+   gradients. The !important on background/border/color/box-shadow below is what keeps the flat
+   Machinon look across every state. Do NOT strip it without first raising each rule to cover
+   :hover/:active/[disabled] at matching specificity (see the [disabled] rules, which DO carry
+   !important so they can beat this base and render the grey disabled state). */
 .btn-info,
 .btn-success,
 .btn-warning,
@@ -1726,21 +1736,24 @@ button.savebtn:disabled {
 }
 
 /* Unified disabled states */
+/* !important required: the base .btn-* rules above set background/color with !important (to beat
+   Bootstrap 2 hover), which would otherwise defeat this [disabled] styling and make disabled filled
+   buttons render identical to enabled ones. !important here lets the disabled state win. */
 .btn-info[disabled],
 .btn-success[disabled],
 .btn-warning[disabled],
 .btn-danger[disabled] {
-    background: var(--dz-btn-disabled-bg);
-    border-color: var(--dz-btn-disabled-bg);
-    color: var(--dz-btn-disabled-text);
+    background: var(--dz-btn-disabled-bg) !important;
+    border-color: var(--dz-btn-disabled-bg) !important;
+    color: var(--dz-btn-disabled-text) !important;
     cursor: not-allowed;
     pointer-events: none;
 }
 
 .btn-primary[disabled] {
-    background: var(--dz-btn-disabled-bg);
-    border-color: var(--dz-btn-disabled-bg);
-    color: var(--dz-btn-disabled-text);
+    background: var(--dz-btn-disabled-bg) !important;
+    border-color: var(--dz-btn-disabled-bg) !important;
+    color: var(--dz-btn-disabled-text) !important;
     cursor: not-allowed;
     pointer-events: none;
 }
