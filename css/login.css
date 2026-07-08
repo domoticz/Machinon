@@ -1,0 +1,179 @@
+/*
+  login.css - Login page styling for Machinon: the current glass-morphism login
+  (views/login.html) made Machinon-flat, plus the legacy #login styles for older Domoticz.
+
+  Part of the INCREMENTAL DE-MONOLITH of custom.css (Phase 5.3) - see the import block in
+  custom.css for the full direction. Only LOGIN-specific selectors live here (#login*,
+  .remember-row, and the .glass-card .glass-input/.auth-tab/.passkey-*/.back-link/.domoticz-link
+  form rules). The shared .glass-card BASE rule and the About-page .section-title/.version-badge/
+  .info-value/.donation-text stay in custom.css because they are shared with the About page, not
+  login - they belong to a future about/glass-primitives file, not here. Safe to relocate earlier
+  in the cascade: every selector here is login-only (verified) and the .glass-card descendant
+  rules outrank core's .glass-input by specificity regardless of order.
+*/
+/* Legacy login page styles (#login) - targets old Domoticz login HTML structure.
+   Can be removed once Domoticz versions before the glass-themed login redesign
+   are no longer supported. */
+#login:before {
+    background: linear-gradient(to right, #0bcdc7 0%, var(--dz-accent-color) 100%);
+    text-align: center;
+    vertical-align: middle;
+    background-size: 100% 75px;
+    background-repeat: no-repeat;
+    border: none !important;
+	border-radius: 6px !important;
+    top: 0% !important;
+    bottom: 0% !important;
+    left: 0% !important;
+    right: 0% !important;
+    padding-top: 15px;
+	content: url(images/logo.png) !important;
+}
+
+#login h1:after, #login h1:before {
+    content: none !important;
+}
+
+
+#login {
+    width: 450px;
+    height: auto !important;
+/*     margin: auto;
+    position: relative; */
+	padding: 90px 30px 30px 30px !important;
+	background: #fff;
+    background-image: none !important;
+    background-color: #ffffff !important;
+    border: 1.5px solid;
+    border-color: transparent;
+    border-radius: 6px !important;
+    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
+}
+
+#login h1 {
+	color:#fff !important;
+	font: bold 26px/1 Verdana, Helvetica !important;
+	display: none
+}
+
+#login input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -ms-appearance: none;
+    height: 14px;
+    width: 14px;
+    margin-right: 8px;
+    position: relative;
+    background: #fff;
+    border: 1px solid var(--dz-accent-color);
+    outline: none;
+}
+#login input[type="checkbox"]:checked::before {
+    background: var(--dz-accent-color);
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 8px;
+    height: 8px;
+}
+
+#login a {
+    display: none
+}
+
+#login #inputs input[type=text], #login #inputs input[type=password] {
+    border: none;
+    border-radius: none !important;
+    box-shadow: none !important;
+    background: #f1f1f1;
+    border-bottom: 1px solid #ccc;
+    color: #1a1a1a;
+}
+
+#login #inputs input[type=text]:focus, #login #inputs input[type=password]:focus {
+    border-bottom: 1px solid var(--dz-accent-color);
+    color: #1a1a1a;
+}
+
+#login fieldset {
+    font-family: main-font;
+    margin: auto !important;
+    width: 25%;
+}
+
+#login #submit {
+    background-image: none;
+    background-color: var(--dz-accent-color);
+    color: #fff;
+    border: none;
+    text-shadow: none;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* New Domoticz login page (glass-themed redesign) - Machinon-flat.
+   Keep the white .glass-card + dark canvas + blue .btn-modern; fix the light-on-glass
+   elements to Machinon's palette. .glass-input is used only on login/2FA, so scoping the
+   overrides under .glass-card is safe and does not affect other pages. Colours via --dz-*. */
+.remember-row {
+    color: var(--dz-body-text) !important;
+}
+
+.glass-card .glass-input {
+    background: var(--dz-body-bg);
+    border: 1px solid var(--dz-input-border);
+    border-radius: 6px;
+    color: var(--dz-body-text);
+}
+
+.glass-card .glass-input::placeholder {
+    color: var(--secondary-text-color);
+}
+
+.glass-card .glass-input:focus {
+    border-color: var(--dz-accent-color);
+    background: var(--dz-input-bg);
+    box-shadow: none;
+}
+
+/* 2FA / passkey copy (core: white on glass) */
+.glass-card .glass-text,
+.glass-card .passkey-desc {
+    color: var(--secondary-text-color);
+}
+
+.glass-card .passkey-icon {
+    color: var(--dz-accent-color);
+}
+
+/* Auth method tabs (shown when passkeys are available) */
+.glass-card .auth-tab {
+    background: var(--dz-body-bg);
+    border: 1px solid var(--dz-input-border);
+    color: var(--dz-body-text);
+}
+
+.glass-card .auth-tab.active {
+    background: rgba(var(--dz-accent-values), 0.12);
+    border-color: var(--dz-accent-color);
+    color: var(--dz-accent-color);
+}
+
+.glass-card .auth-tab:hover:not(.active) {
+    background: rgba(var(--dz-accent-values), 0.06);
+    color: var(--dz-body-text);
+}
+
+/* Links */
+.glass-card .back-link,
+.glass-card .domoticz-link {
+    color: var(--dz-accent-color);
+}
+
+.glass-card .back-link:hover,
+.glass-card .domoticz-link:hover {
+    color: var(--dz-accent-color);
+    filter: brightness(0.85);
+}
