@@ -1,0 +1,144 @@
+/*
+  charts.css - Highcharts (device log graphs) + chart zoom-button styling for Machinon.
+
+  Part of the INCREMENTAL DE-MONOLITH of custom.css (Phase 5.3) - see the import block in
+  custom.css for the full direction. This block was safe to relocate earlier in the cascade
+  because every selector is chart-scoped (.highcharts-* / .zoom-*), appears nowhere else, and is
+  class-scoped (higher specificity than any generic element rule), so no cascade outcome changes.
+  When you touch a chart rule, keep it here rather than in custom.css.
+*/
+/* Charts */
+.highcharts-tooltip-container,
+.highcharts-legend.highcharts-no-tooltip > rect {
+	fill: var(--dz-body-bg) !important;
+}
+	
+.highcharts-background {
+    fill: var(--dz-widget-bg);
+    stroke-width: 0;
+}
+
+.highcharts-point {
+    stroke-width: 0;
+}
+
+.highcharts-label text .highcharts-text-outline {
+    display: none;
+}
+
+.highcharts-title,
+.highcharts-menu-item,
+.highcharts-label text,
+.highcharts-axis-title text,
+.highcharts-axis-labels text,
+.highcharts-legend-item text,
+.highcharts-tooltip text,
+.highcharts-data-label text {
+    color: var(--secondary-text-color) !important;
+    fill: var(--secondary-text-color) !important;
+    font-family: main-font !important;
+}
+/* Charts - Tooltip */
+.highcharts-tooltip text {
+    color: var(--secondary-text-color) !important;
+    fill: var(--secondary-text-color) !important;
+}
+
+.highcharts-tooltip td {
+    color: var(--secondary-text-color) !important;
+}
+
+.highcharts-tooltip-box {
+    fill: var(--dz-body-bg);
+    fill-opacity: 0.6;
+    stroke-width: 0;
+}
+/* Charts - Grid */
+.highcharts-yaxis-grid .highcharts-grid-line {
+    stroke: var(--dz-body-bg);
+}
+
+.highcharts-axis-line {
+    stroke: var(--dz-body-bg);
+}
+
+.highcharts-tick {
+    stroke: var(--dz-body-bg);
+}
+
+.highcharts-yaxis .highcharts-tick {
+    display: none;
+}
+
+/* Charts - Export button/menu */
+.highcharts-button-box {
+    fill: var(--dz-widget-bg);
+    rx: 4;
+    ry: 4;
+}
+
+.highcharts-button-symbol {
+    stroke: var(--dz-accent-color) !important;
+    stroke-width: 2px;
+}
+
+.highcharts-contextbutton:hover {
+    cursor: pointer;
+}
+
+/* Chart zoom buttons */
+.zoom-buttons-container {
+    gap: 4px;
+}
+
+.zoom-button,
+.zoom-reset {
+    font-family: main-font;
+    font-size: 11px;
+    color: var(--dz-body-text);
+    background: transparent;
+    border: 1px solid var(--dz-accent-color);
+    border-radius: 5px;
+    padding: 2px 8px;
+    cursor: pointer;
+}
+
+.zoom-button:hover {
+    background: var(--dz-accent-color);
+    color: #fff;
+}
+
+.zoom-reset {
+    border-color: var(--dz-accent-red);
+}
+
+.zoom-reset:hover {
+    background: var(--dz-accent-red);
+    border-color: var(--dz-accent-red);
+    color: #fff;
+}
+
+.highcharts-contextbutton:hover .highcharts-button-box {
+    fill: rgba(var(--dz-accent-values), 0.1) !important;
+}
+
+.highcharts-menu {
+    background: var(--dz-widget-bg) !important;
+    border: none !important;
+    border-radius: 6px !important;
+    box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.2) !important;
+    padding: 6px 0 !important;
+}
+
+.highcharts-menu-item {
+    font-family: main-font !important;
+    color: var(--dz-body-text) !important;
+    padding: 8px 16px !important;
+    font-size: 12px !important;
+    transition: background 0.15s ease;
+}
+
+.highcharts-menu-item:hover {
+    background: var(--dz-accent-color) !important;
+    color: #fff !important;
+}
