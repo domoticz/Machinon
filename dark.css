@@ -22,6 +22,7 @@ html[data-dz-scheme="dark"] {
   /* Machinon aux tokens (no core --dz-* equivalent) */
   --secondary-text-color:   #cccccc;
   --main-blue-color-values: 11,158,218;
+  --dz-accent-red-values:   224,85,85;
 
   /* Dash2 chrome tokens (dark). Special-widget recolour handled in Task 4. */
   --dz-panel-bg:             #515558;

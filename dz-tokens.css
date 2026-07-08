@@ -30,6 +30,7 @@
     /* Machinon aux tokens (no core --dz-* equivalent) */
     --secondary-text-color:   #6d6e6d;
     --main-blue-color-values: 9,127,174;
+    --dz-accent-red-values:   196,59,59;
 
     /* Dash2 (dynamic GridStack dashboard) chrome tokens (light).
        Consumed by core dashboard.css; device-card bg comes from --dz-widget-bg above.
@@ -52,6 +53,23 @@
     --dz-table-border:          var(--dz-input-border);
     --dz-table-row-selected-bg: var(--dz-accent-color);
     --dz-table-control-text:    var(--secondary-text-color);
+
+    /* Button (--dz-btn-*) contract - core dashboard.css/style.css consume these; retargeted
+       Machinon button rules in custom.css consume them too. Values = current Machinon palette.
+       --dz-btn-success-bg / --dz-btn-warning-bg are defined in the mapped-tokens block above. */
+    --dz-btn-primary-bg:      var(--dz-accent-color);
+    --dz-btn-primary-text:    #fff;
+    --dz-btn-info-bg:         var(--dz-accent-color);
+    --dz-btn-danger-bg:       var(--dz-accent-red);
+    --dz-btn-danger-bg-alpha: rgba(var(--dz-accent-red-values), 0.85);
+    --dz-btn-bg:              var(--dz-widget-bg);
+    --dz-btn-text:            var(--dz-body-text);
+    --dz-btn-border:          var(--dz-input-border);
+    --dz-btn-hover-bg:        rgba(var(--main-blue-color-values), 0.1);
+    --dz-btn-shadow:          none;
+    --dz-btn-text-shadow:     none;
+    --dz-btn-disabled-bg:     var(--dz-status-disabled);
+    --dz-btn-disabled-text:   var(--secondary-text-color);
 
     /* Back-compat aliases: existing --main-* rules now source from --dz-* */
     --main-bg-color:        var(--dz-body-bg);
