@@ -66,23 +66,6 @@
          url('fonts/open-sans-v16-latin_latin-ext-600.woff2') format('woff2'),
          url('fonts/open-sans-v16-latin_latin-ext-600.woff') format('woff');
 }
-/* Bootbox */
-.bootbox.modal.fade.in {
-    background-color: var(--dz-modal-bg) !important;
-}
-
-.modal-content {
-    background-color: var(--dz-modal-bg) !important;
-}
-
-.modal-title {
-    color: var(--dz-modal-text);
-}
-
-.modal-footer {
-    border-top: 1px solid #f1f2f3 !important;
-    background-color: var(--dz-modal-bg) !important;
-}
 .help-block {
     color: var(--dz-body-text);
 }
@@ -1745,6 +1728,27 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
     padding: 8px 15px;
 }
 
+/* Bootbox */
+.bootbox.modal.fade.in {
+    background-color: var(--dz-modal-bg) !important;
+}
+
+.modal-content {
+    background-color: var(--dz-modal-bg) !important;
+}
+
+.modal-title {
+    color: var(--dz-modal-text);
+}
+
+.modal-footer {
+    border-top: 1px solid #f1f2f3 !important;
+    background-color: var(--dz-modal-bg) !important;
+}
+.ui-dialog-buttonset .ui-button-text {
+    color: var(--dz-btn-primary-text);
+}
+
 /* Device log stat cards — upstream uses rgba(255,255,255,0.05) inline which is invisible in light mode */
 .current-conditions .ng-scope[style*="background"] {
     background: var(--dz-widget-bg) !important;
@@ -1824,9 +1828,6 @@ select.ui-corner-all option {
 }
 
 /* =Popus */
-.ui-dialog-buttonset .ui-button-text {
-    color: var(--dz-btn-primary-text);
-}
 
 .ui-widget-header {
     color: var(--secondary-text-color);
