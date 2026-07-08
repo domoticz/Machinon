@@ -17,6 +17,16 @@
 @import url("css/animate.css");
 @import url("css/dashboard2.css");
 
+/* Incremental de-monolith (Phase 5.3): custom.css grew as one large source-ordered file. We are
+   splitting it into focused feature files one COHESIVE, CONTIGUOUS block at a time - each extracted
+   block must use selectors that don't collide (same selector + specificity) with rules elsewhere,
+   so relocating it here (earlier in the cascade) is safe, verified by pixel-parity. Direction for
+   contributors: when you touch a rule that belongs to one of these feature files, migrate it there
+   instead of adding to custom.css, so the monolith keeps shrinking. Do NOT bulk-reorder unrelated
+   rules into feature files (that risks cascade regressions); grow the split gradually and verified.
+   Extracted so far: css/tables.css (DataTables). */
+@import url("css/tables.css");
+
 /* Display sidemenu on low resolution devices */
 @import url("css/sidemenu.css") (max-width: 979px);
 
@@ -1763,75 +1773,6 @@ button.savebtn:disabled {
 #itemtabletrippleicon td:last-child .btnsmall-sel {
     border-radius: 0;
     height: auto;
-}
-
-/* Data Tables */
-.dataTables_wrapper {
-		border: 1.5px solid;
-    border-color: transparent;
-    border-radius: 6px;
-    margin-bottom: 10px;
-    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
-}
-table.dataTable {
-    width: 100% !important;
-}
-
-.dataTables_wrapper > div:first-child,
-.dataTables_wrapper > div:last-child {
-    background: transparent;
-    border: none !important;
-}
-
-.dataTables_wrapper .dataTables_length,
-.dataTables_wrapper .dataTables_filter,
-.dataTables_wrapper .dataTables_info {
-    color: var(--dz-table-control-text);
-}
-
-.dataTables_wrapper .ui-widget-header .ui-state-default {
-    background: transparent;
-    border: none !important;
-    color: var(--dz-table-header-text) !important;
-}
-
-table.dataTable thead th,
-table.dataTable thead th.ui-state-default {
-    background: var(--dz-table-header-bg) !important;
-    background-image: none !important;
-    color: var(--dz-table-header-text);
-    height: 35px;
-    padding-right: 10px;
-    text-align: -webkit-left;
-    border: none !important;
-}
-
-.dataTables_wrapper .dataTable tr {
-    border: 1px solid var(--dz-table-border);
-}
-
-.dataTables_wrapper tr.odd,
-.dataTables_wrapper tr.even {
-    height: 45px;
-    color: var(--dz-table-row-text) !important;
-}
-
-.dataTables_wrapper tr.odd {
-    background-color: var(--dz-table-row-odd-bg);
-}
-
-.dataTables_wrapper tr.even {
-    background-color: var(--dz-table-row-even-bg);
-}
-
-tr.odd td.sorting_1, tr.even td.sorting_1 {
-    background-color: transparent;
-}
-
-.dataTables_wrapper table tbody tr.odd.row_selected td,
-.dataTables_wrapper table tbody tr.even.row_selected td {
-    background: var(--dz-table-row-selected-bg) !important;
-    opacity: .75;
 }
 
 .btnstyle3, .btnstyle3-sel {
