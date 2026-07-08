@@ -17,26 +17,37 @@
 @import url("css/animate.css");
 @import url("css/dashboard2.css");
 
-/* Incremental de-monolith (Phase 5.3): custom.css grew as one large source-ordered file. We are
-   splitting it into focused feature files one COHESIVE, CONTIGUOUS block at a time - each extracted
-   block must use selectors that don't collide (same selector + specificity) with rules elsewhere,
-   so relocating it here (earlier in the cascade) is safe, verified by pixel-parity. Direction for
-   contributors: when you touch a rule that belongs to one of these feature files, migrate it there
-   instead of adding to custom.css, so the monolith keeps shrinking. Do NOT bulk-reorder unrelated
-   rules into feature files (that risks cascade regressions); grow the split gradually and verified.
-   Extracted so far: css/tables.css (DataTables), css/charts.css (Highcharts + zoom buttons),
-   css/login.css (login page: glass-login form + legacy #login; shared .glass-card base and the
-   About-page .section-title/.version-badge/etc. deliberately stay here, not in login.css). */
+/* Incremental de-monolith (Phase 5.3): custom.css grew as one large source-ordered file. We split
+   it into focused feature files, but ONLY for features whose selectors are UNIQUE (appear nowhere
+   else). That matters because @import must precede all inline rules, so a feature file loads BEFORE
+   the rest of custom.css - safe only when the extracted rules can't collide with anything they now
+   jump over. Verified per file.
+
+   DELIBERATELY KEPT IN custom.css (structural reason): buttons, nav/sub-tabs, forms, device cards,
+   the shared "Add fonts" block, and the core layout. These rely on their LATE source position to
+   override earlier cross-cutting rules (e.g. the button block overrides the font block's
+   .btnstyle3 colour) and/or use selectors shared across the file, so extracting them to a top
+   @import would REGRESS the cascade. They stay here as the well-commented base; do not force them
+   into feature files without collision-resolution.
+
+   Direction for contributors: when you touch a rule that belongs to an existing feature file,
+   migrate it there. Do NOT bulk-reorder rules into feature files (cascade-regression risk).
+   Extracted feature files: tables (DataTables), charts (Highcharts + zoom), login (glass-login +
+   legacy #login), energy, logpage, setpoint, search, device-status. */
 @import url("css/tables.css");
 @import url("css/charts.css");
 @import url("css/login.css");
+@import url("css/energy.css");
+@import url("css/logpage.css");
+@import url("css/setpoint.css");
+@import url("css/search.css");
+@import url("css/device-status.css");
 
 /* Display sidemenu on low resolution devices */
 @import url("css/sidemenu.css") (max-width: 979px);
 
 /* ionicons */
 @import url("css/ionicons.min.css");
-
 
 @font-face {
     font-family: main-font;
@@ -151,121 +162,6 @@ h4,
 .disabledBg {
     background: var(--dz-status-disabled);
 }
-/* Energy dashboard */
-#emain {
-	width: calc(90vw - 50px)!important;
-    height: calc(90vh - 110px) !important;
-	background: var(--dz-body-bg)!important;
-	border-color: var(--dz-accent-color) !important;
-}
-#eicon {
-    fill: var(--dz-body-text)!important;
-}
-
-
-/* logpage */
-#logdata,
-#logdata_status,
-#logdata_error,
-#logdata_debug {
-    background: var(--dz-nav-bg);
-    max-height: calc(100vh - 220px);
-}
-
-.log-console-container {
-		background: var(--dz-widget-bg);
-    border: 1.5px solid;
-    border-color: transparent;
-    border-radius: 6px;
-    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
-}
-
-.log-console {
-	font-family: main-font;
-}
-.log-toolbar {
-	background: var(--dz-widget-bg);
-}
-.log-statusbar {
-	background: var(--dz-widget-bg);
-}
-
-.log-filter-btn {
-    background: transparent !important;
-    border: 1px solid var(--dz-accent-color) !important;
-    color: var(--dz-body-text) !important;
-    border-radius: 5px !important;
-}
-
-.log-filter-btn:hover {
-    background: var(--dz-accent-color) !important;
-    color: #fff !important;
-}
-
-.log-filter-btn-active {
-    opacity: 1;
-    background: var(--dz-accent-color) !important;
-    color: #fff !important;
-    border-color: var(--dz-accent-color) !important;
-}
-
-.log-filter-btn-active span {
-    color: #fff !important;
-}
-
-.log-toggle-count {
-    background: rgba(var(--dz-accent-values), 0.2);
-    border-radius: 3px;
-}
-
-.log-filter-btn-active .log-toggle-count {
-    background: rgba(255, 255, 255, 0.25);
-}
-
-.log-level-norm {
-    color: var(--dz-body-text);
-}
-
-.log-level-status {
-    color: var(--dz-accent-color);
-}
-
-.log-level-error {
-    color: var(--dz-accent-red);
-}
-/* Setpoint popup */
-#setpoint_popup {
-    color: var(--secondary-text-color)!important;
-    text-shadow: none;
-    background-color: var(--dz-widget-bg)!important;
-}
-
-#popup_setpoint {
-    font-family: main-font-bold;
-    color: var(--dz-accent-color)!important;
-    border-color: var(--dz-widget-bg)!important;
-    background: var(--dz-widget-bg)!important;
-	border-color: var(--dz-accent-color) !important;
-}
-
-.ui-close {
-    background: url(../images/Close.png);
-    width: 32px;
-    height: 32px;
-}
-
-.ui-close:hover {
-    background-position: 0 0px
-}
-
-.ui-popup.ui-corner-all {
-    background: var(--dz-widget-bg);
-    border-radius: 6px;
-    box-shadow: -2px 2px 20px 0px rgba(0, 0, 0, 0.2);
-    color: var(--dz-widget-text);
-    border-bottom: none;
-}
-
 /* Remove domoticz item search */
 #tbFiltSearch {
     display: none;
@@ -274,155 +170,6 @@ h4,
 /* Hide upstream "Switching On/Off" notification — inconsistent timing */
 #notification {
     display: none !important;
-}
-
-/* Search */
-#search {
-    float: right;
-    margin-top: 5px;
-    margin-right: 10px;
-    color: #fff;
-    background-color: transparent;
-    outline: 0;
-    transition: transform .5s;
-}
-
-#search i {
-    font-size: 30px;
-    line-height: 30px;
-}
-
-#searchInput {
-    color: #fff;
-    border-color: #fff;
-}
-
-#searchInput::placeholder {
-    color: #fff;
-    opacity: 0.5;
-}
-
-#search.readonly {
-    opacity: 0.3;
-}
-
-#search.readonly #searchInput {
-    display: none;
-}
-
-@media (max-width: 767px) {
-    #searchInput {
-        width: 0;
-        margin-right: 10px;
-    }
-
-    #search:hover #searchInput,
-    #search:active #searchInput,
-    #search:focus #searchInput {
-        width: calc(100% - 60px);
-        max-width: unset;
-        transform: translate(30px, 45px);
-        background: var(--dz-accent-color);
-        box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.2);
-        border-radius: 20px;
-        border: 5px solid #fff;
-        padding: 10px;
-        position: relative;
-        z-index: 5;
-    }
-
-    #search:not(.readonly):hover,
-        #search:not(.readonly):active,
-        #search:not(.readonly):focus {
-        width: 100%;
-    }
-
-    #search:not(.readonly):hover i,
-        #search:not(.readonly):active i,
-        #search:not(.readonly):focus  i {
-        position: absolute;
-        right: 10px;
-    }
-}
-
-.msg {
-    background-color: var(--dz-widget-bg);
-    font-family: main-font-bold;
-    color: var(--dz-body-text);
-    border-radius: 5px;
-    box-shadow: -2px 2px 20px 0px rgba(0, 0, 0, 0.2);
-    z-index: 99;
-    display: block;
-    position: absolute;
-    top: 30px;
-    height: flex;
-    padding: 8px;
-    right: 200px;
-    overflow: hidden;
-    width: flex;
-}
-
-.msg span {
-    color: var(--secondary-text-color);
-}
-
-input[type="number"] {
-    width: 40px;
-}
-
-input[type="text"],
-input[type="input"],
-input[type="number"],
-input[type="password"] {
-    background-color: transparent;
-    outline: 0;
-    border-width: 0 0 1px;
-    border-color: var(--dz-accent-color);
-    color: var(--secondary-text-color);
-    max-width: 250px;
-}
-
-input[type="checkbox"], input[type="radio"] {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    -ms-appearance: none;
-    height: 14px;
-    width: 14px;
-    margin-right: 8px;
-    position: relative;
-    background: var(--dz-widget-bg);
-    border: 1px solid var(--dz-accent-color);
-    outline: none;
-}
-
-input[type="checkbox"] {
-    border-radius: 2px;
-}
-
-input[type="checkbox"]:disabled, 
-input[type="radio"]:disabled {
-    border: 1px solid var(--dz-status-disabled);
-}
-
-input[type="checkbox"]:disabled + label, 
-input[type="radio"]:disabled + label {
-    color: var(--dz-status-disabled);
-}
-
-input[type="checkbox"]:checked::before, 
-input[type="radio"]:checked::before {
-    background: var(--dz-accent-color);
-    content: "";
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 8px;
-    height: 8px;
-}
-
-[type=radio], [type=radio]:checked::before{
-    border-radius: 100%;
 }
 
 /* common features */
@@ -608,8 +355,6 @@ div.bannercontent .row:not(.divider) {
     display: grid;
 }
 
-
-
 #holder .row .span4 table[id^="item"] > tbody > tr,
 #holder .row .item.span4 table[id^="item"] > tbody > tr,
 .dd-widget-body .item.itemBlock table[id^="item"] > tbody > tr {
@@ -759,7 +504,6 @@ table.mobileitem td.name {
     scrollbar-width: thin;
     scrollbar-color: var(--dz-accent-color) var(--dz-body-bg);
 }
-
 
 .btn-group::-webkit-scrollbar,
 .item #status::-webkit-scrollbar,
@@ -1472,7 +1216,6 @@ a.btnstyle {
     color: var(--dz-body-text);
 }
 
-
 /* Reset/save theme button */
 .resetbtn {
     background: var(--dz-btn-danger-bg);
@@ -2009,55 +1752,6 @@ select.ui-corner-all option {
     color: var(--secondary-text-color);
 }
 
-/* Device update pulse */
-@keyframes updatePulse {
-    0% { box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2); }
-    50% { box-shadow: 0px 0px 0px 3px var(--dz-accent-color); }
-    100% { box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2); }
-}
-
-tr.update-pulse {
-    animation: updatePulse 0.8s ease;
-}
-
-.item.fadeOff {
-    opacity: 0.5;
-}
-/*  Device is timeout  */
-.item.statusTimeout {
-    box-shadow: 0px 0px 10px 2px rgb(199,67,67,0.5);
-    opacity: 0.5;
-}
-
-.item.statusTimeout tr:hover {
-    box-shadow: 0px 0px 0px 2px rgb(199,67,67) !important;
-}
-/* Switch is protected */
-.item.statusProtected tr {
-    box-shadow: 0px 0px 10px 2px rgb(0, 0, 139, 0.4) !important;
-}
-.item.statusProtected tr:hover {
-    box-shadow: 0px 0px 10px 2px rgb(0, 0, 139, 0.4) !important;
-}
-
-/* Device has low battery */
-.item.statusLowBattery tr {
-    box-shadow: 0px 0px 10px 2px rgb(255,255,0,0.4) !important;
-}
-
-.item.statusLowBattery tr:hover {
-    box-shadow: 0px 0px 0px 2px rgb(255,255,0) !important;
-}
-
-.blink {
-    animation: blinker 2s linear infinite;
-}
-
-@keyframes blinker {
-    50% {
-        opacity: 0;
-    }
-}
 /* Watermarks */
 /* Media Queries */
 

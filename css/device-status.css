@@ -1,0 +1,56 @@
+/*
+  device-status.css - device status animations (update pulse, timeout, protected, low battery) for Machinon.
+  Part of the incremental de-monolith of custom.css (Phase 5.3) - see the import block in
+  custom.css. Extracted because its selectors (.updatePulse keyframe + status modifiers) are unique to this feature and appear
+  nowhere else, so relocating it earlier in the cascade changes no outcome (verified). Keep
+  touched device-status rules here.
+*/
+/* Device update pulse */
+@keyframes updatePulse {
+    0% { box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2); }
+    50% { box-shadow: 0px 0px 0px 3px var(--dz-accent-color); }
+    100% { box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2); }
+}
+
+tr.update-pulse {
+    animation: updatePulse 0.8s ease;
+}
+
+.item.fadeOff {
+    opacity: 0.5;
+}
+/*  Device is timeout  */
+.item.statusTimeout {
+    box-shadow: 0px 0px 10px 2px rgb(199,67,67,0.5);
+    opacity: 0.5;
+}
+
+.item.statusTimeout tr:hover {
+    box-shadow: 0px 0px 0px 2px rgb(199,67,67) !important;
+}
+/* Switch is protected */
+.item.statusProtected tr {
+    box-shadow: 0px 0px 10px 2px rgb(0, 0, 139, 0.4) !important;
+}
+.item.statusProtected tr:hover {
+    box-shadow: 0px 0px 10px 2px rgb(0, 0, 139, 0.4) !important;
+}
+
+/* Device has low battery */
+.item.statusLowBattery tr {
+    box-shadow: 0px 0px 10px 2px rgb(255,255,0,0.4) !important;
+}
+
+.item.statusLowBattery tr:hover {
+    box-shadow: 0px 0px 0px 2px rgb(255,255,0) !important;
+}
+
+.blink {
+    animation: blinker 2s linear infinite;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
+}

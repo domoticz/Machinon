@@ -1,0 +1,40 @@
+/*
+  setpoint.css - setpoint popup for Machinon.
+  Part of the incremental de-monolith of custom.css (Phase 5.3) - see the import block in
+  custom.css. Extracted because its selectors (.setpoint*) are unique to this feature and appear
+  nowhere else, so relocating it earlier in the cascade changes no outcome (verified). Keep
+  touched setpoint rules here.
+*/
+/* Setpoint popup */
+#setpoint_popup {
+    color: var(--secondary-text-color)!important;
+    text-shadow: none;
+    background-color: var(--dz-widget-bg)!important;
+}
+
+#popup_setpoint {
+    font-family: main-font-bold;
+    color: var(--dz-accent-color)!important;
+    border-color: var(--dz-widget-bg)!important;
+    background: var(--dz-widget-bg)!important;
+	border-color: var(--dz-accent-color) !important;
+}
+
+.ui-close {
+    background: url(../images/Close.png);
+    width: 32px;
+    height: 32px;
+}
+
+.ui-close:hover {
+    background-position: 0 0px
+}
+
+.ui-popup.ui-corner-all {
+    background: var(--dz-widget-bg);
+    border-radius: 6px;
+    box-shadow: -2px 2px 20px 0px rgba(0, 0, 0, 0.2);
+    color: var(--dz-widget-text);
+    border-bottom: none;
+}
+

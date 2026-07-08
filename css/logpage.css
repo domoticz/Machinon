@@ -1,0 +1,77 @@
+/*
+  logpage.css - log viewer page for Machinon.
+  Part of the incremental de-monolith of custom.css (Phase 5.3) - see the import block in
+  custom.css. Extracted because its selectors (#logdata* / .log-*) are unique to this feature and appear
+  nowhere else, so relocating it earlier in the cascade changes no outcome (verified). Keep
+  touched logpage rules here.
+*/
+/* logpage */
+#logdata,
+#logdata_status,
+#logdata_error,
+#logdata_debug {
+    background: var(--dz-nav-bg);
+    max-height: calc(100vh - 220px);
+}
+
+.log-console-container {
+		background: var(--dz-widget-bg);
+    border: 1.5px solid;
+    border-color: transparent;
+    border-radius: 6px;
+    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
+}
+
+.log-console {
+	font-family: main-font;
+}
+.log-toolbar {
+	background: var(--dz-widget-bg);
+}
+.log-statusbar {
+	background: var(--dz-widget-bg);
+}
+
+.log-filter-btn {
+    background: transparent !important;
+    border: 1px solid var(--dz-accent-color) !important;
+    color: var(--dz-body-text) !important;
+    border-radius: 5px !important;
+}
+
+.log-filter-btn:hover {
+    background: var(--dz-accent-color) !important;
+    color: #fff !important;
+}
+
+.log-filter-btn-active {
+    opacity: 1;
+    background: var(--dz-accent-color) !important;
+    color: #fff !important;
+    border-color: var(--dz-accent-color) !important;
+}
+
+.log-filter-btn-active span {
+    color: #fff !important;
+}
+
+.log-toggle-count {
+    background: rgba(var(--dz-accent-values), 0.2);
+    border-radius: 3px;
+}
+
+.log-filter-btn-active .log-toggle-count {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.log-level-norm {
+    color: var(--dz-body-text);
+}
+
+.log-level-status {
+    color: var(--dz-accent-color);
+}
+
+.log-level-error {
+    color: var(--dz-accent-red);
+}

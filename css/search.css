@@ -1,0 +1,156 @@
+/*
+  search.css - device/page search UI for Machinon.
+  Part of the incremental de-monolith of custom.css (Phase 5.3) - see the import block in
+  custom.css. Extracted because its selectors (#search / #searchInput) are unique to this feature and appear
+  nowhere else, so relocating it earlier in the cascade changes no outcome (verified). Keep
+  touched search rules here.
+*/
+/* Search */
+#search {
+    float: right;
+    margin-top: 5px;
+    margin-right: 10px;
+    color: #fff;
+    background-color: transparent;
+    outline: 0;
+    transition: transform .5s;
+}
+
+#search i {
+    font-size: 30px;
+    line-height: 30px;
+}
+
+#searchInput {
+    color: #fff;
+    border-color: #fff;
+}
+
+#searchInput::placeholder {
+    color: #fff;
+    opacity: 0.5;
+}
+
+#search.readonly {
+    opacity: 0.3;
+}
+
+#search.readonly #searchInput {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    #searchInput {
+        width: 0;
+        margin-right: 10px;
+    }
+
+    #search:hover #searchInput,
+    #search:active #searchInput,
+    #search:focus #searchInput {
+        width: calc(100% - 60px);
+        max-width: unset;
+        transform: translate(30px, 45px);
+        background: var(--dz-accent-color);
+        box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.2);
+        border-radius: 20px;
+        border: 5px solid #fff;
+        padding: 10px;
+        position: relative;
+        z-index: 5;
+    }
+
+    #search:not(.readonly):hover,
+        #search:not(.readonly):active,
+        #search:not(.readonly):focus {
+        width: 100%;
+    }
+
+    #search:not(.readonly):hover i,
+        #search:not(.readonly):active i,
+        #search:not(.readonly):focus  i {
+        position: absolute;
+        right: 10px;
+    }
+}
+
+.msg {
+    background-color: var(--dz-widget-bg);
+    font-family: main-font-bold;
+    color: var(--dz-body-text);
+    border-radius: 5px;
+    box-shadow: -2px 2px 20px 0px rgba(0, 0, 0, 0.2);
+    z-index: 99;
+    display: block;
+    position: absolute;
+    top: 30px;
+    height: flex;
+    padding: 8px;
+    right: 200px;
+    overflow: hidden;
+    width: flex;
+}
+
+.msg span {
+    color: var(--secondary-text-color);
+}
+
+input[type="number"] {
+    width: 40px;
+}
+
+input[type="text"],
+input[type="input"],
+input[type="number"],
+input[type="password"] {
+    background-color: transparent;
+    outline: 0;
+    border-width: 0 0 1px;
+    border-color: var(--dz-accent-color);
+    color: var(--secondary-text-color);
+    max-width: 250px;
+}
+
+input[type="checkbox"], input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -ms-appearance: none;
+    height: 14px;
+    width: 14px;
+    margin-right: 8px;
+    position: relative;
+    background: var(--dz-widget-bg);
+    border: 1px solid var(--dz-accent-color);
+    outline: none;
+}
+
+input[type="checkbox"] {
+    border-radius: 2px;
+}
+
+input[type="checkbox"]:disabled, 
+input[type="radio"]:disabled {
+    border: 1px solid var(--dz-status-disabled);
+}
+
+input[type="checkbox"]:disabled + label, 
+input[type="radio"]:disabled + label {
+    color: var(--dz-status-disabled);
+}
+
+input[type="checkbox"]:checked::before, 
+input[type="radio"]:checked::before {
+    background: var(--dz-accent-color);
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 8px;
+    height: 8px;
+}
+
+[type=radio], [type=radio]:checked::before{
+    border-radius: 100%;
+}
+
