@@ -7,7 +7,7 @@ input#AcceptNewHardware:checked ~ button {
 .allow5min,
 .allow5min:hover {
     background: none;
-    background-color: var(--main-blue-color);
+    background-color: var(--dz-accent-color);
     color: #fff;
     border-radius: 2px;
     border: none;
@@ -55,7 +55,7 @@ input#AcceptNewHardware:checked ~ button {
 #settingscontent input.parentrequired:not(:checked) ~ span.option,
 #settingscontent input.parentrequired:not(:checked) ~ span.option > input.parentrequiredchild,
 #settingscontent input.parentrequired:not(:checked) ~ span.option > textarea.parentrequiredchild {
-    color: var(--main-disabled-color);
+    color: var(--dz-status-disabled);
 }
 
 a.resetschemebtn {
@@ -72,8 +72,8 @@ a.resetschemebtn {
 }
 
 #settings .row-fluid > div {
-    background: var(--main-item-bg-color);
-    border: 1px solid var(--main-item-bg-color);
+    background: var(--dz-widget-bg);
+    border: 1px solid var(--dz-widget-bg);
 }
 
 #settings .row-fluid > div:has(> #SoftwareUpdates.ng-hide) {
@@ -146,7 +146,7 @@ a.resetschemebtn {
     font-size: 16px;
     font-weight: 300;
     letter-spacing: -0.5px;
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
     margin-left: 20px;
 }
 
@@ -181,9 +181,9 @@ ul.machinon_ul li {
 
 .dropdown-content {
     display: none;
-    background-color: var(--main-item-bg-color);
+    background-color: var(--dz-widget-bg);
     min-width: 160px;
-    border: 1.5px solid var(--main-blue-color);
+    border: 1.5px solid var(--dz-accent-color);
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     padding: 12px 16px;
     z-index: 1;
@@ -191,7 +191,7 @@ ul.machinon_ul li {
 }
 
 .dropdown-content a {
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
 }
 
 .rectangle-8-dropdown:hover .dropdown-content {
@@ -215,7 +215,7 @@ ul.machinon_ul li {
 }
 
 #settings .norm-link, #settings .norm-link a, #settings .norm-link a:link, #settings .norm-link a:active, #settings .norm-link a:visited, #settings .norm-link href, #settings a:link {
-    color: var(--main-blue-color);
+    color: var(--dz-accent-color);
 }
 
 @media all and (max-width: 767px) {

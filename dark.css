@@ -21,7 +21,7 @@ html[data-dz-scheme="dark"] {
 
   /* Machinon aux tokens (no core --dz-* equivalent) */
   --secondary-text-color:   #cccccc;
-  --main-blue-color-values: 11,158,218;
+  --dz-accent-values: 11,158,218;
   --dz-accent-red-values:   224,85,85;
 
   /* Dash2 chrome tokens (dark). Special-widget recolour handled in Task 4. */
@@ -29,6 +29,6 @@ html[data-dz-scheme="dark"] {
   --dz-dd-grid-line:         rgba(11,158,218,0.15);
   --dz-dd-skeleton-mid:      #444a4e;
 
-  /* Table zebra stripe (decoupled from --main-disabled-color) */
+  /* Table zebra stripe (decoupled from --dz-status-disabled) */
   --dz-table-row-odd-bg: #808080;
 }

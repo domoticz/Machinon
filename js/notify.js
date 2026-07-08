@@ -590,7 +590,7 @@
             },
             info: {
                 color: "#fff",
-                "background-color": "var(--main-blue-color)"
+                "background-color": "var(--dz-accent-color)"
             }
         }
     });

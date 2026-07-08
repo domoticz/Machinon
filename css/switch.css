@@ -27,7 +27,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(var(--main-blue-color-values), 0.2);
+    background-color: rgba(var(--dz-accent-values), 0.2);
     transition: 0.4s;
 }
 
@@ -52,12 +52,12 @@
 }
 
 input:checked + .slider {
-    background-color: rgba(var(--main-blue-color-values), 0.5);
+    background-color: rgba(var(--dz-accent-values), 0.5);
 }
 
 input:checked + .slider:before {
     transform: translateX(34px);
-    background-color: var(--main-blue-color);
+    background-color: var(--dz-accent-color);
 }
 
 input:focus + .slider {

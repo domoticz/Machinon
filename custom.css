@@ -59,7 +59,7 @@
     background-color: var(--dz-modal-bg) !important;
 }
 .help-block {
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
 }
 
 /* Add fonts */
@@ -75,7 +75,7 @@
 .item #type,
 .item #lastupdate {
     font-family: main-font;
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
 }
 
 h1,
@@ -101,16 +101,16 @@ h4,
     display: none;
 }
 .glass-card {
-	background: var(--main-item-bg-color);
+	background: var(--dz-widget-bg);
 	border-radius: 6px;
 }
 .version-badge {
-    color: var(--main-text-color) !important;
+    color: var(--dz-body-text) !important;
 }
 .section-title,
 .info-value,
 .donation-text {
-	color: var(--main-text-color) !important;
+	color: var(--dz-body-text) !important;
 }
 
 .user {
@@ -131,21 +131,21 @@ h4,
 }
 
 .disabledText {
-    color: var(--main-disabled-color);
+    color: var(--dz-status-disabled);
 }
 
 .disabledBg {
-    background: var(--main-disabled-color);
+    background: var(--dz-status-disabled);
 }
 /* Energy dashboard */
 #emain {
 	width: calc(90vw - 50px)!important;
     height: calc(90vh - 110px) !important;
-	background: var(--main-bg-color)!important;
-	border-color: var(--main-blue-color) !important;
+	background: var(--dz-body-bg)!important;
+	border-color: var(--dz-accent-color) !important;
 }
 #eicon {
-    fill: var(--main-text-color)!important;
+    fill: var(--dz-body-text)!important;
 }
 
 
@@ -154,12 +154,12 @@ h4,
 #logdata_status,
 #logdata_error,
 #logdata_debug {
-    background: var(--main-navbar-bg-color);
+    background: var(--dz-nav-bg);
     max-height: calc(100vh - 220px);
 }
 
 .log-console-container {
-		background: var(--main-item-bg-color);
+		background: var(--dz-widget-bg);
     border: 1.5px solid;
     border-color: transparent;
     border-radius: 6px;
@@ -170,29 +170,29 @@ h4,
 	font-family: main-font;
 }
 .log-toolbar {
-	background: var(--main-item-bg-color);
+	background: var(--dz-widget-bg);
 }
 .log-statusbar {
-	background: var(--main-item-bg-color);
+	background: var(--dz-widget-bg);
 }
 
 .log-filter-btn {
     background: transparent !important;
-    border: 1px solid var(--main-blue-color) !important;
-    color: var(--main-text-color) !important;
+    border: 1px solid var(--dz-accent-color) !important;
+    color: var(--dz-body-text) !important;
     border-radius: 5px !important;
 }
 
 .log-filter-btn:hover {
-    background: var(--main-blue-color) !important;
+    background: var(--dz-accent-color) !important;
     color: #fff !important;
 }
 
 .log-filter-btn-active {
     opacity: 1;
-    background: var(--main-blue-color) !important;
+    background: var(--dz-accent-color) !important;
     color: #fff !important;
-    border-color: var(--main-blue-color) !important;
+    border-color: var(--dz-accent-color) !important;
 }
 
 .log-filter-btn-active span {
@@ -200,7 +200,7 @@ h4,
 }
 
 .log-toggle-count {
-    background: rgba(var(--main-blue-color-values), 0.2);
+    background: rgba(var(--dz-accent-values), 0.2);
     border-radius: 3px;
 }
 
@@ -209,29 +209,29 @@ h4,
 }
 
 .log-level-norm {
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
 }
 
 .log-level-status {
-    color: var(--main-blue-color);
+    color: var(--dz-accent-color);
 }
 
 .log-level-error {
-    color: var(--color-error);
+    color: var(--dz-accent-red);
 }
 /* Setpoint popup */
 #setpoint_popup {
     color: var(--secondary-text-color)!important;
     text-shadow: none;
-    background-color: var(--main-item-bg-color)!important;
+    background-color: var(--dz-widget-bg)!important;
 }
 
 #popup_setpoint {
     font-family: main-font-bold;
-    color: var(--main-blue-color)!important;
-    border-color: var(--main-item-bg-color)!important;
-    background: var(--main-item-bg-color)!important;
-	border-color: var(--main-blue-color) !important;
+    color: var(--dz-accent-color)!important;
+    border-color: var(--dz-widget-bg)!important;
+    background: var(--dz-widget-bg)!important;
+	border-color: var(--dz-accent-color) !important;
 }
 
 .ui-close {
@@ -245,10 +245,10 @@ h4,
 }
 
 .ui-popup.ui-corner-all {
-    background: var(--main-item-bg-color);
+    background: var(--dz-widget-bg);
     border-radius: 6px;
     box-shadow: -2px 2px 20px 0px rgba(0, 0, 0, 0.2);
-    color: var(--main-item-color);
+    color: var(--dz-widget-text);
     border-bottom: none;
 }
 
@@ -308,7 +308,7 @@ h4,
         width: calc(100% - 60px);
         max-width: unset;
         transform: translate(30px, 45px);
-        background: var(--main-blue-color);
+        background: var(--dz-accent-color);
         box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.2);
         border-radius: 20px;
         border: 5px solid #fff;
@@ -332,9 +332,9 @@ h4,
 }
 
 .msg {
-    background-color: var(--main-item-bg-color);
+    background-color: var(--dz-widget-bg);
     font-family: main-font-bold;
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
     border-radius: 5px;
     box-shadow: -2px 2px 20px 0px rgba(0, 0, 0, 0.2);
     z-index: 99;
@@ -363,7 +363,7 @@ input[type="password"] {
     background-color: transparent;
     outline: 0;
     border-width: 0 0 1px;
-    border-color: var(--main-blue-color);
+    border-color: var(--dz-accent-color);
     color: var(--secondary-text-color);
     max-width: 250px;
 }
@@ -377,8 +377,8 @@ input[type="checkbox"], input[type="radio"] {
     width: 14px;
     margin-right: 8px;
     position: relative;
-    background: var(--main-item-bg-color);
-    border: 1px solid var(--main-blue-color);
+    background: var(--dz-widget-bg);
+    border: 1px solid var(--dz-accent-color);
     outline: none;
 }
 
@@ -388,17 +388,17 @@ input[type="checkbox"] {
 
 input[type="checkbox"]:disabled, 
 input[type="radio"]:disabled {
-    border: 1px solid var(--main-disabled-color);
+    border: 1px solid var(--dz-status-disabled);
 }
 
 input[type="checkbox"]:disabled + label, 
 input[type="radio"]:disabled + label {
-    color: var(--main-disabled-color);
+    color: var(--dz-status-disabled);
 }
 
 input[type="checkbox"]:checked::before, 
 input[type="radio"]:checked::before {
-    background: var(--main-blue-color);
+    background: var(--dz-accent-color);
     content: "";
     position: absolute;
     top: 2px;
@@ -433,7 +433,7 @@ input[type="radio"]:checked::before {
 }
 
 .page-header-small {
-    border-color: var(--main-blue-color);
+    border-color: var(--dz-accent-color);
 }
 
 div#floorplancontent {
@@ -545,7 +545,7 @@ div.bannercontent .row:not(.divider) {
 .rectangle-8,
 .rectangle-8-dropdown,
 #settings .row-fluid > div {
-    background: var(--main-item-bg-color);
+    background: var(--dz-widget-bg);
     border: 1.5px solid;
     border-color: transparent;
     border-radius: 6px;
@@ -557,7 +557,7 @@ div.bannercontent .row:not(.divider) {
 .rectangle-8:hover,
 .rectangle-8-dropdown:hover,
 #settings .row-fluid > div:hover {
-    box-shadow: 0px 0px 0px 2px var(--main-blue-color);
+    box-shadow: 0px 0px 0px 2px var(--dz-accent-color);
 }
 
 /* Drag constraint for dashboard/tab card reordering — scoped to avoid affecting dialogs */
@@ -578,14 +578,14 @@ div.bannercontent .row:not(.divider) {
 
 /* Drop target feedback while dragging — target the visible card (tr), not the outer wrapper */
 .ui-droppable-active table[id^="item"] > tbody > tr {
-    outline: 2px dashed rgba(var(--main-blue-color-values), 0.3);
+    outline: 2px dashed rgba(var(--dz-accent-values), 0.3);
     outline-offset: 3px;
 }
 
 .ui-droppable-hover table[id^="item"] > tbody > tr {
-    outline: 2px solid var(--main-blue-color);
+    outline: 2px solid var(--dz-accent-color);
     outline-offset: 3px;
-    background-color: rgba(var(--main-blue-color-values), 0.08);
+    background-color: rgba(var(--dz-accent-values), 0.08);
     transition: background-color 0.15s ease;
 }
 
@@ -660,7 +660,7 @@ div.item.statusDisabled td#name,
 table.mobileitem td#name,
 table.mobileitem td.name {
     padding: 10px 0 0 10px;
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
     background: transparent !important;
     line-height: 18px;
     grid-area: name;
@@ -673,7 +673,7 @@ table.mobileitem td.name {
     content: attr(data-desc);
     position: fixed;
     margin-top: 20px;
-    background: var(--main-item-bg-color);
+    background: var(--dz-widget-bg);
     color: var(--secondary-text-color);
     font-family: main-font;
     font-size: 11px;
@@ -698,7 +698,7 @@ table.mobileitem td.name {
 
 /* bigtext */
 .item #bigtext {
-    color: var(--main-blue-color);
+    color: var(--dz-accent-color);
     background: transparent;
     font-size: 1.4em;
     line-height: 20px;
@@ -733,7 +733,7 @@ table.mobileitem td.name {
 
 .item #status,
 .item .status {
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
     grid-area: status;
     padding-right: 20px;
     align-self: center;
@@ -743,7 +743,7 @@ table.mobileitem td.name {
 	white-space: normal;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: var(--main-blue-color) var(--main-bg-color);
+    scrollbar-color: var(--dz-accent-color) var(--dz-body-bg);
 }
 
 
@@ -762,7 +762,7 @@ table.mobileitem td.name {
     gap: 3px;
     justify-content: center;
     scrollbar-width: thin;
-    scrollbar-color: var(--main-blue-color) var(--main-bg-color);
+    scrollbar-color: var(--dz-accent-color) var(--dz-body-bg);
     width: 100%;
 }
 
@@ -780,7 +780,7 @@ table.mobileitem td.name {
 .item .btn-group::-webkit-scrollbar-thumb,
 .item #status::-webkit-scrollbar-thumb,
 .item .status::-webkit-scrollbar-thumb {
-    background: var(--main-blue-color);
+    background: var(--dz-accent-color);
     border-radius: 5px;
 }
 
@@ -788,7 +788,7 @@ table.mobileitem td.name {
 .options-cell {
     padding: 0 3px !important;
     margin-right: 5px !important;
-    color: var(--main-blue-color);
+    color: var(--dz-accent-color);
     background: transparent;
     font-size: 26px;
     cursor: pointer;
@@ -804,7 +804,7 @@ body table#itemtable tr > .options {
     display: none;
     font-family: main-font-bold;
     position: absolute;
-    background: var(--main-item-bg-color);
+    background: var(--dz-widget-bg);
     border-radius: 5px;
     right: 5px;
     top: 8px;
@@ -839,7 +839,7 @@ body table#itemtable tr > .options {
 .options .btnsmall-sel {
     width: auto;
     background: transparent;
-    color: var(--main-blue-color);
+    color: var(--dz-accent-color);
 }
 
 .options .btnsmall {
@@ -855,7 +855,7 @@ body table#itemtable tr > .options {
     margin-left: 10px !important;
     font-size: 16px;
     line-height: 16px;
-    color: var(--main-blue-color);
+    color: var(--dz-accent-color);
 }
 
 .timers_log {
@@ -873,7 +873,7 @@ body table#itemtable tr > .options {
     padding: 0 5px;
     font-size: 0;
     line-height: 16px;
-    color: var(--main-blue-color);
+    color: var(--dz-accent-color);
 }
 
 /* CSS fallback icons — survive Angular re-renders that overwrite JS-injected icons */
@@ -973,7 +973,7 @@ body table#itemtable tr > .options {
 
 .selectorlevels > select {
     padding: 5px;
-    color: var(--main-blue-color) !important;
+    color: var(--dz-accent-color) !important;
     outline: 0;
     max-width: 100%;
 }
@@ -1029,7 +1029,7 @@ body table#itemtable tr > .options {
 .input .dimslider .ui-slider-range,
 .statusNormal .dimslider .ui-slider-range,
 .statusProtected .dimslider .ui-slider-range {
-    background: rgba(var(--main-blue-color-values), 0.5);
+    background: rgba(var(--dz-accent-values), 0.5);
 }
 
 #type .dimslider .ui-slider-handle,
@@ -1038,7 +1038,7 @@ body table#itemtable tr > .options {
 .statusProtected .dimslider .ui-slider-handle {
     width: 15px;
     height: 15px;
-    background: var(--main-blue-color);
+    background: var(--dz-accent-color);
     border-radius: 50%;
     top: -5px;
 }
@@ -1050,9 +1050,9 @@ body table#itemtable tr > .options {
 }
 
 body {
-    background: var(--main-bg-color) !important;
+    background: var(--dz-body-bg) !important;
     font-family: main-font;
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
 }
 
 html {
@@ -1075,8 +1075,8 @@ html.pattern {
 
 /* Header */
 header.logo {
-    background: var(--main-disabled-color);
-    background: linear-gradient(to right, var(--main-disabled-color) 0%, var(--main-blue-color) 100%);
+    background: var(--dz-status-disabled);
+    background: linear-gradient(to right, var(--dz-status-disabled) 0%, var(--dz-accent-color) 100%);
 }
 
 .container-logo {
@@ -1085,29 +1085,29 @@ header.logo {
     position: relative;
 }
 .page-content-container {
-    background: var(--main-item-bg-color) !important;
-    border: 1px solid var(--main-blue-color) !important;
+    background: var(--dz-widget-bg) !important;
+    border: 1px solid var(--dz-accent-color) !important;
     border-radius: 5px;
     box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
     padding: 10px 0;
     margin-top: 10px;
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
 }
 
 .page-content-container a,
 .page-content-container a:link,
 .page-content-container a:visited {
-    color: var(--main-blue-color);
+    color: var(--dz-accent-color);
 }
 
 /* Timer/Log form styling */
 .page-content-container table:not(.dataTable) {
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
 }
 
 .page-content-container table:not(.dataTable) td {
     padding: 4px 8px;
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
 }
 
 .page-content-container table:not(.dataTable) label {
@@ -1116,17 +1116,17 @@ header.logo {
 
 /* Timer Grid view */
 .ts-planning {
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
 }
 
 .ts-planning table {
-    border-color: var(--main-border-color);
+    border-color: var(--dz-input-border);
 }
 
 .ts-planning table td,
 .ts-planning table th {
-    border-color: var(--main-border-color);
-    color: var(--main-text-color);
+    border-color: var(--dz-input-border);
+    color: var(--dz-body-text);
 }
 
 .ts-planning .modes .mode {
@@ -1199,7 +1199,7 @@ div.menu-toggle {
 }
 
 div.menu-toggle.scrolled {
-    background: var(--main-blue-color);
+    background: var(--dz-accent-color);
     transition: background-color 1s ease;
     padding: 0 5px 15px 5px;
     border-bottom-left-radius: 6px;
@@ -1220,7 +1220,7 @@ div.menu-toggle.scrolled {
 
 .navbar-inverse .navbar-inner {
     border: none;
-    background: var(--main-navbar-bg-color);
+    background: var(--dz-nav-bg);
     box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.2);
 }
 
@@ -1230,20 +1230,20 @@ div.menu-toggle.scrolled {
     left: 50%;
     transform: translate(-50%);
     bottom: 5px;
-    border-top-color: var(--main-text-color);
-    border-bottom-color: var(--main-text-color);
+    border-top-color: var(--dz-body-text);
+    border-bottom-color: var(--dz-body-text);
 }
 
 .navbar-inverse .nav li.dropdown > a:hover .caret,
 .navbar-inverse .nav li.dropdown.open > .dropdown-toggle .caret {
-    border-top-color: var(--main-text-color);
-    border-bottom-color: var(--main-text-color);
+    border-top-color: var(--dz-body-text);
+    border-bottom-color: var(--dz-body-text);
 }
 
 .navbar-inverse .nav li.dropdown.open > .dropdown-toggle,
 .navbar-inverse .nav li.dropdown.open > .dropdown-toggle:before {
     background: transparent; 
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
 }
 
 /* Navbar move abit to left */
@@ -1273,7 +1273,7 @@ div.menu-toggle.scrolled {
     font-family: main-font-bold;
     font-size: 11pt;
     background-color: transparent;
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
     border: 1px solid transparent;
     border-radius: 5px;
     position: relative;
@@ -1284,8 +1284,8 @@ div.menu-toggle.scrolled {
 }
 
 .navbar .nav li a:hover {
-    color: var(--main-text-color);
-    background: var(--main-navbar-bg-color);
+    color: var(--dz-body-text);
+    background: var(--dz-nav-bg);
     border: 1px solid transparent;
     box-shadow: none;
     transform: none;
@@ -1313,7 +1313,7 @@ div.menu-toggle.scrolled {
 
 .navbar .nav .dropdown-menu {
     border: none;
-    background: var(--main-bg-color);
+    background: var(--dz-body-bg);
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
@@ -1327,26 +1327,26 @@ div.menu-toggle.scrolled {
     border-radius: 0;
     box-shadow: none;
     transform: none;
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
 }
 
 .navbar .nav .dropdown-menu li a:hover {
-    background: rgba(var(--main-blue-color-values), 0.15);
+    background: rgba(var(--dz-accent-values), 0.15);
 }
 
 .navbar .pull-right > li > .dropdown-menu .dropdown-menu,
 .navbar .nav > li > .dropdown-menu.pull-right .dropdown-menu {
-    background:  var(--main-bg-color) !important;
+    background:  var(--dz-body-bg) !important;
 }
 
 .navbar .nav .current_page_item > a,
 .navbar .nav .current_page_item > a:hover,
 .navbar-inverse .nav > li > a:focus {
     text-shadow: none;
-    color: var(--main-text-color);
-    background: rgba(var(--main-blue-color-values), 0.4);
+    color: var(--dz-body-text);
+    background: rgba(var(--dz-accent-values), 0.4);
     font-family: main-font-bold;
-    border: 1px solid var(--main-blue-color);
+    border: 1px solid var(--dz-accent-color);
     border-radius: 5px;
     box-shadow: none;
     transform: none;
@@ -1373,7 +1373,7 @@ div.menu-toggle.scrolled {
     border-bottom: 2px solid transparent;
     border-radius: 0;
     box-shadow: none;
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
     cursor: pointer;
     transition: none;
 }
@@ -1388,8 +1388,8 @@ div.menu-toggle.scrolled {
 .nav-tabs > .active > a,
 .nav-tabs > .active > a:hover,
 .nav-tabs > .active > a:focus {
-    border-bottom: 2px solid var(--main-blue-color);
-    color: var(--main-blue-color);
+    border-bottom: 2px solid var(--dz-accent-color);
+    color: var(--dz-accent-color);
 }
 
 /* =Header */
@@ -1419,7 +1419,7 @@ div.menu-toggle.scrolled {
 .btnstylerev,
 .btnstyle {
     background: none;
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
 }
 
 a.btnstylerev,
@@ -1437,8 +1437,8 @@ a.btnstyle::after {
     width: 1vmin;
     height: 1vmin;
     background: transparent;
-    border-top: 0.1vmin solid var(--main-text-color);
-    border-right: 0.1vmin solid var(--main-text-color);
+    border-top: 0.1vmin solid var(--dz-body-text);
+    border-right: 0.1vmin solid var(--dz-body-text);
 }
 
 a.btnstylerev::before {
@@ -1455,7 +1455,7 @@ a.btnstyle {
     position: relative;
     overflow: visible;
     margin-left: 16px;
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
 }
 
 
@@ -1495,7 +1495,7 @@ button.savebtn:disabled {
 /* Settings button, z-wave etc. */
 .label-info[href], .badge-info[href],
 .label-info.lcursor {
-    background-color: var(--main-blue-color);
+    background-color: var(--dz-accent-color);
     color: #fff;
 }
 
@@ -1537,15 +1537,15 @@ button.savebtn:disabled {
 
 .btn-mini {
     background: transparent;
-    border: 1px solid var(--main-blue-color);
-    color: var(--main-text-color);
+    border: 1px solid var(--dz-accent-color);
+    color: var(--dz-body-text);
     border-radius: 5px;
     padding: 2px 8px;
     font-size: 11px;
 }
 
 .btn-mini:hover {
-    background: var(--main-blue-color);
+    background: var(--dz-accent-color);
     color: #fff;
 }
 
@@ -1623,8 +1623,8 @@ button.savebtn:disabled {
 
 .btnsmall,
 .btnsmall-sel {
-    color: var(--main-blue-color);
-    background: rgba(var(--main-blue-color-values), 0.1);
+    color: var(--dz-accent-color);
+    background: rgba(var(--dz-accent-values), 0.1);
     border: none;
     border-radius: 5px;
     padding: 4px 8px;
@@ -1634,12 +1634,12 @@ button.savebtn:disabled {
 
 .btnsmall:hover,
 .btnsmall-sel:hover {
-    background: rgba(var(--main-blue-color-values), 0.2);
+    background: rgba(var(--dz-accent-values), 0.2);
 }
 
 /* Ghost: disabled small button */
 .btnsmall-dis {
-    color: var(--main-disabled-color);
+    color: var(--dz-status-disabled);
     background: transparent;
     border: none;
     border-radius: 5px;
@@ -1661,14 +1661,14 @@ button.savebtn:disabled {
 }
 
 .btn-icon:hover {
-    background: rgba(var(--main-blue-color-values), 0.1);
+    background: rgba(var(--dz-accent-values), 0.1);
 }
 
 /* Ghost: link-styled button */
 .btn-link {
     background: transparent;
     border: none;
-    color: var(--main-blue-color);
+    color: var(--dz-accent-color);
     cursor: pointer;
     text-decoration: none;
     padding: 0;
@@ -1870,7 +1870,7 @@ tr.odd td.sorting_1, tr.even td.sorting_1 {
 h1,
 h2,
 h2 span {
-    color: var(--main-text-color) !important;
+    color: var(--dz-body-text) !important;
 }
 
 body table#itemtabledoubleicon tr td:first-child {
@@ -1891,17 +1891,17 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
 }
 
 .devices-filters__group-title {
-    border-color: var(--main-blue-color);
-    background-color: var(--main-item-bg-color);
+    border-color: var(--dz-accent-color);
+    background-color: var(--dz-widget-bg);
     color: var(--secondary-text-color);
 }
 
 .label, .badge {
     font-family: main-font-bold;
     border-radius: 2px;
-    background-color: var(--main-blue-color);
+    background-color: var(--dz-accent-color);
     text-align: center;
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
     padding-right: 10px;
     padding-left: 10px;
 }
@@ -1980,11 +1980,11 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
 /* Charts */
 .highcharts-tooltip-container,
 .highcharts-legend.highcharts-no-tooltip > rect {
-	fill: var(--main-bg-color) !important;
+	fill: var(--dz-body-bg) !important;
 }
 	
 .highcharts-background {
-    fill: var(--main-item-bg-color);
+    fill: var(--dz-widget-bg);
     stroke-width: 0;
 }
 
@@ -2019,21 +2019,21 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
 }
 
 .highcharts-tooltip-box {
-    fill: var(--main-bg-color);
+    fill: var(--dz-body-bg);
     fill-opacity: 0.6;
     stroke-width: 0;
 }
 /* Charts - Grid */
 .highcharts-yaxis-grid .highcharts-grid-line {
-    stroke: var(--main-bg-color);
+    stroke: var(--dz-body-bg);
 }
 
 .highcharts-axis-line {
-    stroke: var(--main-bg-color);
+    stroke: var(--dz-body-bg);
 }
 
 .highcharts-tick {
-    stroke: var(--main-bg-color);
+    stroke: var(--dz-body-bg);
 }
 
 .highcharts-yaxis .highcharts-tick {
@@ -2042,13 +2042,13 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
 
 /* Charts - Export button/menu */
 .highcharts-button-box {
-    fill: var(--main-item-bg-color);
+    fill: var(--dz-widget-bg);
     rx: 4;
     ry: 4;
 }
 
 .highcharts-button-symbol {
-    stroke: var(--main-blue-color) !important;
+    stroke: var(--dz-accent-color) !important;
     stroke-width: 2px;
 }
 
@@ -2065,35 +2065,35 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
 .zoom-reset {
     font-family: main-font;
     font-size: 11px;
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
     background: transparent;
-    border: 1px solid var(--main-blue-color);
+    border: 1px solid var(--dz-accent-color);
     border-radius: 5px;
     padding: 2px 8px;
     cursor: pointer;
 }
 
 .zoom-button:hover {
-    background: var(--main-blue-color);
+    background: var(--dz-accent-color);
     color: #fff;
 }
 
 .zoom-reset {
-    border-color: var(--color-error);
+    border-color: var(--dz-accent-red);
 }
 
 .zoom-reset:hover {
-    background: var(--color-error);
-    border-color: var(--color-error);
+    background: var(--dz-accent-red);
+    border-color: var(--dz-accent-red);
     color: #fff;
 }
 
 .highcharts-contextbutton:hover .highcharts-button-box {
-    fill: rgba(var(--main-blue-color-values), 0.1) !important;
+    fill: rgba(var(--dz-accent-values), 0.1) !important;
 }
 
 .highcharts-menu {
-    background: var(--main-item-bg-color) !important;
+    background: var(--dz-widget-bg) !important;
     border: none !important;
     border-radius: 6px !important;
     box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.2) !important;
@@ -2102,33 +2102,33 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
 
 .highcharts-menu-item {
     font-family: main-font !important;
-    color: var(--main-text-color) !important;
+    color: var(--dz-body-text) !important;
     padding: 8px 16px !important;
     font-size: 12px !important;
     transition: background 0.15s ease;
 }
 
 .highcharts-menu-item:hover {
-    background: var(--main-blue-color) !important;
+    background: var(--dz-accent-color) !important;
     color: #fff !important;
 }
 
 /* Device log stat cards — upstream uses rgba(255,255,255,0.05) inline which is invisible in light mode */
 .current-conditions .ng-scope[style*="background"] {
-    background: var(--main-item-bg-color) !important;
+    background: var(--dz-widget-bg) !important;
     border-radius: 6px;
     box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.1);
 }
 
 .current-conditions .ng-scope[style*="background"] .ng-binding {
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
 }
 
 /* Map upstream hardcoded delta colors to theme variables */
-[ng-style*="deltaColor"][style*="ff6b6b"] { color: var(--color-error) !important; }
-[ng-style*="deltaColor"][style*="4ecdc4"] { color: var(--color-success) !important; }
+[ng-style*="deltaColor"][style*="ff6b6b"] { color: var(--dz-accent-red) !important; }
+[ng-style*="deltaColor"][style*="4ecdc4"] { color: var(--dz-btn-success-bg) !important; }
 [ng-style*="deltaColor"][style*="aaa"]    { color: var(--secondary-text-color) !important; }
-    color: var(--main-bg-color) !important;
+    color: var(--dz-body-bg) !important;
 }
 
 /* Setup */
@@ -2137,7 +2137,7 @@ input#AcceptNewHardware:checked ~ button {
 }
 
 .allow5min {
-    background: var(--main-blue-color);
+    background: var(--dz-accent-color);
     border: none;
     color: #fff;
     border-radius: 5px;
@@ -2151,7 +2151,7 @@ input#AcceptNewHardware:checked ~ button {
     background: none;
     border-radius: 0;
     border: none;
-    border-bottom: 1px solid var(--main-blue-color);
+    border-bottom: 1px solid var(--dz-accent-color);
     color: var(--secondary-text-color);
     font-family: main-font;
     outline: none;
@@ -2159,14 +2159,14 @@ input#AcceptNewHardware:checked ~ button {
 
 textarea {
 	border-radius: 2px !important;
-	border: 1px solid var(--main-blue-color) !important;
+	border: 1px solid var(--dz-accent-color) !important;
 	width: 100% !important;
 	max-width: 100% !important;
 	box-sizing: border-box;
 }
 
 select.ui-corner-all option {
-    background: var(--main-navbar-bg-color);
+    background: var(--dz-nav-bg);
 }
 
 /* =Setup */
@@ -2175,8 +2175,8 @@ select.ui-corner-all option {
 /* Popups */
 
 .list-group-item, .list-group-item:link {
-    background: var(--main-bg-color);
-    color: var(--main-text-color);
+    background: var(--dz-body-bg);
+    color: var(--dz-body-text);
 }
 
 #offline {
@@ -2203,7 +2203,7 @@ select.ui-corner-all option {
 /* Device update pulse */
 @keyframes updatePulse {
     0% { box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2); }
-    50% { box-shadow: 0px 0px 0px 3px var(--main-blue-color); }
+    50% { box-shadow: 0px 0px 0px 3px var(--dz-accent-color); }
     100% { box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2); }
 }
 
@@ -2263,7 +2263,7 @@ tr.update-pulse {
    Can be removed once Domoticz versions before the glass-themed login redesign
    are no longer supported. */
 #login:before {
-    background: linear-gradient(to right, #0bcdc7 0%, var(--main-blue-color) 100%);
+    background: linear-gradient(to right, #0bcdc7 0%, var(--dz-accent-color) 100%);
     text-align: center;
     vertical-align: middle;
     background-size: 100% 75px;
@@ -2314,11 +2314,11 @@ tr.update-pulse {
     margin-right: 8px;
     position: relative;
     background: #fff;
-    border: 1px solid var(--main-blue-color);
+    border: 1px solid var(--dz-accent-color);
     outline: none;
 }
 #login input[type="checkbox"]:checked::before {
-    background: var(--main-blue-color);
+    background: var(--dz-accent-color);
     content: "";
     position: absolute;
     top: 2px;
@@ -2341,7 +2341,7 @@ tr.update-pulse {
 }
 
 #login #inputs input[type=text]:focus, #login #inputs input[type=password]:focus {
-    border-bottom: 1px solid var(--main-blue-color);
+    border-bottom: 1px solid var(--dz-accent-color);
     color: #1a1a1a;
 }
 
@@ -2353,7 +2353,7 @@ tr.update-pulse {
 
 #login #submit {
     background-image: none;
-    background-color: var(--main-blue-color);
+    background-color: var(--dz-accent-color);
     color: #fff;
     border: none;
     text-shadow: none;
@@ -2366,7 +2366,7 @@ tr.update-pulse {
    elements to Machinon's palette. .glass-input is used only on login/2FA, so scoping the
    overrides under .glass-card is safe and does not affect other pages. Colours via --dz-*. */
 .remember-row {
-    color: var(--main-text-color) !important;
+    color: var(--dz-body-text) !important;
 }
 
 .glass-card .glass-input {
@@ -2404,13 +2404,13 @@ tr.update-pulse {
 }
 
 .glass-card .auth-tab.active {
-    background: rgba(var(--main-blue-color-values), 0.12);
+    background: rgba(var(--dz-accent-values), 0.12);
     border-color: var(--dz-accent-color);
     color: var(--dz-accent-color);
 }
 
 .glass-card .auth-tab:hover:not(.active) {
-    background: rgba(var(--main-blue-color-values), 0.06);
+    background: rgba(var(--dz-accent-values), 0.06);
     color: var(--dz-body-text);
 }
 
@@ -2429,9 +2429,9 @@ tr.update-pulse {
 /* Button groups in toolbars/dialogs: connected */
 .btn-group .btn {
     margin: 0 0 0 -1px !important;
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
     font-family: main-font;
-    border: 1px solid var(--main-blue-color) !important;
+    border: 1px solid var(--dz-accent-color) !important;
 }
 
 .btn-group > .btn:first-child {
@@ -2451,8 +2451,8 @@ tr.update-pulse {
 .btn-default,
 .btn-group .btn-default {
     background: transparent !important;
-    border: 1px solid var(--main-blue-color) !important;
-    color: var(--main-text-color) !important;
+    border: 1px solid var(--dz-accent-color) !important;
+    color: var(--dz-body-text) !important;
 }
 
 .btn.btn-selected,
@@ -2460,20 +2460,20 @@ tr.update-pulse {
 .btn-default.active,
 .btn-group .btn-default.active {
     color: #fff !important;
-    background: var(--main-blue-color) !important;
-    border-color: var(--main-blue-color) !important;
+    background: var(--dz-accent-color) !important;
+    border-color: var(--dz-accent-color) !important;
     font-family: main-font;
 }
 
 .btn-default:hover {
     color: #fff !important;
-    background: var(--main-blue-color) !important;
-    border-color: var(--main-blue-color) !important;
+    background: var(--dz-accent-color) !important;
+    border-color: var(--dz-accent-color) !important;
 }
 
 .btn-group .btn-primary {
-    background: var(--main-blue-color) !important;
-    border-color: var(--main-blue-color) !important;
+    background: var(--dz-accent-color) !important;
+    border-color: var(--dz-accent-color) !important;
     color: #fff !important;
 }
 
@@ -2482,8 +2482,8 @@ tr.update-pulse {
 }
 
 .btn-group .btn-danger {
-    background: var(--color-error) !important;
-    border-color: var(--color-error) !important;
+    background: var(--dz-accent-red) !important;
+    border-color: var(--dz-accent-red) !important;
     color: #fff;
     border-radius: 5px !important;
 }
@@ -2493,13 +2493,13 @@ tr.update-pulse {
 }
 
 .btn-group .btn-info {
-    background: var(--main-blue-color) !important;
-    border-color: var(--main-blue-color) !important;
+    background: var(--dz-accent-color) !important;
+    border-color: var(--dz-accent-color) !important;
     color: #fff;
 }
 
 .btn-group .btn-info:hover {
-    border-color: var(--main-blue-color) !important;
+    border-color: var(--dz-accent-color) !important;
     filter: brightness(0.85);
 }
 
@@ -2517,7 +2517,7 @@ tr.update-pulse {
 }
 
 .ui-menu-item-wrapper.ui-state-active {
-    background: var(--main-blue-color);
+    background: var(--dz-accent-color);
     border: 0;
     font-weight: normal;
 }
@@ -2529,15 +2529,15 @@ tr.update-pulse {
 }
 
 .ui-selectmenu-text {
-    color: var(--main-blue-color);
+    color: var(--dz-accent-color);
     font-family: main-font-bold;
     font-weight: 600;
 }
 
 .selectorlevels-menu {
-    border-color: var(--main-blue-color) !important;
-    color: var(--main-text-color);
-    background: var(--main-bg-color);
+    border-color: var(--dz-accent-color) !important;
+    color: var(--dz-body-text);
+    background: var(--dz-body-bg);
 }
 
 @media (max-width: 767px) {
@@ -2547,7 +2547,7 @@ tr.update-pulse {
 }
 
 #copyright {
-    background: var(--main-navbar-bg-color);
+    background: var(--dz-nav-bg);
     opacity: 0.6;
     border-top: 0;
     box-shadow: 0 1px 10px rgba(0, 0, 0, 0.1);
@@ -2555,11 +2555,11 @@ tr.update-pulse {
 
 #copyright p {
     font-family: main-font;
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
 }
 
 #copyright p a {
-    color: var(--main-blue-color);
+    color: var(--dz-accent-color);
 }
 /* author at footer */
 #copyright p:after {
@@ -2599,7 +2599,7 @@ section.compact .row:not(.divider) {
 }
 
 .span3 #status {
-    color: var(--main-blue-color);
+    color: var(--dz-accent-color);
 }
 
 .span3 td.input {
@@ -2621,7 +2621,7 @@ section.compact .row:not(.divider) {
     height: 50px;
     width: 100%;
     scroll-snap-type: y mandatory;
-    background: var(--main-item-bg-color) !important;
+    background: var(--dz-widget-bg) !important;
 }
 
 .span3 td.input .btn-group button {
@@ -2689,7 +2689,7 @@ section.compact .row:not(.divider) {
     padding: 2px 8px 0 0;
     text-align: right;
     align-self: center;
-    color: var(--main-blue-color);
+    color: var(--dz-accent-color);
 }
 
 #holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr td#status,

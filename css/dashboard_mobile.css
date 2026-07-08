@@ -19,7 +19,7 @@ body.dashMobile section.dashCategory div.row:not(.divider):first-of-type {
 body.dashMobile .tbSun,
 body.dashMobile #tbSunGroup,
 body.dashMobile #tbSunGroup * {
-    color: var(--main-text-color) !important;
+    color: var(--dz-body-text) !important;
 }
 
 body.dashMobile section:first-of-type table.mobileitem {
@@ -46,7 +46,7 @@ body.dashMobile table.mobileitem th {
     box-shadow: none;
     display: inline;
     text-shadow: none;
-    background: var(--main-blue-color);
+    background: var(--dz-accent-color);
     color: #fff;
 }
 
@@ -55,7 +55,7 @@ body.dashMobile table.mobileitem th:last-child a {
 }
 
 body.dashMobile table.mobileitem tr {
-    background: var(--main-item-bg-color);
+    background: var(--dz-widget-bg);
     display: flex;
     flex-grow: 1;
     flex-direction: row;
@@ -65,12 +65,12 @@ body.dashMobile table.mobileitem tr {
 
 body.dashMobile table.mobileitem td {
     display: inline-flex;
-    color: var(--main-text-color);
+    color: var(--dz-body-text);
     flex-grow: 1;
     flex-shrink: 1;
     align-items: center;
     padding: 5px!important;
-    border-color: var(--main-bg-color);
+    border-color: var(--dz-body-bg);
 }
 
 body.dashMobile table.mobileitem td:last-child {
@@ -101,8 +101,8 @@ body.dashMobile table.mobileitem td.name img {
 body.dashMobile table.mobileitem th a,
 body.dashMobile table.mobileitem td#name a,
 body.dashMobile table.mobileitem td.name a {
-    color: var(--main-item-bg-color);
-    background: var(--main-blue-color);
+    color: var(--dz-widget-bg);
+    background: var(--dz-accent-color);
     text-decoration: none;
     border-radius: 50%;
     display: block;
@@ -154,11 +154,11 @@ body.dashMobile table.mobileitem .btn-group .btn {
 body.dashMobile table.mobileitem .btn-mini {
     margin-left: 2px;
     font-family: main-font;
-    background: var(--main-item-bg-color) !important;
+    background: var(--dz-widget-bg) !important;
     background-image: none !important;
-    border: 1px solid var(--main-blue-color);
+    border: 1px solid var(--dz-accent-color);
     border-radius: 5px;
-    color: var(--main-text-color) !important;
+    color: var(--dz-body-text) !important;
     padding: 4px 10px !important;
     font-size: 12px;
     min-width: 40px;
@@ -169,7 +169,7 @@ body.dashMobile table.mobileitem .btn-mini {
 body.dashMobile table.mobileitem .btn-mini.btn-info,
 body.dashMobile table.mobileitem .btn-mini.active,
 body.dashMobile table.mobileitem .btn-mini:active {
-    background: var(--main-blue-color) !important;
+    background: var(--dz-accent-color) !important;
     color: #fff !important;
     padding: 4px 10px !important;
 }
@@ -190,7 +190,7 @@ body.dashMobile table.mobileitem .dimslider .ui-slider-range {
 body.dashMobile table.mobileitem .dimslider .ui-slider-handle {
     width: 15px;
     height: 15px;
-    background: var(--main-blue-color);
+    background: var(--dz-accent-color);
     border-radius: 50%;
     top: -6px;
 }

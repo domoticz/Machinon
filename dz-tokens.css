@@ -9,9 +9,10 @@
   Dark and future schemes override these under html[data-dz-scheme="..."] (see dark.css).
   Values match custom.js light_theme / DESIGN.md.
 
-  Phase 1 defines the mapped token set the --main-* aliases point to (feeds Machinon's existing
-  rules once setColorScheme stops painting --main-*). Widget/status/Dash2 token families are
-  added in Phase 2, when core dashboard.css (their only consumer) is tuned.
+  Machinon's own component CSS (custom.css + css/*.css) consumes these --dz-* tokens directly.
+  The Phase 1 --main-* back-compat aliases were retired in Phase 5; the only non-core-named tokens
+  left are the aux ones below (--secondary-text-color and the --dz-accent*-values RGB triads used
+  for rgba() tints and the custom-colour picker).
 */
 :root {
     /* Core --dz-* tokens mapped from Machinon's palette (light) */
@@ -29,7 +30,7 @@
 
     /* Machinon aux tokens (no core --dz-* equivalent) */
     --secondary-text-color:   #6d6e6d;
-    --main-blue-color-values: 9,127,174;
+    --dz-accent-values: 9,127,174;
     --dz-accent-red-values:   196,59,59;
 
     /* Dash2 (dynamic GridStack dashboard) chrome tokens (light).
@@ -65,7 +66,7 @@
     --dz-btn-bg:              var(--dz-widget-bg);
     --dz-btn-text:            var(--dz-body-text);
     --dz-btn-border:          var(--dz-input-border);
-    --dz-btn-hover-bg:        rgba(var(--main-blue-color-values), 0.1);
+    --dz-btn-hover-bg:        rgba(var(--dz-accent-values), 0.1);
     --dz-btn-shadow:          none;
     --dz-btn-text-shadow:     none;
     --dz-btn-disabled-bg:     var(--dz-status-disabled);
@@ -80,19 +81,6 @@
     --dz-input-text:          var(--dz-body-text);
     --dz-modal-bg:            var(--dz-widget-bg);
     --dz-modal-text:          var(--dz-body-text);
-
-    /* Back-compat aliases: existing --main-* rules now source from --dz-* */
-    --main-bg-color:        var(--dz-body-bg);
-    --main-text-color:      var(--dz-body-text);
-    --main-navbar-bg-color: var(--dz-nav-bg);
-    --main-item-bg-color:   var(--dz-widget-bg);
-    --main-item-color:      var(--dz-widget-text);
-    --main-blue-color:      var(--dz-accent-color);
-    --main-border-color:    var(--dz-input-border);
-    --main-disabled-color:  var(--dz-status-disabled);
-    --color-error:          var(--dz-accent-red);
-    --color-success:        var(--dz-btn-success-bg);
-    --color-warning:        var(--dz-btn-warning-bg);
 }
 
 /*

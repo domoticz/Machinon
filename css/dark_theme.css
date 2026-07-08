@@ -16,7 +16,7 @@
 }
 
 #bigtext {
-    color: var(--main-text-color) !important;
+    color: var(--dz-body-text) !important;
 }
 
 #holder .row .item table[id^="item"] > tbody > tr.with-cam-preview > #name {

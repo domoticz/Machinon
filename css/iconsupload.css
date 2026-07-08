@@ -3,7 +3,7 @@
 #iconsmain h3 {
     font-family: main-font !important;
     font-size: 150% !important;
-		color: var(--main-text-color);
+		color: var(--dz-body-text);
 }
 
 #iconsmain .iconlist .iconlistitem p {
@@ -12,7 +12,7 @@
 }
 
 #iconsmain > div > div > div > h3 {
-    color: var(--main-text-color) !important;
+    color: var(--dz-body-text) !important;
 }
 
 #iconsmain > div > img {
@@ -25,7 +25,7 @@
 }
 
 #iconsmain > div > div {
-    color: var(--main-text-color) !important;
+    color: var(--dz-body-text) !important;
     border: none;
 }
 
@@ -62,7 +62,7 @@
 #iconsmain .iconlist .iconlistitem:hover,
 #iconsmain .iconlist .iconlistitemselected {
     border-radius: 2px;
-    background-color: var(--main-bg-color) !important;
+    background-color: var(--dz-body-bg) !important;
     box-shadow: 0px 0px 0px 2px rgb(11, 150, 205);
 }
 

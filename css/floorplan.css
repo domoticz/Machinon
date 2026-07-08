@@ -8,19 +8,19 @@ rect#shadow {
 rect.popup {
     rx: 5;
     ry: 5;
-    fill: var(--main-item-bg-color) !important;
+    fill: var(--dz-widget-bg) !important;
 }
 
 rect.header {
     rx: 5;
     ry: 5;
-    fill: var(--main-item-bg-color) !important;
+    fill: var(--dz-widget-bg) !important;
     stroke-width: 0 !important;
 }
 
 .DeviceDetails text {
     font-family: main-font !important;
-    fill: var(--main-text-color) !important;
+    fill: var(--dz-body-text) !important;
 }
 
 .DeviceDetails text#name {
@@ -29,7 +29,7 @@ rect.header {
 
 .DeviceDetails text#status {
     font-size: 100% !important;
-    fill: var(--main-blue-color) !important;
+    fill: var(--dz-accent-color) !important;
 }
 
 .DeviceDetails text#bigtext {
@@ -37,12 +37,12 @@ rect.header {
 }
 
 g text {
-    fill: var(--main-text-color) !important;
+    fill: var(--dz-body-text) !important;
 }
 
 g.selector .level-list .level path {
-    fill: var(--main-item-bg-color);
-    stroke: var(--main-item-bg-color);
+    fill: var(--dz-widget-bg);
+    stroke: var(--dz-widget-bg);
 }
 
 
@@ -51,10 +51,10 @@ image#twisty {
 }
 
 .bullet {
-    border: 1px solid var(--main-blue-color) !important;
+    border: 1px solid var(--dz-accent-color) !important;
 }
 
 .bulletSelected {
-    border: 1px solid var(--main-blue-color) !important;
-    background: var(--main-blue-color) !important;
+    border: 1px solid var(--dz-accent-color) !important;
+    background: var(--dz-accent-color) !important;
 }
