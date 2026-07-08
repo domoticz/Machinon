@@ -1139,20 +1139,20 @@ header.logo {
 .page-content-container .btnstyle3-sel {
     border-radius: 5px;
     padding: 4px 12px;
-    color: #fff;
+    color: var(--dz-btn-primary-text);
 }
 
 /* Ensure btnstyle3 link color overrides page-content-container a color */
 .page-content-container a.btnstyle3,
 .page-content-container a.btnstyle3:link,
 .page-content-container a.btnstyle3:visited {
-    color: #fff;
+    color: var(--dz-btn-primary-text);
 }
 
 .page-content-container a.btnstyle3-dis,
 .page-content-container a.btnstyle3-dis:link,
 .page-content-container a.btnstyle3-dis:visited {
-    color: var(--secondary-text-color);
+    color: var(--dz-btn-disabled-text);
 }
 
 .events-editor {
@@ -1400,19 +1400,19 @@ div.menu-toggle.scrolled {
 
 .sub-tabs .sub-tabs-apply,
 .sub-tabs > li > a.sub-tabs-apply {
-    background: var(--color-error) !important;
+    background: var(--dz-btn-danger-bg) !important;
     border: none !important;
     border-bottom: none !important;
     border-radius: 5px;
-    color: #fff !important;
+    color: var(--dz-btn-primary-text) !important;
     padding: 6px 12px;
     font-family: main-font-bold;
 }
 
 .sub-tabs .sub-tabs-apply:hover,
 .sub-tabs > li > a.sub-tabs-apply:hover {
-    background: var(--main-blue-color) !important;
-    color: #fff !important;
+    background: var(--dz-btn-primary-bg) !important;
+    color: var(--dz-btn-primary-text) !important;
     border-bottom: none !important;
 }
 
@@ -1461,10 +1461,10 @@ a.btnstyle {
 
 /* Reset/save theme button */
 .resetbtn {
-    background: var(--color-error);
+    background: var(--dz-btn-danger-bg);
     border: none;
     border-radius: 5px;
-    color: #fff;
+    color: var(--dz-btn-primary-text);
     padding: 10px 20px;
     cursor: pointer;
 }
@@ -1474,10 +1474,10 @@ a.btnstyle {
 }
 
 .savebtn {
-    background: var(--main-blue-color);
+    background: var(--dz-btn-primary-bg);
     border: none;
     border-radius: 5px;
-    color: #fff;
+    color: var(--dz-btn-primary-text);
     padding: 10px 20px;
     cursor: pointer;
 }
@@ -1487,9 +1487,9 @@ a.btnstyle {
 }
 
 button.savebtn:disabled {
-    background: var(--main-disabled-color);
-    border-color: var(--main-disabled-color);
-    color: var(--secondary-text-color);
+    background: var(--dz-btn-disabled-bg);
+    border-color: var(--dz-btn-disabled-bg);
+    color: var(--dz-btn-disabled-text);
     cursor: not-allowed;
 }
 /* Settings button, z-wave etc. */
@@ -1540,9 +1540,9 @@ button.savebtn:disabled {
 }
 
 .btn-primary {
-    background: var(--main-blue-color) !important;
+    background: var(--dz-btn-primary-bg) !important;
     border: none !important;
-    color: #fff !important;
+    color: var(--dz-btn-primary-text) !important;
     border-radius: 5px;
     font-size: 12px;
     padding: 6px 12px;
@@ -1554,9 +1554,9 @@ button.savebtn:disabled {
 }
 
 .btn-success {
-    background: var(--color-success) !important;
+    background: var(--dz-btn-success-bg) !important;
     border: none !important;
-    color: #fff !important;
+    color: var(--dz-btn-primary-text) !important;
     border-radius: 5px;
     box-shadow: none !important;
 }
@@ -1566,9 +1566,9 @@ button.savebtn:disabled {
 }
 
 .btn-warning {
-    background: var(--color-warning) !important;
+    background: var(--dz-btn-warning-bg) !important;
     border: none !important;
-    color: #fff !important;
+    color: var(--dz-btn-primary-text) !important;
     border-radius: 5px;
     font-size: 12px;
     padding: 6px 12px;
@@ -1580,9 +1580,9 @@ button.savebtn:disabled {
 }
 
 .btn-info {
-    background: var(--main-blue-color) !important;
+    background: var(--dz-btn-info-bg) !important;
     border: none !important;
-    color: #fff !important;
+    color: var(--dz-btn-primary-text) !important;
     border-radius: 5px;
     font-size: 12px;
     padding: 6px 12px;
@@ -1594,13 +1594,13 @@ button.savebtn:disabled {
 }
 
 .btn-info:visited {
-    color: #fff;
+    color: var(--dz-btn-primary-text);
 }
 
 .btn-danger {
-    background: var(--color-error) !important;
+    background: var(--dz-btn-danger-bg) !important;
     border: none !important;
-    color: #fff !important;
+    color: var(--dz-btn-primary-text) !important;
     border-radius: 5px;
     font-size: 12px;
     padding: 6px 12px;
@@ -1672,10 +1672,10 @@ button.savebtn:disabled {
 
 /* Filled: modern login/wizard button */
 .btn-modern {
-    background: var(--main-blue-color);
+    background: var(--dz-btn-primary-bg);
     border: none;
     border-radius: 5px;
-    color: #fff;
+    color: var(--dz-btn-primary-text);
     padding: 10px 20px;
     font-family: main-font-bold;
     font-size: 14px;
@@ -1688,16 +1688,16 @@ button.savebtn:disabled {
 
 .btn-modern:hover {
     filter: brightness(0.85);
-    color: #fff;
+    color: var(--dz-btn-primary-text);
     text-decoration: none;
 }
 
 /* Filled: modern danger button */
 .btn-modern-warning {
-    background: var(--color-error);
+    background: var(--dz-btn-danger-bg);
     border: none;
     border-radius: 5px;
-    color: #fff;
+    color: var(--dz-btn-primary-text);
     padding: 10px 20px;
     font-family: main-font-bold;
     font-size: 14px;
@@ -1709,7 +1709,7 @@ button.savebtn:disabled {
 
 .btn-modern-warning:hover {
     filter: brightness(0.85);
-    color: #fff;
+    color: var(--dz-btn-primary-text);
     text-decoration: none;
 }
 
@@ -1730,17 +1730,17 @@ button.savebtn:disabled {
 .btn-success[disabled],
 .btn-warning[disabled],
 .btn-danger[disabled] {
-    background: var(--main-disabled-color);
-    border-color: var(--main-disabled-color);
-    color: var(--secondary-text-color);
+    background: var(--dz-btn-disabled-bg);
+    border-color: var(--dz-btn-disabled-bg);
+    color: var(--dz-btn-disabled-text);
     cursor: not-allowed;
     pointer-events: none;
 }
 
 .btn-primary[disabled] {
-    background: var(--main-disabled-color);
-    border-color: var(--main-disabled-color);
-    color: var(--secondary-text-color);
+    background: var(--dz-btn-disabled-bg);
+    border-color: var(--dz-btn-disabled-bg);
+    color: var(--dz-btn-disabled-text);
     cursor: not-allowed;
     pointer-events: none;
 }
@@ -1822,10 +1822,10 @@ tr.odd td.sorting_1, tr.even td.sorting_1 {
 }
 
 .btnstyle3, .btnstyle3-sel {
-    background: var(--main-blue-color);
+    background: var(--dz-btn-primary-bg);
     border: none;
     border-radius: 5px;
-    color: #fff;
+    color: var(--dz-btn-primary-text);
     text-align: center;
     padding: 6px 12px;
     line-height: 1;
@@ -1840,10 +1840,10 @@ tr.odd td.sorting_1, tr.even td.sorting_1 {
 
 .btnstyle3-dis,
 .btnstyle3:disabled {
-    background: var(--main-disabled-color);
+    background: var(--dz-btn-disabled-bg);
     border: none;
     border-radius: 5px;
-    color: var(--secondary-text-color);
+    color: var(--dz-btn-disabled-text);
     text-align: center;
     padding: 6px 12px;
     line-height: 1;
