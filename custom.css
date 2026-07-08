@@ -43,20 +43,20 @@
 }
 /* Bootbox */
 .bootbox.modal.fade.in {
-    background-color: var(--main-item-bg-color) !important;
+    background-color: var(--dz-modal-bg) !important;
 }
 
 .modal-content {
-    background-color: var(--main-item-bg-color) !important;
+    background-color: var(--dz-modal-bg) !important;
 }
 
 .modal-title {
-    color: var(--main-text-color);
+    color: var(--dz-modal-text);
 }
 
 .modal-footer {
     border-top: 1px solid #f1f2f3 !important;
-    background-color: var(--main-item-bg-color) !important;
+    background-color: var(--dz-modal-bg) !important;
 }
 .help-block {
     color: var(--main-text-color);
@@ -1899,7 +1899,7 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
 }
 
 .ui-dialog {
-    background: var(--main-bg-color) !important;
+    background: var(--dz-modal-bg) !important;
     z-index: 9999 !important;
     max-width: calc(100vw - 20px) !important;
     max-height: calc(100vh - 20px) !important;
@@ -1930,6 +1930,7 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
     flex-wrap: wrap;
     gap: 5px;
     padding: 8px;
+    background: var(--dz-modal-bg);
 }
 
 .ui-dialog .ui-dialog-buttonset {
@@ -1945,9 +1946,9 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
 
 .ui-dialog-buttonset button {
     font-family: main-font;
-    background: var(--main-blue-color) !important;
-    color: white !important;
-    border: 1px solid var(--main-blue-color) !important;
+    background: var(--dz-btn-primary-bg) !important;
+    color: var(--dz-btn-primary-text) !important;
+    border: 1px solid var(--dz-btn-primary-bg) !important;
     border-radius: 5px !important;
 }
 
@@ -1956,9 +1957,9 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
 }
 
 #getlatlong {
-    background: var(--main-blue-color) !important;
-    color: white !important;
-    border: 1px solid var(--main-blue-color) !important;
+    background: var(--dz-btn-primary-bg) !important;
+    color: var(--dz-btn-primary-text) !important;
+    border: 1px solid var(--dz-btn-primary-bg) !important;
     border-radius: 5px !important;
     padding: 8px 15px;
 }
@@ -2179,7 +2180,7 @@ select.ui-corner-all option {
 
 /* =Popus */
 .ui-dialog-buttonset .ui-button-text {
-    color: #fff;
+    color: var(--dz-btn-primary-text);
 }
 
 .ui-widget-header {
