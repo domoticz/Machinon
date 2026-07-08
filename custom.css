@@ -2348,9 +2348,69 @@ tr.update-pulse {
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
 }
 
-/* New Domoticz login page (glass-themed redesign) */
+/* New Domoticz login page (glass-themed redesign) - Machinon-flat.
+   Keep the white .glass-card + dark canvas + blue .btn-modern; fix the light-on-glass
+   elements to Machinon's palette. .glass-input is used only on login/2FA, so scoping the
+   overrides under .glass-card is safe and does not affect other pages. Colours via --dz-*. */
 .remember-row {
     color: var(--main-text-color) !important;
+}
+
+.glass-card .glass-input {
+    background: var(--dz-body-bg);
+    border: 1px solid var(--dz-input-border);
+    border-radius: 6px;
+    color: var(--dz-body-text);
+}
+
+.glass-card .glass-input::placeholder {
+    color: var(--secondary-text-color);
+}
+
+.glass-card .glass-input:focus {
+    border-color: var(--dz-accent-color);
+    background: var(--dz-input-bg);
+    box-shadow: none;
+}
+
+/* 2FA / passkey copy (core: white on glass) */
+.glass-card .glass-text,
+.glass-card .passkey-desc {
+    color: var(--secondary-text-color);
+}
+
+.glass-card .passkey-icon {
+    color: var(--dz-accent-color);
+}
+
+/* Auth method tabs (shown when passkeys are available) */
+.glass-card .auth-tab {
+    background: var(--dz-body-bg);
+    border: 1px solid var(--dz-input-border);
+    color: var(--dz-body-text);
+}
+
+.glass-card .auth-tab.active {
+    background: rgba(var(--main-blue-color-values), 0.12);
+    border-color: var(--dz-accent-color);
+    color: var(--dz-accent-color);
+}
+
+.glass-card .auth-tab:hover:not(.active) {
+    background: rgba(var(--main-blue-color-values), 0.06);
+    color: var(--dz-body-text);
+}
+
+/* Links */
+.glass-card .back-link,
+.glass-card .domoticz-link {
+    color: var(--dz-accent-color);
+}
+
+.glass-card .back-link:hover,
+.glass-card .domoticz-link:hover {
+    color: var(--dz-accent-color);
+    filter: brightness(0.85);
 }
 
 /* Button groups in toolbars/dialogs: connected */
