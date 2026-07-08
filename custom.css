@@ -70,19 +70,12 @@
     color: var(--dz-body-text);
 }
 
-/* Add fonts */
-.ui-widget-content,
-.btnstylerev,
-.btnstyle,
-.btnstyle3-dis,
-.btnstyle3,
-.btnstyle3-sel
-.mHeaderBtn,
-.navbar-inverse .navbar-inner,
-.item #bigtext,
-.item #type,
-.item #lastupdate {
-    font-family: main-font;
+/* jQuery UI's bundled ui-darkness theme forces white .ui-widget-content text (invisible in light
+   mode). Restore the theme text colour. Body already provides font-family (main-font) + colour by
+   inheritance for everything else, so the old cross-cutting "Add fonts" grab-bag rule was removed -
+   it conflated font + colour across unrelated components (buttons, nav, cards) and was the reason
+   buttons could not be extracted to their own file. */
+.ui-widget-content {
     color: var(--dz-body-text);
 }
 
