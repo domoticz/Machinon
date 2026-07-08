@@ -892,27 +892,6 @@ header.logo {
     margin: 2px;
 }
 
-/* Activate/Deactivate buttons on grid view */
-.page-content-container .btnstyle3,
-.page-content-container .btnstyle3-sel {
-    border-radius: 5px;
-    padding: 4px 12px;
-    color: var(--dz-btn-primary-text);
-}
-
-/* Ensure btnstyle3 link color overrides page-content-container a color */
-.page-content-container a.btnstyle3,
-.page-content-container a.btnstyle3:link,
-.page-content-container a.btnstyle3:visited {
-    color: var(--dz-btn-primary-text);
-}
-
-.page-content-container a.btnstyle3-dis,
-.page-content-container a.btnstyle3-dis:link,
-.page-content-container a.btnstyle3-dis:visited {
-    color: var(--dz-btn-disabled-text);
-}
-
 .events-editor {
     margin-top: 40px;
 }
@@ -1555,6 +1534,107 @@ button.savebtn:disabled {
     pointer-events: none;
 }
 
+/* Activate/Deactivate buttons on grid view */
+.page-content-container .btnstyle3,
+.page-content-container .btnstyle3-sel {
+    border-radius: 5px;
+    padding: 4px 12px;
+    color: var(--dz-btn-primary-text);
+}
+
+/* Ensure btnstyle3 link color overrides page-content-container a color */
+.page-content-container a.btnstyle3,
+.page-content-container a.btnstyle3:link,
+.page-content-container a.btnstyle3:visited {
+    color: var(--dz-btn-primary-text);
+}
+
+.page-content-container a.btnstyle3-dis,
+.page-content-container a.btnstyle3-dis:link,
+.page-content-container a.btnstyle3-dis:visited {
+    color: var(--dz-btn-disabled-text);
+}
+/* Button groups in toolbars/dialogs: connected */
+.btn-group .btn {
+    margin: 0 0 0 -1px !important;
+    color: var(--dz-body-text);
+    font-family: main-font;
+    border: 1px solid var(--dz-accent-color) !important;
+}
+
+.btn-group > .btn:first-child {
+    margin-left: 0 !important;
+    border-radius: 5px 0 0 5px !important;
+}
+
+.btn-group > .btn:last-child {
+    margin-left: 0 !important;
+    border-radius: 0 5px 5px 0 !important;
+}
+
+.btn-group > .btn:not(:first-child):not(:last-child) {
+    border-radius: 0 !important;
+}
+
+.btn-default,
+.btn-group .btn-default {
+    background: transparent !important;
+    border: 1px solid var(--dz-accent-color) !important;
+    color: var(--dz-body-text) !important;
+}
+
+.btn.btn-selected,
+.btn-group .btn-selected,
+.btn-default.active,
+.btn-group .btn-default.active {
+    color: #fff !important;
+    background: var(--dz-accent-color) !important;
+    border-color: var(--dz-accent-color) !important;
+    font-family: main-font;
+}
+
+.btn-default:hover {
+    color: #fff !important;
+    background: var(--dz-accent-color) !important;
+    border-color: var(--dz-accent-color) !important;
+}
+
+.btn-group .btn-primary {
+    background: var(--dz-accent-color) !important;
+    border-color: var(--dz-accent-color) !important;
+    color: #fff !important;
+}
+
+.btn-group .btn-primary:hover {
+    filter: brightness(0.85);
+}
+
+.btn-group .btn-danger {
+    background: var(--dz-accent-red) !important;
+    border-color: var(--dz-accent-red) !important;
+    color: #fff;
+    border-radius: 5px !important;
+}
+
+.btn-group .btn-danger:hover {
+    filter: brightness(0.85);
+}
+
+.btn-group .btn-info {
+    background: var(--dz-accent-color) !important;
+    border-color: var(--dz-accent-color) !important;
+    color: #fff;
+}
+
+.btn-group .btn-info:hover {
+    border-color: var(--dz-accent-color) !important;
+    filter: brightness(0.85);
+}
+
+.btn-group {
+    padding-bottom: 1px;
+}
+
 h1,
 h2,
 h2 span {
@@ -1761,87 +1841,6 @@ select.ui-corner-all option {
         margin-left: 90px;
         transform: translateX(0);
     }
-}
-
-/* Button groups in toolbars/dialogs: connected */
-.btn-group .btn {
-    margin: 0 0 0 -1px !important;
-    color: var(--dz-body-text);
-    font-family: main-font;
-    border: 1px solid var(--dz-accent-color) !important;
-}
-
-.btn-group > .btn:first-child {
-    margin-left: 0 !important;
-    border-radius: 5px 0 0 5px !important;
-}
-
-.btn-group > .btn:last-child {
-    margin-left: 0 !important;
-    border-radius: 0 5px 5px 0 !important;
-}
-
-.btn-group > .btn:not(:first-child):not(:last-child) {
-    border-radius: 0 !important;
-}
-
-.btn-default,
-.btn-group .btn-default {
-    background: transparent !important;
-    border: 1px solid var(--dz-accent-color) !important;
-    color: var(--dz-body-text) !important;
-}
-
-.btn.btn-selected,
-.btn-group .btn-selected,
-.btn-default.active,
-.btn-group .btn-default.active {
-    color: #fff !important;
-    background: var(--dz-accent-color) !important;
-    border-color: var(--dz-accent-color) !important;
-    font-family: main-font;
-}
-
-.btn-default:hover {
-    color: #fff !important;
-    background: var(--dz-accent-color) !important;
-    border-color: var(--dz-accent-color) !important;
-}
-
-.btn-group .btn-primary {
-    background: var(--dz-accent-color) !important;
-    border-color: var(--dz-accent-color) !important;
-    color: #fff !important;
-}
-
-.btn-group .btn-primary:hover {
-    filter: brightness(0.85);
-}
-
-.btn-group .btn-danger {
-    background: var(--dz-accent-red) !important;
-    border-color: var(--dz-accent-red) !important;
-    color: #fff;
-    border-radius: 5px !important;
-}
-
-.btn-group .btn-danger:hover {
-    filter: brightness(0.85);
-}
-
-.btn-group .btn-info {
-    background: var(--dz-accent-color) !important;
-    border-color: var(--dz-accent-color) !important;
-    color: #fff;
-}
-
-.btn-group .btn-info:hover {
-    border-color: var(--dz-accent-color) !important;
-    filter: brightness(0.85);
-}
-
-.btn-group {
-    padding-bottom: 1px;
 }
 
 /* Selector */
