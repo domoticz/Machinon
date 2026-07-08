@@ -214,10 +214,7 @@ function loadSettingsHTML() {
     });
     $('a.resetschemebtn').click(function(e) {
             e.preventDefault();
-            var current_theme = light_theme;
-            if (theme.features.dark_theme.enabled) {
-                current_theme = dark_theme;
-            }
+            var current_theme = getSchemeDefaults();
             $('input#themevar39_bg').val(current_theme.bg);
             $('input#themevar39_main_color').val(current_theme.main);
             $('input#themevar39_navbar').val(current_theme.navbar);

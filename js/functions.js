@@ -42,6 +42,34 @@ function setColorScheme() {
     }
 }
 
+// Read the current base scheme's DEFAULT palette straight from the --dz-* tokens (single source of
+// truth in dz-tokens.css / dark.css), so the theme-settings "reset scheme" button no longer needs a
+// duplicated JS colour map. Temporarily strips any active custom-colour override and forces the base
+// (light/dark) scheme attribute, reads the resolved tokens, then restores the real scheme via
+// setColorScheme(). All synchronous, so no repaint happens between - the user sees no flicker.
+function getSchemeDefaults() {
+    var html = document.documentElement;
+    clearCustomColorScheme();
+    if (theme.features.dark_theme && theme.features.dark_theme.enabled) {
+        html.setAttribute('data-dz-scheme', 'dark');
+    } else {
+        html.removeAttribute('data-dz-scheme');
+    }
+    var cs = getComputedStyle(html);
+    var v = function (t) { return cs.getPropertyValue(t).trim(); };
+    var defaults = {
+        bg:       v('--dz-body-bg'),
+        main:     v('--dz-accent-color'),
+        navbar:   v('--dz-nav-bg'),
+        item:     v('--dz-widget-bg'),
+        text:     v('--dz-body-text'),
+        alt_text: v('--secondary-text-color'),
+        disabled: v('--dz-status-disabled')
+    };
+    setColorScheme();
+    return defaults;
+}
+
 // --dz-* tokens the custom colour scheme may override (used to clear them on a scheme switch).
 var DZ_CUSTOM_TOKENS = [
     '--dz-body-bg', '--dz-body-text', '--dz-nav-bg', '--dz-widget-bg', '--dz-widget-text',
