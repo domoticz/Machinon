@@ -1,0 +1,493 @@
+/*
+  buttons.css - all button + button-styled-control styling for Machinon.
+
+  Extracted in Phase 5.3 AFTER the cross-cutting "Add fonts" grab-bag was dissolved (that rule's
+  colour on .btnstyle3 was the reorder trap that previously forced buttons to stay in custom.css).
+  Now that no cross-cutting rule colours buttons, this block is position-independent and lives here.
+  Contains: btnstyle arrows, reset/save theme buttons, the settings/z-wave label-buttons, the
+  Bootstrap-2 gradient reset + all .btn-* variants, ghost/modern/size/disabled buttons, btnstyle3
+  (+ grid-view overrides), and connected .btn-group toolbars. The load-bearing !important that beats
+  Bootstrap 2 state rules is preserved (see the reset block comment). Card-specific .item .btn-group
+  layout stays in custom.css with the device cards.
+*/
+.btnstylerev,
+.btnstyle {
+    background: none;
+    color: var(--dz-body-text);
+}
+
+a.btnstylerev,
+a.btnstyle {
+    position: relative;
+    overflow: visible;
+    padding: 0em 1em;
+}
+
+a.btnstylerev::before,
+a.btnstyle::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 1vmin;
+    height: 1vmin;
+    background: transparent;
+    border-top: 0.1vmin solid var(--dz-body-text);
+    border-right: 0.1vmin solid var(--dz-body-text);
+}
+
+a.btnstylerev::before {
+    left: 0;
+    transform: translate3d(0, -50%, 0) rotate(-135deg);
+}
+
+a.btnstyle::after {
+    right: 0;
+    transform: translate3d(0, -50%, 0) rotate(45deg);
+}
+
+a.btnstyle {
+    position: relative;
+    overflow: visible;
+    margin-left: 16px;
+    color: var(--dz-body-text);
+}
+
+/* Reset/save theme button */
+.resetbtn {
+    background: var(--dz-btn-danger-bg);
+    border: none;
+    border-radius: 5px;
+    color: var(--dz-btn-primary-text);
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.resetbtn:hover {
+    filter: brightness(0.85);
+}
+
+.savebtn {
+    background: var(--dz-btn-primary-bg);
+    border: none;
+    border-radius: 5px;
+    color: var(--dz-btn-primary-text);
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.savebtn:hover {
+    filter: brightness(0.85);
+}
+
+button.savebtn:disabled {
+    background: var(--dz-btn-disabled-bg);
+    border-color: var(--dz-btn-disabled-bg);
+    color: var(--dz-btn-disabled-text);
+    cursor: not-allowed;
+}
+/* Settings button, z-wave etc. */
+.label-info[href], .badge-info[href],
+.label-info.lcursor {
+    background-color: var(--dz-accent-color);
+    color: #fff;
+}
+
+/* Panels */
+.btn-small {
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+}
+/* Universal button reset — kills Bootstrap 2.x gradients.
+
+   Load-bearing !important: Bootstrap 2 (css/bootstrap.css, loaded globally before this theme and
+   NOT removable per theme) styles .btn-* with gradients, and its STATE rules carry higher
+   specificity than our base rules: .btn-primary:hover / :active / [disabled] are (0,2,0) and set
+   background-color/color. Our .btn-* base rules are only (0,1,0), so without !important a hover
+   would flip the button to Bootstrap blue (#0044cc) and active/disabled would show Bootstrap
+   gradients. The !important on background/border/color/box-shadow below is what keeps the flat
+   Machinon look across every state. Do NOT strip it without first raising each rule to cover
+   :hover/:active/[disabled] at matching specificity (see the [disabled] rules, which DO carry
+   !important so they can beat this base and render the grey disabled state). */
+.btn-info,
+.btn-success,
+.btn-warning,
+.btn-danger,
+.btn-primary,
+.btn-default,
+.btn-mini,
+.btnstyle3,
+.btnstyle3-sel,
+.btnstyle3-dis,
+.savebtn,
+.resetbtn,
+.allow5min {
+    text-shadow: none;
+    background-image: none;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, filter 0.15s ease;
+    cursor: pointer;
+    font-family: main-font;
+}
+
+.btn-mini {
+    background: transparent;
+    border: 1px solid var(--dz-accent-color);
+    color: var(--dz-body-text);
+    border-radius: 5px;
+    padding: 2px 8px;
+    font-size: 11px;
+}
+
+.btn-mini:hover {
+    background: var(--dz-accent-color);
+    color: #fff;
+}
+
+.btn-primary {
+    background: var(--dz-btn-primary-bg) !important;
+    border: none !important;
+    color: var(--dz-btn-primary-text) !important;
+    border-radius: 5px;
+    font-size: 12px;
+    padding: 6px 12px;
+    box-shadow: none !important;
+}
+
+.btn-primary:hover {
+    filter: brightness(0.85);
+}
+
+.btn-success {
+    background: var(--dz-btn-success-bg) !important;
+    border: none !important;
+    color: var(--dz-btn-primary-text) !important;
+    border-radius: 5px;
+    box-shadow: none !important;
+}
+
+.btn-success:hover {
+    filter: brightness(0.85);
+}
+
+.btn-warning {
+    background: var(--dz-btn-warning-bg) !important;
+    border: none !important;
+    color: var(--dz-btn-primary-text) !important;
+    border-radius: 5px;
+    font-size: 12px;
+    padding: 6px 12px;
+    box-shadow: none !important;
+}
+
+.btn-warning:hover {
+    filter: brightness(0.85);
+}
+
+.btn-info {
+    background: var(--dz-btn-info-bg) !important;
+    border: none !important;
+    color: var(--dz-btn-primary-text) !important;
+    border-radius: 5px;
+    font-size: 12px;
+    padding: 6px 12px;
+    box-shadow: none !important;
+}
+
+.btn-info:hover {
+    filter: brightness(0.85);
+}
+
+.btn-info:visited {
+    color: var(--dz-btn-primary-text);
+}
+
+.btn-danger {
+    background: var(--dz-btn-danger-bg) !important;
+    border: none !important;
+    color: var(--dz-btn-primary-text) !important;
+    border-radius: 5px;
+    font-size: 12px;
+    padding: 6px 12px;
+    box-shadow: none !important;
+}
+
+.btn-danger:hover {
+    filter: brightness(0.85);
+}
+
+.btnsmall,
+.btnsmall-sel {
+    color: var(--dz-accent-color);
+    background: rgba(var(--dz-accent-values), 0.1);
+    border: none;
+    border-radius: 5px;
+    padding: 4px 8px;
+    font-style: normal;
+    cursor: pointer;
+}
+
+.btnsmall:hover,
+.btnsmall-sel:hover {
+    background: rgba(var(--dz-accent-values), 0.2);
+}
+
+/* Ghost: disabled small button */
+.btnsmall-dis {
+    color: var(--dz-status-disabled);
+    background: transparent;
+    border: none;
+    border-radius: 5px;
+    padding: 4px 8px;
+    cursor: not-allowed;
+    pointer-events: none;
+    font-style: normal;
+}
+
+/* Ghost: icon-only buttons */
+.btn-icon {
+    background: transparent;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 5px;
+}
+
+.btn-icon:hover {
+    background: rgba(var(--dz-accent-values), 0.1);
+}
+
+/* Ghost: link-styled button */
+.btn-link {
+    background: transparent;
+    border: none;
+    color: var(--dz-accent-color);
+    cursor: pointer;
+    text-decoration: none;
+    padding: 0;
+    font-family: main-font;
+    font-size: 12px;
+}
+
+.btn-link:hover {
+    text-decoration: underline;
+}
+
+/* Filled: modern login/wizard button */
+.btn-modern {
+    background: var(--dz-btn-primary-bg);
+    border: none;
+    border-radius: 5px;
+    color: var(--dz-btn-primary-text);
+    padding: 10px 20px;
+    font-family: main-font-bold;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+.btn-modern:hover {
+    filter: brightness(0.85);
+    color: var(--dz-btn-primary-text);
+    text-decoration: none;
+}
+
+/* Filled: modern danger button */
+.btn-modern-warning {
+    background: var(--dz-btn-danger-bg);
+    border: none;
+    border-radius: 5px;
+    color: var(--dz-btn-primary-text);
+    padding: 10px 20px;
+    font-family: main-font-bold;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-modern-warning:hover {
+    filter: brightness(0.85);
+    color: var(--dz-btn-primary-text);
+    text-decoration: none;
+}
+
+/* Size: extra small */
+.btn-xs {
+    padding: 4px 8px;
+    font-size: 11px;
+}
+
+/* Size: large */
+.btn-large {
+    padding: 10px 20px;
+    font-size: 14px;
+}
+
+/* Unified disabled states */
+/* !important required: the base .btn-* rules above set background/color with !important (to beat
+   Bootstrap 2 hover), which would otherwise defeat this [disabled] styling and make disabled filled
+   buttons render identical to enabled ones. !important here lets the disabled state win. */
+.btn-info[disabled],
+.btn-success[disabled],
+.btn-warning[disabled],
+.btn-danger[disabled] {
+    background: var(--dz-btn-disabled-bg) !important;
+    border-color: var(--dz-btn-disabled-bg) !important;
+    color: var(--dz-btn-disabled-text) !important;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.btn-primary[disabled] {
+    background: var(--dz-btn-disabled-bg) !important;
+    border-color: var(--dz-btn-disabled-bg) !important;
+    color: var(--dz-btn-disabled-text) !important;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+#itemtabledoubleicon td:last-child .btnsmall-sel,
+#itemtablenostatus td:last-child .btnsmall-sel,
+#itemtabletrippleicon td:last-child .btnsmall-sel {
+    border-radius: 0;
+    height: auto;
+}
+
+.btnstyle3, .btnstyle3-sel {
+    background: var(--dz-btn-primary-bg);
+    border: none;
+    border-radius: 5px;
+    color: var(--dz-btn-primary-text);
+    text-align: center;
+    padding: 6px 12px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btnstyle3:hover, .btnstyle3-sel:hover {
+    filter: brightness(0.85);
+}
+
+.btnstyle3-dis,
+.btnstyle3:disabled {
+    background: var(--dz-btn-disabled-bg);
+    border: none;
+    border-radius: 5px;
+    color: var(--dz-btn-disabled-text);
+    text-align: center;
+    padding: 6px 12px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Activate/Deactivate buttons on grid view */
+.page-content-container .btnstyle3,
+.page-content-container .btnstyle3-sel {
+    border-radius: 5px;
+    padding: 4px 12px;
+    color: var(--dz-btn-primary-text);
+}
+
+/* Ensure btnstyle3 link color overrides page-content-container a color */
+.page-content-container a.btnstyle3,
+.page-content-container a.btnstyle3:link,
+.page-content-container a.btnstyle3:visited {
+    color: var(--dz-btn-primary-text);
+}
+
+.page-content-container a.btnstyle3-dis,
+.page-content-container a.btnstyle3-dis:link,
+.page-content-container a.btnstyle3-dis:visited {
+    color: var(--dz-btn-disabled-text);
+}
+/* Button groups in toolbars/dialogs: connected */
+.btn-group .btn {
+    margin: 0 0 0 -1px !important;
+    color: var(--dz-body-text);
+    font-family: main-font;
+    border: 1px solid var(--dz-accent-color) !important;
+}
+
+.btn-group > .btn:first-child {
+    margin-left: 0 !important;
+    border-radius: 5px 0 0 5px !important;
+}
+
+.btn-group > .btn:last-child {
+    margin-left: 0 !important;
+    border-radius: 0 5px 5px 0 !important;
+}
+
+.btn-group > .btn:not(:first-child):not(:last-child) {
+    border-radius: 0 !important;
+}
+
+.btn-default,
+.btn-group .btn-default {
+    background: transparent !important;
+    border: 1px solid var(--dz-accent-color) !important;
+    color: var(--dz-body-text) !important;
+}
+
+.btn.btn-selected,
+.btn-group .btn-selected,
+.btn-default.active,
+.btn-group .btn-default.active {
+    color: #fff !important;
+    background: var(--dz-accent-color) !important;
+    border-color: var(--dz-accent-color) !important;
+    font-family: main-font;
+}
+
+.btn-default:hover {
+    color: #fff !important;
+    background: var(--dz-accent-color) !important;
+    border-color: var(--dz-accent-color) !important;
+}
+
+.btn-group .btn-primary {
+    background: var(--dz-accent-color) !important;
+    border-color: var(--dz-accent-color) !important;
+    color: #fff !important;
+}
+
+.btn-group .btn-primary:hover {
+    filter: brightness(0.85);
+}
+
+.btn-group .btn-danger {
+    background: var(--dz-accent-red) !important;
+    border-color: var(--dz-accent-red) !important;
+    color: #fff;
+    border-radius: 5px !important;
+}
+
+.btn-group .btn-danger:hover {
+    filter: brightness(0.85);
+}
+
+.btn-group .btn-info {
+    background: var(--dz-accent-color) !important;
+    border-color: var(--dz-accent-color) !important;
+    color: #fff;
+}
+
+.btn-group .btn-info:hover {
+    border-color: var(--dz-accent-color) !important;
+    filter: brightness(0.85);
+}
+
+.btn-group {
+    padding-bottom: 1px;
+}
