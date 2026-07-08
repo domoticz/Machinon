@@ -86,12 +86,16 @@
 }
 
 /*
-  Dash2 special-widget recolour. dashboard.css self-defines --dz-widget-accent (and the
-  energy/weather/moon/stat tokens) in its own :root, loaded after the theme, so a plain :root
-  override loses the source-order tie. html:root (specificity 0,1,1) beats :root (0,1,0) in
-  both schemes; var(--dz-accent-color) resolves per-scheme. Only the brand accent is
-  Machinon-ised - the energy/weather/moon colours are semantic and stay at core defaults.
+  Dash2 special-widget recolour. dashboard.css self-defines --dz-widget-accent AND
+  --dz-accent-red (plus the energy/weather/moon/stat tokens) in its own :root, loaded after the
+  theme, so a plain :root override loses the source-order tie. html:root (specificity 0,1,1)
+  beats :root (0,1,0) in both schemes; dark.css's html[data-dz-scheme="dark"] (also 0,1,1) still
+  wins over this via source order when the dark attribute is set. Only the brand accent + brand
+  red are Machinon-ised - the energy/weather/moon colours are semantic and stay at core defaults.
+  --dz-accent-red: without this line core's #DF2D3A overrides Machinon's #c43b3b in light mode
+  (dark was already correct via the higher-specificity attribute selector).
 */
 html:root {
     --dz-widget-accent: var(--dz-accent-color);
+    --dz-accent-red:    #c43b3b;
 }
