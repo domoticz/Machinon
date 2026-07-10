@@ -20,14 +20,26 @@
 	border-color: var(--dz-accent-color) !important;
 }
 
+/* Shared close control of core's cursor popups (index.html: rgbw_popup, setpoint_popup,
+   thermostat3_popup, rfy_popup). Drawn in CSS so it follows the scheme tokens; the previous
+   Close.png image was a dark X, invisible on the dark popup surface. */
 .ui-close {
-    background: url(../images/Close.png);
     width: 32px;
     height: 32px;
+    cursor: pointer;
 }
 
-.ui-close:hover {
-    background-position: 0 0px
+.ui-close::before {
+    content: "\00d7";
+    display: block;
+    font-size: 28px;
+    line-height: 32px;
+    text-align: center;
+    color: var(--dz-body-text);
+}
+
+.ui-close:hover::before {
+    color: var(--dz-accent-color);
 }
 
 .ui-popup.ui-corner-all {
