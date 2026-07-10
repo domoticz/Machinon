@@ -247,6 +247,10 @@ function setDeviceLastUpdate(idx, lastupdate) {
 
     $(tr).each(function() {
         let lastupdateEl = $(this).find("#lastupdate");
+        /* Core renders its bar-ranges strip (<dz-bar>, views/widgets/utility_widget.html)
+           inside this same cell. Rewriting the cell with .html()/.text() destroys that live
+           Angular element, so detach it first and put it back after. */
+        let barEl = lastupdateEl.children("dz-bar").detach();
         if (theme.features.time_ago.enabled === true) {
             /* Modify existing #lastupdate in-place instead of creating new #timeago */
             let livestampSpan = lastupdateEl.find("span[data-livestamp]");
@@ -265,6 +269,7 @@ function setDeviceLastUpdate(idx, lastupdate) {
                 lastupdateEl.prepend("<i id='lastSeen' class='ion-ios-pulse'></i> ");
             }
         }
+        if (barEl.length) { lastupdateEl.prepend(barEl); }
     });
 }
 
