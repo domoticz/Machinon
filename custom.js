@@ -152,37 +152,20 @@ function init_theme() {
                             setDeviceOptions(idx);
                         }
 
-                        /* Re-apply switch toggle if enabled and wiped — same guards as setAllDevicesFeatures() */
+                        /* Re-apply switch toggle if enabled and wiped — heuristics shared
+                           with setAllDevicesFeatures() via devices.js helpers */
                         if (switchEnabled && tr.find(".switch").length === 0) {
                             let item = $(this);
                             let bigText = item.find("#bigtext");
-                            let isSwitch = bigText.siblings("#img").find("img").hasClass("lcursor") &&
-                                item.find(".dimslider").length === 0 &&
-                                item.find(".selectorlevels").length === 0 &&
-                                item.find(".btn-group").length === 0 &&
-                                item.find("#img2").length === 0;
-                            if (isSwitch) {
-                                let dynamicDashboardStatus = bigText.text().trim();
-                                let inDynamicDashboard = item.closest(".dd-dz-inner").length > 0 && (dynamicDashboardStatus === "On" || dynamicDashboardStatus === "Off");
-                                let isLightSwitch = (location.hash === "#/Dashboard" && ((item.parent().attr("id") && item.parent().attr("id").startsWith("light")) || inDynamicDashboard)) ||
-                                    location.hash === "#/LightSwitches";
+                            if (isPlainOnOffSwitch(item) && item.find("#img2").length === 0) {
+                                /* The Dynamic Dashboard binary check reads the raw bigtext,
+                                   exactly like the initial pass */
                                 let isScene = item.parents("#scenecontent").length > 0 ||
                                     (item.parents("#dashScenes").length > 0 && item.find("#itemtablesmalldoubleicon").length > 0);
-                                if (isLightSwitch && theme.features.switch_instead_of_bigtext.enabled === true) {
-                                    /* Read status from bigtext, or detect from icon src if bigtext is hidden */
-                                    let status = bigText.text().trim();
-                                    if (!status) {
-                                        let imgSrc = bigText.siblings("#img").find("img").attr("src") || "";
-                                        status = imgSrc.indexOf("_On") > -1 ? "On" : "Off";
-                                    }
-                                    setDeviceSwitch(idx, status);
+                                if (isLightSwitchContext(item, bigText.text().trim()) && theme.features.switch_instead_of_bigtext.enabled === true) {
+                                    setDeviceSwitch(idx, readSwitchStatus(item));
                                 } else if (isScene && theme.features.switch_instead_of_bigtext_scenes.enabled === true) {
-                                    let status = bigText.text().trim();
-                                    if (!status) {
-                                        let imgSrc = bigText.siblings("#img").find("img").attr("src") || "";
-                                        status = imgSrc.indexOf("_On") > -1 ? "On" : "Off";
-                                    }
-                                    setDeviceSwitch(idx, status);
+                                    setDeviceSwitch(idx, readSwitchStatus(item));
                                     bigText.hide();
                                 }
                             }

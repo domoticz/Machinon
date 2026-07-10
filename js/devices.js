@@ -19,6 +19,43 @@ function setCorrectDashboardLinksforMobile() {
     });
 }
 
+/* Switch-detection heuristic, shared by the initial pass below and the
+   MutationObserver re-enhance pass in custom.js. A card is a plain on/off
+   switch when its icon is clickable (lcursor) and it carries no dimmer
+   slider, selector levels or button group. */
+function isPlainOnOffSwitch(item) {
+    return item.find("#bigtext").siblings("#img").find("img").hasClass("lcursor") &&
+        item.find(".dimslider").length === 0 &&
+        item.find(".selectorlevels").length === 0 &&
+        item.find(".btn-group").length === 0;
+}
+
+/* A card is in light-switch context on the Light/Switches page, or on the
+   Dashboard when inside a light_* group, or on a Dynamic Dashboard tile.
+   Dynamic Dashboard tiles have no light_ parent id, so a binary On/Off
+   status is also required there to avoid toggling sensors (e.g.
+   temperature) that pass the icon heuristics. */
+function isLightSwitchContext(item, status) {
+    var parentId = item.parent().attr("id") || "";
+    var inDynamicDashboard = item.closest(".dd-dz-inner").length > 0 && (status === "On" || status === "Off");
+    return ((location.hash === "#/Dashboard") && (parentId.startsWith("light") || inDynamicDashboard)) ||
+        (location.hash === "#/LightSwitches");
+}
+
+/* Status for setDeviceSwitch: visible bigtext, else its data-status, else
+   inferred from the icon filename (an earlier enhancement pass may have
+   emptied the bigtext). */
+function readSwitchStatus(item) {
+    var bigText = item.find("#bigtext");
+    var status = bigText.text().trim();
+    if (!status) status = (bigText.attr("data-status") || "").trim();
+    if (!status) {
+        var imgSrc = bigText.siblings("#img").find("img").attr("src") || "";
+        status = imgSrc.indexOf("_On") > -1 ? "On" : "Off";
+    }
+    return status;
+}
+
 function setAllDevicesFeatures() {
     switchState = {
         on: $.t("On"),
@@ -73,21 +110,11 @@ function setAllDevicesFeatures() {
         }
 
         /* Feature - Switch instead of text */
-        var parentId = $(this).parent().attr("id") || "";
-        /* Dynamic Dashboard tiles have no light_ parent id, so also require a binary On/Off status
-           to avoid toggling sensors (e.g. temperature) that pass the icon heuristics. */
-        var inDynamicDashboard = $(this).closest(".dd-dz-inner").length > 0 && (status === "On" || status === "Off");
-        if (((location.hash === "#/Dashboard") && (parentId.startsWith("light") || inDynamicDashboard)) || (location.hash === "#/LightSwitches")) {
-            if (bigText.siblings("#img").find("img").hasClass("lcursor") && 
-                ($(this).find(".dimslider").length == 0) && 
-                ($(this).find(".selectorlevels").length == 0) && 
-                ($(this).find(".btn-group").length == 0)
-            ) {
-                if (theme.features.switch_instead_of_bigtext.enabled && $(this).find("#img2").length == 0) {
-                    setDeviceSwitch(idx, status);
-                } else {
-                    bigText.show();
-                }
+        if (isLightSwitchContext($(this), status) && isPlainOnOffSwitch($(this))) {
+            if (theme.features.switch_instead_of_bigtext.enabled && $(this).find("#img2").length == 0) {
+                setDeviceSwitch(idx, status);
+            } else {
+                bigText.show();
             }
         }
 
