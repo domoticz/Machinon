@@ -14,7 +14,7 @@ var THEME_MODULES = [
     "src/js/scheme.js",
     "src/js/search.js",
     "src/js/page.js",
-    "js/devices.js"
+    "src/js/devices.js"
 ];
 
 /* Ordered script loader: script elements with async=false execute in insertion
