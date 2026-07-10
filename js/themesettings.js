@@ -163,6 +163,9 @@ function loadSettingsHTML() {
         }
         localStorage.setObject(themeFolder + ".themeSettings", theme);
         console.log(theme.name + " - theme settings saved");
+        // File-less features that apply through JS need an explicit re-apply for
+        // immediate feedback; the others take effect via their loaded/unloaded files.
+        if (this.value === "hide_logo") { setLogo(); }
     });
     $("#saveSettingsButton").click(function() {
         $('#tabtheme input[type="number"], #tabtheme input[type="text"], #tabtheme input[type="color"], #tabtheme select').each(function() {
@@ -177,6 +180,7 @@ function loadSettingsHTML() {
         localStorage.setObject(themeFolder + ".themeSettings", theme);
         storeUserVariableThemeSettings("update");
         applyCardWidths();
+        setLogo();
         generate_noty('success', language.domoticz_settings_saved, 4000)
         /* location.reload(); */
     });
@@ -253,6 +257,11 @@ function loadSettings() {
             theme = localStorage.getObject(themeFolder + ".themeSettings", theme);
             themeName = theme.name;
             console.log(themeName + " - theme settings was already found in the browser.");
+            // Features added after a user's settings were cached: seed a default instead of
+            // hitting the unknown-feature reset prompt in loadSettingsHTML.
+            if (theme.features && !theme.features.hide_logo) {
+                theme.features.hide_logo = { id: 42, enabled: false, files: [] };
+            }
         }
     }
     return Promise.resolve();

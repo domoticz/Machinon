@@ -46,6 +46,11 @@
             "enabled":true,
             "files": ["settings_page.js"]
         },
+        "hide_logo": {
+            "id": 42,
+            "enabled": false,
+            "files": []
+        },
         "standby": {
             "id":13,
             "enabled":false,

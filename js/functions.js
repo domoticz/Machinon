@@ -13,17 +13,18 @@ function removeRowDivider() {
     }
 }
 
+// Renders the navbar logo; idempotent, so the settings panel can re-apply it live. The
+// container also hosts the search box (setSearch), so hide_logo hides only the image.
+// theme.logo is user data (settings -> DB): it reaches the DOM through .attr(), never
+// through string-built markup or a composed <style> element. The old #login:before style
+// injection is gone with the page it targeted (core's views/login.html has no #login).
 function setLogo() {
-    let containerLogo = '<header class="logo"><div class="container-logo">';
-    if (theme.logo && theme.logo.length) {
-        containerLogo += '<img class="header__icon" src="images/' + theme.logo + '"';
-        $("<style>#login:before {content: url(../images/" + theme.logo + ") !important;}</style>").appendTo("head");
-    } else {
-        containerLogo += '<img class="header__icon" src="images/logo.png">';
-        $("<style>#login:before {content: url(../images/logo.png) !important;}</style>").appendTo("head");
+    if ($("header.logo").length === 0) {
+        $('<header class="logo"><div class="container-logo"><img class="header__icon"></div></header>').insertBefore(".navbar-inner");
     }
-    containerLogo += "</div></header>";
-    $(containerLogo).insertBefore(".navbar-inner");
+    var img = $("header.logo img.header__icon");
+    img.attr("src", "images/" + (theme.logo && theme.logo.length ? theme.logo : "logo.png"));
+    img.toggle(!(theme.features.hide_logo && theme.features.hide_logo.enabled));
 }
 
 function setColorScheme() {

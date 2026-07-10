@@ -569,6 +569,7 @@ Toggled via `theme.json` features object. Each feature has an `enabled` boolean 
 | Scene switches | `switch_instead_of_bigtext_scenes` | on | (none) | Extends toggle switch behavior to scene devices. |
 | Navbar icons | `navbar_icons` | off | `navbar_icons.css` | Adds icons above nav link text. |
 | Hide nav text | `navbar_icons_text` | off | (none) | Hides nav link labels, icons only. Requires `navbar_icons`. |
+| Hide logo | `hide_logo` | off | (none) | Hides the navbar logo image; the header keeps hosting the search box. Custom logo image set separately via `theme.logo`. |
 | Sidemenu | `sidemenu` | off | `sidemenu.css` | Vertical side navigation on narrow viewports (max-width: 979px). |
 | Hide footer | `footer_text_disabled` | on | `footer.css` | Hides the copyright footer bar. |
 | Center popups | `center_popups` | off | `center_popups.css` | Centers jQuery UI dialogs on screen. |
