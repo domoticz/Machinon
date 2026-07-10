@@ -3,14 +3,17 @@
    so settings follow the user across browsers). UI wiring lives in
    settings-ui.js; feature file loading in feature-loader.js. */
 
-Storage.prototype.setObject = function(key, value) {
-    this.setItem(key, JSON.stringify(value));
-};
+/* The theme object's localStorage cache. Plain functions instead of the old
+   Storage.prototype monkey-patch: no global prototype pollution, and every
+   caller stores the same thing, so the key/value pair lives here once. */
+function cacheThemeSettings() {
+    localStorage.setItem(themeFolder + ".themeSettings", JSON.stringify(theme));
+}
 
-Storage.prototype.getObject = function(key) {
-    var value = this.getItem(key);
+function readCachedThemeSettings() {
+    var value = localStorage.getItem(themeFolder + ".themeSettings");
     return value && JSON.parse(value);
-};
+}
 
 function isEmptyObject(obj) {
     for (var prop in obj) {
@@ -30,7 +33,7 @@ function loadSettings() {
                     theme = localJson;
                     themeName = theme.name;
                     if (isEmptyObject(theme) === false) {
-                        localStorage.setObject(themeFolder + ".themeSettings", theme);
+                        cacheThemeSettings();
                         setTimeout(function() {
                             location.reload();
                         }, 3000);
@@ -41,7 +44,7 @@ function loadSettings() {
                     console.log("Machinon - failed to load theme.json:", error);
                 });
         } else {
-            theme = localStorage.getObject(themeFolder + ".themeSettings", theme);
+            theme = readCachedThemeSettings();
             themeName = theme.name;
             console.log(themeName + " - theme settings was already found in the browser.");
             // Features added after a user's settings were cached: seed a default instead of
@@ -160,7 +163,7 @@ function getThemeUserVar(idx, settingType, applyFn) {
             }
             if (data.status == "OK") {
                 applyFn(JSON.parse(data.result[0].Value));
-                localStorage.setObject(themeFolder + ".themeSettings", theme);
+                cacheThemeSettings();
             }
         },
         error: function() {

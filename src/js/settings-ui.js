@@ -60,7 +60,7 @@ function addImgInsteadofIcon() {
         value = "[" + value + "]";
         theme[this.name] = JSON.parse(value);
     });
-    localStorage.setObject(themeFolder + ".themeSettings", theme);
+    cacheThemeSettings();
     storeUserVariableThemeSettings("update");
 }
 
@@ -96,7 +96,7 @@ function loadSettingsHTML() {
                     title: "Congratulations on the theme upgrade!"
                 });
                 if (isEmptyObject(theme) === false) {
-                    localStorage.setObject(themeFolder + ".themeSettings", theme);
+                    cacheThemeSettings();
                 }
             }
         }
@@ -169,7 +169,7 @@ function loadSettingsHTML() {
                 }
             });
         }
-        localStorage.setObject(themeFolder + ".themeSettings", theme);
+        cacheThemeSettings();
         console.log(theme.name + " - theme settings saved");
         // File-less features that apply through JS need an explicit re-apply for
         // immediate feedback; the others take effect via their loaded/unloaded files.
@@ -185,7 +185,7 @@ function loadSettingsHTML() {
                 theme[this.name] = value;
             }
         });
-        localStorage.setObject(themeFolder + ".themeSettings", theme);
+        cacheThemeSettings();
         storeUserVariableThemeSettings("update");
         applyCardWidths();
         setLogo();
