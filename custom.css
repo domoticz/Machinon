@@ -404,6 +404,18 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
     border-top: 1px solid #f1f2f3 !important;
     background-color: var(--dz-modal-bg) !important;
 }
+
+/* A Bootstrap modal opened on top of a jQuery UI dialog must stack above it (core opens the
+   Bar Ranges $uibModal from the Edit Device dialog and patches _allowInteraction for exactly
+   that layering). Bootstrap's default modal z-index is 1050; the theme's .ui-dialog sits at
+   9999, so without this the modal renders behind the dialog it was opened from. */
+.modal {
+    z-index: 10050 !important;
+}
+
+.modal-backdrop {
+    z-index: 10040 !important;
+}
 .ui-dialog-buttonset .ui-button-text {
     color: var(--dz-btn-primary-text);
 }
@@ -460,6 +472,21 @@ textarea {
 
 select.ui-corner-all option {
     background: var(--dz-nav-bg);
+}
+
+/* The input-underline styling above targets form controls, but jQuery UI puts ui-corner-all
+   on the dialog titlebar close button too, which then grew an accent underline under its X.
+   Not a text-decoration: it is that border-bottom. */
+.ui-dialog-titlebar-close {
+    border-bottom: none;
+}
+
+/* Ghost buttons inside dialogs: core's own style.css has .btnsmall { color: #fff } (written
+   for its dark default theme) and loads after the theme, winning the equal-specificity tie,
+   so the Bar Ranges chart button rendered white-on-white. Scoped to dialogs; the device-card
+   button states keep their higher-specificity rules. */
+.ui-dialog .btnsmall {
+    color: var(--dz-accent-color) !important;
 }
 
 /* Core's Backup/Restore section hardcodes color:#fff inline on its database-size labels
