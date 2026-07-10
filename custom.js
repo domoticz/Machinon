@@ -5,6 +5,30 @@ var supported_lang = "en fr de sv nl pl";
 // theme-settings "reset scheme" button reads the current scheme's defaults via getSchemeDefaults()
 // in functions.js, so no duplicated light_theme/dark_theme JS objects are needed here.
 
+/* The theme's always-loaded modules, in load order. Feature-toggled files
+   (theme.json "files") are separate and load on demand via the feature loader. */
+var THEME_MODULES = [
+    "js/themesettings.js",
+    "js/functions.js",
+    "js/devices.js"
+];
+
+/* Ordered script loader: script elements with async=false execute in insertion
+   order and use the browser cache ($.getScript appended a cache-busting query
+   on every page load). Resolves when all files have executed. */
+function loadThemeScripts(files) {
+    return Promise.all(files.map(function(file) {
+        return new Promise(function(resolve, reject) {
+            var s = document.createElement("script");
+            s.src = "styles/machinon/" + file;
+            s.async = false;
+            s.onload = resolve;
+            s.onerror = function() { reject(new Error(file + " failed to load")); };
+            document.head.appendChild(s);
+        });
+    }));
+}
+
 fetch('json.htm?type=command&param=getsettings', {
     method: 'GET',
     headers: {
@@ -18,16 +42,11 @@ fetch('json.htm?type=command&param=getsettings', {
     lang = (0 <= supported_lang.split(" ").indexOf(data.Language)) ?data.Language : 'en';
     themeFolder = data.WebTheme;
 
-    /* Load required script files and then init the theme */
-    $.when(
-        $.getScript("styles/machinon/js/themesettings.js"),
-        $.getScript("styles/machinon/js/functions.js"),
-        $.getScript("styles/machinon/js/devices.js"),
-        $.getScript("styles/machinon/lang/machinon." + lang + ".js"),
-        $.Deferred(function(deferred) {
-            $(deferred.resolve);
-        })
-    ).done(function() {
+    /* Load required script files (plus DOM ready) and then init the theme */
+    Promise.all([
+        loadThemeScripts(THEME_MODULES.concat(["lang/machinon." + lang + ".js"])),
+        new Promise(function(resolve) { $(resolve); })
+    ]).then(function() {
         moment.locale(lang);
         /* Load livestamp after moment is available (livestamp requires moment at parse time).
            Use fetch+eval instead of $.getScript to avoid RequireJS intercepting
