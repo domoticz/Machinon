@@ -1,6 +1,9 @@
 function showThemeSettings() {
     if (!$("#tabsystem").length) {
-        setTimeout(showThemeSettings, 1000);
+        /* Wait for the Settings page to render; every call used to start
+           another 1s retry chain that never stopped if the user navigated
+           away before the page rendered. */
+        whenElementRenders("tabsystem", "#tabsystem", showThemeSettings);
         return;
     }
     if (!$("#tabtheme").length) {
