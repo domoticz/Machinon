@@ -1,7 +1,7 @@
 /*
   nav.css - top navbar, brand/logo, dropdown menus, and .sub-tabs / .nav-tabs (Machinon's flat
   underline tab style that overrides core's glass tabs), plus the banner header + the red
-  sub-tabs Apply button. Extracted in Phase 5.3 after the "Add fonts" grab-bag fix; selectors are
+  sub-tabs Apply button. Extracted after the "Add fonts" grab-bag fix; selectors are
   nav-specific (.navbar/.sub-tabs/.nav-tabs/.brand). The one responsive `.navbar .brand` override
   stays in custom.css's Media Queries (breakpoint-grouped). Verified permutation + snapshot.
 */

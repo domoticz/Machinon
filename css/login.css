@@ -2,7 +2,7 @@
   login.css - Login page styling for Machinon: the current glass-morphism login
   (views/login.html) made Machinon-flat, plus the legacy #login styles for older Domoticz.
 
-  Part of the INCREMENTAL DE-MONOLITH of custom.css (Phase 5.3) - see the import block in
+  One of the feature files split out of custom.css - see the @import block in
   custom.css for the full direction. Only LOGIN-specific selectors live here (#login*,
   .remember-row, and the .glass-card .glass-input/.auth-tab/.passkey-*/.back-link/.domoticz-link
   form rules). The shared .glass-card BASE rule and the About-page .section-title/.version-badge/

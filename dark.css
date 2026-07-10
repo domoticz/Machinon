@@ -24,7 +24,8 @@ html[data-dz-scheme="dark"] {
   --dz-accent-values: 11,158,218;
   --dz-accent-red-values:   224,85,85;
 
-  /* Dash2 chrome tokens (dark). Special-widget recolour handled in Task 4. */
+  /* Dynamic Dashboard chrome tokens (dark). Special-widget recolour is done by the html:root
+     block in dz-tokens.css, which outranks dashboard.css's own :root. */
   --dz-panel-bg:             #515558;
   --dz-dd-grid-line:         rgba(11,158,218,0.15);
   --dz-dd-skeleton-mid:      #444a4e;

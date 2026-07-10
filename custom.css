@@ -17,7 +17,7 @@
 @import url("css/animate.css");
 @import url("css/dynamic-dashboard.css");
 
-/* Incremental de-monolith (Phase 5.3): custom.css grew as one large source-ordered file. We split
+/* custom.css grew as one large source-ordered file, so it is being split
    it into focused feature files, but ONLY for features whose selectors are UNIQUE (appear nowhere
    else). That matters because @import must precede all inline rules, so a feature file loads BEFORE
    the rest of custom.css - safe only when the extracted rules can't collide with anything they now

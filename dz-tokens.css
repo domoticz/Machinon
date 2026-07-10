@@ -10,7 +10,7 @@
   Values match custom.js light_theme / DESIGN.md.
 
   Machinon's own component CSS (custom.css + css/*.css) consumes these --dz-* tokens directly.
-  The Phase 1 --main-* back-compat aliases were retired in Phase 5; the only non-core-named tokens
+  The old --main-* back-compat aliases have been retired; the only non-core-named tokens
   left are the aux ones below (--secondary-text-color and the --dz-accent*-values RGB triads used
   for rgba() tints and the custom-colour picker).
 */
@@ -33,12 +33,12 @@
     --dz-accent-values: 9,127,174;
     --dz-accent-red-values:   196,59,59;
 
-    /* Dash2 (dynamic GridStack dashboard) chrome tokens (light).
+    /* Dynamic Dashboard chrome tokens (light). Core's GridStack dashboard: www/app/dashboardDynamic/, .dd-* classes.
        Consumed by core dashboard.css; device-card bg comes from --dz-widget-bg above.
        Special-widget tokens (--dz-widget-accent/amber/energy/weather/moon) are NOT set here:
        dashboard.css self-defines them in its own :root (loaded after the theme), so a plain
        :root override loses the source-order tie. Those are recoloured at higher specificity
-       in Task 4. */
+       by the html:root block near the bottom of this file. */
     --dz-panel-bg:             #ffffff;
     --dz-panel-text:           var(--dz-body-text);
     --dz-border-color:         var(--dz-input-border);
@@ -84,7 +84,7 @@
 }
 
 /*
-  Dash2 special-widget recolour. dashboard.css self-defines --dz-widget-accent AND
+  Dynamic Dashboard special-widget recolour. dashboard.css self-defines --dz-widget-accent AND
   --dz-accent-red (plus the energy/weather/moon/stat tokens) in its own :root, loaded after the
   theme, so a plain :root override loses the source-order tie. html:root (specificity 0,1,1)
   beats :root (0,1,0) in both schemes; dark.css's html[data-dz-scheme="dark"] (also 0,1,1) still

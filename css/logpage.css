@@ -1,6 +1,6 @@
 /*
   logpage.css - log viewer page for Machinon.
-  Part of the incremental de-monolith of custom.css (Phase 5.3) - see the import block in
+  One of the feature files split out of custom.css - see the @import block in
   custom.css. Extracted because its selectors (#logdata* / .log-*) are unique to this feature and appear
   nowhere else, so relocating it earlier in the cascade changes no outcome (verified). Keep
   touched logpage rules here.

@@ -1,7 +1,8 @@
 /*
   compact.css - Compact dashboard mode (section.compact + the #dashSwitches/#dashLights/
   #dashScenes/#dashWeather .span3 tile overrides). Unique selectors; @imported after cards.css to
-  preserve its original position after the tile rules. Part of the Phase 5.3 de-monolith.
+  preserve its original position after the tile rules. One of the feature files split out of
+  custom.css.
 */
 /* Compact mode */
 section.compact {

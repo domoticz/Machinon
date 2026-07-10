@@ -1,9 +1,9 @@
 /*
   tables.css - DataTables (jQuery DataTables) styling for Machinon.
 
-  Part of the INCREMENTAL DE-MONOLITH of custom.css (Phase 5.3). Direction for future
-  contributors: custom.css grew as one large source-ordered file; we are splitting it into
-  focused feature files one cohesive block at a time. Rules for a feature move into that
+  One of the feature files split out of custom.css. Direction for future contributors:
+  custom.css grew as one large source-ordered file and is being split into focused feature
+  files, one cohesive block at a time. Rules for a feature move into that
   feature's file (here: everything scoped to .dataTables_wrapper / table.dataTable), and
   custom.css @imports the file. When you touch a rule that belongs to an existing feature file,
   migrate it here rather than leaving it in custom.css - the monolith shrinks over time.

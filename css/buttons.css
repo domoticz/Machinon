@@ -1,7 +1,7 @@
 /*
   buttons.css - all button + button-styled-control styling for Machinon.
 
-  Extracted in Phase 5.3 AFTER the cross-cutting "Add fonts" grab-bag was dissolved (that rule's
+  Extracted only after the cross-cutting "Add fonts" grab-bag was dissolved (that rule's
   colour on .btnstyle3 was the reorder trap that previously forced buttons to stay in custom.css).
   Now that no cross-cutting rule colours buttons, this block is position-independent and lives here.
   Contains: btnstyle arrows, reset/save theme buttons, the settings/z-wave label-buttons, the

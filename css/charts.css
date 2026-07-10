@@ -1,7 +1,7 @@
 /*
   charts.css - Highcharts (device log graphs) + chart zoom-button styling for Machinon.
 
-  Part of the INCREMENTAL DE-MONOLITH of custom.css (Phase 5.3) - see the import block in
+  One of the feature files split out of custom.css - see the @import block in
   custom.css for the full direction. This block was safe to relocate earlier in the cascade
   because every selector is chart-scoped (.highcharts-* / .zoom-*), appears nowhere else, and is
   class-scoped (higher specificity than any generic element rule), so no cascade outcome changes.
