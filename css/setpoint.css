@@ -21,19 +21,21 @@
 }
 
 /* Shared close control of core's cursor popups (index.html: rgbw_popup, setpoint_popup,
-   thermostat3_popup, rfy_popup). Drawn in CSS so it follows the scheme tokens; the previous
-   Close.png image was a dark X, invisible on the dark popup surface. */
+   thermostat3_popup, rfy_popup). Core paints its own circled-X sprite on this element
+   (css/style.css, .ui-close background: url(images/close.png)) and core's stylesheet loads
+   after the theme, so it wins the equal-specificity tie: !important is the only way to
+   suppress it. The control is then drawn as a CSS glyph that follows the scheme tokens;
+   core's sprite is near-invisible on the dark popup surface. Box size and position stay
+   core's (30px, absolute top/right). */
 .ui-close {
-    width: 32px;
-    height: 32px;
-    cursor: pointer;
+    background: none !important;
 }
 
 .ui-close::before {
     content: "\00d7";
     display: block;
     font-size: 28px;
-    line-height: 32px;
+    line-height: 30px;
     text-align: center;
     color: var(--dz-body-text);
 }
