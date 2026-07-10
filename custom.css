@@ -2,9 +2,10 @@
 @charset "UTF-8";
 
 /* Machinon --dz-* token contract (must stay first, before component rules).
-   dz-tokens.css: light :root --dz-* + --main-* aliases. dark.css: dark scheme block.
-   Machinon imports NOTHING from core (no legacy.css/base.css) - its #itemtable* layout /
-   common.css utilities clash with Machinon's own CSS. See spec 2026-07-07 4.1. */
+   dz-tokens.css: light :root --dz-* token contract. dark.css: dark scheme block.
+   Machinon imports NOTHING from core (no legacy.css/base.css): core's #itemtable* layout and
+   common.css utilities clash with Machinon's own card CSS. Any --dz-* token that core's
+   globally-linked stylesheets consume must therefore be defined in dz-tokens.css. */
 @import url("dz-tokens.css");
 @import url("dark.css");
 

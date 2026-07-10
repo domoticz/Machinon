@@ -129,13 +129,16 @@ components:
     elevation: "{elevation.card}"
     gap: "{spacing.sm}"
   device-card-hover:
-    boxShadow: "0 0 0 2px {colors.light-primary}"
+    boxShadow: "{elevation.card}, 0 0 0 2px {colors.light-primary}"
+    # On the Dynamic Dashboard the card is full-bleed in a clipped cell, so the ring is
+    # drawn inset: "inset 0 0 0 2px {colors.light-primary}"
   text-input:
     backgroundColor: "transparent"
     textColor: "{colors.light-text-secondary}"
     border: "0 0 1px {colors.light-primary}"
     maxWidth: "250px"
   checkbox:
+    # Only styled on the login page (css/login.css)
     size: "14px"
     border: "1px solid {colors.light-primary}"
     rounded: "{rounded.xs}"
@@ -193,29 +196,63 @@ Machinon is a clean, card-based theme for the Domoticz home automation dashboard
 - Single accent color (`{colors.light-primary}` / `{colors.dark-primary}`) used for all interactive elements
 - Card-based device layout with CSS grid, not Bootstrap's float grid
 - Two font weights only: Open Sans Regular (body) and SemiBold (headings/emphasis)
-- Dual theme support via CSS custom properties swapped at runtime by JavaScript
+- Dual theme support via CSS custom properties, selected by a `data-dz-scheme` attribute
 - Feature modules that layer additional CSS/JS without altering the base theme
+
+## How to read this document
+
+This document is the **target**, not a description of the current CSS. It states what Machinon
+should be, so that a difference between the code and this document is a defect in one of them,
+never a precedent to copy.
+
+Three kinds of statement appear, and they are not interchangeable:
+
+- **Intent.** A design decision we chose and can revisit. Values in the tables are intent, and the
+  CSS is expected to match them. If it does not, either fix the CSS or change this document
+  deliberately.
+- **Constraint.** Something Domoticz core imposes on us. Not a choice, and not fixable here. These
+  cite the core file that forces them, so a reader can tell an external limit from a preference.
+- **Gap.** A place where the code does not yet meet the intent above. Listed under Gaps, with what
+  it would take to close it. A gap is a debt marker, not an excuse.
+
+Values here were verified against the CSS. When you change a value in the code, change it here in
+the same edit, or record the difference as a gap.
 
 ## Colors
 
-> Colors are defined in `custom.js` as `light_theme` and `dark_theme` objects, then applied to CSS custom properties on `:root` by `setColorScheme()`. Users can override individual colors via the theme settings UI when `custom_color_scheme` is enabled.
+> Colors live in CSS, not JavaScript. `dz-tokens.css` defines the light scheme on `:root`;
+> `dark.css` overrides it under `html[data-dz-scheme="dark"]`. `setColorScheme()` in
+> `js/functions.js` sets that attribute, and `getSchemeDefaults()` reads the resulting computed
+> values back so the settings UI can show them. Users can override individual colors via the
+> theme settings UI when `custom_color_scheme` is enabled; overrides are applied with
+> `setProperty()`, never by composing a stylesheet from strings.
+>
+> Machinon publishes the `--dz-*` token names that Domoticz core's globally-linked stylesheets
+> (`css/dashboard.css`, `css/style.css`) consume. It deliberately does not import core's
+> `legacy.css`, so any token core reads must be defined here.
 
 ### CSS Custom Property Mapping
 
-| Property | Light | Dark | Role |
-|----------|-------|------|------|
-| `--main-bg-color` | `{colors.light-bg}` | `{colors.dark-bg}` | Page background |
-| `--main-blue-color` | `{colors.light-primary}` | `{colors.dark-primary}` | Accent/primary; CTAs, active states, links, sliders |
-| `--main-navbar-bg-color` | `{colors.light-navbar}` | `{colors.dark-navbar}` | Top navigation bar |
-| `--main-item-bg-color` | `{colors.light-surface}` | `{colors.dark-surface}` | Card/panel surfaces |
-| `--main-text-color` | `{colors.light-text}` | `{colors.dark-text}` | Primary text |
+| Token | Light | Dark | Role |
+|-------|-------|------|------|
+| `--dz-body-bg` | `{colors.light-bg}` | `{colors.dark-bg}` | Page background |
+| `--dz-accent-color` | `{colors.light-primary}` | `{colors.dark-primary}` | Accent/primary; CTAs, active states, links, sliders |
+| `--dz-nav-bg` | `{colors.light-navbar}` | `{colors.dark-navbar}` | Top navigation bar |
+| `--dz-widget-bg` | `{colors.light-surface}` | `{colors.dark-surface}` | Card/panel surfaces |
+| `--dz-body-text` | `{colors.light-text}` | `{colors.dark-text}` | Primary text |
 | `--secondary-text-color` | `{colors.light-text-secondary}` | `{colors.dark-text-secondary}` | Captions, timestamps, labels |
-| `--main-border-color` | `{colors.light-border}` | `{colors.dark-border}` | Table/row borders |
-| `--main-disabled-color` | `{colors.light-disabled}` | `{colors.dark-disabled}` | Disabled controls, odd table rows |
-| `--color-error` | `{colors.light-error}` | `{colors.dark-error}` | Destructive actions, timeout status |
-| `--color-success` | `{colors.light-success}` | `{colors.dark-success}` | Success state buttons |
-| `--color-warning` | `{colors.light-warning}` | `{colors.dark-warning}` | Warning state buttons |
-| `--main-blue-color-values` | `9,127,174` | `11,158,218` | Raw RGB for `rgba()` usage |
+| `--dz-input-border` | `{colors.light-border}` | `{colors.dark-border}` | Table/row/input borders |
+| `--dz-status-disabled` | `{colors.light-disabled}` | `{colors.dark-disabled}` | Disabled controls, odd table rows |
+| `--dz-accent-red` | `{colors.light-error}` | `{colors.dark-error}` | Destructive actions, timeout status |
+| `--dz-btn-success-bg` | `{colors.light-success}` | `{colors.dark-success}` | Success state buttons |
+| `--dz-btn-warning-bg` | `{colors.light-warning}` | `{colors.dark-warning}` | Warning state buttons |
+| `--dz-accent-values` | `9,127,174` | `11,158,218` | Raw RGB for `rgba()` usage |
+| `--dz-accent-red-values` | `196,59,59` | `224,85,85` | Raw RGB for `rgba()` usage |
+
+Derived tokens (`--dz-panel-bg`, `--dz-border-color`, `--dz-table-*`, `--dz-btn-*`, `--dz-input-*`,
+`--dz-modal-*`) reference the rows above rather than restating colors. `--dz-widget-accent` and
+`--dz-accent-red` are additionally set in an `html:root` block, whose `(0,1,1)` specificity beats
+core's later-loaded `:root`.
 
 ### Fixed Colors (theme-independent)
 
@@ -254,12 +291,12 @@ Machinon is a clean, card-based theme for the Domoticz home automation dashboard
 
 | Element | Size | Font | Color |
 |---------|------|------|-------|
-| Name | inherited | `main-font-bold` | `--main-text-color` |
-| Bigtext (value) | `1.4em` | `main-font` | `--main-blue-color` |
-| Status | inherited | `main-font-bold` | `--main-text-color` |
+| Name | inherited | `main-font-bold` | `--dz-body-text` |
+| Bigtext (value) | `1.4em` | `main-font` | `--dz-accent-color` |
+| Status | inherited | `main-font-bold` | `--dz-body-text` |
 | Last update | `80%` | `main-font` | `--secondary-text-color` |
 | Name icon | `110%` | inherited | inherited |
-| Compact bigtext | `1.3em` | `main-font-bold` | `--main-blue-color` |
+| Compact bigtext | `1.3em` | `main-font-bold` | `--dz-accent-color` |
 | Compact last update | `0.72em` | inherited | `--secondary-text-color` |
 
 ## Spacing
@@ -338,7 +375,12 @@ Settings pages, timer/log forms, and detail views use `.page-content-container`:
 
 ### Interactive States
 
-- **Card hover**: replaces card shadow with `0 0 0 2px var(--main-blue-color)` (blue outline ring)
+- **Card hover**: keeps the card shadow and adds an accent ring:
+  `0 0 10px 1px rgba(0,0,0,0.2), 0 0 0 2px var(--dz-accent-color)`. `box-shadow` is a single
+  property, so a hover rule that lists only the ring deletes the resting shadow.
+- **Card hover (Dynamic Dashboard)**: `inset 0 0 0 2px var(--dz-accent-color)`. The card is
+  full-bleed inside a cell that core wraps in five nested `overflow: hidden` ancestors, so an
+  outer ring cannot show there.
 - **Update pulse**: keyframe animation that flashes the blue outline ring over 0.8s
 - **Drag target (active)**: `2px dashed rgba(blue, 0.3)` outline, `3px` offset
 - **Drag target (hover)**: `2px solid blue` outline, `3px` offset, `rgba(blue, 0.08)` background tint, `0.15s ease` transition
@@ -351,10 +393,10 @@ Settings pages, timer/log forms, and detail views use `.page-content-container`:
 
 | Tier | Background | Text | Border | Usage |
 |------|-----------|------|--------|-------|
-| **Filled primary** | `var(--main-blue-color)` | `{colors.on-primary}` | none | Primary actions, save, active toggles |
+| **Filled primary** | `var(--dz-accent-color)` | `{colors.on-primary}` | none | Primary actions, save, active toggles |
 | **Filled semantic** | respective semantic color | `{colors.on-primary}` | none | Success, warning, destructive actions |
-| **Outlined** | transparent | `var(--main-text-color)` | `1px solid var(--main-blue-color)` | Secondary actions, filters, zoom buttons |
-| **Ghost** | transparent or `rgba(blue, 0.1)` | `var(--main-blue-color)` | none | Tertiary actions, icon buttons, inline links |
+| **Outlined** | transparent | `var(--dz-body-text)` | `1px solid var(--dz-accent-color)` | Secondary actions, filters, zoom buttons |
+| **Ghost** | transparent or `rgba(blue, 0.1)` | `var(--dz-accent-color)` | none | Tertiary actions, icon buttons, inline links |
 
 **Size tiers:**
 
@@ -367,9 +409,9 @@ Settings pages, timer/log forms, and detail views use `.page-content-container`:
 
 **States:**
 - Hover (filled): `filter: brightness(0.85)`
-- Hover (outlined): fill with `var(--main-blue-color)`, text switches to `{colors.on-primary}`
+- Hover (outlined): fill with `var(--dz-accent-color)`, text switches to `{colors.on-primary}`
 - Hover (ghost `.btnsmall`): tint deepens to `rgba(blue, 0.2)`
-- Disabled: `background: var(--main-disabled-color)`, `color: var(--secondary-text-color)`, `cursor: not-allowed`, `pointer-events: none`
+- Disabled: `background: var(--dz-status-disabled)`, `color: var(--secondary-text-color)`, `cursor: not-allowed`, `pointer-events: none`
 - Transition: `background 0.15s ease, color 0.15s ease, border-color 0.15s ease, filter 0.15s ease`
 
 ### Button Groups
@@ -411,9 +453,24 @@ Fixed tile width: 180px
 
 **Double/triple icon variants**: wider icon columns (48px + 48px for double, adds `img3` area for triple).
 
+**Dynamic Dashboard card** (Constraint): the same card, mounted in a GridStack cell. Core sets
+`defaultH: 2` and `minH: 2` (`ddDzDevice.widget.js`) against a `rowHeight` of 60
+(`ddGrid.directive.js`), so the cell is always at least 120px and there is no theme hook for
+either. Measured natural card heights are
+116px (switch), 118px (dimmer, blinds) and 120px (selector), so the tallest card needs the whole
+cell. Consequences:
+
+- The row gap is tightened to `4px` (from `{spacing.sm}`); at the classic gap the card is ~128px.
+- The card keeps its natural height. Forcing `height: 100%` compresses its grid rows and squeezes
+  the switch pill and icons.
+- No padding may be reserved around the card, which is why the hover ring is inset.
+- Core clips every cell of the card (`dashboard.css`: `.dd-dz-inner table[id^="itemtable"] td
+  { overflow: hidden }`), so an icon that overhangs its `td` is shaved here though it is visible on
+  the classic dashboard. Not fixable from the theme.
+
 ### Form Inputs
 
-- **Text/number/password**: transparent background, bottom-border only (`1px solid var(--main-blue-color)`), secondary text color, max-width 250px
+- **Text/number/password**: transparent background, bottom-border only (`1px solid var(--dz-accent-color)`), secondary text color, max-width 250px
 - **Checkbox**: custom-drawn, 14x14px, `{rounded.xs}` radius, `1px solid blue` border, 8x8px blue inner fill when checked
 - **Radio**: same as checkbox but `{rounded.circle}` on both outer and inner
 - **Textarea**: `{rounded.xs}` radius, `1px solid blue` border, full width
@@ -426,19 +483,19 @@ Material-style slider. Track: 40x15px, `{rounded.container}` radius. Handle: 20x
 | State | Track | Handle | Handle shadow |
 |-------|-------|--------|--------------|
 | Off | `rgba(blue, 0.2)` | `var(--secondary-text-color)` | `0 2px 3px rgba(0,0,0,0.7)` |
-| On | `rgba(blue, 0.5)` | `var(--main-blue-color)` | same |
+| On | `rgba(blue, 0.5)` | `var(--dz-accent-color)` | same |
 
 Handle translates `34px` right on toggle, `0.4s` transition.
 
 ### Navigation
 
-**Top navbar**: `var(--main-navbar-bg-color)` background with `0 0 10px 2px rgba(0,0,0,0.2)` shadow. Links distributed via `display: flex; justify-content: space-around`. Link style: `main-font-bold`, `{typography.sm}`, `var(--main-text-color)`, `{rounded.interactive}` radius.
+**Top navbar**: `var(--dz-nav-bg)` background with `0 0 10px 2px rgba(0,0,0,0.2)` shadow. Links distributed via `display: flex; justify-content: space-around`. Link style: `main-font-bold`, `{typography.sm}`, `var(--dz-body-text)`, `{rounded.interactive}` radius.
 
 - **Active page**: `rgba(blue, 0.4)` background, `1px solid blue` border
 - **Dropdown hover**: `rgba(blue, 0.15)` background
-- **Dropdown menu**: `var(--main-bg-color)` background, `{rounded.container}` radius, `{elevation.overlay}` shadow
+- **Dropdown menu**: `var(--dz-body-bg)` background, `{rounded.container}` radius, `{elevation.overlay}` shadow
 
-**Sub-tabs / Nav-tabs**: underline style. Inactive: transparent bottom border. Active/hover: `2px solid var(--main-blue-color)` bottom border, blue text color. No background change.
+**Sub-tabs / Nav-tabs**: underline style. Inactive: transparent bottom border. Active/hover: `2px solid var(--dz-accent-color)` bottom border, blue text color. No background change.
 
 **Mobile hamburger** (max-width: 979px): fixed-position 25x25px toggle. Three 4px bars animate to X via `rotate(135deg)` / `rotate(-135deg)` transforms, `0.2s ease-in-out`. Gets blue background pill with `{rounded.container}` bottom corners after 50px scroll.
 
@@ -448,11 +505,11 @@ Wrapped in a container with `{elevation.card}` shadow and `{rounded.container}` 
 
 | Element | Style |
 |---------|-------|
-| Header | `var(--main-item-bg-color)` background, 35px height, no border |
-| Odd rows | `var(--main-disabled-color)` background |
-| Even rows | `var(--main-item-bg-color)` background |
-| Row border | `1px solid var(--main-border-color)` |
-| Selected row | `var(--main-blue-color)` background, 75% opacity |
+| Header | `var(--dz-widget-bg)` background, 35px height, no border |
+| Odd rows | `var(--dz-status-disabled)` background |
+| Even rows | `var(--dz-widget-bg)` background |
+| Row border | `1px solid var(--dz-input-border)` |
+| Selected row | `var(--dz-accent-color)` background, 75% opacity |
 | Filter/info text | `var(--secondary-text-color)` |
 | Bottom margin | 10px |
 
@@ -460,18 +517,18 @@ Wrapped in a container with `{elevation.card}` shadow and `{rounded.container}` 
 
 | Element | Style |
 |---------|-------|
-| Background | `var(--main-item-bg-color)` |
+| Background | `var(--dz-widget-bg)` |
 | Text (titles, labels, legends) | `var(--secondary-text-color)`, `main-font` |
-| Tooltip box | `var(--main-bg-color)` fill, 60% opacity, no stroke |
-| Grid lines | `var(--main-bg-color)` |
+| Tooltip box | `var(--dz-body-bg)` fill, 60% opacity, no stroke |
+| Grid lines | `var(--dz-body-bg)` |
 | Export button | card surface, `4px` radius, blue icon stroke |
 | Export menu | card surface, `{rounded.container}` radius, `{elevation.card}` shadow |
 | Zoom buttons | outlined style, `{rounded.interactive}` radius |
-| Zoom reset | outlined with `var(--color-error)` border |
+| Zoom reset | outlined with `var(--dz-accent-red)` border |
 
 ### Dialogs (jQuery UI)
 
-- Background: `var(--main-bg-color)`
+- Background: `var(--dz-body-bg)`
 - Max: `calc(100vw - 20px)` x `calc(100vh - 20px)`
 - Content max height: `calc(100vh - 150px)` with `overflow-y: auto`
 - Button pane: flex wrap, `5px` gap
@@ -482,7 +539,7 @@ Wrapped in a container with `{elevation.card}` shadow and `{rounded.container}` 
 
 - Track: `rgba(0,0,0,0.26)`, 5px height, `{rounded.sm}` radius
 - Range fill: `rgba(blue, 0.5)`
-- Handle: 15px circle, solid `var(--main-blue-color)`, positioned -5px top
+- Handle: 15px circle, solid `var(--dz-accent-color)`, positioned -5px top
 - Width: `calc(100% - 100px)`, narrower (50%) when double-icon cards, 55% on wide screens (1200px+)
 
 ## Feature Modules
@@ -511,6 +568,8 @@ Toggled via `theme.json` features object. Each feature has an `enabled` boolean 
 | Check update | `check_update` | on | `check_update.js` | Checks for Domoticz software updates. |
 | Custom pages | `custom_page_menu` | on | `custom_page.js` | Adds custom page entries to navigation. |
 | Settings menu | `custom_settings_menu` | on | `settings_page.js` | Theme settings panel in Domoticz settings. |
+| Notifications | `notification` | on | (none) | Warning toasts (noty) when a sensor times out or reports a low battery. |
+| Dashboard camera section | `dashboard_camera_section` | on | (none) | Renders the camera preview as its own dashboard section. Requires `dashboard_camera`. |
 
 ## Animations
 
@@ -527,14 +586,14 @@ Toggled via `theme.json` features object. Each feature has an `enabled` boolean 
 
 ## Do's
 
-- Use CSS custom properties for all colors; never hardcode hex values outside the `light_theme`/`dark_theme` definitions in `custom.js`
+- Use CSS custom properties for all colors; never hardcode hex values outside the token definitions in `dz-tokens.css` and `dark.css`
 - Use `filter: brightness(0.85)` for filled button hover states; it works across both light and dark themes
 - Use the card grid gap (`{spacing.md}`, 15px) for spacing between device cards
 - Use `main-font` for body text and `main-font-bold` for headings and emphasis
 - Keep device cards as CSS grid layouts; the `grid-template-areas` pattern is the foundation of the card system
 - Use the outlined button style for secondary/toggle actions and filled for primary actions
 - Apply `{elevation.card}` for any new card-like container
-- Use the blue outline ring (`0 0 0 2px var(--main-blue-color)`) for card hover/focus states
+- Use the blue outline ring (`0 0 0 2px var(--dz-accent-color)`) for card hover/focus states
 - Test all changes in both light and dark mode
 - Use the current spacing clusters (4/8/10/15/20px) until the 4px grid migration
 
@@ -572,16 +631,62 @@ Toggled via `theme.json` features object. Each feature has an `enabled` boolean 
 - Settings grid tiles shrink to `100px` with hidden labels
 - Compact card button groups become vertical scroll-snap columns
 
-## Known Gaps
+## Source Layout
+
+`custom.css` is a thin base plus an `@import` list. It grew as one large source-ordered file and is
+being split into focused feature files, one cohesive block at a time.
+
+| File | Contents |
+|------|----------|
+| `dz-tokens.css` | Light `:root` `--dz-*` token contract, plus the `html:root` overrides |
+| `dark.css` | Dark scheme under `html[data-dz-scheme="dark"]` |
+| `css/cards.css` | Device-tile and dashboard system: card box contract, grids, card content, options menu |
+| `css/buttons.css` | Buttons and button-styled controls |
+| `css/nav.css` | Navbar, brand, dropdowns, sub-tabs |
+| `css/dynamic-dashboard.css` | Chrome unique to core's Dynamic Dashboard (`.dd-*`) |
+| `css/compact.css` | Compact dashboard mode (`.span3` tiles) |
+| `css/tables.css` | DataTables |
+| `css/charts.css` | Highcharts |
+| `css/login.css` | Login page |
+| `css/energy.css`, `css/logpage.css`, `css/setpoint.css`, `css/search.css`, `css/device-status.css` | Per-feature blocks |
+| `css/dashboard_mobile.css`, `css/settings.css`, `css/floorplan.css`, `css/icons_on_tabs.css`, `css/iconsupload.css`, `css/animate.css` | Imported ahead of the base |
+| `css/ionicons.min.css` | Vendored icon font |
+
+Ten further stylesheets (`dark_theme.css`, `switch.css`, `sidemenu.css`, `footer.css`,
+`navbar_icons.css`, `center_popups.css`, `standby.css`, `dashboard_camera.css`,
+`dashboard_columns.css`, `dashboard_show_last_update.css`) are not imported. They are loaded at
+runtime by `loadThemeFeatureFiles()` when their feature flag is on, which appends a `<link>` after
+every static stylesheet.
+
+Because `@import` must precede all inline rules, an extracted file loads *before* the rest of
+`custom.css`. Only features whose selectors appear nowhere else may be extracted, or the extracted
+rules would lose to the rules they now jump over.
+
+## Gaps
+
+Where the code does not yet meet the intent stated above. Each is a debt marker: it names what
+would have to change, not a reason to copy the current behaviour.
 
 - No formal `:focus-visible` styles for keyboard navigation / accessibility
 - No CSS custom properties for shadows (hardcoded `rgba` values)
 - No typography scale as CSS custom properties
-- Status glow colors (timeout red, protected blue, low battery yellow) are hardcoded `rgb()`, not mapped to the semantic color system
-- Login page has hardcoded light-mode colors (`#fff`, `#f1f1f1`, `#ccc`, `#1a1a1a`) that do not respond to dark mode custom properties
-- `--main-border-color` and `--main-disabled-color` share the same value (`#d3d3d3`) in light mode, making them visually indistinguishable
-- Disabled button contrast below WCAG AA: light theme `#6d6e6d` on `#d3d3d3` is 3.42:1, dark theme `#cccccc` on `#808080` is 2.46:1. WCAG exempts disabled controls, but readability would benefit from dedicated `--disabled-text-color` and `--disabled-bg-color` variables for buttons. The global `--main-disabled-color` is shared with odd table rows, header gradient, and input borders, so it cannot be changed in isolation.
-- Navbar shadow uses `10px 2px` spread instead of `10px 1px` (should be normalized to card tier)
+- Status glow colors (timeout red, protected blue, low battery yellow) are hardcoded `rgb()` in
+  `css/device-status.css`, not mapped to the semantic color system
+- `--dz-input-border` and `--dz-status-disabled` share the same value (`{colors.light-border}`) in
+  light mode, making borders and disabled controls visually indistinguishable
+- Disabled button contrast below WCAG AA: light theme `{colors.light-text-secondary}` on
+  `{colors.light-disabled}` is 3.42:1, dark theme `{colors.dark-text-secondary}` on
+  `{colors.dark-disabled}` is 2.46:1. WCAG exempts disabled controls, but readability would benefit
+  from dedicated disabled text/background tokens. `--dz-status-disabled` is shared with odd table
+  rows and input borders, so it cannot be changed in isolation.
+- Navbar shadow uses `10px 2px` spread instead of the card tier's `10px 1px`
+- `css/login.css` still carries nine hardcoded literals (`#fff`, `#f1f1f1`, `#ccc`, `#1a1a1a`)
+  alongside its 22 `--dz-*` usages, so parts of the login page do not follow the dark scheme
+- Machinon's device card is designed at ~128px, but core's Dynamic Dashboard cell is fixed at 120px
+  (`minH: 2` x `rowHeight: 60`) with no theme hook. That cell size is a constraint; the gap is that
+  the card is squeezed to fit rather than designed for it, which costs the outer hover ring and the
+  resting drop shadow on that board. Closing it needs either a compact card drawn for 120px, or a
+  themeable `minH`/`defaultH` upstream.
 
 ## Iteration Guide
 
