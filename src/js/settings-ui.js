@@ -176,6 +176,8 @@ function loadSettingsHTML() {
         if (this.value === "hide_logo") { setLogo(); }
         // Loaded JS cannot be unloaded, so the module re-reads its enabled flag.
         if (this.value === "log_plot_bands" && typeof dzApplyLogPlotBands === "function") { dzApplyLogPlotBands(); }
+        // The scheme picker mirrors these legacy checkboxes; keep both truthful.
+        if (this.value === "dark_theme" || this.value === "custom_color_scheme") { syncSchemeFromFeatures(); }
     });
     $("#saveSettingsButton").click(function() {
         $('#tabtheme input[type="number"], #tabtheme input[type="text"], #tabtheme input[type="color"], #tabtheme select').each(function() {
@@ -230,6 +232,7 @@ function loadSettingsHTML() {
             }
         });
     });
+    renderSchemePicker();
     $('a.resetschemebtn').click(function(e) {
             e.preventDefault();
             var current_theme = getSchemeDefaults();

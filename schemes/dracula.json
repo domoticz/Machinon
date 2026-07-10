@@ -1,0 +1,19 @@
+{
+    "name": "Dracula",
+    "description": "Dark purple-tinted with vivid accents",
+    "base": "dark",
+    "preview": { "bg": "#282a36", "surface": "#343746", "accent": "#bd93f9", "text": "#f8f8f2" },
+    "colors": {
+        "background": "#282a36",
+        "item": "#343746",
+        "navbar": "#21222c",
+        "main_color": "#bd93f9",
+        "main_text": "#f8f8f2",
+        "alt_text": "#b8bac6",
+        "border": "#6272a4",
+        "disabled": "#6272a4",
+        "error": "#ff5555",
+        "success": "#50fa7b",
+        "warning": "#f1fa8c"
+    }
+}

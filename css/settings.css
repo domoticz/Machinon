@@ -298,3 +298,51 @@ ul.machinon_ul li {
         display: none;
     }
 }
+
+/* Scheme picker (Theme tab, Colour Options). Cards are rendered by
+   src/js/schemes.js from schemes/*.json; swatch colours arrive via
+   element.style.backgroundColor, never composed markup. */
+#schemePicker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 6px 0 12px;
+}
+
+#schemePicker .scheme-card {
+    cursor: pointer;
+    width: 128px;
+    padding: 7px;
+    border: 2px solid var(--dz-input-border);
+    border-radius: 8px;
+    background: var(--dz-widget-bg);
+    transition: border-color 0.15s ease;
+}
+
+#schemePicker .scheme-card:hover {
+    border-color: var(--dz-accent-color);
+}
+
+#schemePicker .scheme-card.selected {
+    border-color: var(--dz-accent-color);
+    box-shadow: 0 0 0 1px var(--dz-accent-color);
+}
+
+#schemePicker .swatches {
+    display: flex;
+    height: 26px;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--dz-input-border);
+}
+
+#schemePicker .swatches span {
+    flex: 1;
+}
+
+#schemePicker .scheme-name {
+    margin-top: 6px;
+    font-size: 12px;
+    text-align: center;
+    color: var(--dz-body-text);
+}

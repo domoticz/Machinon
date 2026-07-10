@@ -227,6 +227,13 @@ the same edit, or record the difference as a gap.
 > theme settings UI when `custom_color_scheme` is enabled; overrides are applied with
 > `setProperty()`, never by composing a stylesheet from strings.
 >
+> Built-in schemes (`schemes/*.json`, picker in the Theme tab rendered by `src/js/schemes.js`)
+> are presets for that same applier: a scheme carries a `colors` object with the applier's
+> keys plus a `base` ("light"/"dark") that picks the token underlay beneath the overrides via
+> `theme.scheme_base` (dark schemes keep `dark.css` active for every token they do not set).
+> Every shipped scheme must hold body text vs body background at WCAG AA 4.5:1 or better
+> (checked by `dz-scheme-picker.js`). Adding a scheme = one JSON file + an `index.json` entry.
+>
 > Machinon publishes the `--dz-*` token names that Domoticz core's globally-linked stylesheets
 > (`css/dashboard.css`, `css/style.css`) consume. It deliberately does not import core's
 > `legacy.css`, so any token core reads must be defined here.

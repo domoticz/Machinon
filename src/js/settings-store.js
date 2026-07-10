@@ -55,6 +55,13 @@ function loadSettings() {
             if (theme.features && !theme.features.log_plot_bands) {
                 theme.features.log_plot_bands = { id: 43, enabled: true, files: ["log_ranges.js"] };
             }
+            // Settings cached before the scheme picker existed: derive the
+            // selection from the legacy feature flags.
+            if (theme.features && !theme.scheme) {
+                theme.scheme = theme.features.custom_color_scheme && theme.features.custom_color_scheme.enabled ? "custom"
+                    : (theme.features.dark_theme && theme.features.dark_theme.enabled ? "dark" : "light");
+                theme.scheme_base = theme.features.dark_theme && theme.features.dark_theme.enabled ? "dark" : "light";
+            }
         }
     }
     return Promise.resolve();
@@ -121,9 +128,13 @@ function storeUserVariableThemeSettings(action) {
         }
     });
 
+    /* Positional contract: readers index into this array, so only APPEND.
+       7 and 8 (scheme picker selection + its token underlay) arrived after
+       the first seven; older stored arrays simply lack them. */
     var custom = [
         theme.standby_after, theme.button_name, theme.custom_url,
-        theme.logo, theme.icons, theme.background_img, theme.background_type
+        theme.logo, theme.icons, theme.background_img, theme.background_type,
+        theme.scheme, theme.scheme_base
     ];
 
     function saveVariable(varName, value) {
@@ -192,6 +203,12 @@ function getCustomThemeSettings(idx) {
         theme.icons = customThemeSettings[4];
         theme.background_img = customThemeSettings[5];
         theme.background_type = customThemeSettings[6];
+        /* Arrays stored before the scheme picker have no 7/8; keep the
+           derived values from loadSettings in that case. */
+        if (customThemeSettings.length > 8) {
+            theme.scheme = customThemeSettings[7];
+            theme.scheme_base = customThemeSettings[8];
+        }
     });
 }
 

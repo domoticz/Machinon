@@ -12,6 +12,7 @@ var THEME_MODULES = [
     "src/js/feature-loader.js",
     "src/js/settings-ui.js",
     "src/js/scheme.js",
+    "src/js/schemes.js",
     "src/js/search.js",
     "src/js/page.js",
     "src/js/devices.js"

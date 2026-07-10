@@ -8,7 +8,13 @@ function setColorScheme() {
     if (theme.features.custom_color_scheme && theme.features.custom_color_scheme.enabled === true) {
         clearCustomColorScheme();
         applyCustomColorScheme(theme.color_scheme);
-        html.setAttribute('data-dz-scheme', 'custom');
+        /* theme.scheme_base picks the token UNDERLAY beneath the overrides:
+           "dark" keeps dark.css active for every token the scheme does not
+           set (shadows, panel backgrounds); anything else sits on the light
+           base. Built-in schemes (src/js/schemes.js) set it; hand-built
+           custom colors historically ran on the light base, which the
+           undefined fallback preserves. */
+        html.setAttribute('data-dz-scheme', theme.scheme_base === 'dark' ? 'dark' : 'custom');
     } else {
         clearCustomColorScheme();
         if (theme.features.dark_theme && theme.features.dark_theme.enabled) {
