@@ -317,3 +317,131 @@ function setDeviceOpacity(idx, status) {
     }
 }
 
+/* Live device/scene updates pushed by core through $rootScope (websocket).
+   Registered once by the bootstrap (custom.js) as soon as Angular is up. */
+function initDeviceLiveUpdates($scope) {
+    $scope.$on('device_update', function (event, data) {
+        searchFunction();
+        if (data.Type === "Light/Switch") {
+            setDeviceOpacity(data.idx, data.Status);
+            if (theme.features.icon_image.enabled === true) {
+                /* We have to delay it a few otherwise it's get overwritten by standard icon */
+                setTimeout(setDeviceCustomIcon, 10, data.idx, data.Status);
+            }
+            if (theme.features.switch_instead_of_bigtext.enabled === true && data.SwitchType === "On/Off") {
+                setDeviceSwitch(data.idx, data.Status);
+            }
+        }
+        if (data.Type.startsWith("Temp") || (data.Type === "Wind")) {
+            /* Temp/Wind widgets are all refreshed, we need to format them again after a delay */
+            setTimeout(function() {
+                $("dzweatherwidget[id='" + data.idx + "']").find("tbody > tr").each(function() {
+                    $(this).attr("data-idx", data.idx);
+                });
+                $("dztemperaturewidget[id='" + data.idx + "']").find("tbody > tr").each(function() {
+                    $(this).attr("data-idx", data.idx);
+                });
+                setDeviceOptions(data.idx);
+                let lastupd = moment(data.LastUpdate, ["YYYY-MM-DD HH:mm:ss", "L LT"]).format();
+                setDeviceLastUpdate(data.idx, lastupd);
+            }, 10);
+        }
+        if (data.Type === "Wind") {
+            if (theme.features.wind_direction.enabled === true) {
+                /* We have to delay it a few otherwise it's get overwritten by standard icon */
+                setTimeout(setDeviceWindDirectionIcon, 10, data.idx, data.DirectionStr);
+            }
+        }
+        setTimeout(function() {
+            let lastupd = moment(data.LastUpdate, ["YYYY-MM-DD HH:mm:ss", "L LT"]).format();
+            setDeviceLastUpdate(data.idx, lastupd);
+            setAllDevicesIconsStatus();
+            /* Blue border pulse on updated card (if Domoticz flash setting enabled) */
+            if ($scope.config && $scope.config.ShowUpdatedEffect === true) {
+                var tr = $("tr[data-idx='" + data.idx + "']");
+                tr.addClass("update-pulse");
+                setTimeout(function() { tr.removeClass("update-pulse"); }, 800);
+            }
+        }, 10);
+    }, function errorCallback(response) {
+        console.error("Cannot connect to websocket");
+    });
+
+    $scope.$on('scene_update', function (event, data) {
+        if (theme.features.switch_instead_of_bigtext_scenes.enabled === true) {
+            setDeviceSwitch(data.idx, data.Status);
+        }
+        let lastupd = moment(data.LastUpdate, ["YYYY-MM-DD HH:mm:ss", "L LT"]).format();
+        setDeviceLastUpdate(data.idx, lastupd);
+        setDeviceOpacity(data.idx, data.Status);
+    }, function errorCallback(response) {
+        console.error("Cannot connect to websocket");
+    });
+}
+
+/* The theme's central re-enhancement pass: one debounced MutationObserver on
+   #holder re-applies the progressive enhancements (and the page chrome that
+   Angular rerenders wipe) after every digest. Registered once by the
+   bootstrap (custom.js) on DOM ready. */
+function initDeviceObserver() {
+    MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+    var mutationTimer = null;
+    var observer = new MutationObserver(function(mutations) {
+        /* Debounce: wait for Angular digest to settle */
+        if (mutationTimer) clearTimeout(mutationTimer);
+        mutationTimer = setTimeout(function() {
+            $("#main-view").children("div.container").removeClass("container").addClass("container-fluid");
+            removeRowDivider();
+            setCorrectDashboardLinksforMobile();
+            setDevicesNativeSelectorForMobile();
+
+            /* Re-apply progressive enhancements if device cards are present */
+            if ($("#main-view").find(".item").length > 0) {
+                /* Initialize unprocessed items (no data-idx = setAllDevicesFeatures hasn't run) */
+                var hasUnprocessed = $("#main-view .item tr:not([data-idx])").length > 0;
+                if (hasUnprocessed && typeof setAllDevicesFeatures === "function") {
+                    setAllDevicesFeatures();
+                    setAllDevicesIconsStatus();
+                }
+
+                var switchEnabled = theme.features.switch_instead_of_bigtext.enabled === true ||
+                    theme.features.switch_instead_of_bigtext_scenes.enabled === true;
+                $("#main-view .item").each(function() {
+                    let tr = $(this).find("tr[data-idx]");
+                    if (!tr.length) return;
+                    let idx = tr.attr("data-idx");
+                    if (!idx) return;
+
+                    /* Re-apply options menu if wiped */
+                    if (tr.find(".options-cell").length === 0) {
+                        setDeviceOptions(idx);
+                    }
+
+                    /* Re-apply switch toggle if enabled and wiped — heuristics shared
+                       with setAllDevicesFeatures() via the helpers above */
+                    if (switchEnabled && tr.find(".switch").length === 0) {
+                        let item = $(this);
+                        let bigText = item.find("#bigtext");
+                        if (isPlainOnOffSwitch(item) && item.find("#img2").length === 0) {
+                            /* The Dynamic Dashboard binary check reads the raw bigtext,
+                               exactly like the initial pass */
+                            let isScene = item.parents("#scenecontent").length > 0 ||
+                                (item.parents("#dashScenes").length > 0 && item.find("#itemtablesmalldoubleicon").length > 0);
+                            if (isLightSwitchContext(item, bigText.text().trim()) && theme.features.switch_instead_of_bigtext.enabled === true) {
+                                setDeviceSwitch(idx, readSwitchStatus(item));
+                            } else if (isScene && theme.features.switch_instead_of_bigtext_scenes.enabled === true) {
+                                setDeviceSwitch(idx, readSwitchStatus(item));
+                                bigText.hide();
+                            }
+                        }
+                    }
+                });
+            }
+        }, 50);
+    });
+    observer.observe(document.getElementById("holder"), {
+        childList: true,
+        subtree: true
+    });
+}
+
