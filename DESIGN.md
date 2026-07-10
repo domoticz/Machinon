@@ -657,7 +657,7 @@ being split into focused feature files, one cohesive block at a time.
 | `css/tables.css` | DataTables |
 | `css/charts.css` | Highcharts |
 | `css/login.css` | Login page |
-| `css/energy.css`, `css/logpage.css`, `css/setpoint.css`, `css/search.css`, `css/device-status.css` | Per-feature blocks |
+| `css/energy.css`, `css/logpage.css`, `css/setpoint.css`, `css/search.css`, `css/device-status.css`, `css/users.css` | Per-feature blocks |
 | `css/dashboard_mobile.css`, `css/settings.css`, `css/floorplan.css`, `css/icons_on_tabs.css`, `css/iconsupload.css`, `css/animate.css` | Imported ahead of the base |
 | `css/ionicons.min.css` | Vendored icon font |
 

@@ -1,0 +1,57 @@
+/*
+  users.css - Users page (core views/users.html) for Machinon.
+  One of the feature files split out of custom.css - see the @import block in custom.css.
+  The device-assignment dual list is core's jquery.uix.multiselect plugin, skinned by jQuery
+  UI's bundled ui-darkness theme (black panes, #333 headers, grey rows, white icon sprites),
+  which Machinon does not otherwise cover. All selectors are scoped to .uix-multiselect and
+  appear nowhere else, so this file loads safely ahead of custom.css.
+*/
+
+/* Panes and headers onto the theme surfaces. Shorthand background also clears ui-darkness's
+   texture images. */
+.uix-multiselect .uix-list-container {
+    background: var(--dz-widget-bg);
+    border-color: var(--dz-input-border);
+}
+
+.uix-multiselect .ui-widget-header {
+    background: var(--dz-widget-bg);
+    color: var(--dz-body-text);
+    border-color: var(--dz-input-border);
+}
+
+/* Option rows. ui-darkness also matches these via .ui-widget-content .ui-state-default at
+   (0,2,0); this selector must stay above that, because core's stylesheet loads after the
+   theme and would win an equal-specificity tie. */
+.uix-multiselect .option-element.ui-state-default {
+    background: var(--dz-widget-bg);
+    color: var(--dz-body-text);
+    border-color: var(--dz-input-border);
+}
+
+.uix-multiselect .option-element.ui-state-hover,
+.uix-multiselect .option-element:hover {
+    background: rgba(var(--dz-accent-values), 0.15);
+    color: var(--dz-body-text);
+}
+
+.uix-multiselect .option-element.ui-state-active {
+    background: rgba(var(--dz-accent-values), 0.4);
+    color: var(--dz-body-text);
+}
+
+.uix-multiselect .uix-search {
+    color: var(--dz-body-text);
+}
+
+/* Count badge in the pane header: accent chip with on-primary text, like filled controls. */
+.uix-multiselect .header-text .label {
+    color: #fff;
+}
+
+/* ui-darkness ships white icon sprites (search, move arrows, collapse handles): inverted to
+   dark on our light surfaces, left white on dark. See --dz-ui-icon-filter in dz-tokens.css
+   and dark.css. */
+.uix-multiselect .ui-icon {
+    filter: var(--dz-ui-icon-filter);
+}

@@ -32,4 +32,7 @@ html[data-dz-scheme="dark"] {
 
   /* Table zebra stripe (decoupled from --dz-status-disabled) */
   --dz-table-row-odd-bg: #808080;
+
+  /* jQuery UI's white icon sprites are already right for dark surfaces */
+  --dz-ui-icon-filter: none;
 }

@@ -56,6 +56,10 @@
     --dz-card-min-width:        320px;
     --dz-card-max-width:        500px;
 
+    /* jQuery UI ships white icon sprites (ui-darkness theme): invert to dark on light
+       surfaces; dark.css resets to none. Consumed by css/users.css. */
+    --dz-ui-icon-filter:        invert(1);
+
     /* Table (DataTables) tokens - consumed by the DataTables block in custom.css. */
     --dz-table-header-bg:       var(--dz-widget-bg);
     --dz-table-header-text:     var(--dz-body-text);

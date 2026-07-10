@@ -48,6 +48,7 @@
 @import url("css/setpoint.css");
 @import url("css/search.css");
 @import url("css/device-status.css");
+@import url("css/users.css");
 
 /* Display sidemenu on low resolution devices */
 @import url("css/sidemenu.css") (max-width: 979px);
