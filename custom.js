@@ -8,7 +8,9 @@ var supported_lang = "en fr de sv nl pl";
 /* The theme's always-loaded modules, in load order. Feature-toggled files
    (theme.json "files") are separate and load on demand via the feature loader. */
 var THEME_MODULES = [
-    "js/themesettings.js",
+    "src/js/settings-store.js",
+    "src/js/feature-loader.js",
+    "src/js/settings-ui.js",
     "js/functions.js",
     "js/devices.js"
 ];
