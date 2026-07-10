@@ -202,6 +202,7 @@ function init_theme() {
         enableThemeFeatures();
         locationHashChanged();
         setColorScheme();
+        applyCardWidths();
         setLogo();
         setSearch();
         setDevicesNativeSelectorForMobile();

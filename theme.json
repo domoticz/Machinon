@@ -19,6 +19,8 @@
         ],
     "background_img":"",
     "background_type":"",
+    "card_min_width": 320,
+    "card_max_width": 500,
     "color_scheme": {
         "background":"",
         "main_color": "",

@@ -45,6 +45,17 @@
     --dz-dd-grid-line:         rgba(9,127,174,0.12);
     --dz-dd-skeleton-mid:      #eef2f5;
 
+    /* Device-card grid sizing (css/cards.css auto-fill grids). --dz-card-min-width sets the
+       density (column count = how many fit at this width); --dz-card-max-width caps card
+       growth. User-configurable via the theme settings panel (applyCardWidths overrides
+       these inline on <html>). auto-fill counts by CONTAINER width, not viewport: at an
+       800px viewport the .row container measures 675px. 320px reproduces the former
+       viewport-breakpoint ladder's column counts at measured containers 675/1251/1333/1750
+       (viewports 800/1400/1500/1920); only the ladder's 3-column sliver around a ~950-1000px
+       container becomes 2. */
+    --dz-card-min-width:        320px;
+    --dz-card-max-width:        500px;
+
     /* Table (DataTables) tokens - consumed by the DataTables block in custom.css. */
     --dz-table-header-bg:       var(--dz-widget-bg);
     --dz-table-header-text:     var(--dz-body-text);

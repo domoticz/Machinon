@@ -109,6 +109,9 @@ function loadSettingsHTML() {
     });
     $('#tabtheme input[type="number"]').each(function() {
         var value = theme[this.name];
+        // A settings object cached before a key existed has no value for it; show the
+        // input's HTML default instead of an empty spinner.
+        if (value == null || value === "") { value = this.getAttribute("value"); }
         $(this).val(value);
     });
     $('#tabtheme input[type="text"], #tabtheme input[type="color"]').each(function() {
@@ -173,6 +176,7 @@ function loadSettingsHTML() {
         });
         localStorage.setObject(themeFolder + ".themeSettings", theme);
         storeUserVariableThemeSettings("update");
+        applyCardWidths();
         generate_noty('success', language.domoticz_settings_saved, 4000)
         /* location.reload(); */
     });

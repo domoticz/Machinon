@@ -80,44 +80,29 @@ div.clearfix {
     display: none;
 }
 
+/* Column count derives from the container and --dz-card-min-width, not from viewport
+   breakpoints, so it also tracks sidemenu/scrollbar space. auto-fill counts tracks by the
+   MAX sizing function when it is definite (CSS Grid 7.2.3.2), which is why the max is 1fr
+   here and the user's max is a max-width cap on the card below; putting
+   var(--dz-card-max-width) as the track max would make the min knob dead and drop columns
+   (measured: 800px viewport fell from 2 columns to 1). The min() guard lets cards shrink
+   on viewports narrower than the min width. */
 div.bannercontent .row.divider,
 div.bannercontent .row:not(.divider) {
     padding: 5px 0;
     margin: 0 !important;
     display: grid;
-    grid-template-columns: minmax(0, 500px);
+    grid-template-columns: repeat(auto-fill, minmax(min(var(--dz-card-min-width), 100%), 1fr));
     justify-content: center;
     gap: 15px;
     justify-items: stretch;
     align-items: stretch;
 }
 
-@media (min-width: 720px) {
-    div.bannercontent .row.divider,
-    div.bannercontent .row:not(.divider) {
-        grid-template-columns: repeat(2, minmax(0, 500px));
-    }
-}
-
-@media (min-width: 1060px) {
-    div.bannercontent .row.divider,
-    div.bannercontent .row:not(.divider) {
-        grid-template-columns: repeat(3, minmax(0, 500px));
-    }
-}
-
-@media (min-width: 1500px) {
-    div.bannercontent .row.divider,
-    div.bannercontent .row:not(.divider) {
-        grid-template-columns: repeat(4, minmax(0, 500px));
-    }
-}
-
-@media (min-width: 1900px) {
-    div.bannercontent .row.divider,
-    div.bannercontent .row:not(.divider) {
-        grid-template-columns: repeat(5, minmax(0, 500px));
-    }
+div.bannercontent .row > .item {
+    max-width: var(--dz-card-max-width);
+    justify-self: center;
+    width: 100%;
 }
 
 @media (max-width: 767px) {
@@ -148,28 +133,23 @@ div.bannercontent .row:not(.divider) {
     height: 100%;
 }
 
-/* Override upstream flex with grid for Temperature/Weather tabs (match Switches layout) */
+/* Override upstream flex with grid for Temperature/Weather tabs (match Switches layout).
+   Same auto-fill contract as the .row grids above; see the note there. */
 #tempwidgets,
 #weatherwidgets {
     display: grid;
-    grid-template-columns: minmax(0, 500px);
+    grid-template-columns: repeat(auto-fill, minmax(min(var(--dz-card-min-width), 100%), 1fr));
     justify-content: center;
     gap: 15px;
     justify-items: stretch;
     align-items: stretch;
 }
 
-@media (min-width: 720px) {
-    #tempwidgets, #weatherwidgets { grid-template-columns: repeat(2, minmax(0, 500px)); }
-}
-@media (min-width: 1060px) {
-    #tempwidgets, #weatherwidgets { grid-template-columns: repeat(3, minmax(0, 500px)); }
-}
-@media (min-width: 1500px) {
-    #tempwidgets, #weatherwidgets { grid-template-columns: repeat(4, minmax(0, 500px)); }
-}
-@media (min-width: 1900px) {
-    #tempwidgets, #weatherwidgets { grid-template-columns: repeat(5, minmax(0, 500px)); }
+#tempwidgets > *,
+#weatherwidgets > * {
+    max-width: var(--dz-card-max-width);
+    justify-self: center;
+    width: 100%;
 }
 
 #holder .row .item table[id^="item"] > tbody > tr,

@@ -329,15 +329,24 @@ When adding new spacing, use the current cluster values (4/8/10/15/20px) for con
 
 ### Responsive Grid
 
-Device cards use CSS grid with responsive column count. Cards have a max-width of 500px and are centered via `justify-content: center`.
+Device cards use CSS grid with `repeat(auto-fill, minmax(min(var(--dz-card-min-width), 100%), 1fr))`:
+the column count derives from the container width and the card-min-width token, not from viewport
+breakpoints. Cards are capped at `var(--dz-card-max-width)` and centered in their tracks
+(`justify-self: center`).
 
-| Columns | Breakpoint | Applies to |
-|---------|-----------|------------|
-| 1 | default | All device grids |
-| 2 | min-width: 720px | All device grids |
-| 3 | min-width: 1060px | All device grids |
-| 4 | min-width: 1500px | All device grids |
-| 5 | min-width: 1900px | All device grids |
+| Token | Default | Role |
+|-------|---------|------|
+| `--dz-card-min-width` | 320px | Density: a column exists for every 320px of container |
+| `--dz-card-max-width` | 500px | Cap on card growth when tracks are wider |
+
+Both are user-configurable (Theme settings > Devices > Card Min/Max Width, clamped 200-800 /
+250-1200 by `applyCardWidths()`). The 320px default reproduces the former viewport-breakpoint
+ladder (1/2/3/4/5 columns at 720/1060/1500/1900px) at common widths, measured against container
+widths 675/1251/1333/1750; ultrawide screens now gain columns instead of stopping at 5.
+
+Constraint: `auto-fill` counts tracks by the max sizing function when definite (CSS Grid
+7.2.3.2), so the user's max must be a card `max-width`, never the track max; putting it in
+`minmax()` makes the min knob dead and drops columns.
 
 Grid gap: `{spacing.md}` (15px). Applied to dashboard (`.bannercontent .row`), switches, temperature (`#tempwidgets`), and weather (`#weatherwidgets`) tabs.
 

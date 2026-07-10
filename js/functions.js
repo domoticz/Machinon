@@ -104,6 +104,25 @@ function clearCustomColorScheme() {
     for (var i = 0; i < DZ_CUSTOM_TOKENS.length; i++) { s.removeProperty(DZ_CUSTOM_TOKENS[i]); }
 }
 
+// Apply the user's card width settings as --dz-card-* overrides on <html> (consumed by the
+// auto-fill grids in css/cards.css). parseInt reduces the stored value to a number before it
+// reaches setProperty, so a non-numeric setting cannot inject CSS. Values are clamped to the
+// same ranges as the settings inputs (the input min/max attributes do not stop typed or
+// imported values); a non-numeric value falls back to the dz-tokens.css defaults by removing
+// the override, and max is raised to min so the pair can never invert.
+function applyCardWidths() {
+    var s = document.documentElement.style;
+    var clamp = function (v, lo, hi) {
+        v = parseInt(v, 10);
+        return isNaN(v) ? NaN : Math.min(Math.max(v, lo), hi);
+    };
+    var min = clamp(theme.card_min_width, 200, 800);
+    var max = clamp(theme.card_max_width, 250, 1200);
+    if (!isNaN(min) && !isNaN(max) && max < min) { max = min; }
+    if (min > 0) { s.setProperty("--dz-card-min-width", min + "px"); } else { s.removeProperty("--dz-card-min-width"); }
+    if (max > 0) { s.setProperty("--dz-card-max-width", max + "px"); } else { s.removeProperty("--dz-card-max-width"); }
+}
+
 function setSearch() {
     $('<div id="search"><input type="text" id="searchInput" autocomplete="off" onkeyup="searchFunction()" placeholder="Name, Desc, Idx, Status" title="' + language.type_to_search + '"><i class="ion-md-search"></i></div>').appendTo(".container-logo");
     window.addEventListener("keydown",function (e) {
