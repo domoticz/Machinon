@@ -19,6 +19,19 @@ function setCorrectDashboardLinksforMobile() {
     });
 }
 
+/* Localized switch state labels, shared by every consumer (switch.js and the
+   helpers below). Recomputed per call on purpose: $.t only returns translated
+   strings once core's i18n is initialized, so caching the first result could
+   freeze untranslated labels. */
+function switchLabels() {
+    return {
+        on: $.t("On"),
+        off: $.t("Off"),
+        open: $.t("Open"),
+        closed: $.t("Closed")
+    };
+}
+
 /* Switch-detection heuristic, shared by the initial pass below and the
    MutationObserver re-enhance pass in custom.js. A card is a plain on/off
    switch when its icon is clickable (lcursor) and it carries no dimmer
@@ -57,13 +70,6 @@ function readSwitchStatus(item) {
 }
 
 function setAllDevicesFeatures() {
-    switchState = {
-        on: $.t("On"),
-        off: $.t("Off"),
-        open: $.t("Open"),
-        closed: $.t("Closed")
-    };
-
     /* Browse all items to apply themes features and styles */
     $("#main-view .item").each(function() {
         /* Set idx on tr, for easy retrieval */
@@ -228,10 +234,7 @@ function setDeviceOptions(idx) {
 }
 
 function setDeviceCustomIcon(idx, status) {
-    switchState = {
-        on: $.t("On"),
-        off: $.t("Off"),
-    };
+    var switchState = switchLabels();
 
     var icons = theme.icons;
     for (var i = 0; i < icons.length; i++) {
@@ -302,12 +305,7 @@ function setDeviceLastUpdate(idx, lastupdate) {
 }
 
 function setDeviceOpacity(idx, status) {
-    switchState = {
-        on: $.t("On"),
-        off: $.t("Off"),
-        open: $.t("Open"),
-        closed: $.t("Closed")
-    };
+    var switchState = switchLabels();
 
     if (theme.features.fade_off_items.enabled === true) {
         let tr = "tr[data-idx='" + idx + "']";

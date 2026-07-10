@@ -1,4 +1,4 @@
-var theme = {}, themeName = "", switchState = {}, isMobile, lang, themeFolder;
+var theme = {}, themeName = "", isMobile, lang, themeFolder;
 isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 var supported_lang = "en fr de sv nl pl";
 // The scheme colour palette now lives solely in the --dz-* tokens (dz-tokens.css / dark.css). The

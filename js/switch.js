@@ -1,10 +1,5 @@
 function setDeviceSwitch(idx, status) {
-    switchState = {
-        on: $.t("On"),
-        off: $.t("Off"),
-        open: $.t("Open"),
-        closed: $.t("Closed")
-    };
+    var switchState = switchLabels();
 
     let tr = "tr[data-idx='" + idx + "']";
     let switcher = $(tr).find(".switch");
