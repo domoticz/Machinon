@@ -52,7 +52,10 @@ function init_theme() {
 
     window.onhashchange = locationHashChanged;
 
-    /* Set $scope variable when angular is available */
+    /* Set $scope variable when angular is available. This is the one polling
+       wait kept on purpose: core owns the Angular app, so there is no event a
+       theme can subscribe to before the injector exists. Bounded: clears as
+       soon as Angular has booted. */
     var $scope = null;
     var checkAngular = setInterval(function() {
         if (($scope === null) && (typeof angular !== "undefined") && (typeof angular.element(document.body).injector() !== "undefined")) {
@@ -129,6 +132,7 @@ function init_theme() {
                 $("#main-view").children("div.container").removeClass("container").addClass("container-fluid");
                 removeRowDivider();
                 setCorrectDashboardLinksforMobile();
+                setDevicesNativeSelectorForMobile();
 
                 /* Re-apply progressive enhancements if device cards are present */
                 if ($("#main-view").find(".item").length > 0) {

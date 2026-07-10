@@ -275,23 +275,12 @@ function setCustomIconsPage() {
 
 function ajaxSuccessCallback(event, xhr, settings) {
     setPageTitle();
-    
-    if (settings.url.startsWith("json.htm?type=command&param=getdevices") || settings.url.startsWith("json.htm?type=command&param=getscenes")) {
-        let counter = 0;
-        let intervalId = setInterval(function() {
-            if ($("#main-view").find(".item").length > 0) {
-                setAllDevicesFeatures();
-                setAllDevicesIconsStatus();
-                clearInterval(intervalId);
-            } else {
-                counter++;
-                if (counter >= 5) {
-                    clearInterval(intervalId);
-                }
-            }
-            setDevicesNativeSelectorForMobile();
-        }, 100);
-    } else if (settings.url.startsWith("json.htm?type=command&param=switchscene")) {
+
+    /* No per-request enhancement here for getdevices/getscenes: the cards
+       those responses produce render in a later Angular digest, and the
+       MutationObserver in custom.js already re-enhances when they appear
+       (setAllDevicesFeatures on unprocessed items, plus the mobile passes). */
+    if (settings.url.startsWith("json.htm?type=command&param=switchscene")) {
         let id = settings.url.split("&")[2];
         id = id.substr(4);
         let scene = $(".item#" + id);
