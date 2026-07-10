@@ -40,8 +40,64 @@
     color: var(--dz-body-text);
 }
 
+/* Search input: ui-darkness paints .ui-widget-content inputs with a black inset TEXTURE
+   IMAGE (background-color computes transparent, so measure background-image too). The
+   shorthand clears it. */
 .uix-multiselect .uix-search {
+    background: var(--dz-widget-bg);
+    border: 1px solid var(--dz-input-border);
     color: var(--dz-body-text);
+}
+
+/* Pane headers as flex rows with explicit order: title, search input, search toggle, move
+   button. The plugin floats these and MOVES the search toggle to the other side of the
+   input on the selected pane when it expands, so the icon jumped and the two panes
+   mirrored each other. Flex order pins the icon in place and the input flies out on its
+   left, identically in both panes. Scoped to the direct pane headers; the group rows
+   inside the lists are also .ui-widget-header and must not become flex rows. */
+.uix-multiselect .multiselect-available-list > .ui-widget-header,
+.uix-multiselect .multiselect-selected-list > .ui-widget-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.uix-multiselect .multiselect-available-list > .ui-widget-header .header-text,
+.uix-multiselect .multiselect-selected-list > .ui-widget-header .header-text {
+    flex: 1;
+    order: 0;
+    min-width: 0;
+}
+
+.uix-multiselect .multiselect-available-list > .ui-widget-header .uix-search,
+.uix-multiselect .multiselect-selected-list > .ui-widget-header .uix-search {
+    order: 1;
+}
+
+.uix-multiselect .multiselect-available-list > .ui-widget-header button,
+.uix-multiselect .multiselect-selected-list > .ui-widget-header button {
+    order: 3;
+    float: none;
+}
+
+.uix-multiselect .multiselect-available-list > .ui-widget-header button:has(.ui-icon-search),
+.uix-multiselect .multiselect-selected-list > .ui-widget-header button:has(.ui-icon-search) {
+    order: 2;
+}
+
+/* Header icon buttons (expand search, move all): ui-darkness gives them grey resting and
+   orange hover/focus/active states. Retheme all states; the icons themselves follow
+   --dz-ui-icon-filter below. */
+.uix-multiselect .ui-button {
+    background: transparent;
+    border-color: var(--dz-input-border);
+}
+
+.uix-multiselect .ui-button.ui-state-hover,
+.uix-multiselect .ui-button.ui-state-focus,
+.uix-multiselect .ui-button.ui-state-active {
+    background: rgba(var(--dz-accent-values), 0.15);
+    border-color: var(--dz-accent-color);
 }
 
 /* Count badge in the pane header: accent chip with on-primary text, like filled controls. */
