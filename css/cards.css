@@ -329,6 +329,27 @@ table.mobileitem td.name {
     overflow-wrap: break-word;
 }
 
+/* Bar-ranges gauge (core <dz-bar>, rendered inside td#lastupdate by
+   views/widgets/utility_widget.html). Core stacks it above the timestamp, which overflows
+   the 20px bottom row of our card grid, so the theme draws it as a full-bleed status edge
+   along the card top instead. The containing block is the card tr (position: relative in
+   the box contract above); absolute positioning also lets it escape the standard
+   dashboard's collapsed third row. On the Dynamic Dashboard it stays hidden with its host
+   cell (dynamic-dashboard.css hides td#lastupdate there). */
+.item .dz-uw-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    margin: 0;
+    border-radius: 6px 6px 0 0;
+}
+
+.item .dz-uw-bar .dz-uw-bar-fill {
+    border-radius: 6px 0 0 0;
+}
+
 /* last update */
 .item #lastupdate {
     color: var(--secondary-text-color);

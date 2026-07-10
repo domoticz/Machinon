@@ -462,6 +462,12 @@ Fixed tile width: 180px
 
 **Double/triple icon variants**: wider icon columns (48px + 48px for double, adds `img3` area for triple).
 
+**Bar-ranges gauge**: core renders its `<dz-bar>` threshold gauge inside the last-update cell;
+the theme repositions it as a 4px full-bleed status edge along the card top (top corners follow
+the card radius). Core's inline placement would overflow the 20px bottom row. Track color comes
+from `--dz-bar-track-bg` (0.2 neutral grey, both schemes). Applies to classic pages and the
+standard dashboard; on the Dynamic Dashboard the gauge stays hidden with its host cell.
+
 **Dynamic Dashboard card** (Constraint): the same card, mounted in a GridStack cell. Core sets
 `defaultH: 2` and `minH: 2` (`ddDzDevice.widget.js`) against a `rowHeight` of 60
 (`ddGrid.directive.js`), so the cell is always at least 120px and there is no theme hook for

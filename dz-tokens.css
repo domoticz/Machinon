@@ -60,6 +60,12 @@
        surfaces; dark.css resets to none. Consumed by css/users.css. */
     --dz-ui-icon-filter:        invert(1);
 
+    /* Track of core's bar-ranges gauge (style.css, .dz-uw-bar; repositioned to the card top
+       edge in css/cards.css). Slightly stronger than core's 0.15 so an empty gauge stays
+       visible against the card surface; neutral grey works on both schemes, so dark.css
+       does not redefine it. */
+    --dz-bar-track-bg:          rgba(128,128,128,0.2);
+
     /* Table (DataTables) tokens - consumed by the DataTables block in custom.css. */
     --dz-table-header-bg:       var(--dz-widget-bg);
     --dz-table-header-text:     var(--dz-body-text);
