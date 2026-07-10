@@ -123,6 +123,30 @@ function applyCardWidths() {
     if (max > 0) { s.setProperty("--dz-card-max-width", max + "px"); } else { s.removeProperty("--dz-card-max-width"); }
 }
 
+// Core positions its device popups (index.html: rgbw_popup, setpoint_popup,
+// thermostat3_popup, rfy_popup) at the raw click coordinates with no viewport clamping
+// (js/domoticz.js, ShowRGBWPopupInt: top = mouseY, left = mouseX + 15), so a popup opened
+// near the bottom or right edge is partly unreachable. Nudge it back into view whenever core
+// shows or moves it. Mitigation for a core behavior; drop this when core clamps.
+function clampCorePopups() {
+    ["rgbw_popup", "setpoint_popup", "thermostat3_popup", "rfy_popup"].forEach(function (id) {
+        var pop = document.getElementById(id);
+        if (!pop) return;
+        new MutationObserver(function () {
+            if (pop.style.display === "none") return;
+            var r = pop.getBoundingClientRect();
+            if (!r.width) return;
+            // Already-clamped popups yield dx = dy = 0, so the style write below cannot loop.
+            var dx = Math.min(0, window.innerWidth - 10 - r.right);
+            var dy = Math.min(0, window.innerHeight - 10 - r.bottom);
+            if (dx || dy) {
+                pop.style.left = Math.max(10, r.left + dx + window.scrollX) + "px";
+                pop.style.top = Math.max(10, r.top + dy + window.scrollY) + "px";
+            }
+        }).observe(pop, { attributes: true, attributeFilter: ["style"] });
+    });
+}
+
 function setSearch() {
     $('<div id="search"><input type="text" id="searchInput" autocomplete="off" onkeyup="searchFunction()" placeholder="Name, Desc, Idx, Status" title="' + language.type_to_search + '"><i class="ion-md-search"></i></div>').appendTo(".container-logo");
     window.addEventListener("keydown",function (e) {

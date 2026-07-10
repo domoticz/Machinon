@@ -203,6 +203,7 @@ function init_theme() {
         locationHashChanged();
         setColorScheme();
         applyCardWidths();
+        clampCorePopups();
         setLogo();
         setSearch();
         setDevicesNativeSelectorForMobile();
