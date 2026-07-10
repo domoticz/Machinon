@@ -193,6 +193,27 @@ function searchFunction() {
     }
 }
 
+/* One-shot DOM waiters: run fn once selector matches, immediately or when it
+   renders. A repeated call with the same key re-arms the waiter instead of
+   stacking a second one. Replaces the per-feature polling loops, which kept
+   timers spinning for the whole session when their element never appeared. */
+var domWaiters = {};
+function whenElementRenders(key, selector, fn) {
+    if ($(selector).length) {
+        fn();
+        return;
+    }
+    if (domWaiters[key]) domWaiters[key].disconnect();
+    domWaiters[key] = new MutationObserver(function() {
+        if ($(selector).length) {
+            domWaiters[key].disconnect();
+            delete domWaiters[key];
+            fn();
+        }
+    });
+    domWaiters[key].observe(document.getElementById("holder") || document.body, { childList: true, subtree: true });
+}
+
 function locationHashChanged() {
     setPageTitle();
     $(".current_page_item:not(:first)").removeClass("current_page_item");
