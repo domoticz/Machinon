@@ -260,18 +260,17 @@ function removeEmptySectionDashboard() {
 }
 
 function setCustomIconsPage() {
-    var checkIconsmain = setInterval(function() {
-        if ($("#iconsmain #fileupload").length && $("#iconsmain label.fileupload").length === 0) {
-            clearInterval(checkIconsmain);
-   
-            $("#iconsmain #fileupload").parent().prepend('<label for="fileupload" class="fileupload btn btn-info">' + $.t("Upload") + "</label>");
-            $("#iconsmain > div table:first").find("td:last").append($("#iconsmain > table td:last").children());
-            $("#iconsmain #fileupload").on("change", function() {
-                $(this).next().click();
-                $(this).val("");
-            });
-        }
-    }, 100);
+    whenElementRenders("iconsmain", "#iconsmain #fileupload", function() {
+        /* Already enhanced (the old 100ms poll never stopped in this case) */
+        if ($("#iconsmain label.fileupload").length) return;
+
+        $("#iconsmain #fileupload").parent().prepend('<label for="fileupload" class="fileupload btn btn-info">' + $.t("Upload") + "</label>");
+        $("#iconsmain > div table:first").find("td:last").append($("#iconsmain > table td:last").children());
+        $("#iconsmain #fileupload").on("change", function() {
+            $(this).next().click();
+            $(this).val("");
+        });
+    });
 }
 
 function ajaxSuccessCallback(event, xhr, settings) {
