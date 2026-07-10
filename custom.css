@@ -273,8 +273,10 @@ header.logo {
     margin-top: 40px;
 }
 
-}
-
+/* Beats core's h2 { color: #CCCCCC } (css/style.css), which is unreadable on light surfaces
+   (measured 1.61:1 on the Setup cards). A stray closing brace above this rule made the
+   parser drop it silently for a long time; keep this file brace-balanced or this rule dies
+   again without any visual error. */
 h1,
 h2,
 h2 span {
@@ -421,8 +423,6 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
 [ng-style*="deltaColor"][style*="ff6b6b"] { color: var(--dz-accent-red) !important; }
 [ng-style*="deltaColor"][style*="4ecdc4"] { color: var(--dz-btn-success-bg) !important; }
 [ng-style*="deltaColor"][style*="aaa"]    { color: var(--secondary-text-color) !important; }
-    color: var(--dz-body-bg) !important;
-}
 
 /* Setup */
 input#AcceptNewHardware:checked ~ button {
