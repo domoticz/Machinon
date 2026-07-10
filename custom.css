@@ -461,6 +461,14 @@ select.ui-corner-all option {
     background: var(--dz-nav-bg);
 }
 
+/* Core's Backup/Restore section hardcodes color:#fff inline on its database-size labels
+   (www/views/setup.html:1622-1624), written for the dark default theme and invisible on our
+   light card. An inline style loses only to !important. */
+#restoredatabase span[style],
+#restoredatabase strong[style] {
+    color: var(--dz-body-text) !important;
+}
+
 /* =Setup */
 /* Footer */
 /* =Footer */
