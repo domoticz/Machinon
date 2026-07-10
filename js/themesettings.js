@@ -398,7 +398,10 @@ function storeUserVariableThemeSettings(action) {
     ]);
 }
 
-function getFeatureThemeSettings(idx) {
+/* Fetch one theme settings user variable and hand its parsed JSON value to
+   applyFn; caching the merged theme to localStorage happens here, so appliers
+   only mutate the in-memory theme object. */
+function getThemeUserVar(idx, settingType, applyFn) {
     $.ajax({
         url: "json.htm?type=command&param=getuservariable" + "&idx=" + idx,
         async: true,
@@ -409,69 +412,39 @@ function getFeatureThemeSettings(idx) {
                 $.get("json.htm?type=command&param=addlogmessage&message=Theme Error - The theme was unable to load your user variable.");
             }
             if (data.status == "OK") {
-                var themeSettingsFromDomoticz = JSON.parse(data.result[0].Value);
-                $.each(theme.features, function(key, feature) {
-                    if ($.inArray(feature.id, themeSettingsFromDomoticz) > -1) {
-                        theme.features[key].enabled = true;
-                    } else {
-                        theme.features[key].enabled = false;
-                    }
-                });
+                applyFn(JSON.parse(data.result[0].Value));
                 localStorage.setObject(themeFolder + ".themeSettings", theme);
             }
         },
         error: function() {
-            console.log(themeName + " - ERROR reading feature settings from Domoticz for theme" + theme.name + "from user variable #" + idx);
+            console.log(themeName + " - ERROR reading " + settingType + " settings from Domoticz for theme " + theme.name + " from user variable #" + idx);
         }
+    });
+}
+
+function getFeatureThemeSettings(idx) {
+    getThemeUserVar(idx, "feature", function(enabledFeatureIds) {
+        $.each(theme.features, function(key, feature) {
+            feature.enabled = $.inArray(feature.id, enabledFeatureIds) > -1;
+        });
     });
 }
 
 function getCustomThemeSettings(idx) {
-    $.ajax({
-        url: "json.htm?type=command&param=getuservariable" + "&idx=" + idx,
-        async: true,
-        dataType: "json",
-        success: function(data) {
-            if (data.status == "ERR") {
-                console.log(themeName + " - Although they seem to exist, there was an error loading theme preferences from Domoticz");
-                $.get("json.htm?type=command&param=addlogmessage&message=Theme Error - The theme was unable to load your user variable.");
-            }
-            if (data.status == "OK") {
-                var customThemeSettings = JSON.parse(data.result[0].Value);
-                theme.standby_after = customThemeSettings[0];
-                theme.button_name = customThemeSettings[1];
-                theme.custom_url = customThemeSettings[2];
-                theme.logo = customThemeSettings[3];
-                theme.icons = customThemeSettings[4];
-                theme.background_img = customThemeSettings[5];
-                theme.background_type = customThemeSettings[6];
-                localStorage.setObject(themeFolder + ".themeSettings", theme);
-            }
-        },
-        error: function() {
-            console.log(themeName + " - ERROR reading feature settings from Domoticz for theme" + theme.name + "from user variable #" + idx);
-        }
+    getThemeUserVar(idx, "custom", function(customThemeSettings) {
+        theme.standby_after = customThemeSettings[0];
+        theme.button_name = customThemeSettings[1];
+        theme.custom_url = customThemeSettings[2];
+        theme.logo = customThemeSettings[3];
+        theme.icons = customThemeSettings[4];
+        theme.background_img = customThemeSettings[5];
+        theme.background_type = customThemeSettings[6];
     });
 }
 
 function getColorsThemeSettings(idx) {
-    $.ajax({
-        url: "json.htm?type=command&param=getuservariable" + "&idx=" + idx,
-        async: true,
-        dataType: "json",
-        success: function(data) {
-            if (data.status == "ERR") {
-                console.log(themeName + " - Although they seem to exist, there was an error loading theme preferences from Domoticz");
-                $.get("json.htm?type=command&param=addlogmessage&message=Theme Error - The theme was unable to load your user variable.");
-            }
-            if (data.status == "OK") {
-                theme.color_scheme = JSON.parse(data.result[0].Value)
-                localStorage.setObject(themeFolder + ".themeSettings", theme);
-            }
-        },
-        error: function() {
-            console.log(themeName + " - ERROR reading colors settings from Domoticz for theme" + theme.name + "from user variable #" + idx);
-        }
+    getThemeUserVar(idx, "colors", function(colorScheme) {
+        theme.color_scheme = colorScheme;
     });
 }
 function resetTheme() {
