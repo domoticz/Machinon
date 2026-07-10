@@ -470,6 +470,32 @@ select.ui-corner-all option {
     color: var(--dz-body-text) !important;
 }
 
+/* Core's short-log table couples unrelated rows through one column model: the first column
+   is pinned to 60px inline and the checkbox rows have no colspan (views/setup.html:226,238,
+   241), so their labels wrap word-by-word in a 60px column; freeing the widths instead makes
+   the column as wide as the longest label and floats the right-aligned "Days:" mid-panel.
+   Measured identically with every theme stylesheet removed, so the markup is the cause.
+   Decouple the rows from the column model entirely: each tr lays out as its own flex line
+   (same approach as the device-card tr, which the theme lays out as a grid), so "Days:"
+   sits beside its select and every label takes its natural width. width !important beats
+   the inline 60px; margin:0 stops the DataTables .display margin:auto centering the
+   now-content-sized table. Proper fix upstream: colspan on the label rows. */
+#shortlogtable {
+    width: auto !important;
+    margin: 0;
+}
+
+#shortlogtable tr {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+#shortlogtable td {
+    display: block;
+    width: auto !important;
+}
+
 /* =Setup */
 /* Footer */
 /* =Footer */
