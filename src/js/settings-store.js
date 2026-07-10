@@ -52,6 +52,9 @@ function loadSettings() {
             if (theme.features && !theme.features.hide_logo) {
                 theme.features.hide_logo = { id: 42, enabled: false, files: [] };
             }
+            if (theme.features && !theme.features.log_plot_bands) {
+                theme.features.log_plot_bands = { id: 43, enabled: true, files: ["log_ranges.js"] };
+            }
         }
     }
     return Promise.resolve();

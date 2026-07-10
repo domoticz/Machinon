@@ -51,6 +51,11 @@
             "enabled": false,
             "files": []
         },
+        "log_plot_bands": {
+            "id": 43,
+            "enabled": true,
+            "files": ["log_ranges.js"]
+        },
         "standby": {
             "id":13,
             "enabled":false,

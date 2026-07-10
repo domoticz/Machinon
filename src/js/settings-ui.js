@@ -174,6 +174,8 @@ function loadSettingsHTML() {
         // File-less features that apply through JS need an explicit re-apply for
         // immediate feedback; the others take effect via their loaded/unloaded files.
         if (this.value === "hide_logo") { setLogo(); }
+        // Loaded JS cannot be unloaded, so the module re-reads its enabled flag.
+        if (this.value === "log_plot_bands" && typeof dzApplyLogPlotBands === "function") { dzApplyLogPlotBands(); }
     });
     $("#saveSettingsButton").click(function() {
         $('#tabtheme input[type="number"], #tabtheme input[type="text"], #tabtheme input[type="color"], #tabtheme select').each(function() {
