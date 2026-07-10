@@ -19,9 +19,15 @@ tr.update-pulse {
 .item.fadeOff {
     opacity: 0.5;
 }
-/*  Device is timeout  */
+/* Device is timeout. The glow goes on the card tr like the other statuses, NOT on the
+   .item wrapper: on classic pages the wrapper is 16px wider than the card (Bootstrap span
+   padding; measured item w=403 vs tr w=387), so a wrapper glow floats 8px outside the card
+   edge and doubles up with the tr hover ring. !important beats the resting card shadow in
+   cards.css, whose #holder selector outranks a class chain. */
+.item.statusTimeout tr {
+    box-shadow: 0px 0px 10px 2px rgb(199,67,67,0.5) !important;
+}
 .item.statusTimeout {
-    box-shadow: 0px 0px 10px 2px rgb(199,67,67,0.5);
     opacity: 0.5;
 }
 
