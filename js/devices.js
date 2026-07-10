@@ -121,7 +121,10 @@ function setAllDevicesIconsStatus() {
     $("div.item.statusTimeout").each(function() {
         if ($(this).find("#name > i.ion-ios-wifi").length === 0) {
             if (theme.features.notification.enabled === true) {
-                generate_noty('warning', "Sensor " + $(this).find('#name').text() + " " + language.is + " " + language.timedout, 4000);
+                // Noty renders its text as HTML; device names come from hardware/plugins,
+                // so they must be escaped before entering the toast markup.
+                var timeoutName = $("<span>").text($(this).find("#name").text()).html();
+                generate_noty('warning', "Sensor " + timeoutName + " " + language.is + " " + language.timedout, 4000);
             }
             $(this).find("#name").prepend("<i class='ion-ios-wifi blink warning-text' title='" + $.t("Sensor Timeout") + "'></i>&nbsp;");
         }
@@ -129,7 +132,8 @@ function setAllDevicesIconsStatus() {
     $("div.item.statusLowBattery").each(function() {
         if ($(this).find("#name > i.ion-ios-battery-dead").length === 0) {
             if (theme.features.notification.enabled === true) {
-                generate_noty('warning', $(this).find('#name').text() + ' ' + $.t("Battery Level") + ' ' + $.t("Low"), 4000)
+                var batteryName = $("<span>").text($(this).find("#name").text()).html();
+                generate_noty('warning', batteryName + ' ' + $.t("Battery Level") + ' ' + $.t("Low"), 4000)
             }
             $(this).find("#name").prepend("<i class='ion-ios-battery-dead blink warning-text' title='" + $.t("Battery Low Level") + "'></i>&nbsp;");
         }

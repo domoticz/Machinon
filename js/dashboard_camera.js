@@ -23,7 +23,8 @@ function cameraPreview(section) {
                             var camId = cam.idx;
                             html += "<div class='" + (compact ? "span3" : "span4") + " movable ui-draggable ui-draggable-handle ui-droppable' id='cam_" + camId + "'><div class='item'>";
                             html += "<table id='itemtablecam' class='itemtablesmall'><tbody><tr class='with-cam-preview' data-cam='" + camId + "'>";
-                            html += "<td id='name' class='name'>" + cam.Name + "</td>";
+                            // Camera names are user data; escape before splicing into markup.
+                            html += "<td id='name' class='name'>" + $("<span>").text(cam.Name).html() + "</td>";
                             html += "</tr></tbody></table>";
                             html += "</div></div>";
                             refreshCamera(camId);
