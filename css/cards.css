@@ -612,10 +612,20 @@ body table#itemtable tr > .options {
     justify-self: right;
 }
 
-/* dashboard items - hide last seen by default, dashboard_show_last_update.css reveals it */
+/* Dashboard items hide last-seen by default; dashboard_show_last_update.css reveals it.
+   The old mechanism relied on the collapsed third grid row clipping the text, but the row
+   line sits inside the tr's padding slack, so the top half of the timestamp stayed visible
+   (measured on the standard dashboard with the feature off). visibility hides the text node
+   and icon outright; display stays so the cell keeps rendering the bar-ranges strip, which
+   un-hides itself below. */
 #dashcontent .lastupdate,
 #dashcontent #lastupdate {
     display: inline-table;
+    visibility: hidden;
+}
+
+#dashcontent #lastupdate .dz-uw-bar {
+    visibility: visible;
 }
 
 #type .dimslider,

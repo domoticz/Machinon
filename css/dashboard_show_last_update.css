@@ -18,6 +18,8 @@
 #dashcontent #lastupdate,
 #dashcontent #timeago {
     display: block;
+    /* cards.css hides the cell content with visibility when the feature is off */
+    visibility: visible;
     white-space: nowrap;
 }
 
