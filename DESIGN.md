@@ -222,7 +222,7 @@ the same edit, or record the difference as a gap.
 
 > Colors live in CSS, not JavaScript. `dz-tokens.css` defines the light scheme on `:root`;
 > `dark.css` overrides it under `html[data-dz-scheme="dark"]`. `setColorScheme()` in
-> `js/functions.js` sets that attribute, and `getSchemeDefaults()` reads the resulting computed
+> `src/js/scheme.js` sets that attribute, and `getSchemeDefaults()` reads the resulting computed
 > values back so the settings UI can show them. Users can override individual colors via the
 > theme settings UI when `custom_color_scheme` is enabled; overrides are applied with
 > `setProperty()`, never by composing a stylesheet from strings.
