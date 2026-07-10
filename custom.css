@@ -336,6 +336,31 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
     overflow-x: hidden !important;
 }
 
+/* Core's legacy device-edit dialogs (core app/UtilityController.js,
+   #dialog-edittextdevice and friends) render their icon picker with ddslick,
+   which positions a ~400px menu absolutely INSIDE the dialog content. jQuery
+   UI's overflow:auto on the content (and the overflow rules above) cut that
+   menu off at the dialog edge; measured identical on the stock default theme,
+   so the root cause is core's. Let only dialogs that contain a ddslick
+   control overflow, so the menu floats over the page exactly like the
+   rebuilt switch edit page (core app/DeviceLightEdit.js) renders the same
+   picker. Browsers without :has() keep today's clipped-but-scrollable
+   behavior. Drop this when core portals or clamps the ddslick menu. */
+.ui-dialog:has(.dd-container) {
+    overflow: visible;
+}
+.ui-dialog:has(.dd-container) .ui-dialog-content {
+    overflow: visible !important;
+}
+/* ddslick sizes its menu with an inline height (490px for text devices, core
+   app/widgets/dzUtilityWidget.js:49); on short viewports the box tail (and
+   the last icons with it) would sit below the fold. max-height wins against
+   an inline height without !important; the menu's own scrollbar handles the
+   rest. */
+.ui-dialog .dd-options {
+    max-height: 45vh;
+}
+
 @media (max-width: 767px) {
     .ui-dialog .ui-dialog-content table {
         width: 100% !important;
