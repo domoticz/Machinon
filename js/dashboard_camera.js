@@ -45,7 +45,7 @@ function cameraPreview(section) {
         }
     } else {
         $("#bigtext > span > a").each(function() {
-            camId = $(this).attr("href").split(/\'/)[3];
+            var camId = $(this).attr("href").split(/\'/)[3];
             if ($(this).parents("tr.with-cam-preview").length == 0) {
                 $(this).parents("tr").attr("data-cam", camId).addClass("with-cam-preview").on("click", function(e) {
                     ShowCameraLiveStream($(this).children("td#name").text(), $(this).attr("data-cam"), $(this).attr("data-cam"));

@@ -239,7 +239,7 @@ function removeEmptySectionDashboard() {
 }
 
 function setCustomIconsPage() {
-     checkIconsmain = setInterval(function() {
+    var checkIconsmain = setInterval(function() {
         if ($("#iconsmain #fileupload").length && $("#iconsmain label.fileupload").length === 0) {
             clearInterval(checkIconsmain);
    

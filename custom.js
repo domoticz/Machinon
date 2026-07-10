@@ -1,6 +1,5 @@
-var theme = {}, themeName = "", baseURL = "", switchState = {}, isMobile, newVersionText = "", gitVersion, lang, user, themeFolder, checkUpdate, userVariableThemeLoaded = false;
+var theme = {}, themeName = "", switchState = {}, isMobile, lang, themeFolder;
 isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-var msgCount = 0;
 var supported_lang = "en fr de sv nl pl";
 // The scheme colour palette now lives solely in the --dz-* tokens (dz-tokens.css / dark.css). The
 // theme-settings "reset scheme" button reads the current scheme's defaults via getSchemeDefaults()
@@ -18,8 +17,6 @@ fetch('json.htm?type=command&param=getsettings', {
 }).then(data => {
     lang = (0 <= supported_lang.split(" ").indexOf(data.Language)) ?data.Language : 'en';
     themeFolder = data.WebTheme;
-    user = data.WebUserName;
-    checkUpdate = data.UseAutoUpdate;
 
     /* Load required script files and then init the theme */
     $.when(
@@ -57,7 +54,7 @@ function init_theme() {
 
     /* Set $scope variable when angular is available */
     var $scope = null;
-    checkAngular = setInterval(function() {
+    var checkAngular = setInterval(function() {
         if (($scope === null) && (typeof angular !== "undefined") && (typeof angular.element(document.body).injector() !== "undefined")) {
             clearInterval(checkAngular);
             $scope = angular.element(document.body).injector().get('$rootScope');
@@ -217,6 +214,7 @@ function init_theme() {
         });
 
         if (theme.background_img && theme.background_img.length) {
+            var bg_url;
             if (theme.background_img.startsWith("http")) {
                 bg_url = theme.background_img;
             } else {

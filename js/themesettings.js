@@ -275,7 +275,6 @@ function enableThemeFeatures() {
             }
         }
     });
-    loadedThemeCSSandJS = true;
 }
 
 function loadThemeFeatureFiles(featureName) {
@@ -408,7 +407,6 @@ function getFeatureThemeSettings(idx) {
             if (data.status == "ERR") {
                 console.log(themeName + " - Although they seem to exist, there was an error loading theme preferences from Domoticz");
                 $.get("json.htm?type=command&param=addlogmessage&message=Theme Error - The theme was unable to load your user variable.");
-                userVariableThemeLoaded = false;
             }
             if (data.status == "OK") {
                 var themeSettingsFromDomoticz = JSON.parse(data.result[0].Value);
@@ -420,12 +418,10 @@ function getFeatureThemeSettings(idx) {
                     }
                 });
                 localStorage.setObject(themeFolder + ".themeSettings", theme);
-                userVariableThemeLoaded = true;
             }
         },
         error: function() {
             console.log(themeName + " - ERROR reading feature settings from Domoticz for theme" + theme.name + "from user variable #" + idx);
-            userVariableThemeLoaded = false;
         }
     });
 }
@@ -439,7 +435,6 @@ function getCustomThemeSettings(idx) {
             if (data.status == "ERR") {
                 console.log(themeName + " - Although they seem to exist, there was an error loading theme preferences from Domoticz");
                 $.get("json.htm?type=command&param=addlogmessage&message=Theme Error - The theme was unable to load your user variable.");
-                userVariableThemeLoaded = false;
             }
             if (data.status == "OK") {
                 var customThemeSettings = JSON.parse(data.result[0].Value);
@@ -451,12 +446,10 @@ function getCustomThemeSettings(idx) {
                 theme.background_img = customThemeSettings[5];
                 theme.background_type = customThemeSettings[6];
                 localStorage.setObject(themeFolder + ".themeSettings", theme);
-                userVariableThemeLoaded = true;
             }
         },
         error: function() {
             console.log(themeName + " - ERROR reading feature settings from Domoticz for theme" + theme.name + "from user variable #" + idx);
-            userVariableThemeLoaded = false;
         }
     });
 }
@@ -470,17 +463,14 @@ function getColorsThemeSettings(idx) {
             if (data.status == "ERR") {
                 console.log(themeName + " - Although they seem to exist, there was an error loading theme preferences from Domoticz");
                 $.get("json.htm?type=command&param=addlogmessage&message=Theme Error - The theme was unable to load your user variable.");
-                colorsVariableThemeLoaded = false;
             }
             if (data.status == "OK") {
                 theme.color_scheme = JSON.parse(data.result[0].Value)
                 localStorage.setObject(themeFolder + ".themeSettings", theme);
-                colorsVariableThemeLoaded = true;
             }
         },
         error: function() {
             console.log(themeName + " - ERROR reading colors settings from Domoticz for theme" + theme.name + "from user variable #" + idx);
-            colorsVariableThemeLoaded = false;
         }
     });
 }

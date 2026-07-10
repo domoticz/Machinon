@@ -160,7 +160,7 @@ function setDeviceOptions(idx) {
                 });
             });
             $(this).append('<td class="timers_log"></td>');
-            timers = $(this).find(".timers_log");
+            var timers = $(this).find(".timers_log");
             $(timers).append($(this).find('.options .btnsmall[data-i18n="Log"]').html("<i class='ion-ios-stats' title='" + $.t("Log") + "'></i>"));
             $(timers).append($(this).find('.options .btnsmall[href*="Log"]:not(.btnsmall[data-i18n="Log"])').html("<i class='ion-ios-stats' title='" + $.t("Log") + "'></i>"));
             $(timers).append($(this).find('.options .btnsmall[data-i18n="Timers"]').html("<i class='ion-ios-timer disabledText' title='" + $.t("Timers") + "'></i>"));
@@ -170,6 +170,7 @@ function setDeviceOptions(idx) {
             var scope = (typeof angular !== "undefined" && itemEl) ? angular.element(itemEl).scope() : null;
             var device = scope?.device || scope?.ctrl?.device || scope?.item;
             var isFavorite = device ? device.Favorite !== 0 : false;
+            var icon;
             if (isFavorite) {
                 icon = '<i class="ion-ios-star lcursor" title="' + $.t("Remove from Dashboard") + '"></i>';
             } else {
