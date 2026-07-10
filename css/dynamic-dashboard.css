@@ -1,7 +1,9 @@
 /*
-  dashboard2.css - styling specific to the dynamic GridStack dashboard ("Dash2").
-  Loaded via custom.css. Device-card visuals live in custom.css (shared with the classic
-  dashboard); this file holds Dash2-only chrome + fixes. Colours come from --dz-* tokens.
+  dynamic-dashboard.css - styling specific to core's Dynamic Dashboard, the GridStack board
+  at www/app/dashboardDynamic/ (.dd-* classes, per-user toggle UseDynamicDashboard).
+  Loaded via custom.css. Device-card visuals live in cards.css (shared with the classic
+  dashboard), including the card box contract that keeps cards inside a resizable cell.
+  This file holds chrome + fixes unique to that board. Colours come from --dz-* tokens.
 */
 
 /* Edit-mode widget header (shown only while editing the board) */
@@ -10,11 +12,6 @@
     color: var(--dz-panel-text);
     border-radius: 6px 6px 0 0;
 }
-.dd-widget-header .dd-widget-btn {
-    background: transparent;
-    color: inherit;
-}
-
 /* Edit-mode grid guide lines */
 .dd-grid.grid-stack .grid-stack-item > .grid-stack-item-content {
     outline-color: var(--dz-dd-grid-line);
@@ -25,10 +22,9 @@
     background: var(--dz-dd-skeleton-mid);
 }
 
-/* Small breathing room around device tiles so cards do not crowd the grid cell */
-.dd-widget--dz-device {
-    padding: 2px;
-}
+/* No padding on the widget wrapper: it is box-sizing:content-box, so padding is ADDED
+   to the cell height and clips the card. Spacing between cells is the grid's `margin`
+   option (DashboardDynamicController), not ours. See the card box contract in cards.css. */
 
 /* Keep the last-seen row inside the card instead of overflowing the bottom edge */
 .dd-widget-body .item table[id^="item"] > tbody > tr td#lastupdate {
@@ -38,7 +34,7 @@
     min-height: 0;
 }
 
-/* Last-seen hidden by default on Dash2 (matches classic: dashboard_show_last_update = off).
+/* Last-seen hidden by default on the Dynamic Dashboard (matches classic: dashboard_show_last_update = off).
    Hidden via display:none rather than an overflow:hidden row-collapse, so the device icon
    is never clipped. dashboard_show_last_update.css reveals it when the feature is enabled. */
 .dd-widget-body .item.itemBlock td#lastupdate {

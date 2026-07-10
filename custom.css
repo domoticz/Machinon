@@ -15,7 +15,7 @@
 @import url("css/iconsupload.css");
 @import url("css/floorplan.css");
 @import url("css/animate.css");
-@import url("css/dashboard2.css");
+@import url("css/dynamic-dashboard.css");
 
 /* Incremental de-monolith (Phase 5.3): custom.css grew as one large source-ordered file. We split
    it into focused feature files, but ONLY for features whose selectors are UNIQUE (appear nowhere

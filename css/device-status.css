@@ -1,6 +1,6 @@
 /*
   device-status.css - device status animations (update pulse, timeout, protected, low battery) for Machinon.
-  Part of the incremental de-monolith of custom.css (Phase 5.3) - see the import block in
+  One of the feature files split out of custom.css - see the @import block in
   custom.css. Extracted because its selectors (.updatePulse keyframe + status modifiers) are unique to this feature and appear
   nowhere else, so relocating it earlier in the cascade changes no outcome (verified). Keep
   touched device-status rules here.
@@ -25,8 +25,15 @@ tr.update-pulse {
     opacity: 0.5;
 }
 
+/* Restate the resting drop shadow before the ring: box-shadow is one property, so listing
+   only the ring would delete the card's shadow on hover (see cards.css). Inset on the dynamic
+   dashboard, where the card is full-bleed in a clipped cell and an outer ring is shaved off. */
 .item.statusTimeout tr:hover {
-    box-shadow: 0px 0px 0px 2px rgb(199,67,67) !important;
+    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2),
+                0px 0px 0px 2px rgb(199,67,67) !important;
+}
+.dd-widget-body .item.statusTimeout tr:hover {
+    box-shadow: inset 0px 0px 0px 2px rgb(199,67,67) !important;
 }
 /* Switch is protected */
 .item.statusProtected tr {
@@ -42,7 +49,11 @@ tr.update-pulse {
 }
 
 .item.statusLowBattery tr:hover {
-    box-shadow: 0px 0px 0px 2px rgb(255,255,0) !important;
+    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2),
+                0px 0px 0px 2px rgb(255,255,0) !important;
+}
+.dd-widget-body .item.statusLowBattery tr:hover {
+    box-shadow: inset 0px 0px 0px 2px rgb(255,255,0) !important;
 }
 
 .blink {

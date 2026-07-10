@@ -1,16 +1,77 @@
 /*
   cards.css - the Machinon device-tile + dashboard system (self-contained, no core import).
 
-  Gathered in Phase 5.3. The theme's CORE, INHERENTLY interdependent by design: Machinon owns the
+  The theme's CORE, and inherently interdependent by design: Machinon owns the
   whole tile layout (imports nothing from core, so it reimplements what core's legacy.css provides)
-  AND supports BOTH classic (#holder .row) and Dash2 (.dd-widget-body) with one look - hence the
-  dual selector chains + itemtabledoubleicon/trippleicon variants. All of it lives together here:
-  the .bannercontent responsive grid, the #holder .row tile container reset + card box visual,
-  Temperature/Weather grid override, drag-drop feedback, Dash2 tile-fit, card content (name/bigtext/
-  type/status/last-update/time-ago/last-seen), the 3-dot options menu, device images, in-card button
-  groups. Keep tile rules together here. (The 3-dot menu, last-seen data, and drag-drop are Domoticz
+  AND supports BOTH the classic dashboard (#holder .row) and the Dynamic Dashboard
+  (.dd-widget-body) with one look - hence the dual selector chains + itemtabledoubleicon/
+  trippleicon variants. All of it lives together here: the .bannercontent responsive grid, the
+  #holder .row tile container reset + card box visual, Temperature/Weather grid override,
+  drag-drop feedback, Dynamic Dashboard tile-fit, card content (name/bigtext/type/status/
+  last-update/time-ago/last-seen), the 3-dot options menu, device images, in-card button groups.
+  Keep tile rules together here. (The 3-dot menu, last-seen data, and drag-drop are Domoticz
   CORE functionality - this file only STYLES them.)
+
+  "Dynamic Dashboard" is core's own name for the GridStack board: www/app/dashboardDynamic/,
+  .dd-* classes, per-user toggle UseDynamicDashboard in My Profile. Do not call it "Dash2".
 */
+/* ── Card box contract (context-free) ─────────────────────────────────────────
+   Core mounts our card inside a Bootstrap 2 grid cell (.span3/.span4/...), whose
+   padding is breakpoint-dependent (bootstrap-responsive.css: 0.5em >=1200px,
+   0.3em at 768-979px). Every context that hosts a card used to neutralise that
+   wrapper separately, so any new context (Dynamic Dashboard, compact, mobile) silently
+   clipped until someone noticed. These two rules key off "wraps a card" rather
+   than off where the card lives, so a new context inherits them for free.
+
+   box-sizing:border-box is what makes any future wrapper padding safe: it insets the card
+   inside the wrapper instead of growing the wrapper. A content-box wrapper with padding
+   adds to the cell height, which clips the card. */
+:is(.span2, .span3, .span4, .span6, .span12):has(> .item) {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+/* The tr IS the visible card (background, 1.5px border, radius, shadow). Without border-box
+   its 1.5px border adds to the card's height, pushing it past its container. */
+.item,
+.item table[id^="item"],
+.item table[id^="item"] > tbody > tr {
+    box-sizing: border-box;
+}
+
+/* WHY THE CARD IS FULL-BLEED ON THE DYNAMIC DASHBOARD, AND HAS NO FORCED HEIGHT.
+
+   Core's device cell is 120px and can never be smaller: ddDzDevice.widget.js sets
+   minH: 2, ddGrid.directive.js sets cellHeight to rowHeight (default 60). There is no
+   theme hook for either. Measured natural Machinon card heights against that 120px cell:
+       itemtablesmall             116 (switch) .. 118 (dimmer) .. 120 (selector)
+       itemtablesmalldoubleicon   118
+       itemtablesmalltrippleicon  118
+   So the tallest card needs the entire cell. Three consequences, each learned the hard way:
+
+   1. Do NOT reserve padding on the wrapper here. Even 2px leaves 116px and clips every
+      dimmer, blind and selector card. (A <table> cannot shrink below its min-content
+      height, so `height: 100%` acts as a minimum there, not a maximum.)
+   2. Do NOT force height:100% on the card. The card is a CSS grid whose rows size to
+      content (30px name / 60px status / 20px last-update). Forcing the cell height
+      compresses them (measured: 28px 58px 20px), squeezing the switch pill and clipping
+      the icons. It is also unnecessary: minH guarantees cell >= card.
+   3. The hover ring must therefore be INSET. Core clips the cell with five nested
+      `overflow: hidden` ancestors (dd-dz-inner, dd-dz-device, dd-widget-body, dd-widget,
+      dd-widget-cell), so an outer ring or drop shadow cannot spill into the grid gutter.
+
+   To get an outer ring back, the card must first become ~4px shorter in this context (the
+   #name row carries padding-top:10px). That is a density change, not a bug fix.
+
+   Related: core also clips each cell of the card (dashboard.css: `.dd-dz-inner
+   table[id^="itemtable"] td { overflow: hidden }`), which shaves any icon that overhangs
+   its td, e.g. the 24px STOP image in an 18px cell. Visible on classic, clipped here.
+
+   Finally, do not add height:100% to the wrapper "for symmetry": #tempwidgets is a grid
+   with align-items:stretch, so its cells have a definite height and a blanket height:100%
+   squashes the taller Temperature/Weather cards into the row height. */
+
 div.bannercontent .row.divider:before,
 div.bannercontent .row.divider:after,
 div.bannercontent .row:not(.divider):before,
@@ -123,12 +184,21 @@ div.bannercontent .row:not(.divider) {
     box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
 }
 
+/* box-shadow is a single property, so a hover rule that lists only the ring DELETES the
+   card's drop shadow. Always restate the resting shadow first, then add the ring. */
 #holder .row .item table[id^="item"] > tbody > tr:hover,
-.dd-widget-body .item table[id^="item"] > tbody > tr:hover,
 .rectangle-8:hover,
 .rectangle-8-dropdown:hover,
 #settings .row-fluid > div:hover {
-    box-shadow: 0px 0px 0px 2px var(--dz-accent-color);
+    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2),
+                0px 0px 0px 2px var(--dz-accent-color);
+}
+
+/* Dynamic dashboard only: the card is full-bleed in a clipped cell (see the note above), so
+   an outer ring would be shaved off on all four sides. Inset is the only ring that survives.
+   Change this back to an outer ring ONLY together with a card that is ~4px shorter here. */
+.dd-widget-body .item table[id^="item"] > tbody > tr:hover {
+    box-shadow: inset 0px 0px 0px 2px var(--dz-accent-color);
 }
 
 /* Drag constraint for dashboard/tab card reordering — scoped to avoid affecting dialogs */
@@ -210,7 +280,7 @@ div.bannercontent .row:not(.divider) {
     overflow: hidden;
 }
 
-/* Dash2: tighten the tile row gaps so the Machinon card fits the fixed-height GridStack cell
+/* Dynamic Dashboard: tighten the tile row gaps so the Machinon card fits the fixed-height GridStack cell
    (default gs-h=2 = 120px). At the classic 10px gap the card is ~128px and its bottom border /
    rounded corners get clipped by the cell's overflow:hidden. Placed after the span4 grid rule
    so it wins by source order (no !important). */
