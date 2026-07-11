@@ -51,25 +51,32 @@ section.compact .row:not(.divider) {
      width: calc(100% - 60px);
 }
 
-.span3 td.input .btn-group {
+.span3 td.input .btn-group,
+.span3 td#status .btn-group {
     flex-flow: column;
     justify-content: start;
     white-space: normal;
     margin-top: 0 !important;
     height: 50px;
     width: 100%;
+    /* the group itself is the scroll container: without this the
+       non-selected buttons stack past the 50px design height and hang
+       out of the card (dz-pages-matrix.js caught 18-117px) */
+    overflow-y: auto;
     scroll-snap-type: y mandatory;
     background: var(--dz-widget-bg) !important;
 }
 
-.span3 td.input .btn-group button {
+.span3 td.input .btn-group button,
+.span3 td#status .btn-group button {
     order: 2;
     border-radius: 0 !important;
     scroll-snap-align: start;
     scroll-snap-stop: always;
 }
 
-.span3 td.input .btn-group button.btn-selected {
+.span3 td.input .btn-group button.btn-selected,
+.span3 td#status .btn-group button.btn-selected {
     color: var(--dz-accent-text) !important;
     font-size: 1rem;
     min-height: 50px;
@@ -133,6 +140,20 @@ section.compact .row:not(.divider) {
 #holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr td#status,
 #holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr td#status {
     display:none;
+}
+
+/* Selector switches: core moved the level buttons from td.input into
+   td#status, so the blanket td#status hide above emptied the whole card
+   (no buttons, and the :has(td.input) rule below hides the value too).
+   Give the button-carrying td#status the same treatment the scroll-column
+   rules were designed for: visible, in the value's grid slot. */
+#holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr td#status:has(.btn-group),
+#holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr td#status:has(.btn-group) {
+    display: block;
+    grid-area: bigtext;
+    align-self: center;
+    padding: 10px 15px;
+    overflow: auto;
 }
 
 #holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr td#lastupdate,
