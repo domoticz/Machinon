@@ -15,11 +15,22 @@ body.dashMobile section.dashCategory div.row:not(.divider):first-of-type {
     display: none;
 }
 
-/* Sun rise/set visibility on mobile */
-body.dashMobile .tbSun,
+/* Mobile top bar clock/sunrise/sunset (#topBar, views/dashboard_mobile.html).
+   Core paints this bar for its own dark header (style.css: #tbSunGroup #ccc,
+   .fa-sun yellow) and loads after the theme, so a same-specificity theme rule
+   loses the tie; the body.dashMobile prefix outranks it. Match the desktop
+   #timesun look: secondary text, semantic orange sun. (Replaces an old
+   "visibility" fix that forced EVERYTHING to body-text with !important,
+   which painted the sun and arrows unstyled black.) */
+body.dashMobile #tbTimeSun,
 body.dashMobile #tbSunGroup,
-body.dashMobile #tbSunGroup * {
-    color: var(--dz-body-text) !important;
+body.dashMobile #tbSunGroup .tbSun {
+    color: var(--secondary-text-color);
+    font-size: 12px;
+}
+
+body.dashMobile #tbTimeSun .fa-sun {
+    color: #ff8c00;
 }
 
 body.dashMobile section:first-of-type table.mobileitem {

@@ -81,3 +81,14 @@ tr.odd td.sorting_1, tr.even td.sorting_1 {
     background: var(--dz-table-row-selected-bg) !important;
     opacity: .75;
 }
+
+/* Narrow viewports: a DataTable wider than the screen scrolls inside its own
+   wrapper instead of dragging the whole page sideways (the Users table
+   overflowed the phone viewport by 10px and made the page scroll; found by
+   dz-mobile-sweep.js). */
+@media (max-width: 767px) {
+    .dataTables_wrapper {
+        overflow-x: auto;
+        max-width: 100%;
+    }
+}
