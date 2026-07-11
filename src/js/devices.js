@@ -44,27 +44,33 @@ function isPlainOnOffSwitch(item) {
 }
 
 /* A card is in light-switch context on the Light/Switches page, or on the
-   Dashboard when inside a light_* group, or on a Dynamic Dashboard tile.
-   Dynamic Dashboard tiles have no light_ parent id, so a binary On/Off
-   status is also required there to avoid toggling sensors (e.g.
-   temperature) that pass the icon heuristics. */
+   Dashboard when inside a light_* group, or on a Dynamic Dashboard tile or
+   its Favorites widget (.dd-dz-favorites re-renders the classic cards
+   WITHOUT the .dd-dz-inner wrapper). Neither container has a light_ parent
+   id, so a binary On/Off status is also required there to avoid toggling
+   sensors (e.g. temperature) that pass the icon heuristics. */
 function isLightSwitchContext(item, status) {
     var parentId = item.parent().attr("id") || "";
-    var inDynamicDashboard = item.closest(".dd-dz-inner").length > 0 && (status === "On" || status === "Off");
+    var inDynamicDashboard = (item.closest(".dd-dz-inner").length > 0 || item.closest(".dd-dz-favorites").length > 0) &&
+        (status === "On" || status === "Off");
     return ((location.hash === "#/Dashboard") && (parentId.startsWith("light") || inDynamicDashboard)) ||
         (location.hash === "#/LightSwitches");
 }
 
 /* Status for setDeviceSwitch: visible bigtext, else its data-status, else
    inferred from the icon filename (an earlier enhancement pass may have
-   emptied the bigtext). */
+   emptied the bigtext, and push buttons on the Dynamic Dashboard render
+   with no text at all). The icon speaks only when its filename actually
+   carries a state: inventing "Off" for stateless icons put toggles on
+   text sensors (caught by dz-dd-matrix.js). */
 function readSwitchStatus(item) {
     var bigText = item.find("#bigtext");
     var status = bigText.text().trim();
     if (!status) status = (bigText.attr("data-status") || "").trim();
     if (!status) {
         var imgSrc = bigText.siblings("#img").find("img").attr("src") || "";
-        status = imgSrc.indexOf("_On") > -1 ? "On" : "Off";
+        if (imgSrc.indexOf("_On") > -1) { status = "On"; }
+        else if (imgSrc.indexOf("_Off") > -1) { status = "Off"; }
     }
     return status;
 }
@@ -423,11 +429,16 @@ function initDeviceObserver() {
                         let item = $(this);
                         let bigText = item.find("#bigtext");
                         if (isPlainOnOffSwitch(item) && item.find("#img2").length === 0) {
-                            /* The Dynamic Dashboard binary check reads the raw bigtext,
-                               exactly like the initial pass */
+                            /* The Dynamic Dashboard binary check uses the full status
+                               chain (bigtext, data-status, icon filename): push buttons
+                               on that board render an EMPTY bigtext and no data-status,
+                               so the icon name is their only signal. Sensors stay safe:
+                               a non-binary value fails the check, and an empty-value
+                               sensor icon is not clickable, so isPlainOnOffSwitch
+                               already rejected it (dz-dd-matrix.js guards this). */
                             let isScene = item.parents("#scenecontent").length > 0 ||
                                 (item.parents("#dashScenes").length > 0 && item.find("#itemtablesmalldoubleicon").length > 0);
-                            if (isLightSwitchContext(item, bigText.text().trim()) && theme.features.switch_instead_of_bigtext.enabled === true) {
+                            if (isLightSwitchContext(item, readSwitchStatus(item)) && theme.features.switch_instead_of_bigtext.enabled === true) {
                                 setDeviceSwitch(idx, readSwitchStatus(item));
                             } else if (isScene && theme.features.switch_instead_of_bigtext_scenes.enabled === true) {
                                 setDeviceSwitch(idx, readSwitchStatus(item));

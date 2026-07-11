@@ -43,6 +43,24 @@
     overflow: visible;
 }
 
+/* Favorites widget (dz-favorites): core re-renders the classic device cards
+   INSIDE a widget (views/dashboardDynamic/widgets/dz-favorites.html). The
+   theme's absolutely positioned card internals (.dimslider, the dz-uw-bar
+   gauge) size against the nearest positioned ancestor, which in every other
+   card context is the card itself; without this the dimmer slider sizes
+   against the WHOLE widget (measured 376px inside a 330px card, hanging
+   across its neighbours). */
+.dd-dz-fav-item .item {
+    position: relative;
+}
+
+/* The widget re-creates a page-in-a-widget: grey page background behind the
+   white cards, like every other card surface; otherwise white cards float
+   invisibly on the white widget panel. */
+.dd-dz-favorites {
+    background: var(--dz-body-bg);
+}
+
 /* Keep the last-seen row inside the card instead of overflowing the bottom edge */
 .dd-widget-body .item table[id^="item"] > tbody > tr td#lastupdate {
     overflow: hidden;
