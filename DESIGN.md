@@ -314,7 +314,7 @@ core's later-loaded `:root`.
 | `{typography.sm}` | 14px | Navbar links, options menu items, `.btn-modern`, settings dropdowns |
 | `{typography.md}` | 16px | Base body text, settings panel text |
 | `{typography.display}` | 26px | Login page heading |
-| page title (h1) | 24px (core) / 19px mobile | `General:`/`Log:` page headers; stepped down under 768px (custom.css), off-scale by design: core owns the 24px |
+| page title (h1) | 24px (core) / `{typography.md}` mobile | `General:`/`Log:` page headers; stepped down to 16px under 768px (custom.css); core owns the desktop 24px |
 
 ### Device Card Typography (relative units)
 
@@ -675,7 +675,7 @@ Toggled via `theme.json` features object. Each feature has an `enabled` boolean 
 - Settings buttons become fixed bottom bar
 - Dialog content tables switch to `table-layout: fixed` with word-wrap
 - Edit-form tables (`.table-details`, sub-device picker) stack label above field, inputs full-width (releases core's inline 356px/250px widths and the theme's 250px input cap; < 768px)
-- Page-title rows: title owns the flex row (button column content-sized, core split it 50/50); h1 steps 24px -> 19px
+- Page-title rows: title owns the flex row (button column content-sized, core split it 50/50); h1 steps 24px -> `{typography.md}` 16px
 - Settings grid tiles shrink to `100px` with hidden labels
 - Compact card button groups become vertical scroll-snap columns
 

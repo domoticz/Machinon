@@ -391,10 +391,11 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
     }
 
     /* Page titles (General: <device>, Log: <device>) keep desktop's 24px on a
-       360px phone; step down so long device names hold one or two lines
-       without dominating the screen. */
+       360px phone; step down to the type scale's md tier (16px, DESIGN.md
+       Size Scale) so long device names hold one or two lines without
+       dominating the screen. */
     .page-header-small h1 {
-        font-size: 19px;
+        font-size: 16px;
         margin-top: 2px;
         margin-bottom: 2px;
     }
