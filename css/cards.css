@@ -454,13 +454,19 @@ body table#itemtable tr > .options {
     font-size: 0;
 }
 
-.options > *:not(img):not([ng-show*="Favorite"]) {
+.options > *:not(img):not([ng-show*="Favorite"]):not([ng-if*="Favorite"]) {
     font-size: 14px;
 }
 
+/* Core's favorite star stays out of this menu (the theme renders its own
+   star in the card corner, td.favorite). Core used ng-show until upstream
+   fdab5e10c switched the spans to ng-if; match both so either markup stays
+   hidden. */
 .options > img,
 .options > span[ng-show*="Favorite"],
+.options > span[ng-if*="Favorite"],
 .options > img[ng-show*="Favorite"],
+.options > img[ng-if*="Favorite"],
 .options > img[src*="favorite"] {
     display: none;
 }

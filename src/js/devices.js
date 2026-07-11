@@ -221,12 +221,19 @@ function setDeviceOptions(idx) {
                 var currentScope = angular.element(itemEl).scope();
                 var currentDevice = currentScope?.device || currentScope?.ctrl?.device || currentScope?.item;
                 var currentlyFav = currentDevice ? currentDevice.Favorite !== 0 : false;
-                /* Find favorite toggle — spans (Switches) or bare imgs (Weather/Temperature) */
+                /* Find core's favorite toggle img by its ng-click action, which is
+                   stable across markups: upstream fdab5e10c changed the wrapping
+                   spans from ng-show to ng-if, so presentation attributes cannot be
+                   relied on. With ng-if only the current state's img is in the DOM.
+                   Matched without the first letter: light widgets call
+                   makeFavorite(n), weather/temperature call MakeFavorite(n). */
                 var clickTarget = currentlyFav
-                    ? $(tr).find('.options span[ng-show*="Favorite != 0"] img, .options > img[ng-show*="Favorite != 0"]')
-                    : $(tr).find('.options span[ng-show*="Favorite == 0"] img, .options > img[ng-show*="Favorite == 0"]');
-                if (clickTarget.length) clickTarget.click();
-                /* Update star icon after toggle */
+                    ? $(tr).find('.options img[ng-click*="akeFavorite(0)"]')
+                    : $(tr).find('.options img[ng-click*="akeFavorite(1)"]');
+                if (!clickTarget.length) { return; }
+                clickTarget.click();
+                /* Update star icon after toggle (only when the toggle really fired,
+                   otherwise the star would lie about the stored state) */
                 var $icon = $(this).find("i");
                 if (currentlyFav) {
                     $icon.removeClass("ion-ios-star").addClass("ion-ios-star-outline").attr("title", $.t("Add to Dashboard"));
