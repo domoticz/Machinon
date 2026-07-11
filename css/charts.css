@@ -105,7 +105,7 @@
 
 .zoom-button:hover {
     background: var(--dz-accent-color);
-    color: #fff;
+    color: var(--dz-accent-text);
 }
 
 .zoom-reset {
@@ -140,5 +140,5 @@
 
 .highcharts-menu-item:hover {
     background: var(--dz-accent-color) !important;
-    color: #fff !important;
+    color: var(--dz-accent-text) !important;
 }

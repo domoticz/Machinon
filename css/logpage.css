@@ -41,18 +41,18 @@
 
 .log-filter-btn:hover {
     background: var(--dz-accent-color) !important;
-    color: #fff !important;
+    color: var(--dz-accent-text) !important;
 }
 
 .log-filter-btn-active {
     opacity: 1;
     background: var(--dz-accent-color) !important;
-    color: #fff !important;
+    color: var(--dz-accent-text) !important;
     border-color: var(--dz-accent-color) !important;
 }
 
 .log-filter-btn-active span {
-    color: #fff !important;
+    color: var(--dz-accent-text) !important;
 }
 
 .log-toggle-count {

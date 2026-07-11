@@ -70,7 +70,7 @@ section.compact .row:not(.divider) {
 }
 
 .span3 td.input .btn-group button.btn-selected {
-    color: #fff !important;
+    color: var(--dz-accent-text) !important;
     font-size: 1rem;
     min-height: 50px;
     order: 1;

@@ -89,7 +89,7 @@ button.savebtn:disabled {
 .label-info[href], .badge-info[href],
 .label-info.lcursor {
     background-color: var(--dz-accent-color);
-    color: #fff;
+    color: var(--dz-accent-text);
 }
 
 /* Panels */
@@ -139,7 +139,7 @@ button.savebtn:disabled {
 
 .btn-mini:hover {
     background: var(--dz-accent-color);
-    color: #fff;
+    color: var(--dz-accent-text);
 }
 
 .btn-primary {
@@ -444,14 +444,14 @@ button.savebtn:disabled {
 .btn-group .btn-selected,
 .btn-default.active,
 .btn-group .btn-default.active {
-    color: #fff !important;
+    color: var(--dz-accent-text) !important;
     background: var(--dz-accent-color) !important;
     border-color: var(--dz-accent-color) !important;
     font-family: main-font;
 }
 
 .btn-default:hover {
-    color: #fff !important;
+    color: var(--dz-accent-text) !important;
     background: var(--dz-accent-color) !important;
     border-color: var(--dz-accent-color) !important;
 }
@@ -459,7 +459,7 @@ button.savebtn:disabled {
 .btn-group .btn-primary {
     background: var(--dz-accent-color) !important;
     border-color: var(--dz-accent-color) !important;
-    color: #fff !important;
+    color: var(--dz-accent-text) !important;
 }
 
 .btn-group .btn-primary:hover {

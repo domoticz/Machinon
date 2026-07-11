@@ -25,7 +25,7 @@ tr.update-pulse {
    edge and doubles up with the tr hover ring. !important beats the resting card shadow in
    cards.css, whose #holder selector outranks a class chain. */
 .item.statusTimeout tr {
-    box-shadow: 0px 0px 10px 2px rgb(199,67,67,0.5) !important;
+    box-shadow: 0px 0px 10px 2px rgba(var(--dz-status-timeout-values), 0.5) !important;
 }
 .item.statusTimeout {
     opacity: 0.5;
@@ -36,30 +36,30 @@ tr.update-pulse {
    dashboard, where the card is full-bleed in a clipped cell and an outer ring is shaved off. */
 .item.statusTimeout tr:hover {
     box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2),
-                0px 0px 0px 2px rgb(199,67,67) !important;
+                0px 0px 0px 2px rgb(var(--dz-status-timeout-values)) !important;
 }
 .dd-widget-body .item.statusTimeout tr:hover {
-    box-shadow: inset 0px 0px 0px 2px rgb(199,67,67) !important;
+    box-shadow: inset 0px 0px 0px 2px rgb(var(--dz-status-timeout-values)) !important;
 }
 /* Switch is protected */
 .item.statusProtected tr {
-    box-shadow: 0px 0px 10px 2px rgb(0, 0, 139, 0.4) !important;
+    box-shadow: 0px 0px 10px 2px rgba(var(--dz-status-protected-values), 0.4) !important;
 }
 .item.statusProtected tr:hover {
-    box-shadow: 0px 0px 10px 2px rgb(0, 0, 139, 0.4) !important;
+    box-shadow: 0px 0px 10px 2px rgba(var(--dz-status-protected-values), 0.4) !important;
 }
 
 /* Device has low battery */
 .item.statusLowBattery tr {
-    box-shadow: 0px 0px 10px 2px rgb(255,255,0,0.4) !important;
+    box-shadow: 0px 0px 10px 2px rgba(var(--dz-status-lowbat-values), 0.4) !important;
 }
 
 .item.statusLowBattery tr:hover {
     box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2),
-                0px 0px 0px 2px rgb(255,255,0) !important;
+                0px 0px 0px 2px rgb(var(--dz-status-lowbat-values)) !important;
 }
 .dd-widget-body .item.statusLowBattery tr:hover {
-    box-shadow: inset 0px 0px 0px 2px rgb(255,255,0) !important;
+    box-shadow: inset 0px 0px 0px 2px rgb(var(--dz-status-lowbat-values)) !important;
 }
 
 .blink {

@@ -469,7 +469,7 @@ input#AcceptNewHardware:checked ~ button {
 .allow5min {
     background: var(--dz-accent-color);
     border: none;
-    color: #fff;
+    color: var(--dz-accent-text);
     border-radius: 5px;
 }
 

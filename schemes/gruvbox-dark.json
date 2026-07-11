@@ -2,7 +2,12 @@
     "name": "Gruvbox Dark",
     "description": "Retro warm dark with earthy accents",
     "base": "dark",
-    "preview": { "bg": "#282828", "surface": "#3c3836", "accent": "#83a598", "text": "#ebdbb2" },
+    "preview": {
+        "bg": "#282828",
+        "surface": "#3c3836",
+        "accent": "#83a598",
+        "text": "#ebdbb2"
+    },
     "colors": {
         "background": "#282828",
         "item": "#3c3836",
@@ -14,6 +19,7 @@
         "disabled": "#665c54",
         "error": "#fb4934",
         "success": "#b8bb26",
-        "warning": "#fabd2f"
+        "warning": "#fabd2f",
+        "accent_text": "#1d2021"
     }
 }

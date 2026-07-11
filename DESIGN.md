@@ -231,8 +231,15 @@ the same edit, or record the difference as a gap.
 > are presets for that same applier: a scheme carries a `colors` object with the applier's
 > keys plus a `base` ("light"/"dark") that picks the token underlay beneath the overrides via
 > `theme.scheme_base` (dark schemes keep `dark.css` active for every token they do not set).
-> Every shipped scheme must hold body text vs body background at WCAG AA 4.5:1 or better
-> (checked by `dz-scheme-picker.js`). Adding a scheme = one JSON file + an `index.json` entry.
+> Every shipped scheme must hold body text vs body background at WCAG AA 4.5:1 or better,
+> and text-on-accent (`--dz-accent-text`, the token every "text on an accent surface" rule
+> consumes; scheme key `accent_text`) at 3:1 or better (both gated by `dz-scheme-picker.js`).
+> Adding a scheme = one JSON file + an `index.json` entry.
+>
+> Deliberately NOT tokenized: text on the semantic colours (red/success/warning buttons stay
+> white), the login page and the offline splash (fixed brand surfaces), Blockly's canvas, and
+> the legacy dark_theme.css gradient. Everything else colour-bearing flows through tokens;
+> the device status glows use the `--dz-status-*-values` r,g,b triplets.
 >
 > Machinon publishes the `--dz-*` token names that Domoticz core's globally-linked stylesheets
 > (`css/dashboard.css`, `css/style.css`) consume. It deliberately does not import core's

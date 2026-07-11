@@ -32,6 +32,16 @@
     --secondary-text-color:   #6d6e6d;
     --dz-accent-values: 9,127,174;
     --dz-accent-red-values:   196,59,59;
+    /* Text placed ON an accent-coloured surface (buttons, active chips,
+       hovered menu rows). Schemes with a light accent override this to a
+       dark value; keep contrast vs --dz-accent-color at 3:1 or better
+       (gated by dz-scheme-picker.js). */
+    --dz-accent-text:         #ffffff;
+    /* Device status glows (card shadows), as r,g,b triplets so consumers
+       can alpha them with rgba(). */
+    --dz-status-timeout-values:    199, 67, 67;
+    --dz-status-protected-values:  0, 0, 139;
+    --dz-status-lowbat-values:     255, 255, 0;
 
     /* Dynamic Dashboard chrome tokens (light). Core's GridStack dashboard: www/app/dashboardDynamic/, .dd-* classes.
        Consumed by core dashboard.css; device-card bg comes from --dz-widget-bg above.

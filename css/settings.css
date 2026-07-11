@@ -8,7 +8,7 @@ input#AcceptNewHardware:checked ~ button {
 .allow5min:hover {
     background: none;
     background-color: var(--dz-accent-color);
-    color: #fff;
+    color: var(--dz-accent-text);
     border-radius: 2px;
     border: none;
 }

@@ -47,11 +47,11 @@ body.dashMobile table.mobileitem th {
     display: inline;
     text-shadow: none;
     background: var(--dz-accent-color);
-    color: #fff;
+    color: var(--dz-accent-text);
 }
 
 body.dashMobile table.mobileitem th:last-child a {
-    color: #fff !important;
+    color: var(--dz-accent-text) !important;
 }
 
 body.dashMobile table.mobileitem tr {
@@ -170,7 +170,7 @@ body.dashMobile table.mobileitem .btn-mini.btn-info,
 body.dashMobile table.mobileitem .btn-mini.active,
 body.dashMobile table.mobileitem .btn-mini:active {
     background: var(--dz-accent-color) !important;
-    color: #fff !important;
+    color: var(--dz-accent-text) !important;
     padding: 4px 10px !important;
 }
 
@@ -184,7 +184,7 @@ body.dashMobile table.mobileitem .dimslider {
 }
 
 body.dashMobile table.mobileitem .dimslider .ui-slider-range {
-    background: rgba(11, 151, 205, 0.5);
+    background: rgba(var(--dz-accent-values), 0.5);
 }
 
 body.dashMobile table.mobileitem .dimslider .ui-slider-handle {
