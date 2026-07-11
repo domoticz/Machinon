@@ -79,6 +79,9 @@ tr.odd td.sorting_1, tr.even td.sorting_1 {
 .dataTables_wrapper table tbody tr.odd.row_selected td,
 .dataTables_wrapper table tbody tr.even.row_selected td {
     background: var(--dz-table-row-selected-bg) !important;
+    /* selected rows sit on the accent: use the on-accent text token, not the
+       body text (unreadable under several schemes) */
+    color: var(--dz-accent-text) !important;
     opacity: .75;
 }
 
