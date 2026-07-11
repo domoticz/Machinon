@@ -540,7 +540,21 @@ body table#itemtable tr > .options {
 
 #itemtabledoubleicon #img2 img,
 #itemtablesmalldoubleicon #img2 img {
-    width: 30px;
+    width: 40px;
+}
+
+/* Blinds stop button: centre it in place. The slider keeps its narrow column and
+   core-tuned width/offset (widening the stop column pushed the slider into the
+   close chevron; centring the close chevron in its flex column did the same). So
+   only the stop is touched: instead of bottom-aligning the small glyph (which
+   left it sitting low), a 40px-tall object-fit box lifts it to sit vertically
+   level with the 40px open/close chevrons. Horizontal centring comes from the
+   existing `.item #img2` rule. Scoped to the blinds+stop tripple layout. */
+#itemtabletrippleicon #img2 img,
+#itemtablesmalltrippleicon #img2 img {
+    width: 100%;
+    height: 40px;
+    object-fit: contain;
 }
 
 .item #img2 {
@@ -563,6 +577,45 @@ body table#itemtable tr > .options {
 .item #img3 img {
     width: 40px;
     height: 40px;
+}
+
+/* Modern hover/focus affordance for clickable device icons.
+   Overrules core's `#img img:hover { transform: scale(1.1) }`, which only
+   emphasises the primary icon, and extends the cue to the secondary/tertiary
+   action icons (stop, close, media remote). Kept strictly IN-BOX: the five
+   nested overflow:hidden ancestors documented above shave any outer ring or
+   spilled glow, so the emphasis is a springy lift plus a gentle in-place tonal
+   pop (saturate/brightness) instead of a drop shadow. :focus-visible is
+   included for when these icons become keyboard-focusable; prefers-reduced-
+   motion drops the movement but keeps the pop. */
+.item #img img,
+.item #img1 img,
+.item #img2 img,
+.item #img3 img {
+    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+                filter 0.18s ease;
+}
+
+.item #img img:hover,
+.item #img1 img:hover,
+.item #img2 img:hover,
+.item #img3 img:hover,
+.item #img img:focus-visible,
+.item #img1 img:focus-visible,
+.item #img2 img:focus-visible,
+.item #img3 img:focus-visible {
+    transform: scale(1.1);
+    filter: saturate(1.1) brightness(1.04);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .item #img img:hover,
+    .item #img1 img:hover,
+    .item #img2 img:hover,
+    .item #img3 img:hover {
+        transform: none;
+        filter: saturate(1.12) brightness(1.05);
+    }
 }
 
 /* item with button group */
