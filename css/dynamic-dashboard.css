@@ -54,6 +54,17 @@
     position: relative;
 }
 
+/* The card box contract in cards.css (full-width table so the painted card
+   fills the item) is keyed on the page containers and missed this context:
+   the tr painted the card at the table's CONTENT width while the absolutely
+   positioned dimmer slider anchored to the full item box, hanging up to
+   ~130px past the visible card edge (dimmer, blinds %, RGBW variants;
+   measured by dz-dd-matrix.js). Full-width table = painted card == item box,
+   and card widths in the grid become uniform as a side effect. */
+.dd-dz-fav-item .item table[id^="item"] {
+    width: 100%;
+}
+
 /* The widget re-creates a page-in-a-widget: grey page background behind the
    white cards, like every other card surface; otherwise white cards float
    invisibly on the white widget panel. */
