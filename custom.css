@@ -180,6 +180,24 @@ h4,
     border-color: var(--dz-accent-color);
 }
 
+/* Page-title rows (General: <device>, Log: <device>): core splits the flex
+   row's FREE space evenly between the h1 and the button column (h1 flex:1,
+   div flex:1 0 100px in style.css), so the Back button's column takes half
+   the row and the title wraps into a tall block (3 lines on a 360px phone,
+   still half-width on desktop). Size the button column to its content and
+   give the title the rest; equal specificity, theme loads after style.css
+   so source order wins. min-width:0 lets a long device name shrink and wrap
+   inside the flex item instead of pushing the button out. */
+.page-header-with-button h1 {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.page-header-with-button div {
+    flex: 0 0 auto;
+}
+
 div#floorplancontent {
     height: 87%;
 }
@@ -370,6 +388,15 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
     .ui-dialog .ui-dialog-content td {
         overflow: hidden;
         word-wrap: break-word;
+    }
+
+    /* Page titles (General: <device>, Log: <device>) keep desktop's 24px on a
+       360px phone; step down so long device names hold one or two lines
+       without dominating the screen. */
+    .page-header-small h1 {
+        font-size: 19px;
+        margin-top: 2px;
+        margin-bottom: 2px;
     }
 
     /* Core's edit-form tables (.table-details on the device/scene edit pages)
