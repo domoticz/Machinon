@@ -1,0 +1,21 @@
+{
+    "name": "E-Ink",
+    "description": "Monochrome paper: zero-chrome interface, colour reserved for states",
+    "base": "light",
+    "preview": { "bg": "#fafafa", "surface": "#ffffff", "accent": "#222222", "text": "#111111" },
+    "colors": {
+        "background": "#fafafa",
+        "item": "#ffffff",
+        "navbar": "#efefef",
+        "main_color": "#222222",
+        "main_text": "#111111",
+        "alt_text": "#444444",
+        "border": "#cccccc",
+        "disabled": "#999999",
+        "error": "#8b0000",
+        "success": "#1b5e20",
+        "warning": "#8a6d00",
+        "accent_text": "#ffffff",
+        "sun": "#555555"
+    }
+}

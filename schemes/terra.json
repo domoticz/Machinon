@@ -1,0 +1,21 @@
+{
+    "name": "Terra",
+    "description": "Warm sunset dark: terracotta and cream, no blue anywhere",
+    "base": "dark",
+    "preview": { "bg": "#2a1e1a", "surface": "#3b2a23", "accent": "#e07a5f", "text": "#f4e9dc" },
+    "colors": {
+        "background": "#2a1e1a",
+        "item": "#3b2a23",
+        "navbar": "#241a16",
+        "main_color": "#e07a5f",
+        "main_text": "#f4e9dc",
+        "alt_text": "#d3bfae",
+        "border": "#5c463b",
+        "disabled": "#6f584c",
+        "error": "#ff6b6b",
+        "success": "#a3b565",
+        "warning": "#f2b950",
+        "accent_text": "#2a1e1a",
+        "sun": "#f2b950"
+    }
+}
