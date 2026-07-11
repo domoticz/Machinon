@@ -58,7 +58,7 @@ var DZ_CUSTOM_TOKENS = [
     '--dz-body-bg', '--dz-body-text', '--dz-nav-bg', '--dz-widget-bg', '--dz-widget-text',
     '--dz-accent-color', '--dz-input-border', '--dz-status-disabled', '--dz-accent-red',
     '--dz-btn-success-bg', '--dz-btn-warning-bg', '--secondary-text-color', '--dz-accent-values',
-    '--dz-accent-text', '--dz-sun-color'
+    '--dz-accent-text', '--dz-sun-color', '--dz-accent-red-values'
 ];
 
 // Apply the user's custom colours as --dz-* overrides on <html> via setProperty.
@@ -86,6 +86,9 @@ function applyCustomColorScheme(cs) {
     /* Sunrise/sunset sun icon; semantic default #ff8c00 unless a scheme says otherwise */
     set('--dz-sun-color', cs.sun);
     if (cs.main_color) { s.setProperty('--dz-accent-values', hexToRGB(cs.main_color, true)); }
+    /* danger-button tints derive from this triplet; without it schemes kept
+       the base red's rgba tints under their own error colour */
+    if (cs.error) { s.setProperty('--dz-accent-red-values', hexToRGB(cs.error, true)); }
 }
 
 function clearCustomColorScheme() {

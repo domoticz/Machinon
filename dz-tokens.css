@@ -54,11 +54,14 @@
        dashboard.css self-defines them in its own :root (loaded after the theme), so a plain
        :root override loses the source-order tie. Those are recoloured at higher specificity
        by the html:root block near the bottom of this file. */
-    --dz-panel-bg:             #ffffff;
+    /* Panels share the card surface; deriving (not copying the value) keeps
+       schemes tracking - a literal copy here is how the zebra-stripe class of
+       bug happens. */
+    --dz-panel-bg:             var(--dz-widget-bg);
     --dz-panel-text:           var(--dz-body-text);
     --dz-border-color:         var(--dz-input-border);
-    --dz-dd-grid-line:         rgba(9,127,174,0.12);
-    --dz-dd-skeleton-mid:      #eef2f5;
+    --dz-dd-grid-line:         rgba(var(--dz-accent-values), 0.12);
+    --dz-dd-skeleton-mid:      color-mix(in srgb, var(--dz-body-bg) 90%, var(--dz-body-text));
 
     /* Device-card grid sizing (css/cards.css auto-fill grids). --dz-card-min-width sets the
        density (column count = how many fit at this width); --dz-card-max-width caps card
@@ -99,7 +102,7 @@
        Machinon button rules in custom.css consume them too. Values = current Machinon palette.
        --dz-btn-success-bg / --dz-btn-warning-bg are defined in the mapped-tokens block above. */
     --dz-btn-primary-bg:      var(--dz-accent-color);
-    --dz-btn-primary-text:    #fff;
+    --dz-btn-primary-text:    var(--dz-accent-text);
     --dz-btn-info-bg:         var(--dz-accent-color);
     --dz-btn-danger-bg:       var(--dz-accent-red);
     --dz-btn-danger-bg-alpha: rgba(var(--dz-accent-red-values), 0.85);

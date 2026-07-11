@@ -24,11 +24,12 @@ html[data-dz-scheme="dark"] {
   --dz-accent-values: 11,158,218;
   --dz-accent-red-values:   224,85,85;
 
-  /* Dynamic Dashboard chrome tokens (dark). Special-widget recolour is done by the html:root
-     block in dz-tokens.css, which outranks dashboard.css's own :root. */
-  --dz-panel-bg:             #515558;
-  --dz-dd-grid-line:         rgba(11,158,218,0.15);
-  --dz-dd-skeleton-mid:      #444a4e;
+  /* Dynamic Dashboard chrome tokens (dark). panel-bg and skeleton derive in
+     dz-tokens.css and track this scheme's widget-bg/body tokens; only the
+     grid-line alpha differs from light. Special-widget recolour is done by
+     the html:root block in dz-tokens.css, which outranks dashboard.css's
+     own :root. */
+  --dz-dd-grid-line:         rgba(var(--dz-accent-values), 0.15);
 
   /* Table zebra stripe: no override needed - dz-tokens.css derives it from
      widget-bg/body-text via color-mix, which tracks this scheme too (the old
