@@ -33,6 +33,48 @@ function loadBuiltinSchemes() {
         });
 }
 
+/* WCAG contrast rails. Built-in schemes are gated before shipping
+   (dz-scheme-picker.js); user presets and hand-picked custom colours get
+   checked HERE at save time, with a warning that names the failing pair and
+   ratio. Warn, not block: the user may knowingly trade contrast, but never
+   silently. */
+function contrastRatio(hexA, hexB) {
+    function lum(hex) {
+        var c = hexToRGB(hex, true).split(",").map(function(v) {
+            v = Number(v) / 255;
+            return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+        });
+        return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    }
+    var a = lum(hexA), b = lum(hexB);
+    return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+}
+
+function schemeContrastFailures(cs) {
+    var fails = [];
+    if (cs.main_text && cs.background) {
+        var body = contrastRatio(cs.main_text, cs.background);
+        if (body < 4.5) { fails.push("text on background " + body.toFixed(1) + ":1 (WCAG AA needs 4.5)"); }
+    }
+    if (cs.alt_text && cs.background) {
+        var alt = contrastRatio(cs.alt_text, cs.background);
+        if (alt < 4.5) { fails.push("secondary text " + alt.toFixed(1) + ":1 (WCAG AA needs 4.5)"); }
+    }
+    if (cs.main_color) {
+        var onAcc = contrastRatio(cs.accent_text || "#ffffff", cs.main_color);
+        if (onAcc < 3.0) { fails.push("text on accent " + onAcc.toFixed(1) + ":1 (needs 3.0)"); }
+    }
+    return fails;
+}
+
+function warnIfContrastFails(cs, what) {
+    var fails = schemeContrastFailures(cs);
+    if (fails.length && typeof generate_noty === "function") {
+        generate_noty('warning', what + " fails WCAG contrast: " + fails.join("; "), 8000);
+    }
+    return fails;
+}
+
 /* User-saved presets: snapshots of the current colours under a chosen name.
    Stored on the theme object (theme.user_schemes), so they ride the same
    localStorage cache and Domoticz user-variable sync as everything else.
@@ -49,6 +91,7 @@ function saveCurrentColorsAsScheme(name) {
     theme.scheme = "user:" + name;
     cacheThemeSettings();
     renderSchemePicker();
+    warnIfContrastFails(theme.color_scheme, 'Preset "' + name + '" saved, but it');
 }
 
 function deleteUserScheme(name) {

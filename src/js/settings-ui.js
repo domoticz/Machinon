@@ -194,6 +194,11 @@ function loadSettingsHTML() {
         storeUserVariableThemeSettings("update");
         applyCardWidths();
         setLogo();
+        // Hand-picked custom colours are the one ungated colour path; warn
+        // with the measured ratios rather than silently accepting them.
+        if (theme.features.custom_color_scheme.enabled === true) {
+            warnIfContrastFails(theme.color_scheme, "The custom colour scheme");
+        }
         generate_noty('success', language.domoticz_settings_saved, 4000)
         /* location.reload(); */
     });
