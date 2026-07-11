@@ -1,0 +1,20 @@
+{
+    "name": "Tokyo Night",
+    "description": "Deep blue city dark",
+    "base": "dark",
+    "preview": { "bg": "#1a1b26", "surface": "#24283b", "accent": "#7aa2f7", "text": "#c0caf5" },
+    "colors": {
+        "background": "#1a1b26",
+        "item": "#24283b",
+        "navbar": "#16161e",
+        "main_color": "#7aa2f7",
+        "main_text": "#c0caf5",
+        "alt_text": "#a9b1d6",
+        "border": "#414868",
+        "disabled": "#565f89",
+        "error": "#f7768e",
+        "success": "#9ece6a",
+        "warning": "#e0af68",
+        "accent_text": "#1a1b26"
+    }
+}

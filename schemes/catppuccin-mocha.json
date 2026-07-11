@@ -1,0 +1,20 @@
+{
+    "name": "Catppuccin Mocha",
+    "description": "Soothing dark pastel",
+    "base": "dark",
+    "preview": { "bg": "#1e1e2e", "surface": "#313244", "accent": "#cba6f7", "text": "#cdd6f4" },
+    "colors": {
+        "background": "#1e1e2e",
+        "item": "#313244",
+        "navbar": "#181825",
+        "main_color": "#cba6f7",
+        "main_text": "#cdd6f4",
+        "alt_text": "#bac2de",
+        "border": "#6c7086",
+        "disabled": "#6c7086",
+        "error": "#f38ba8",
+        "success": "#a6e3a1",
+        "warning": "#f9e2af",
+        "accent_text": "#1e1e2e"
+    }
+}
