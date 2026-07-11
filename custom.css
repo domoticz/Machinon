@@ -425,8 +425,28 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
     color: var(--dz-modal-text);
 }
 
+/* Title-less bootbox confirms (e.g. delete Sub/Slave Device on the device
+   edit page) render an empty header strip whose only content is the close
+   button, floating oddly; the footer's Cancel already dismisses, so drop
+   the dead strip entirely. */
+.bootbox .modal-header:has(.modal-title:empty) {
+    display: none;
+}
+
+.modal-header {
+    border-bottom-color: var(--dz-input-border) !important;
+    color: var(--dz-modal-text);
+}
+
+.modal-body {
+    color: var(--dz-modal-text);
+}
+
 .modal-footer {
-    border-top: 1px solid #f1f2f3 !important;
+    /* border was a fixed #f1f2f3: invisible on light schemes, a glowing
+       white rule across dark ones (the token-derivation lesson, in
+       component CSS) */
+    border-top: 1px solid var(--dz-input-border) !important;
     background-color: var(--dz-modal-bg) !important;
 }
 
