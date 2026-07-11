@@ -371,6 +371,56 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
         overflow: hidden;
         word-wrap: break-word;
     }
+
+    /* Core's edit-form tables (.table-details on the device/scene edit pages)
+       inline width:356px on their inputs, so the label + field columns cannot
+       fit a phone (Galaxy S24 is 360px): the page scrolled sideways. Stack
+       each label cell above its field cell and let the fields fill the row;
+       !important beats the template's inline widths, max-width:none releases
+       the theme's global 250px input cap (css/search.css). Direct-child
+       selectors keep nested tables (LightEdit's sub-device DataTable) laying
+       themselves out. */
+    .table-details > tbody > tr > td {
+        display: block;
+        width: auto;
+    }
+
+    /* Label cells: core right-aligns and fixes them at 120px via
+       table.table-details > tbody > tr > td:first-child (style.css), which
+       outranks the shorthand rule above. Same selector at equal specificity;
+       custom.css loads after style.css, so source order gives the theme the
+       tie. Right-aligned reads wrong once the label sits ABOVE its field. */
+    table.table-details > tr > td:first-child,
+    table.table-details > tbody > tr > td:first-child {
+        width: auto;
+        text-align: left;
+    }
+
+    .table-details input.text,
+    .table-details textarea.text,
+    .table-details select {
+        width: 100% !important;
+        max-width: none;
+        box-sizing: border-box;
+    }
+
+    /* Same problem in core's sub-device picker (device-subdevices-editor):
+       120px label cell + inline width:250px select + Add button + 20px
+       cellspacing gutters. Not a .table-details table, so stack it here;
+       !important beats the inline width on the select and the width:120px
+       inline style on the label cell. */
+    device-subdevices-editor table.display > tbody > tr > td {
+        display: block;
+        width: auto !important;
+        text-align: left;
+    }
+
+    device-subdevices-editor select.combobox {
+        width: 100% !important;
+        max-width: none;
+        box-sizing: border-box;
+        margin-bottom: 5px;
+    }
 }
 
 .ui-dialog .ui-dialog-buttonpane {
