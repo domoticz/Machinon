@@ -442,12 +442,53 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
     color: var(--dz-modal-text);
 }
 
+/* Core's style.css (loads AFTER the theme) hardcodes .bootbox-body and
+   .bootbox-form to #000 - black message text on any dark scheme's modal.
+   The extra .bootbox ancestor outranks core's single class without
+   !important. (Trap that hid this: the .modal-body WRAPPER computes the
+   themed colour; the text lives in the nested .bootbox-body - measure the
+   element that owns the pixels.) */
+.bootbox .bootbox-body,
+.bootbox .bootbox-form {
+    color: var(--dz-modal-text);
+}
+
+/* Modal footer buttons follow the theme button contract; Bootstrap 2's own
+   skin (transparent ghost, 4px radius, inset white highlight) predates the
+   tokens and read as foreign next to the theme's buttons. */
+.modal-footer .btn {
+    background: var(--dz-btn-bg);
+    color: var(--dz-btn-text);
+    border: 1px solid var(--dz-btn-border);
+    border-radius: 5px;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+.modal-footer .btn-primary {
+    background: var(--dz-btn-primary-bg);
+    color: var(--dz-btn-primary-text);
+    border-color: var(--dz-btn-primary-bg);
+}
+
+/* bootbox autofocuses OK, which painted the browser's DEFAULT focus ring (a
+   stray-looking double border). Keep a focus indicator - it is the keyboard
+   user's cursor - but themed and offset so it reads on every scheme. */
+.modal-footer .btn:focus,
+.modal-footer .btn:focus-visible {
+    outline: 2px solid rgba(var(--dz-accent-values), 0.55);
+    outline-offset: 2px;
+}
+
 .modal-footer {
     /* border was a fixed #f1f2f3: invisible on light schemes, a glowing
        white rule across dark ones (the token-derivation lesson, in
        component CSS) */
     border-top: 1px solid var(--dz-input-border) !important;
     background-color: var(--dz-modal-bg) !important;
+    /* Bootstrap 2 bakes a white inset highlight into the footer
+       (box-shadow: inset 0 1px 0 #fff) - a glowing line on dark schemes */
+    box-shadow: none !important;
 }
 
 /* A Bootstrap modal opened on top of a jQuery UI dialog must stack above it (core opens the
