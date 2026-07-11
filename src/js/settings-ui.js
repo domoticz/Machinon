@@ -176,8 +176,9 @@ function loadSettingsHTML() {
         if (this.value === "hide_logo") { setLogo(); }
         // Loaded JS cannot be unloaded, so the module re-reads its enabled flag.
         if (this.value === "log_plot_bands" && typeof dzApplyLogPlotBands === "function") { dzApplyLogPlotBands(); }
-        // The scheme picker mirrors these legacy checkboxes; keep both truthful.
-        if (this.value === "dark_theme" || this.value === "custom_color_scheme") { syncSchemeFromFeatures(); }
+        // The scheme picker mirrors the legacy Custom checkbox; keep both truthful.
+        // (The Dark Theme checkbox is gone: the picker's Machinon Dark card owns it.)
+        if (this.value === "custom_color_scheme") { syncSchemeFromFeatures(); }
     });
     $("#saveSettingsButton").click(function() {
         $('#tabtheme input[type="number"], #tabtheme input[type="text"], #tabtheme input[type="color"], #tabtheme select').each(function() {

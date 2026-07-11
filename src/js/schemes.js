@@ -67,7 +67,7 @@ function applyScheme(slug) {
         theme.scheme = slug;
         theme.scheme_base = slug;
         theme.features.custom_color_scheme.enabled = false;
-        theme.features.dark_theme.enabled = (slug === "dark");
+        setDarkFeature(slug === "dark");
         setColorScheme();
         cacheThemeSettings();
         return Promise.resolve();
@@ -86,7 +86,7 @@ function applyScheme(slug) {
         theme.scheme_base = preset.base === "dark" ? "dark" : "light";
         theme.color_scheme = Object.assign({}, preset.colors);
         theme.features.custom_color_scheme.enabled = true;
-        theme.features.dark_theme.enabled = false;
+        setDarkFeature(false);
         syncColorInputs();
         setColorScheme();
         cacheThemeSettings();
@@ -99,11 +99,25 @@ function applyScheme(slug) {
         theme.scheme_base = scheme.base === "dark" ? "dark" : "light";
         theme.color_scheme = Object.assign({}, scheme.colors);
         theme.features.custom_color_scheme.enabled = true;
-        theme.features.dark_theme.enabled = false;
+        setDarkFeature(false);
         syncColorInputs();
         setColorScheme();
         cacheThemeSettings();
     });
+}
+
+/* The dark_theme FEATURE outlived its checkbox (removed once the picker's
+   Machinon Dark card superseded it): the feature still carries
+   dark_theme.css (dark-mode adjuncts: scroll fade, mobile search focus,
+   camera-name overlay), persists in the stored feature-id list, and drives
+   the base attribute in setColorScheme(). Load/unload its file here the way
+   the checkbox handler used to. Named dark schemes run WITHOUT it: its
+   values are Machinon-dark specific. */
+function setDarkFeature(enabled) {
+    var was = theme.features.dark_theme.enabled === true;
+    theme.features.dark_theme.enabled = enabled;
+    if (enabled && !was) { loadThemeFeatureFiles("dark_theme"); }
+    if (!enabled && was) { unloadThemeFeatureFiles("dark_theme"); }
 }
 
 /* The Save button harvests the colour INPUTS back into theme.color_scheme,
@@ -199,8 +213,7 @@ function renderSchemePicker() {
                 applyScheme(card.slug).then(function() {
                     container.querySelectorAll(".scheme-card").forEach(function(c) { c.classList.remove("selected"); });
                     el.classList.add("selected");
-                    /* mirror into the legacy checkboxes so the panel stays truthful */
-                    $("#themevar10").prop("checked", theme.features.dark_theme.enabled);
+                    /* mirror into the legacy Custom checkbox so the panel stays truthful */
                     $("#themevar39").prop("checked", theme.features.custom_color_scheme.enabled);
                 });
             });
