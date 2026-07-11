@@ -314,6 +314,7 @@ core's later-loaded `:root`.
 | `{typography.sm}` | 14px | Navbar links, options menu items, `.btn-modern`, settings dropdowns |
 | `{typography.md}` | 16px | Base body text, settings panel text |
 | `{typography.display}` | 26px | Login page heading |
+| page title (h1) | 24px (core) / 19px mobile | `General:`/`Log:` page headers; stepped down under 768px (custom.css), off-scale by design: core owns the 24px |
 
 ### Device Card Typography (relative units)
 
@@ -583,7 +584,8 @@ Wrapped in a container with `{elevation.card}` shadow and `{rounded.container}` 
 - Track: `rgba(0,0,0,0.26)`, 5px height, `{rounded.sm}` radius
 - Range fill: `rgba(blue, 0.5)`
 - Handle: 15px circle, solid `var(--dz-accent-color)`, positioned -5px top
-- Width: `calc(100% - 100px)`, narrower (50%) when double-icon cards, 55% on wide screens (1200px+)
+- Width: `calc(100% - 100px)` (start point fixed relative to the card, so it never crosses the device icon), 55% on wide screens (1200px+)
+- Blinds cards (any card with a second icon cell): track anchored on BOTH edges (`left: 14px` for the handle's -12px overhang, `right: 20px`, `width: auto`); the icon clearance itself comes from core's inline `margin-left` per variant, so the track can never overlap the blind icons at any card width
 
 ## Feature Modules
 
@@ -672,6 +674,8 @@ Toggled via `theme.json` features object. Each feature has an `enabled` boolean 
 - Message toast repositions to left edge
 - Settings buttons become fixed bottom bar
 - Dialog content tables switch to `table-layout: fixed` with word-wrap
+- Edit-form tables (`.table-details`, sub-device picker) stack label above field, inputs full-width (releases core's inline 356px/250px widths and the theme's 250px input cap; < 768px)
+- Page-title rows: title owns the flex row (button column content-sized, core split it 50/50); h1 steps 24px -> 19px
 - Settings grid tiles shrink to `100px` with hidden labels
 - Compact card button groups become vertical scroll-snap columns
 
