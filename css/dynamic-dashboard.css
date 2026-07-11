@@ -38,6 +38,9 @@
    domoticz/domoticz#6898). Extra .dd-grid ancestor outranks core's
    later-loading equal-specificity rule without !important. */
 .dd-grid .dd-dz-inner table[id^="itemtable"] td#img,
+.dd-grid .dd-dz-inner table[id^="itemtable"] td#img1,
+.dd-grid .dd-dz-inner table[id^="itemtable"] td#img2,
+.dd-grid .dd-dz-inner table[id^="itemtable"] td#img3,
 .dd-grid .dd-dz-inner table[id^="itemtable"] td#bigtext,
 .dd-grid .dd-dz-inner table[id^="itemtable"] td.input {
     overflow: visible;
