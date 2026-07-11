@@ -243,6 +243,18 @@ the same edit, or record the difference as a gap.
 > sunrise/sunset sun is `--dz-sun-color` (#ff8c00 in every base scheme; scheme colors key
 > `sun` overrides it like the other semantic colours).
 >
+> **Token definitions must DERIVE, never copy.** A token whose definition is a literal copy of
+> another token's value stops tracking schemes and rots silently (found this way: the zebra
+> stripe #808080, panel-bg, the dd grid-line with the accent baked into an rgba, primary
+> button text, the danger-red rgba triplet). Write `var(--dz-widget-bg)` /
+> `rgba(var(--dz-accent-values), a)` / `color-mix(...)`, or document WHY a value is fixed.
+> Derived-by-mix examples: table odd stripe (8% body-text into widget-bg), dd skeleton.
+> Selected table rows sit on the accent and use `--dz-accent-text`.
+>
+> Scheme picks persist to the Domoticz user variables immediately (persistSchemeChoice);
+> user presets and hand-picked customs are contrast-checked at save time
+> (schemeContrastFailures: body/secondary 4.5, on-accent 3.0) with a warning, never silently.
+>
 > Machinon publishes the `--dz-*` token names that Domoticz core's globally-linked stylesheets
 > (`css/dashboard.css`, `css/style.css`) consume. It deliberately does not import core's
 > `legacy.css`, so any token core reads must be defined here.
