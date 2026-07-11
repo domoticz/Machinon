@@ -26,6 +26,22 @@
    to the cell height and clips the card. Spacing between cells is the grid's `margin`
    option (DashboardDynamicController), not ours. See the card box contract in cards.css. */
 
+/* Core's Dynamic Dashboard clips every widget td (dashboard.css:
+   .dd-dz-inner table[id^="itemtable"] td { overflow: hidden }), while the
+   same td computes visible on the classic dashboard. With Machinon's card
+   that asymmetry shaves the device icon and the bigtext value (2px cuts,
+   22 elements measured). Free exactly the two victim tds - td#name keeps
+   core's hidden so long names still ellipsize. Card internals render
+   intact; a card taller than its widget is cropped by the widget FRAME
+   only, and the user resizes the widget to reveal it (core saves size per
+   widget, maxH 6; a theme sizing hook was declined in
+   domoticz/domoticz#6898). Extra .dd-grid ancestor outranks core's
+   later-loading equal-specificity rule without !important. */
+.dd-grid .dd-dz-inner table[id^="itemtable"] td#img,
+.dd-grid .dd-dz-inner table[id^="itemtable"] td#bigtext {
+    overflow: visible;
+}
+
 /* Keep the last-seen row inside the card instead of overflowing the bottom edge */
 .dd-widget-body .item table[id^="item"] > tbody > tr td#lastupdate {
     overflow: hidden;
