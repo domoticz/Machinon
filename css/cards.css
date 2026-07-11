@@ -694,11 +694,20 @@ body table#itemtable tr > .options {
     width: calc(100% - 100px) !important;
 }
 
+/* Blinds sliders (any card with a second icon cell). Anchor BOTH edges instead
+   of sizing by percentage: a % width moves the track's left edge with card
+   width, and under ~330px cards (small phones) the old 50% track crossed the
+   fixed-width blind icons. The icon clearance stays core's own inline
+   margin-left on the slider div (108/132px tab, 94/124px dashboard, per
+   variant); left adds the handle's -12px overhang at 0% plus breathing room,
+   and width:auto (!important beats core's JS-set inline width) stretches the
+   track from there to the right:20px anchor of the base rule above. */
 .span4 td#img2 ~ #type .dimslider,
 .span4 td#img2 ~ .input .dimslider,
 .span4 td#img2 ~ .statusNormal .dimslider,
 .span4 td#img2 ~ .statusProtected .dimslider {
-    width: 50% !important;
+    left: 14px;
+    width: auto !important;
     margin-top: 0 !important;
 }
 
