@@ -85,7 +85,11 @@
     --dz-table-header-bg:       var(--dz-widget-bg);
     --dz-table-header-text:     var(--dz-body-text);
     --dz-table-row-even-bg:     var(--dz-widget-bg);
-    --dz-table-row-odd-bg:      #d3d3d3;
+    /* Odd stripe DERIVES from the scheme (8% of the text colour mixed into
+       the widget background) so striping stays readable under every scheme.
+       The old fixed greys failed WCAG under scheme text colours (dark base
+       used #808080: white text on it measured 3.9:1, worse for schemes). */
+    --dz-table-row-odd-bg:      color-mix(in srgb, var(--dz-widget-bg) 92%, var(--dz-body-text));
     --dz-table-row-text:        var(--dz-body-text);
     --dz-table-border:          var(--dz-input-border);
     --dz-table-row-selected-bg: var(--dz-accent-color);

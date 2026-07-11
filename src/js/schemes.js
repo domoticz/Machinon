@@ -33,6 +33,17 @@ function loadBuiltinSchemes() {
         });
 }
 
+/* A scheme pick is a decision: persist it to the Domoticz user variables
+   immediately (like users expect from a theme switcher), instead of waiting
+   for the Save button. Without this, an unsaved pick lived only in
+   localStorage and the async DB round-trip on the next full reload silently
+   reverted it (owner-reported). */
+function persistSchemeChoice() {
+    if (typeof storeUserVariableThemeSettings === "function") {
+        storeUserVariableThemeSettings("update");
+    }
+}
+
 /* WCAG contrast rails. Built-in schemes are gated before shipping
    (dz-scheme-picker.js); user presets and hand-picked custom colours get
    checked HERE at save time, with a warning that names the failing pair and
@@ -90,6 +101,7 @@ function saveCurrentColorsAsScheme(name) {
     });
     theme.scheme = "user:" + name;
     cacheThemeSettings();
+    persistSchemeChoice();
     renderSchemePicker();
     warnIfContrastFails(theme.color_scheme, 'Preset "' + name + '" saved, but it');
 }
@@ -98,13 +110,14 @@ function deleteUserScheme(name) {
     theme.user_schemes = (theme.user_schemes || []).filter(function(p) { return p.name !== name; });
     if (theme.scheme === "user:" + name) { theme.scheme = "custom"; }
     cacheThemeSettings();
+    persistSchemeChoice();
     renderSchemePicker();
 }
 
 /* Apply a scheme by slug: "light"/"dark" are the token bases, "custom" is
    the user's own colours (colour inputs), "user:<name>" a saved preset,
-   anything else a built-in preset. Applies live and caches; the Domoticz
-   user variables update on Save, like every other settings control. */
+   anything else a built-in preset. Applies live, caches, and persists to
+   the Domoticz user variables immediately (see persistSchemeChoice). */
 function applyScheme(slug) {
     if (slug === "light" || slug === "dark") {
         theme.scheme = slug;
@@ -113,6 +126,7 @@ function applyScheme(slug) {
         setDarkFeature(slug === "dark");
         setColorScheme();
         cacheThemeSettings();
+        persistSchemeChoice();
         return Promise.resolve();
     }
     if (slug === "custom") {
@@ -120,6 +134,7 @@ function applyScheme(slug) {
         theme.features.custom_color_scheme.enabled = true;
         setColorScheme();
         cacheThemeSettings();
+        persistSchemeChoice();
         return Promise.resolve();
     }
     if (slug.indexOf("user:") === 0) {
@@ -133,6 +148,7 @@ function applyScheme(slug) {
         syncColorInputs();
         setColorScheme();
         cacheThemeSettings();
+        persistSchemeChoice();
         return Promise.resolve();
     }
     return loadBuiltinSchemes().then(function(schemes) {
@@ -146,6 +162,7 @@ function applyScheme(slug) {
         syncColorInputs();
         setColorScheme();
         cacheThemeSettings();
+        persistSchemeChoice();
     });
 }
 
@@ -183,6 +200,7 @@ function syncSchemeFromFeatures() {
     theme.scheme_base = theme.features.dark_theme.enabled ? "dark" : "light";
     setColorScheme();
     cacheThemeSettings();
+    persistSchemeChoice();
     renderSchemePicker();
 }
 

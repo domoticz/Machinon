@@ -6,15 +6,15 @@
         "bg": "#fdf6e3",
         "surface": "#eee8d5",
         "accent": "#268bd2",
-        "text": "#586e75"
+        "text": "#50656c"
     },
     "colors": {
         "background": "#fdf6e3",
         "item": "#eee8d5",
         "navbar": "#eee8d5",
         "main_color": "#268bd2",
-        "main_text": "#586e75",
-        "alt_text": "#657b83",
+        "main_text": "#50656c",
+        "alt_text": "#586e75",
         "border": "#d1c9b2",
         "disabled": "#93a1a1",
         "error": "#dc322f",

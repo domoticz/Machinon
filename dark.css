@@ -30,8 +30,9 @@ html[data-dz-scheme="dark"] {
   --dz-dd-grid-line:         rgba(11,158,218,0.15);
   --dz-dd-skeleton-mid:      #444a4e;
 
-  /* Table zebra stripe (decoupled from --dz-status-disabled) */
-  --dz-table-row-odd-bg: #808080;
+  /* Table zebra stripe: no override needed - dz-tokens.css derives it from
+     widget-bg/body-text via color-mix, which tracks this scheme too (the old
+     fixed #808080 put white text at 3.9:1). */
 
   /* jQuery UI's white icon sprites are already right for dark surfaces */
   --dz-ui-icon-filter: none;
