@@ -346,3 +346,20 @@ ul.machinon_ul li {
     text-align: center;
     color: var(--dz-body-text);
 }
+
+#schemePicker .scheme-card {
+    position: relative;
+}
+
+#schemePicker .scheme-delete {
+    position: absolute;
+    top: -2px;
+    right: 4px;
+    font-size: 15px;
+    line-height: 1;
+    color: var(--secondary-text-color);
+}
+
+#schemePicker .scheme-delete:hover {
+    color: var(--dz-accent-red);
+}

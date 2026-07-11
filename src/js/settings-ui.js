@@ -233,6 +233,13 @@ function loadSettingsHTML() {
         });
     });
     renderSchemePicker();
+    $('a.saveschemebtn').click(function(e) {
+        e.preventDefault();
+        bootbox.prompt("Preset name", function(name) {
+            if (name) { saveCurrentColorsAsScheme(name); }
+        });
+        return false;
+    });
     $('a.resetschemebtn').click(function(e) {
             e.preventDefault();
             var current_theme = getSchemeDefaults();

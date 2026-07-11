@@ -33,10 +33,35 @@ function loadBuiltinSchemes() {
         });
 }
 
+/* User-saved presets: snapshots of the current colours under a chosen name.
+   Stored on the theme object (theme.user_schemes), so they ride the same
+   localStorage cache and Domoticz user-variable sync as everything else.
+   Names render via textContent only. */
+function saveCurrentColorsAsScheme(name) {
+    name = (name || "").trim().slice(0, 40);
+    if (!name) return;
+    theme.user_schemes = (theme.user_schemes || []).filter(function(p) { return p.name !== name; });
+    theme.user_schemes.push({
+        name: name,
+        base: theme.scheme_base === "dark" ? "dark" : "light",
+        colors: Object.assign({}, theme.color_scheme)
+    });
+    theme.scheme = "user:" + name;
+    cacheThemeSettings();
+    renderSchemePicker();
+}
+
+function deleteUserScheme(name) {
+    theme.user_schemes = (theme.user_schemes || []).filter(function(p) { return p.name !== name; });
+    if (theme.scheme === "user:" + name) { theme.scheme = "custom"; }
+    cacheThemeSettings();
+    renderSchemePicker();
+}
+
 /* Apply a scheme by slug: "light"/"dark" are the token bases, "custom" is
-   the user's own colours (colour inputs), anything else a built-in preset.
-   Applies live and caches; the Domoticz user variables update on Save, like
-   every other settings control. */
+   the user's own colours (colour inputs), "user:<name>" a saved preset,
+   anything else a built-in preset. Applies live and caches; the Domoticz
+   user variables update on Save, like every other settings control. */
 function applyScheme(slug) {
     if (slug === "light" || slug === "dark") {
         theme.scheme = slug;
@@ -50,6 +75,19 @@ function applyScheme(slug) {
     if (slug === "custom") {
         theme.scheme = "custom";
         theme.features.custom_color_scheme.enabled = true;
+        setColorScheme();
+        cacheThemeSettings();
+        return Promise.resolve();
+    }
+    if (slug.indexOf("user:") === 0) {
+        var preset = (theme.user_schemes || []).filter(function(p) { return "user:" + p.name === slug; })[0];
+        if (!preset) return Promise.resolve();
+        theme.scheme = slug;
+        theme.scheme_base = preset.base === "dark" ? "dark" : "light";
+        theme.color_scheme = Object.assign({}, preset.colors);
+        theme.features.custom_color_scheme.enabled = true;
+        theme.features.dark_theme.enabled = false;
+        syncColorInputs();
         setColorScheme();
         cacheThemeSettings();
         return Promise.resolve();
@@ -106,6 +144,13 @@ function renderSchemePicker() {
             var s = schemes[slug];
             cards.push({ slug: slug, name: s.name, preview: s.preview || {} });
         });
+        (theme.user_schemes || []).forEach(function(p) {
+            var cs = p.colors || {};
+            cards.push({
+                slug: "user:" + p.name, name: p.name, deletable: true,
+                preview: { bg: cs.background, surface: cs.item, accent: cs.main_color, text: cs.main_text }
+            });
+        });
         cards.push({ slug: "custom", name: "Custom", preview: null });
 
         container.textContent = "";
@@ -137,6 +182,18 @@ function renderSchemePicker() {
             label.className = "scheme-name";
             label.textContent = card.name;
             el.appendChild(label);
+
+            if (card.deletable) {
+                var del = document.createElement("span");
+                del.className = "scheme-delete";
+                del.textContent = "×";
+                del.title = "Delete preset";
+                del.addEventListener("click", function(e) {
+                    e.stopPropagation();
+                    deleteUserScheme(card.name);
+                });
+                el.appendChild(del);
+            }
 
             el.addEventListener("click", function() {
                 applyScheme(card.slug).then(function() {

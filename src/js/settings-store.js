@@ -129,12 +129,13 @@ function storeUserVariableThemeSettings(action) {
     });
 
     /* Positional contract: readers index into this array, so only APPEND.
-       7 and 8 (scheme picker selection + its token underlay) arrived after
-       the first seven; older stored arrays simply lack them. */
+       7 and 8 (scheme picker selection + its token underlay) and 9 (saved
+       colour presets) arrived after the first seven; older stored arrays
+       simply lack them. */
     var custom = [
         theme.standby_after, theme.button_name, theme.custom_url,
         theme.logo, theme.icons, theme.background_img, theme.background_type,
-        theme.scheme, theme.scheme_base
+        theme.scheme, theme.scheme_base, theme.user_schemes
     ];
 
     function saveVariable(varName, value) {
@@ -203,11 +204,14 @@ function getCustomThemeSettings(idx) {
         theme.icons = customThemeSettings[4];
         theme.background_img = customThemeSettings[5];
         theme.background_type = customThemeSettings[6];
-        /* Arrays stored before the scheme picker have no 7/8; keep the
+        /* Arrays stored before the scheme picker have no 7/8/9; keep the
            derived values from loadSettings in that case. */
         if (customThemeSettings.length > 8) {
             theme.scheme = customThemeSettings[7];
             theme.scheme_base = customThemeSettings[8];
+        }
+        if (customThemeSettings.length > 9 && Array.isArray(customThemeSettings[9])) {
+            theme.user_schemes = customThemeSettings[9];
         }
     });
 }
