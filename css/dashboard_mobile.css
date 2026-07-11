@@ -30,7 +30,7 @@ body.dashMobile #tbSunGroup .tbSun {
 }
 
 body.dashMobile #tbTimeSun .fa-sun {
-    color: #ff8c00;
+    color: var(--dz-sun-color);
 }
 
 body.dashMobile section:first-of-type table.mobileitem {

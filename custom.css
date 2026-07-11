@@ -173,7 +173,7 @@ h4,
 
 #tbSunGroup #tbIconSun,
 #tbTimeSun .fa-sun {
-    color: #ff8c00;
+    color: var(--dz-sun-color);
 }
 
 .page-header-small {

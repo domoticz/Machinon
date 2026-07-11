@@ -58,7 +58,7 @@ var DZ_CUSTOM_TOKENS = [
     '--dz-body-bg', '--dz-body-text', '--dz-nav-bg', '--dz-widget-bg', '--dz-widget-text',
     '--dz-accent-color', '--dz-input-border', '--dz-status-disabled', '--dz-accent-red',
     '--dz-btn-success-bg', '--dz-btn-warning-bg', '--secondary-text-color', '--dz-accent-values',
-    '--dz-accent-text'
+    '--dz-accent-text', '--dz-sun-color'
 ];
 
 // Apply the user's custom colours as --dz-* overrides on <html> via setProperty.
@@ -83,6 +83,8 @@ function applyCustomColorScheme(cs) {
     /* Text on accent surfaces; schemes with a light accent set a dark value
        (default token: white). */
     set('--dz-accent-text', cs.accent_text);
+    /* Sunrise/sunset sun icon; semantic default #ff8c00 unless a scheme says otherwise */
+    set('--dz-sun-color', cs.sun);
     if (cs.main_color) { s.setProperty('--dz-accent-values', hexToRGB(cs.main_color, true)); }
 }
 

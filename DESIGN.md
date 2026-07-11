@@ -239,7 +239,9 @@ the same edit, or record the difference as a gap.
 > Deliberately NOT tokenized: text on the semantic colours (red/success/warning buttons stay
 > white), the login page and the offline splash (fixed brand surfaces), Blockly's canvas, and
 > the legacy dark_theme.css gradient. Everything else colour-bearing flows through tokens;
-> the device status glows use the `--dz-status-*-values` r,g,b triplets.
+> the device status glows use the `--dz-status-*-values` r,g,b triplets, and the
+> sunrise/sunset sun is `--dz-sun-color` (#ff8c00 in every base scheme; scheme colors key
+> `sun` overrides it like the other semantic colours).
 >
 > Machinon publishes the `--dz-*` token names that Domoticz core's globally-linked stylesheets
 > (`css/dashboard.css`, `css/style.css`) consume. It deliberately does not import core's

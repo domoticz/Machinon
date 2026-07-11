@@ -42,6 +42,11 @@
     --dz-status-timeout-values:    199, 67, 67;
     --dz-status-protected-values:  0, 0, 139;
     --dz-status-lowbat-values:     255, 255, 0;
+    /* The sunrise/sunset sun icon (desktop #timesun row + mobile top bar).
+       Semantic like error/success/warning, and like them overridable per
+       scheme (scheme colors key: sun); every built-in scheme keeps the
+       default. */
+    --dz-sun-color:                #ff8c00;
 
     /* Dynamic Dashboard chrome tokens (light). Core's GridStack dashboard: www/app/dashboardDynamic/, .dd-* classes.
        Consumed by core dashboard.css; device-card bg comes from --dz-widget-bg above.
