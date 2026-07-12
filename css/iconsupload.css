@@ -87,3 +87,18 @@
     border-radius: 6px;
     box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
 }
+
+/* Selected-icon preview row (core customicons.html renders the three files
+   with NO size attributes, i.e. at natural size). Pack zips carry the same
+   96x96 masters as the theme's <Type>48 device-icon family (a pack icon IS a
+   device icon once picked), so pin the preview to the intended 16/48/48. */
+#customiconedittable td img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+}
+
+#customiconedittable td img:first-child {
+    width: 16px;
+    height: 16px;
+}
