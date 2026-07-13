@@ -142,6 +142,18 @@ a.resetschemebtn {
     align-items: center;
 }
 
+/* Tile icons render in a fixed 36px square regardless of the PNG's intrinsic size, so the
+   art can ship at 2x resolution (72x72) for high-DPI displays and the labels line up
+   across tiles (legacy sources range 29-38px and several are non-square; object-fit keeps
+   those centered and unstretched). */
+.rectangle-8 > img,
+.rectangle-8-dropdown > img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
 .machinoText {
     font-size: 16px;
     font-weight: 300;
