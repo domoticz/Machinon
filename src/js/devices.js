@@ -32,11 +32,54 @@ function switchLabels() {
     };
 }
 
-/* Switch-detection heuristic, shared by the initial pass below and the
-   MutationObserver re-enhance pass in custom.js. A card is a plain on/off
-   switch when its icon is clickable (lcursor) and it carries no dimmer
-   slider, selector levels or button group. */
+/* Core's toggleability vocabulary, mirrored from dzLightWidget.js
+   (isRegularSwitch/deviceIconClick): these SwitchTypes render a clickable
+   icon, but the click is a special action, not an On/Off toggle. A theme
+   toggle on them lies about state or fires the wrong command outright: a
+   Smoke Detector click ALWAYS sends On (triggers the alarm), push buttons
+   are momentary, door locks key their state off InternalState and their
+   Locked/Unlocked status breaks the checked mapping, a doorbell click
+   rings it. Sensors (contacts, motion, dusk) are read-only. */
+var NON_TOGGLE_SWITCH_TYPES = [
+    "Doorbell",
+    "Push On Button",
+    "Push Off Button",
+    "Door Contact",
+    "Contact",
+    "Motion Sensor",
+    "Smoke Detector",
+    "Dusk Sensor",
+    "Door Lock",
+    "Door Lock Inverted",
+    "Security Panel",
+    "Media Player"
+];
+
+/* The device object core bound to this card's widget scope. Every card
+   surface (classic pages, Dynamic Dashboard tiles and its Favorites/Room
+   widgets) renders through an Angular-compiled dzLightWidget, so the
+   scope is reachable from the .item element; scenes expose no device and
+   return undefined here on purpose. */
+function getCardDevice(item) {
+    var el = item.closest(".item")[0];
+    var scope = (typeof angular !== "undefined" && el) ? angular.element(el).scope() : null;
+    return scope ? (scope.device || (scope.ctrl && scope.ctrl.device)) : null;
+}
+
+/* Switch-detection gate, shared by the initial pass below and the
+   MutationObserver re-enhance pass (initDeviceObserver). A card is a plain
+   on/off switch when core's device data says its SwitchType actually
+   toggles, its icon is clickable (lcursor), and it carries no dimmer
+   slider, selector levels or button group. The DOM heuristics alone are
+   NOT sufficient: core marks special-action icons clickable too (see
+   NON_TOGGLE_SWITCH_TYPES), so cards whose scope is unreachable only get
+   a toggle if the DOM checks pass, which keeps scenes working. */
 function isPlainOnOffSwitch(item) {
+    var device = getCardDevice(item);
+    if (device && (device.Type === "Security" ||
+        NON_TOGGLE_SWITCH_TYPES.indexOf(device.SwitchType) !== -1)) {
+        return false;
+    }
     return item.find("#bigtext").siblings("#img").find("img").hasClass("lcursor") &&
         item.find(".dimslider").length === 0 &&
         item.find(".selectorlevels").length === 0 &&
@@ -341,9 +384,15 @@ function initDeviceLiveUpdates($scope) {
                 /* We have to delay it a few otherwise it's get overwritten by standard icon */
                 setTimeout(setDeviceCustomIcon, 10, data.idx, data.Status);
             }
-            if (theme.features.switch_instead_of_bigtext.enabled === true && data.SwitchType === "On/Off") {
-                setDeviceSwitch(data.idx, data.Status);
-            }
+        }
+        /* Sync EXISTING toggles only, on any device type. Creation stays with
+           the enhancement passes, which check page context and switch type; the
+           old Light/Switch + SwitchType === "On/Off" gate here both created
+           toggles without those checks and left every other toggleable type
+           (X10 Siren, Lighting 2 on/off) stale on remote state changes. */
+        if (theme.features.switch_instead_of_bigtext.enabled === true &&
+            $("tr[data-idx='" + data.idx + "'] .switch").length > 0) {
+            setDeviceSwitch(data.idx, data.Status);
         }
         if (data.Type.startsWith("Temp") || (data.Type === "Wind")) {
             /* Temp/Wind widgets are all refreshed, we need to format them again after a delay */
