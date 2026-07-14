@@ -288,10 +288,21 @@ table.mobileitem td.name {
     min-width: 0;
 }
 
+/* Anchors the description tooltip below. */
+.item #name {
+    position: relative;
+}
+
 .item #name[data-desc]:not([data-desc=""])::after {
     content: attr(data-desc);
-    position: fixed;
-    margin-top: 20px;
+    /* Anchored to the name cell (left/right = its width) and wrapping, so a
+       long description stays inside the card's column instead of running past
+       the viewport on right-edge cards, which position: fixed + nowrap did. */
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    margin-top: 4px;
     background: var(--dz-widget-bg);
     color: var(--secondary-text-color);
     font-family: main-font;
@@ -300,7 +311,8 @@ table.mobileitem td.name {
     padding: 6px 10px;
     border-radius: 4px;
     box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.3);
-    white-space: nowrap;
+    white-space: normal;
+    overflow-wrap: anywhere;
     z-index: 9999;
     pointer-events: none;
     visibility: hidden;
