@@ -566,6 +566,18 @@ body table#itemtable tr > .options {
     width: 100%;
     height: 40px;
     object-fit: contain;
+    /* The stop column is ~18px wide while its neighbours render 40px, and
+       object-fit caps the square glyph at column width. Scale is paint-only
+       (layout box unchanged), so the glyph grows WITHOUT moving the down
+       chevron or the slider (the overlap trap documented below). The hover
+       restates the whole transform: transforms do not compose across rules,
+       so the generic spring-lift would otherwise SHRINK it back to 1.1x. */
+    transform: scale(1.8);
+}
+
+#itemtabletrippleicon #img2 img:hover,
+#itemtablesmalltrippleicon #img2 img:hover {
+    transform: scale(2);
 }
 
 .item #img2 {
