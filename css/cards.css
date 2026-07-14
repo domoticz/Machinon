@@ -540,8 +540,13 @@ body table#itemtable tr > .options {
     padding: 0 10px;
 }
 
+/* The active scene icon (core scene_widget.html puts it in #img1) rendered at the
+   PNG's intrinsic size while #img is pinned to 40px on the same card: a 96px master
+   measured 48x48 next to its 40x40 sibling. Same box as .item #img img. */
 .item #img1 img {
-    height: auto;
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
 }
 
 #itemtabledoubleicon #img2 img,
