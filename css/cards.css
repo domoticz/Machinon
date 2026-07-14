@@ -575,9 +575,14 @@ body table#itemtable tr > .options {
     transform: scale(1.8);
 }
 
+/* Hover feedback is tonal-only (see the affordance block below), but the
+   generic hover sets transform: none, which would UNDO the static 1.8 sizing
+   above on hover: restate it. */
 #itemtabletrippleicon #img2 img:hover,
-#itemtablesmalltrippleicon #img2 img:hover {
-    transform: scale(2);
+#itemtablesmalltrippleicon #img2 img:hover,
+#itemtabletrippleicon #img2 img:focus-visible,
+#itemtablesmalltrippleicon #img2 img:focus-visible {
+    transform: scale(1.8);
 }
 
 .item #img2 {
@@ -602,21 +607,21 @@ body table#itemtable tr > .options {
     height: 40px;
 }
 
-/* Modern hover/focus affordance for clickable device icons.
-   Overrules core's `#img img:hover { transform: scale(1.1) }`, which only
-   emphasises the primary icon, and extends the cue to the secondary/tertiary
-   action icons (stop, close, media remote). Kept strictly IN-BOX: the five
-   nested overflow:hidden ancestors documented above shave any outer ring or
-   spilled glow, so the emphasis is a springy lift plus a gentle in-place tonal
-   pop (saturate/brightness) instead of a drop shadow. :focus-visible is
-   included for when these icons become keyboard-focusable; prefers-reduced-
-   motion drops the movement but keeps the pop. */
+/* Hover/focus affordance for clickable device icons: an in-place tonal pop
+   (saturate/brightness), no movement. Overrules core's
+   `#img img:hover { transform: scale(1.1) }` (transform: none below) and
+   extends the cue to the secondary/tertiary action icons (stop, close, media
+   remote). Kept strictly IN-BOX: the five nested overflow:hidden ancestors
+   documented above shave any outer ring or spilled glow. The owner picked the
+   tonal-only variant deliberately (2026-07-14): it started as the
+   prefers-reduced-motion fallback and turned out to be the better design, so
+   it IS the design and no motion media query is needed. :focus-visible is
+   included for when these icons become keyboard-focusable. */
 .item #img img,
 .item #img1 img,
 .item #img2 img,
 .item #img3 img {
-    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
-                filter 0.18s ease;
+    transition: filter 0.18s ease;
 }
 
 .item #img img:hover,
@@ -627,18 +632,8 @@ body table#itemtable tr > .options {
 .item #img1 img:focus-visible,
 .item #img2 img:focus-visible,
 .item #img3 img:focus-visible {
-    transform: scale(1.1);
-    filter: saturate(1.1) brightness(1.04);
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .item #img img:hover,
-    .item #img1 img:hover,
-    .item #img2 img:hover,
-    .item #img3 img:hover {
-        transform: none;
-        filter: saturate(1.12) brightness(1.05);
-    }
+    transform: none;
+    filter: saturate(1.12) brightness(1.05);
 }
 
 /* item with button group */
