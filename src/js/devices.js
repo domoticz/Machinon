@@ -173,13 +173,16 @@ function setAllDevicesFeatures() {
             }
         }
 
-        /* Feature - Switch instead of text for scenes */
-        if (theme.features.switch_instead_of_bigtext_scenes.enabled === true) {
-            if (($(this).parents("#scenecontent").length > 0) || ($(this).parents("#dashScenes").length > 0 && $(this).find("#itemtablesmalldoubleicon").length > 0)) {
-                setDeviceSwitch(idx, status);
-                bigText.hide();
-            }
-            
+        /* Feature - Switch instead of text for scenes. Only a GROUP carries both an
+           On and an Off button (#img1 + #img2) and can actually toggle; a SCENE is
+           activate-only, so a toggle on it lies (its off-click targets an #img2 that
+           does not exist). Gate on the second button, the discriminator the dashboard
+           branch always used, on every scene surface. */
+        if (theme.features.switch_instead_of_bigtext_scenes.enabled === true &&
+            $(this).find("#img2").length > 0 &&
+            ($(this).parents("#scenecontent").length > 0 || $(this).parents("#dashScenes").length > 0)) {
+            setDeviceSwitch(idx, status);
+            bigText.hide();
         }
 
         /* Feature - Set custom icons */
@@ -489,7 +492,18 @@ function initDeviceObserver() {
                     if (switchEnabled && tr.find(".switch").length === 0) {
                         let item = $(this);
                         let bigText = item.find("#bigtext");
-                        if (isPlainOnOffSwitch(item) && item.find("#img2").length === 0) {
+                        /* Groups (both scene surfaces): toggleable only with BOTH buttons
+                           present; activate-only scenes never get a toggle. This branch
+                           cannot sit behind isPlainOnOffSwitch: scene widgets have no
+                           #img sibling, so that heuristic always rejected them and group
+                           toggles were silently never re-created after a re-render. */
+                        let isGroupCard = item.find("#img2").length > 0 &&
+                            (item.parents("#scenecontent").length > 0 ||
+                             item.parents("#dashScenes").length > 0);
+                        if (isGroupCard && theme.features.switch_instead_of_bigtext_scenes.enabled === true) {
+                            setDeviceSwitch(idx, readSwitchStatus(item));
+                            bigText.hide();
+                        } else if (isPlainOnOffSwitch(item) && item.find("#img2").length === 0) {
                             /* The Dynamic Dashboard binary check uses the full status
                                chain (bigtext, data-status, icon filename): push buttons
                                on that board render an EMPTY bigtext and no data-status,
@@ -497,13 +511,8 @@ function initDeviceObserver() {
                                a non-binary value fails the check, and an empty-value
                                sensor icon is not clickable, so isPlainOnOffSwitch
                                already rejected it (dz-dd-matrix.js guards this). */
-                            let isScene = item.parents("#scenecontent").length > 0 ||
-                                (item.parents("#dashScenes").length > 0 && item.find("#itemtablesmalldoubleicon").length > 0);
                             if (isLightSwitchContext(item, readSwitchStatus(item)) && theme.features.switch_instead_of_bigtext.enabled === true) {
                                 setDeviceSwitch(idx, readSwitchStatus(item));
-                            } else if (isScene && theme.features.switch_instead_of_bigtext_scenes.enabled === true) {
-                                setDeviceSwitch(idx, readSwitchStatus(item));
-                                bigText.hide();
                             }
                         }
                     }
