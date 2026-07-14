@@ -495,6 +495,8 @@ Fixed tile width: 180px
 
 **Double/triple icon variants**: wider icon columns (48px + 48px for double, adds `img3` area for triple).
 
+**Card icon boxes are pinned**: `#img img` and `#img1 img` (the scene widget's active icon) render in a fixed `40x40` box with `object-fit: contain`, so 96px masters (2x art) stay crisp and never resize the row. An unpinned `#img1` used to render scene icons at intrinsic size (caught by the icon facts engine's slot-mismatch check).
+
 **Bar-ranges gauge**: core renders its `<dz-bar>` threshold gauge inside the last-update cell;
 the theme repositions it as a 4px full-bleed status edge along the card top (top corners follow
 the card radius). Core's inline placement would overflow the 20px bottom row. Track color comes
