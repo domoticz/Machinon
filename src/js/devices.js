@@ -306,17 +306,22 @@ function setDeviceCustomIcon(idx, status) {
     }
 }
 
+/* Core names its wind icons Wind<DIR>.png with an uppercase compass direction;
+   match that shape exactly. The old substring selector ([src*='Wind']) hijacked
+   ANY icon containing "Wind": a device with the built-in Window picker icon got
+   rewritten to images/wind-direction/Window48_On.png, a 404. */
 function setDeviceWindDirectionIcon(idx, direction) {
     let tr = "tr[data-idx='" + idx + "']";
-    $(tr).find("#img img[src*='Wind']").each(function() {
+    $(tr).find("#img img").each(function() {
+        var src = $(this).attr("src") || "";
         if (direction === undefined) {
-            let src = $(this).attr("src").split('/Wind');
-            direction = src[1];
-        } else {
-            direction += '.png';
+            var m = src.match(/images\/Wind([A-Z]{1,3})\.png$/);
+            if (!m) { return; }
+            $(this).attr("src", 'images/wind-direction/Wind' + m[1] + '.png');
+        } else if (/images\/(wind-direction\/)?Wind[A-Z]{1,3}\.png$/.test(src)) {
+            $(this).attr("src", 'images/wind-direction/Wind' + direction + '.png');
         }
-        $(this).attr("src", 'images/wind-direction/Wind' + direction);
-    }); 
+    });
 }
 
 function setDeviceLastUpdate(idx, lastupdate) {
