@@ -482,6 +482,14 @@ function initDeviceObserver() {
                     let idx = tr.attr("data-idx");
                     if (!idx) return;
 
+                    /* Re-strip the native title tooltip. The theme's own tooltip is the
+                       CSS ::after reading data-desc; stable core's legacy update path
+                       re-adds title="<description>" to #name after every device update,
+                       which stacked a browser tooltip on top of ours. The initial strip
+                       in setAllDevicesFeatures runs once, so it must repeat here.
+                       (Current beta sets no title: this is a no-op there.) */
+                    tr.find("#name[title]").removeAttr("title");
+
                     /* Re-apply options menu if wiped */
                     if (tr.find(".options-cell").length === 0) {
                         setDeviceOptions(idx);
