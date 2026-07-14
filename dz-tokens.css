@@ -42,6 +42,14 @@
     --dz-status-timeout-values:    199, 67, 67;
     --dz-status-protected-values:  0, 0, 139;
     --dz-status-lowbat-values:     255, 255, 0;
+    /* Semantic status FILLS (danger/warn/ok), for non-button status surfaces
+       (first consumer: the Devices-table battery bar). Pure aliases of the
+       existing palette on purpose: no new colors, the dark scheme's overrides
+       of the referenced tokens flow through automatically, and a status
+       surface gains a home that can diverge from button styling later. */
+    --dz-status-danger: var(--dz-accent-red);
+    --dz-status-warn:   var(--dz-btn-warning-bg);
+    --dz-status-ok:     var(--dz-btn-success-bg);
     /* The sunrise/sunset sun icon (desktop #timesun row + mobile top bar).
        Semantic like error/success/warning, and like them overridable per
        scheme (scheme colors key: sun); every built-in scheme keeps the

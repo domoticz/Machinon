@@ -95,3 +95,31 @@ tr.odd td.sorting_1, tr.even td.sorting_1 {
         max-width: 100%;
     }
 }
+
+/* Devices-table battery bar: core's style.css hardcodes scheme-blind hexes
+   (#B8DB23 base/full, #ED3745 empty, #F9D023 half, black shell outline) and
+   loads after the theme, winning equal-specificity ties, so these rules are
+   td-scoped to outrank it. Fill = the status trio; the shell outline follows
+   body text so it survives the dark scheme; the empty state keeps core's
+   all-red treatment (outline included) so a dead battery reads red whole. */
+td .battery {
+    background-color: var(--dz-status-ok);
+}
+
+td .battery:before,
+td .battery:after {
+    border-color: var(--dz-body-text);
+}
+
+td .battery.empty {
+    background-color: var(--dz-status-danger);
+}
+
+td .battery.empty:before,
+td .battery.empty:after {
+    border-color: var(--dz-status-danger);
+}
+
+td .battery.half {
+    background-color: var(--dz-status-warn);
+}
