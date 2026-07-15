@@ -1,0 +1,21 @@
+{
+    "name": "Blue UI",
+    "description": "Blue UI icons on white, matched",
+    "base": "light",
+    "preview": { "bg": "#F4F8FC", "surface": "#FFFFFF", "accent": "#396D9E", "text": "#1B2B3A" },
+    "colors": {
+        "background": "#F4F8FC",
+        "item": "#FFFFFF",
+        "navbar": "#E9F2FB",
+        "main_color": "#396D9E",
+        "main_text": "#1B2B3A",
+        "alt_text": "#3E5568",
+        "border": "#CBD9E6",
+        "disabled": "#8CA0B3",
+        "error": "#992F2B",
+        "success": "#306B30",
+        "warning": "#7A5412",
+        "accent_text": "#FFFFFF",
+        "sun": "#8C730E"
+    }
+}
