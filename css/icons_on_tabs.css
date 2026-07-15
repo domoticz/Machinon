@@ -1,341 +1,141 @@
 /**** ./icons_on_tabs.css ***/
-/* css file for custom tabs */
+/* Custom settings-page tab header icons.
 
-/* Add icons on headers */
-.span6 H2 [data-i18n="User Interface"]::before {
-    content: url(../images/tabs/user.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
+   Each iconed <h2> gets its glyph as a ::before background box, not a
+   content:url image. A content:url renders at the file's intrinsic size and
+   cannot be sized, so a 2x (retina) master would double the header icon and
+   shift the row. The shared box below height-pins every tab glyph to one
+   16px cap-height (width 20px clears the widest current glyph, lock.png at
+   25x20 -> 20px wide at 16px tall); `background-size: auto 16px` scales by
+   height so nothing distorts, and a square 2x master will fill 16x16 centered
+   in the box with no CSS change. The grouped selector is scoped to exactly the
+   iconed headers so no boxless header gains an empty ::before. */
 
-.span6 H2 [data-i18n="Location"]::before {
-    content: url(../images/tabs/location.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
 
-.span6 H2 [data-i18n="Dashboard"]::before {
-    content: url(../images/tabs/dashboard.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span6 H2 [data-i18n="Mobile"]::before {
-    content: url(../images/tabs/mobile.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span6 H2 [data-i18n="WebsiteProtection"]::before {
-    content: url(../images/tabs/lock.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span6 H2 [data-i18n="SecurityPanel"]::before {
-    content: url(../images/tabs/protection.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span6 H2 [data-i18n="Light/Switch Protection"]::before {
-    content: url(../images/tabs/lights.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span12 H2 [data-i18n="LocalNetworks(no_username/password)"]::before {
-    content: url(../images/tabs/network.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span6 H2 [data-i18n="RemoteSharedPortForDomoticzClients"]::before {
-    content: url(../images/tabs/remote.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span6 H2 [data-i18n="SoftwareUpdates"]::before {
-    content: url(../images/tabs/software_update.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span6 H2 [data-i18n="AutoBackup"]::before {
-    content: url(../images/tabs/backup.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span12 H2 [data-i18n="RemoteProxyIPs"]::before {
-    content: url(../images/tabs/remote.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span6 H2 [data-i18n="AcceptNewHardware"]::before {
-    content: url(../images/tabs/hardwares.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span6 H2 [data-i18n="MyDomoticzSettings"]::before {
-    content: url(../images/tabs/other.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span12 H2 [data-i18n="ActiveMenus"]::before {
-    content: url(../images/tabs/icons8-menu-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span12 H2 [data-i18n="General"]::before {
-    content: url(../images/tabs/other.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span6 H2 [data-i18n="General"]::before {
-    content: url(../images/tabs/other.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span6 H2 [data-i18n="Menu"]::before {
-    content: url(../images/tabs/icons8-menu-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span6 H2 [data-i18n="Devices"]::before {
-    content: url(../images/tabs/icons8-meter-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span12 H2 [data-i18n="Images instead of Icons"]::before {
-    content: url(../images/tabs/icons8-camera-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span6 H2 [data-i18n="Background"]::before {
-    content: url(../images/tabs/icons8-camera-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span6 H2 [data-i18n="logo"]::before {
-    content: url(../images/tabs/icons8-display-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span6 H2 [data-i18n="Colour Options"]::before {
-    content: url(../images/tabs/icons8-color-palette-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span12 H2 [data-i18n="Light/Switches"]::before {
-    content: url(../images/tabs/lights.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span12 H2 [data-i18n="Short Log Sensors"]::before {
-    content: url(../images/tabs/icons8-edit-property-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span6 H2 [data-i18n="Prowl (iPhone/iPad)"]::before {
-    content: url(../images/tabs/icons8-push-notifications-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-.span6 H2 [data-i18n="IFTTT"]::before {
-    content: url(../images/tabs/icons8-push-notifications-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span6 H2 [data-i18n="Pushover (Android/iOs)"]::before {
-    content: url(../images/tabs/icons8-push-notifications-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span6 H2 [data-i18n="Pushalot (Windows/Windows Phone)"]::before {
-    content: url(../images/tabs/icons8-push-notifications-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-.span6 H2 [data-i18n="Pushbullet (iOS/Android/Windows)"]::before {
-    content: url(../images/tabs/icons8-push-notifications-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-.span6 H2 [data-i18n="Pushsafer (iOS/Android/Windows)"]::before {
-    content: url(../images/tabs/icons8-push-notifications-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-.span6 H2 [data-i18n="Telegram"]::before {
-    content: url(../images/tabs/icons8-push-notifications-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span6 H2 [data-i18n="Clickatell SMS"]::before {
-    content: url(../images/tabs/icons8-sms-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span12 H2 [data-i18n="Custom HTTP"]::before {
-    content: url(../images/tabs/icons8-website-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span6 H2 [data-i18n="Custom HTTP"]::before {
-    content: url(../images/tabs/icons8-website-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span6 H2 [data-i18n="Kodi Media Player"]::before {
-    content: url(../images/tabs/icons8-kodi-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span6 H2 [data-i18n="Logitech Media Server"]::before {
-    content: url(../images/tabs/icons8-cloud-storage-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span6 H2 [data-i18n="Google Cloud Messaging"]::before {
-    content: url(../images/tabs/icons8-cloud-storage-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span12 H2 [data-i18n="Notification Intervals"]::before {
-    content: url(../images/tabs/other.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span6 H2 [data-i18n="Notification Intervals"]::before {
-    content: url(../images/tabs/other.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span12 H2 [data-i18n="Email Setup"]::before {
-    content: url(../images/tabs/icons8-new-post-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span4 H2 [data-i18n="Temperature"]::before {
-    content: url(../images/tabs/icons8-temperature-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span4 H2 [data-i18n="Wind Meter"]::before {
-    content: url(../images/tabs/icons8-wind-gauge-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span4 H2 [data-i18n="Weight"]::before {
-    content: url(../images/tabs/icons8-weight-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span12 H2 [data-i18n="RFXMeter/Counter Dividers"]::before {
-    content: url(../images/tabs/icons8-counter-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span12 H2 [data-i18n="P1 Smart Meter Type"]::before {
-    content: url(../images/tabs/icons8-meter-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span12 H2 [data-i18n="Display Values"]::before {
-    content: url(../images/tabs/icons8-display-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span12 H2 [data-i18n="Colour Options"]::before {
-    content: url(../images/tabs/icons8-color-palette-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span12 H2 [data-i18n="Random Timer"]::before {
-    content: url(../images/tabs/icons8-time-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span12 H2 [data-i18n="Sensor Timeout"]::before {
-    content: url(../images/tabs/icons8-time-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span12 H2 [data-i18n="Timer Plan"]::before {
-    content: url(../images/tabs/icons8-schedule-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span12 H2 [data-i18n="Battery Low Level"]::before {
-    content: url(../images/tabs/icons8-low-battery-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span12 H2 [data-i18n="Doorbell Command"]::before {
-    content: url(../images/tabs/icons8-doorbell-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span12 H2 [data-i18n="Raspberry Pi Camera Parameters"]::before {
-    content: url(../images/tabs/icons8-camera-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span12 H2 [data-i18n="UVC Parameters"]::before {
-    content: url(../images/tabs/other.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.span12 H2 [data-i18n="EventSystem (Lua/Blockly/Scripts)"]::before {
-    content: url(../images/tabs/icons8-events-16.png);
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
+.span6 H2 [data-i18n="User Interface"]::before,
+.span6 H2 [data-i18n="Location"]::before,
+.span6 H2 [data-i18n="Dashboard"]::before,
+.span6 H2 [data-i18n="Mobile"]::before,
+.span6 H2 [data-i18n="WebsiteProtection"]::before,
+.span6 H2 [data-i18n="SecurityPanel"]::before,
+.span6 H2 [data-i18n="Light/Switch Protection"]::before,
+.span12 H2 [data-i18n="LocalNetworks(no_username/password)"]::before,
+.span6 H2 [data-i18n="RemoteSharedPortForDomoticzClients"]::before,
+.span6 H2 [data-i18n="SoftwareUpdates"]::before,
+.span6 H2 [data-i18n="AutoBackup"]::before,
+.span12 H2 [data-i18n="RemoteProxyIPs"]::before,
+.span6 H2 [data-i18n="AcceptNewHardware"]::before,
+.span6 H2 [data-i18n="MyDomoticzSettings"]::before,
+.span12 H2 [data-i18n="ActiveMenus"]::before,
+.span12 H2 [data-i18n="General"]::before,
+.span6 H2 [data-i18n="General"]::before,
+.span6 H2 [data-i18n="Menu"]::before,
+.span6 H2 [data-i18n="Devices"]::before,
+.span12 H2 [data-i18n="Images instead of Icons"]::before,
+.span6 H2 [data-i18n="Background"]::before,
+.span6 H2 [data-i18n="logo"]::before,
+.span6 H2 [data-i18n="Colour Options"]::before,
+.span12 H2 [data-i18n="Light/Switches"]::before,
+.span12 H2 [data-i18n="Short Log Sensors"]::before,
+.span6 H2 [data-i18n="Prowl (iPhone/iPad)"]::before,
+.span6 H2 [data-i18n="IFTTT"]::before,
+.span6 H2 [data-i18n="Pushover (Android/iOs)"]::before,
+.span6 H2 [data-i18n="Pushalot (Windows/Windows Phone)"]::before,
+.span6 H2 [data-i18n="Pushbullet (iOS/Android/Windows)"]::before,
+.span6 H2 [data-i18n="Pushsafer (iOS/Android/Windows)"]::before,
+.span6 H2 [data-i18n="Telegram"]::before,
+.span6 H2 [data-i18n="Clickatell SMS"]::before,
+.span12 H2 [data-i18n="Custom HTTP"]::before,
+.span6 H2 [data-i18n="Custom HTTP"]::before,
+.span6 H2 [data-i18n="Kodi Media Player"]::before,
+.span6 H2 [data-i18n="Logitech Media Server"]::before,
+.span6 H2 [data-i18n="Google Cloud Messaging"]::before,
+.span12 H2 [data-i18n="Notification Intervals"]::before,
+.span6 H2 [data-i18n="Notification Intervals"]::before,
+.span12 H2 [data-i18n="Email Setup"]::before,
+.span4 H2 [data-i18n="Temperature"]::before,
+.span4 H2 [data-i18n="Wind Meter"]::before,
+.span4 H2 [data-i18n="Weight"]::before,
+.span12 H2 [data-i18n="RFXMeter/Counter Dividers"]::before,
+.span12 H2 [data-i18n="P1 Smart Meter Type"]::before,
+.span12 H2 [data-i18n="Display Values"]::before,
+.span12 H2 [data-i18n="Colour Options"]::before,
+.span12 H2 [data-i18n="Random Timer"]::before,
+.span12 H2 [data-i18n="Sensor Timeout"]::before,
+.span12 H2 [data-i18n="Timer Plan"]::before,
+.span12 H2 [data-i18n="Battery Low Level"]::before,
+.span12 H2 [data-i18n="Doorbell Command"]::before,
+.span12 H2 [data-i18n="Raspberry Pi Camera Parameters"]::before,
+.span12 H2 [data-i18n="UVC Parameters"]::before,
+.span12 H2 [data-i18n="EventSystem (Lua/Blockly/Scripts)"]::before,
 .span12 H2 [data-i18n="dzVents"]::before {
-    content: url(../images/tabs/icons8-code-file-16.png);
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 16px;
     margin-right: 10px;
     vertical-align: middle;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: auto 16px;
 }
+
+/* per-header glyph */
+
+.span6 H2 [data-i18n="User Interface"]::before { background-image: url(../images/tabs/user.png); }
+.span6 H2 [data-i18n="Location"]::before { background-image: url(../images/tabs/location.png); }
+.span6 H2 [data-i18n="Dashboard"]::before { background-image: url(../images/tabs/dashboard.png); }
+.span6 H2 [data-i18n="Mobile"]::before { background-image: url(../images/tabs/mobile.png); }
+.span6 H2 [data-i18n="WebsiteProtection"]::before { background-image: url(../images/tabs/lock.png); }
+.span6 H2 [data-i18n="SecurityPanel"]::before { background-image: url(../images/tabs/protection.png); }
+.span6 H2 [data-i18n="Light/Switch Protection"]::before { background-image: url(../images/tabs/lights.png); }
+.span12 H2 [data-i18n="LocalNetworks(no_username/password)"]::before { background-image: url(../images/tabs/network.png); }
+.span6 H2 [data-i18n="RemoteSharedPortForDomoticzClients"]::before { background-image: url(../images/tabs/remote.png); }
+.span6 H2 [data-i18n="SoftwareUpdates"]::before { background-image: url(../images/tabs/software_update.png); }
+.span6 H2 [data-i18n="AutoBackup"]::before { background-image: url(../images/tabs/backup.png); }
+.span12 H2 [data-i18n="RemoteProxyIPs"]::before { background-image: url(../images/tabs/remote.png); }
+.span6 H2 [data-i18n="AcceptNewHardware"]::before { background-image: url(../images/tabs/hardwares.png); }
+.span6 H2 [data-i18n="MyDomoticzSettings"]::before { background-image: url(../images/tabs/other.png); }
+.span12 H2 [data-i18n="ActiveMenus"]::before { background-image: url(../images/tabs/icons8-menu-16.png); }
+.span12 H2 [data-i18n="General"]::before { background-image: url(../images/tabs/other.png); }
+.span6 H2 [data-i18n="General"]::before { background-image: url(../images/tabs/other.png); }
+.span6 H2 [data-i18n="Menu"]::before { background-image: url(../images/tabs/icons8-menu-16.png); }
+.span6 H2 [data-i18n="Devices"]::before { background-image: url(../images/tabs/icons8-meter-16.png); }
+.span12 H2 [data-i18n="Images instead of Icons"]::before { background-image: url(../images/tabs/icons8-camera-16.png); }
+.span6 H2 [data-i18n="Background"]::before { background-image: url(../images/tabs/icons8-camera-16.png); }
+.span6 H2 [data-i18n="logo"]::before { background-image: url(../images/tabs/icons8-display-16.png); }
+.span6 H2 [data-i18n="Colour Options"]::before { background-image: url(../images/tabs/icons8-color-palette-16.png); }
+.span12 H2 [data-i18n="Light/Switches"]::before { background-image: url(../images/tabs/lights.png); }
+.span12 H2 [data-i18n="Short Log Sensors"]::before { background-image: url(../images/tabs/icons8-edit-property-16.png); }
+.span6 H2 [data-i18n="Prowl (iPhone/iPad)"]::before { background-image: url(../images/tabs/icons8-push-notifications-16.png); }
+.span6 H2 [data-i18n="IFTTT"]::before { background-image: url(../images/tabs/icons8-push-notifications-16.png); }
+.span6 H2 [data-i18n="Pushover (Android/iOs)"]::before { background-image: url(../images/tabs/icons8-push-notifications-16.png); }
+.span6 H2 [data-i18n="Pushalot (Windows/Windows Phone)"]::before { background-image: url(../images/tabs/icons8-push-notifications-16.png); }
+.span6 H2 [data-i18n="Pushbullet (iOS/Android/Windows)"]::before { background-image: url(../images/tabs/icons8-push-notifications-16.png); }
+.span6 H2 [data-i18n="Pushsafer (iOS/Android/Windows)"]::before { background-image: url(../images/tabs/icons8-push-notifications-16.png); }
+.span6 H2 [data-i18n="Telegram"]::before { background-image: url(../images/tabs/icons8-push-notifications-16.png); }
+.span6 H2 [data-i18n="Clickatell SMS"]::before { background-image: url(../images/tabs/icons8-sms-16.png); }
+.span12 H2 [data-i18n="Custom HTTP"]::before { background-image: url(../images/tabs/icons8-website-16.png); }
+.span6 H2 [data-i18n="Custom HTTP"]::before { background-image: url(../images/tabs/icons8-website-16.png); }
+.span6 H2 [data-i18n="Kodi Media Player"]::before { background-image: url(../images/tabs/icons8-kodi-16.png); }
+.span6 H2 [data-i18n="Logitech Media Server"]::before { background-image: url(../images/tabs/icons8-cloud-storage-16.png); }
+.span6 H2 [data-i18n="Google Cloud Messaging"]::before { background-image: url(../images/tabs/icons8-cloud-storage-16.png); }
+.span12 H2 [data-i18n="Notification Intervals"]::before { background-image: url(../images/tabs/other.png); }
+.span6 H2 [data-i18n="Notification Intervals"]::before { background-image: url(../images/tabs/other.png); }
+.span12 H2 [data-i18n="Email Setup"]::before { background-image: url(../images/tabs/icons8-new-post-16.png); }
+.span4 H2 [data-i18n="Temperature"]::before { background-image: url(../images/tabs/icons8-temperature-16.png); }
+.span4 H2 [data-i18n="Wind Meter"]::before { background-image: url(../images/tabs/icons8-wind-gauge-16.png); }
+.span4 H2 [data-i18n="Weight"]::before { background-image: url(../images/tabs/icons8-weight-16.png); }
+.span12 H2 [data-i18n="RFXMeter/Counter Dividers"]::before { background-image: url(../images/tabs/icons8-counter-16.png); }
+.span12 H2 [data-i18n="P1 Smart Meter Type"]::before { background-image: url(../images/tabs/icons8-meter-16.png); }
+.span12 H2 [data-i18n="Display Values"]::before { background-image: url(../images/tabs/icons8-display-16.png); }
+.span12 H2 [data-i18n="Colour Options"]::before { background-image: url(../images/tabs/icons8-color-palette-16.png); }
+.span12 H2 [data-i18n="Random Timer"]::before { background-image: url(../images/tabs/icons8-time-16.png); }
+.span12 H2 [data-i18n="Sensor Timeout"]::before { background-image: url(../images/tabs/icons8-time-16.png); }
+.span12 H2 [data-i18n="Timer Plan"]::before { background-image: url(../images/tabs/icons8-schedule-16.png); }
+.span12 H2 [data-i18n="Battery Low Level"]::before { background-image: url(../images/tabs/icons8-low-battery-16.png); }
+.span12 H2 [data-i18n="Doorbell Command"]::before { background-image: url(../images/tabs/icons8-doorbell-16.png); }
+.span12 H2 [data-i18n="Raspberry Pi Camera Parameters"]::before { background-image: url(../images/tabs/icons8-camera-16.png); }
+.span12 H2 [data-i18n="UVC Parameters"]::before { background-image: url(../images/tabs/other.png); }
+.span12 H2 [data-i18n="EventSystem (Lua/Blockly/Scripts)"]::before { background-image: url(../images/tabs/icons8-events-16.png); }
+.span12 H2 [data-i18n="dzVents"]::before { background-image: url(../images/tabs/icons8-code-file-16.png); }
