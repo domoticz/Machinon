@@ -253,6 +253,21 @@ button.savebtn:disabled {
     border-radius: 5px;
 }
 
+/* Devices-table action-button glyphs (log, delete, rename, remove, add). Core
+   emits ONLY these as a bare <img src="images/x.png"> with NO width/height, so
+   they render at intrinsic size: log.png (29x35) was visibly oversized and the
+   others only looked right because their file is 16x16 - a 2x master would balloon
+   the column. `:not([width])` targets exactly the attr-less action icons and
+   leaves the device STATE-toggle buttons alone (their <img> carries width="16"
+   height="16", e.g. push.png / the *48 family shown at 16px, already 2x-safe).
+   A fixed 16x16 box + object-fit:contain gives the whole column one uniform
+   footprint without distorting the portrait log glyph. */
+.btn-icon img:not([width]) {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+}
+
 .btn-icon:hover {
     background: rgba(var(--dz-accent-values), 0.1);
 }
