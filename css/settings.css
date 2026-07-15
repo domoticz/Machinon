@@ -58,9 +58,11 @@ input#AcceptNewHardware:checked ~ button {
     color: var(--dz-status-disabled);
 }
 
-a.resetschemebtn {
+a.resetschemebtn,
+a.saveschemebtn {
     font-size: 18px;
     padding: 0 10px;
+    color: var(--dz-accent-color);
 }
 
 /*System page*/

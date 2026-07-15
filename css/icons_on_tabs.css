@@ -1,15 +1,15 @@
 /**** ./icons_on_tabs.css ***/
 /* Custom settings-page tab header icons.
 
-   Each iconed <h2> gets its glyph as a ::before background box, not a
-   content:url image. A content:url renders at the file's intrinsic size and
-   cannot be sized, so a 2x (retina) master would double the header icon and
-   shift the row. The shared box below height-pins every tab glyph to one
-   16px cap-height (width 20px clears the widest current glyph, lock.png at
-   25x20 -> 20px wide at 16px tall); `background-size: auto 16px` scales by
-   height so nothing distorts, and a square 2x master will fill 16x16 centered
-   in the box with no CSS change. The grouped selector is scoped to exactly the
-   iconed headers so no boxless header gains an empty ::before. */
+   Each iconed <h2> gets its glyph as a ::before Ionicons character, tinted with
+   var(--dz-accent-color), so the tab icons follow the active colour scheme (Blue
+   UI, Magenta, light/dark) and stay crisp at any DPI. The shared rule below sets
+   the font (Ionicons, 16px, accent colour) and a centred 20px-wide / 16px-tall
+   box; each per-header rule supplies its own `content: "\fXXX"` glyph. The
+   grouped selector is scoped to exactly the iconed headers (by data-i18n key and
+   column span) so no other <h2> gains a stray ::before. Replaced the previous
+   images/tabs/*.png background-image system on 2026-07-15 (the PNG dir and its
+   settings-tab-icons model site were deleted). */
 
 
 .span6 H2 [data-i18n="User Interface"]::before,
@@ -17,6 +17,7 @@
 .span6 H2 [data-i18n="Dashboard"]::before,
 .span6 H2 [data-i18n="Mobile"]::before,
 .span6 H2 [data-i18n="WebsiteProtection"]::before,
+.span6 H2 [data-i18n="ApiProtection"]::before,
 .span6 H2 [data-i18n="SecurityPanel"]::before,
 .span6 H2 [data-i18n="Light/Switch Protection"]::before,
 .span12 H2 [data-i18n="LocalNetworks(no_username/password)"]::before,
@@ -49,7 +50,7 @@
 .span6 H2 [data-i18n="Custom HTTP"]::before,
 .span6 H2 [data-i18n="Kodi Media Player"]::before,
 .span6 H2 [data-i18n="Logitech Media Server"]::before,
-.span6 H2 [data-i18n="Google Cloud Messaging"]::before,
+.span12 H2 [data-i18n="Google Cloud Messaging"]::before,
 .span12 H2 [data-i18n="Notification Intervals"]::before,
 .span6 H2 [data-i18n="Notification Intervals"]::before,
 .span12 H2 [data-i18n="Email Setup"]::before,
@@ -57,6 +58,9 @@
 .span4 H2 [data-i18n="Wind Meter"]::before,
 .span4 H2 [data-i18n="Weight"]::before,
 .span12 H2 [data-i18n="RFXMeter/Counter Dividers"]::before,
+.span12 H2 [data-i18n="(Dynamic) Price calculation"]::before,
+.span12 H2 [data-i18n="Device Assignment"]::before,
+.span12 H2 [data-i18n="Additional Settings"]::before,
 .span12 H2 [data-i18n="P1 Smart Meter Type"]::before,
 .span12 H2 [data-i18n="Display Values"]::before,
 .span12 H2 [data-i18n="Colour Options"]::before,
@@ -75,67 +79,96 @@
     height: 16px;
     margin-right: 10px;
     vertical-align: middle;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: auto 16px;
+    font-family: "Ionicons";
+    font-size: 16px;
+    line-height: 16px;
+    text-align: center;
+    color: var(--dz-accent-color);
 }
 
 /* per-header glyph */
 
-.span6 H2 [data-i18n="User Interface"]::before { background-image: url(../images/tabs/user.png); }
-.span6 H2 [data-i18n="Location"]::before { background-image: url(../images/tabs/location.png); }
-.span6 H2 [data-i18n="Dashboard"]::before { background-image: url(../images/tabs/dashboard.png); }
-.span6 H2 [data-i18n="Mobile"]::before { background-image: url(../images/tabs/mobile.png); }
-.span6 H2 [data-i18n="WebsiteProtection"]::before { background-image: url(../images/tabs/lock.png); }
-.span6 H2 [data-i18n="SecurityPanel"]::before { background-image: url(../images/tabs/protection.png); }
-.span6 H2 [data-i18n="Light/Switch Protection"]::before { background-image: url(../images/tabs/lights.png); }
-.span12 H2 [data-i18n="LocalNetworks(no_username/password)"]::before { background-image: url(../images/tabs/network.png); }
-.span6 H2 [data-i18n="RemoteSharedPortForDomoticzClients"]::before { background-image: url(../images/tabs/remote.png); }
-.span6 H2 [data-i18n="SoftwareUpdates"]::before { background-image: url(../images/tabs/software_update.png); }
-.span6 H2 [data-i18n="AutoBackup"]::before { background-image: url(../images/tabs/backup.png); }
-.span12 H2 [data-i18n="RemoteProxyIPs"]::before { background-image: url(../images/tabs/remote.png); }
-.span6 H2 [data-i18n="AcceptNewHardware"]::before { background-image: url(../images/tabs/hardwares.png); }
-.span6 H2 [data-i18n="MyDomoticzSettings"]::before { background-image: url(../images/tabs/other.png); }
-.span12 H2 [data-i18n="ActiveMenus"]::before { background-image: url(../images/tabs/icons8-menu-16.png); }
-.span12 H2 [data-i18n="General"]::before { background-image: url(../images/tabs/other.png); }
-.span6 H2 [data-i18n="General"]::before { background-image: url(../images/tabs/other.png); }
-.span6 H2 [data-i18n="Menu"]::before { background-image: url(../images/tabs/icons8-menu-16.png); }
-.span6 H2 [data-i18n="Devices"]::before { background-image: url(../images/tabs/icons8-meter-16.png); }
-.span12 H2 [data-i18n="Images instead of Icons"]::before { background-image: url(../images/tabs/icons8-camera-16.png); }
-.span6 H2 [data-i18n="Background"]::before { background-image: url(../images/tabs/icons8-camera-16.png); }
-.span6 H2 [data-i18n="logo"]::before { background-image: url(../images/tabs/icons8-display-16.png); }
-.span6 H2 [data-i18n="Colour Options"]::before { background-image: url(../images/tabs/icons8-color-palette-16.png); }
-.span12 H2 [data-i18n="Light/Switches"]::before { background-image: url(../images/tabs/lights.png); }
-.span12 H2 [data-i18n="Short Log Sensors"]::before { background-image: url(../images/tabs/icons8-edit-property-16.png); }
-.span6 H2 [data-i18n="Prowl (iPhone/iPad)"]::before { background-image: url(../images/tabs/icons8-push-notifications-16.png); }
-.span6 H2 [data-i18n="IFTTT"]::before { background-image: url(../images/tabs/icons8-push-notifications-16.png); }
-.span6 H2 [data-i18n="Pushover (Android/iOs)"]::before { background-image: url(../images/tabs/icons8-push-notifications-16.png); }
-.span6 H2 [data-i18n="Pushalot (Windows/Windows Phone)"]::before { background-image: url(../images/tabs/icons8-push-notifications-16.png); }
-.span6 H2 [data-i18n="Pushbullet (iOS/Android/Windows)"]::before { background-image: url(../images/tabs/icons8-push-notifications-16.png); }
-.span6 H2 [data-i18n="Pushsafer (iOS/Android/Windows)"]::before { background-image: url(../images/tabs/icons8-push-notifications-16.png); }
-.span6 H2 [data-i18n="Telegram"]::before { background-image: url(../images/tabs/icons8-push-notifications-16.png); }
-.span6 H2 [data-i18n="Clickatell SMS"]::before { background-image: url(../images/tabs/icons8-sms-16.png); }
-.span12 H2 [data-i18n="Custom HTTP"]::before { background-image: url(../images/tabs/icons8-website-16.png); }
-.span6 H2 [data-i18n="Custom HTTP"]::before { background-image: url(../images/tabs/icons8-website-16.png); }
-.span6 H2 [data-i18n="Kodi Media Player"]::before { background-image: url(../images/tabs/icons8-kodi-16.png); }
-.span6 H2 [data-i18n="Logitech Media Server"]::before { background-image: url(../images/tabs/icons8-cloud-storage-16.png); }
-.span6 H2 [data-i18n="Google Cloud Messaging"]::before { background-image: url(../images/tabs/icons8-cloud-storage-16.png); }
-.span12 H2 [data-i18n="Notification Intervals"]::before { background-image: url(../images/tabs/other.png); }
-.span6 H2 [data-i18n="Notification Intervals"]::before { background-image: url(../images/tabs/other.png); }
-.span12 H2 [data-i18n="Email Setup"]::before { background-image: url(../images/tabs/icons8-new-post-16.png); }
-.span4 H2 [data-i18n="Temperature"]::before { background-image: url(../images/tabs/icons8-temperature-16.png); }
-.span4 H2 [data-i18n="Wind Meter"]::before { background-image: url(../images/tabs/icons8-wind-gauge-16.png); }
-.span4 H2 [data-i18n="Weight"]::before { background-image: url(../images/tabs/icons8-weight-16.png); }
-.span12 H2 [data-i18n="RFXMeter/Counter Dividers"]::before { background-image: url(../images/tabs/icons8-counter-16.png); }
-.span12 H2 [data-i18n="P1 Smart Meter Type"]::before { background-image: url(../images/tabs/icons8-meter-16.png); }
-.span12 H2 [data-i18n="Display Values"]::before { background-image: url(../images/tabs/icons8-display-16.png); }
-.span12 H2 [data-i18n="Colour Options"]::before { background-image: url(../images/tabs/icons8-color-palette-16.png); }
-.span12 H2 [data-i18n="Random Timer"]::before { background-image: url(../images/tabs/icons8-time-16.png); }
-.span12 H2 [data-i18n="Sensor Timeout"]::before { background-image: url(../images/tabs/icons8-time-16.png); }
-.span12 H2 [data-i18n="Timer Plan"]::before { background-image: url(../images/tabs/icons8-schedule-16.png); }
-.span12 H2 [data-i18n="Battery Low Level"]::before { background-image: url(../images/tabs/icons8-low-battery-16.png); }
-.span12 H2 [data-i18n="Doorbell Command"]::before { background-image: url(../images/tabs/icons8-doorbell-16.png); }
-.span12 H2 [data-i18n="Raspberry Pi Camera Parameters"]::before { background-image: url(../images/tabs/icons8-camera-16.png); }
-.span12 H2 [data-i18n="UVC Parameters"]::before { background-image: url(../images/tabs/other.png); }
-.span12 H2 [data-i18n="EventSystem (Lua/Blockly/Scripts)"]::before { background-image: url(../images/tabs/icons8-events-16.png); }
-.span12 H2 [data-i18n="dzVents"]::before { background-image: url(../images/tabs/icons8-code-file-16.png); }
+.span6 H2 [data-i18n="User Interface"]::before { content: "\f33c"; }
+.span6 H2 [data-i18n="Location"]::before { content: "\f34a"; }
+.span6 H2 [data-i18n="Dashboard"]::before { content: "\f37f"; }
+.span6 H2 [data-i18n="Mobile"]::before { content: "\f347"; }
+.span6 H2 [data-i18n="WebsiteProtection"]::before { content: "\f31d"; }
+.span6 H2 [data-i18n="ApiProtection"]::before { content: "\f316"; }
+.span6 H2 [data-i18n="SecurityPanel"]::before { content: "\f2ee"; }
+.span6 H2 [data-i18n="Light/Switch Protection"]::before { content: "\f2a7"; }
+.span12 H2 [data-i18n="LocalNetworks(no_username/password)"]::before { content: "\f2fe"; }
+.span6 H2 [data-i18n="RemoteSharedPortForDomoticzClients"]::before { content: "\f378"; }
+.span6 H2 [data-i18n="SoftwareUpdates"]::before { content: "\f2c6"; }
+.span6 H2 [data-i18n="AutoBackup"]::before { content: "\f2c8"; }
+.span12 H2 [data-i18n="RemoteProxyIPs"]::before { content: "\f378"; }
+.span6 H2 [data-i18n="AcceptNewHardware"]::before { content: "\f2d5"; }
+.span6 H2 [data-i18n="MyDomoticzSettings"]::before { content: "\f2cf"; }
+.span12 H2 [data-i18n="ActiveMenus"]::before { content: "\f32a"; }
+.span12 H2 [data-i18n="General"]::before { content: "\f2cf"; }
+.span6 H2 [data-i18n="General"]::before { content: "\f2cf"; }
+.span6 H2 [data-i18n="Menu"]::before { content: "\f32a"; }
+.span6 H2 [data-i18n="Devices"]::before { content: "\f35d"; }
+.span12 H2 [data-i18n="Images instead of Icons"]::before { content: "\f2ad"; }
+.span6 H2 [data-i18n="Background"]::before { content: "\f2ad"; }
+.span6 H2 [data-i18n="logo"]::before { content: "\f2df"; }
+.span6 H2 [data-i18n="Colour Options"]::before { content: "\f2d2"; }
+.span12 H2 [data-i18n="Light/Switches"]::before { content: "\f2a7"; }
+.span12 H2 [data-i18n="Short Log Sensors"]::before { content: "\f2db"; }
+.span6 H2 [data-i18n="Prowl (iPhone/iPad)"]::before { content: "\f329"; }
+.span6 H2 [data-i18n="IFTTT"]::before { content: "\f329"; }
+.span6 H2 [data-i18n="Pushover (Android/iOs)"]::before { content: "\f329"; }
+.span6 H2 [data-i18n="Pushalot (Windows/Windows Phone)"]::before { content: "\f329"; }
+.span6 H2 [data-i18n="Pushbullet (iOS/Android/Windows)"]::before { content: "\f329"; }
+.span6 H2 [data-i18n="Pushsafer (iOS/Android/Windows)"]::before { content: "\f329"; }
+.span6 H2 [data-i18n="Telegram"]::before { content: "\f329"; }
+.span6 H2 [data-i18n="Clickatell SMS"]::before { content: "\f2b7"; }
+.span12 H2 [data-i18n="Custom HTTP"]::before { content: "\f301"; }
+.span6 H2 [data-i18n="Custom HTTP"]::before { content: "\f301"; }
+.span6 H2 [data-i18n="Kodi Media Player"]::before { content: "\f2ed"; }
+.span6 H2 [data-i18n="Logitech Media Server"]::before { content: "\f2c9"; }
+.span12 H2 [data-i18n="Google Cloud Messaging"]::before { content: "\f2c9"; }
+.span12 H2 [data-i18n="Notification Intervals"]::before { content: "\f2cf"; }
+.span6 H2 [data-i18n="Notification Intervals"]::before { content: "\f2cf"; }
+.span12 H2 [data-i18n="Email Setup"]::before { content: "\f322"; }
+.span4 H2 [data-i18n="Temperature"]::before { content: "\f390"; }
+.span4 H2 [data-i18n="Wind Meter"]::before { content: "\f334"; }
+.span4 H2 [data-i18n="Weight"]::before { content: "\f1ac"; }
+.span12 H2 [data-i18n="RFXMeter/Counter Dividers"]::before { content: "\f2aa"; }
+.span12 H2 [data-i18n="(Dynamic) Price calculation"]::before { content: "\f2b5"; }
+.span12 H2 [data-i18n="Device Assignment"]::before { content: "\f22e"; }
+.span12 H2 [data-i18n="Additional Settings"]::before { content: "\f272"; }
+.span12 H2 [data-i18n="P1 Smart Meter Type"]::before { content: "\f35d"; }
+.span12 H2 [data-i18n="Display Values"]::before { content: "\f2df"; }
+.span12 H2 [data-i18n="Colour Options"]::before { content: "\f2d2"; }
+.span12 H2 [data-i18n="Random Timer"]::before { content: "\f394"; }
+.span12 H2 [data-i18n="Sensor Timeout"]::before { content: "\f394"; }
+.span12 H2 [data-i18n="Timer Plan"]::before { content: "\f2ab"; }
+.span12 H2 [data-i18n="Battery Low Level"]::before { content: "\f295"; }
+.span12 H2 [data-i18n="Doorbell Command"]::before { content: "\f338"; }
+.span12 H2 [data-i18n="Raspberry Pi Camera Parameters"]::before { content: "\f2ad"; }
+.span12 H2 [data-i18n="UVC Parameters"]::before { content: "\f2cf"; }
+.span12 H2 [data-i18n="EventSystem (Lua/Blockly/Scripts)"]::before { content: "\f2f1"; }
+.span12 H2 [data-i18n="dzVents"]::before { content: "\f2ce"; }
+
+/* Debug Levels is an <h1> section heading (not an <h2> like the tab headers),
+   so it needs its own rule; scoped to #debuglevels so no other <h1> is touched. */
+#debuglevels h1[data-i18n="Debug Levels"]::before {
+    content: "\f2a5"; /* ion-md-bug */
+    font-family: "Ionicons";
+    font-size: 16px;
+    margin-right: 10px;
+    vertical-align: middle;
+    color: var(--dz-accent-color);
+}
+
+/* OWL CM113/CM180i is a plain-text <h2> (no data-i18n span like the other tab
+   headers), so target it structurally within the meters section and give it the
+   generic settings cog. :not(:has()) matches only the header with no i18n span. */
+#metercounters .span12 h2:not(:has(span[data-i18n]))::before {
+    content: "\f2cf"; /* ion-md-cog */
+    font-family: "Ionicons";
+    font-size: 16px;
+    margin-right: 10px;
+    vertical-align: middle;
+    color: var(--dz-accent-color);
+}
