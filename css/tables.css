@@ -139,3 +139,19 @@ thead img[src$="/battery.png"] {
     height: 16px;
     width: auto;
 }
+
+/* Device Report page trend arrows. The core report tables render each row's
+   trend as <img src="images/up.png"> (down/equal) with NO width/height
+   (app/report/TemperatureReport.js:322, WindReport.js:292,
+   EnergyMultiCounterReport.js:627; src is concatenated as 'images/'+trend+'.png'),
+   so they render at the file's intrinsic 16px and a 2x master would grow the row.
+   Pin to their current 16px, width auto. Scoped to #reporttable so it never
+   touches the 16x16 reorder arrows (up.png/down.png) in the device-edit, scenes
+   and floorplan lists, which live outside this table and would otherwise be
+   shrunk by an unscoped rule (CSS height beats their inline height attribute). */
+#reporttable img[src$="/up.png"],
+#reporttable img[src$="/down.png"],
+#reporttable img[src$="/equal.png"] {
+    height: 16px;
+    width: auto;
+}
