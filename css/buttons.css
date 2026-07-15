@@ -268,8 +268,17 @@ button.savebtn:disabled {
     object-fit: contain;
 }
 
-.btn-icon:hover {
-    background: rgba(var(--dz-accent-values), 0.1);
+/* Hover/focus affordance: the same in-place tonal pop as the device-card icons
+   (css/cards.css, 2026-07-14) - saturate/brightness on the glyph, no movement and
+   no background wash - so the Devices-table action buttons and device state toggles
+   read consistently with the cards. :focus-visible covers keyboard focus. */
+.btn-icon img {
+    transition: filter 0.18s ease;
+}
+
+.btn-icon:hover img,
+.btn-icon:focus-visible img {
+    filter: saturate(1.12) brightness(1.05);
 }
 
 /* Ghost: link-styled button */
