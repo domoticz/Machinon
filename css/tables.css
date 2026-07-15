@@ -123,3 +123,19 @@ td .battery.empty:after {
 td .battery.half {
     background-color: var(--dz-status-warn);
 }
+
+/* Devices/Hardware table HEADER icons (RF signal, battery). Core emits these as
+   <img src="images/air_signal.png"> / <img src="images/battery.png"> with no
+   width/height (www/app/devices/Devices.js:439,443 and the hardware setup
+   tables ZWave/Matter/EnOceanESP3.html), so they render at the file's intrinsic
+   pixels and a 2x master would grow the header. Pin height, width follows aspect.
+   Scoped to thead so it covers the Devices DataTable and the plain hardware
+   tables while never touching the row .battery bar (a div, in tbody); the
+   src$="/x.png" match cannot catch low-battery-16.png. air_signal (14x16) is
+   unchanged; battery (24x12, landscape) grows to 16px tall until its 2x master
+   is redrawn square. Inline rotate(180deg) on battery.png is orthogonal. */
+thead img[src$="/air_signal.png"],
+thead img[src$="/battery.png"] {
+    height: 16px;
+    width: auto;
+}
