@@ -515,3 +515,23 @@ button.savebtn:disabled {
 .btn-group {
     padding-bottom: 1px;
 }
+
+/* Back-to-top floating button. Core style.css paints it with a static PNG
+   (url(images/bttb.png)). Replace that with an Ionicons up-arrow glyph tinted
+   by the scheme accent, so the button follows the active colour scheme (Blue
+   UI, Magenta, light/dark) instead of shipping a fixed-colour image. The parent
+   keeps core's 24x24 box and its 0.5 -> 1 hover opacity. */
+.gz-back-to-top {
+    background-image: none !important;
+}
+.gz-back-to-top::before {
+    content: "\f28b"; /* ion-md-arrow-round-up */
+    font-family: "Ionicons";
+    font-size: 24px;
+    line-height: 24px;
+    display: block;
+    width: 24px;
+    height: 24px;
+    text-align: center;
+    color: var(--dz-accent-color);
+}
