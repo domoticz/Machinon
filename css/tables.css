@@ -155,3 +155,23 @@ thead img[src$="/battery.png"] {
     height: 16px;
     width: auto;
 }
+
+/* Small status/action glyphs (16x16) that core emits as a bare
+   <img src="images/x.png"> with no width/height, so they render at intrinsic
+   size and a 2x master would grow the row/link:
+     ok.png / failed.png   - Floorplan-edit area validity, Matter/EnOcean status
+     heal.png              - Z-Wave "heal node" action button
+     sleep.png / unknown.png - EnOcean node state
+     next.png              - device Report year-navigation link
+   Pin height 16px, width auto. These render ONLY as these 16px glyphs; the src$
+   match is unique and does not touch the classic-dashboard SVG <image> uses of
+   unknown.png (SVG, not <img>, unaffected by this selector). */
+img[src$="/ok.png"],
+img[src$="/failed.png"],
+img[src$="/heal.png"],
+img[src$="/sleep.png"],
+img[src$="/unknown.png"],
+img[src$="/next.png"] {
+    height: 16px;
+    width: auto;
+}
