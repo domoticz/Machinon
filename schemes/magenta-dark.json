@@ -1,0 +1,21 @@
+{
+    "name": "Magenta Dark",
+    "description": "Magenta glow, Blue UI icons on plum-black",
+    "base": "dark",
+    "preview": { "bg": "#171015", "surface": "#21191F", "accent": "#FC72D3", "text": "#EBD3E4" },
+    "colors": {
+        "background": "#171015",
+        "item": "#21191F",
+        "navbar": "#0F0A0E",
+        "main_color": "#FC72D3",
+        "main_text": "#EBD3E4",
+        "alt_text": "#B89EB0",
+        "border": "#3D3039",
+        "disabled": "#7A6975",
+        "error": "#FA5D57",
+        "success": "#73D173",
+        "warning": "#F2B03D",
+        "accent_text": "#1A0F16",
+        "sun": "#FAD232"
+    }
+}
