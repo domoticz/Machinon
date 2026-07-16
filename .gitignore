@@ -5,6 +5,7 @@ machinon-*.tar.gz
 # Shell files except the one for making releases
 *.sh
 !makerelease.sh
+!scripts/check-typography.sh
 # JPEG images
 images/*.[jJ][pP][gG]
 # Claude-generated working documents (local-only: specs, plans, brainstorms)

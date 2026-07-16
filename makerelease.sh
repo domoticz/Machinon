@@ -22,6 +22,9 @@ if [ "true" != "$(git rev-parse --is-inside-work-tree 2> /dev/null)" ]
     exit
 fi
 
+# Typography contract must be clean before a release is cut.
+./scripts/check-typography.sh || { echo "ABORT: typography contract violations"; exit 1; }
+
 # Get release number from theme.json
 VERSION=$(grep version theme.json | grep -E -o "([0-9]+\.?)*")
 FULLNAME=$NAME-$VERSION
