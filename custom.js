@@ -143,6 +143,19 @@ function init_theme() {
         if (theme.features.navbar_icons_text.enabled !== false) {
             $(".navbar").addClass("notext");
         }
+
+        // ACE measures glyph width at init; when JetBrains Mono arrives later than the
+        // editor (font-display: swap), cursor/selection metrics go stale. Re-measure
+        // every live editor once the webfonts settle.
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(function () {
+                document.querySelectorAll('.ace_editor').forEach(function (el) {
+                    if (el.env && el.env.editor) {
+                        el.env.editor.renderer.updateFontSize();
+                    }
+                });
+            });
+        }
     });
     }); /* end loadSettings().then() */
 }
