@@ -85,6 +85,23 @@ tr.odd td.sorting_1, tr.even td.sorting_1 {
     opacity: .75;
 }
 
+/* Inter is wider than Open Sans, which wrapped date/time cells (Last Seen column) onto
+   two lines on the Devices/Hardware/Setup DataTables (25 wrapped cells measured on
+   #/Devices at 1440px before this rule). Data cells go nowrap; the Devices table's Name
+   column is the one exception that must keep wrapping long device names. That column
+   carries no id/class of its own (app/devices/Devices.js columns array: title 'Name',
+   data 'Name', no className, unlike its neighbours Data/actions which do set one), so
+   it is targeted positionally, scoped to the Devices table's own id (#devices) rather
+   than the shared table.display class so no other DataTable's column layout is
+   affected by the position-based selector. */
+table.display td {
+    white-space: nowrap;
+}
+
+#devices td:nth-child(7) {
+    white-space: normal;
+}
+
 /* Narrow viewports: a DataTable wider than the screen scrolls inside its own
    wrapper instead of dragging the whole page sideways (the Users table
    overflowed the phone viewport by 10px and made the page scroll; found by
