@@ -1,0 +1,169 @@
+{
+ "icons": [
+  {
+   "base": "machinon_Aquarium",
+   "name": "Aquarium",
+   "description": "Aquarium / fish tank"
+  },
+  {
+   "base": "machinon_ColdWater",
+   "name": "Cold Water",
+   "description": "Cold water (water drop with a blue cooling badge)"
+  },
+  {
+   "base": "machinon_DomeCamera",
+   "name": "Dome Camera",
+   "description": "Indoor dome camera"
+  },
+  {
+   "base": "machinon_EnergyCounter",
+   "name": "Energy Counter",
+   "description": "Grey odometer with a blue lightning-bolt badge"
+  },
+  {
+   "base": "machinon_GasCounter",
+   "name": "Gas Counter",
+   "description": "Grey odometer with a blue gas badge"
+  },
+  {
+   "base": "machinon_WaterCounter",
+   "name": "Water Counter",
+   "description": "Grey odometer with a blue water-drop badge"
+  },
+  {
+   "base": "machinon_WindGauge",
+   "name": "Wind Gauge",
+   "description": "Anemometer / wind-speed gauge"
+  },
+  {
+   "base": "machinon_Pressure",
+   "name": "Pressure",
+   "description": "Barometric pressure gauge"
+  },
+  {
+   "base": "machinon_User",
+   "name": "User",
+   "description": "Person / user"
+  },
+  {
+   "base": "machinon_GameController",
+   "name": "Game Controller",
+   "description": "Gamepad / console controller"
+  },
+  {
+   "base": "machinon_Music",
+   "name": "Music",
+   "description": "Music note"
+  },
+  {
+   "base": "machinon_NAS",
+   "name": "NAS",
+   "description": "Network-attached storage"
+  },
+  {
+   "base": "machinon_WiredNetwork",
+   "name": "Wired Network",
+   "description": "Ethernet / wired network"
+  },
+  {
+   "base": "machinon_WiFi",
+   "name": "Wi-Fi",
+   "description": "Wireless network"
+  },
+  {
+   "base": "machinon_Bathtub",
+   "name": "Bathtub",
+   "description": "Bath"
+  },
+  {
+   "base": "machinon_Shower",
+   "name": "Shower",
+   "description": "Shower"
+  },
+  {
+   "base": "machinon_Fountain",
+   "name": "Fountain",
+   "description": "Fountain"
+  },
+  {
+   "base": "machinon_DewPoint",
+   "name": "Dew Point",
+   "description": "Dew-point sensor"
+  },
+  {
+   "base": "machinon_Wind",
+   "name": "Wind",
+   "description": "Wind / airflow / ventilation"
+  },
+  {
+   "base": "machinon_Link",
+   "name": "Link",
+   "description": "Link connected (on) / broken (off)"
+  },
+  {
+   "base": "machinon_Padlock",
+   "name": "Padlock",
+   "description": "Padlock open (on) / closed (off)"
+  },
+  {
+   "base": "machinon_Switch",
+   "name": "Switch",
+   "description": "Toggle switch on (green) / off (red)"
+  },
+  {
+   "base": "machinon_Mood",
+   "name": "Mood",
+   "description": "Happy/green (on) / sad/red (off) mood indicator"
+  },
+  {
+   "base": "machinon_Online",
+   "name": "Online",
+   "description": "Online (on) / offline (off) status"
+  },
+  {
+   "base": "machinon_Garage",
+   "name": "Garage Door",
+   "description": "Garage door open (on) / closed (off)"
+  },
+  {
+   "base": "machinon_Height",
+   "name": "Height",
+   "description": "Height sensor (height arrows + eye badge)"
+  },
+  {
+   "base": "machinon_Distance",
+   "name": "Distance",
+   "description": "Distance sensor (width arrows + eye badge)"
+  },
+  {
+   "base": "machinon_Duck",
+   "name": "Duck",
+   "description": "Duck"
+  },
+  {
+   "base": "machinon_HotWater",
+   "name": "Hot Water",
+   "description": "Hot water / boiler"
+  },
+  {
+   "base": "machinon_Jacuzzi",
+   "name": "Jacuzzi",
+   "description": "Jacuzzi / hot tub"
+  },
+  {
+   "base": "machinon_Lock",
+   "name": "Door Lock",
+   "description": "Door with a padlock badge (unlock/lock)"
+  },
+  {
+   "base": "machinon_OilTank",
+   "name": "Oil Tank",
+   "description": "Oil tank level"
+  },
+  {
+   "base": "machinon_OutdoorCamera",
+   "name": "Outdoor Camera",
+   "description": "Wall-mounted outdoor camera"
+  }
+ ]
+}
