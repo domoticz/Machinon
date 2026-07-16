@@ -70,10 +70,17 @@ button, input, select, textarea {
     font-family: var(--dz-font-family);
 }
 
-/* Headings: css/style.css sets Arial directly on h1/h2/h3, and Georgia on
-   .brand h2 (the "*" version marker beside the logo in the navbar). h4 has
-   no core rule targeting it and already inherits Inter correctly. */
+/* Headings: css/style.css sets Arial directly on h1/h2/h3, Oswald on
+   .brand h1 (the always-visible navbar "Domoticz" wordmark), and Georgia on
+   .brand h2 (the "*" version marker beside it). The .brand descendants need
+   their own compound selectors: at (0,1,1) each core rule outranks a bare
+   h1/h2 (0,0,1), so the type-only group cannot reach them. h4 has no core
+   rule targeting it and already inherits Inter correctly. Known gap until
+   the T7 pages sweep: css/iconsupload.css #iconsmain h3 re-breaks h3 on the
+   Custom Icons page with a retired family name at higher specificity plus
+   !important, which no rule in this file can beat. */
 h1, h2, h3,
+.brand h1,
 .brand h2 {
     font-family: var(--dz-font-family);
 }
