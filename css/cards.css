@@ -788,3 +788,14 @@ html.pattern {
     background-repeat: repeat !important;
     background-attachment: scroll !important;
 }
+/* Reorder handle affordance: when a card is draggable (reorder enabled, desktop),
+   only the device-name area is the drag handle (set by src/js/card-drag-handle.js),
+   so only it shows the grab cursor. The rest of the card keeps its normal cursor,
+   and nothing shows a handle when reordering is off (no .ui-draggable). */
+.ui-draggable .item-name {
+    cursor: grab;
+}
+
+.ui-draggable .item-name:active {
+    cursor: grabbing;
+}
