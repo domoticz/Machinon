@@ -22,3 +22,10 @@
         margin-top: 10px;
     }
 }
+
+/* Weather nav item: core hardcodes images/rain.png here, which is ALSO the rain
+   device icon. Override only the nav icon (by its .clWeather class) with a
+   distinct theme-original glyph, leaving the shared device rain.png untouched. */
+.navbar .nav li.clWeather a img {
+    content: url(../images/machinon/weather.png);
+}

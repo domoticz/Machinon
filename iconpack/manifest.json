@@ -8,11 +8,81 @@
    "off_sig": "6439-f9f386f7"
   },
   {
+   "base": "machinon_Avengers",
+   "name": "Avengers",
+   "description": "Fun: Avengers logo",
+   "on_sig": "9782-2bce0a6b",
+   "off_sig": "8957-a0873236"
+  },
+  {
+   "base": "machinon_Bathtub",
+   "name": "Bathtub",
+   "description": "Bath",
+   "on_sig": "5402-3bc2c00b",
+   "off_sig": "4991-b63afa8f"
+  },
+  {
+   "base": "machinon_Batman",
+   "name": "Batman",
+   "description": "Fun: Batman logo",
+   "on_sig": "3869-c693a7a3",
+   "off_sig": "3476-32114693"
+  },
+  {
+   "base": "machinon_Battery",
+   "name": "Battery",
+   "description": "Battery charged (on) / empty (off)",
+   "on_sig": "743-ffa13b81",
+   "off_sig": "661-d823460b"
+  },
+  {
+   "base": "machinon_BatteryCharging",
+   "name": "Battery Charging",
+   "description": "Charging/green (on) / charged, not charging (off)",
+   "on_sig": "1412-5f8d2403",
+   "off_sig": "743-ffa13b81"
+  },
+  {
+   "base": "machinon_BatteryLow",
+   "name": "Battery Low",
+   "description": "Low-battery warning/red (on) / ok/grey (off)",
+   "on_sig": "783-edf1d0e5",
+   "off_sig": "738-4026ba9c"
+  },
+  {
+   "base": "machinon_Bed",
+   "name": "Bed",
+   "description": "Bed / bed occupancy",
+   "on_sig": "3502-188ad3f0",
+   "off_sig": "3065-ad1264de"
+  },
+  {
    "base": "machinon_ColdWater",
    "name": "Cold Water",
-   "description": "Cold water (water drop with a blue cooling badge)",
+   "description": "Cold water",
    "on_sig": "6100-a17c57cd",
    "off_sig": "5755-8a897944"
+  },
+  {
+   "base": "machinon_Connection",
+   "name": "Connection",
+   "description": "Connected (on) / disconnected (off)",
+   "on_sig": "5608-331c28f3",
+   "off_sig": "6613-a0dcf2bd"
+  },
+  {
+   "base": "machinon_DewPoint",
+   "name": "Dew Point",
+   "description": "Dew-point sensor",
+   "on_sig": "6908-7aa0fb2b",
+   "off_sig": "6147-46a98e2e"
+  },
+  {
+   "base": "machinon_Distance",
+   "name": "Distance",
+   "description": "Distance sensor",
+   "on_sig": "6888-b7cc9577",
+   "off_sig": "6345-01377a52"
   },
   {
    "base": "machinon_DomeCamera",
@@ -22,46 +92,46 @@
    "off_sig": "4642-24ecceca"
   },
   {
+   "base": "machinon_Lock",
+   "name": "Door Lock",
+   "description": "Door with padlock, locked/green (on) / unlocked/red (off)",
+   "on_sig": "2850-592566d0",
+   "off_sig": "2837-f1697885"
+  },
+  {
+   "base": "machinon_Duck",
+   "name": "Duck",
+   "description": "Duck",
+   "on_sig": "6648-2b687671",
+   "off_sig": "5893-e8732216"
+  },
+  {
    "base": "machinon_EnergyCounter",
    "name": "Energy Counter",
-   "description": "Grey odometer with a blue lightning-bolt badge",
+   "description": "Energy / electricity counter",
    "on_sig": "5101-f268aae4",
    "off_sig": "4783-4ab9e7dd"
   },
   {
-   "base": "machinon_GasCounter",
-   "name": "Gas Counter",
-   "description": "Grey odometer with a blue gas badge",
-   "on_sig": "5468-0ca5bf30",
-   "off_sig": "5075-a421c09e"
+   "base": "machinon_EnergyMeter",
+   "name": "Energy Meter",
+   "description": "Electricity / energy meter",
+   "on_sig": "5680-40c0f1fc",
+   "off_sig": "4880-eb64870d"
   },
   {
-   "base": "machinon_WaterCounter",
-   "name": "Water Counter",
-   "description": "Grey odometer with a blue water-drop badge",
-   "on_sig": "5184-3c1239c5",
-   "off_sig": "4918-f80aaff0"
+   "base": "machinon_FluidMeter",
+   "name": "Fluid Meter",
+   "description": "Fluid / glucose meter sensor",
+   "on_sig": "3421-b7941539",
+   "off_sig": "3045-fc58fd28"
   },
   {
-   "base": "machinon_WindGauge",
-   "name": "Wind Gauge",
-   "description": "Anemometer / wind-speed gauge",
-   "on_sig": "6967-0d47b975",
-   "off_sig": "6268-602826a7"
-  },
-  {
-   "base": "machinon_Pressure",
-   "name": "Pressure",
-   "description": "Barometric pressure gauge",
-   "on_sig": "7953-83d5f4d0",
-   "off_sig": "6959-151df762"
-  },
-  {
-   "base": "machinon_User",
-   "name": "User",
-   "description": "Person / user",
-   "on_sig": "5993-f64c8ab1",
-   "off_sig": "5444-2003e4d4"
+   "base": "machinon_Fountain",
+   "name": "Fountain",
+   "description": "Fountain",
+   "on_sig": "6408-5d7d4920",
+   "off_sig": "6143-92ad6eb2"
   },
   {
    "base": "machinon_GameController",
@@ -69,6 +139,69 @@
    "description": "Gamepad / console controller",
    "on_sig": "7070-31687ff6",
    "off_sig": "6163-dd12ad81"
+  },
+  {
+   "base": "machinon_Garage",
+   "name": "Garage Door",
+   "description": "Garage door open (on) / closed (off)",
+   "on_sig": "4616-d3ffaf5f",
+   "off_sig": "4706-7b3919e8"
+  },
+  {
+   "base": "machinon_GasCounter",
+   "name": "Gas Counter",
+   "description": "Gas counter",
+   "on_sig": "5468-0ca5bf30",
+   "off_sig": "5075-a421c09e"
+  },
+  {
+   "base": "machinon_Height",
+   "name": "Height",
+   "description": "Height sensor",
+   "on_sig": "6293-a6947681",
+   "off_sig": "5775-31648a78"
+  },
+  {
+   "base": "machinon_HotWater",
+   "name": "Hot Water",
+   "description": "Hot water / boiler",
+   "on_sig": "6024-2834d711",
+   "off_sig": "5280-80e01a05"
+  },
+  {
+   "base": "machinon_HouseLock",
+   "name": "House Lock",
+   "description": "House with padlock, secured (green) / open (red)",
+   "on_sig": "5778-b60bdda8",
+   "off_sig": "5826-2917dd38"
+  },
+  {
+   "base": "machinon_Hygrometer",
+   "name": "Hygrometer",
+   "description": "Humidity / hygrometer sensor",
+   "on_sig": "6486-91ee8cf9",
+   "off_sig": "5858-7a4a0b24"
+  },
+  {
+   "base": "machinon_Jacuzzi",
+   "name": "Jacuzzi",
+   "description": "Jacuzzi / hot tub",
+   "on_sig": "6630-054496a4",
+   "off_sig": "5839-41271a86"
+  },
+  {
+   "base": "machinon_Link",
+   "name": "Link",
+   "description": "Link connected (on) / broken (off)",
+   "on_sig": "8144-916ce92e",
+   "off_sig": "9671-4d8ea0f2"
+  },
+  {
+   "base": "machinon_Mood",
+   "name": "Mood",
+   "description": "Happy/green (on) / sad/red (off) mood indicator",
+   "on_sig": "7749-331cb373",
+   "off_sig": "7820-daa1960d"
   },
   {
    "base": "machinon_Music",
@@ -85,81 +218,18 @@
    "off_sig": "2367-039333a2"
   },
   {
-   "base": "machinon_WiredNetwork",
-   "name": "Wired Network",
-   "description": "Ethernet / wired network",
-   "on_sig": "1679-41d4fe2e",
-   "off_sig": "1435-4c07c3bc"
+   "base": "machinon_OilTank",
+   "name": "Oil Tank",
+   "description": "Oil tank level",
+   "on_sig": "3946-d5fb7581",
+   "off_sig": "3593-d766edea"
   },
   {
-   "base": "machinon_WiFi",
-   "name": "Wi-Fi",
-   "description": "Wireless network",
-   "on_sig": "7212-19e809c6",
-   "off_sig": "6305-fe5eb5b0"
-  },
-  {
-   "base": "machinon_Bathtub",
-   "name": "Bathtub",
-   "description": "Bath",
-   "on_sig": "5402-3bc2c00b",
-   "off_sig": "4991-b63afa8f"
-  },
-  {
-   "base": "machinon_Shower",
-   "name": "Shower",
-   "description": "Shower",
-   "on_sig": "6373-59153757",
-   "off_sig": "5767-09258668"
-  },
-  {
-   "base": "machinon_Fountain",
-   "name": "Fountain",
-   "description": "Fountain",
-   "on_sig": "6408-5d7d4920",
-   "off_sig": "6143-92ad6eb2"
-  },
-  {
-   "base": "machinon_DewPoint",
-   "name": "Dew Point",
-   "description": "Dew-point sensor",
-   "on_sig": "6908-7aa0fb2b",
-   "off_sig": "6147-46a98e2e"
-  },
-  {
-   "base": "machinon_Wind",
-   "name": "Wind",
-   "description": "Wind / airflow / ventilation",
-   "on_sig": "7295-fade08cc",
-   "off_sig": "6821-dfb23ab3"
-  },
-  {
-   "base": "machinon_Link",
-   "name": "Link",
-   "description": "Link connected (on) / broken (off)",
-   "on_sig": "8144-916ce92e",
-   "off_sig": "9671-4d8ea0f2"
-  },
-  {
-   "base": "machinon_Padlock",
-   "name": "Padlock",
-   "description": "Padlock open (on) / closed (off)",
-   "on_sig": "4367-e0b9f5fb",
-   "off_sig": "4456-dffdf29e"
-  },
-  {
-   "base": "machinon_Switch",
-   "name": "Switch",
-   "description": "Toggle switch on (green) / off (red)",
-   "on_sig": "1112-5fcbb2ed",
-   "off_sig": "1214-dad00e09"
-  },
-  {
-   "base": "machinon_Mood",
-   "name": "Mood",
-   "description": "Happy/green (on) / sad/red (off) mood indicator",
-   "on_sig": "7749-331cb373",
-   "off_sig": "7820-daa1960d"
+   "base": "machinon_OneRing",
+   "name": "One Ring",
+   "description": "Fun: the One Ring",
+   "on_sig": "11676-b5919b08",
+   "off_sig": "10514-d697664c"
   },
   {
    "base": "machinon_Online",
@@ -169,67 +239,144 @@
    "off_sig": "10569-d27ae3df"
   },
   {
-   "base": "machinon_Garage",
-   "name": "Garage Door",
-   "description": "Garage door open (on) / closed (off)",
-   "on_sig": "4616-d3ffaf5f",
-   "off_sig": "4706-7b3919e8"
-  },
-  {
-   "base": "machinon_Height",
-   "name": "Height",
-   "description": "Height sensor (height arrows + eye badge)",
-   "on_sig": "6293-a6947681",
-   "off_sig": "5775-31648a78"
-  },
-  {
-   "base": "machinon_Distance",
-   "name": "Distance",
-   "description": "Distance sensor (width arrows + eye badge)",
-   "on_sig": "6888-b7cc9577",
-   "off_sig": "6345-01377a52"
-  },
-  {
-   "base": "machinon_Duck",
-   "name": "Duck",
-   "description": "Duck",
-   "on_sig": "6648-2b687671",
-   "off_sig": "5893-e8732216"
-  },
-  {
-   "base": "machinon_HotWater",
-   "name": "Hot Water",
-   "description": "Hot water / boiler",
-   "on_sig": "6024-2834d711",
-   "off_sig": "5280-80e01a05"
-  },
-  {
-   "base": "machinon_Jacuzzi",
-   "name": "Jacuzzi",
-   "description": "Jacuzzi / hot tub",
-   "on_sig": "6630-054496a4",
-   "off_sig": "5839-41271a86"
-  },
-  {
-   "base": "machinon_Lock",
-   "name": "Door Lock",
-   "description": "Door with a padlock badge (unlock/lock)",
-   "on_sig": "2837-f1697885",
-   "off_sig": "2850-592566d0"
-  },
-  {
-   "base": "machinon_OilTank",
-   "name": "Oil Tank",
-   "description": "Oil tank level",
-   "on_sig": "3946-d5fb7581",
-   "off_sig": "3593-d766edea"
-  },
-  {
    "base": "machinon_OutdoorCamera",
    "name": "Outdoor Camera",
    "description": "Wall-mounted outdoor camera",
    "on_sig": "6288-ca74c16b",
    "off_sig": "5417-be06347e"
+  },
+  {
+   "base": "machinon_OutsideTemp",
+   "name": "Outside Temperature",
+   "description": "Outdoor temperature sensor",
+   "on_sig": "4301-e6efb257",
+   "off_sig": "3893-37cc739f"
+  },
+  {
+   "base": "machinon_Padlock",
+   "name": "Padlock",
+   "description": "Padlock locked/closed (on) / unlocked/open (off)",
+   "on_sig": "4456-dffdf29e",
+   "off_sig": "4367-e0b9f5fb"
+  },
+  {
+   "base": "machinon_PHMeter",
+   "name": "pH Meter",
+   "description": "pH sensor",
+   "on_sig": "7466-5d85eee0",
+   "off_sig": "6484-5223e135"
+  },
+  {
+   "base": "machinon_PixarLamp",
+   "name": "Pixar Lamp",
+   "description": "Fun: Pixar lamp",
+   "on_sig": "5212-98bcfa6c",
+   "off_sig": "4827-abb00abc"
+  },
+  {
+   "base": "machinon_Pressure",
+   "name": "Pressure",
+   "description": "Barometric pressure gauge",
+   "on_sig": "7953-83d5f4d0",
+   "off_sig": "6959-151df762"
+  },
+  {
+   "base": "machinon_Proximity",
+   "name": "Proximity",
+   "description": "Proximity sensor, detected (red) / idle (grey)",
+   "on_sig": "10596-447a66fc",
+   "off_sig": "9771-7a8170be"
+  },
+  {
+   "base": "machinon_Shower",
+   "name": "Shower",
+   "description": "Shower",
+   "on_sig": "6373-59153757",
+   "off_sig": "5767-09258668"
+  },
+  {
+   "base": "machinon_Signal",
+   "name": "Signal",
+   "description": "Signal present (on) / no connection (off)",
+   "on_sig": "1588-58c7ddc4",
+   "off_sig": "1340-33f258a7"
+  },
+  {
+   "base": "machinon_SpiderMan",
+   "name": "Spider-Man",
+   "description": "Fun: Spider-Man",
+   "on_sig": "7525-399be379",
+   "off_sig": "6800-ef09158f"
+  },
+  {
+   "base": "machinon_Superman",
+   "name": "Superman",
+   "description": "Fun: Superman",
+   "on_sig": "6146-56b37c64",
+   "off_sig": "5503-afd79d52"
+  },
+  {
+   "base": "machinon_Switch",
+   "name": "Switch",
+   "description": "Toggle switch, on / off (Blue UI, not tinted)",
+   "on_sig": "1135-6ae495dc",
+   "off_sig": "1211-1bc5f481"
+  },
+  {
+   "base": "machinon_User",
+   "name": "User",
+   "description": "Person / user",
+   "on_sig": "5993-f64c8ab1",
+   "off_sig": "5444-2003e4d4"
+  },
+  {
+   "base": "machinon_Voltage",
+   "name": "Voltage",
+   "description": "Voltage sensor",
+   "on_sig": "2758-cc671ee3",
+   "off_sig": "2366-a1a03a6a"
+  },
+  {
+   "base": "machinon_WaterCounter",
+   "name": "Water Counter",
+   "description": "Water counter",
+   "on_sig": "5184-3c1239c5",
+   "off_sig": "4918-f80aaff0"
+  },
+  {
+   "base": "machinon_WiFi",
+   "name": "Wi-Fi",
+   "description": "Wireless network",
+   "on_sig": "7212-19e809c6",
+   "off_sig": "6305-fe5eb5b0"
+  },
+  {
+   "base": "machinon_Wind",
+   "name": "Wind",
+   "description": "Wind / airflow / ventilation",
+   "on_sig": "7295-fade08cc",
+   "off_sig": "6821-dfb23ab3"
+  },
+  {
+   "base": "machinon_WindGauge",
+   "name": "Wind Gauge",
+   "description": "Anemometer / wind-speed gauge",
+   "on_sig": "6967-0d47b975",
+   "off_sig": "6268-602826a7"
+  },
+  {
+   "base": "machinon_WindowLock",
+   "name": "Window Lock",
+   "description": "Window with padlock, closed/secure (green) / open (red)",
+   "on_sig": "3218-1fe509b5",
+   "off_sig": "3255-0f8cf42b"
+  },
+  {
+   "base": "machinon_WiredNetwork",
+   "name": "Wired Network",
+   "description": "Ethernet / wired network",
+   "on_sig": "1679-41d4fe2e",
+   "off_sig": "1435-4c07c3bc"
   }
  ]
 }
