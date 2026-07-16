@@ -230,7 +230,12 @@ function uploadPackZip(base) {
             return fetch("json.htm?type=command&param=uploadcustomicon",
                 { method: "POST", body: fd, credentials: "include" });
         })
-        .then(function(r) { return r.json(); })
+        .then(function(r) {
+            /* a 403 (non-admin, expired session) has an HTML body: fail with
+               the status instead of a JSON parse error */
+            if (!r.ok) { throw new Error("HTTP " + r.status); }
+            return r.json();
+        })
         .then(function(data) {
             if (data.status !== "OK") { throw new Error(data.error || "upload failed"); }
         });
