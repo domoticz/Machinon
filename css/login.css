@@ -52,7 +52,9 @@
 
 #login h1 {
 	color:#fff !important;
-	font: bold 26px/1 Verdana, Helvetica !important;
+	font-weight: var(--dz-weight-semibold);
+	font-size: var(--dz-text-display);
+	line-height: 1;
 	display: none
 }
 
@@ -98,7 +100,6 @@
 }
 
 #login fieldset {
-    font-family: main-font;
     margin: auto !important;
     width: 25%;
 }

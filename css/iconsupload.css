@@ -1,13 +1,11 @@
 /**** ./iconsupload.css ***/
 /* Icon Page */
 #iconsmain h3 {
-    font-family: main-font !important;
-    font-size: 150% !important;
+    font-size: var(--dz-text-lg);
 		color: var(--dz-body-text);
 }
 
 #iconsmain .iconlist .iconlistitem p {
-    font-family: main-font !important;
     color: var(--secondary-text-color) !important;
 }
 

@@ -19,16 +19,16 @@ rect.header {
 }
 
 .DeviceDetails text {
-    font-family: main-font !important;
+    font-family: var(--dz-font-family) !important;
     fill: var(--dz-body-text) !important;
 }
 
 .DeviceDetails text#name {
-    font-weight: bold !important;
+    font-weight: var(--dz-weight-semibold) !important;
 }
 
 .DeviceDetails text#status {
-    font-size: 100% !important;
+    font-size: var(--dz-text-sm) !important;
     fill: var(--dz-accent-color) !important;
 }
 

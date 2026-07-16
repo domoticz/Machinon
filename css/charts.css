@@ -36,7 +36,7 @@
 .highcharts-data-label text {
     color: var(--secondary-text-color) !important;
     fill: var(--secondary-text-color) !important;
-    font-family: main-font !important;
+    font-family: var(--dz-font-family) !important;
 }
 /* Charts - Tooltip */
 .highcharts-tooltip text {
@@ -93,8 +93,7 @@
 
 .zoom-button,
 .zoom-reset {
-    font-family: main-font;
-    font-size: 11px;
+    font-size: var(--dz-text-micro);
     color: var(--dz-body-text);
     background: transparent;
     border: 1px solid var(--dz-accent-color);
@@ -131,10 +130,10 @@
 }
 
 .highcharts-menu-item {
-    font-family: main-font !important;
+    font-family: var(--dz-font-family) !important;
     color: var(--dz-body-text) !important;
     padding: 8px 16px !important;
-    font-size: 12px !important;
+    font-size: var(--dz-text-xs) !important;
     transition: background 0.15s ease;
 }
 

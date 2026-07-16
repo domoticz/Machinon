@@ -60,7 +60,7 @@ input#AcceptNewHardware:checked ~ button {
 
 a.resetschemebtn,
 a.saveschemebtn {
-    font-size: 18px;
+    font-size: var(--dz-text-md);
     padding: 0 10px;
     color: var(--dz-accent-color);
 }
@@ -124,11 +124,11 @@ a.saveschemebtn {
 }
 
 .mHeaderBtn li i {
-    font-size: 22px;
+    font-size: var(--dz-icon-size-md);
 }
 
 .mHeaderBtn li div {
-    font-size: 14px;
+    font-size: var(--dz-text-sm);
     letter-spacing: -0.5px;
     margin-left: 10px;
 }
@@ -157,16 +157,16 @@ a.saveschemebtn {
 }
 
 .machinoText {
-    font-size: 16px;
-    font-weight: 300;
+    font-size: var(--dz-text-md);
+    font-weight: var(--dz-weight-regular);
     letter-spacing: -0.5px;
     color: var(--dz-body-text);
     margin-left: 20px;
 }
 
 .mDropdown-Text {
-    font-size: 14px;
-    font-weight: 300;
+    font-size: var(--dz-text-sm);
+    font-weight: var(--dz-weight-regular);
     letter-spacing: -0.5px;
     text-align: left;
     vertical-align: middle;
@@ -261,7 +261,7 @@ ul.machinon_ul li {
     div.machinoText {
         display: table-cell;
         margin: 0;
-        font-size: 1em;
+        font-size: var(--dz-text-md);
         line-height: 1em;
         height: 35px;
         vertical-align: middle;
@@ -300,7 +300,7 @@ ul.machinon_ul li {
 @media screen and (max-width: 979px) {
     #settings .row-fluid {
         flex-wrap: wrap;
-        font-size: 0.9em;
+        font-size: var(--dz-text-sm);
     }
 
     #settings .row-fluid > .span4, #settings .row-fluid > .span6, #settings .row-fluid > .span12 {
@@ -356,7 +356,7 @@ ul.machinon_ul li {
 
 #schemePicker .scheme-name {
     margin-top: 6px;
-    font-size: 12px;
+    font-size: var(--dz-text-xs);
     text-align: center;
     color: var(--dz-body-text);
 }
@@ -369,7 +369,7 @@ ul.machinon_ul li {
     position: absolute;
     top: -2px;
     right: 4px;
-    font-size: 15px;
+    font-size: var(--dz-text-sm);
     line-height: 1;
     color: var(--secondary-text-color);
 }
