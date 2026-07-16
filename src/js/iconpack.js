@@ -5,7 +5,23 @@
    action, never bookkept client-side, so every operation is idempotent.
    Pack strings only ever reach the DOM via textContent. */
 
-var ICONPACK = { state: [] }; /* [{base, name, description, idx|null, outdated}] */
+var ICONPACK = { state: [], busy: false }; /* [{base, name, description, idx|null, outdated}] */
+
+/* One DB-writing operation at a time: uploads and deletes share the guard,
+   cleared before the post-action refresh re-renders the buttons. */
+function packOpStarts() {
+    if (ICONPACK.busy) {
+        generate_noty("warning", "Another icon operation is still running", 3000);
+        return false;
+    }
+    ICONPACK.busy = true;
+    return true;
+}
+
+function packOpEnds() {
+    ICONPACK.busy = false;
+    return refreshIconPack();
+}
 
 function injectIconPackTab() {
     if ($("#iconPackTabButton").length) return;
@@ -221,10 +237,11 @@ function uploadPackZip(base) {
 }
 
 function installPackIcon(ic) {
+    if (!packOpStarts()) return;
     return uploadPackZip(ic.base)
         .then(function() { generate_noty("success", ic.name + " installed", 3000); })
         .catch(function(e) { generate_noty("error", ic.name + ": " + e.message, 6000); })
-        .then(refreshIconPack);
+        .then(packOpEnds);
 }
 
 function devicesUsingPackIcon(idx) {
@@ -247,23 +264,29 @@ function removePackIcon(ic) {
             message: $("<div>").text(msg),
             callback: function(ok) {
                 if (!ok) return;
+                if (!packOpStarts()) return;
                 fetchPackJson("json.htm?type=command&param=deletecustomicon&idx=" + ic.idx)
                     .then(function() { generate_noty("success", ic.name + " removed", 3000); })
                     .catch(function() { generate_noty("error", "Could not remove " + ic.name, 6000); })
-                    .then(refreshIconPack);
+                    .then(packOpEnds);
             }
         });
-    });
+    })
+    .catch(function() { generate_noty("error", "Could not check which devices use " + ic.name, 6000); });
 }
 
 /* Sequential on purpose: each upload is a SQLite write plus blob extraction;
    parallel uploads invite lock contention. */
 function installAllPackIcons() {
+    if (!packOpStarts()) return;
     var pool = visiblePackIcons();
     var todo = pool.filter(function(ic) { return ic.idx === null || ic.outdated; });
     var current = pool.length - todo.length;
     if (!todo.length) {
-        generate_noty("success", "All " + pool.length + " shown pack icons are installed and current", 3000);
+        generate_noty("success", pool.length === ICONPACK.state.length
+            ? "All " + pool.length + " pack icons are installed and current"
+            : "All " + pool.length + " shown pack icons are installed and current", 3000);
+        ICONPACK.busy = false;
         return;
     }
     var added = 0, updated = 0, failures = [];
@@ -280,6 +303,6 @@ function installAllPackIcons() {
         var msg = added + " installed, " + updated + " updated, " + current + " already current";
         if (failures.length) { generate_noty("error", msg + "; failed: " + failures.join(", "), 8000); }
         else { generate_noty("success", msg, 5000); }
-        refreshIconPack();
+        packOpEnds();
     });
 }
