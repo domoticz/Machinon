@@ -42,6 +42,18 @@ check_property "font-size" "[[:space:]]*(var\(--dz-(text|icon-size)-[a-z-]+\)|0)
 # font-weight: only var(--dz-weight-*)
 check_property "font-weight" "[[:space:]]*var\(--dz-weight-[a-z-]+\)" "raw font-weight"
 
+# font shorthand: no token-legal form exists, so every hit is a violation.
+# The boundary alternation (lineno prefix from strip(), or ; { whitespace)
+# plus requiring ":" right after "font" (optional whitespace) keeps longhands
+# like font-family:/font-size:/font-weight:/font-style: from matching.
+for f in $files; do
+  out=$(strip "$f" | grep -E "(^[0-9]+:|[;{[:space:]])font[[:space:]]*:")
+  if [ -n "$out" ]; then
+    fail=1
+    echo "$out" | sed -E "s|^([0-9]+):|${f}:\1: raw font shorthand: |"
+  fi
+done
+
 # Retired family names must not appear anywhere in the repo (js/html/json/css).
 out=$(grep -rn "main-font" --include="*.css" --include="*.js" --include="*.html" --include="*.json" . | grep -v "^\./docs/")
 if [ -n "$out" ]; then
