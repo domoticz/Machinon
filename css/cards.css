@@ -72,10 +72,26 @@
    with align-items:stretch, so its cells have a definite height and a blanket height:100%
    squashes the taller Temperature/Weather cards into the row height. */
 
-div.bannercontent .row.divider:before,
-div.bannercontent .row.divider:after,
-div.bannercontent .row:not(.divider):before,
-div.bannercontent .row:not(.divider):after,
+/* :has(.item) scopes every rule in this block to rows that actually hold device
+   cards. Without it, ".row"/".row.divider" is Bootstrap's own generic grid-row
+   class, reused by unrelated Angular views inside .bannercontent - e.g. the Events
+   page (app/events/Events.html) wraps its <timesun> topbar widget in a bare
+   ".row" and its script-tree/editor split in another. The unscoped selector
+   turned BOTH into auto-fill device-card grids (card min-width, gap, stretch,
+   the works), which is how <timesun> ended up stretched to a full grid track and
+   overlapping the editor's "My automation scripts" heading below it (measured:
+   #timesun computed a different width at every viewport, tracking the grid
+   track rather than its own content). .item is a device-card-only class (every
+   widget template that emits it - light/scene/utility/temperature/weather - and
+   nothing else; verified against every www/views/*.html use of `class="item`),
+   so :has(.item) is a safe, precise match: the plain grid-item rows have .item
+   as a direct child, #tempwidgets/#weatherwidgets have it two levels down inside
+   <dztemperaturewidget>/<dzweatherwidget>, and :has() with no combinator catches
+   both. */
+div.bannercontent .row.divider:has(.item):before,
+div.bannercontent .row.divider:has(.item):after,
+div.bannercontent .row:not(.divider):has(.item):before,
+div.bannercontent .row:not(.divider):has(.item):after,
 div.clearfix {
     display: none;
 }
@@ -87,8 +103,8 @@ div.clearfix {
    var(--dz-card-max-width) as the track max would make the min knob dead and drop columns
    (measured: 800px viewport fell from 2 columns to 1). The min() guard lets cards shrink
    on viewports narrower than the min width. */
-div.bannercontent .row.divider,
-div.bannercontent .row:not(.divider) {
+div.bannercontent .row.divider:has(.item),
+div.bannercontent .row:not(.divider):has(.item) {
     padding: 5px 0;
     margin: 0 !important;
     display: grid;
