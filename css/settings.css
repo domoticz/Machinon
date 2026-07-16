@@ -261,7 +261,8 @@ ul.machinon_ul li {
     div.machinoText {
         display: table-cell;
         margin: 0;
-        font-size: var(--dz-text-md);
+        /* sm, not md: the old 1em resolved against a 14px ancestor chain */
+        font-size: var(--dz-text-sm);
         line-height: 1em;
         height: 35px;
         vertical-align: middle;
@@ -300,7 +301,8 @@ ul.machinon_ul li {
 @media screen and (max-width: 979px) {
     #settings .row-fluid {
         flex-wrap: wrap;
-        font-size: var(--dz-text-sm);
+        /* xs, not sm: the old 0.9em resolved to ~12.6px against a 14px chain */
+        font-size: var(--dz-text-xs);
     }
 
     #settings .row-fluid > .span4, #settings .row-fluid > .span6, #settings .row-fluid > .span12 {
