@@ -102,7 +102,9 @@ div.clearfix {
    here and the user's max is a max-width cap on the card below; putting
    var(--dz-card-max-width) as the track max would make the min knob dead and drop columns
    (measured: 800px viewport fell from 2 columns to 1). The min() guard lets cards shrink
-   on viewports narrower than the min width. */
+   on viewports narrower than the min width. Browsers without :has() support never match
+   this selector, so .row/.row.divider falls back to plain Bootstrap float layout: no
+   card grid, no auto-fill columns, but still functional. */
 div.bannercontent .row.divider:has(.item),
 div.bannercontent .row:not(.divider):has(.item) {
     padding: 5px 0;

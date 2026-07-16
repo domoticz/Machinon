@@ -14,13 +14,36 @@
   Devices/Hardware/Setup tables, light + dark). Keep new rules here equally self-contained.
 */
 /* Data Tables */
+/* overflow-x: auto + max-width: 100% keep any table wider than its wrapper scrolling
+   INSIDE the wrapper, never dragging the whole page sideways. Originally only applied
+   narrow viewports (max-width: 767px), because that is where the Users table was found
+   overflowing (dz-mobile-sweep.js). Widened to all widths: it is a containment
+   backstop against ANY future wide table/column, at any viewport, at zero visual cost
+   when the table already fits (auto only shows a scrollbar when content overflows). */
 .dataTables_wrapper {
 		border: 1.5px solid;
     border-color: transparent;
     border-radius: 6px;
     margin-bottom: 10px;
     box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
+    overflow-x: auto;
+    max-width: 100%;
 }
+
+/* The overflow-x: auto above only takes effect if .dataTables_wrapper is actually allowed
+   to be narrower than its content. On the Devices page it is not: core's own Devices.css
+   puts the table in a flex split-view (filters | table | splitter, .page-devices > .devices-table
+   { flex: 1 }), and a flex item's default min-width is auto (not 0), so it refuses to shrink
+   below its content's min-content width. That forces .devices-table, and the wrapper inside
+   it, to grow to the table's full width instead of clipping/scrolling it, and the overflow
+   leaks all the way out to the page (measured: #/Devices at 1024x768 still overflowed the
+   viewport even with no table nowrap CSS at all, so this is core's own flex layout, not
+   something the theme's nowrap rule introduced). min-width: 0 lets the flex item shrink to
+   its container so the wrapper's overflow-x:auto above can actually do its job. */
+.page-devices > .devices-table {
+    min-width: 0;
+}
+
 table.dataTable {
     width: 100% !important;
 }
@@ -85,32 +108,21 @@ tr.odd td.sorting_1, tr.even td.sorting_1 {
     opacity: .75;
 }
 
-/* Inter is wider than Open Sans, which wrapped date/time cells (Last Seen column) onto
-   two lines on the Devices/Hardware/Setup DataTables (25 wrapped cells measured on
-   #/Devices at 1440px before this rule). Data cells go nowrap; the Devices table's Name
-   column is the one exception that must keep wrapping long device names. That column
-   carries no id/class of its own (app/devices/Devices.js columns array: title 'Name',
-   data 'Name', no className, unlike its neighbours Data/actions which do set one), so
-   it is targeted positionally, scoped to the Devices table's own id (#devices) rather
-   than the shared table.display class so no other DataTable's column layout is
-   affected by the position-based selector. */
-table.display td {
+/* Inter is wider than Open Sans, which wrapped the Devices table's Last Seen date/time
+   cells onto two lines (25 wrapped cells measured on #/Devices at 1440px with no nowrap
+   rule at all). A first attempt made ALL table.display td cells nowrap, with a positional
+   exception for the Name column; that was too broad; it also blocked SubType/Data from
+   wrapping, which pushed the whole page into horizontal scroll (body scrollWidth 1723 vs
+   1425 at 1440x900, 1714 vs 1244 at 1024x768, measured on #/Devices). The lesson: scope
+   nowrap to the ONE column that actually needs it, never to the whole row. Last Seen
+   carries no id/class of its own (app/devices/Devices.js columns array: title
+   'Last Seen', data 'LastUpdate', no className, unlike its neighbours Data/actions which
+   do set one), so it is targeted positionally (14th column, verified against that same
+   columns array and empirically in the browser), scoped to the Devices table's own id
+   (#devices) rather than the shared table.display class so no other DataTable's column
+   layout is affected by the position-based selector. */
+#devices td:nth-child(14) {
     white-space: nowrap;
-}
-
-#devices td:nth-child(7) {
-    white-space: normal;
-}
-
-/* Narrow viewports: a DataTable wider than the screen scrolls inside its own
-   wrapper instead of dragging the whole page sideways (the Users table
-   overflowed the phone viewport by 10px and made the page scroll; found by
-   dz-mobile-sweep.js). */
-@media (max-width: 767px) {
-    .dataTables_wrapper {
-        overflow-x: auto;
-        max-width: 100%;
-    }
 }
 
 /* Devices-table battery bar: core's style.css hardcodes scheme-blind hexes
