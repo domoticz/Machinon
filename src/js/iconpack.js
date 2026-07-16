@@ -23,11 +23,29 @@ function packOpEnds() {
     return refreshIconPack();
 }
 
+/* Re-entrant, per-piece injector, same contract discipline as
+   injectThemeTabs (settings-ui.js): an in-place Angular recompile can wipe
+   or corrupt any piece independently, so verify button, label, and pane
+   separately and rebuild only what is broken. */
 function injectIconPackTab() {
-    if ($("#iconPackTabButton").length) return;
-    $('<li id="iconPackTabButton"><a data-target="#tabiconpack" data-toggle="tab" data-i18n="Icons">Icons</a></li>').insertBefore("#tabs > li.pull-right");
-    $("#my-tab-content").append('<div class="tab-pane" id="tabiconpack"><section id="iconpack">Loading..</section></div>');
-    $("#my-tab-content #iconpack").load("styles/" + themeFolder + "/iconsettings.html", initIconPack);
+    var anchor = $("#tabs > li.pull-right").first();
+    if (!anchor.length || !$("#my-tab-content").length) return;
+
+    var expected = (typeof $.t === "function") ? $.t("Icons") : "Icons";
+    var btn = $("#iconPackTabButton");
+    if (btn.length && btn.text().trim() !== expected) {
+        console.log(themeName + ' - Icons tab label corrupted to "' + btn.text().trim() + '", rebuilding');
+        btn.remove();
+        btn = $();
+    }
+    if (!btn.length) {
+        $('<li id="iconPackTabButton"><a data-target="#tabiconpack" data-toggle="tab" data-i18n="Icons">Icons</a></li>').insertBefore(anchor);
+        $("#iconPackTabButton").i18n();
+    }
+    if (!$("#tabiconpack").length) {
+        $("#my-tab-content").append('<div class="tab-pane" id="tabiconpack"><section id="iconpack">Loading..</section></div>');
+        $("#my-tab-content #iconpack").load("styles/" + themeFolder + "/iconsettings.html", initIconPack);
+    }
 }
 
 function initIconPack() {

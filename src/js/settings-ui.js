@@ -11,24 +11,68 @@ function showThemeSettings() {
         whenElementRenders("tabsystem", "#tabsystem", showThemeSettings);
         return;
     }
+    injectThemeTabs();
+    armThemeTabsHealer();
+}
+
+/* Re-entrant, per-piece injector. Angular can recompile the settings view
+   IN PLACE (same route, no hashchange), which wipes the injected tabs, and
+   it has been observed stamping the neighbouring Apply Settings label into
+   a surviving button (owner report 2026-07-16). So never assume a surviving
+   piece is intact: verify button, label, and pane separately and rebuild
+   only what is broken. Handlers are namespaced+delegated so re-runs never
+   stack duplicates. */
+function injectThemeTabs() {
+    var anchor = $("#tabs > li.pull-right").first();
+    if (!anchor.length || !$("#my-tab-content").length) return;
+
+    var expected = (typeof $.t === "function") ? $.t("Theme") : "Theme";
+    var btn = $("#themeTabButton");
+    if (btn.length && btn.text().trim() !== expected) {
+        console.log(themeName + ' - Theme tab label corrupted to "' + btn.text().trim() + '", rebuilding');
+        btn.remove();
+        btn = $();
+    }
+    if (!btn.length) {
+        /* keep tab order stable: Theme sits left of Icons */
+        var themeLi = $('<li id="themeTabButton"><a data-target="#tabtheme" data-toggle="tab" data-i18n="Theme">Theme</a></li>');
+        var iconsBtn = $("#iconPackTabButton");
+        themeLi.insertBefore(iconsBtn.length ? iconsBtn : anchor);
+        $("#themeTabButton").i18n();
+        /* a missing button means the row is fresh (or rebuilt): (re)bind the
+           row-level handlers on the new elements; namespaced+delegated so a
+           rebind never stacks duplicates */
+        $("#tabs").off("click.dzTheme")
+            .on("click.dzTheme", "li:not(.pull-right)", function() {
+                if ($(window).width() < 480) { $(this).siblings().show(); }
+            })
+            .on("click.dzTheme", "> li.pull-right > a", function() {
+                generate_noty('success', language.domoticz_settings_saved, 4000);
+            });
+        $("#acceptnewhardwaretable").off("click.dzTheme")
+            .on("click.dzTheme", "> tbody > tr:nth-child(1) > td > button", function() {
+                generate_noty('success', language.allow_new_hardware, 4000);
+            });
+    }
     if (!$("#tabtheme").length) {
-        $('<li id="themeTabButton"><a data-target="#tabtheme" data-toggle="tab" data-i18n="Theme">Theme</a></li>').insertBefore("#tabs > li.pull-right");
-        $("#tabs li:not(.pull-right)").click(function() {
-            if ($(window).width() < 480) {
-                $(this).siblings().show();
-            }
-        });
-        $("#acceptnewhardwaretable > tbody > tr:nth-child(1) > td > button").click(function() {
-            generate_noty('success', language.allow_new_hardware, 4000);
-        });
-        $("#tabs > li.pull-right > a").click(function() {
-            generate_noty('success', language.domoticz_settings_saved, 4000)
-        });
-        $("#tabs").i18n();
         $("#my-tab-content").append('<div class="tab-pane" id="tabtheme"><section id="theme">Loading..</section></div>');
         $("#my-tab-content #theme").load("styles/" + themeFolder + "/themesettings.html", loadSettingsHTML);
-        injectIconPackTab();
     }
+    injectIconPackTab();
+}
+
+/* The in-place recompile fires no hashchange, so nothing re-runs the
+   injection; watch the view container and heal whenever the settings page
+   is present without intact tabs. Our own injection also mutates #tabs,
+   but the re-entrant check makes that a no-op, so no loop. */
+var themeTabsHealer = null;
+function armThemeTabsHealer() {
+    if (themeTabsHealer) return;
+    themeTabsHealer = new MutationObserver(function() {
+        if (document.getElementById("tabsystem")) { injectThemeTabs(); }
+    });
+    themeTabsHealer.observe(document.getElementById("holder") || document.body,
+        { childList: true, subtree: true });
 }
 
 function setupIcons() {
