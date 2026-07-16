@@ -329,7 +329,7 @@ Fallback stacks apply only while the self-hosted face loads (`font-display: swap
 |-------|-------|---------|
 | `--dz-weight-regular` | 400 | Body text and most UI chrome |
 | `--dz-weight-semibold` | 600 | Headings, nav links, device names/values, emphasis |
-| `--dz-weight-mono-bold` | 700 | ACE editor syntax-highlight bold only |
+| `--dz-weight-mono-bold` | 700 | Reserves 700 weight for JetBrains Mono Bold face; ACE applies it via its own CSS (no theme CSS consumer yet) |
 
 No other font weight is used anywhere in the theme.
 

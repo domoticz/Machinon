@@ -1,5 +1,5 @@
 /* Icons tab (src/js/iconpack.js): icon pack browser grid.
-   Sizes from the DESIGN.md type scale (11/12/14/16/26). */
+   Sizes from the DESIGN.md type scale (11/12/14/16/22/26). */
 .iconpack-intro { font-size: var(--dz-text-xs); max-width: 640px; }
 .iconpack-toolbar { display: flex; align-items: center; gap: 10px; margin: 10px 0 15px; flex-wrap: wrap; }
 .iconpack-toolbar input[type="search"] { flex: 1 1 200px; max-width: 320px; font-size: var(--dz-text-sm); }
