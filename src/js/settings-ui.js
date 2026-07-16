@@ -27,6 +27,7 @@ function showThemeSettings() {
         $("#tabs").i18n();
         $("#my-tab-content").append('<div class="tab-pane" id="tabtheme"><section id="theme">Loading..</section></div>');
         $("#my-tab-content #theme").load("styles/" + themeFolder + "/themesettings.html", loadSettingsHTML);
+        injectIconPackTab();
     }
 }
 

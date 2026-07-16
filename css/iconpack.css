@@ -1,0 +1,20 @@
+/* Icons tab (src/js/iconpack.js): icon pack browser grid.
+   Sizes from the DESIGN.md type scale (11/12/14/16/26). */
+.iconpack-intro { font-size: 12px; max-width: 640px; }
+.iconpack-toolbar { display: flex; align-items: center; gap: 10px; margin: 10px 0 15px; flex-wrap: wrap; }
+.iconpack-toolbar input[type="search"] { flex: 1 1 200px; max-width: 320px; font-size: 14px; }
+#iconpackCounter { font-size: 12px; opacity: .75; white-space: nowrap; }
+.iconpack-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; font-size: 12px; }
+.iconpack-card { position: relative; text-align: center; padding: 10px; border-radius: 6px; background: var(--dz-widget-bg, rgba(128, 128, 128, .08)); }
+.iconpack-preview { width: 48px; height: 48px; object-fit: contain; cursor: pointer; }
+.iconpack-name { font-size: 14px; font-weight: 600; margin-top: 4px; }
+.iconpack-desc { font-size: 11px; opacity: .75; min-height: 26px; }
+.iconpack-chip { position: absolute; top: 6px; right: 6px; font-size: 11px; padding: 1px 6px; border-radius: 8px; background: var(--dz-status-ok); color: #fff; }
+.iconpack-actions { display: flex; justify-content: center; gap: 8px; margin-top: 8px; }
+.iconpack-actions button { width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; border-radius: 6px; }
+.iconpack-actions button:hover:not(:disabled) { background: rgba(128, 128, 128, .15); }
+.iconpack-actions button:disabled { opacity: .3; cursor: default; }
+.iconpack-actions button img { width: 16px; height: 16px; }
+@media (max-width: 480px) {
+    .iconpack-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
