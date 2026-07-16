@@ -1,7 +1,7 @@
 ---
 version: alpha
 name: Machinon
-description: Clean, card-based Domoticz home automation theme. Dual light/dark color scheme driven by CSS custom properties, responsive grid layout, Open Sans typography, single teal-blue accent color against neutral surfaces. Optional feature modules for compact dashboard, toggle switches, navbar icons, sidemenu, and more.
+description: Clean, card-based Domoticz home automation theme. Dual light/dark color scheme driven by CSS custom properties, responsive grid layout, Inter typography, single teal-blue accent color against neutral surfaces. Optional feature modules for compact dashboard, toggle switches, navbar icons, sidemenu, and more.
 
 colors:
   # Light theme
@@ -39,11 +39,17 @@ colors:
 
 typography:
   body:
-    fontFamily: main-font (Open Sans Regular)
+    fontFamily: Inter (--dz-font-family, weight 400)
     fontWeight: 400
-  bold:
-    fontFamily: main-font-bold (Open Sans SemiBold)
+  semibold:
+    fontFamily: Inter (--dz-font-family, weight 600)
     fontWeight: 600
+  mono:
+    fontFamily: JetBrains Mono (--dz-font-mono, weight 400)
+    fontWeight: 400
+  monoBold:
+    fontFamily: JetBrains Mono (--dz-font-mono, weight 700)
+    fontWeight: 700
   micro:
     fontSize: 11px
   xs:
@@ -52,6 +58,8 @@ typography:
     fontSize: 14px
   md:
     fontSize: 16px
+  lg:
+    fontSize: 22px
   display:
     fontSize: 26px
 
@@ -170,7 +178,7 @@ components:
   navbar:
     backgroundColor: "{colors.light-navbar}"
     elevation: "0 0 10px 2px rgba(0,0,0,0.2)"
-    linkFont: "{typography.bold}"
+    linkFont: "{typography.semibold}"
     linkSize: "{typography.sm}"
     activeBg: "rgba({colors.light-primary}, 0.4)"
     activeBorder: "1px solid {colors.light-primary}"
@@ -195,7 +203,7 @@ Machinon is a clean, card-based theme for the Domoticz home automation dashboard
 **Key characteristics:**
 - Single accent color (`{colors.light-primary}` / `{colors.dark-primary}`) used for all interactive elements
 - Card-based device layout with CSS grid, not Bootstrap's float grid
-- Two font weights only: Open Sans Regular (body) and SemiBold (headings/emphasis)
+- Two font weights only: Inter Regular (body) and Inter SemiBold (headings/emphasis)
 - Dual theme support via CSS custom properties, selected by a `data-dz-scheme` attribute
 - Feature modules that layer additional CSS/JS without altering the base theme
 
@@ -305,31 +313,76 @@ core's later-loaded `:root`.
 
 ### Font Families
 
-- **main-font**: Open Sans Regular (weight 400). Self-hosted woff2/woff. Used for body text, UI controls, secondary labels, timestamps.
-- **main-font-bold**: Open Sans SemiBold (weight 600). Self-hosted woff2/woff. Used for headings (`h1`-`h4`), nav links, device names, status text, form labels.
+| Token | Family | Weights | Source | Usage |
+|-------|--------|---------|--------|-------|
+| `--dz-font-family` | Inter | 400 (regular), 600 (semibold) | Self-hosted woff2, v4.1, no `local()` fallback (`fonts/Inter-Regular.woff2`, `fonts/Inter-SemiBold.woff2`) | Body text, headings, nav links, device names/values, form labels, all UI chrome |
+| `--dz-font-mono` | JetBrains Mono | 400 (regular), 700 (bold) | Self-hosted woff2, v2.304, no `local()` fallback | ACE editor (Events/Blockly code panes), code-style inputs (`.aw-code-input`, `.aw-code-review`), log console |
+| `--dz-font-icons` | Ionicons | n/a (icon glyphs) | Vendored (`css/ionicons.min.css`) | Icon glyphs painted on `::before`; never collides with text, so it is exempt from the family-takeover rules below |
+
+Fallback stacks apply only while the self-hosted face loads (`font-display: swap`):
+- `--dz-font-family`: `'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif`
+- `--dz-font-mono`: `'JetBrains Mono', ui-monospace, Consolas, Menlo, monospace`
+
+### Weights
+
+| Token | Value | Used by |
+|-------|-------|---------|
+| `--dz-weight-regular` | 400 | Body text and most UI chrome |
+| `--dz-weight-semibold` | 600 | Headings, nav links, device names/values, emphasis |
+| `--dz-weight-mono-bold` | 700 | ACE editor syntax-highlight bold only |
+
+No other font weight is used anywhere in the theme.
 
 ### Size Scale
 
 | Token | Size | Usage |
 |-------|------|-------|
-| `{typography.micro}` | 11px | Extra-small buttons (`.btn-mini`, `.btn-xs`), chart zoom buttons |
-| `{typography.xs}` | 12px | Standard buttons (`.btn-primary`, `.btn-info`), chart menu items, `.btn-link` |
-| `{typography.sm}` | 14px | Navbar links, options menu items, `.btn-modern`, settings dropdowns |
-| `{typography.md}` | 16px | Base body text, settings panel text |
-| `{typography.display}` | 26px | Login page heading |
-| page title (h1) | 24px (core) / `{typography.md}` mobile | `General:`/`Log:` page headers; stepped down to 16px under 768px (custom.css); core owns the desktop 24px |
+| `{typography.micro}` | 11px | `.btn-mini`/`.btn-xs`, chart zoom buttons, compact-card last update, description tooltips, sunrise/sunset times, Dynamic Dashboard library descriptions, log search counter, icon pack chip/description |
+| `{typography.xs}` | 12px | Standard buttons, chart menu items, device-card last update, badges, Dynamic Dashboard library labels |
+| `{typography.sm}` | 14px | **Body base**, nav links, menus, tables, ACE editor, options menu |
+| `{typography.md}` | 16px | Settings panels, dropdown panes, mobile page-title h1 |
+| `{typography.lg}` | 22px | Device values (`#bigtext`), section headings |
+| `{typography.display}` | 26px | Page-title h1 (desktop), login heading |
+| clock (`--dz-text-clock`) | 80px (60px at <=979px) | Standby clock |
+| clock-sub (`--dz-text-clock-sub`) | 60px (40px at <=979px) | Standby date |
+| icon sm (`--dz-icon-size-sm`) | 16px | Inline/tab Ionicons |
+| icon md (`--dz-icon-size-md`) | 24px | Header buttons, card options |
+| icon lg (`--dz-icon-size-lg`) | 30px | Search icon, dialog close glyphs |
 
-### Device Card Typography (relative units)
+### The Token Contract
 
-| Element | Size | Font | Color |
-|---------|------|------|-------|
-| Name | inherited | `main-font-bold` | `--dz-body-text` |
-| Bigtext (value) | `1.4em` | `main-font` | `--dz-accent-color` |
-| Status | inherited | `main-font-bold` | `--dz-body-text` |
-| Last update | `80%` | `main-font` | `--secondary-text-color` |
-| Name icon | `110%` | inherited | inherited |
-| Compact bigtext | `1.3em` | `main-font-bold` | `--dz-accent-color` |
-| Compact last update | `0.72em` | inherited | `--secondary-text-color` |
+Every `font-family`, `font-size`, and `font-weight` declared anywhere in the theme's own CSS
+(`custom.css`, `css/*.css`) must resolve through one of the `var(--dz-*)` tokens above, or be
+`font-size: 0` (used to visually hide a text node without removing it). `scripts/check-typography.sh`
+enforces this line by line, including the shorthand `font:` property (no token-legal form exists for
+it, so any use is a violation) and a repo-wide scan for the retired `main-font` family name, and it
+gates `makerelease.sh`: a release cannot ship with a raw font declaration in theme CSS.
+
+Body text is theme-owned at `--dz-text-sm` (14px), replacing core's `10pt` (13.33px) default. Page
+titles (`.page-header-small h1`) are theme-owned at `--dz-text-display` (26px) on desktop, stepping
+down to `--dz-text-md` (16px) under 768px so long device names hold one or two lines on a phone.
+
+Core and vendor CSS that sets its own family or size directly on a descendant element is retargeted
+in `css/typography.css`: form controls, headings (including `.brand h1`/`.brand h2`, the always-visible
+navbar wordmark), the navbar links and dropdown, jQuery UI widgets (including dialog buttons),
+DataTables chrome, Dynamic Dashboard edit chrome, the topbar clock/sun-times and toasts, and the
+report/energy/floorplan/chart SVG text. An inherited value never wins the cascade against a rule that
+targets the element directly, so each of those needs its own `var(--dz-*)` rule; it cannot rely on
+inheriting Inter from `body`.
+
+Value-bearing contexts (`#bigtext`, last-update timestamps, the log console, the topbar clock,
+DataTables cells, device data tooltips) use `font-variant-numeric: tabular-nums` so digits line up in
+columns.
+
+### Device Card Typography
+
+Card text sizes are fixed `--dz-text-*` tokens, not the relative (`em`/`%`) sizes the original theme
+used. Name and status are explicit `--dz-text-sm` (14px; `.item-name, .item #name, .item #status` in
+`css/typography.css`, not left to inheritance). The value (`#bigtext`) is `--dz-text-lg` (22px,
+regular weight); last update is `--dz-text-xs` (12px). Compact-dashboard cards (`.span3`) reuse the
+same tokens: bigtext is `--dz-text-lg` at `--dz-weight-semibold`, last update steps down to
+`--dz-text-micro` (11px). There is no separate relative-size table: every card variant, standard or
+compact, reads its size from the scale above.
 
 ## Spacing
 
@@ -527,7 +580,7 @@ cell. Consequences:
 - **Checkbox**: custom-drawn, 14x14px, `{rounded.xs}` radius, `1px solid blue` border, 8x8px blue inner fill when checked
 - **Radio**: same as checkbox but `{rounded.circle}` on both outer and inner
 - **Textarea**: `{rounded.xs}` radius, `1px solid blue` border, full width
-- **Select (jQuery UI)**: bottom-border only, blue text, `main-font-bold`
+- **Select (jQuery UI)**: bottom-border only, blue text, semibold weight (`--dz-weight-semibold`)
 
 ### Toggle Switch (feature: `switch_instead_of_bigtext`)
 
@@ -542,7 +595,7 @@ Handle translates `34px` right on toggle, `0.4s` transition.
 
 ### Navigation
 
-**Top navbar**: `var(--dz-nav-bg)` background with `0 0 10px 2px rgba(0,0,0,0.2)` shadow. Links distributed via `display: flex; justify-content: space-around`. Link style: `main-font-bold`, `{typography.sm}`, `var(--dz-body-text)`, `{rounded.interactive}` radius.
+**Top navbar**: `var(--dz-nav-bg)` background with `0 0 10px 2px rgba(0,0,0,0.2)` shadow. Links distributed via `display: flex; justify-content: space-around`. Link style: Inter semibold (`{typography.semibold}`), `{typography.sm}`, `var(--dz-body-text)`, `{rounded.interactive}` radius.
 
 - **Active page**: `rgba(blue, 0.4)` background, `1px solid blue` border
 - **Dropdown hover**: `rgba(blue, 0.15)` background
@@ -571,7 +624,7 @@ Wrapped in a container with `{elevation.card}` shadow and `{rounded.container}` 
 | Element | Style |
 |---------|-------|
 | Background | `var(--dz-widget-bg)` |
-| Text (titles, labels, legends) | `var(--secondary-text-color)`, `main-font` |
+| Text (titles, labels, legends) | `var(--secondary-text-color)`, Inter (`var(--dz-font-family)`) |
 | Tooltip box | `var(--dz-body-bg)` fill, 60% opacity, no stroke |
 | Grid lines | `var(--dz-body-bg)` |
 | Export button | card surface, `4px` radius, blue icon stroke |
@@ -605,7 +658,7 @@ Card grid (`.iconpack-grid`, `auto-fill, minmax(150px, 1fr)`, 140px under 480px)
 | Element | Size/Token | Note |
 |---------|------------|------|
 | Preview | 48x48px | Defaults to the On master; hover shows Off on desktop, tap toggles a sticky Off on touch |
-| Name | `{typography.sm}` (14px), `font-weight: 600` | Weight on the ambient family, not the `main-font-bold` face |
+| Name | `{typography.sm}` (14px), `font-weight: 600` | Weight (`--dz-weight-semibold`) on the ambient Inter family, not a separate bold face |
 | Description | `{typography.micro}` (11px), 75% opacity | `min-height: 26px` keeps card heights aligned when a description is empty |
 | Intro text / search input | `{typography.xs}` (12px) / `{typography.sm}` (14px) | |
 | Counter | `{typography.xs}` (12px), 75% opacity | |
@@ -663,7 +716,7 @@ Toggled via `theme.json` features object. Each feature has an `enabled` boolean 
 - Use CSS custom properties for all colors; never hardcode hex values outside the token definitions in `dz-tokens.css` and `dark.css`
 - Use `filter: brightness(0.85)` for filled button hover states; it works across both light and dark themes
 - Use the card grid gap (`{spacing.md}`, 15px) for spacing between device cards
-- Use `main-font` for body text and `main-font-bold` for headings and emphasis
+- Use Inter regular (`--dz-weight-regular`) for body text and Inter semibold (`--dz-weight-semibold`) for headings and emphasis
 - Keep device cards as CSS grid layouts; the `grid-template-areas` pattern is the foundation of the card system
 - Use the outlined button style for secondary/toggle actions and filled for primary actions
 - Apply `{elevation.card}` for any new card-like container
@@ -678,7 +731,7 @@ Toggled via `theme.json` features object. Each feature has an `enabled` boolean 
 - Don't add new hardcoded colors; extend the CSS custom property system instead
 - Don't use `box-shadow` and `border` together for card containers; the theme uses transparent borders with box-shadow
 - Don't set fixed heights on device cards; rows use `minmax()` to accommodate variable content
-- Don't use `pt` units; normalize to `px` (the `11pt` on navbar links is legacy debt)
+- Don't use `pt` units; normalize to `px` (every theme font size is a `px`-based `--dz-text-*`/`--dz-icon-size-*` token; core's `10pt` body default is the only remaining `pt` value, and the token contract overrides it)
 - Don't introduce spacing values outside the documented clusters until the 4px grid migration
 - Don't add `!important` unless overriding upstream Domoticz styles that cannot be beaten by specificity
 - Don't rely on Bootstrap class semantics (`.btn-info` = blue, `.btn-danger` = red); the theme remaps these to its own palette
@@ -703,7 +756,7 @@ Toggled via `theme.json` features object. Each feature has an `enabled` boolean 
 - Settings buttons become fixed bottom bar
 - Dialog content tables switch to `table-layout: fixed` with word-wrap
 - Edit-form tables (`.table-details`, sub-device picker) stack label above field, inputs full-width (releases core's inline 356px/250px widths and the theme's 250px input cap; < 768px)
-- Page-title rows: title owns the flex row (button column content-sized, core split it 50/50); h1 steps 24px -> `{typography.md}` 16px
+- Page-title rows: title owns the flex row (button column content-sized, core split it 50/50); h1 steps `{typography.display}` 26px -> `{typography.md}` 16px
 - Settings grid tiles shrink to `100px` with hidden labels
 - Compact card button groups become vertical scroll-snap columns
 
@@ -745,7 +798,6 @@ would have to change, not a reason to copy the current behaviour.
 
 - No formal `:focus-visible` styles for keyboard navigation / accessibility
 - No CSS custom properties for shadows (hardcoded `rgba` values)
-- No typography scale as CSS custom properties
 - Status glow colors (timeout red, protected blue, low battery yellow) are hardcoded `rgb()` in
   `css/device-status.css`, not mapped to the semantic color system
 - `--dz-input-border` and `--dz-status-disabled` share the same value (`{colors.light-border}`) in

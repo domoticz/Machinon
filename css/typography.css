@@ -48,8 +48,10 @@ body {
    a descendant element. The body rule above only wins the cascade for the
    <body> element itself; a browser resolves each element's OWN applicable
    rule before ever falling back to an inherited value, so a normal-weight
-   core rule that targets, say, <h2> or <button> beats body's !important
-   without any specificity contest. The old theme (pre-takeover) had ~39
+   core rule that targets, say, <h2> or <button> beats body's inherited
+   family without any specificity or !important contest at all: an element's
+   own rule always outranks an inherited value, regardless of weight. The old
+   theme (pre-takeover) had ~39
    rules that happened to sit on exactly these selectors and quietly won that
    same contest; deleting them assumed inheritance would carry Inter through,
    which only holds where no core/vendor rule targets the element. Confirmed
