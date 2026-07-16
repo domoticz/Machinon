@@ -87,7 +87,7 @@ h4,
 .ui-widget,
 .item #status,
 .item #name {
-    font-family: main-font-bold !important;
+    font-weight: var(--dz-weight-semibold) !important;
 }
 
 #aboutcontent #canvas2 {
@@ -189,18 +189,18 @@ div#floorplancontent {
 
 /* CSS fallback icons — survive Angular re-renders that overwrite JS-injected icons */
 .timers_log .btnsmall[data-i18n="Log"]::before {
-    font-family: 'Ionicons';
+    font-family: var(--dz-font-icons);
     content: '\f21c';
-    font-size: 16px;
+    font-size: var(--dz-icon-size-sm);
     font-style: normal;
     speak: none;
 }
 
 .timers_log .btnsmall[data-i18n="Timers"]::before,
 .timers_log .btnsmall-sel[data-i18n="Timers"]::before {
-    font-family: 'Ionicons';
+    font-family: var(--dz-font-icons);
     content: '\f4c1';
-    font-size: 16px;
+    font-size: var(--dz-icon-size-sm);
     font-style: normal;
     speak: none;
 }
@@ -310,7 +310,7 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
 }
 
 .label, .badge {
-    font-family: main-font-bold;
+    font-weight: var(--dz-weight-semibold);
     border-radius: 2px;
     background-color: var(--dz-accent-color);
     text-align: center;
@@ -380,7 +380,7 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
        Size Scale) so long device names hold one or two lines without
        dominating the screen. */
     .page-header-small h1 {
-        font-size: 16px;
+        font-size: var(--dz-text-md);
         margin-top: 2px;
         margin-bottom: 2px;
     }
@@ -456,7 +456,6 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
 }
 
 .ui-dialog-buttonset button {
-    font-family: main-font;
     background: var(--dz-btn-primary-bg) !important;
     color: var(--dz-btn-primary-text) !important;
     border: 1px solid var(--dz-btn-primary-bg) !important;
@@ -607,7 +606,6 @@ input#AcceptNewHardware:checked ~ button {
     border: none;
     border-bottom: 1px solid var(--dz-accent-color);
     color: var(--secondary-text-color);
-    font-family: main-font;
     outline: none;
 }
 
@@ -723,7 +721,7 @@ select.ui-corner-all option {
 .ui-menu-item-wrapper.ui-state-active {
     background: var(--dz-accent-color);
     border: 0;
-    font-weight: normal;
+    font-weight: var(--dz-weight-regular);
 }
 
 .ui-selectmenu-button-open, 
@@ -734,8 +732,7 @@ select.ui-corner-all option {
 
 .ui-selectmenu-text {
     color: var(--dz-accent-color);
-    font-family: main-font-bold;
-    font-weight: 600;
+    font-weight: var(--dz-weight-semibold);
 }
 
 .selectorlevels-menu {
@@ -758,7 +755,6 @@ select.ui-corner-all option {
 }
 
 #copyright p {
-    font-family: main-font;
     color: var(--dz-body-text);
 }
 
