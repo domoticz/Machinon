@@ -45,6 +45,68 @@ body {
     font-size: var(--dz-text-sm);
 }
 
+/* Family takeover: core/vendor CSS that sets its own font-family directly on
+   a descendant element. The body rule above only wins the cascade for the
+   <body> element itself; a browser resolves each element's OWN applicable
+   rule before ever falling back to an inherited value, so a normal-weight
+   core rule that targets, say, <h2> or <button> beats body's !important
+   without any specificity contest. The old theme (pre-takeover) had ~39
+   rules that happened to sit on exactly these selectors and quietly won that
+   same contest; deleting them assumed inheritance would carry Inter through,
+   which only holds where no core/vendor rule targets the element. Confirmed
+   by live probe (http://localhost:8080, Devices/Settings pages): every
+   selector below still computed a non-Inter family with only the rule above
+   in place. Icon fonts are deliberately absent from this list: Ionicons
+   paints its glyph on ::before (the element's own text stays Inter, which is
+   correct) and Font Awesome 7 sets --fa-family on .fa/.fas/.far itself, so
+   neither one is reachable in a way that would collide with these rules. */
+
+/* Form controls: button/input/select/textarea never inherit their font from
+   body by default; the browser's UA stylesheet gives them their own value.
+   A handful of core rules already inherit it per-selector (e.g. css/style.css
+   .log-search-input); most don't, which is why this needs to be a blanket
+   rule rather than case-by-case patching. */
+button, input, select, textarea {
+    font-family: var(--dz-font-family);
+}
+
+/* Headings: css/style.css sets Arial directly on h1/h2/h3, and Georgia on
+   .brand h2 (the "*" version marker beside the logo in the navbar). h4 has
+   no core rule targeting it and already inherits Inter correctly. */
+h1, h2, h3,
+.brand h2 {
+    font-family: var(--dz-font-family);
+}
+
+/* Navbar links + dropdown: css/style.css sets a -apple-system stack directly
+   on both selectors. */
+.navbar .nav li a,
+.navbar .nav .dropdown-menu {
+    font-family: var(--dz-font-family);
+}
+
+/* jQuery UI (ui-darkness theme): .ui-widget and its form descendants set
+   "Segoe UI, Arial, sans-serif" directly. This also covers dialog buttons
+   (a jQuery UI dialog's chrome carries the .ui-widget class), so
+   .ui-dialog-buttonset button resolves through the compound rule below. */
+.ui-widget,
+.ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {
+    font-family: var(--dz-font-family);
+}
+
+/* colpick (device color picker popup): both the popup chrome and its hex/RGB
+   text inputs set Arial directly. */
+.colpick,
+.colpick_field input, .colpick_hex_field input {
+    font-family: var(--dz-font-family);
+}
+
+/* Remote-control widget (RM devices): the SVG button labels set a bare
+   sans-serif stack directly. */
+.remotetext {
+    font-family: var(--dz-font-family);
+}
+
 /* Page titles are theme-owned (were core's 24px on desktop). Login heading
    shares the same step (css/login.css). Mobile step-down stays in custom.css.
    Selector verified against the live core markup (Setup tabs, Log pages,
