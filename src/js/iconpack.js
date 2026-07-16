@@ -187,13 +187,6 @@ function iconPackButton(kind, ic) {
     return btn;
 }
 
-function bytesEqual(a, b) {
-    if (a.byteLength !== b.byteLength) return false;
-    var x = new Uint8Array(a), y = new Uint8Array(b);
-    for (var i = 0; i < x.length; i++) { if (x[i] !== y[i]) return false; }
-    return true;
-}
-
 function fetchPackBytes(url) {
     return fetch(url, { cache: "no-cache", credentials: "include" }).then(function(r) {
         if (!r.ok) { throw new Error("HTTP " + r.status); }
@@ -201,19 +194,35 @@ function fetchPackBytes(url) {
     });
 }
 
-/* Outdated = shipped art differs from the served DB art, or metadata drifted.
-   The pack's 16px base derives from the On master, so On+Off covers art. */
+/* Content signature of an art file: "<bytelen>-<fnv1a32 hex>". Mirrors
+   art_sig() in images-machinon's dz-pack-build.py byte for byte, which stamps
+   the shipped values into manifest.json; FNV-1a (not crypto.subtle) because
+   plain-http LAN installs are not a secure context. */
+function packArtSig(buf) {
+    var bytes = new Uint8Array(buf);
+    var h = 0x811C9DC5;
+    for (var i = 0; i < bytes.length; i++) {
+        h = h ^ bytes[i];
+        /* h * 16777619 in 32-bit space, without overflow: shift-add form */
+        h = (h + ((h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24))) >>> 0;
+    }
+    return bytes.length + "-" + ("0000000" + h.toString(16)).slice(-8);
+}
+
+/* Outdated = the served DB art differs from the manifest's shipped signature,
+   or metadata drifted. The manifest carries the shipped sigs, so only the two
+   SERVED files are fetched (2 requests per installed icon, not 4). The pack's
+   16px base derives from the On master, so On+Off covers art. */
 function packIconOutdated(icon, installed) {
     if (installed.title !== icon.name || installed.description !== icon.description) {
         return Promise.resolve(true);
     }
+    if (!icon.on_sig || !icon.off_sig) { return Promise.resolve(false); }
     return Promise.all([
-        fetchPackBytes(packPreviewUrl(icon.base, "On")),
         fetchPackBytes("images/" + icon.base + "48_On.png"),
-        fetchPackBytes(packPreviewUrl(icon.base, "Off")),
         fetchPackBytes("images/" + icon.base + "48_Off.png")
     ]).then(function(b) {
-        return !bytesEqual(b[0], b[1]) || !bytesEqual(b[2], b[3]);
+        return packArtSig(b[0]) !== icon.on_sig || packArtSig(b[1]) !== icon.off_sig;
     }).catch(function() { return false; }); /* unreadable art: no false update nag */
 }
 
