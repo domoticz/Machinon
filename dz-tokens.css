@@ -56,6 +56,27 @@
        default. */
     --dz-sun-color:                #ff8c00;
 
+    /* ---- Typography tokens (scheme-independent; schemes never override) ----
+       The ONLY place font sizes/weights/families are defined. Enforced by
+       scripts/check-typography.sh. Scale: 11/12/14/16/22/26 (DESIGN.md). */
+    --dz-font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --dz-font-mono: 'JetBrains Mono', ui-monospace, Consolas, Menlo, monospace;
+    --dz-font-icons: 'Ionicons';
+    --dz-weight-regular: 400;
+    --dz-weight-semibold: 600;
+    --dz-weight-mono-bold: 700;   /* ACE syntax-highlight bold */
+    --dz-text-micro: 11px;        /* btn-mini/xs, chart zoom, compact last-update */
+    --dz-text-xs: 12px;           /* buttons, chart menus, last-update, badges */
+    --dz-text-sm: 14px;           /* BODY BASE, nav, menus, tables, ACE */
+    --dz-text-md: 16px;           /* settings panels, dropdown panes, mobile h1 */
+    --dz-text-lg: 22px;           /* device values (bigtext), section headings */
+    --dz-text-display: 26px;      /* page-title h1, login heading */
+    --dz-text-clock: 80px;        /* standby clock */
+    --dz-text-clock-sub: 60px;    /* standby date */
+    --dz-icon-size-sm: 16px;      /* inline/tab ionicons */
+    --dz-icon-size-md: 24px;      /* header buttons, card options */
+    --dz-icon-size-lg: 30px;      /* search icon, dialog close glyphs */
+
     /* Dynamic Dashboard chrome tokens (light). Core's GridStack dashboard: www/app/dashboardDynamic/, .dd-* classes.
        Consumed by core dashboard.css; device-card bg comes from --dz-widget-bg above.
        Special-widget tokens (--dz-widget-accent/amber/energy/weather/moon) are NOT set here:
@@ -147,4 +168,12 @@
 html:root {
     --dz-widget-accent: var(--dz-accent-color);
     --dz-accent-red:    #c43b3b;
+}
+
+/* Standby clock steps down on small screens (matches css/standby.css media query). */
+@media screen and (max-width: 768px) {
+    :root {
+        --dz-text-clock: 60px;
+        --dz-text-clock-sub: 40px;
+    }
 }

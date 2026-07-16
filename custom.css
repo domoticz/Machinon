@@ -7,6 +7,7 @@
    common.css utilities clash with Machinon's own card CSS. Any --dz-* token that core's
    globally-linked stylesheets consume must therefore be defined in dz-tokens.css. */
 @import url("dz-tokens.css");
+@import url("css/typography.css");
 @import url("dark.css");
 
 /* import css files */
@@ -57,30 +58,13 @@
 /* ionicons */
 @import url("css/ionicons.min.css");
 
-@font-face {
-    font-family: main-font;
-    font-style: normal;
-    font-weight: 400;
-    src: local('Open Sans Regular'), local('OpenSans-Regular'),
-         url('fonts/open-sans-v16-latin_latin-ext-regular.woff2') format('woff2'),
-         url('fonts/open-sans-v16-latin_latin-ext-regular.woff') format('woff');
-}
-
-@font-face {
-    font-family: main-font-bold;
-    font-style: normal;
-    font-weight: 600;
-    src: local('Open Sans SemiBold'), local('OpenSans-SemiBold'),
-         url('fonts/open-sans-v16-latin_latin-ext-600.woff2') format('woff2'),
-         url('fonts/open-sans-v16-latin_latin-ext-600.woff') format('woff');
-}
 .help-block {
     color: var(--dz-body-text);
 }
 
 /* jQuery UI's bundled ui-darkness theme forces white .ui-widget-content text (invisible in light
-   mode). Restore the theme text colour. Body already provides font-family (main-font) + colour by
-   inheritance for everything else, so the old cross-cutting "Add fonts" grab-bag rule was removed -
+   mode). Restore the theme text colour. Body already provides font-family (--dz-font-family) + colour
+   by inheritance for everything else, so the old cross-cutting "Add fonts" grab-bag rule was removed -
    it conflated font + colour across unrelated components (buttons, nav, cards) and was the reason
    buttons could not be extracted to their own file. */
 .ui-widget-content {
