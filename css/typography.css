@@ -155,7 +155,11 @@ table[id^="item"] > tbody > tr {
 /* Dynamic-dashboard edit chrome (core dashboard.css sizes: 12/10.4/10px). */
 .dd-library-item-label, .dd-topbar-name { font-size: var(--dz-text-xs); }
 .dd-library-item-desc, .dd-library-category-label { font-size: var(--dz-text-micro); }
-.dd-panel-close { font-size: var(--dz-icon-size-md); }
+/* core's css/dashboard.css loads after this sheet (index.html: styles/default/
+   custom.css, then css/dashboard.css) and sets this same class to a hardcoded
+   20px; at equal specificity source order wins, so this rule was dead without
+   !important (same cascade-loss pattern as .ace_editor below, T10 census). */
+.dd-panel-close { font-size: var(--dz-icon-size-md) !important; }
 
 /* Topbar clock + sun times, toasts. */
 #jsTbTime, .noty_body { font-size: var(--dz-text-sm); }
