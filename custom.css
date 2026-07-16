@@ -381,9 +381,9 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
         word-wrap: break-word;
     }
 
-    /* Page titles (General: <device>, Log: <device>) keep desktop's 24px on a
-       360px phone; step down to the type scale's md tier (16px, DESIGN.md
-       Size Scale) so long device names hold one or two lines without
+    /* Page titles (General: <device>, Log: <device>) render at the display
+       tier (26px, css/typography.css) on desktop; step down to the md tier
+       (16px) on phones so long device names hold one or two lines without
        dominating the screen. */
     .page-header-small h1 {
         font-size: var(--dz-text-md);
