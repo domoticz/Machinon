@@ -12,6 +12,13 @@
 	background: var(--dz-body-bg)!important;
 	border-color: var(--dz-accent-color) !important;
 }
+
+/* The energy flow diagram's <svg> root (views/energy_dashboard.html) carries an inline
+   style attribute pinning the -apple-system stack, which every <text> node inherits
+   (SVG text inherits the property normally); only !important beats an inline style. */
+#emain svg {
+    font-family: var(--dz-font-family) !important;
+}
 #eicon {
     fill: var(--dz-body-text)!important;
 }

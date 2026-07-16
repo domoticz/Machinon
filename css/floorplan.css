@@ -27,8 +27,17 @@ rect.header {
     font-weight: var(--dz-weight-semibold) !important;
 }
 
-.DeviceDetails text#status {
+/* Core (www/js/domoticzdevices.js) sets font-weight="bold" as an SVG presentation
+   attribute directly on this text node (and its tspans, for the multiline status
+   variant) - unlike text#name, which core leaves unstyled and so takes font-weight
+   600 cleanly from the rule above. A presentation attribute loses to ANY stylesheet
+   declaration, but only if one exists for that property on that element; nothing here
+   declared font-weight for text#status, so the attribute's "bold" (700) won by
+   default. Declare it explicitly so floorplan labels match the card/name weight. */
+.DeviceDetails text#status,
+.DeviceDetails text#status tspan {
     font-size: var(--dz-text-sm) !important;
+    font-weight: var(--dz-weight-semibold) !important;
     fill: var(--dz-accent-color) !important;
 }
 

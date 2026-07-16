@@ -156,9 +156,12 @@ a.saveschemebtn {
     flex-shrink: 0;
 }
 
+/* font-weight is not set here: custom.css's h1-h4/.machinoText/... group forces
+   semibold !important, so a regular-weight declaration on this selector was always
+   dead (last-write on the same property inside one file, then still beaten by the
+   !important rule loaded later). Removed rather than kept as documentation. */
 .machinoText {
     font-size: var(--dz-text-md);
-    font-weight: var(--dz-weight-regular);
     letter-spacing: -0.5px;
     color: var(--dz-body-text);
     margin-left: 20px;

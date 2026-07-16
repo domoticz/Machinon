@@ -26,9 +26,16 @@
     display: none;
 }
 
+/* .highcharts-axis-title is listed both bare and with a "text" descendant: Highcharts
+   puts the class directly on the <text> element for the Y-axis title (no wrapping
+   group), so the descendant-only form never matched it and it kept rendering
+   Highcharts' own Lucida Grande stack on every report/device-log chart (measured on
+   #/Devices/N/Report). The other axis/label/tooltip text nodes DO sit inside a
+   classed wrapper, which is why only this one needs the bare form too. */
 .highcharts-title,
 .highcharts-menu-item,
 .highcharts-label text,
+.highcharts-axis-title,
 .highcharts-axis-title text,
 .highcharts-axis-labels text,
 .highcharts-legend-item text,
