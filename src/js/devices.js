@@ -72,12 +72,19 @@ function getCardDevice(item) {
    toggles, its icon is clickable (lcursor), and it carries no dimmer
    slider, selector levels or button group. The DOM heuristics alone are
    NOT sufficient: core marks special-action icons clickable too (see
-   NON_TOGGLE_SWITCH_TYPES), so cards whose scope is unreachable only get
-   a toggle if the DOM checks pass, which keeps scenes working. */
+   NON_TOGGLE_SWITCH_TYPES), so an unreachable scope FAILS CLOSED. The only
+   cards without a device scope are scenes (which have their own gated
+   branches and are rejected by the #img heuristic anyway) and cards probed
+   mid-render: after a drag drop core re-renders the whole list
+   (ShowLights) and the fresh cards' scopes attach a beat after the DOM
+   lands, so the old DOM-only fallback re-grew toggles on smoke detectors
+   (owner report 2026-07-16). A real switch rejected in that window is
+   picked up by the next observer pass once its scope is bound. */
 function isPlainOnOffSwitch(item) {
     var device = getCardDevice(item);
-    if (device && (device.Type === "Security" ||
-        NON_TOGGLE_SWITCH_TYPES.indexOf(device.SwitchType) !== -1)) {
+    if (!device) return false;
+    if (device.Type === "Security" ||
+        NON_TOGGLE_SWITCH_TYPES.indexOf(device.SwitchType) !== -1) {
         return false;
     }
     return item.find("#bigtext").siblings("#img").find("img").hasClass("lcursor") &&
