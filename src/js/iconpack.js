@@ -159,8 +159,114 @@ function iconPackButton(kind, ic) {
     return btn;
 }
 
-/* Implemented in the actions task; harmless stubs so the skeleton renders. */
-function packIconOutdated(icon, installed) { return Promise.resolve(false); }
-function installPackIcon(ic) {}
-function removePackIcon(ic) {}
-function installAllPackIcons() {}
+function bytesEqual(a, b) {
+    if (a.byteLength !== b.byteLength) return false;
+    var x = new Uint8Array(a), y = new Uint8Array(b);
+    for (var i = 0; i < x.length; i++) { if (x[i] !== y[i]) return false; }
+    return true;
+}
+
+function fetchPackBytes(url) {
+    return fetch(url, { cache: "no-cache", credentials: "include" }).then(function(r) {
+        if (!r.ok) { throw new Error("HTTP " + r.status); }
+        return r.arrayBuffer();
+    });
+}
+
+/* Outdated = shipped art differs from the served DB art, or metadata drifted.
+   The pack's 16px base derives from the On master, so On+Off covers art. */
+function packIconOutdated(icon, installed) {
+    if (installed.title !== icon.name || installed.description !== icon.description) {
+        return Promise.resolve(true);
+    }
+    return Promise.all([
+        fetchPackBytes(packPreviewUrl(icon.base, "On")),
+        fetchPackBytes("images/" + icon.base + "48_On.png"),
+        fetchPackBytes(packPreviewUrl(icon.base, "Off")),
+        fetchPackBytes("images/" + icon.base + "48_Off.png")
+    ]).then(function(b) {
+        return !bytesEqual(b[0], b[1]) || !bytesEqual(b[2], b[3]);
+    }).catch(function() { return false; }); /* unreadable art: no false update nag */
+}
+
+function uploadPackZip(base) {
+    return fetch("styles/" + themeFolder + "/iconpack/" + base + ".zip",
+        { cache: "no-cache", credentials: "include" })
+        .then(function(r) {
+            if (!r.ok) { throw new Error("zip fetch HTTP " + r.status); }
+            return r.blob();
+        })
+        .then(function(blob) {
+            var fd = new FormData();
+            fd.append("file", blob, base + ".zip");
+            return fetch("json.htm?type=command&param=uploadcustomicon",
+                { method: "POST", body: fd, credentials: "include" });
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.status !== "OK") { throw new Error(data.error || "upload failed"); }
+        });
+}
+
+function installPackIcon(ic) {
+    return uploadPackZip(ic.base)
+        .then(function() { generate_noty("success", ic.name + " installed", 3000); })
+        .catch(function(e) { generate_noty("error", ic.name + ": " + e.message, 6000); })
+        .then(refreshIconPack);
+}
+
+function devicesUsingPackIcon(idx) {
+    return fetchPackJson("json.htm?type=command&param=getdevices&used=true&displayhidden=1")
+        .then(function(data) {
+            return (data.result || [])
+                .filter(function(d) { return Number(d.CustomImage) === 100 + idx; })
+                .map(function(d) { return d.Name; });
+        });
+}
+
+function removePackIcon(ic) {
+    devicesUsingPackIcon(ic.idx).then(function(users) {
+        var msg = users.length
+            ? 'Remove "' + ic.name + '"? Used by: ' + users.join(", ")
+                + ". These devices will revert to their default icon."
+            : 'Remove "' + ic.name + '" from the icon database?';
+        bootbox.confirm({
+            /* device names are user data: text only, never markup */
+            message: $("<div>").text(msg),
+            callback: function(ok) {
+                if (!ok) return;
+                fetchPackJson("json.htm?type=command&param=deletecustomicon&idx=" + ic.idx)
+                    .then(function() { generate_noty("success", ic.name + " removed", 3000); })
+                    .catch(function() { generate_noty("error", "Could not remove " + ic.name, 6000); })
+                    .then(refreshIconPack);
+            }
+        });
+    });
+}
+
+/* Sequential on purpose: each upload is a SQLite write plus blob extraction;
+   parallel uploads invite lock contention. */
+function installAllPackIcons() {
+    var todo = ICONPACK.state.filter(function(ic) { return ic.idx === null || ic.outdated; });
+    var current = ICONPACK.state.length - todo.length;
+    if (!todo.length) {
+        generate_noty("success", "All " + ICONPACK.state.length + " pack icons are installed and current", 3000);
+        return;
+    }
+    var added = 0, updated = 0, failures = [];
+    var chain = Promise.resolve();
+    todo.forEach(function(ic, i) {
+        chain = chain.then(function() {
+            generate_noty("information", "Installing " + (i + 1) + "/" + todo.length + ": " + ic.name, 1000);
+            return uploadPackZip(ic.base)
+                .then(function() { if (ic.idx === null) { added++; } else { updated++; } })
+                .catch(function(e) { failures.push(ic.name + " (" + e.message + ")"); });
+        });
+    });
+    chain.then(function() {
+        var msg = added + " installed, " + updated + " updated, " + current + " already current";
+        if (failures.length) { generate_noty("error", msg + "; failed: " + failures.join(", "), 8000); }
+        else { generate_noty("success", msg, 5000); }
+        refreshIconPack();
+    });
+}
