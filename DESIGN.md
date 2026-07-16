@@ -605,12 +605,13 @@ Card grid (`.iconpack-grid`, `auto-fill, minmax(150px, 1fr)`, 140px under 480px)
 | Element | Size/Token | Note |
 |---------|------------|------|
 | Preview | 48x48px | Defaults to the On master; hover shows Off on desktop, tap toggles a sticky Off on touch |
-| Name | `{typography.sm}` (14px), `main-font-bold` | |
+| Name | `{typography.sm}` (14px), `font-weight: 600` | Weight on the ambient family, not the `main-font-bold` face |
 | Description | `{typography.micro}` (11px), 75% opacity | `min-height: 26px` keeps card heights aligned when a description is empty |
 | Intro text / search input | `{typography.xs}` (12px) / `{typography.sm}` (14px) | |
-| Counter / "Installed" chip | `{typography.micro}` (11px) | Chip: `var(--dz-status-ok)` background, white text, top-right |
+| Counter | `{typography.xs}` (12px), 75% opacity | |
+| "Installed" chip | `{typography.micro}` (11px) | `var(--dz-status-ok)` background, white text, top-right |
 
-Actions row: `images/add.png` installs; it swaps to `images/machinon/refresh.png` only when the served art or metadata has actually drifted from the pack (byte-compare of the On and Off 48px previews, plus a title/description check against `getcustomiconset`), never on a hunch. `images/remove.png` warns with the names of any devices currently assigned the icon (looked up via `getdevices`), notes they will revert to their default icon, and is disabled when nothing is installed. State is never bookkept client-side: every action re-derives install status from `getcustomiconset` before the grid repaints, so operations are idempotent and safe to retry.
+Actions row: `images/add.png` installs; it swaps to `images/machinon/refresh.png` only when the served art or metadata has actually drifted from the pack (a title/description check against `getcustomiconset` first, then a byte-compare of the On and Off 48px previews), never on a hunch. `images/remove.png` warns with the names of any devices currently assigned the icon (looked up via `getdevices`), notes they will revert to their default icon, and is disabled when nothing is installed. State is never bookkept client-side: every action re-derives install status from `getcustomiconset` before the grid repaints, so operations are idempotent and safe to retry.
 
 "Install / update all" acts on the visible set only: with a search filter active it relabels to "Install / update shown (N)" and installs/updates just the shown icons, one upload at a time (chained, not parallel, to avoid SQLite lock contention on the CustomImages table). A busy flag serializes every DB-writing operation, install, update, or remove alike, so a second click mid-upload gets a warning toast instead of a second concurrent write.
 
