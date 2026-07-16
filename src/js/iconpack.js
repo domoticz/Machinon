@@ -95,11 +95,12 @@ function buildIconPackCard(ic) {
 
     var img = document.createElement("img");
     img.className = "iconpack-preview";
-    img.src = packPreviewUrl(ic.base, "Off");
+    img.src = packPreviewUrl(ic.base, "On");
     img.alt = ic.name;
-    /* preview state: hover shows On (desktop), click/tap toggles it (touch) */
+    /* preview state: On by default (owner preference), hover shows Off
+       (desktop), click/tap toggles it (touch) */
     var sticky = false, hover = false;
-    function paint() { img.src = packPreviewUrl(ic.base, (sticky !== hover) ? "On" : "Off"); }
+    function paint() { img.src = packPreviewUrl(ic.base, (sticky !== hover) ? "Off" : "On"); }
     img.addEventListener("mouseenter", function() { hover = true; paint(); });
     img.addEventListener("mouseleave", function() { hover = false; paint(); });
     img.addEventListener("click", function() { sticky = !sticky; paint(); });
