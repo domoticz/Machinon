@@ -170,8 +170,12 @@ html:root {
     --dz-accent-red:    #c43b3b;
 }
 
-/* Standby clock steps down on small screens (matches css/standby.css media query). */
-@media screen and (max-width: 768px) {
+/* Standby clock steps down on small screens. Breakpoint (979px) matches the
+   theme's other tablet/mobile media queries (css/settings.css,
+   css/iconsupload.css). css/standby.css no longer carries its own
+   step-down media query: .standbyClock/.standbyDate consume these tokens
+   directly, so the swap happens for free wherever this file redefines them. */
+@media screen and (max-width: 979px) {
     :root {
         --dz-text-clock: 60px;
         --dz-text-clock-sub: 40px;

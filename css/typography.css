@@ -35,13 +35,12 @@
 
 /* Base: one family + one size for everything; components override by token.
    Replaces core's 10pt body default (was 13.33px on ~700 visible elements).
-   font-family carries !important: css/cards.css line 770 still redeclares
-   body's font on a retired, now-unresolvable font name, loaded later in the
-   cascade at equal specificity, which would otherwise win by source order
-   and undo the takeover. Drop the !important once the cards cluster sweep
-   (later task) removes that stale line. */
+   No !important needed: the cards cluster sweep (T6) removed css/cards.css's
+   stale body rule that redeclared the font on a retired, now-unresolvable
+   family name, loaded later in the cascade at equal specificity, which would
+   otherwise have won by source order and undone the takeover. */
 body {
-    font-family: var(--dz-font-family) !important;
+    font-family: var(--dz-font-family);
     font-size: var(--dz-text-sm);
 }
 

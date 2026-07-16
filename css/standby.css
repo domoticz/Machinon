@@ -14,8 +14,8 @@
     left: 50%;
     transform: translateX(-50%) translateY(-50%);
     color: #fff;
-    font-size: 80px;
-    font-family: main-font-bold;
+    font-size: var(--dz-text-clock);
+    font-weight: var(--dz-weight-semibold);
     letter-spacing: 7px;
 }
 
@@ -25,17 +25,11 @@
     left: 50%;
     transform: translateX(-50%) translateY(-50%);
     color: #fff;
-    font-size: 60px;
-    font-family: main-font-bold;
+    font-size: var(--dz-text-clock-sub);
+    font-weight: var(--dz-weight-semibold);
     letter-spacing: 7px;
 }
 
-@media screen and (max-width: 979px) {
-    .standbyClock {
-        font-size: 60px;
-    }
-
-    .standbyDate {
-        font-size: 40px;
-    }
-}
+/* Step-down at <=979px is handled entirely by dz-tokens.css redefining
+   --dz-text-clock / --dz-text-clock-sub at the same breakpoint; no
+   standby-local media query is needed. */

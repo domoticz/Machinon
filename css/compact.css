@@ -78,7 +78,7 @@ section.compact .row:not(.divider) {
 .span3 td.input .btn-group button.btn-selected,
 .span3 td#status .btn-group button.btn-selected {
     color: var(--dz-accent-text) !important;
-    font-size: 1rem;
+    font-size: var(--dz-text-md);
     min-height: 50px;
     order: 1;
 }
@@ -110,7 +110,7 @@ section.compact .row:not(.divider) {
     grid-area: status;
     padding: 0 10px;
     align-self: center;
-    font-size: 1.4em;
+    font-size: var(--dz-text-lg);
 }
 
 #holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr,
@@ -129,8 +129,8 @@ section.compact .row:not(.divider) {
 #holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr td#bigtext,
 #holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr td#bigtext {
     grid-area: bigtext;
-    font-size: 1.3em;
-    font-family: main-font-bold;
+    font-size: var(--dz-text-lg);
+    font-weight: var(--dz-weight-semibold);
     padding: 2px 8px 0 0;
     text-align: right;
     align-self: center;
@@ -162,7 +162,7 @@ section.compact .row:not(.divider) {
     padding: 0 8px 2px 0;
     text-align: right;
     align-self: center;
-    font-size: 0.72em;
+    font-size: var(--dz-text-micro);
     color: var(--secondary-text-color);
     max-height: unset;
 }

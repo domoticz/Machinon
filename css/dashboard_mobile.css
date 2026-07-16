@@ -26,7 +26,7 @@ body.dashMobile #tbTimeSun,
 body.dashMobile #tbSunGroup,
 body.dashMobile #tbSunGroup .tbSun {
     color: var(--secondary-text-color);
-    font-size: 12px;
+    font-size: var(--dz-text-xs);
 }
 
 body.dashMobile #tbTimeSun .fa-sun {
@@ -49,7 +49,7 @@ body.dashMobile table.mobileitem > thead > tr {
 }
 
 body.dashMobile table.mobileitem > thead > tr > th:first-of-type {
-    font-family: main-font-bold;
+    font-weight: var(--dz-weight-semibold);
     flex-grow: 1;
 }
 
@@ -85,7 +85,7 @@ body.dashMobile table.mobileitem td {
 }
 
 body.dashMobile table.mobileitem td:last-child {
-    font-family: main-font-bold;
+    font-weight: var(--dz-weight-semibold);
     min-height: 25px;
 }
 
@@ -128,7 +128,7 @@ body.dashMobile table.mobileitem td.name a:after {
     content: "\2794";
     display: block;
     color: inherit;
-    font-size: 12px;
+    font-size: var(--dz-text-xs);
     text-align: center;
     width: 18px;
 }
@@ -155,8 +155,7 @@ body.dashMobile table.mobileitem .btn-group {
 body.dashMobile table.mobileitem .btn-group .btn {
     padding-top: 0 !important;
     padding-bottom: 0 !important;
-    font-family: main-font;
-    font-size: 10pt;
+    font-size: var(--dz-text-sm);
     margin-left: 2px !important;
     margin-bottom: 2px !important;
     border-radius: 5px !important;
@@ -164,14 +163,13 @@ body.dashMobile table.mobileitem .btn-group .btn {
 
 body.dashMobile table.mobileitem .btn-mini {
     margin-left: 2px;
-    font-family: main-font;
     background: var(--dz-widget-bg) !important;
     background-image: none !important;
     border: 1px solid var(--dz-accent-color);
     border-radius: 5px;
     color: var(--dz-body-text) !important;
     padding: 4px 10px !important;
-    font-size: 12px;
+    font-size: var(--dz-text-xs);
     min-width: 40px;
     text-align: center;
     box-sizing: border-box;
