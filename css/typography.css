@@ -113,6 +113,21 @@ h1, h2, h3,
     font-family: var(--dz-font-family);
 }
 
+/* Light/Utility TAB pages (LightSwitches, Utility: light_widget_tab.html renders
+   id="itemtable", not the itemtablesmall/itemtabledoubleicon ids the Dashboard/Scenes/
+   Temperature/Weather cards use): css/style.css's "body table#itemtable tbody tr" sets
+   Arial directly on the row, which every cell (name/bigtext/status/lastupdate/type)
+   then inherits instead of body's Inter. Confirmed by computed-style probe: identical
+   card markup read Inter on Dashboard/Scenes and Arial on LightSwitches/Utility. Same
+   selector shape as the box-sizing/grid rules in css/cards.css, so any current or future
+   itemtable* id is covered. !important is required, not stylistic: core's selector
+   carries an id (#itemtable), which outranks this attribute-selector form on
+   specificity alone regardless of source order (confirmed: without !important the
+   probe still read Arial). */
+table[id^="item"] > tbody > tr {
+    font-family: var(--dz-font-family) !important;
+}
+
 /* Page titles are theme-owned (were core's 24px on desktop). Login heading
    shares the same step (css/login.css). Mobile step-down stays in custom.css.
    Selector verified against the live core markup (Setup tabs, Log pages,
@@ -142,14 +157,25 @@ h1, h2, h3,
 .dd-library-item-desc, .dd-library-category-label { font-size: var(--dz-text-micro); }
 .dd-panel-close { font-size: var(--dz-icon-size-md); }
 
-/* Topbar clock + sun times, toasts, log lines. */
-#jsTbTime, .noty_body, .log-line { font-size: var(--dz-text-sm); }
+/* Topbar clock + sun times, toasts. */
+#jsTbTime, .noty_body { font-size: var(--dz-text-sm); }
 #jsTbSunRise, #jsTbSunSet { font-size: var(--dz-text-micro); }
+
+/* Log page search-result counter: css/style.css's .log-search-count hardcodes 10px,
+   off the type scale entirely. Nearest token. */
+.log-search-count { font-size: var(--dz-text-micro); }
 
 /* Code surfaces: first-class mono typography (was ACE's OS-dependent stack /
    bare 'monospace' inputs on the Events page). */
 .ace_editor { font-family: var(--dz-font-mono) !important; font-size: var(--dz-text-sm) !important; }
 .aw-code-input, .aw-code-review { font-family: var(--dz-font-mono); font-size: var(--dz-text-xs); }
+
+/* Log console: adopt mono for scanability (timestamps/levels line up in columns).
+   .log-console is the scrollable output area (css/style.css); .log-line already
+   inherits font-family from it, but restated explicitly so the contract checker's
+   per-file scan and future readers see the log surface owns its family, not just
+   inherits it. tabular-nums is applied below. */
+.log-console, .log-line { font-family: var(--dz-font-mono); font-size: var(--dz-text-sm); }
 
 /* Numbers align in value-bearing contexts. */
 #bigtext, .item #lastupdate, .log-line, #jsTbTime, table.display td,

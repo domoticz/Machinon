@@ -71,6 +71,14 @@
     color: var(--dz-body-text);
 }
 
+/* #lightcontent td / #utilitycontent td used to sit in this list too: they match
+   EVERY <td> in a device card on the LightSwitches/Utility tab pages (bigtext,
+   lastupdate, type - not just name/status), so those two pages alone rendered
+   every card cell semibold while the identical markup on Dashboard/Scenes/
+   Temperature/Weather stayed regular. #lightcontent/#utilitycontent wrap nothing
+   but device cards and the empty-state <h2> (already covered by the h1-h4 rule
+   below; see views/lights.html, views/utility.html), so the two selectors were
+   pure blast radius with no remaining purpose - removed rather than narrowed. */
 h1,
 h2,
 h3,
@@ -78,8 +86,6 @@ h4,
 #tophtm,
 #temptophtm,
 #weathertophtm,
-#lightcontent td,
-#utilitycontent td,
 .warning-text,
 .beforebannav,
 .machinoText,
