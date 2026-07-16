@@ -73,16 +73,28 @@ function refreshIconPack() {
     });
 }
 
+/* The icons matching the current search: the set the grid shows AND the set
+   the install-all button acts on (its toolbar placement implies exactly that). */
+function visiblePackIcons() {
+    var q = ($("#iconpackSearch").val() || "").toLowerCase();
+    return ICONPACK.state.filter(function(ic) {
+        return !q || (ic.base + " " + ic.name + " " + ic.description).toLowerCase().indexOf(q) !== -1;
+    });
+}
+
 function renderIconPackGrid() {
     var grid = document.getElementById("iconpackGrid");
     if (!grid) return;
-    var q = ($("#iconpackSearch").val() || "").toLowerCase();
-    var shown = ICONPACK.state.filter(function(ic) {
-        return !q || (ic.base + " " + ic.name + " " + ic.description).toLowerCase().indexOf(q) !== -1;
-    });
+    var shown = visiblePackIcons();
     var installedCount = ICONPACK.state.filter(function(ic) { return ic.idx !== null; }).length;
     document.getElementById("iconpackCounter").textContent =
         installedCount + " of " + ICONPACK.state.length + " installed";
+    var allBtn = document.getElementById("iconpackInstallAll");
+    if (allBtn) {
+        allBtn.textContent = shown.length === ICONPACK.state.length
+            ? "Install / update all"
+            : "Install / update shown (" + shown.length + ")";
+    }
     grid.textContent = "";
     shown.forEach(function(ic) { grid.appendChild(buildIconPackCard(ic)); });
     if (!shown.length) { grid.textContent = "No icons match the search."; }
@@ -247,10 +259,11 @@ function removePackIcon(ic) {
 /* Sequential on purpose: each upload is a SQLite write plus blob extraction;
    parallel uploads invite lock contention. */
 function installAllPackIcons() {
-    var todo = ICONPACK.state.filter(function(ic) { return ic.idx === null || ic.outdated; });
-    var current = ICONPACK.state.length - todo.length;
+    var pool = visiblePackIcons();
+    var todo = pool.filter(function(ic) { return ic.idx === null || ic.outdated; });
+    var current = pool.length - todo.length;
     if (!todo.length) {
-        generate_noty("success", "All " + ICONPACK.state.length + " pack icons are installed and current", 3000);
+        generate_noty("success", "All " + pool.length + " shown pack icons are installed and current", 3000);
         return;
     }
     var added = 0, updated = 0, failures = [];
