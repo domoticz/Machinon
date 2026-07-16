@@ -192,6 +192,20 @@ function syncColorInputs() {
     });
 }
 
+/* The custom_color_scheme FEATURE flag means "the colour-override applier is
+   active", which is true for built-in schemes and user presets too (they ride
+   the same plumbing). The legacy Custom Color Scheme CHECKBOX means "the
+   Custom card is selected": integrated schemes must not read as custom. So
+   the checkbox mirrors the card, never the flag, and the colour inputs
+   enable only while it is checked. */
+function syncCustomCheckbox() {
+    var isCustom = theme.scheme === "custom";
+    var box = $("#themevar39");
+    if (!box.length) return;
+    box.prop("checked", isCustom);
+    box.siblings("span.option").children(".parentrequiredchild").prop("disabled", !isCustom);
+}
+
 /* The legacy Dark Theme / Custom Color Scheme checkboxes still exist; when
    one is toggled directly, re-derive the picker selection from them. */
 function syncSchemeFromFeatures() {
@@ -210,6 +224,7 @@ function syncSchemeFromFeatures() {
 function renderSchemePicker() {
     var container = document.getElementById("schemePicker");
     if (!container) return;
+    syncCustomCheckbox();
     loadBuiltinSchemes().then(function(schemes) {
         var cards = [
             { slug: "light", name: "Machinon Light", preview: { bg: "#f1f1f1", surface: "#ffffff", accent: "#097fae", text: "#1a1a1a" } },
@@ -274,8 +289,7 @@ function renderSchemePicker() {
                 applyScheme(card.slug).then(function() {
                     container.querySelectorAll(".scheme-card").forEach(function(c) { c.classList.remove("selected"); });
                     el.classList.add("selected");
-                    /* mirror into the legacy Custom checkbox so the panel stays truthful */
-                    $("#themevar39").prop("checked", theme.features.custom_color_scheme.enabled);
+                    syncCustomCheckbox();
                 });
             });
             container.appendChild(el);
