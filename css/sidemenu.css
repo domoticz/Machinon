@@ -85,7 +85,7 @@ img.header__icon {
 }
 
 .navbar .nav li a {
-    font-size: 20px !important;
+    font-size: var(--dz-text-lg) !important;
     text-align: left;
 }
 
@@ -160,7 +160,7 @@ img.header__icon {
 .navbar .pull-right > li > .dropdown-menu .dropdown-menu,
 .navbar .nav > li > .dropdown-menu.pull-right .dropdown-menu {
     position: relative;
-    font-size: 16px;
+    font-size: var(--dz-text-md);
 }
 
 .dropdown-submenu > a:after {

@@ -17,7 +17,7 @@
 }
 
 #search i {
-    font-size: 30px;
+    font-size: var(--dz-icon-size-lg);
     line-height: 30px;
 }
 
@@ -76,7 +76,7 @@
 
 .msg {
     background-color: var(--dz-widget-bg);
-    font-family: main-font-bold;
+    font-weight: var(--dz-weight-semibold);
     color: var(--dz-body-text);
     border-radius: 5px;
     box-shadow: -2px 2px 20px 0px rgba(0, 0, 0, 0.2);

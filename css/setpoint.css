@@ -13,7 +13,7 @@
 }
 
 #popup_setpoint {
-    font-family: main-font-bold;
+    font-weight: var(--dz-weight-semibold);
     color: var(--dz-accent-color)!important;
     border-color: var(--dz-widget-bg)!important;
     background: var(--dz-widget-bg)!important;
@@ -34,7 +34,7 @@
 .ui-close::before {
     content: "\00d7";
     display: block;
-    font-size: 28px;
+    font-size: var(--dz-icon-size-lg);
     line-height: 30px;
     text-align: center;
     color: var(--dz-body-text);

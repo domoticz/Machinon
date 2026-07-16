@@ -79,8 +79,8 @@
     height: 16px;
     margin-right: 10px;
     vertical-align: middle;
-    font-family: "Ionicons";
-    font-size: 16px;
+    font-family: var(--dz-font-icons);
+    font-size: var(--dz-icon-size-sm);
     line-height: 16px;
     text-align: center;
     color: var(--dz-accent-color);
@@ -154,8 +154,8 @@
    so it needs its own rule; scoped to #debuglevels so no other <h1> is touched. */
 #debuglevels h1[data-i18n="Debug Levels"]::before {
     content: "\f2a5"; /* ion-md-bug */
-    font-family: "Ionicons";
-    font-size: 16px;
+    font-family: var(--dz-font-icons);
+    font-size: var(--dz-icon-size-sm);
     margin-right: 10px;
     vertical-align: middle;
     color: var(--dz-accent-color);
@@ -166,8 +166,8 @@
    generic settings cog. :not(:has()) matches only the header with no i18n span. */
 #metercounters .span12 h2:not(:has(span[data-i18n]))::before {
     content: "\f2cf"; /* ion-md-cog */
-    font-family: "Ionicons";
-    font-size: 16px;
+    font-family: var(--dz-font-icons);
+    font-size: var(--dz-icon-size-sm);
     margin-right: 10px;
     vertical-align: middle;
     color: var(--dz-accent-color);
