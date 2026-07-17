@@ -658,6 +658,7 @@ a.saveschemebtn {
    secondary/chrome ghost, icon-only a quiet hit-box with tonal hover only. */
 
 /* dd-topbar (Dynamic Dashboard compact view-mode bar, views/dashboardDynamic.html).
+   Icon-quiet role: hit-box with tonal hover, no resting elevation or border.
    Every .dd-topbar-btn element also carries the theme's own .btn class
    (dashboardDynamic.html: class="btn btn-xs dd-topbar-btn ..."), so
    ".btn.dd-topbar-btn" is a genuine two-class compound, not a specificity
@@ -671,7 +672,9 @@ a.saveschemebtn {
    order. Radius and elevation are already correct without any override here:
    core's rule never touches border-radius (so the shared .btn base rule's
    token already applies) and core's own "no shadow" already matches the
-   ghost family's resting elevation.
+   icon-quiet resting elevation.
+   Hover applies only to inactive toggles (:not(.dd-topbar-nav-on):not(.dd-topbar-kiosk-active))
+   to preserve the solid fill indicator of active-toggle state.
    Tokenizing padding also resolves the B5-deferred sibling mismatch
    (task-5-report.md): dd-topbar-fullpage/-kiosk computed "2px 5px" while
    dd-topbar-edit computed "2px 5px 2px 8px" (core's own .dd-topbar-edit
@@ -683,7 +686,7 @@ a.saveschemebtn {
 .btn.dd-topbar-btn {
     padding: var(--dz-btn-pad-xs) !important;
 }
-.btn.dd-topbar-btn:hover {
+.btn.dd-topbar-btn:not(.dd-topbar-nav-on):not(.dd-topbar-kiosk-active):hover {
     background: var(--dz-btn-hover-bg) !important;
 }
 
