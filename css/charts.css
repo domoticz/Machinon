@@ -126,7 +126,72 @@
     background: var(--dz-btn-hover-bg);
 }
 
+/* Adjoined segmented range-button group (owner refinement x, 2026-07-17):
+   1h/3h/day (app/log/chart-day.html and friends) render as ONE connected
+   control instead of separate pills, using the same longhand-corner /
+   collapsed-shared-border technique as css/buttons.css's .btn-group (outer
+   corners get --dz-btn-radius, inner corners flatten, adjoining borders
+   overlap by 1px via a negative margin). Core's own www/css/style.css sets
+   ".zoom-button { margin-left:5px; margin-right:5px !important; }" - the
+   !important forces this override to carry !important too, same as every
+   other core-fights-back rule in this file.
+   :has() identifies the true LAST VISIBLE .zoom-button regardless of how
+   many of 1H/3H/1d/3d/day core shows via ng-show for a given device's
+   history depth (chart-day.html) - it excludes hidden (.ng-hide, Angular's
+   ng-show/ng-hide toggle) siblings from the check, so whichever button ends
+   up last on screen gets the right-hand radius, not just whichever is last
+   in the DOM. Modern :has() support confirmed live (page.evaluate
+   CSS.supports('selector(:has(a))') === true in this project's Playwright
+   Chromium).
+   The SELECTED range is marked by core's own toggle class
+   .zoom-button-active (ng-class="{'zoom-button-active': activeZoom ===
+   '1H'}"), themed with the SAME toggle-selected tokens css/buttons.css uses
+   for .btn.active - one active-state language everywhere, not a chart-local
+   invention.
+   Vertical centering (owner: "text not centered" - measured live: the glyph
+   sat 5px from the button's top edge but only 2px from the bottom, inside
+   core's fixed 21px-tall box, ".chartarea button { height: 21px }") is a
+   flex-centering fix, not a padding nudge: the cause is font-metric leading
+   distribution inside a block box, which padding numbers can't reliably
+   correct; inline-flex + centered items is the same technique
+   css/buttons.css's .btnstyle3 already uses elsewhere in this theme. */
+.zoom-buttons-container {
+    gap: 0;
+}
+
+.zoom-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 0 0 -1px !important;
+    border-radius: 0 !important;
+}
+
+.zoom-button:first-child {
+    margin-left: 0 !important;
+    border-top-left-radius: var(--dz-btn-radius) !important;
+    border-bottom-left-radius: var(--dz-btn-radius) !important;
+}
+
+.zoom-button:not(:has(~ .zoom-button:not(.ng-hide))) {
+    border-top-right-radius: var(--dz-btn-radius) !important;
+    border-bottom-right-radius: var(--dz-btn-radius) !important;
+}
+
+.zoom-button-active {
+    background: var(--dz-btn-toggle-selected-bg) !important;
+    color: var(--dz-btn-toggle-selected-text) !important;
+    border-color: var(--dz-btn-toggle-selected-bg) !important;
+    box-shadow: var(--dz-btn-shadow-pressed) !important;
+    position: relative;
+    z-index: 1;
+}
+
 .zoom-reset {
+    /* Sits outside the segmented group; restores the breathing room the
+       container's zeroed gap (above) would otherwise remove between it and
+       the group. */
+    margin-left: 8px !important;
     /* !important: beats this file's own shorthand "border" !important above,
        which would otherwise win the tie against a plain border-color here
        regardless of specificity/order (an !important declaration always

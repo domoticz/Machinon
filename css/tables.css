@@ -66,6 +66,45 @@ table.dataTable {
     color: var(--dz-table-header-text) !important;
 }
 
+/* DataTables PAGER (Task 8, Phase C2, 2026-07-17). F6 source, confirmed
+   live: ".fg-button" is not defined by ANY vendor stylesheet in this
+   checkout (grepped css/demo_table_jui.css, css/ui-darkness/jquery-ui.min.css,
+   every *.css under www/) - it is a JS-injected class STRING literal inside
+   js/data-tables/jquery.dataTables.min.js's jQuery-UI integration (zgrep
+   hit: `sPaging:"dataTables_paginate fg-buttonset ui-buttonset
+   fg-buttonset-multi ui-buttonset-multi paging_"`), paired at runtime with
+   jquery-ui's OWN .ui-button/.ui-state-default classes (css/ui-darkness/
+   jquery-ui.min.css). There never was an .fg-button rule to find; the
+   pager's visual styling used to come entirely from ui-button/ui-state-*
+   plus this theme's font override (css/typography.css:149).
+   This lives HERE, not in css/buttons.css, because the pager's markup nests
+   its <a class="fg-button ui-state-default"> anchors inside DataTables'
+   OWN ".fg-toolbar.ui-widget-header" wrapper (confirmed live via DOM
+   walk-up) - the SAME ancestor shape the table-header reset directly above
+   targets. That rule's selector is three classes deep with !important; a
+   buttons.css rule scoped to ".dataTables_paginate .fg-button" (two
+   classes) can never outrank it regardless of !important, and buttons.css
+   also loads BEFORE this file (custom.css's @import order), so even an
+   equally-specific rule there would still lose the source-order tie. Ghost
+   tier, matching the redesign's other chrome controls; !important matches
+   the property-for-property tier the rule above already fights at. */
+.dataTables_wrapper .dataTables_paginate .fg-button {
+    background: transparent !important;
+    border: var(--dz-btn-ghost-border) !important;
+    color: var(--dz-btn-ghost-text) !important;
+    border-radius: var(--dz-btn-radius) !important;
+    box-shadow: none !important;
+    padding: var(--dz-btn-pad-xs) !important;
+}
+.dataTables_wrapper .dataTables_paginate .fg-button:hover {
+    background: var(--dz-btn-hover-bg) !important;
+}
+.dataTables_wrapper .dataTables_paginate .fg-button.ui-state-disabled {
+    border-color: var(--dz-status-disabled) !important;
+    color: var(--dz-btn-disabled-text) !important;
+    cursor: default;
+}
+
 table.dataTable thead th,
 table.dataTable thead th.ui-state-default {
     background: var(--dz-table-header-bg) !important;

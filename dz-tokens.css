@@ -184,6 +184,18 @@
        replacement. Floating menus consume THIS alias, never --dz-nav-bg
        directly, so the mapping stays a single-line decision. */
     --dz-menu-bg:             var(--dz-nav-bg);
+
+    /* "You are here" navbar tint (owner decision 2026-07-17, Task 8 item xi):
+       the top-level navbar tab marks the active route with a translucent
+       accent tint over body text (css/nav.css), not a solid fill. A Setup
+       dropdown entry marked as the current route (core's .current_page_item)
+       is the SAME semantic state at a different nesting depth, so both
+       consume this one pair instead of nav.css hardcoding the value while
+       buttons.css invented an unrelated solid --dz-btn-toggle-selected-*
+       fill for what is really the identical marker. Derived from the
+       existing accent/body-text tokens (derive-not-copy), not a new colour. */
+    --dz-nav-active-bg:       rgba(var(--dz-accent-values), 0.4);
+    --dz-nav-active-text:     var(--dz-body-text);
 }
 
 /*

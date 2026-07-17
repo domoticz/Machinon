@@ -646,8 +646,34 @@ textarea {
 	box-sizing: border-box;
 }
 
-select.ui-corner-all option {
-    background: var(--dz-nav-bg);
+/* Room picker (#comboroom, views/inc_topbar.html: "select#comboroom.combobox
+   .ui-corner-all") and every other themed <select> (owner refinement vii,
+   2026-07-17): the option-list surface joins the MENU family
+   (--dz-menu-bg), migrated off the old direct --dz-nav-bg reference this
+   rule used to read (nav.css's dropdown-menu already made that same move -
+   see --dz-menu-bg's own comment in dz-tokens.css). Selected/hover option
+   gets the same accent tint the dropdown-menu's own rows use for :hover
+   (css/nav.css ".navbar .nav .dropdown-menu li a:hover"), so a room
+   picker's popup reads as the same chrome as every other menu surface.
+   Native <option>/<optgroup> styling is a browser-controlled native widget,
+   not an ordinary DOM box: background-color and color are the only
+   properties most engines honor on it at all. Verified live (Chromium):
+   background/color apply as declared, but :hover on a plain (non-multiple)
+   <select>'s native popup is NOT honored - Chromium draws its own OS-style
+   highlight for whichever row the pointer is over, ignoring this rule
+   entirely; :checked IS honored, so the currently-selected room does pick
+   up the accent tint. Documented here rather than silently claimed as
+   fully working. */
+select.ui-corner-all option,
+select.ui-corner-all optgroup {
+    background: var(--dz-menu-bg);
+    color: var(--dz-body-text);
+}
+
+select.ui-corner-all option:checked,
+select.ui-corner-all option:hover {
+    background: rgba(var(--dz-accent-values), 0.15);
+    color: var(--dz-body-text);
 }
 
 /* The input-underline styling above targets form controls, but jQuery UI puts ui-corner-all

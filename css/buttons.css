@@ -732,31 +732,82 @@ a.saveschemebtn {
     color: #333;
 }
 
-/* Setup dropdown active-item glass leak (owner report 2026-07-17). With the
-   Machinon Settings menu feature (theme.json "custom_settings_menu")
-   disabled, core's raw Admin/Setup dropdown renders directly instead of the
-   tile grid js/settings_page.js normally builds, and its active entry
-   (ng-class="current_page_item") hits core's own glass selection style:
-   domoticz/www/css/style.css:1047-1060, ".navbar .nav .dropdown-menu
-   .current_page_item > a" (and its :hover), background/border/radius/color/
-   box-shadow all !important. This theme's existing top-level override
-   (css/nav.css:191-202) only reaches the bare 3-class ".navbar .nav
-   .current_page_item > a" (core's OWN top-level rule, style.css:1026-1038,
-   carries no !important there, so nav.css's later, equal-specificity rule
-   already wins it); the DROPDOWN-nested selector adds a 4th class AND
-   !important, so nothing in nav.css can beat it. Repeating core's exact
-   selector here (loaded later: custom.css after style.css) matches
-   specificity and !important tier, so source order decides in our favor.
-   Flat accent pill (same toggle-selected tokens as .btn.active elsewhere in
-   this file) instead of the blue gradient/glow; not Setup-specific, this is
-   core's generic "active item inside any navbar dropdown" rule, so the fix
-   generalizes to every dropdown, not just the one this bug was reported on. */
-.navbar .nav .dropdown-menu .current_page_item > a,
-.navbar .nav .dropdown-menu .current_page_item > a:hover {
-    background: var(--dz-btn-toggle-selected-bg) !important;
-    border: none !important;
-    border-radius: var(--dz-btn-radius) !important;
-    color: var(--dz-btn-toggle-selected-text) !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
+/* ---- Phase C2 continued (Task 8, 2026-07-17): Devices splitter, Events
+   Wizard footer, Events toolbar icon parity, room-picker options.
+   DataTables pager now lives in css/tables.css (see there for why: a
+   specificity conflict with that file's own table-header reset means the
+   fix has to live in, and load-order-after, that exact rule). Setup-
+   dropdown active-item lives in css/nav.css (owner refinement xi: it needs
+   a raw 5px radius to match the navbar tab, which this file's border-radius
+   contract check would reject). ---- */
+
+/* Devices panel splitter/collapse toggle. Confirmed real selector live via
+   app/devices/Devices.html:22-27: a bare <button class="splitter"> inside
+   <section class="page-devices"> (the brief's speculative ".devices-
+   splitter" class does not exist anywhere in core). Styled by core's own
+   app/devices/Devices.css:28-38 (".page-devices > .splitter") with a fixed
+   white-on-near-transparent-white look baked for core's own dark default
+   theme (color:white, background-color: rgba(255,255,255,0.1)) - never
+   adapted to Machinon's light body text, so the icon-only collapse toggle
+   sat at low contrast on the light page. Icon-quiet role, matching
+   .btn-icon's resting-transparent / tonal-hover language elsewhere in this
+   file rather than a permanent tint. Devices.css carries no !important and
+   loads before custom.css (index.html:98-99), and this selector matches its
+   specificity exactly (0,2,0), so a plain override wins by source order. */
+.page-devices > .splitter {
+    color: var(--dz-btn-ghost-text);
+    background-color: transparent;
+    border-radius: var(--dz-btn-radius);
+}
+.page-devices > .splitter:hover {
+    background-color: var(--dz-btn-hover-bg);
+}
+
+/* Automation Wizard footer (owner refinement viii, 2026-07-17): FULL/filled
+   treatment for every footer action, including Back and Cancel - overrides
+   the earlier ghost assignment those two inherited from plain .btn-default.
+   Scoped to .aw-footer so the theme-wide .btn-default GHOST convention (used
+   everywhere else in the app) is untouched; two classes (0,2,0) beats the
+   ghost rule's one-class .btn-default (0,1,0) even though both carry
+   !important, per the shared cascade-tie rule documented throughout this
+   file. Back's icon (<i class="icon-arrow-left">, a Bootstrap glyphicon
+   sprite) is forced pure white unconditionally by core's own
+   app/events/Events.css:577-580 (".aw-modal i[class^='icon-']" /
+   "i[class*=\" icon-\"]" -> "filter: brightness(0) invert(1)") in EVERY
+   scheme - measured live (Playwright, both schemes): on the old ghost/
+   transparent background that white icon was invisible against the light
+   page ("light-on-light"), while on the dark scheme's darker chrome behind
+   the modal it happened to read fine. Filling the button with the accent
+   background turns that same forced-white icon into the exact contrast
+   the rule was already trying to produce (white-on-accent), and the text
+   color below is set explicitly to --dz-btn-primary-text (not left to
+   inherit the old ghost --dz-btn-ghost-text) for the same reason. */
+.aw-footer .btn-default {
+    background: var(--dz-btn-primary-bg) !important;
+    color: var(--dz-btn-primary-text) !important;
+    border-color: var(--dz-btn-primary-bg) !important;
+    box-shadow: var(--dz-btn-shadow) !important;
+}
+.aw-footer .btn-default:hover {
+    background-color: color-mix(in srgb, var(--dz-btn-primary-bg) 90%, black) !important;
+    box-shadow: var(--dz-btn-shadow-hover) !important;
+}
+
+/* Events editor Ace toolbar (EventViewer.html): A-/A+ are bold text glyphs
+   ("<b>A</b><small>-</small>", 14px tall at .btn-xs's micro font); the Word
+   Wrap button's icon is core's Bootstrap 2 glyphicon sprite
+   (.icon-align-justify, bootstrap.css's generic [class^="icon-"] rule fixes
+   EVERY such icon at a flat 14x14px raster tile) which reads visibly
+   smaller/fainter beside the bold "A" glyphs - owner report 2026-07-17
+   (item ix). All three buttons already share one tier (.btn.btn-default.
+   btn-xs - confirmed identical outer box via the button-contract census,
+   single cluster/signature for all three), so this is a glyph-only fix.
+   icon-align-justify is used nowhere else in core (grepped), so enlarging
+   it here is safe. Scaling the raster tile up toward the --dz-icon-size-sm
+   token (16px, "inline/tab ionicons") via transform keeps the fix a single
+   declarative rule instead of fragile sprite-sheet background-position/
+   background-size math (resizing via width/height alone would just reveal
+   neighbouring tiles from the sprite sheet, not enlarge this one icon). */
+.ace-settings .icon-align-justify {
+    transform: scale(1.15); /* ~= --dz-icon-size-sm (16px) over the native 14px tile */
 }
