@@ -38,15 +38,15 @@
   {
    "base": "machinon_BatteryCharging",
    "name": "Battery Charging",
-   "description": "Charging/green (on) / charged, not charging (off)",
-   "on_sig": "1412-5f8d2403",
+   "description": "Charging (green) / charged (off)",
+   "on_sig": "1684-a58bbf83",
    "off_sig": "743-ffa13b81"
   },
   {
    "base": "machinon_BatteryLow",
    "name": "Battery Low",
-   "description": "Low-battery warning/red (on) / ok/grey (off)",
-   "on_sig": "783-edf1d0e5",
+   "description": "Low battery (red) / ok (grey)",
+   "on_sig": "822-4e24a18a",
    "off_sig": "738-4026ba9c"
   },
   {
@@ -94,9 +94,9 @@
   {
    "base": "machinon_Lock",
    "name": "Door Lock",
-   "description": "Door with padlock, locked/green (on) / unlocked/red (off)",
-   "on_sig": "2850-592566d0",
-   "off_sig": "2837-f1697885"
+   "description": "Door lock: locked green / unlocked red",
+   "on_sig": "2891-094f2ad0",
+   "off_sig": "2790-bd4650d2"
   },
   {
    "base": "machinon_Duck",
@@ -165,15 +165,15 @@
    "base": "machinon_HotWater",
    "name": "Hot Water",
    "description": "Hot water / boiler",
-   "on_sig": "6024-2834d711",
+   "on_sig": "6002-d1c058d8",
    "off_sig": "5280-80e01a05"
   },
   {
    "base": "machinon_HouseLock",
    "name": "House Lock",
-   "description": "House with padlock, secured (green) / open (red)",
-   "on_sig": "5778-b60bdda8",
-   "off_sig": "5826-2917dd38"
+   "description": "House secured green / open red",
+   "on_sig": "5867-68ff7f46",
+   "off_sig": "5827-db487a6f"
   },
   {
    "base": "machinon_Hygrometer",
@@ -199,9 +199,9 @@
   {
    "base": "machinon_Mood",
    "name": "Mood",
-   "description": "Happy/green (on) / sad/red (off) mood indicator",
-   "on_sig": "7749-331cb373",
-   "off_sig": "7820-daa1960d"
+   "description": "Mood: happy green / sad red",
+   "on_sig": "7841-4d1c29b3",
+   "off_sig": "7792-be23a7ab"
   },
   {
    "base": "machinon_Music",
@@ -255,7 +255,7 @@
   {
    "base": "machinon_Padlock",
    "name": "Padlock",
-   "description": "Padlock locked/closed (on) / unlocked/open (off)",
+   "description": "Padlock locked (on) / unlocked (off)",
    "on_sig": "4456-dffdf29e",
    "off_sig": "4367-e0b9f5fb"
   },
@@ -283,8 +283,8 @@
   {
    "base": "machinon_Proximity",
    "name": "Proximity",
-   "description": "Proximity sensor, detected (red) / idle (grey)",
-   "on_sig": "10596-447a66fc",
+   "description": "Proximity detected red / idle grey",
+   "on_sig": "10468-d26d0146",
    "off_sig": "9771-7a8170be"
   },
   {
@@ -297,9 +297,9 @@
   {
    "base": "machinon_Signal",
    "name": "Signal",
-   "description": "Signal present (on) / no connection (off)",
+   "description": "Signal present (on) / none (off)",
    "on_sig": "1588-58c7ddc4",
-   "off_sig": "1340-33f258a7"
+   "off_sig": "1424-46361727"
   },
   {
    "base": "machinon_SpiderMan",
@@ -318,7 +318,7 @@
   {
    "base": "machinon_Switch",
    "name": "Switch",
-   "description": "Toggle switch, on / off (Blue UI, not tinted)",
+   "description": "Toggle switch on / off (Blue UI)",
    "on_sig": "1135-6ae495dc",
    "off_sig": "1211-1bc5f481"
   },
@@ -367,9 +367,9 @@
   {
    "base": "machinon_WindowLock",
    "name": "Window Lock",
-   "description": "Window with padlock, closed/secure (green) / open (red)",
-   "on_sig": "3218-1fe509b5",
-   "off_sig": "3255-0f8cf42b"
+   "description": "Window closed green / open red",
+   "on_sig": "3290-c7dad659",
+   "off_sig": "3233-d2446fd8"
   },
   {
    "base": "machinon_WiredNetwork",
@@ -377,6 +377,272 @@
    "description": "Ethernet / wired network",
    "on_sig": "1679-41d4fe2e",
    "off_sig": "1435-4c07c3bc"
+  },
+  {
+   "base": "machinon_Presence",
+   "name": "Presence",
+   "description": "At home (blue) / away (grey)",
+   "on_sig": "6548-05219340",
+   "off_sig": "6435-23bb0625"
+  },
+  {
+   "base": "machinon_PresenceGreen",
+   "name": "Presence Green",
+   "description": "At home (green) / away (grey)",
+   "on_sig": "6632-64b11ff8",
+   "off_sig": "6435-23bb0625"
+  },
+  {
+   "base": "machinon_PersonHome",
+   "name": "Person Home",
+   "description": "Person home (green) / away (grey)",
+   "on_sig": "6766-fd5fd2fd",
+   "off_sig": "6662-b5a4336f"
+  },
+  {
+   "base": "machinon_PersonHome2",
+   "name": "Person Home 2",
+   "description": "2nd person home / away",
+   "on_sig": "7080-7e6a8061",
+   "off_sig": "6941-ac106575"
+  },
+  {
+   "base": "machinon_FamilyHome",
+   "name": "Family Home",
+   "description": "Family home (green) / away (grey)",
+   "on_sig": "8572-8340ab56",
+   "off_sig": "8288-aa096a75"
+  },
+  {
+   "base": "machinon_Person",
+   "name": "Person",
+   "description": "Person",
+   "on_sig": "5987-a2e5c1e1",
+   "off_sig": "5425-547367f4"
+  },
+  {
+   "base": "machinon_Person2",
+   "name": "Person 2",
+   "description": "Person (alt)",
+   "on_sig": "6677-26c07412",
+   "off_sig": "5968-fecf3b7e"
+  },
+  {
+   "base": "machinon_Family",
+   "name": "Family",
+   "description": "Family",
+   "on_sig": "11086-9a639f2d",
+   "off_sig": "9674-0668eb6c"
+  },
+  {
+   "base": "machinon_Address",
+   "name": "Address",
+   "description": "Address / location marker",
+   "on_sig": "6717-1e317477",
+   "off_sig": "5947-e0a5af00"
+  },
+  {
+   "base": "machinon_Car",
+   "name": "Car",
+   "description": "Car / vehicle",
+   "on_sig": "5486-fcbcc56b",
+   "off_sig": "4926-f1de0670"
+  },
+  {
+   "base": "machinon_MotionDetector",
+   "name": "Motion Detector",
+   "description": "Motion detected (red) / clear (grey)",
+   "on_sig": "6252-be02d032",
+   "off_sig": "5906-41ee4ed5"
+  },
+  {
+   "base": "machinon_InfraredSensor",
+   "name": "Infrared Sensor",
+   "description": "IR detected (red) / clear (grey)",
+   "on_sig": "7331-b56d0b4c",
+   "off_sig": "7375-45919949"
+  },
+  {
+   "base": "machinon_Access",
+   "name": "Access",
+   "description": "Access granted (green) / denied (red)",
+   "on_sig": "3628-c367d6ba",
+   "off_sig": "3628-e0967cef"
+  },
+  {
+   "base": "machinon_RadioTower",
+   "name": "Radio Tower",
+   "description": "Radio active (blue) / off (grey)",
+   "on_sig": "13585-b2d7eef1",
+   "off_sig": "12324-1dd0c497"
+  },
+  {
+   "base": "machinon_Mobile",
+   "name": "Mobile",
+   "description": "Phone present (green) / away (grey)",
+   "on_sig": "1898-a1a75e79",
+   "off_sig": "1824-d1201045"
+  },
+  {
+   "base": "machinon_Weight",
+   "name": "Weight",
+   "description": "Weight / scale sensor",
+   "on_sig": "5858-fec72578",
+   "off_sig": "5132-6d0eebed"
+  },
+  {
+   "base": "machinon_Graph",
+   "name": "Graph",
+   "description": "Graph / statistics",
+   "on_sig": "5182-3a5f5088",
+   "off_sig": "4678-d077cd94"
+  },
+  {
+   "base": "machinon_LightAuto",
+   "name": "Light Automation",
+   "description": "Automated light on / off",
+   "on_sig": "8342-f6b680f8",
+   "off_sig": "7594-2169d45e"
+  },
+  {
+   "base": "machinon_ReflectorBulb",
+   "name": "Reflector Bulb",
+   "description": "Spotlight bulb on / off",
+   "on_sig": "5527-4376daa1",
+   "off_sig": "5032-a7f5c851"
+  },
+  {
+   "base": "machinon_Router",
+   "name": "Router",
+   "description": "Router online (green) / offline (red)",
+   "on_sig": "7874-17b6448e",
+   "off_sig": "7865-fed09920"
+  },
+  {
+   "base": "machinon_RobotVacuum",
+   "name": "Robot Vacuum",
+   "description": "Vacuum running / docked (grey)",
+   "on_sig": "8261-ad31d2a2",
+   "off_sig": "5856-aa1f06bf"
+  },
+  {
+   "base": "machinon_Mailbox",
+   "name": "Mailbox",
+   "description": "Mail waiting (red) / empty (grey)",
+   "on_sig": "2718-258b4e12",
+   "off_sig": "2909-3f9b4b9b"
+  },
+  {
+   "base": "machinon_Gate",
+   "name": "Gate",
+   "description": "Gate open (red) / closed (green)",
+   "on_sig": "3734-af06faab",
+   "off_sig": "3768-29bea80b"
+  },
+  {
+   "base": "machinon_Pet",
+   "name": "Pet",
+   "description": "Pet detected (green) / away (grey)",
+   "on_sig": "8317-6d5dde18",
+   "off_sig": "8091-d2618be2"
+  },
+  {
+   "base": "machinon_Safe",
+   "name": "Safe",
+   "description": "Safe locked (green) / open (red)",
+   "on_sig": "6723-473339a9",
+   "off_sig": "6616-9e1f4143"
+  },
+  {
+   "base": "machinon_Fingerprint",
+   "name": "Fingerprint",
+   "description": "Fingerprint OK (green) / idle (grey)",
+   "on_sig": "18443-c8ead04d",
+   "off_sig": "17009-b3515f13"
+  },
+  {
+   "base": "machinon_Dishwasher",
+   "name": "Dishwasher",
+   "description": "Dishwasher running / off (grey)",
+   "on_sig": "3684-ea5d95d9",
+   "off_sig": "3278-c109cc0a"
+  },
+  {
+   "base": "machinon_Oven",
+   "name": "Oven",
+   "description": "Oven hot (red) / off (grey)",
+   "on_sig": "4682-25893518",
+   "off_sig": "4045-06f6d17e"
+  },
+  {
+   "base": "machinon_Cooktop",
+   "name": "Cooktop",
+   "description": "Cooktop on (red) / off (grey)",
+   "on_sig": "9434-45b97420",
+   "off_sig": "8681-88f00dd8"
+  },
+  {
+   "base": "machinon_Fridge",
+   "name": "Fridge",
+   "description": "Fridge door open (red) / closed (grey)",
+   "on_sig": "1970-1f307b19",
+   "off_sig": "1244-c194fab7"
+  },
+  {
+   "base": "machinon_Kettle",
+   "name": "Kettle",
+   "description": "Kettle boiling (red) / off (grey)",
+   "on_sig": "8423-fcd4c796",
+   "off_sig": "7692-d64a1f81"
+  },
+  {
+   "base": "machinon_Microwave",
+   "name": "Microwave",
+   "description": "Microwave running / off (grey)",
+   "on_sig": "3499-c1ad8c6d",
+   "off_sig": "2909-637176ab"
+  },
+  {
+   "base": "machinon_Projector",
+   "name": "Projector",
+   "description": "Projector on (blue) / off (grey)",
+   "on_sig": "5225-cceb0bf9",
+   "off_sig": "4686-5db58b08"
+  },
+  {
+   "base": "machinon_Package",
+   "name": "Package",
+   "description": "Package delivered (green) / none (grey)",
+   "on_sig": "822-d55f4aac",
+   "off_sig": "745-61904e3e"
+  },
+  {
+   "base": "machinon_PetBowl",
+   "name": "Pet Bowl",
+   "description": "Pet bowl full (green) / empty (red)",
+   "on_sig": "7632-5eaec7c2",
+   "off_sig": "7484-af427dce"
+  },
+  {
+   "base": "machinon_Vibration",
+   "name": "Vibration",
+   "description": "Vibration detected (red) / still (grey)",
+   "on_sig": "6525-2d35c578",
+   "off_sig": "5221-5fbd7925"
+  },
+  {
+   "base": "machinon_RFID",
+   "name": "RFID",
+   "description": "RFID read (green) / idle (grey)",
+   "on_sig": "11952-45c30dfe",
+   "off_sig": "10886-97e85bed"
+  },
+  {
+   "base": "machinon_CarCharging",
+   "name": "Car Charging",
+   "description": "EV charging (green) / idle (grey)",
+   "on_sig": "6357-b1bc6cf9",
+   "off_sig": "6166-6b8405ca"
   }
  ]
 }
