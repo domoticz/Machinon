@@ -126,6 +126,16 @@
     --dz-table-border:          var(--dz-input-border);
     --dz-table-row-selected-bg: var(--dz-accent-color);
     --dz-table-control-text:    var(--secondary-text-color);
+    /* Totals/summary rows: a quiet accent-tinted band, DERIVED so schemes
+       track (a literal copy is how the zebra-stripe class of bug happens).
+       Text must hold WCAG AA vs the band; dz-table-census.js asserts it. */
+    --dz-table-total-bg:   color-mix(in srgb, var(--dz-accent-color) 15%, var(--dz-widget-bg));
+    --dz-table-total-text: var(--dz-body-text);
+    /* One cell-padding rhythm for theme-styled tables (design choice near the
+       de facto 4/8/10 cluster; owner-gated in strips; exceptions annotated in
+       the table contract baseline). */
+    --dz-table-cell-pad:   6px 10px;
+    --dz-table-header-pad: 8px 10px;
 
     /* Button (--dz-btn-*) contract - core dashboard.css/style.css consume these; retargeted
        Machinon button rules in custom.css consume them too. Values = current Machinon palette.
