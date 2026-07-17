@@ -67,6 +67,7 @@ rounded:
   xs: 2px
   sm: 3px
   interactive: 5px
+  button: 10px
   container: 6px
   circle: 50%
 
@@ -86,48 +87,68 @@ spacing:
 elevation:
   card: "0 0 10px 1px rgba(0,0,0,0.2)"
   popup: "-2px 2px 20px rgba(0,0,0,0.2)"
-  button: "0 2px 4px rgba(0,0,0,0.2)"
+  button: "0 1px 3px rgba(0,0,0,.18), 0 1px 2px rgba(0,0,0,.10)"
   overlay: "0 5px 10px rgba(0,0,0,0.5)"
   drag: "0 8px 24px rgba(0,0,0,0.3)"
 
 components:
+  # Buttons: soft-elevated redesign (2026-07-17). Every filled/ghost/toggle/
+  # icon variant shares one radius ({rounded.button}) and one elevation
+  # language (see the "## Buttons" section for the full token table, size
+  # tiers, and states).
   button-filled-primary:
     backgroundColor: "{colors.light-primary}"
     textColor: "{colors.on-primary}"
     typography: "{typography.xs}"
-    rounded: "{rounded.interactive}"
-    padding: "6px 12px"
+    rounded: "{rounded.button}"
+    padding: "6px 14px"
   button-filled-semantic-success:
     backgroundColor: "{colors.light-success}"
     textColor: "{colors.on-primary}"
-    rounded: "{rounded.interactive}"
-    padding: "6px 12px"
+    rounded: "{rounded.button}"
+    # No dedicated size-tier padding/font is declared for .btn-success itself
+    # (unlike primary/danger/warning/info); declared-only, no live consumer.
   button-filled-semantic-warning:
     backgroundColor: "{colors.light-warning}"
     textColor: "{colors.on-primary}"
-    rounded: "{rounded.interactive}"
-    padding: "6px 12px"
+    rounded: "{rounded.button}"
+    padding: "6px 14px"
+    # Declared-only: no live instance in the current button-contract crawl.
   button-filled-semantic-danger:
     backgroundColor: "{colors.light-error}"
     textColor: "{colors.on-primary}"
-    rounded: "{rounded.interactive}"
-    padding: "6px 12px"
-  button-outlined:
+    rounded: "{rounded.button}"
+    padding: "6px 14px"
+  button-ghost:
     backgroundColor: "transparent"
     textColor: "{colors.light-text}"
     border: "1px solid {colors.light-primary}"
-    rounded: "{rounded.interactive}"
-    padding: "6px 12px"
-  button-ghost:
-    backgroundColor: "rgba({colors.light-primary}, 0.1)"
-    textColor: "{colors.light-primary}"
+    rounded: "{rounded.button}"
+    padding: "4px 12px"
+    hoverBg: "rgba({colors.light-primary}, 0.1)"
+    # Renamed from "button-outlined" (pre-redesign): resting state is
+    # transparent + bordered; the accent tint above only appears on hover.
+  button-icon-quiet:
+    backgroundColor: "transparent"
+    textColor: "inherit"
     border: "none"
-    rounded: "{rounded.interactive}"
+    rounded: "{rounded.button}"
     padding: "4px 8px"
+    hitBox: "28px min-width/min-height"
+    # Icon-only controls (Devices row actions, splitter, scheme-picker icons):
+    # no resting border or shadow; hover is a tonal glyph filter, not a
+    # background wash.
+  button-toggle-selected:
+    backgroundColor: "{colors.light-primary}"
+    textColor: "{colors.on-primary}"
+    rounded: "{rounded.button}"
+    boxShadow: "inset 0 1px 2px rgba(0,0,0,.12)"
+    # One pressed language for both selected-state code paths: the theme's
+    # own .btn-selected class and Bootstrap's native .active toggle groups.
   button-disabled:
     backgroundColor: "{colors.light-disabled}"
     textColor: "{colors.light-text-secondary}"
-    rounded: "{rounded.interactive}"
+    rounded: "{rounded.button}"
     cursor: "not-allowed"
     # Contrast: 3.42:1 light, 2.46:1 dark (below AA 4.5:1, but WCAG exempts disabled controls)
   device-card:
@@ -457,9 +478,14 @@ The Setup menu is replaced by a tile grid (`settings_page.js`, `.machinon_ul`): 
 |-------|-------|-------|
 | `{rounded.xs}` | 2px | Checkboxes, `.label`, `.badge`, textarea |
 | `{rounded.sm}` | 3px | Slider track, timer mode blocks, log toggle count |
-| `{rounded.interactive}` | 5px | All buttons, nav links, input select borders, login submit |
+| `{rounded.interactive}` | 5px | Nav links/tabs, the "you are here" nav-active pair (top navbar tab + Setup dropdown active item), input select borders |
+| `{rounded.button}` | 10px | Every button and button-styled control (see [Buttons](#buttons)): filled/ghost/toggle-selected/icon-quiet/label-as-button. Deliberately larger than the card radius; see Radius Rationale below |
 | `{rounded.container}` | 6px | Device cards, DataTables, dropdown menus, popups, dialogs, log console, settings panels |
 | `{rounded.circle}` | 50% | Radio buttons, slider handle, user avatars |
+
+`{rounded.interactive}` and `{rounded.button}` are deliberately different values (5px vs 10px), not a
+rounding inconsistency: nav chrome (tabs, the active-route tint, dropdown borders) is a thinner,
+denser visual language than the buttons floating on top of it. See Buttons > Radius Rationale.
 
 ## Elevation
 
@@ -468,7 +494,7 @@ The Setup menu is replaced by a tile grid (`settings_page.js`, `.machinon_ul`): 
 | 0 | flat | none | Default state, transparent backgrounds |
 | 1 | card | `{elevation.card}` | Device cards, DataTables, log console, page-content containers |
 | 2 | popup | `{elevation.popup}` | Options popup, message toast, setpoint popup |
-| 3 | button | `{elevation.button}` | Login submit, `.btn-modern` |
+| 3 | button | `{elevation.button}` (= `--dz-btn-shadow`) | Resting shadow for every filled button; see [Buttons](#buttons) for the hover/pressed/focus-ring variants |
 | 4 | overlay | `{elevation.overlay}` | Dropdown menus |
 | 5 | drag | `{elevation.drag}` | Drag ghost during card reorder |
 
@@ -484,40 +510,214 @@ The Setup menu is replaced by a tile grid (`settings_page.js`, `.machinon_ul`): 
 - **Drag target (active)**: `2px dashed rgba(blue, 0.3)` outline, `3px` offset
 - **Drag target (hover)**: `2px solid blue` outline, `3px` offset, `rgba(blue, 0.08)` background tint, `0.15s ease` transition
 
-## Components
+## Buttons
 
-### Buttons
+Every button-like control in the theme (`.btn*` classes, label-as-button chips, icon-only hit-boxes,
+and several core-rendered regions that ship no `.btn` class at all) shares one **soft-elevated**
+language: one radius, one resting/hover/pressed shadow triple, one focus ring, one disabled
+treatment (spec 2026-07-17, `css/buttons.css`). Before this redesign the same visual intents were
+spread across 5 different padding/radius combinations that had never been named; the token table and
+size tiers below are what replaced them.
 
-**Hierarchy (4 visual tiers):**
+### Token Table
 
-| Tier | Background | Text | Border | Usage |
-|------|-----------|------|--------|-------|
-| **Filled primary** | `var(--dz-accent-color)` | `{colors.on-primary}` | none | Primary actions, save, active toggles |
-| **Filled semantic** | respective semantic color | `{colors.on-primary}` | none | Success, warning, destructive actions |
-| **Outlined** | transparent | `var(--dz-body-text)` | `1px solid var(--dz-accent-color)` | Secondary actions, filters, zoom buttons |
-| **Ghost** | transparent or `rgba(blue, 0.1)` | `var(--dz-accent-color)` | none | Tertiary actions, icon buttons, inline links |
+All tokens live in `dz-tokens.css`. Colors/text below are the light-scheme values; dark.css overrides
+the ones that need to differ.
 
-**Size tiers:**
+| Token | Value | Notes |
+|-------|-------|-------|
+| `--dz-btn-primary-bg` | `var(--dz-accent-color)` | Filled primary/info background |
+| `--dz-btn-primary-text` | `var(--dz-accent-text)` | Text on any filled or toggle-selected surface |
+| `--dz-btn-info-bg` | `var(--dz-accent-color)` | Alias: Bootstrap's `.btn-info` reuses the primary look |
+| `--dz-btn-danger-bg` | `var(--dz-accent-red)` | Filled danger background |
+| `--dz-btn-danger-bg-alpha` | `rgba(var(--dz-accent-red-values), 0.85)` | Declared; no current CSS consumer (flagged for cleanup, not fixed here) |
+| `--dz-btn-success-bg` / `--dz-btn-warning-bg` | `#3b863b` / `#b36200` | Defined in the mapped-token block, not the `--dz-btn-*` block; consumed by `.btn-success`/`.btn-warning` (both declared-only, no live instance in the current contract crawl) |
+| `--dz-btn-bg` / `--dz-btn-text` / `--dz-btn-border` | `var(--dz-widget-bg)` / `var(--dz-body-text)` / `var(--dz-input-border)` | Bootbox `.modal-footer .btn` only (see Gaps: that rule still has a raw `border-radius: 5px`, not `--dz-btn-radius`) |
+| `--dz-btn-hover-bg` | `rgba(var(--dz-accent-values), 0.1)` | Ghost/icon-quiet hover tint |
+| `--dz-btn-shadow` | `0 1px 3px rgba(0,0,0,.18), 0 1px 2px rgba(0,0,0,.10)` | Resting elevation for every filled button |
+| `--dz-btn-shadow-hover` | `0 2px 6px rgba(0,0,0,.22), 0 1px 3px rgba(0,0,0,.12)` | Hover: shadow grows, it does not change color |
+| `--dz-btn-shadow-pressed` | `inset 0 1px 2px rgba(0,0,0,.12)` | `:active` and the toggle-selected family |
+| `--dz-btn-focus-ring` | `0 0 0 2px rgba(var(--dz-accent-values), .35)` | `:focus-visible`; stacks on top of the resting or pressed shadow (comma-joined, never replaces it) |
+| `--dz-btn-radius` | `10px` | Every button's corner radius; see Radius Rationale |
+| `--dz-btn-pad-xs` / `-sm` / `-md` / `-lg` | `4px 8px` / `4px 12px` / `6px 14px` / `10px 20px` | Size-tier padding only; font size stays on the typography token contract, not here |
+| `--dz-btn-ghost-border` / `-text` | `1px solid var(--dz-accent-color)` / `var(--dz-body-text)` | Ghost family (bordered, transparent at rest) |
+| `--dz-btn-toggle-selected-bg` / `-text` | `var(--dz-accent-color)` / `var(--dz-accent-text)` | One pressed/selected fill for every toggle mechanism (theme's own `.btn-selected` and Bootstrap's native `.active`) |
+| `--dz-btn-icon-box` | `28px` | Min-width/min-height square hit-box for icon-only buttons |
+| `--dz-btn-line-height` | `20px` | Forced line-height so same-tier block buttons measure an identical height everywhere |
+| `--dz-btn-text-shadow` | `none` | Declared; no current CSS consumer (`text-shadow: none` is applied as a literal in the base rule instead) |
+| `--dz-btn-disabled-bg` / `-text` | `var(--dz-status-disabled)` / `var(--secondary-text-color)` | Shared by every family; see the existing WCAG AA gap below |
+| `--dz-menu-bg` | `var(--dz-nav-bg)` | Shared "Menu" surface; see Menu Surface below |
+| `--dz-nav-active-bg` / `-text` | `rgba(var(--dz-accent-values), 0.4)` / `var(--dz-body-text)` | "You are here" tint; see Radius Rationale (this pair stays at 5px, not the button radius) |
 
-| Size | Padding | Font size | Classes |
-|------|---------|-----------|---------|
-| `xs` | `2px 8px` | `{typography.micro}` | `.btn-mini`, `.zoom-button` |
-| `sm` | `4px 8px` | `{typography.micro}` | `.btn-small`, `.btnsmall`, `.btn-icon`, `.btn-xs` |
-| `md` | `6px 12px` | `{typography.xs}` | `.btnstyle3`, `.btn-primary`, `.btn-info`, `.btn-warning`, `.btn-danger` |
-| `lg` | `10px 20px` | `{typography.sm}` | `.savebtn`, `.resetbtn`, `.btn-modern`, `.btn-large` |
+### Size Tiers
 
-**States:**
-- Hover (filled): `filter: brightness(0.85)`
-- Hover (outlined): fill with `var(--dz-accent-color)`, text switches to `{colors.on-primary}`
-- Hover (ghost `.btnsmall`): tint deepens to `rgba(blue, 0.2)`
-- Disabled: `background: var(--dz-status-disabled)`, `color: var(--secondary-text-color)`, `cursor: not-allowed`, `pointer-events: none`
-- Transition: `background 0.15s ease, color 0.15s ease, border-color 0.15s ease, filter 0.15s ease`
+| Tier | Padding token | Value | Paired font | Example consumers |
+|------|--------------|-------|-------------|--------------------|
+| `xs` | `--dz-btn-pad-xs` | `4px 8px` | `--dz-text-micro` (11px), explicit on `.btn-mini`/`.btn-xs`/`.btn-small` | Chart zoom buttons, HVAC/Scene segmented pills, Events A-/A+, label-as-button chips |
+| `sm` | `--dz-btn-pad-sm` | `4px 12px` | Inherits the ambient `--dz-text-sm` (14px); no tier-level override | Back/Forecast nav links, `.btnsmall`/`.btnsmall-sel` ghost buttons, grid-view `.btnstyle3` |
+| `md` | `--dz-btn-pad-md` | `6px 14px` | Split: `.btn-primary`/`.btn-info`/`.btn-warning`/`.btn-danger` pin `--dz-text-xs` (12px) explicitly; `.btnstyle3`/`.btnstyle3-sel` inherit the ambient `--dz-text-sm` (14px) instead | Save/Delete toolbars, Hardware/Users "Add", sub-device editor buttons, Setup "Apply Settings" |
+| `lg` | `--dz-btn-pad-lg` | `10px 20px` | `--dz-text-sm` (14px), explicit on `.btn-modern`/`.btn-modern-warning`; `.resetbtn`/`.savebtn` inherit the same ambient size | Login/Verify/Passkey (`.btn-modern`), Theme Settings Reset/Save |
+
+Three more names appear in the button contract's tier field, but they are not padding-driven sizes,
+so they sit outside the table above:
+
+- **`compact`** - the flex-centered `.btnstyle3` family. It hugs its own text content height instead
+  of the forced line-height the block family uses, so it lands on a constant rendered height
+  regardless of which pad token happens to apply; the contract gives it its own name so a real
+  height regression is never masked by "well, it's still md padding."
+- **`icon-box`** - `.btn-icon` and friends: the `--dz-btn-icon-box` (28px) square hit-box family.
+- **`icon`** - bare glyph close buttons (Tips modal `x`, Automation Wizard `x`, Dynamic Dashboard
+  panel `x`). These render at `border-radius: 0`, sized by their own font-size/line-height alone; they
+  are core-native text glyphs, deliberately outside the button token system, not an oversight.
+
+### Family Roles
+
+| Family | Look | Classes | Notes |
+|--------|------|---------|-------|
+| **Filled primary/info** | Accent fill, `--dz-accent-text` text | `.btn-primary`, `.btn-info`, `.btnstyle3`, `.savebtn`, `.btn-modern` | Primary actions, save, login |
+| **Filled danger** | `--dz-accent-red` fill | `.btn-danger`, `.resetbtn`, `.btn-modern-warning` | Destructive actions |
+| **Filled success/warning** | Semantic fill | `.btn-success`, `.btn-warning` | Declared and token-correct; **no live instance** in the current button-contract crawl (same as the original 2026-07-16 inventory) |
+| **Ghost** | Transparent, `1px solid` accent border, tint only on hover | `.btn-default`, `.btnsmall`, `.btn-small` | Secondary/filter/toolbar actions; no resting elevation |
+| **Toggle-selected** | Accent fill + pressed inset shadow | `.btn-selected`, `.btn-group .btn.active`, `.btn.active`, `.zoom-button-active` | One pressed language for both the theme's own selected class and Bootstrap's native `.active`, replacing two divergent inset shadows the original inventory flagged (finding F2) |
+| **Icon-quiet** | Fully transparent, no border, no resting shadow | `.btn-icon`, `.resetschemebtn`, `.saveschemebtn`, `.page-devices > .splitter` | Hit-box only (`--dz-btn-icon-box`); hover is a tonal glyph filter (`saturate`/`brightness`), never a background wash, so device/card icon glyphs don't start looking like buttons |
+| **Label-as-button** | Accent fill, xs padding | `.label-info[href]`, `.badge-info[href]`, `.label.lcursor`, `.badge.lcursor` | Core renders several clickable actions as `<span>`/`<a>` labels, not `<button>`; only the clickable ones (`[href]`/`.lcursor`) join the button system - static `.label`/`.badge` chips stay flat informational chips |
+| **Disabled** | Flat grey, no shadow | `[disabled]`, `.disabled`, `.btnstyle3-dis`, `.btnsmall-dis` | Same `--dz-btn-disabled-bg`/`-text` pair across every family; `cursor: default`/`not-allowed`, `pointer-events: none` in most paths |
+
+### States
+
+- **Rest**: `--dz-btn-shadow` (filled/toggle-selected only; ghost and icon-quiet render flat)
+- **Hover (filled)**: the shadow grows to `--dz-btn-shadow-hover` and the fill darkens via
+  `color-mix(in srgb, <bg> 90%, black)` - not a `filter`. The `.btn-group` filled variants
+  (`.btn-group .btn-primary`/`.btn-danger`/`.btn-info`, the connected Save/Delete/Enabled pills) are
+  the one place still on the pre-redesign `filter: brightness(0.85)` mechanism; left alone because
+  those groups were out of this redesign's touched scope, not because two hover languages are
+  intended
+- **Hover (ghost/icon-quiet)**: `--dz-btn-hover-bg` tint (ghost) or a tonal glyph `filter` (icon-quiet); no shadow change
+- **Pressed / toggle-selected**: `--dz-btn-shadow-pressed` (inset), replacing Bootstrap 2's own
+  divergent light/dark inset shadows (finding F2)
+- **Focus-visible**: `--dz-btn-focus-ring`, stacked with a comma onto whatever shadow the element
+  already carries at rest. Two later rules (the ghost family's `box-shadow: none` and the
+  toggle-selected pressed inset) tie the base rule's ring at equal specificity and win by source
+  order, so the ring is re-asserted a second time on each of those selectors' own `:focus-visible`
+  state (documented in `css/buttons.css`'s "Focus ring, state-proof" block)
+- **Disabled**: flat - `--dz-btn-disabled-bg`/`-text`, `box-shadow: none`, no hover/focus reaction
+- **Transition**: `background-color .12s ease, box-shadow .12s ease` on the shared base rule (plus a
+  slower `0.15s ease` background/color/border-color/filter transition kept on the older Bootstrap-class
+  selectors for the brightness-hover holdouts above)
+
+**Label centering.** Every button in the base rule is `display: inline-flex; align-items: center;
+justify-content: center` rather than centered by arithmetic (padding + forced line-height happening to
+sum to the box). Two live cases needed this: core fixes some heights the theme doesn't own (e.g.
+`.btnsmall { height: 1.6em }` in `style.css`, versus this theme's own 20px line-height), and
+flex/stretch parents can grow a box past the padding+line-height sum (Events A-/A+ compute 31px in
+their own toolbar). Flex centering makes the label track the box that actually renders, in every such
+case, instead of the box the padding math assumed.
+
+### Radius Rationale
+
+Buttons are `10px` (`--dz-btn-radius`), device cards are `6px` (`{rounded.container}`) - a deliberate
+split, not a rounding inconsistency: buttons are a small, dense control that reads better with a
+softer, roomier corner than a large card surface would want. The one documented exception is the
+"you are here" pair - the top navbar's active-tab tint and the Setup dropdown's active-item tint
+(`--dz-nav-active-bg`/`-text`, `css/nav.css`) - which stays at `5px` (`{rounded.interactive}`) to
+match the navbar tab it sits beside, not the button system it visually resembles. `css/buttons.css`'s
+own contract check would reject a raw `5px` there, which is why that rule lives in `css/nav.css`
+instead: it is nav/dropdown chrome, not a button.
+
+### Menu Surface
+
+`--dz-menu-bg` aliases `--dz-nav-bg` (owner decision 2026-07-17): the top menu bar and every floating
+menu (navbar dropdown, card 3-dot flyout) share ONE color concept, the scheme's "navbar" color, which
+the settings UI labels "Menu". Floating menus consume `--dz-menu-bg`, never `--dz-nav-bg` directly, so
+the mapping stays a single-line decision if a future scheme ever wants the two surfaces to diverge. The
+scheme JSON key itself stays `navbar` (not renamed to `menu`), since renaming it would be a scheme
+file-format break for no behavioral gain.
+
+### The Button Contract (enforcement)
+
+Two independent gates, at different layers:
+
+- **`scripts/check-buttons.sh`** (static, scoped to `css/buttons.css` only) checks that every
+  `border-radius`, `box-shadow`, and `padding` declaration in that one file resolves through a
+  `var(--dz-btn-*)` token (or is `0`/`none`); a line tagged `dz-btn-exempt` with its own justification
+  comment is skipped. It gates `makerelease.sh` alongside `check-typography.sh`: a release cannot ship
+  with a raw radius/shadow/padding value in that file.
+- **`dz-button-contract.js`** (live, Playwright, run against the Docker test instance) censuses every
+  button-ish element across 13 hash routes plus the Theme Settings tab, the Events editor + Automation
+  Wizard dialog, the DeviceEdit page, and the core Tips & Tricks modal, then runs 4 checks against the
+  committed baseline (`scripts/baselines/button-contract.json`):
+  1. **No new/drifted signatures** - every live cluster must match its baseline signature exactly.
+  2. **No silent loss** - every baseline entry marked `required` must still be observed live.
+  3. **Height uniformity per size tier** - baseline entries sharing a hand-curated `tier` must compute
+     the same element height everywhere (entries marked `layoutException` are excluded, with a reason
+     recorded in the baseline).
+  4. **Sibling coherence** - buttons inside one container (`.btn-group`, `.btn-toolbar`,
+     `.ui-dialog-buttonset`, or `[class*="toolbar"]`) must share one height, unless the container is
+     annotated `intentionalHierarchy` (none are, currently).
+
+  The current baseline (post-redesign) carries **147 clusters across 51 distinct style signatures**,
+  up from the pre-redesign v0 baseline's 131 clusters / 48 signatures - both counts genuinely larger
+  than before, because `tier`/`layoutException` annotations and the 2026-07-17 nav-active-token work
+  folded in clusters the original inventory never separately tracked (dropdown-toggle variants). Task
+  9's verification gate measured the actual per-property collapse: distinct raw `border-radius` values
+  went from 9 (pre-redesign) to 6 (post; `10px` now dominates at 62 entries, corner-squared variants
+  and the deliberate `5px` nav-active exception account for the rest - it was never going to be 1,
+  since one token still renders several distinct corner-radius strings), `box-shadow` settled on
+  exactly the 3 token values (rest/pressed/none - hover is only ever observed on `:hover`, not in a
+  resting-state census), and padding went from 14 distinct raw pairs to 10, 4 of which are the exact
+  `--dz-btn-pad-*` token values and together cover 112 of the 147 clusters. Rebaselining
+  (`--rebaseline`) is a deliberate act, never automatic: it prints an adds/removes summary against the
+  previous file, and `tier`/`layoutException` are hand-curated annotations preserved by clusterId
+  across the regenerate, so a routine rebaseline never silently re-arms checks 3-4 back into their
+  dormant (pre-redesign) no-op state.
+
+### Bootstrap 2 Constraint
+
+Bootstrap 2 (`css/bootstrap.css`, loaded globally, not removable per-theme) styles `.btn-*` with
+gradients, and its own **state** rules (`:hover`/`:active`/`[disabled]`) carry higher specificity
+(`0,2,0`) than this theme's base rules (`0,1,0`). Without `!important`, a hover would flip a button to
+Bootstrap's own blue and disabled/active would show Bootstrap's gradients. Every `!important` in
+`css/buttons.css` on `background`/`border`/`box-shadow`/`color` exists to beat this one constraint,
+not as a style preference; see the "Universal button reset" comment block in that file for the full
+specificity accounting, and the Don'ts entry on `!important` below.
+
+### Core-Region Takeover
+
+Regions core styles itself (its own stylesheet loads after the theme and re-asserts raw values, or
+ships bare/unclassed buttons the `.btn` system never reaches) needed their own rules, one per region,
+each citing the exact core selector/specificity that forced it:
+
+- **`dd-topbar`** (Dynamic Dashboard compact view-mode bar) - icon-quiet tier (`css/buttons.css`)
+- **Events editor chrome + Automation Wizard** - toolbar buttons, the open-file tab close-`x`, and the
+  Wizard footer (filled tier, including Back/Cancel which the ghost convention would otherwise give)
+  (`css/buttons.css`)
+- **Charts zoom/range segmented group** - `.zoom-button`/`.zoom-reset` ghost tier, plus the connected
+  1H/3H/day range group using the same corner-squaring technique as `.btn-group` (`css/charts.css`)
+- **DataTables pager** - `.fg-button` ghost tier; lives in `css/tables.css`, not `css/buttons.css`,
+  because its markup nests inside that file's own table-header reset and needs to load after it
+- **Devices panel splitter** - icon-quiet tier (`css/buttons.css`)
+- **Dropdown active item** - the Setup dropdown's "you are here" marker; lives in `css/nav.css` (see
+  Radius Rationale: it needs the raw 5px nav radius, which `check-buttons.sh` would reject)
+- **About page** - `.btn-modern` is used directly for Website/Forum/Wiki/Source Code and the Tips
+  trigger; no override needed here, listed for completeness since it is the one region above that
+  needed nothing extra
 
 ### Button Groups
 
-**In device cards**: flex row wrap with `3px` gap, each button gets `{rounded.interactive}` (pill-with-gap style).
+**In device cards** (`css/cards.css`, `.item .btn-group`): flex row wrap with `3px` gap. Each button
+still gets a **raw `border-radius: 5px !important`** here, not `--dz-btn-radius` - `css/buttons.css`'s
+own header comment scopes this layout to stay with the device-card CSS, and it was explicitly out of
+this redesign's touched scope. This is the one place in the app where a "button" still renders at the
+pre-redesign radius; see Gaps.
 
-**In toolbars/dialogs**: connected segments. First child: `5px 0 0 5px` radius. Last child: `0 5px 5px 0` radius. Middle children: `0` radius. `1px solid blue` border, `-1px` left margin to collapse borders.
+**In toolbars/dialogs** (`css/buttons.css`, `.btn-group`): connected segments, all at `--dz-btn-radius`
+(10px). First child: outer corners rounded, inner corners squared. Last child: mirrored. Middle
+children: fully squared. A `.btn-group` wrapping a single button (`:only-child`, e.g. the Dynamic
+Dashboard's dashboard-switcher) gets the full radius back, since there is no sibling to square against.
+`1px solid` accent border, `-1px` left margin to collapse borders. The same corner-squaring technique
+is reused verbatim for the chart zoom/range group (see Core-Region Takeover).
+
+## Components
 
 ### Device Cards
 
@@ -715,7 +915,7 @@ Toggled via `theme.json` features object. Each feature has an `enabled` boolean 
 ## Do's
 
 - Use CSS custom properties for all colors; never hardcode hex values outside the token definitions in `dz-tokens.css` and `dark.css`
-- Use `filter: brightness(0.85)` for filled button hover states; it works across both light and dark themes
+- Use `--dz-btn-shadow-hover` + `color-mix(in srgb, <bg> 90%, black)` for filled button hover states (see Buttons > States); `filter: brightness(0.85)` is a legacy holdout on `.btn-group` filled variants only, not the pattern for new buttons
 - Use the card grid gap (`{spacing.md}`, 15px) for spacing between device cards
 - Use Inter regular (`--dz-weight-regular`) for body text and Inter semibold (`--dz-weight-semibold`) for headings and emphasis
 - Keep device cards as CSS grid layouts; the `grid-template-areas` pattern is the foundation of the card system
@@ -734,7 +934,7 @@ Toggled via `theme.json` features object. Each feature has an `enabled` boolean 
 - Don't set fixed heights on device cards; rows use `minmax()` to accommodate variable content
 - Don't use `pt` units; normalize to `px` (every theme font size is a `px`-based `--dz-text-*`/`--dz-icon-size-*` token; core's `10pt` body default is the only remaining `pt` value, and the token contract overrides it)
 - Don't introduce spacing values outside the documented clusters until the 4px grid migration
-- Don't add `!important` unless overriding upstream Domoticz styles that cannot be beaten by specificity
+- Don't add `!important` unless overriding upstream Domoticz styles that cannot be beaten by specificity (see Buttons > Bootstrap 2 Constraint for the concrete accounting behind every `!important` in `css/buttons.css`)
 - Don't rely on Bootstrap class semantics (`.btn-info` = blue, `.btn-danger` = red); the theme remaps these to its own palette
 
 ## Responsive Behavior
@@ -797,8 +997,12 @@ rules would lose to the rules they now jump over.
 Where the code does not yet meet the intent stated above. Each is a debt marker: it names what
 would have to change, not a reason to copy the current behaviour.
 
-- No formal `:focus-visible` styles for keyboard navigation / accessibility
-- No CSS custom properties for shadows (hardcoded `rgba` values)
+- `:focus-visible` styles now exist for every button family (see Buttons > States) plus a handful of
+  specific spots (card device-icon images, the Setup Apply Settings button, `.modal-footer .btn`), but
+  plain nav links (`.navbar .nav li a`) and the Setup dropdown's own menu items still have no visible
+  keyboard-focus ring
+- No CSS custom properties for shadows outside the button family (card/popup/overlay/drag elevations
+  are hardcoded `rgba` values; only the button shadows are tokenized)
 - Status glow colors (timeout red, protected blue, low battery yellow) are hardcoded `rgb()` in
   `css/device-status.css`, not mapped to the semantic color system
 - `--dz-input-border` and `--dz-status-disabled` share the same value (`{colors.light-border}`) in
@@ -816,15 +1020,32 @@ would have to change, not a reason to copy the current behaviour.
   the card is squeezed to fit rather than designed for it, which costs the outer hover ring and the
   resting drop shadow on that board. Closing it needs either a compact card drawn for 120px, or a
   themeable `minH`/`defaultH` upstream.
+- `.modal-footer .btn` (bootbox dialog footer buttons) still has a raw `border-radius: 5px` in
+  `custom.css`, not `var(--dz-btn-radius)` (10px); it already consumes `--dz-btn-bg`/`-text`/`-border`
+  for color, only the radius was left behind. `scripts/check-buttons.sh` cannot catch this, since it
+  only scans `css/buttons.css`.
+- In-card button groups (`.item .btn-group`, `css/cards.css`: HVAC mode pills, dimmer level selector,
+  scene buttons) still render each button at a raw `border-radius: 5px !important`, not
+  `--dz-btn-radius`. This was an explicit scope decision (`css/buttons.css`'s own header comment:
+  card-specific `.item .btn-group` layout "stays... with the device cards"), not an oversight, but it
+  means the in-card pill-group radius and the rest of the button system have deliberately diverged
+  since the 2026-07-17 redesign.
+- Two declared `--dz-btn-*` tokens have no current CSS consumer: `--dz-btn-danger-bg-alpha` and
+  `--dz-btn-text-shadow` (the base rule applies a literal `text-shadow: none !important` instead of
+  the token). Candidates for removal in a future cleanup pass.
+- The legacy `#login #submit` button (old pre-glass-morphism login markup, `css/login.css`) still has
+  a raw `border-radius: 5px`. The current login page (`views/login.html`) uses `.btn-modern` instead,
+  which is fully on the 10px token; this raw rule only affects the superseded markup kept for older
+  Domoticz core versions.
 
 ## Iteration Guide
 
 1. Focus on ONE component at a time
 2. Reference component names and design tokens directly
 3. Always check both light and dark mode after changes
-4. Add new button variants following the 4-tier hierarchy (filled/semantic/outlined/ghost) and 4-size system (xs/sm/md/lg)
+4. Add new button variants following the family roles (filled primary/danger/success/warning, ghost, toggle-selected, icon-quiet, label-as-button, disabled) and 4-size system (xs/sm/md/lg); see Buttons
 5. New spacing values must come from the current clusters (4/8/10/15/20px) or the target 4px grid
 6. New containers use `{rounded.container}` (6px) and `{elevation.card}`
-7. New interactive elements use `{rounded.interactive}` (5px)
+7. New interactive elements (nav links, dropdown borders) use `{rounded.interactive}` (5px); new buttons use `{rounded.button}` (10px) via `--dz-btn-radius`, never a raw value
 8. Test on mobile (< 720px) and desktop (1060px+) at minimum
 9. Check upstream Domoticz source before fixing styling issues
