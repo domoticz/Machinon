@@ -18,8 +18,17 @@ input#AcceptNewHardware:checked ~ button {
 /* =Footer */
 /* Popups */
 
-/* Theme tab in Settings */
-#settingscontent #themeTabButton.active + li.pull-right {
+/* Theme tab in Settings: core's "Apply Settings" CTA (the .sub-tabs strip's
+   li.pull-right) stores CORE settings; on the theme's own injected tabs the
+   theme's Reset/Save buttons are the real actions, so the core CTA is hidden
+   while a theme tab is active. General sibling (~), not adjacent (+): the
+   injected Icons tab (#iconPackTabButton) sits between #themeTabButton and
+   the pull-right li in the strip, which silently killed the old + selector
+   (owner report 2026-07-17, mobile: the un-hidden fixed-bottom Apply bar
+   stacked on top of Reset/Save). Both injected tab ids get the same rule so
+   the Icons tab cannot regress the same way. */
+#settingscontent #themeTabButton.active ~ li.pull-right,
+#settingscontent #iconPackTabButton.active ~ li.pull-right {
     display: none !important;
 }
 
@@ -287,7 +296,13 @@ ul.machinon_ul li {
         margin-bottom: 50px;
     }
 
-    #settings li.pull-right, 
+    /* Phone widths: the action row (core's Apply li, or the theme tabs'
+       Reset/Save div) becomes one fixed bottom bar. Only ONE of the two can
+       be visible at a time: the theme-tab rule at the top of this file hides
+       core's li.pull-right while a theme tab is active, which is what keeps
+       these two fixed bars from stacking on each other (owner report
+       2026-07-17; the broken hide selector was the actual bug, see there). */
+    #settings li.pull-right,
     #settings div.pull-right {
         position: fixed;
         left: 0;
@@ -297,7 +312,11 @@ ul.machinon_ul li {
         z-index: 10;
     }
 
-    #settings .pull-right a {
+    /* a for core's Apply link, button for the theme's Reset/Save pair
+       (themesettings.html renders them as <button>s; the button arm keeps
+       them spaced side by side in the fixed bar instead of touching). */
+    #settings .pull-right a,
+    #settings .pull-right button {
         margin: 0 20px;
         box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
     }
