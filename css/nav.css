@@ -278,14 +278,36 @@ div.menu-toggle.scrolled {
     margin-top: -10px;
 }
 
+/* Apply Settings CTA in the Setup/ThemeSettings sub-tab strip (core:
+   views/setup.html). Rendered as a bare .btn-danger with no companion .btn
+   class, so it never reaches the shared soft-elevated base selector list in
+   buttons.css (that list keys off .btn/.btnstyle3/.savebtn/etc, all absent
+   here), and this rule's own two-class selector (0,2,0) outranked
+   buttons.css's plain .btn-danger padding/radius (0,1,0), leaving it on
+   pre-redesign raw values (5px radius, 6px 12px padding, no elevation, no
+   focus ring). Bring it onto the same md-tier soft-elevated recipe every
+   other .btn-danger pill uses (button contract task B9: it sits alone in
+   the .sub-tabs strip with no button siblings for check 4 to compare, but
+   it shares the md tier with every other .btn-danger instance site-wide,
+   so check 3 catches it). border uses the same transparent-border trick as
+   the shared base rule, on all four sides, so border-box height matches
+   exactly: the old rule zeroed border-bottom specifically to keep the
+   .sub-tabs tab-underline mechanics (the base .sub-tabs > li > a reserves
+   a 2px transparent bottom border, swapped to a coloured 2px border on
+   hover/active) off this pill-shaped CTA, but a fully transparent bottom
+   border is equally invisible and this selector's two classes already
+   outrank both of those .sub-tabs rules (2 classes beats 1), so the
+   override is unnecessary now. */
 .sub-tabs .sub-tabs-apply,
 .sub-tabs > li > a.sub-tabs-apply {
     background: var(--dz-btn-danger-bg) !important;
-    border: none !important;
-    border-bottom: none !important;
-    border-radius: 5px;
+    border: 1px solid transparent;
+    border-radius: var(--dz-btn-radius);
+    box-shadow: var(--dz-btn-shadow);
+    box-sizing: border-box;
+    line-height: var(--dz-btn-line-height);
     color: var(--dz-btn-primary-text) !important;
-    padding: 6px 12px;
+    padding: var(--dz-btn-pad-md);
     font-weight: var(--dz-weight-semibold);
 }
 
@@ -293,4 +315,11 @@ div.menu-toggle.scrolled {
 .sub-tabs > li > a.sub-tabs-apply:hover {
     background: var(--dz-btn-primary-bg) !important;
     color: var(--dz-btn-primary-text) !important;
-    border-bottom: none !important;
+    box-shadow: var(--dz-btn-shadow-hover);
+}
+
+.sub-tabs .sub-tabs-apply:focus-visible,
+.sub-tabs > li > a.sub-tabs-apply:focus-visible {
+    outline: none;
+    box-shadow: var(--dz-btn-shadow), var(--dz-btn-focus-ring);
+}

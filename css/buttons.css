@@ -477,6 +477,23 @@ a.saveschemebtn {
 .page-content-container a.btnstyle3-dis:visited {
     color: var(--dz-btn-disabled-text);
 }
+
+/* Back link on core's page headers (.page-header-with-button, e.g.
+   views/device_light_edit.html, DeviceLog.html, DeviceReport.html,
+   RoomPlans.html, timers.html, uservariables.html, notifications.html,
+   SceneLog.html): core's own .page-header-small sets a 9pt (12px) font size
+   on the wrapping header (style.css:1339-1344), which the flex-centered
+   .btnstyle3 link inherits since neither core nor this rule set font-size on
+   plain .btnstyle3. A flex-centered .btnstyle3's box hugs its own text's
+   natural glyph height (same mechanism documented on .log-toolbar
+   .btn-danger above), so the smaller inherited font-size also shrinks the
+   rendered button to 24px, 4px short of every other .btnstyle3 instance
+   (28px tall; those all inherit the page's ambient body text size instead).
+   Reset to that same ambient size so Back matches its family everywhere
+   (button contract task B9, height-uniformity check). */
+.page-header-with-button .btnstyle3 {
+    font-size: var(--dz-text-sm);
+}
 /* Button groups in toolbars/dialogs: connected */
 .btn-group .btn {
     margin: 0 0 0 -1px !important;
