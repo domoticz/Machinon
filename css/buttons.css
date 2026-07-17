@@ -16,8 +16,7 @@
    control the theme owns. !important mirrors the Bootstrap-2 constraint
    documented on the reset block below (state rules outrank base rules). */
 .btn, .btnstyle3, .btnstyle3-sel, .btnstyle3-dis, .savebtn, .resetbtn,
-.btnsmall, .btnsmall-sel, .btnsmall-dis, .btn-modern, .btn-modern-warning,
-.allow5min {
+.btnsmall, .btnsmall-sel, .btnsmall-dis, .btn-modern, .btn-modern-warning {
     border-radius: var(--dz-btn-radius) !important;
     box-shadow: var(--dz-btn-shadow) !important;
     text-shadow: none !important;
@@ -55,11 +54,13 @@
     box-shadow: var(--dz-btn-shadow-hover) !important;
 }
 .btn:focus-visible, .btnstyle3:focus-visible, .savebtn:focus-visible,
-.resetbtn:focus-visible, .btnsmall:focus-visible {
+.resetbtn:focus-visible, .btnsmall:focus-visible, .btn-modern:focus-visible,
+.btn-modern-warning:focus-visible {
     outline: none;
     box-shadow: var(--dz-btn-shadow), var(--dz-btn-focus-ring) !important;
 }
-.btn:active, .btnstyle3:active, .savebtn:active, .resetbtn:active {
+.btn:active, .btnstyle3:active, .savebtn:active, .resetbtn:active,
+.btn-modern:active, .btn-modern-warning:active {
     box-shadow: var(--dz-btn-shadow-pressed) !important;
 }
 /* Disabled controls do not float and do not react. */
@@ -182,8 +183,7 @@ a.btnstyle {
 .btnstyle3-sel,
 .btnstyle3-dis,
 .savebtn,
-.resetbtn,
-.allow5min {
+.resetbtn {
     text-shadow: none;
     background-image: none;
     transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, filter 0.15s ease;
@@ -200,8 +200,10 @@ a.btnstyle {
 }
 
 .btn-mini:hover {
-    background: var(--dz-accent-color);
-    color: var(--dz-accent-text);
+    /* Ghost tint (2026-07-17): matches the .btn-default/.btnsmall hover
+       pattern below (background wash, no text-colour flip) instead of the
+       retired solid-fill hover this rule used before. */
+    background: var(--dz-btn-hover-bg);
 }
 
 /* .btn-modern is aliased in here (Phase A1): same primary-bg look. Its own

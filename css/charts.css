@@ -159,10 +159,18 @@
     gap: 0;
 }
 
-.zoom-button {
+.zoom-button,
+.zoom-reset {
+    /* Centering applies to both: .zoom-reset sits outside the segmented
+       group (own margin/border-color below) but shares the same fixed-height
+       core box and font-metric leading problem described above, so it needs
+       the identical flex fix, not just the grouped zoom-range buttons. */
     display: inline-flex;
     align-items: center;
     justify-content: center;
+}
+
+.zoom-button {
     margin: 0 0 0 -1px !important;
     border-radius: 0 !important;
 }

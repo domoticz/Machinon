@@ -159,9 +159,10 @@ div.menu-toggle.scrolled {
 
 .navbar .nav .dropdown-menu {
     border: none;
-    /* Shared menu-surface token (2026-07-17): resolves to the page bg by
-       design, see --dz-menu-bg in dz-tokens.css; the card 3-dot flyout
-       (css/cards.css .options) consumes the same token. */
+    /* Shared menu-surface token (2026-07-17): --dz-menu-bg aliases
+       --dz-nav-bg, the scheme's navbar/"Menu" colour (see dz-tokens.css);
+       the card 3-dot flyout (css/cards.css .options) consumes the same
+       token. */
     background: var(--dz-menu-bg);
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
     backdrop-filter: none;

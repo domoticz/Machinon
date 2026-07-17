@@ -4,15 +4,6 @@ input#AcceptNewHardware:checked ~ button {
     display: none
 }
 
-.allow5min,
-.allow5min:hover {
-    background: none;
-    background-color: var(--dz-accent-color);
-    color: var(--dz-accent-text);
-    border-radius: 2px;
-    border: none;
-}
-
 /* =Setup */
 /* Footer */
 /* =Footer */

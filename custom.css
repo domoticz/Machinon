@@ -547,8 +547,6 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
     background: var(--dz-btn-bg);
     color: var(--dz-btn-text);
     border: 1px solid var(--dz-btn-border);
-    border-radius: 5px;
-    box-shadow: none;
     text-shadow: none;
 }
 
@@ -614,21 +612,6 @@ input#AcceptNewHardware:checked ~ button {
     display: none
 }
 
-/* border/border-radius removed (Task 5, 2026-07-17): both were non-!important
-   declarations that won the cascade tie over the soft-elevated base block in
-   css/buttons.css (.allow5min is in that selector list), defeating its
-   transparent 1px border (height parity with every other button tier) and
-   its --dz-btn-radius. Letting the base block apply gives this button the
-   same border-width and radius as its siblings. */
-.allow5min {
-    background: var(--dz-accent-color);
-    color: var(--dz-accent-text);
-}
-
-.allow5min:hover {
-    filter: brightness(0.85);
-}
-
 .ui-corner-all {
     background: none;
     border-radius: 0;
@@ -681,6 +664,23 @@ select.ui-corner-all option:hover {
    Not a text-decoration: it is that border-bottom. */
 .ui-dialog-titlebar-close {
     border-bottom: none;
+}
+
+/* Every jQuery UI dialog titlebar (jquery-ui.min.js dialog widget, unconditional) carries
+   BOTH .ui-widget-header (css/ui-darkness/jquery-ui.min.css: dark #333 chrome + white
+   ui-icons_ffffff close-icon sprite) and .ui-corner-all at the same time. The
+   input-underline rule above strips .ui-corner-all's background to flatten form controls,
+   and every titlebar loses its dark chrome the same way (the title TEXT was already
+   re-colored dark for that now-light surface, see the plain .ui-widget-header rule above -
+   only the close-icon sprite was left on the dark-bg-only white variant). Verified live
+   (ShowCameraLiveStream dialog): the close X was fully invisible on the light/custom-light
+   underlay - present, correctly positioned, clickable - just white icon on the (now
+   transparent) light titlebar; on the dark underlay the titlebar stays dark enough that the
+   same white icon is still legible. Same problem and same fix css/users.css already applies
+   to the multiselect widget's own ui-darkness icons: reuse --dz-ui-icon-filter (dz-tokens.css
+   invert(1) / dark.css none) instead of adding a duplicate token. */
+.ui-widget-header.ui-corner-all .ui-icon {
+    filter: var(--dz-ui-icon-filter);
 }
 
 /* Ghost buttons inside dialogs: core's own style.css has .btnsmall { color: #fff } (written

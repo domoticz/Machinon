@@ -532,7 +532,7 @@ the ones that need to differ.
 | `--dz-btn-danger-bg` | `var(--dz-accent-red)` | Filled danger background |
 | `--dz-btn-danger-bg-alpha` | `rgba(var(--dz-accent-red-values), 0.85)` | Declared; no current CSS consumer (flagged for cleanup, not fixed here) |
 | `--dz-btn-success-bg` / `--dz-btn-warning-bg` | `#3b863b` / `#b36200` | Defined in the mapped-token block, not the `--dz-btn-*` block; consumed by `.btn-success`/`.btn-warning` (both declared-only, no live instance in the current contract crawl) |
-| `--dz-btn-bg` / `--dz-btn-text` / `--dz-btn-border` | `var(--dz-widget-bg)` / `var(--dz-body-text)` / `var(--dz-input-border)` | Bootbox `.modal-footer .btn` only (see Gaps: that rule still has a raw `border-radius: 5px`, not `--dz-btn-radius`) |
+| `--dz-btn-bg` / `--dz-btn-text` / `--dz-btn-border` | `var(--dz-widget-bg)` / `var(--dz-body-text)` / `var(--dz-input-border)` | Bootbox `.modal-footer .btn` only; radius/shadow come from the shared base rule (`--dz-btn-radius`/`--dz-btn-shadow`), not from this token group |
 | `--dz-btn-hover-bg` | `rgba(var(--dz-accent-values), 0.1)` | Ghost/icon-quiet hover tint |
 | `--dz-btn-shadow` | `0 1px 3px rgba(0,0,0,.18), 0 1px 2px rgba(0,0,0,.10)` | Resting elevation for every filled button |
 | `--dz-btn-shadow-hover` | `0 2px 6px rgba(0,0,0,.22), 0 1px 3px rgba(0,0,0,.12)` | Hover: shadow grows, it does not change color |
@@ -1020,10 +1020,6 @@ would have to change, not a reason to copy the current behaviour.
   the card is squeezed to fit rather than designed for it, which costs the outer hover ring and the
   resting drop shadow on that board. Closing it needs either a compact card drawn for 120px, or a
   themeable `minH`/`defaultH` upstream.
-- `.modal-footer .btn` (bootbox dialog footer buttons) still has a raw `border-radius: 5px` in
-  `custom.css`, not `var(--dz-btn-radius)` (10px); it already consumes `--dz-btn-bg`/`-text`/`-border`
-  for color, only the radius was left behind. `scripts/check-buttons.sh` cannot catch this, since it
-  only scans `css/buttons.css`.
 - In-card button groups (`.item .btn-group`, `css/cards.css`: HVAC mode pills, dimmer level selector,
   scene buttons) still render each button at a raw `border-radius: 5px !important`, not
   `--dz-btn-radius`. This was an explicit scope decision (`css/buttons.css`'s own header comment:
