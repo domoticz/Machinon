@@ -58,10 +58,12 @@ input#AcceptNewHardware:checked ~ button {
     color: var(--dz-status-disabled);
 }
 
+/* Box properties (padding, hit-box, radius, box-shadow) live with the rest of
+   the icon-only button family in css/buttons.css (Phase B, 2026-07-17); only
+   the glyph's own typography/colour stay here. */
 a.resetschemebtn,
 a.saveschemebtn {
     font-size: var(--dz-text-md);
-    padding: 0 10px;
     color: var(--dz-accent-color);
 }
 

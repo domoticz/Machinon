@@ -504,10 +504,23 @@ body table#itemtable tr > .options {
     display: block;
 }
 
+/* Flyout menu rows (Edit/Notifications/Idx...), NOT physical buttons (owner
+   feedback 2026-07-17, item a): the ghost family in buttons.css gives
+   .btnsmall/.btnsmall-sel a bordered outline and a radius, which reads as a
+   tiny button per row instead of a flat menu; killed here (more specific,
+   and cards.css loads after buttons.css) so a row is just text. Box-shadow
+   already resolves to none from that same ghost rule, so no override is
+   needed for elevation. Hover/selection stays a plain accent-tint highlight:
+   the ghost rule's hover background (--dz-btn-hover-bg) already applies
+   unchanged, and the extra rule below tints the text to match. The floating
+   .options container above keeps its own drop shadow: it is a dropdown
+   surface, not a button. */
 .options .btnsmall,
 .options .btnsmall-sel {
     display: block;
     background: transparent;
+    border: none !important;
+    border-radius: 0 !important;
 }
 
 .options .btnsmall-sel {
@@ -520,6 +533,11 @@ body table#itemtable tr > .options {
     padding-top: 4px;
     text-align: left;
     color: var(--secondary-text-color);
+}
+
+.options .btnsmall:hover,
+.options .btnsmall-sel:hover {
+    color: var(--dz-accent-color);
 }
 
 .favorite {
@@ -539,15 +557,22 @@ body table#itemtable tr > .options {
     padding-right: 5px;
 }
 
+/* Card Log/Timer icon pair: quiet icon treatment, not a button (owner
+   feedback 2026-07-17, item b; glyph itself is a CSS ::before Ionicon, see
+   custom.css ~197-218). Background/box-shadow already resolve to
+   transparent/none from the buttons.css ghost rule (.btnsmall/.btnsmall-sel
+   are two of its selectors); only the border needs killing here (more
+   specific, and cards.css loads after buttons.css). Hover stays exactly
+   that ghost rule's tonal tint (--dz-btn-hover-bg) - no extra background is
+   added here so the icons don't grow a pill/circle. */
 .timers_log .btnsmall,
-.timers_log .btnsmall-sel,
-.timers_log .btnsmall:hover,
-.timers_log .btnsmall-sel:hover {
+.timers_log .btnsmall-sel {
     display: inline;
     padding: 0 5px;
     font-size: 0;
     line-height: 16px;
     color: var(--dz-accent-color);
+    border: none !important;
 }
 /* images */
 .item .img,

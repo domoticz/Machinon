@@ -111,14 +111,30 @@ a.btnstyle {
 }
 /* button.savebtn:disabled is covered by the Soft-elevated base's disabled
    selector list above (background/color/cursor, !important). */
-/* Settings button, z-wave etc. */
+/* Label-as-button family (owner report 2026-07-17): core uses clickable
+   .label/.badge spans and links as buttons too (e.g. Hardware's "Create
+   Virtual Sensors" <span class="label label-info lcursor" onclick=...>,
+   Users' "Set Devices", the settings/z-wave label-buttons this rule
+   originally covered). Distinction preserved: CLICKABLE labels ([href] or
+   .lcursor) join the button system below; STATIC .label/.badge chips
+   (custom.css) stay flat informational chips, no elevation/radius change. */
 .label-info[href], .badge-info[href],
-.label-info.lcursor {
+.label.lcursor, .badge.lcursor {
     background-color: var(--dz-accent-color);
     color: var(--dz-accent-text);
+    padding: var(--dz-btn-pad-xs) !important;
+    border-radius: var(--dz-btn-radius) !important;
+    box-shadow: var(--dz-btn-shadow) !important;
+    transition: background-color .12s ease, box-shadow .12s ease;
 }
 
-/* Panels: extra-small tier, xs. */
+.label-info[href]:hover, .label.lcursor:hover {
+    box-shadow: var(--dz-btn-shadow-hover) !important;
+    background-color: color-mix(in srgb, var(--dz-accent-color) 90%, black) !important;
+}
+
+/* Panels: extra-small tier, xs. Background/border/color/box-shadow join the
+   ghost family further down this file (.btn-small is one of its selectors). */
 .btn-small {
     padding: var(--dz-btn-pad-xs) !important;
     font-size: var(--dz-text-micro) !important;
@@ -157,7 +173,7 @@ a.btnstyle {
     background: transparent;
     border: 1px solid var(--dz-accent-color);
     color: var(--dz-body-text);
-    border-radius: 5px; /* dz-btn-exempt: ghost mini radius, owned by the Phase B ghost/icon redesign (task B6); left as-is for now */
+    border-radius: var(--dz-btn-radius);
     padding: var(--dz-btn-pad-xs);
     font-size: var(--dz-text-micro);
 }
@@ -237,44 +253,66 @@ a.btnstyle {
     background-color: color-mix(in srgb, var(--dz-btn-danger-bg) 90%, black) !important;
 }
 
+/* Padding/layout only: background/border/color/box-shadow now come from the
+   ghost family further down this file (.btnsmall/.btnsmall-sel are two of
+   its selectors); the old rgba tint background and its hover here were
+   dropped as dead, since the ghost rule's !important always wins the tie. */
 .btnsmall,
 .btnsmall-sel {
-    color: var(--dz-accent-color);
-    background: rgba(var(--dz-accent-values), 0.1);
     padding: var(--dz-btn-pad-sm);
     font-style: normal;
     cursor: pointer;
 }
 
-.btnsmall:hover,
-.btnsmall-sel:hover {
-    background: rgba(var(--dz-accent-values), 0.2);
-}
-
-/* Ghost: disabled small button. color/background/cursor below are currently
-   shadowed by the Soft-elevated base's shared disabled selector (!important,
-   var(--dz-btn-disabled-bg)/-text) - .btnsmall-dis is a ghost family, its own
-   distinct disabled look is Task 6 scope; left in place rather than deleted
-   so that follow-up can either restyle or intentionally drop them. */
+/* Ghost: disabled small button. Color/background/cursor are governed by the
+   Soft-elevated base's shared disabled selector (--dz-btn-disabled-bg/-text,
+   cursor: default, !important); only pointer-events and font-style are
+   unique to this class and kept here. */
 .btnsmall-dis {
-    color: var(--dz-status-disabled);
-    background: transparent;
-    padding: var(--dz-btn-pad-sm);
-    cursor: not-allowed;
     pointer-events: none;
     font-style: normal;
 }
 
-/* Ghost: icon-only buttons. Padding maps to xs (numerically unchanged); the
-   box model itself (radius, square hit-box) is Phase B scope (task B6). */
-.btn-icon {
+/* Ghost: icon-only buttons share one hit-box (Phase B, 2026-07-17). Visual
+   chrome at rest is intentionally none per owner feedback (device/card icon
+   glyphs must not look like buttons): background/border stay transparent/
+   none, so only the tonal hover pop (filter, on .btn-icon img below) and the
+   min hit-box are visible; border-radius only shapes that hover highlight,
+   not a resting box. min-width/min-height give every icon button (Devices
+   row actions, RoomPlans, the scheme-picker reset/save icons) the same
+   square-ish hit target regardless of its glyph's intrinsic size.
+
+   F1 root cause (diagnosed live via CDP CSS.getMatchedStylesForNode on
+   #/Devices): core's own www/css/style.css ships a ".btn.btn-icon" rule that
+   zeroes the same four properties (padding, border, box-shadow, background)
+   - two classes, specificity (0,2,0) - and every .btn-icon element core emits
+   (Devices table row actions, RoomPlans) carries the "btn" class alongside
+   it, so that rule always matches too. Our previous one-class ".btn-icon"
+   selector (0,1,0) could never outrank it: neither side carried !important,
+   so the browser fell back to specificity, and core's two-class selector
+   always wins that regardless of file load order. Border/box-shadow/
+   background already matched core's values by coincidence, so only padding
+   visibly computed to 0 instead of the declared xs box. Since the hit-box is
+   now guaranteed by min-width/min-height (not by padding pushing the box
+   out), this fix mostly restores intent for icons whose padding-driven width
+   already exceeds the 28px floor (e.g. wider glyphs); !important is the same
+   load-bearing pattern documented on the "Universal button reset" block
+   below, applied here so the declared box actually wins. */
+.btn-icon,
+a.resetschemebtn,
+a.saveschemebtn {
     background: transparent;
     border: none;
-    padding: var(--dz-btn-pad-xs);
+    box-sizing: border-box;
+    padding: var(--dz-btn-pad-xs) !important;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    border-radius: 5px; /* dz-btn-exempt: ghost icon-only radius, owned by the Phase B ghost/icon redesign (task B6); left as-is for now */
+    justify-content: center;
+    min-width: var(--dz-btn-icon-box);
+    min-height: var(--dz-btn-icon-box);
+    border-radius: var(--dz-btn-radius) !important;
+    box-shadow: none !important;
 }
 
 /* Devices-table action-button glyphs (log, delete, rename, remove, add). Core
@@ -470,26 +508,48 @@ a.btnstyle {
     border-radius: 0 !important;
 }
 
+/* ---- Ghost family (Phase B, 2026-07-17) ----
+   Ghosts are quiet: no resting elevation, an outline in the ghost tokens,
+   a tint on hover, the same radius every other button carries. Placed AFTER
+   the soft-elevated base block (top of file) so its no-elevation override
+   wins the specificity tie against that block's resting shadow token -
+   .btnsmall/.btnsmall-sel are two of that base block's selectors, so this
+   is the rule that actually zeroes their elevation; .btn-default/.btn-small
+   aren't in that list and so only need the radius here. */
 .btn-default,
-.btn-group .btn-default {
+.btn-group .btn-default,
+.btnsmall,
+.btnsmall-sel,
+.btn-small {
     background: transparent !important;
-    border: 1px solid var(--dz-accent-color) !important;
-    color: var(--dz-body-text) !important;
+    border: var(--dz-btn-ghost-border) !important;
+    color: var(--dz-btn-ghost-text) !important;
+    border-radius: var(--dz-btn-radius) !important;
+    box-shadow: none !important;
 }
 
-.btn.btn-selected,
-.btn-group .btn-selected,
-.btn-default.active,
-.btn-group .btn-default.active {
-    color: var(--dz-accent-text) !important;
-    background: var(--dz-accent-color) !important;
-    border-color: var(--dz-accent-color) !important;
+.btn-default:hover,
+.btnsmall:hover,
+.btnsmall-sel:hover,
+.btn-small:hover {
+    background: var(--dz-btn-hover-bg) !important;
+    box-shadow: none !important;
 }
 
-.btn-default:hover {
-    color: var(--dz-accent-text) !important;
-    background: var(--dz-accent-color) !important;
-    border-color: var(--dz-accent-color) !important;
+/* One pressed language for BOTH selected-state code paths (theme
+   .btn-selected, e.g. the HVAC/dimmer level selector, and Bootstrap's own
+   .active toggle-button groups), killing Bootstrap 2's divergent inset
+   highlights (F2). Placed after the ghost rule above so a selected ghost
+   (.btn-default.active, which always also carries .btn per core's markup,
+   so it matches ".btn.active" here) gets the filled/pressed look instead of
+   the ghost's transparent background. */
+.btn-selected,
+.btn-group .btn.active,
+.btn.active {
+    background: var(--dz-btn-toggle-selected-bg) !important;
+    color: var(--dz-btn-toggle-selected-text) !important;
+    border-color: var(--dz-btn-toggle-selected-bg) !important;
+    box-shadow: var(--dz-btn-shadow-pressed) !important;
 }
 
 .btn-group .btn-primary {
@@ -546,9 +606,16 @@ a.btnstyle {
    needs correcting. !important is required: the soft-elevated base block
    sets line-height with !important on .btn (which this element also
    matches), so a plain declaration here would be silently outranked.
-   Verified live: 28px on all six buttons after this rule. */
+   Owner report 2026-07-17 (item c): even after the height fix, Clear's TEXT
+   still read visibly smaller than its siblings - .btn-danger's own rule
+   assigns it the xs text token while .btnstyle3 sets none and falls back to
+   the body base sm token, so the two sizes sat side by side in the same
+   28px-tall box. Aligning Clear to sm makes the whole row read as one
+   weight; !important is needed for the same base-block reason as above.
+   Verified live: 28px tall, sm text, on all six buttons after this rule. */
 .log-toolbar .btn-danger {
     line-height: 14px !important;
+    font-size: var(--dz-text-sm) !important;
 }
 
 /* Back-to-top floating button. Core style.css paints it with a static PNG
