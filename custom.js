@@ -17,7 +17,8 @@ var THEME_MODULES = [
     "src/js/search.js",
     "src/js/page.js",
     "src/js/devices.js",
-    "src/js/card-drag-handle.js"
+    "src/js/card-drag-handle.js",
+    "src/js/menu-icons.js"
 ];
 
 /* Ordered script loader: script elements with async=false execute in insertion

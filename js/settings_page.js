@@ -28,6 +28,7 @@ if (mSettings.length > 0) {
         "#Events": "events.png",
         "#CustomIcons": "customicons.png",
         "#Applications": "app.png",
+        "#AccessTokens": "accesstokens.png",
         "#Mobile": "mobile.png",
         "#UserVariables": "variables.png",
         "#Notification": "notification.png",
