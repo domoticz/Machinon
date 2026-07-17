@@ -226,22 +226,31 @@ function renderSchemePicker() {
     if (!container) return;
     syncCustomCheckbox();
     loadBuiltinSchemes().then(function(schemes) {
+        /* Every card previews the SAME seven colours in the SAME order as the
+           custom colour editor's inputs (Background, Main, Menu, Item, Text,
+           Secondary, Disabled), so preset cards and the Custom card are
+           comparable at a glance (owner report 2026-07-17: presets showed 4
+           swatches while Custom showed 7). Keys are color_scheme key-space;
+           preset swatches derive from each scheme's full colors object (all
+           schemes are fully fetched by loadBuiltinSchemes, the 4-key
+           preview{} block in scheme JSONs is no longer read here). */
+        var SWATCH_KEYS = ["background", "main_color", "navbar", "item", "main_text", "alt_text", "disabled"];
+        /* Base (schemeless) themes have no JSON; their colours mirror the
+           dz-tokens.css / dark.css token defaults. */
         var cards = [
-            { slug: "light", name: "Machinon Light", preview: { bg: "#f1f1f1", surface: "#ffffff", accent: "#097fae", text: "#1a1a1a" } },
-            { slug: "dark", name: "Machinon Dark", preview: { bg: "#333639", surface: "#515558", accent: "#0b9eda", text: "#ffffff" } }
+            { slug: "light", name: "Machinon Light", colors: { background: "#f1f1f1", navbar: "#ffffff", item: "#ffffff", main_color: "#097fae", main_text: "#1a1a1a", alt_text: "#6d6e6d", disabled: "#d3d3d3" } },
+            { slug: "dark", name: "Machinon Dark", colors: { background: "#333639", navbar: "#232324", item: "#515558", main_color: "#0b9eda", main_text: "#ffffff", alt_text: "#cccccc", disabled: "#808080" } }
         ];
         Object.keys(schemes).forEach(function(slug) {
             var s = schemes[slug];
-            cards.push({ slug: slug, name: s.name, preview: s.preview || {} });
+            cards.push({ slug: slug, name: s.name, colors: s.colors || {} });
         });
         (theme.user_schemes || []).forEach(function(p) {
-            var cs = p.colors || {};
-            cards.push({
-                slug: "user:" + p.name, name: p.name, deletable: true,
-                preview: { bg: cs.background, surface: cs.item, accent: cs.main_color, text: cs.main_text }
-            });
+            cards.push({ slug: "user:" + p.name, name: p.name, deletable: true, colors: p.colors || {} });
         });
-        cards.push({ slug: "custom", name: "Custom", preview: null });
+        /* colors: null = the Custom card, resolved to the user's live
+           colours at render time below. */
+        cards.push({ slug: "custom", name: "Custom", colors: null });
 
         container.textContent = "";
         cards.forEach(function(card) {
@@ -251,21 +260,12 @@ function renderSchemePicker() {
 
             var swatches = document.createElement("div");
             swatches.className = "swatches";
-            if (card.preview) {
-                ["bg", "surface", "accent", "text"].forEach(function(key) {
-                    var sw = document.createElement("span");
-                    if (card.preview[key]) sw.style.backgroundColor = card.preview[key];
-                    swatches.appendChild(sw);
-                });
-            } else {
-                /* The Custom card previews the user's current colours */
-                var cs = theme.color_scheme || {};
-                ["background", "item", "main_color", "main_text"].forEach(function(key) {
-                    var sw = document.createElement("span");
-                    if (cs[key]) sw.style.backgroundColor = cs[key];
-                    swatches.appendChild(sw);
-                });
-            }
+            var cs = card.colors || theme.color_scheme || {};
+            SWATCH_KEYS.forEach(function(key) {
+                var sw = document.createElement("span");
+                if (cs[key]) sw.style.backgroundColor = cs[key];
+                swatches.appendChild(sw);
+            });
             el.appendChild(swatches);
 
             var label = document.createElement("div");
