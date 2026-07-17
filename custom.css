@@ -595,11 +595,15 @@ input#AcceptNewHardware:checked ~ button {
     display: none
 }
 
+/* border/border-radius removed (Task 5, 2026-07-17): both were non-!important
+   declarations that won the cascade tie over the soft-elevated base block in
+   css/buttons.css (.allow5min is in that selector list), defeating its
+   transparent 1px border (height parity with every other button tier) and
+   its --dz-btn-radius. Letting the base block apply gives this button the
+   same border-width and radius as its siblings. */
 .allow5min {
     background: var(--dz-accent-color);
-    border: none;
     color: var(--dz-accent-text);
-    border-radius: 5px;
 }
 
 .allow5min:hover {

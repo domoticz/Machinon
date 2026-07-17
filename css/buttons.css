@@ -29,7 +29,7 @@
     border: 1px solid transparent;
     transition: background-color .12s ease, box-shadow .12s ease;
 }
-.btn:hover, .btnstyle3:hover, .savebtn:hover, .resetbtn:hover,
+.btn:hover, .btnstyle3:hover, .btnstyle3-sel:hover, .savebtn:hover, .resetbtn:hover,
 .btnsmall:hover, .btn-modern:hover, .btn-modern-warning:hover {
     box-shadow: var(--dz-btn-shadow-hover) !important;
 }
@@ -57,11 +57,13 @@ button.savebtn:disabled, .btnstyle3:disabled,
     color: var(--dz-body-text);
 }
 
+/* Back/Forecast nav links (core: a.btnstylerev "Back", a.btnstyle "Forecast").
+   Compact-pill tier: sm. */
 a.btnstylerev,
 a.btnstyle {
     position: relative;
     overflow: visible;
-    padding: 0em 1em;
+    padding: var(--dz-btn-pad-sm);
 }
 
 a.btnstylerev::before,
@@ -93,18 +95,18 @@ a.btnstyle {
     color: var(--dz-body-text);
 }
 
-/* Reset/save theme button */
+/* Reset/save theme button: prominent tier, lg. */
 .resetbtn {
     background: var(--dz-btn-danger-bg);
     color: var(--dz-btn-primary-text);
-    padding: 10px 20px;
+    padding: var(--dz-btn-pad-lg);
     cursor: pointer;
 }
 
 .savebtn {
     background: var(--dz-btn-primary-bg);
     color: var(--dz-btn-primary-text);
-    padding: 10px 20px;
+    padding: var(--dz-btn-pad-lg);
     cursor: pointer;
 }
 /* button.savebtn:disabled is covered by the Soft-elevated base's disabled
@@ -116,9 +118,9 @@ a.btnstyle {
     color: var(--dz-accent-text);
 }
 
-/* Panels */
+/* Panels: extra-small tier, xs. */
 .btn-small {
-    padding: 4px 8px !important;
+    padding: var(--dz-btn-pad-xs) !important;
     font-size: var(--dz-text-micro) !important;
 }
 /* Universal button reset — kills Bootstrap 2.x gradients.
@@ -155,8 +157,8 @@ a.btnstyle {
     background: transparent;
     border: 1px solid var(--dz-accent-color);
     color: var(--dz-body-text);
-    border-radius: 5px;
-    padding: 2px 8px;
+    border-radius: 5px; /* dz-btn-exempt: ghost mini radius, owned by the Phase B ghost/icon redesign (task B6); left as-is for now */
+    padding: var(--dz-btn-pad-xs);
     font-size: var(--dz-text-micro);
 }
 
@@ -176,7 +178,7 @@ a.btnstyle {
 
 .btn-primary {
     font-size: var(--dz-text-xs);
-    padding: 6px 12px;
+    padding: var(--dz-btn-pad-md);
 }
 
 .btn-primary:hover,
@@ -197,7 +199,7 @@ a.btnstyle {
     background: var(--dz-btn-warning-bg) !important;
     color: var(--dz-btn-primary-text) !important;
     font-size: var(--dz-text-xs);
-    padding: 6px 12px;
+    padding: var(--dz-btn-pad-md);
 }
 
 .btn-warning:hover {
@@ -208,7 +210,7 @@ a.btnstyle {
     background: var(--dz-btn-info-bg) !important;
     color: var(--dz-btn-primary-text) !important;
     font-size: var(--dz-text-xs);
-    padding: 6px 12px;
+    padding: var(--dz-btn-pad-md);
 }
 
 .btn-info:visited {
@@ -226,7 +228,7 @@ a.btnstyle {
 
 .btn-danger {
     font-size: var(--dz-text-xs);
-    padding: 6px 12px;
+    padding: var(--dz-btn-pad-md);
 }
 
 .btn-danger:hover,
@@ -239,7 +241,7 @@ a.btnstyle {
 .btnsmall-sel {
     color: var(--dz-accent-color);
     background: rgba(var(--dz-accent-values), 0.1);
-    padding: 4px 8px;
+    padding: var(--dz-btn-pad-sm);
     font-style: normal;
     cursor: pointer;
 }
@@ -257,21 +259,22 @@ a.btnstyle {
 .btnsmall-dis {
     color: var(--dz-status-disabled);
     background: transparent;
-    padding: 4px 8px;
+    padding: var(--dz-btn-pad-sm);
     cursor: not-allowed;
     pointer-events: none;
     font-style: normal;
 }
 
-/* Ghost: icon-only buttons */
+/* Ghost: icon-only buttons. Padding maps to xs (numerically unchanged); the
+   box model itself (radius, square hit-box) is Phase B scope (task B6). */
 .btn-icon {
     background: transparent;
     border: none;
-    padding: 4px 8px;
+    padding: var(--dz-btn-pad-xs);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    border-radius: 5px;
+    border-radius: 5px; /* dz-btn-exempt: ghost icon-only radius, owned by the Phase B ghost/icon redesign (task B6); left as-is for now */
 }
 
 /* Devices-table action-button glyphs (log, delete, rename, remove, add). Core
@@ -319,10 +322,9 @@ a.btnstyle {
 
 /* Filled: modern login/wizard button. background/color now come from the
    .btn-primary alias above (Phase A1); only the properties unique to this
-   family (still its own size/layout, padding stays raw until Task 5) live
-   here. */
+   family (its own size/layout; padding now tokenized, lg tier) live here. */
 .btn-modern {
-    padding: 10px 20px;
+    padding: var(--dz-btn-pad-lg);
     font-weight: var(--dz-weight-semibold);
     font-size: var(--dz-text-sm);
     cursor: pointer;
@@ -335,7 +337,7 @@ a.btnstyle {
    .btn-danger alias above (Phase A1); only the properties unique to this
    family live here. */
 .btn-modern-warning {
-    padding: 10px 20px;
+    padding: var(--dz-btn-pad-lg);
     font-weight: var(--dz-weight-semibold);
     font-size: var(--dz-text-sm);
     cursor: pointer;
@@ -346,13 +348,13 @@ a.btnstyle {
 
 /* Size: extra small */
 .btn-xs {
-    padding: 4px 8px;
+    padding: var(--dz-btn-pad-xs);
     font-size: var(--dz-text-micro);
 }
 
 /* Size: large */
 .btn-large {
-    padding: 10px 20px;
+    padding: var(--dz-btn-pad-lg);
     font-size: var(--dz-text-sm);
 }
 
@@ -390,7 +392,7 @@ a.btnstyle {
     background: var(--dz-btn-primary-bg);
     color: var(--dz-btn-primary-text);
     text-align: center;
-    padding: 6px 12px;
+    padding: var(--dz-btn-pad-md);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -410,17 +412,18 @@ a.btnstyle {
 .btnstyle3-dis,
 .btnstyle3:disabled {
     text-align: center;
-    padding: 6px 12px;
+    padding: var(--dz-btn-pad-md);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     pointer-events: none;
 }
 
-/* Activate/Deactivate buttons on grid view */
+/* Activate/Deactivate buttons on grid view: denser context, sm tier
+   (numerically unchanged: 4px 12px). */
 .page-content-container .btnstyle3,
 .page-content-container .btnstyle3-sel {
-    padding: 4px 12px;
+    padding: var(--dz-btn-pad-sm);
     color: var(--dz-btn-primary-text);
 }
 
@@ -443,14 +446,24 @@ a.btnstyle {
     border: 1px solid var(--dz-accent-color) !important;
 }
 
+/* Corner squaring uses longhand border-*-radius (not the shorthand) so the
+   outer corner can carry the button-radius token while the inner corner
+   stays 0: the shorthand's 4-value form has no single-token form the
+   contract's border-radius check accepts. */
 .btn-group > .btn:first-child {
     margin-left: 0 !important;
-    border-radius: 5px 0 0 5px !important;
+    border-top-left-radius: var(--dz-btn-radius) !important;
+    border-bottom-left-radius: var(--dz-btn-radius) !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
 }
 
 .btn-group > .btn:last-child {
     margin-left: 0 !important;
-    border-radius: 0 5px 5px 0 !important;
+    border-top-right-radius: var(--dz-btn-radius) !important;
+    border-bottom-right-radius: var(--dz-btn-radius) !important;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
 }
 
 .btn-group > .btn:not(:first-child):not(:last-child) {
@@ -489,11 +502,17 @@ a.btnstyle {
     filter: brightness(0.85);
 }
 
+/* No border-radius override here (Task 5, 2026-07-17): this rule used to
+   force full round corners on every .btn-group .btn-danger, which silently
+   defeated the first/last-child corner squaring above for the connected
+   Save/Delete pair (EventViewer.html) - Delete bulged out fully round
+   instead of matching Save's connected edge. Removing it lets the squaring
+   rules above govern, so Delete's outer (right) corner rounds and its inner
+   (left) corner squares against Save, same as any other last-child. */
 .btn-group .btn-danger {
     background: var(--dz-accent-red) !important;
     border-color: var(--dz-accent-red) !important;
     color: #fff;
-    border-radius: 5px !important;
 }
 
 .btn-group .btn-danger:hover {
@@ -513,6 +532,23 @@ a.btnstyle {
 
 .btn-group {
     padding-bottom: 1px;
+}
+
+/* ---- Sibling coherence: core assigns mismatched size classes inside one
+   visual group; normalize each group to one tier. Source quirks cited. ----
+   #/Log toolbar (.log-toolbar): the filter/Copy/Download buttons are all
+   .btnstyle3 (flex-centered, computes 28px tall with the md padding above),
+   but the Clear button is a bare .btn.btn-danger with no flex layout, so its
+   single text node's line box uses the full --dz-btn-line-height (20px)
+   instead of hugging the font's content height the way .btnstyle3's flex
+   children do - it renders 34px tall, 6px taller than every sibling in the
+   same toolbar row. Padding is already identical (md); only line-height
+   needs correcting. !important is required: the soft-elevated base block
+   sets line-height with !important on .btn (which this element also
+   matches), so a plain declaration here would be silently outranked.
+   Verified live: 28px on all six buttons after this rule. */
+.log-toolbar .btn-danger {
+    line-height: 14px !important;
 }
 
 /* Back-to-top floating button. Core style.css paints it with a static PNG
