@@ -463,11 +463,23 @@ table.mobileitem td.name {
     grid-area: options;
 }
 
+/* Same vertical-only padding as the .options base rule below; this legacy
+   high-specificity selector would otherwise re-add side padding on
+   #itemtable cards and shrink the full-width row highlight band. */
 body table#itemtable tr > .options {
     display: none;
-    padding: 8px;
+    padding: 8px 0;
 }
 
+/* Flyout container geometry (owner feedback 2026-07-17, second pass): the
+   old fixed width: 97px + padding: 8px made the widest label
+   ("Notifications" at sm) fill the content box wall to wall, so the row
+   hover band hugged the text with no breathing room, and the container's
+   8px side padding stopped that band short of the popup edges. Sized to
+   content instead (max-content + a floor so short menus don't collapse to
+   a sliver), and the padding is vertical-only: horizontal spacing now lives
+   on the rows themselves (below), so the hover highlight spans the full
+   popup width, edge to edge, like a real menu. */
 .options {
     display: none;
     font-weight: var(--dz-weight-semibold);
@@ -478,8 +490,9 @@ body table#itemtable tr > .options {
     top: 8px;
     box-shadow: -2px 2px 20px 0px rgba(0, 0, 0, 0.2);
     z-index: 1;
-    padding: 8px;
-    width: 97px;
+    padding: 8px 0;
+    width: max-content;
+    min-width: 120px;
     font-size: 0;
 }
 
@@ -521,17 +534,26 @@ body table#itemtable tr > .options {
     background: transparent;
     border: none !important;
     border-radius: 0 !important;
+    /* Row spacing (owner feedback, second pass): md tier gives each row its
+       own breathing room, and because the container above carries no side
+       padding, this is also what indents the label from the popup edge while
+       the hover band still paints the full row width. */
+    padding: var(--dz-btn-pad-md);
+    text-align: left;
+    /* Release core style.css's fixed .btnsmall height (1.60em = 22.4px at
+       sm, border-box): it crushed the padded 20px line box (needs 32px), so
+       the text overflowed the row bottom and the hover band read as
+       bottom-hugging the label instead of centered (owner report). Auto lets
+       the symmetric padding + line-height actually center the text. */
+    height: auto;
 }
 
 .options .btnsmall-sel {
-    width: auto;
     background: transparent;
     color: var(--dz-accent-color);
 }
 
 .options .btnsmall {
-    padding-top: 4px;
-    text-align: left;
     color: var(--secondary-text-color);
 }
 
