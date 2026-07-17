@@ -10,6 +10,47 @@
   Bootstrap 2 state rules is preserved (see the reset block comment). Card-specific .item .btn-group
   layout stays in custom.css with the device cards.
 */
+
+/* ---- Soft-elevated base (spec 2026-07-17) ----
+   One radius, one elevation language, one focus ring for every button-like
+   control the theme owns. !important mirrors the Bootstrap-2 constraint
+   documented on the reset block below (state rules outrank base rules). */
+.btn, .btnstyle3, .btnstyle3-sel, .btnstyle3-dis, .savebtn, .resetbtn,
+.btnsmall, .btnsmall-sel, .btnsmall-dis, .btn-modern, .btn-modern-warning,
+.allow5min {
+    border-radius: var(--dz-btn-radius) !important;
+    box-shadow: var(--dz-btn-shadow) !important;
+    text-shadow: none !important;
+    background-image: none !important;
+    line-height: var(--dz-btn-line-height) !important;
+    box-sizing: border-box !important;
+    /* Filled buttons carry a transparent border so they occupy the exact same
+       box as 1px-bordered ghosts: same tier = same height, everywhere. */
+    border: 1px solid transparent;
+    transition: background-color .12s ease, box-shadow .12s ease;
+}
+.btn:hover, .btnstyle3:hover, .savebtn:hover, .resetbtn:hover,
+.btnsmall:hover, .btn-modern:hover, .btn-modern-warning:hover {
+    box-shadow: var(--dz-btn-shadow-hover) !important;
+}
+.btn:focus-visible, .btnstyle3:focus-visible, .savebtn:focus-visible,
+.resetbtn:focus-visible, .btnsmall:focus-visible {
+    outline: none;
+    box-shadow: var(--dz-btn-shadow), var(--dz-btn-focus-ring) !important;
+}
+.btn:active, .btnstyle3:active, .savebtn:active, .resetbtn:active {
+    box-shadow: var(--dz-btn-shadow-pressed) !important;
+}
+/* Disabled controls do not float and do not react. */
+.btn[disabled], .btn.disabled, .btnstyle3-dis, .btnsmall-dis,
+button.savebtn:disabled, .btnstyle3:disabled,
+.btn-group .btn-primary[disabled], .btn-group .btn-primary.disabled {
+    background: var(--dz-btn-disabled-bg) !important;
+    color: var(--dz-btn-disabled-text) !important;
+    box-shadow: none !important;
+    cursor: default !important;
+}
+
 .btnstylerev,
 .btnstyle {
     background: none;
@@ -55,36 +96,19 @@ a.btnstyle {
 /* Reset/save theme button */
 .resetbtn {
     background: var(--dz-btn-danger-bg);
-    border: none;
-    border-radius: 5px;
     color: var(--dz-btn-primary-text);
     padding: 10px 20px;
     cursor: pointer;
-}
-
-.resetbtn:hover {
-    filter: brightness(0.85);
 }
 
 .savebtn {
     background: var(--dz-btn-primary-bg);
-    border: none;
-    border-radius: 5px;
     color: var(--dz-btn-primary-text);
     padding: 10px 20px;
     cursor: pointer;
 }
-
-.savebtn:hover {
-    filter: brightness(0.85);
-}
-
-button.savebtn:disabled {
-    background: var(--dz-btn-disabled-bg);
-    border-color: var(--dz-btn-disabled-bg);
-    color: var(--dz-btn-disabled-text);
-    cursor: not-allowed;
-}
+/* button.savebtn:disabled is covered by the Soft-elevated base's disabled
+   selector list above (background/color/cursor, !important). */
 /* Settings button, z-wave etc. */
 .label-info[href], .badge-info[href],
 .label-info.lcursor {
@@ -141,84 +165,80 @@ button.savebtn:disabled {
     color: var(--dz-accent-text);
 }
 
-.btn-primary {
+/* .btn-modern is aliased in here (Phase A1): same primary-bg look. Its own
+   font-weight/size/padding/layout are distinct and stay on the residual
+   .btn-modern rule below, so only background/color are shared here. */
+.btn-primary,
+.btn-modern {
     background: var(--dz-btn-primary-bg) !important;
-    border: none !important;
     color: var(--dz-btn-primary-text) !important;
-    border-radius: 5px;
-    font-size: var(--dz-text-xs);
-    padding: 6px 12px;
-    box-shadow: none !important;
 }
 
-.btn-primary:hover {
-    filter: brightness(0.85);
+.btn-primary {
+    font-size: var(--dz-text-xs);
+    padding: 6px 12px;
+}
+
+.btn-primary:hover,
+.btn-info:hover {
+    background-color: color-mix(in srgb, var(--dz-btn-primary-bg) 90%, black) !important;
 }
 
 .btn-success {
     background: var(--dz-btn-success-bg) !important;
-    border: none !important;
     color: var(--dz-btn-primary-text) !important;
-    border-radius: 5px;
-    box-shadow: none !important;
 }
 
 .btn-success:hover {
-    filter: brightness(0.85);
+    background-color: color-mix(in srgb, var(--dz-btn-success-bg) 90%, black) !important;
 }
 
 .btn-warning {
     background: var(--dz-btn-warning-bg) !important;
-    border: none !important;
     color: var(--dz-btn-primary-text) !important;
-    border-radius: 5px;
     font-size: var(--dz-text-xs);
     padding: 6px 12px;
-    box-shadow: none !important;
 }
 
 .btn-warning:hover {
-    filter: brightness(0.85);
+    background-color: color-mix(in srgb, var(--dz-btn-warning-bg) 90%, black) !important;
 }
 
 .btn-info {
     background: var(--dz-btn-info-bg) !important;
-    border: none !important;
     color: var(--dz-btn-primary-text) !important;
-    border-radius: 5px;
     font-size: var(--dz-text-xs);
     padding: 6px 12px;
-    box-shadow: none !important;
-}
-
-.btn-info:hover {
-    filter: brightness(0.85);
 }
 
 .btn-info:visited {
     color: var(--dz-btn-primary-text);
 }
 
-.btn-danger {
+/* .btn-modern-warning is aliased in here (Phase A1): same danger-bg look. Its
+   own font-weight/size/padding/layout are distinct and stay on the residual
+   .btn-modern-warning rule below, so only background/color are shared here. */
+.btn-danger,
+.btn-modern-warning {
     background: var(--dz-btn-danger-bg) !important;
-    border: none !important;
     color: var(--dz-btn-primary-text) !important;
-    border-radius: 5px;
-    font-size: var(--dz-text-xs);
-    padding: 6px 12px;
-    box-shadow: none !important;
 }
 
-.btn-danger:hover {
-    filter: brightness(0.85);
+.btn-danger {
+    font-size: var(--dz-text-xs);
+    padding: 6px 12px;
+}
+
+.btn-danger:hover,
+.resetbtn:hover,
+.btn-modern-warning:hover {
+    background-color: color-mix(in srgb, var(--dz-btn-danger-bg) 90%, black) !important;
 }
 
 .btnsmall,
 .btnsmall-sel {
     color: var(--dz-accent-color);
     background: rgba(var(--dz-accent-values), 0.1);
-    border: none;
-    border-radius: 5px;
     padding: 4px 8px;
     font-style: normal;
     cursor: pointer;
@@ -229,12 +249,14 @@ button.savebtn:disabled {
     background: rgba(var(--dz-accent-values), 0.2);
 }
 
-/* Ghost: disabled small button */
+/* Ghost: disabled small button. color/background/cursor below are currently
+   shadowed by the Soft-elevated base's shared disabled selector (!important,
+   var(--dz-btn-disabled-bg)/-text) - .btnsmall-dis is a ghost family, its own
+   distinct disabled look is Task 6 scope; left in place rather than deleted
+   so that follow-up can either restyle or intentionally drop them. */
 .btnsmall-dis {
     color: var(--dz-status-disabled);
     background: transparent;
-    border: none;
-    border-radius: 5px;
     padding: 4px 8px;
     cursor: not-allowed;
     pointer-events: none;
@@ -295,12 +317,11 @@ button.savebtn:disabled {
     text-decoration: underline;
 }
 
-/* Filled: modern login/wizard button */
+/* Filled: modern login/wizard button. background/color now come from the
+   .btn-primary alias above (Phase A1); only the properties unique to this
+   family (still its own size/layout, padding stays raw until Task 5) live
+   here. */
 .btn-modern {
-    background: var(--dz-btn-primary-bg);
-    border: none;
-    border-radius: 5px;
-    color: var(--dz-btn-primary-text);
     padding: 10px 20px;
     font-weight: var(--dz-weight-semibold);
     font-size: var(--dz-text-sm);
@@ -308,21 +329,12 @@ button.savebtn:disabled {
     text-decoration: none;
     display: inline-block;
     text-align: center;
-    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
 }
 
-.btn-modern:hover {
-    filter: brightness(0.85);
-    color: var(--dz-btn-primary-text);
-    text-decoration: none;
-}
-
-/* Filled: modern danger button */
+/* Filled: modern danger button. background/color now come from the
+   .btn-danger alias above (Phase A1); only the properties unique to this
+   family live here. */
 .btn-modern-warning {
-    background: var(--dz-btn-danger-bg);
-    border: none;
-    border-radius: 5px;
-    color: var(--dz-btn-primary-text);
     padding: 10px 20px;
     font-weight: var(--dz-weight-semibold);
     font-size: var(--dz-text-sm);
@@ -330,12 +342,6 @@ button.savebtn:disabled {
     text-decoration: none;
     display: inline-block;
     text-align: center;
-}
-
-.btn-modern-warning:hover {
-    filter: brightness(0.85);
-    color: var(--dz-btn-primary-text);
-    text-decoration: none;
 }
 
 /* Size: extra small */
@@ -382,41 +388,38 @@ button.savebtn:disabled {
 
 .btnstyle3, .btnstyle3-sel {
     background: var(--dz-btn-primary-bg);
-    border: none;
-    border-radius: 5px;
     color: var(--dz-btn-primary-text);
     text-align: center;
     padding: 6px 12px;
-    line-height: 1;
     display: inline-flex;
     align-items: center;
     justify-content: center;
 }
 
-.btnstyle3:hover, .btnstyle3-sel:hover {
-    filter: brightness(0.85);
+.btnstyle3:hover, .btnstyle3-sel:hover,
+.savebtn:hover,
+.btn-modern:hover {
+    background-color: color-mix(in srgb, var(--dz-btn-primary-bg) 90%, black) !important;
 }
 
+/* background/color/cursor below are shadowed by the Soft-elevated base's
+   shared disabled selector (!important, var(--dz-btn-disabled-bg)/-text,
+   cursor: default) - .btnstyle3-dis / .btnstyle3:disabled are both in that
+   selector list. Kept for the layout properties (text-align/display/
+   align-items/justify-content/pointer-events) that base doesn't set. */
 .btnstyle3-dis,
 .btnstyle3:disabled {
-    background: var(--dz-btn-disabled-bg);
-    border: none;
-    border-radius: 5px;
-    color: var(--dz-btn-disabled-text);
     text-align: center;
     padding: 6px 12px;
-    line-height: 1;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    cursor: not-allowed;
     pointer-events: none;
 }
 
 /* Activate/Deactivate buttons on grid view */
 .page-content-container .btnstyle3,
 .page-content-container .btnstyle3-sel {
-    border-radius: 5px;
     padding: 4px 12px;
     color: var(--dz-btn-primary-text);
 }
