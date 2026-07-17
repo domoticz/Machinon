@@ -172,14 +172,18 @@
     --dz-modal-bg:            var(--dz-widget-bg);
     --dz-modal-text:          var(--dz-body-text);
 
-    /* Floating MENU surfaces (navbar dropdown, card 3-dot flyout): deliberately
-       the page background, NOT the card surface, so a menu reads as a distinct
-       panel against the cards it floats over (light: #f1f1f1 vs #ffffff cards;
-       dark: #333639 vs #515558, where shadow-only separation is weakest).
-       Named as its own token because "menus use the page colour" is a design
-       decision, not a coincidence: consume THIS for menus, so a future scheme
-       can retune menu surfaces without touching the page background. */
-    --dz-menu-bg:             var(--dz-body-bg);
+    /* MENU surface family (owner decision 2026-07-17): the top menu bar and
+       every floating menu (navbar dropdown, card 3-dot flyout) share ONE
+       colour, the scheme's "navbar" colour, which the settings UI labels
+       "Menu". Schemes author it as a distinct tint from cards/page (e.g.
+       Blue UI light #E9F2FB vs #FFFFFF cards), so menus read as their own
+       chrome surface; the two schemes where it collided with the card colour
+       (nord, solarized-light) were retired rather than special-cased. In the
+       base (schemeless) light theme nav is white like cards, so base-light
+       menus separate by shadow only, accepted pending the base -> Blue UI
+       replacement. Floating menus consume THIS alias, never --dz-nav-bg
+       directly, so the mapping stays a single-line decision. */
+    --dz-menu-bg:             var(--dz-nav-bg);
 }
 
 /*

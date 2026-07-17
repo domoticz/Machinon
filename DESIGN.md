@@ -183,7 +183,7 @@ components:
     activeBg: "rgba({colors.light-primary}, 0.4)"
     activeBorder: "1px solid {colors.light-primary}"
   dropdown-menu:
-    backgroundColor: "{colors.light-bg}"
+    backgroundColor: "{colors.light-navbar}"
     rounded: "{rounded.container}"
     elevation: "{elevation.overlay}"
     hoverBg: "rgba({colors.light-primary}, 0.15)"
@@ -273,9 +273,9 @@ the same edit, or record the difference as a gap.
 |-------|-------|------|------|
 | `--dz-body-bg` | `{colors.light-bg}` | `{colors.dark-bg}` | Page background |
 | `--dz-accent-color` | `{colors.light-primary}` | `{colors.dark-primary}` | Accent/primary; CTAs, active states, links, sliders |
-| `--dz-nav-bg` | `{colors.light-navbar}` | `{colors.dark-navbar}` | Top navigation bar |
+| `--dz-nav-bg` | `{colors.light-navbar}` | `{colors.dark-navbar}` | Top navigation bar; also feeds `--dz-menu-bg` (all floating menus) |
 | `--dz-widget-bg` | `{colors.light-surface}` | `{colors.dark-surface}` | Card/panel surfaces |
-| `--dz-menu-bg` | `{colors.light-bg}` (alias) | `{colors.dark-bg}` (alias) | Floating menu surfaces (navbar dropdown, card 3-dot flyout); aliases `--dz-body-bg` so menus separate from cards without adding a palette color |
+| `--dz-menu-bg` | `{colors.light-navbar}` (alias) | `{colors.dark-navbar}` (alias) | Menu surface family: aliases `--dz-nav-bg`, so the top menu bar and every floating menu (navbar dropdown, card 3-dot flyout) share the scheme's "Menu" color (stored key: `navbar`) without adding a palette color |
 | `--dz-body-text` | `{colors.light-text}` | `{colors.dark-text}` | Primary text |
 | `--secondary-text-color` | `{colors.light-text-secondary}` | `{colors.dark-text-secondary}` | Captions, timestamps, labels |
 | `--dz-input-border` | `{colors.light-border}` | `{colors.dark-border}` | Table/row/input borders |
