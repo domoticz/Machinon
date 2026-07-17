@@ -93,7 +93,20 @@
     cursor: pointer;
 }
 
-/* Chart zoom buttons */
+/* Chart zoom + range buttons (device Log pages): ghost tier, matching the
+   button-redesign's ghost family (css/buttons.css) even though this file is
+   not checker-scoped - one radius/padding/hover language everywhere a
+   button-like control appears. border/color already matched the ghost
+   tokens' computed values by coincidence; now they read from the same
+   source of truth instead of repeating it. Hover moved from a solid fill to
+   the ghost family's tint (--dz-btn-hover-bg), matching every other ghost
+   control's hover language.
+   !important on border/border-radius: core's own www/css/style.css:2760-2765
+   ".chartarea button { border-radius: 2px; border-width: 0px; }" is a
+   generic element selector (0,1,1) that outranks this file's class-only
+   selector (0,1,0) regardless of load order - measured live, computed
+   border-radius stuck at 2px and the border vanished (0px) without
+   !important here. */
 .zoom-buttons-container {
     gap: 4px;
 }
@@ -101,27 +114,29 @@
 .zoom-button,
 .zoom-reset {
     font-size: var(--dz-text-micro);
-    color: var(--dz-body-text);
+    color: var(--dz-btn-ghost-text);
     background: transparent;
-    border: 1px solid var(--dz-accent-color);
-    border-radius: 5px;
-    padding: 2px 8px;
+    border: var(--dz-btn-ghost-border) !important;
+    border-radius: var(--dz-btn-radius) !important;
+    padding: var(--dz-btn-pad-xs);
     cursor: pointer;
 }
 
 .zoom-button:hover {
-    background: var(--dz-accent-color);
-    color: var(--dz-accent-text);
+    background: var(--dz-btn-hover-bg);
 }
 
 .zoom-reset {
-    border-color: var(--dz-accent-red);
+    /* !important: beats this file's own shorthand "border" !important above,
+       which would otherwise win the tie against a plain border-color here
+       regardless of specificity/order (an !important declaration always
+       outranks a non-important one for the same property). */
+    border-color: var(--dz-accent-red) !important;
 }
 
 .zoom-reset:hover {
-    background: var(--dz-accent-red);
-    border-color: var(--dz-accent-red);
-    color: #fff;
+    background: rgba(var(--dz-accent-red-values), 0.12);
+    border-color: var(--dz-accent-red) !important;
 }
 
 .highcharts-contextbutton:hover .highcharts-button-box {

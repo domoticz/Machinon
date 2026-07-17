@@ -11,7 +11,10 @@
 .iconpack-desc { font-size: var(--dz-text-micro); opacity: .75; min-height: 26px; }
 .iconpack-chip { position: absolute; top: 6px; right: 6px; font-size: var(--dz-text-micro); padding: 1px 6px; border-radius: 8px; background: var(--dz-status-ok); color: #fff; }
 .iconpack-actions { display: flex; justify-content: center; gap: 8px; margin-top: 8px; }
-.iconpack-actions button { width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; border-radius: 6px; }
+/* Icon-only hit-box (install/update/delete): border-radius on the button-redesign's
+   token (was a raw 6px straggler) so the hover highlight shape matches every other
+   icon-only control; background/border already match the icon-only role (no chrome). */
+.iconpack-actions button { width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; border-radius: var(--dz-btn-radius); }
 .iconpack-actions button:hover:not(:disabled) { background: rgba(128, 128, 128, .15); }
 .iconpack-actions button:disabled { opacity: .3; cursor: default; }
 .iconpack-actions button img { width: 16px; height: 16px; }

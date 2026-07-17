@@ -105,11 +105,30 @@ h4,
 }
 .version-badge {
     color: var(--dz-body-text) !important;
+    /* Retint the glass gradient/glow to the active scheme's accent instead of a
+       fixed blue (owner report 2026-07-17, "core glass theme leakage"): the pill
+       stayed cold-blue under every scheme since views/about.html's inline <style>
+       hardcodes rgba(100,200,255,...). Text color above already adapted. */
+    background: rgba(var(--dz-accent-values), 0.18) !important;
+    border-color: rgba(var(--dz-accent-values), 0.4) !important;
+    box-shadow: 0 0 11px rgba(var(--dz-accent-values), 0.3) !important;
 }
 .section-title,
 .info-value,
 .donation-text {
 	color: var(--dz-body-text) !important;
+}
+/* Confirmed live (both schemes): .info-item/.info-label hardcode near-white/
+   light-blue text (views/about.html inline <style>) that never adapts, while
+   .glass-card's own background DOES (var(--dz-widget-bg), white in light
+   scheme) - System Information's rows (Build Hash, Uptime, ...) render
+   near-invisible white-on-white in light scheme. Same leak class as
+   .version-badge/.section-title/.info-value/.donation-text above. */
+.info-item {
+    color: var(--dz-body-text) !important;
+}
+.info-label {
+    color: var(--dz-accent-color) !important;
 }
 
 .user {

@@ -508,6 +508,19 @@ a.saveschemebtn {
     border-radius: 0 !important;
 }
 
+/* A .btn-group wrapping a SINGLE button (Bootstrap's own pattern for a lone
+   dropdown-toggle, e.g. the dd-topbar dashboard-switcher, dd-toolbar's
+   "Dashboards"/"Edit" menus) still matches :first-child above, which zeroes
+   its right corners expecting a second connected button that never arrives -
+   measured live on #/Dashboard: the topbar switcher rendered half-pill
+   (10px 0 0 10px) instead of a full pill. :only-child wins the specificity
+   tie (same 2-class + pseudo-class shape as :first-child/:last-child, placed
+   after both) and restores the full radius whenever there is no sibling to
+   square against. */
+.btn-group > .btn:only-child {
+    border-radius: var(--dz-btn-radius) !important;
+}
+
 /* ---- Ghost family (Phase B, 2026-07-17) ----
    Ghosts are quiet: no resting elevation, an outline in the ghost tokens,
    a tint on hover, the same radius every other button carries. Placed AFTER
@@ -636,4 +649,111 @@ a.saveschemebtn {
     height: 24px;
     text-align: center;
     color: var(--dz-accent-color);
+}
+
+/* ---- Core-region takeover (Phase C1, 2026-07-17) ----
+   Regions core styles itself, where its own stylesheet loads AFTER the
+   theme and re-asserts raw values, or ships bare/unclassed buttons the .btn
+   system never reaches. Role guide unchanged: primary actions filled,
+   secondary/chrome ghost, icon-only a quiet hit-box with tonal hover only. */
+
+/* dd-topbar (Dynamic Dashboard compact view-mode bar, views/dashboardDynamic.html).
+   Every .dd-topbar-btn element also carries the theme's own .btn class
+   (dashboardDynamic.html: class="btn btn-xs dd-topbar-btn ..."), so
+   ".btn.dd-topbar-btn" is a genuine two-class compound, not a specificity
+   hack. That matters because core's own css/dashboard.css loads AFTER
+   custom.css (index.html: dashboard.css comes after styles/default/
+   custom.css) and its .dd-topbar-btn rule (dashboard.css:91-99) sets
+   padding/font-size/line-height with !important at ONE class of specificity
+   - a plain ".dd-topbar-btn" override here, even with !important, would
+   still lose the tie to core's later-loaded rule. The two-class compound
+   (0,2,0) outranks core's one-class selector (0,1,0) regardless of load
+   order. Radius and elevation are already correct without any override here:
+   core's rule never touches border-radius (so the shared .btn base rule's
+   token already applies) and core's own "no shadow" already matches the
+   ghost family's resting elevation.
+   Tokenizing padding also resolves the B5-deferred sibling mismatch
+   (task-5-report.md): dd-topbar-fullpage/-kiosk computed "2px 5px" while
+   dd-topbar-edit computed "2px 5px 2px 8px" (core's own .dd-topbar-edit
+   rule, dashboard.css:117-121, adds a divider + padding-left: 8px
+   !important). Both sides already agree on 8px for the shared left/right
+   component of --dz-btn-pad-xs, so giving every sibling the same xs token
+   makes the whole row uniform (4px 8px) instead of leaving one button 3px
+   off from the rest. */
+.btn.dd-topbar-btn {
+    padding: var(--dz-btn-pad-xs) !important;
+}
+.btn.dd-topbar-btn:hover {
+    background: var(--dz-btn-hover-bg) !important;
+}
+
+/* Events editor tree toolbar (app/events/Events.css:32-44): Expand All /
+   Collapse All are bare <button> elements (no .btn class), so the .btn
+   system never reached them; core hardcoded a light grey chip (border grey,
+   background #CCC, color #333) that never adapted to the active scheme,
+   floating oddly on the scheme-aware tree sidebar (.events-editor__tree has
+   no background of its own - confirmed live, it inherits the ordinary page
+   background). Events.css loads BEFORE custom.css (index.html:97 vs 99), so
+   a plain rule of equal specificity here wins by source order; no
+   !important needed. Ghost tier (ACE's own font-size buttons in
+   EventViewer.html use ".btn.btn-default.btn-xs", i.e. this exact ghost
+   look, for the same kind of small icon-only toolbar control). */
+.events-editor__toolbar-btn {
+    background: transparent;
+    border: var(--dz-btn-ghost-border);
+    color: var(--dz-btn-ghost-text);
+    border-radius: var(--dz-btn-radius);
+    padding: var(--dz-btn-pad-xs);
+    box-shadow: none;
+}
+.events-editor__toolbar-btn:hover {
+    background: var(--dz-btn-hover-bg);
+}
+
+/* Events editor open-file tab close-x (Events.html:185, Events.css:91-102):
+   bare <button>&times;</button>, no color declared, so it renders the
+   browser's UA default button color (measured live: rgb(0,0,0)) rather
+   than anything this theme controls. Investigated the brief's "F3"
+   assumption live in both schemes (setColorScheme() toggle, dz-dash-capture
+   pattern): the parent tab (.events-editor__file) hardcodes a fixed light
+   chip (background #CCC / #e8e8e8, color #333 !important) that does NOT
+   adapt to the active scheme - confirmed identical in light and dark - so
+   the close-x never actually goes invisible on dark here; a literal
+   var(--dz-body-text) swap would have been the regression instead (dark
+   scheme's body-text resolves to white, which would sit white-on-#e8e8e8).
+   Hardened the declaration to an explicit value anyway, matching its
+   siblings' existing fixed-light convention (.events-editor__toolbar-btn's
+   old color, .ace-settings__theme, both #333) rather than leaving it to an
+   implicit, browser-dependent UA default. */
+.events-editor__file-close {
+    color: #333;
+}
+
+/* Setup dropdown active-item glass leak (owner report 2026-07-17). With the
+   Machinon Settings menu feature (theme.json "custom_settings_menu")
+   disabled, core's raw Admin/Setup dropdown renders directly instead of the
+   tile grid js/settings_page.js normally builds, and its active entry
+   (ng-class="current_page_item") hits core's own glass selection style:
+   domoticz/www/css/style.css:1047-1060, ".navbar .nav .dropdown-menu
+   .current_page_item > a" (and its :hover), background/border/radius/color/
+   box-shadow all !important. This theme's existing top-level override
+   (css/nav.css:191-202) only reaches the bare 3-class ".navbar .nav
+   .current_page_item > a" (core's OWN top-level rule, style.css:1026-1038,
+   carries no !important there, so nav.css's later, equal-specificity rule
+   already wins it); the DROPDOWN-nested selector adds a 4th class AND
+   !important, so nothing in nav.css can beat it. Repeating core's exact
+   selector here (loaded later: custom.css after style.css) matches
+   specificity and !important tier, so source order decides in our favor.
+   Flat accent pill (same toggle-selected tokens as .btn.active elsewhere in
+   this file) instead of the blue gradient/glow; not Setup-specific, this is
+   core's generic "active item inside any navbar dropdown" rule, so the fix
+   generalizes to every dropdown, not just the one this bug was reported on. */
+.navbar .nav .dropdown-menu .current_page_item > a,
+.navbar .nav .dropdown-menu .current_page_item > a:hover {
+    background: var(--dz-btn-toggle-selected-bg) !important;
+    border: none !important;
+    border-radius: var(--dz-btn-radius) !important;
+    color: var(--dz-btn-toggle-selected-text) !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
 }
