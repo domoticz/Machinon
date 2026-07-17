@@ -872,12 +872,24 @@ a.saveschemebtn {
    background turns that same forced-white icon into the exact contrast
    the rule was already trying to produce (white-on-accent), and the text
    color below is set explicitly to --dz-btn-primary-text (not left to
-   inherit the old ghost --dz-btn-ghost-text) for the same reason. */
+   inherit the old ghost --dz-btn-ghost-text) for the same reason.
+   All three buttons (Back, Cancel, Next) share md-tier padding and align-items:
+   center on both footer flex containers so heights compute from the buttons,
+   not from flex-stretch (task B9 height-uniformity check). */
+.aw-footer-left {
+    display: flex;
+    align-items: center;
+}
+.aw-footer-right {
+    display: flex;
+    align-items: center;
+}
 .aw-footer .btn-default {
     background: var(--dz-btn-primary-bg) !important;
     color: var(--dz-btn-primary-text) !important;
     border-color: var(--dz-btn-primary-bg) !important;
     box-shadow: var(--dz-btn-shadow) !important;
+    padding: var(--dz-btn-pad-md);
 }
 .aw-footer .btn-default:hover {
     background-color: color-mix(in srgb, var(--dz-btn-primary-bg) 90%, black) !important;
