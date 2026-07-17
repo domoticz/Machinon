@@ -484,7 +484,10 @@ body table#itemtable tr > .options {
     display: none;
     font-weight: var(--dz-weight-semibold);
     position: absolute;
-    background: var(--dz-widget-bg);
+    /* Menu surface, not card surface (owner-approved 2026-07-17): the
+       --dz-menu-bg token separates the flyout from the card it floats over;
+       the navbar dropdown (css/nav.css) consumes the same token. */
+    background: var(--dz-menu-bg);
     border-radius: 5px;
     right: 5px;
     top: 8px;

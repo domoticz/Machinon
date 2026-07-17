@@ -275,6 +275,7 @@ the same edit, or record the difference as a gap.
 | `--dz-accent-color` | `{colors.light-primary}` | `{colors.dark-primary}` | Accent/primary; CTAs, active states, links, sliders |
 | `--dz-nav-bg` | `{colors.light-navbar}` | `{colors.dark-navbar}` | Top navigation bar |
 | `--dz-widget-bg` | `{colors.light-surface}` | `{colors.dark-surface}` | Card/panel surfaces |
+| `--dz-menu-bg` | `{colors.light-bg}` (alias) | `{colors.dark-bg}` (alias) | Floating menu surfaces (navbar dropdown, card 3-dot flyout); aliases `--dz-body-bg` so menus separate from cards without adding a palette color |
 | `--dz-body-text` | `{colors.light-text}` | `{colors.dark-text}` | Primary text |
 | `--secondary-text-color` | `{colors.light-text-secondary}` | `{colors.dark-text-secondary}` | Captions, timestamps, labels |
 | `--dz-input-border` | `{colors.light-border}` | `{colors.dark-border}` | Table/row/input borders |

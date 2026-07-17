@@ -171,6 +171,15 @@
     --dz-input-text:          var(--dz-body-text);
     --dz-modal-bg:            var(--dz-widget-bg);
     --dz-modal-text:          var(--dz-body-text);
+
+    /* Floating MENU surfaces (navbar dropdown, card 3-dot flyout): deliberately
+       the page background, NOT the card surface, so a menu reads as a distinct
+       panel against the cards it floats over (light: #f1f1f1 vs #ffffff cards;
+       dark: #333639 vs #515558, where shadow-only separation is weakest).
+       Named as its own token because "menus use the page colour" is a design
+       decision, not a coincidence: consume THIS for menus, so a future scheme
+       can retune menu surfaces without touching the page background. */
+    --dz-menu-bg:             var(--dz-body-bg);
 }
 
 /*
