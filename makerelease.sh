@@ -25,6 +25,9 @@ fi
 # Typography contract must be clean before a release is cut.
 ./scripts/check-typography.sh || { echo "ABORT: typography contract violations"; exit 1; }
 
+# Button contract must be clean before a release is cut.
+./scripts/check-buttons.sh || { echo "ABORT: button contract violations"; exit 1; }
+
 # Get release number from theme.json
 VERSION=$(grep version theme.json | grep -E -o "([0-9]+\.?)*")
 FULLNAME=$NAME-$VERSION
