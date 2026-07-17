@@ -24,6 +24,27 @@
     background-image: none !important;
     line-height: var(--dz-btn-line-height) !important;
     box-sizing: border-box !important;
+    /* Flex centering (owner report 2026-07-17, item xii: ghost/outline
+       buttons render their label off-center). Block-family buttons only
+       centered by ARITHMETIC (padding + the forced line-height happening to
+       fill the box); whenever the rendered box differs from that sum, the
+       label anchors to the top and reads off-center inside the outline.
+       Two live cases measured: core fixed heights the theme doesn't own
+       (style.css .btnsmall { height: 1.6em } vs our 20px line-height), and
+       flex/stretch parents growing the box past the arithmetic (Events
+       A-/A+ compute 31px in their toolbar, one more than the 30px the
+       padding+line-height+border sum produces). Centering with flex, the
+       .btnstyle3 recipe this theme already uses, makes the label track the
+       ACTUAL box in every such case instead of the assumed one.
+       vertical-align keeps inline-level flow alignment identical to the
+       Bootstrap .btn baseline behaviour this replaces. NOT !important:
+       later, more specific display overrides (e.g. core's .ng-hide
+       display:none !important, or a deliberate block-layout override)
+       must stay able to win. */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
     /* Filled buttons carry a transparent border so they occupy the exact same
        box as 1px-bordered ghosts: same tier = same height, everywhere. */
     border: 1px solid transparent;
@@ -624,6 +645,32 @@ a.saveschemebtn {
     padding-bottom: 1px;
 }
 
+/* ---- Focus ring, state-proof (task B9 keyboard pass, 2026-07-17) ----
+   The base block's .btn:focus-visible ring (top of file, 0,2,0) is beaten
+   by two later state rules that also declare box-shadow !important at equal
+   specificity, where source order then decides: the ghost family's
+   ".btn-group .btn-default { box-shadow: none }" (a keyboard-focused ghost
+   in any toolbar group showed NO ring, measured on #/Devices Used/Not Used)
+   and the selected-state .btn.active rule declaring the pressed inset (the
+   active toggle showed only that inset while focused). Re-assert the ring
+   with :focus-visible appended to the winning rules' own selectors, placed
+   after both, so specificity beats each culprit instead of tying: ghosts
+   get the bare ring (they have no resting elevation to stack under it),
+   selected keeps its pressed inset with the ring stacked on top. */
+.btn-default:focus-visible,
+.btn-group .btn-default:focus-visible,
+.btnsmall:focus-visible,
+.btnsmall-sel:focus-visible,
+.btn-small:focus-visible {
+    box-shadow: var(--dz-btn-focus-ring) !important;
+}
+
+.btn-selected:focus-visible,
+.btn-group .btn.active:focus-visible,
+.btn.active:focus-visible {
+    box-shadow: var(--dz-btn-shadow-pressed), var(--dz-btn-focus-ring) !important;
+}
+
 /* ---- Sibling coherence: core assigns mismatched size classes inside one
    visual group; normalize each group to one tier. Source quirks cited. ----
    #/Log toolbar (.log-toolbar): the filter/Copy/Download buttons are all
@@ -646,6 +693,21 @@ a.saveschemebtn {
 .log-toolbar .btn-danger {
     line-height: 14px !important;
     font-size: var(--dz-text-sm) !important;
+}
+
+/* Icon-only members of text-button rows (item xii follow-through): with the
+   base's flex centering, a button whose only child is an icon glyph hugs
+   that glyph's height instead of the text line, dropping below its
+   text-labelled siblings (measured: Events ACE toolbar's word-wrap toggle
+   25px next to A-/A+ at 30px; Tips modal's chevron prev/next pair 24px
+   where core's btn-sm sat at 30px). Pin the tier's text-line box height
+   explicitly: 30px = --dz-btn-line-height (20) + the xs/sm tiers' shared
+   4px vertical padding on both sides + 2 x 1px transparent border. The
+   text-labelled siblings in both rows already compute exactly this, so the
+   rule is a no-op for them and only lifts the icon-only members. */
+.ace-settings .btn-xs,
+.tips-nav .btn-sm {
+    min-height: 30px;
 }
 
 /* Back-to-top floating button. Core style.css paints it with a static PNG
@@ -729,6 +791,12 @@ a.saveschemebtn {
 .events-editor__toolbar-btn:hover {
     background: var(--dz-btn-hover-bg);
 }
+/* Bare core <button>, so the base block's .btn:focus-visible ring never
+   reaches it; same keyboard pass finding as the state-proof section above. */
+.events-editor__toolbar-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--dz-btn-focus-ring);
+}
 
 /* Events editor open-file tab close-x (Events.html:185, Events.css:91-102):
    bare <button>&times;</button>, no color declared, so it renders the
@@ -778,6 +846,12 @@ a.saveschemebtn {
 }
 .page-devices > .splitter:hover {
     background-color: var(--dz-btn-hover-bg);
+}
+/* Bare core <button> (keyboard-focusable drag/collapse handle): same
+   focus-ring gap as .events-editor__toolbar-btn above. */
+.page-devices > .splitter:focus-visible {
+    outline: none;
+    box-shadow: var(--dz-btn-focus-ring);
 }
 
 /* Automation Wizard footer (owner refinement viii, 2026-07-17): FULL/filled
