@@ -189,28 +189,18 @@ div.menu-toggle.scrolled {
     background: var(--dz-menu-bg) !important;
 }
 
-/* INTERIM overflow clamp (Task 8 fix-wave, 2026-07-18) for the Setup >
-   "More options" submenu (index.html #cMoreOptions, 27 items) and its own
-   nested submenus (Plans, Data push). Measured live: the More options list
-   renders 914px tall with its trigger anchored around y=460, so it overflows
-   the viewport by +474px at 1440x900 and +606px at 1024x768 - the submenu
-   has no scroll or size limit of its own. With the theme's settings grid
-   active (js/settings_page.js) this menu is normally unreachable on Setup
-   click, but it renders raw whenever custom_settings_menu is disabled, which
-   is exactly where the overflow bites. This is NOT the full fix: at a
-   768px-tall viewport the scroll window is only ~290px, cramped because the
-   trigger sits deep in the Setup dropdown rather than the submenu
-   re-anchoring itself; viewport-aware placement (JS, or a menu redesign)
-   belongs to the queued menus-family follow-up. This clamp only trades
-   "items invisible past the viewport edge" for "a scrollable list". Lives
-   HERE (not sidemenu.css) because sidemenu.css only loads at <=979px
-   (custom.css's @import media query) and the overflow is a desktop bug. */
-.navbar .dropdown-submenu > .dropdown-menu {
-    max-height: calc(100vh - 480px);
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--dz-accent-color) var(--dz-body-bg);
-}
+/* REVERTED (2026-07-18): the Task 8 fix-wave clamp on Setup > "More options"
+   (index.html #cMoreOptions) applied max-height + overflow-y: auto to every
+   ".navbar .dropdown-submenu > .dropdown-menu", not just the More options
+   list itself. More options' OWN entries (Plans, Data push) are themselves
+   ".dropdown-submenu > .dropdown-menu", so the same rule clipped their
+   third-level flyouts: the new overflow context prevented those nested
+   submenus from opening/rendered them detached from their trigger. Reverted
+   in full. KNOWN ISSUE (accepted, pending): the More options list again
+   overflows the viewport at 1440x900 and 1024x768 with no scroll or size
+   limit of its own; a real fix needs viewport-aware re-anchoring and is
+   queued with the menus-family redesign, not a blanket clamp on this
+   selector. */
 
 .navbar .nav .current_page_item > a,
 .navbar .nav .current_page_item > a:hover,
