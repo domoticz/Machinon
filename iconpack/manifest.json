@@ -57,6 +57,22 @@
    "off_sig": "3839-7b1447d5"
   },
   {
+   "base": "machinon_Alien",
+   "name": "Alien",
+   "description": "Alien",
+   "tab": "fun",
+   "on_sig": "9851-a98073b8",
+   "off_sig": "8806-a0936c79"
+  },
+  {
+   "base": "machinon_Alien-color",
+   "name": "Alien Color",
+   "description": "Alien",
+   "tab": "fun",
+   "on_sig": "9631-5e497af6",
+   "off_sig": "8597-85c4f20d"
+  },
+  {
    "base": "machinon_Amplifier-color",
    "name": "Amplifier Color",
    "description": "Device that controls audio",
@@ -193,6 +209,22 @@
    "off_sig": "3021-b9db17cd"
   },
   {
+   "base": "machinon_CaptainAmerica",
+   "name": "Captain America",
+   "description": "Captain America",
+   "tab": "fun",
+   "on_sig": "10809-92b999f8",
+   "off_sig": "9202-0330a219"
+  },
+  {
+   "base": "machinon_CaptainAmerica-color",
+   "name": "Captain America Color",
+   "description": "Captain America",
+   "tab": "fun",
+   "on_sig": "10864-5c90fedb",
+   "off_sig": "9078-555387f6"
+  },
+  {
    "base": "machinon_Car",
    "name": "Car",
    "description": "Car / vehicle",
@@ -319,6 +351,22 @@
    "tab": "color",
    "on_sig": "5824-112f7371",
    "off_sig": "5206-db6a5336"
+  },
+  {
+   "base": "machinon_Daredevil",
+   "name": "Daredevil",
+   "description": "Daredevil",
+   "tab": "fun",
+   "on_sig": "7141-d3e3b824",
+   "off_sig": "6298-a957d7d3"
+  },
+  {
+   "base": "machinon_Daredevil-color",
+   "name": "Daredevil Color",
+   "description": "Daredevil",
+   "tab": "fun",
+   "on_sig": "6688-b75b36d2",
+   "off_sig": "6055-c1378e47"
   },
   {
    "base": "machinon_DewPoint",
@@ -505,6 +553,22 @@
    "off_sig": "6005-96d19949"
   },
   {
+   "base": "machinon_FantasticFour",
+   "name": "Fantastic Four",
+   "description": "Fantastic Four",
+   "tab": "fun",
+   "on_sig": "9552-e7ec0506",
+   "off_sig": "8446-53393e64"
+  },
+  {
+   "base": "machinon_FantasticFour-color",
+   "name": "Fantastic Four Color",
+   "description": "Fantastic Four",
+   "tab": "fun",
+   "on_sig": "9327-ea93c419",
+   "off_sig": "8251-2e7c3ec6"
+  },
+  {
    "base": "machinon_Fingerprint",
    "name": "Fingerprint",
    "description": "Fingerprint OK (green) / idle (grey)",
@@ -519,6 +583,38 @@
    "tab": "color",
    "on_sig": "18219-3b2da69f",
    "off_sig": "17631-3697e39a"
+  },
+  {
+   "base": "machinon_FlashHead",
+   "name": "Flash Head",
+   "description": "The Flash",
+   "tab": "fun",
+   "on_sig": "8979-c1eab748",
+   "off_sig": "8048-06fe717a"
+  },
+  {
+   "base": "machinon_FlashHead-color",
+   "name": "Flash Head Color",
+   "description": "The Flash",
+   "tab": "fun",
+   "on_sig": "9088-18db5b70",
+   "off_sig": "8179-24729e9e"
+  },
+  {
+   "base": "machinon_FlashSign",
+   "name": "Flash Sign",
+   "description": "The Flash emblem",
+   "tab": "fun",
+   "on_sig": "8934-183dc96d",
+   "off_sig": "8033-89daf87f"
+  },
+  {
+   "base": "machinon_FlashSign-color",
+   "name": "Flash Sign Color",
+   "description": "The Flash emblem",
+   "tab": "fun",
+   "on_sig": "8762-ec442d72",
+   "off_sig": "7829-b44a7b02"
   },
   {
    "base": "machinon_FluidMeter",
@@ -641,6 +737,22 @@
    "off_sig": "3411-d0b67c28"
   },
   {
+   "base": "machinon_Gizmo",
+   "name": "Gizmo",
+   "description": "Gizmo (mogwai)",
+   "tab": "fun",
+   "on_sig": "7473-7ba00bc6",
+   "off_sig": "6780-4207b994"
+  },
+  {
+   "base": "machinon_Gizmo-color",
+   "name": "Gizmo Color",
+   "description": "Gizmo (mogwai)",
+   "tab": "fun",
+   "on_sig": "7849-cf678da5",
+   "off_sig": "6885-0efb6950"
+  },
+  {
    "base": "machinon_Graph",
    "name": "Graph",
    "description": "Graph / statistics",
@@ -657,12 +769,60 @@
    "off_sig": "4380-36f5816f"
   },
   {
+   "base": "machinon_Gremlin",
+   "name": "Gremlin",
+   "description": "Gremlin",
+   "tab": "fun",
+   "on_sig": "9205-f2b98d14",
+   "off_sig": "8279-2decf089"
+  },
+  {
+   "base": "machinon_Gremlin-color",
+   "name": "Gremlin Color",
+   "description": "Gremlin",
+   "tab": "fun",
+   "on_sig": "9878-e2485c46",
+   "off_sig": "8512-fd92c12c"
+  },
+  {
+   "base": "machinon_GreyAlien",
+   "name": "Grey Alien",
+   "description": "Grey alien",
+   "tab": "fun",
+   "on_sig": "8279-f9f3540d",
+   "off_sig": "7263-642035ca"
+  },
+  {
+   "base": "machinon_GreyAlien-color",
+   "name": "Grey Alien Color",
+   "description": "Grey alien",
+   "tab": "fun",
+   "on_sig": "8046-27e6356a",
+   "off_sig": "7025-b72fa00e"
+  },
+  {
    "base": "machinon_Harddisk-color",
    "name": "Hard Disk Color",
    "description": "Hard disk drive",
    "tab": "color",
    "on_sig": "5649-53b12eec",
    "off_sig": "4860-2a1e15dd"
+  },
+  {
+   "base": "machinon_HarryPotter",
+   "name": "Harry Potter",
+   "description": "Harry Potter",
+   "tab": "fun",
+   "on_sig": "4745-d13058a6",
+   "off_sig": "4266-129cf6f4"
+  },
+  {
+   "base": "machinon_HarryPotter-color",
+   "name": "Harry Potter Color",
+   "description": "Harry Potter",
+   "tab": "fun",
+   "on_sig": "4830-067420e2",
+   "off_sig": "4351-d7ed8c78"
   },
   {
    "base": "machinon_Heating-color",
@@ -721,6 +881,22 @@
    "off_sig": "3597-b3dbab39"
   },
   {
+   "base": "machinon_HumanTorch",
+   "name": "Human Torch",
+   "description": "Human Torch",
+   "tab": "fun",
+   "on_sig": "8922-7dda79b7",
+   "off_sig": "7978-2fd2e287"
+  },
+  {
+   "base": "machinon_HumanTorch-color",
+   "name": "Human Torch Color",
+   "description": "Human Torch",
+   "tab": "fun",
+   "on_sig": "8051-fd244967",
+   "off_sig": "7329-bc4d6655"
+  },
+  {
    "base": "machinon_Hygrometer",
    "name": "Hygrometer",
    "description": "Humidity / hygrometer sensor",
@@ -759,6 +935,22 @@
    "tab": "color",
    "on_sig": "3203-80b02b98",
    "off_sig": "2786-a89af9c4"
+  },
+  {
+   "base": "machinon_IronMan",
+   "name": "Iron Man",
+   "description": "Iron Man",
+   "tab": "fun",
+   "on_sig": "6716-b6dd4fa9",
+   "off_sig": "5913-a3f08928"
+  },
+  {
+   "base": "machinon_IronMan-color",
+   "name": "Iron Man Color",
+   "description": "Iron Man",
+   "tab": "fun",
+   "on_sig": "6641-829af840",
+   "off_sig": "5768-73f1daee"
   },
   {
    "base": "machinon_Irrigation-color",
@@ -969,6 +1161,22 @@
    "off_sig": "5088-13bc2748"
   },
   {
+   "base": "machinon_Navi",
+   "name": "Na'vi",
+   "description": "Na'vi (Avatar)",
+   "tab": "fun",
+   "on_sig": "9085-7b024138",
+   "off_sig": "7758-dd0f5c32"
+  },
+  {
+   "base": "machinon_Navi-color",
+   "name": "Na'vi Color",
+   "description": "Na'vi (Avatar)",
+   "tab": "fun",
+   "on_sig": "8350-88c95c8f",
+   "off_sig": "6733-94dcc39b"
+  },
+  {
    "base": "machinon_NAS",
    "name": "NAS",
    "description": "Network-attached storage",
@@ -983,6 +1191,22 @@
    "tab": "color",
    "on_sig": "2699-a4fcbc6d",
    "off_sig": "2353-9399def7"
+  },
+  {
+   "base": "machinon_NinjaTurtle",
+   "name": "Ninja Turtle",
+   "description": "Ninja Turtle",
+   "tab": "fun",
+   "on_sig": "10177-6595c40a",
+   "off_sig": "9062-b798c34a"
+  },
+  {
+   "base": "machinon_NinjaTurtle-color",
+   "name": "Ninja Turtle Color",
+   "description": "Ninja Turtle",
+   "tab": "fun",
+   "on_sig": "9629-0a7730a3",
+   "off_sig": "8443-77c413e8"
   },
   {
    "base": "machinon_OilTank",
@@ -1247,6 +1471,22 @@
    "tab": "color",
    "on_sig": "5718-aacc58b8",
    "off_sig": "5239-a3128d20"
+  },
+  {
+   "base": "machinon_Predator",
+   "name": "Predator",
+   "description": "Predator",
+   "tab": "fun",
+   "on_sig": "13027-11aa2be3",
+   "off_sig": "11495-391c4de4"
+  },
+  {
+   "base": "machinon_Predator-color",
+   "name": "Predator Color",
+   "description": "Predator",
+   "tab": "fun",
+   "on_sig": "12636-3969f4f7",
+   "off_sig": "11046-cc376b77"
   },
   {
    "base": "machinon_Presence",
@@ -1649,12 +1889,44 @@
    "off_sig": "3149-7cf0c842"
   },
   {
+   "base": "machinon_Targaryen",
+   "name": "Targaryen",
+   "description": "House Targaryen sigil",
+   "tab": "fun",
+   "on_sig": "10281-1c5979c3",
+   "off_sig": "9250-78014ef5"
+  },
+  {
+   "base": "machinon_Targaryen-color",
+   "name": "Targaryen Color",
+   "description": "House Targaryen sigil",
+   "tab": "fun",
+   "on_sig": "10056-469bb6a6",
+   "off_sig": "8961-0348a270"
+  },
+  {
    "base": "machinon_TV-color",
    "name": "Television Color",
    "description": "Television",
    "tab": "color",
    "on_sig": "3635-404d545d",
    "off_sig": "3123-aeb5998f"
+  },
+  {
+   "base": "machinon_Thor",
+   "name": "Thor",
+   "description": "Thor",
+   "tab": "fun",
+   "on_sig": "8420-eb67174f",
+   "off_sig": "7620-f58da8ce"
+  },
+  {
+   "base": "machinon_Thor-color",
+   "name": "Thor Color",
+   "description": "Thor",
+   "tab": "fun",
+   "on_sig": "8611-943a5d26",
+   "off_sig": "7664-a7d572dd"
   },
   {
    "base": "machinon_Trigger-color",
@@ -1697,6 +1969,22 @@
    "off_sig": "5327-a3c90cc0"
   },
   {
+   "base": "machinon_Venom",
+   "name": "Venom",
+   "description": "Venom",
+   "tab": "fun",
+   "on_sig": "8482-bdd2c557",
+   "off_sig": "7541-55ad6118"
+  },
+  {
+   "base": "machinon_Venom-color",
+   "name": "Venom Color",
+   "description": "Venom",
+   "tab": "fun",
+   "on_sig": "8315-c8715dcf",
+   "off_sig": "7284-cbc3389f"
+  },
+  {
    "base": "machinon_Vibration",
    "name": "Vibration",
    "description": "Vibration detected (red) / still (grey)",
@@ -1727,6 +2015,22 @@
    "tab": "color",
    "on_sig": "3848-9f786727",
    "off_sig": "3270-363931e7"
+  },
+  {
+   "base": "machinon_WalterWhite",
+   "name": "Walter White",
+   "description": "Walter White",
+   "tab": "fun",
+   "on_sig": "6610-4176b3c9",
+   "off_sig": "5709-3662c9ef"
+  },
+  {
+   "base": "machinon_WalterWhite-color",
+   "name": "Walter White Color",
+   "description": "Walter White",
+   "tab": "fun",
+   "on_sig": "6758-c6426ada",
+   "off_sig": "5779-e91ca8e0"
   },
   {
    "base": "machinon_WashingMachine-color",
@@ -1863,6 +2167,38 @@
    "tab": "color",
    "on_sig": "1492-83bc58b2",
    "off_sig": "1352-7b3e256b"
+  },
+  {
+   "base": "machinon_WonderWoman",
+   "name": "Wonder Woman",
+   "description": "Wonder Woman",
+   "tab": "fun",
+   "on_sig": "8059-1134cfaa",
+   "off_sig": "7529-8a930e65"
+  },
+  {
+   "base": "machinon_WonderWoman-color",
+   "name": "Wonder Woman Color",
+   "description": "Wonder Woman",
+   "tab": "fun",
+   "on_sig": "6867-0f42a897",
+   "off_sig": "6465-758627d4"
+  },
+  {
+   "base": "machinon_XMen",
+   "name": "X-Men",
+   "description": "X-Men emblem",
+   "tab": "fun",
+   "on_sig": "10448-9aa027ea",
+   "off_sig": "8823-3432a15b"
+  },
+  {
+   "base": "machinon_XMen-color",
+   "name": "X-Men Color",
+   "description": "X-Men emblem",
+   "tab": "fun",
+   "on_sig": "10331-84b2387e",
+   "off_sig": "8367-1726b1b5"
   }
  ]
 }
