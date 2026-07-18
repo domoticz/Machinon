@@ -182,6 +182,29 @@ img.header__icon {
     position: static !important;
 }
 
+/*
+  Mobile app-shell overflow (tables-holistic task 4, complaint k; shared root cause behind
+  the census's recurring +60px scrollHeight on Users/Mobile/Cam/Log at 360x780).
+
+  Above, this file forces the navbar out of position:fixed into normal flow so its
+  navbar-inner can slide out as the mobile side menu. That puts Bootstrap's own navbar
+  back in the document: .navbar-inner's 40px min-height (bootstrap.css) plus
+  .navbar-fixed-top's 20px margin-bottom (bootstrap.css, restated above) - 60px now sits
+  in flow above #holder that isn't there on desktop, where the navbar stays
+  position: fixed and out of flow.
+
+  Core's #holder { min-height: 100% } (style.css) resolves against html/body's own
+  height: 100% (also style.css), i.e. against the full viewport height, with no idea a
+  sibling above it just claimed 60px of that viewport. So on any route whose content is
+  shorter than "100% minus the navbar", #holder still floors out at a full viewport's
+  worth of height starting 60px down, overflowing the document by exactly that 60px.
+  Give back the space the navbar now occupies so #holder's floor matches what's actually
+  left in the viewport.
+*/
+#holder {
+    min-height: calc(100% - 60px);
+}
+
 #iconsmain > div > tbody {
     top: 1%;
 }
