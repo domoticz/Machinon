@@ -33,10 +33,11 @@
   Core's "110px" assumes the navbar is the only chrome between the viewport and the
   console container. At desktop widths (sidemenu.css is not loaded above 979px, see its
   @import guard) Machinon's own chrome adds more: #holder > .container-fluid contributes
-  43px top + 20px bottom padding (63px, style.css), .bannercontent contributes -10px
-  margin-top + 90px padding-top (80px, style.css), and this container's own 1.5px top/
-  bottom border (2px rendered, above in this file) adds another 2px - 145px total, 35px
-  more than core assumes. That 35px is exactly the constant #/Log scrollHeight overflow
+  43px top + 20px bottom padding (63px, core style.css), .bannercontent contributes
+  -10px margin-top + 90px padding-top (80px, the theme's own nav.css override of core
+  style.css's 20px/20px padding), and this container's own 1.5px top/bottom border
+  (2px rendered, above in this file) adds another 2px - 145px total, 35px more than
+  core assumes. That 35px is exactly the constant #/Log scrollHeight overflow
   measured at both 1440x900 and 1024x768 in the table census. Override the constant so
   the container (and never the page) absorbs it; the console keeps scrolling internally
   via its own flex:1/overflow-y.

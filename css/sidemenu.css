@@ -188,10 +188,11 @@ img.header__icon {
 
   Above, this file forces the navbar out of position:fixed into normal flow so its
   navbar-inner can slide out as the mobile side menu. That puts Bootstrap's own navbar
-  back in the document: .navbar-inner's 40px min-height (bootstrap.css) plus
-  .navbar-fixed-top's 20px margin-bottom (bootstrap.css, restated above) - 60px now sits
-  in flow above #holder that isn't there on desktop, where the navbar stays
-  position: fixed and out of flow.
+  back in the document: .navbar-inner's 40px min-height (bootstrap.css) plus the 20px
+  margin-bottom this file's own .navbar-fixed-top rule above declares (bootstrap.css
+  itself zeroes margin-bottom on .navbar-fixed-top, so ours is the one that applies) -
+  60px now sits in flow above #holder that isn't there on desktop, where the navbar
+  stays position: fixed and out of flow.
 
   Core's #holder { min-height: 100% } (style.css) resolves against html/body's own
   height: 100% (also style.css), i.e. against the full viewport height, with no idea a
