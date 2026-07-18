@@ -834,16 +834,38 @@ a.saveschemebtn {
    splitter" class does not exist anywhere in core). Styled by core's own
    app/devices/Devices.css:28-38 (".page-devices > .splitter") with a fixed
    white-on-near-transparent-white look baked for core's own dark default
-   theme (color:white, background-color: rgba(255,255,255,0.1)) - never
-   adapted to Machinon's light body text, so the icon-only collapse toggle
-   sat at low contrast on the light page. Icon-quiet role, matching
-   .btn-icon's resting-transparent / tonal-hover language elsewhere in this
-   file rather than a permanent tint. Devices.css carries no !important and
-   loads before custom.css (index.html:98-99), and this selector matches its
-   specificity exactly (0,2,0), so a plain override wins by source order. */
+   theme (color:white, background-color: rgba(255,255,255,0.1) at 16px wide),
+   never adapted to Machinon's light body text, so the icon-only collapse
+   toggle sat at low contrast on the light page. Devices.css carries no
+   !important and loads before custom.css (index.html:98-99), and this
+   selector matches its specificity exactly (0,2,0), so a plain override wins
+   by source order.
+
+   Owner follow-up (2026-07-18): the icon-quiet treatment above (resting-
+   transparent, ghost-text colored) fixed the contrast but still read as
+   near-invisible next to the actual table it controls - nothing signals a
+   collapse/expand control sits there until a pointer happens to land on it.
+   No longer icon-quiet tier (DESIGN.md's Family Roles table and Core-Region
+   Takeover section updated to match: icon-quiet's own contract is "hover is
+   a tonal glyph filter, never a background wash," which this rule now
+   deliberately breaks). Recast as an accent-tinted pill: a light accent wash
+   at rest (rgba(var(--dz-accent-values), 0.08), so it reads as a control -
+   not dead space - independent of hover) that strengthens to the theme's
+   shared --dz-btn-hover-bg wash (0.1 alpha under blue-ui) on hover, the same
+   token every other ghost/icon-quiet control uses so the escalation matches
+   the rest of the app. The chevron itself is colored --dz-accent-color
+   instead of the generic ghost-text so it draws the eye the way an
+   affordance should. Widened from core's 16px to the button system's own
+   icon hit-box token (--dz-btn-icon-box, 28px) - comfortably over the
+   accessible >=24px hit-target floor - and centered via flex, since the
+   glyph itself stays small while the box grows. */
 .page-devices > .splitter {
-    color: var(--dz-btn-ghost-text);
-    background-color: transparent;
+    width: var(--dz-btn-icon-box);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dz-accent-color);
+    background-color: rgba(var(--dz-accent-values), 0.08);
     border-radius: var(--dz-btn-radius);
 }
 .page-devices > .splitter:hover {

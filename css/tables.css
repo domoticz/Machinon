@@ -62,6 +62,104 @@
     min-width: 0;
 }
 
+/*
+  #/Devices viewport fit (owner request, tables-holistic follow-up). Log already gets
+  this treatment (css/logpage.css's calc(100vh - 145px) fix); Devices was left as an
+  accepted vertical-overflow exception in the table census until now. Same idea here:
+  constrain the page's outermost container to the viewport, let flex hand the leftover
+  space to the one area that actually needs to scroll, so the PAGE never overflows even
+  though the DataTable underneath still has 230+ rows.
+
+  Chrome arithmetic (measured live via getBoundingClientRect, both desktop widths, same
+  method as logpage.css's derivation):
+    Desktop (>=980px, sidemenu.css's own import guard - not loaded above 979px):
+      #holder > .container-fluid: 43px top + 20px bottom padding (63px, core style.css)
+      .bannercontent: -10px margin-top + 90px padding-top, 0px padding-bottom (80px,
+        this theme's css/nav.css override of core's 20px/20px)
+      63 + 80 = 143px. .page-devices-wrapper carries no border/padding of its own
+      (unlike log-console-container's 2px border), so 143px is the total, not 145px.
+      Confirmed live: .page-devices-wrapper's top offset is 123px (43+80) and its
+      trailing chrome is 20px (0 from bannercontent's zeroed bottom + 20 from
+      container-fluid) at BOTH 1440x900 and 1024x768 (the offset does not depend on
+      viewport height, only the chrome above/below it does) - calc(100vh - 143px)
+      lands body.scrollHeight exactly on innerHeight at both widths, no rounding slop.
+    Mobile (<=979px): sidemenu.css zeroes .bannercontent's padding entirely (0 2% 0 2%)
+      and takes the navbar out of position:fixed into normal flow (its own comment,
+      further down this file's sibling css/sidemenu.css, on the resulting #holder
+      60px), so the chrome above #main-view is a completely different number here -
+      measured live at 360x780 (Galaxy S24 emulation): 50px above, 20px below (container-
+      fluid's own bottom padding is untouched at any width), 70px total. Confirmed the
+      same way: calc(100vh - 70px) lands scrollHeight/scrollWidth exactly on the
+      viewport with zero slop.
+
+  What scrolls: core's dataTableDefaultSettings (app/app.constants.js) never sets
+  scrollY, so DataTables renders no .dataTables_scrollBody - the table's dom option
+  (`<"H"lfrC>t<"F"ip>`, bJQueryUI:true) gives a plain `.dataTables_wrapper` with three
+  direct children: two `.fg-toolbar` divs (length/search above, info/pagination below)
+  flanking the bare `<table>`. That structure turns out to support real row-area-only
+  scrolling with CSS alone (confirmed live, no JS): give the wrapper a bounded height via
+  the flex chain below, pin both `.fg-toolbar` rows (flex: none), and let the `<table>`
+  itself be the scrolling box (flex: 1, overflow both axes) with its own `<thead>` as
+  `position: sticky; top: 0`. A `<table>` element can be its own overflow/scroll
+  container without abandoning `display: table` (no display:block hack, so column
+  widths never desync between a "fixed" header and a scrolling body, the classic
+  failure mode of naive sticky-table-header implementations) - verified live that
+  the header stays pinned through a vertical scroll and shifts exactly in sync with a
+  horizontal one (DataTables' own fixed-plus-flexible column widths already needed
+  horizontal scroll at some widths before this change; that behavior is unchanged,
+  just now living on the table element instead of the wrapper). Filters column also
+  gets overflow-y: auto + min-height: 0 as a safety net (its own content is short today,
+  but nothing stops a future filter group list from growing past the row's height).
+  Scoped to `.page-devices` specifically, not `.dataTables_wrapper` generally: every
+  other DataTable (Hardware/Users/Cam/Mobile/reports) shares the same `.fg-toolbar`
+  wrapper markup via the same shared dataTableDefaultSettings, and none of them get the
+  height constraint that would make this scrolling behavior meaningful.
+*/
+@media (min-width: 980px) {
+    .page-devices-wrapper {
+        height: calc(100vh - 143px);
+    }
+}
+@media (max-width: 979px) {
+    .page-devices-wrapper {
+        height: calc(100vh - 70px);
+    }
+}
+.page-devices {
+    flex: 1;
+    min-height: 0;
+}
+.page-devices > .filters {
+    min-height: 0;
+    overflow-y: auto;
+}
+.page-devices > .devices-table {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+.page-devices .dataTables_wrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+.page-devices .dataTables_wrapper > .fg-toolbar {
+    flex: none;
+}
+.page-devices .dataTables_wrapper > table.dataTable {
+    display: block;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+.page-devices .dataTables_wrapper > table.dataTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
 table.dataTable {
     width: 100% !important;
 }

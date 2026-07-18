@@ -135,9 +135,10 @@ components:
     rounded: "{rounded.button}"
     padding: "4px 8px"
     hitBox: "28px min-width/min-height"
-    # Icon-only controls (Devices row actions, splitter, scheme-picker icons):
-    # no resting border or shadow; hover is a tonal glyph filter, not a
-    # background wash.
+    # Icon-only controls (Devices row actions, scheme-picker icons): no
+    # resting border or shadow; hover is a tonal glyph filter, not a
+    # background wash. The Devices panel splitter moved off this tier
+    # (2026-07-18): see Core-Region Takeover below.
   button-toggle-selected:
     backgroundColor: "{colors.light-primary}"
     textColor: "{colors.on-primary}"
@@ -591,7 +592,8 @@ so they sit outside the table above:
 | **Filled success/warning** | Semantic fill | `.btn-success`, `.btn-warning` | Declared and token-correct; **no live instance** in the current button-contract crawl (same as the original 2026-07-16 inventory) |
 | **Ghost** | Transparent, `1px solid` accent border, tint only on hover | `.btn-default`, `.btnsmall`, `.btn-small` | Secondary/filter/toolbar actions; no resting elevation |
 | **Toggle-selected** | Accent fill + pressed inset shadow | `.btn-selected`, `.btn-group .btn.active`, `.btn.active`, `.zoom-button-active` | One pressed language for both the theme's own selected class and Bootstrap's native `.active`, replacing two divergent inset shadows the original inventory flagged (finding F2) |
-| **Icon-quiet** | Fully transparent, no border, no resting shadow | `.btn-icon`, `.resetschemebtn`, `.saveschemebtn`, `.page-devices > .splitter` | Hit-box only (`--dz-btn-icon-box`); hover is a tonal glyph filter (`saturate`/`brightness`), never a background wash, so device/card icon glyphs don't start looking like buttons |
+| **Icon-quiet** | Fully transparent, no border, no resting shadow | `.btn-icon`, `.resetschemebtn`, `.saveschemebtn` | Hit-box only (`--dz-btn-icon-box`); hover is a tonal glyph filter (`saturate`/`brightness`), never a background wash, so device/card icon glyphs don't start looking like buttons |
+| **Accent-pill** | Accent-tinted wash at rest, `--dz-accent-color` glyph, strengthens to `--dz-btn-hover-bg` on hover | `.page-devices > .splitter` | The one icon-quiet-adjacent control that needs to read as an affordance *before* the pointer arrives (it collapses/expands the whole filter column); moved off icon-quiet 2026-07-18 for exactly that reason - see Core-Region Takeover |
 | **Label-as-button** | Accent fill, xs padding | `.label-info[href]`, `.badge-info[href]`, `.label.lcursor`, `.badge.lcursor` | Core renders several clickable actions as `<span>`/`<a>` labels, not `<button>`; only the clickable ones (`[href]`/`.lcursor`) join the button system - static `.label`/`.badge` chips stay flat informational chips |
 | **Disabled** | Flat grey, no shadow | `[disabled]`, `.disabled`, `.btnstyle3-dis`, `.btnsmall-dis` | Same `--dz-btn-disabled-bg`/`-text` pair across every family; `cursor: default`/`not-allowed`, `pointer-events: none` in most paths |
 
@@ -707,7 +709,11 @@ each citing the exact core selector/specificity that forced it:
   1H/3H/day range group using the same corner-squaring technique as `.btn-group` (`css/charts.css`)
 - **DataTables pager** - `.fg-button` ghost tier; lives in `css/tables.css`, not `css/buttons.css`,
   because its markup nests inside that file's own table-header reset and needs to load after it
-- **Devices panel splitter** - icon-quiet tier (`css/buttons.css`)
+- **Devices panel splitter** - accent-pill tier (`css/buttons.css`); started icon-quiet, but an
+  owner pass (2026-07-18) found the fully-transparent-until-hover look read as near-invisible next
+  to the table it controls, so it now carries a resting accent wash (`rgba(var(--dz-accent-values),
+  0.08)`) and an accent-colored chevron, strengthening to the shared `--dz-btn-hover-bg` wash on
+  hover like every other ghost/icon-quiet control - see Family Roles
 - **Dropdown active item** - the Setup dropdown's "you are here" marker; lives in `css/nav.css` (see
   Radius Rationale: it needs the raw 5px nav radius, which `check-buttons.sh` would reject)
 - **About page** - `.btn-modern` is used directly for Website/Forum/Wiki/Source Code and the Tips
@@ -860,6 +866,40 @@ part of this project because they blocked a clean "no page overflow" reading on 
   static) with `#holder { min-height: calc(100% - 60px) }`. Because this is an app-shell bug, not a
   Log-page bug, the one fix also cleared the identical overflow on Users, Mobile, and Cam at
   360x780 for free.
+- **`#/Devices` (owner request, 2026-07-18).** Unlike the pages above, Devices' vertical overflow was
+  never a chrome-sizing bug - the page has 230+ rows, genuinely more content than any viewport - so it
+  was carried as an accepted census exception (see [The Table Contract](#the-table-contract-enforcement)
+  below) rather than "fixed" outright. The owner asked for the `#/Log` treatment instead: the page
+  fits the viewport and the table panel scrolls internally. `.page-devices-wrapper` (the Devices
+  analogue of `.log-console-container`) gets the same `calc(100vh - Npx)` treatment, measured live the
+  same way as the 145px above: 143px at desktop (`>=980px`; 63px `container-fluid` + 80px
+  `.bannercontent`, matching Log's own two components exactly - Devices carries no extra border of its
+  own, so no "+2px" term), 70px at mobile (`<=979px`; sidemenu.css's zeroed `.bannercontent` plus the
+  in-flow navbar leave only 50px above `#main-view` + 20px `container-fluid` bottom padding). Tested at
+  both (per the owner's standing directive); it holds cleanly at mobile too, despite `.page-devices`
+  staying a `flex-direction: row` split (filters | splitter | table) at 360px with no stacking
+  breakpoint of its own - out of this task's scope, but noted as a pre-existing mobile-density
+  question for a future pass.
+
+  What scrolls: core's `dataTableDefaultSettings` (`app/app.constants.js`) never sets `scrollY`, so
+  the Devices DataTable renders no `.dataTables_scrollBody` - its `dom` option
+  (`<"H"lfrC>t<"F"ip>`, `bJQueryUI: true`) gives a plain `.dataTables_wrapper` with two `.fg-toolbar`
+  divs (length/search above, info/pagination below) flanking the bare `<table>`, no extra wrapping
+  div DataTables' own scroller feature would normally use. That shape still supports real
+  row-area-only scrolling with CSS alone: the two `.fg-toolbar` rows stay `flex: none` (always
+  visible), and the `<table>` itself becomes the scrolling box (`flex: 1`, `overflow` both axes) with
+  its `<thead>` pinned via `position: sticky; top: 0`. Verified live that the header stays pinned
+  through a vertical scroll and shifts exactly in sync with a horizontal one, with no `display: block`
+  hack and therefore no risk of the header/body column-width desync that naive sticky-table-header
+  implementations hit. Scoped to `.page-devices .dataTables_wrapper` specifically (`css/tables.css`),
+  not `.dataTables_wrapper` generally - every other DataTable (Hardware/Users/Cam/Mobile/reports)
+  shares the same `.fg-toolbar` markup via the same shared `dataTableDefaultSettings` and none of them
+  get the height constraint that would make this scrolling behavior meaningful. Full derivation and
+  the live measurements live in `css/tables.css`'s own comment above the rules.
+
+  **Census consequence:** this makes Devices' three overflow exceptions (1440x900, 1024x768, and
+  360x780 mobile) obsolete - the page now genuinely fits at all three, confirmed by a clean census
+  run with those exceptions removed from `scripts/baselines/table-contract.json` (docker-test).
 
 ### The Table Contract (enforcement)
 
@@ -898,9 +938,10 @@ Four checks per pass:
 Every violation is checked against a committed, annotated-exception baseline
 (`scripts/baselines/table-contract.json`, docker-test): 178 entries, one per censused
 column/totals-row/overflow-viewport combination, snapshotting the live census whether it passes or
-fails. 25 are hand-annotated `policy: "exception"` with a `reason` string - all overflow, none
-alignment or contrast (both of those categories are 0 FAILs, clean): 22 are pages that genuinely have
-more content than fits the viewport at that width (Devices, Hardware, the report pages, Setup,
+fails. 22 are hand-annotated `policy: "exception"` with a `reason` string (down from 25 once the
+Devices viewport fit above removed its 3 overflow exceptions - see Viewport Fit) - all overflow, none
+alignment or contrast (both of those categories are 0 FAILs, clean): 19 are pages that genuinely have
+more content than fits the viewport at that width (Hardware, the report pages, Setup,
 Timers - scrolling by design, not a layout bug), 1 is Users@1024x768's always-visible Add/Edit User
 form tipping from a small pre-existing margin into overflow once the padding rhythm landed, and 2 are
 the accepted mobile padding-rhythm cost noted above. A plain run PASSes (exit 0) unless a violation's
