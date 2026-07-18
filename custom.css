@@ -268,6 +268,12 @@ header.logo {
     padding: 10px 0;
     margin-top: 10px;
     color: var(--dz-body-text);
+    /* Spec side effect: setting one overflow axis non-visible resolves the
+       other axis to auto too, so overflow-y here computes auto sitewide
+       (~15 core templates use this class). No vertical effect intended and
+       none today (all usages are auto-height, verified 2026-07-18); if a
+       future usage gains a constrained height, embedded flyouts (e.g. the
+       device-icon-select dropdown) would clip HERE, this rule is why. */
     overflow-x: auto;
     max-width: 100%;
 }
