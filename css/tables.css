@@ -28,6 +28,24 @@
     box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
     overflow-x: auto;
     max-width: 100%;
+    /* Thin scrollbar affordance (Task 8 fix-wave, 2026-07-18), mirroring the
+       existing pattern at css/cards.css:414-450: without it, the overflow-x:
+       auto containment above is functionally invisible (no visual cue that a
+       table scrolls) until a pointer happens to hover the horizontal
+       scrollbar track. Firefox via scrollbar-width/-color; WebKit/Blink via
+       the ::-webkit-scrollbar rules below. height, not width: this scrollbar
+       is horizontal. */
+    scrollbar-width: thin;
+    scrollbar-color: var(--dz-accent-color) var(--dz-body-bg);
+}
+
+.dataTables_wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.dataTables_wrapper::-webkit-scrollbar-thumb {
+    background: var(--dz-accent-color);
+    border-radius: 4px;
 }
 
 /* The overflow-x: auto above only takes effect if .dataTables_wrapper is actually allowed
@@ -103,6 +121,35 @@ table.dataTable {
     border-color: var(--dz-status-disabled) !important;
     color: var(--dz-btn-disabled-text) !important;
     cursor: default;
+}
+
+/* Pager width fix (Task 8 fix-wave, 2026-07-18). Vendor
+   www/css/demo_table_jui.css:52 pins ".paging_full_numbers" to a hard
+   "width: 350px !important", sized for the original First/Previous/1..10/
+   Next/Last row before this theme's ghost padding (--dz-btn-pad-xs above)
+   made that same row wider than 350px - so "Last" wrapped onto a bare,
+   unstyled second line, confirmed live on #/Devices at both 1440x900 and
+   1024x768. Let the row size itself instead of fighting a now-too-small
+   fixed width: wrap under real crowding (any DataTable whose pager
+   paginates), with a visible, evenly-spaced gap rather than an unstyled
+   overflow line. This selector (0,3,0) already outranks the vendor rule
+   (0,1,0) on specificity alone; !important matches the vendor's own and
+   this file's existing pager rules. */
+.dataTables_wrapper .dataTables_paginate.paging_full_numbers {
+    width: auto !important;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+/* Neutralize the vendor's -0.1em negative right margin
+   (demo_table_jui.css:48-49), a kludge for the old un-gapped button row;
+   with the flex `gap` above providing spacing, the negative margin only
+   pulls adjacent pager buttons into each other. */
+.dataTables_paginate .ui-button {
+    margin-right: 0 !important;
 }
 
 /* Base header alignment: LEFT is correct for the majority of DataTables

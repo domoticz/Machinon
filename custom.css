@@ -276,6 +276,22 @@ header.logo {
        device-icon-select dropdown) would clip HERE, this rule is why. */
     overflow-x: auto;
     max-width: 100%;
+    /* Thin scrollbar affordance (Task 8 fix-wave, 2026-07-18), mirroring
+       css/cards.css:414-450 and css/tables.css's .dataTables_wrapper: the
+       overflow-x: auto containment above needs a visible cue that a panel
+       scrolls, on narrow viewports especially. height, not width: this
+       scrollbar is horizontal. */
+    scrollbar-width: thin;
+    scrollbar-color: var(--dz-accent-color) var(--dz-body-bg);
+}
+
+.page-content-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.page-content-container::-webkit-scrollbar-thumb {
+    background: var(--dz-accent-color);
+    border-radius: 4px;
 }
 
 .page-content-container a,
