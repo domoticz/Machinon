@@ -191,7 +191,7 @@ components:
   data-table:
     rounded: "{rounded.container}"
     elevation: "{elevation.card}"
-    headerHeight: "35px"
+    headerHeight: "35px (declared; renders 52px content-box with the Tables section's header-pad token, measured live)"
     headerBg: "{colors.light-surface}"
     oddRowBg: "derived: color-mix(in srgb, {colors.light-surface} 92%, {colors.light-text})"
     evenRowBg: "{colors.light-surface}"
@@ -767,9 +767,12 @@ its English-only bundled default regardless of the active UI language. **Risk:**
 localizing DataTables' own aria strings, this column would silently lose its fingerprint and fall
 back to the report table's right-aligned default (wrong for a text column); the live census (see The
 Table Contract below) would catch the regression the next time it runs, but nothing would flag it
-before that.
+before that. The same breakage can arrive from the other direction, independent of core: a future
+DataTables library version bump changing the bundled aria template's own wording (e.g. dropping the
+leading `": "` or the `"activate to sort..."` phrasing) would lose the fingerprint identically, and
+would be caught the same way (the next census run), not before.
 
-### Token Table
+### Token Table (Tables)
 
 All twelve `--dz-table-*` tokens live in `dz-tokens.css`; only `css/tables.css` consumes them. The
 first eight predate this project (Phase 4 pilot); the last four (`total-bg`, `total-text`,
@@ -841,9 +844,9 @@ part of this project because they blocked a clean "no page overflow" reading on 
 
 - **`#/Log` desktop (145px chrome constant).** Core's `.log-console-container` sizes itself as
   `calc(100vh - 110px)`, core's guess at the chrome above/below it. Machinon's actual chrome measures
-  145px (43px `#holder > .container-fluid` padding + 80px `.bannercontent` padding/margin, a
-  `css/nav.css` override of core's own smaller padding + 2px of this container's own border), so the
-  console overflowed the viewport by a flat 35px regardless of viewport height. Fixed in
+  145px (63px `#holder > .container-fluid` padding (43px top + 20px bottom) + 80px `.bannercontent`
+  padding/margin, a `css/nav.css` override of core's own smaller padding + 2px of this container's
+  own border), so the console overflowed the viewport by a flat 35px regardless of viewport height. Fixed in
   `css/logpage.css` by overriding the constant to `calc(100vh - 145px)`, scoped to
   `@media (min-width: 980px)` (the desktop widths where that 145px total actually holds - `sidemenu.css`
   zeroes the same padding below that breakpoint). The derivation and its arithmetic live in
@@ -910,7 +913,7 @@ previously-accepted exception into a failing gate. A `staleExceptions` check fla
 never failing) any baseline exception whose key matched nothing live in that run, so a future fix that
 actually resolves a violation doesn't leave a dead, misleading annotation behind unnoticed.
 
-### Core-Region Takeover
+### Core-Region Takeover (Tables)
 
 Regions core renders and styles itself, each needing the theme's own alignment/padding/totals rules
 layered on top:

@@ -472,10 +472,12 @@ img[src$="/next.png"] {
 }
 
 /* Year-view leading column (Month/Period, e.g. "07. July <link>") is TEXT,
-   not a number - left-align it. Detected as "this table has no empty-
-   titled header" (see the weekday-column rule below for what that empty
-   title looks like); year view never has one, so a table WITHOUT that
-   header is a year-view table. */
+   not a number - left-align it. Column title comes from core's own columns
+   array: CounterReport.js:388 (title 'Period' with a custom start date, else
+   'Month'), TemperatureReport.js:289 and RainReport.js:230 (both always
+   'Month'). Detected as "this table has no empty-titled header" (see the
+   weekday-column rule below for what that empty title looks like); year
+   view never has one, so a table WITHOUT that header is a year-view table. */
 #reporttable.myrighttable:not(:has(thead th[aria-label^=":"])) thead th:first-child,
 #reporttable.myrighttable:not(:has(thead th[aria-label^=":"])) tbody td:first-child {
     text-align: left;
@@ -492,7 +494,14 @@ img[src$="/next.png"] {
    This is locale-safe: Domoticz's $.DataTableLanguage (js/domoticz.js:2576-
    2589, wired in app.constants.js:50) never sets an `aria` key, so
    DataTables always falls back to its English-only bundled default
-   regardless of the active UI language. */
+   regardless of the active UI language. The other realistic way this
+   fingerprint breaks (Task 8 fix-wave, 2026-07-18): a future DataTables
+   library version bump changing the bundled aria template's own wording
+   (e.g. dropping the leading ": " or the "activate to sort..." phrasing
+   entirely) - independent of anything Domoticz core does. Same detection
+   path either way: the live census (see DESIGN.md's Table Contract) would
+   catch the regression the next time it runs, but nothing flags it before
+   that. */
 #reporttable.myrighttable thead th[aria-label^=":"] {
     text-align: left;
 }
@@ -508,12 +517,14 @@ img[src$="/next.png"] {
     text-align: center;
 }
 
-/* Cell/header padding rhythm (task TB2 tokens) for report tables, same
-   rhythm the rest of the theme's tables use. */
-#reporttable.myrighttable thead th {
-    padding: var(--dz-table-header-pad);
-}
-#reporttable.myrighttable tbody td,
+/* Cell padding rhythm (task TB2 tokens) for the report tables' totals
+   row. #reporttable also carries the base `table.dataTable` class, so its
+   thead th and tbody td already inherit the same TB2 padding tokens from
+   the base `table.dataTable thead th` / `table.dataTable tbody td` rules
+   above (removed here 2026-07-18, fix-wave M8: they were an exact,
+   value-for-value duplicate, not an override); only `tfoot td` has no base
+   rule to fall back on (DataTables never styles a <tfoot> itself), so it
+   is the one leg that still needs stating here. */
 #reporttable.myrighttable tfoot td {
     padding: var(--dz-table-cell-pad);
 }
