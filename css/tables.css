@@ -243,3 +243,105 @@ img[src$="/next.png"] {
     height: 16px;
     width: auto;
 }
+
+/* ====================================================================
+   Report tables (core app/report/*.js render these; theme owns look).
+   Task TB3 of the tables-holistic project (dz-table-census.js's "failing
+   test": report-surface alignment 32 desktop + 32 mobile FAILs, totals
+   contrast 2.65:1 on 3 rows, before this section landed).
+
+   Markup (confirmed live, #/Devices/<idx>/Report and its month drilldown):
+   <table id="reporttable" class="display myrighttable dataTable ...">,
+   built by DataTables from a `columns` array core defines per report type
+   (CounterReport.js, TemperatureReport.js, RainReport.js - WindReport.js
+   and EnergyMultiCounterReport.js follow the identical shape, so these
+   rules cover them too even though they are outside this task's censused
+   surfaces). Column order:
+     year view:  Month/Period (text)  | ...numeric metrics... | trend (icon)
+     month view: Day (numeric)  | "" weekday (text) | ...numeric metrics... | trend (icon)
+   The totals row is a hand-built <tfoot> core appends after the DataTable
+   draws (CounterReport.js:488, RainReport.js:275; TemperatureReport has none).
+
+   ROOT CAUSE of the alignment bug (verified TB1): core's own
+   `.myrighttable td` (www/css/style.css:1403) blanket right-aligns EVERY
+   data cell regardless of column type, while this theme's own DataTables
+   header rule (`table.dataTable thead th` above, css/tables.css) makes
+   EVERY header left-ish - so header and data disagree on every column,
+   and both frequently disagree with the text/numeric/icon policy too.
+   Fix: make report headers agree with their data, column by column,
+   per the alignment policy (text->left, numeric->right, icon->center). */
+
+/* Base: most report columns are numeric quantities (Usage, Costs, Counter,
+   Avg/Min/Max Temp, Humidity, Baro, Rain(mm) - and the month-view Day
+   ordinal is a bare number too) - right-align both header and data by
+   default. This also fixes the header side of the bug above; core's
+   `.myrighttable td` already right-aligns data. */
+#reporttable.myrighttable thead th,
+#reporttable.myrighttable tbody td {
+    text-align: right;
+}
+
+/* Year-view leading column (Month/Period, e.g. "07. July <link>") is TEXT,
+   not a number - left-align it. Detected as "this table has no empty-
+   titled header" (see the weekday-column rule below for what that empty
+   title looks like); year view never has one, so a table WITHOUT that
+   header is a year-view table. */
+#reporttable.myrighttable:not(:has(thead th[aria-label^=":"])) thead th:first-child,
+#reporttable.myrighttable:not(:has(thead th[aria-label^=":"])) tbody td:first-child {
+    text-align: left;
+}
+
+/* Month-view weekday column (2nd column, e.g. "Friday") is TEXT - left-
+   align it. Core titles this column '' (CounterReport.js:379-385,
+   TemperatureReport.js:280-286, RainReport.js:213-219, all sibling report
+   files identically); DataTables' own bundled aria template renders a
+   header's aria-label as "<title>: activate to sort column
+   ascending/descending" (confirmed live), so an empty title collapses to
+   an aria-label that STARTS with a bare ":" - the one structural
+   fingerprint this column has, since core gives it no id/class of its own.
+   This is locale-safe: Domoticz's $.DataTableLanguage (js/domoticz.js:2576-
+   2589, wired in app.constants.js:50) never sets an `aria` key, so
+   DataTables always falls back to its English-only bundled default
+   regardless of the active UI language. */
+#reporttable.myrighttable thead th[aria-label^=":"] {
+    text-align: left;
+}
+#reporttable.myrighttable:has(thead th[aria-label^=":"]) tbody td:nth-child(2) {
+    text-align: left;
+}
+
+/* Trend column (always last: header "<>", data a single trend <img> -
+   CounterReport.js:431-441, TemperatureReport.js:317-324, RainReport.js:247-254)
+   is an ICON column - center it. */
+#reporttable.myrighttable thead th:last-child,
+#reporttable.myrighttable tbody td:last-child {
+    text-align: center;
+}
+
+/* Cell/header padding rhythm (task TB2 tokens) for report tables, same
+   rhythm the rest of the theme's tables use. */
+#reporttable.myrighttable thead th {
+    padding: var(--dz-table-header-pad);
+}
+#reporttable.myrighttable tbody td,
+#reporttable.myrighttable tfoot td {
+    padding: var(--dz-table-cell-pad);
+}
+
+/* Totals band (owner report h/m): core appends the <tfoot> with an INLINE
+   style pairing the theme's accent background with the theme's BODY-TEXT
+   token (CounterReport.js:488, RainReport.js:275 -
+   style="background:var(--dz-accent-color,#337ab7); color:var(--dz-body-
+   text,#fff)"), not the accent's own on-accent text token - measured
+   2.65:1 against the live Blue UI scheme's accent (needs 4.5:1). Inline
+   styles beat any external selector regardless of specificity, so these
+   need !important; that is the ONLY reason it appears here. Overriding at
+   the <tr> is enough: background-color does not inherit, but the census
+   script's contrast check (and real rendering) both fall back to the
+   row's background for any cell that has no background of its own, and
+   `color` DOES inherit, so every <td> in the row picks up the readable
+   pairing without needing its own rule. */
+#reporttable.myrighttable tfoot tr {
+    background: var(--dz-table-total-bg) !important;
+    color: var(--dz-table-total-text) !important;
+}
