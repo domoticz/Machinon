@@ -193,9 +193,13 @@ components:
     elevation: "{elevation.card}"
     headerHeight: "35px"
     headerBg: "{colors.light-surface}"
-    oddRowBg: "{colors.light-disabled}"
+    oddRowBg: "derived: color-mix(in srgb, {colors.light-surface} 92%, {colors.light-text})"
     evenRowBg: "{colors.light-surface}"
     rowBorder: "1px solid {colors.light-border}"
+    totalBg: "derived: color-mix(in srgb, {colors.light-primary} 15%, {colors.light-surface})"
+    totalText: "{colors.light-text}"
+    cellPad: "6px 10px"
+    headerPad: "8px 10px"
   navbar:
     backgroundColor: "{colors.light-navbar}"
     elevation: "0 0 10px 2px rgba(0,0,0,0.2)"
@@ -300,7 +304,7 @@ the same edit, or record the difference as a gap.
 | `--dz-body-text` | `{colors.light-text}` | `{colors.dark-text}` | Primary text |
 | `--secondary-text-color` | `{colors.light-text-secondary}` | `{colors.dark-text-secondary}` | Captions, timestamps, labels |
 | `--dz-input-border` | `{colors.light-border}` | `{colors.dark-border}` | Table/row/input borders |
-| `--dz-status-disabled` | `{colors.light-disabled}` | `{colors.dark-disabled}` | Disabled controls, odd table rows |
+| `--dz-status-disabled` | `{colors.light-disabled}` | `{colors.dark-disabled}` | Disabled controls |
 | `--dz-accent-red` | `{colors.light-error}` | `{colors.dark-error}` | Destructive actions, timeout status |
 | `--dz-btn-success-bg` | `{colors.light-success}` | `{colors.dark-success}` | Success state buttons |
 | `--dz-btn-warning-bg` | `{colors.light-warning}` | `{colors.dark-warning}` | Warning state buttons |
@@ -414,9 +418,17 @@ compact, reads its size from the scale above.
 |-------|-------|-------|
 | `{spacing.xxs}` | 4px | Button group gaps, timer mode margins, checkbox `margin-right` |
 | `{spacing.xs}` | 8px | Popup padding, control padding, button internal padding, dialog button gap |
-| `{spacing.sm}` | 10px | Container padding, table cell padding, card name padding, card grid gap (as 15px) |
+| `{spacing.sm}` | 10px | Container padding, card name padding, card grid gap (as 15px) |
 | `{spacing.md}` | 15px | Card grid gap, form list margins, settings list item margins |
 | `{spacing.lg}` | 20px | Section spacing, large button padding, settings panel padding |
+
+Table cell/header padding is NOT one of the scalars above; it is its own dedicated token pair
+(`--dz-table-cell-pad` 6px 10px, `--dz-table-header-pad` 8px 10px, see [Tables](#tables) >
+Padding Rhythm), because a table row needs independent vertical/horizontal control that a single
+scalar can't express. Both land at or near this cluster (the 10px horizontal component matches
+`{spacing.sm}` exactly; 6px and 8px sit between `{spacing.xxs}` and `{spacing.xs}`) rather than
+introducing values outside it, so the two systems agree in spirit even though tables don't
+literally reference the spacing tokens.
 
 ### Target Scale (4px grid migration)
 
@@ -717,6 +729,215 @@ Dashboard's dashboard-switcher) gets the full radius back, since there is no sib
 `1px solid` accent border, `-1px` left margin to collapse borders. The same corner-squaring technique
 is reused verbatim for the chart zoom/range group (see Core-Region Takeover).
 
+## Tables
+
+Every table-bearing surface in the theme (core's DataTables pages and its report tables) follows
+one **alignment policy** keyed to column content type, one shared padding rhythm, and one totals-row
+treatment, landed by the tables-holistic project (2026-07-18, `css/tables.css`, `dz-tokens.css`).
+Before this project, alignment was accidental: core's own CSS either left every column at the
+browser default (left) or, on report tables, blanket right-aligned every cell regardless of type, so
+headers and data frequently disagreed and numbers were never actually right-aligned anywhere in the
+theme.
+
+### Alignment Policy
+
+| Column type | Alignment | Detection (live census) |
+|-------------|-----------|--------------------------|
+| Text | Left | Default; anything that isn't numeric/datetime/icon |
+| Numeric | Right | >=80% of sampled non-empty cells match a number/unit pattern (`kWh`, `W`, `C`, `%`, `m3`, `L`, `hPa`, `mm`, currency) |
+| Datetime | Right | >=80% match an ISO date or `H:MM` time pattern; checked before numeric, since a numeric pattern alone also matches datetime strings |
+| Icon | Center | Every non-empty cell contains only `img`/`i`/`button`/`svg`, no text of its own |
+
+A column's header must carry the same alignment as its own data, both ways: a numeric column with a
+correctly right-aligned header but left-aligned data is still a defect, and so is the reverse (the
+header would be lying about the column). `css/tables.css` layers per-column `nth-child` (or class,
+where core assigns one) rules on top of one shared default (`text-align: left` on every header/cell),
+covering the DataTables pages (Devices, Hardware, Cam, Mobile, Device Timers) and the report tables
+(Counter/Temperature/Rain/Wind/Energy) alike; see Core-Region Takeover below for the full surface
+list.
+
+**The month-view weekday column's fingerprint.** Every report type titles its month-view weekday
+column `''` (an empty string) in core's own `columns` array (`CounterReport.js`,
+`TemperatureReport.js`, `RainReport.js`), so it carries no id, class, or visible header text to select
+on. DataTables' bundled aria template renders a header's `aria-label` as `"<title>: activate to sort
+column ..."`, so an empty title collapses to an aria-label that starts with a bare `:` -
+`css/tables.css` selects on `thead th[aria-label^=":"]`. This is locale-safe today: Domoticz's
+`$.DataTableLanguage` (`js/domoticz.js`) never sets an `aria` key, so DataTables always falls back to
+its English-only bundled default regardless of the active UI language. **Risk:** if core ever starts
+localizing DataTables' own aria strings, this column would silently lose its fingerprint and fall
+back to the report table's right-aligned default (wrong for a text column); the live census (see The
+Table Contract below) would catch the regression the next time it runs, but nothing would flag it
+before that.
+
+### Token Table
+
+All twelve `--dz-table-*` tokens live in `dz-tokens.css`; only `css/tables.css` consumes them. The
+first eight predate this project (Phase 4 pilot); the last four (`total-bg`, `total-text`,
+`cell-pad`, `header-pad`) landed with it.
+
+| Token | Value | Notes |
+|-------|-------|-------|
+| `--dz-table-header-bg` | `var(--dz-widget-bg)` | Header row background |
+| `--dz-table-header-text` | `var(--dz-body-text)` | Header row text |
+| `--dz-table-row-even-bg` | `var(--dz-widget-bg)` | Even (unstriped) row background |
+| `--dz-table-row-odd-bg` | `color-mix(in srgb, var(--dz-widget-bg) 92%, var(--dz-body-text))` | Odd-row stripe; DERIVED (8% body text mixed into the widget background) so striping stays readable under every scheme - the old fixed greys failed WCAG under some schemes' text colors |
+| `--dz-table-row-text` | `var(--dz-body-text)` | Row text |
+| `--dz-table-border` | `var(--dz-input-border)` | Row border |
+| `--dz-table-row-selected-bg` | `var(--dz-accent-color)` | Selected-row background (75% opacity, text swaps to `--dz-accent-text`) |
+| `--dz-table-control-text` | `var(--secondary-text-color)` | DataTables length/filter/info chrome text |
+| `--dz-table-total-bg` | `color-mix(in srgb, var(--dz-accent-color) 15%, var(--dz-widget-bg))` | Totals/summary row background; DERIVED so schemes track (see Totals Rows below) |
+| `--dz-table-total-text` | `var(--dz-body-text)` | Totals/summary row text |
+| `--dz-table-cell-pad` | `6px 10px` | Body-cell padding rhythm (see Padding Rhythm below) |
+| `--dz-table-header-pad` | `8px 10px` | Header-cell padding rhythm |
+
+### Totals Rows
+
+Core appends the report tables' totals `<tfoot>` after the DataTable draws
+(`CounterReport.js`/`RainReport.js`; `TemperatureReport` has none, no natural sum), with an **inline**
+style pairing the theme's accent background with the theme's body-text token
+(`style="background:var(--dz-accent-color,#337ab7); color:var(--dz-body-text,#fff)"`) - a bold
+accent-colored band that measured **2.65:1** against the live Blue UI scheme's accent, well under the
+4.5:1 WCAG AA floor for normal text. `--dz-table-total-bg`/`-text` replace it with a quiet
+accent-tinted band (15% accent mixed into the widget surface) instead of the accent color at full
+strength, paired with the ordinary body-text token; `css/tables.css` overrides the row (not each cell)
+with `!important`, since inline styles otherwise beat any external selector regardless of
+specificity, and `background-color` doesn't inherit but `color` does, so every cell in the row picks
+up the readable pairing without its own rule.
+
+Measured contrast, both base and Blue UI (the schemes named in this project's brief), light and dark:
+
+| Scheme | Light | Dark |
+|--------|-------|------|
+| Base | 14.30:1 | 6.67:1 |
+| Blue UI | 11.79:1 | 9.21:1 |
+
+All four clear AA (4.5:1) by a wide margin. The live table-census contract (base scheme active during
+that harness run) independently re-measured the rendered report totals rows at 14.45:1 - consistent
+with the manual probe above; the small numeric difference is measurement method (the manual check
+resolved `color-mix()` via a temporary DOM probe element, the census reads `getComputedStyle()`
+straight off the live totals row), not a regression.
+
+### Padding Rhythm
+
+`--dz-table-cell-pad` (6px 10px) and `--dz-table-header-pad` (8px 10px) replace DataTables' vendor
+default (`3px 10px`, `demo_table_jui.css`) on every DataTables page and the report tables' `thead`/
+`tbody`/`tfoot` cells alike, so header height and row rhythm match across every table-bearing surface
+in the theme. These are an owner-approved **design choice** near the de facto 4/8/10 spacing cluster
+(see [Spacing](#spacing)), not derived from the spacing scale directly - a table row needs independent
+vertical/horizontal control a single spacing scalar can't express, so they get their own token pair
+rather than reusing `{spacing.xs}`/`{spacing.sm}` in place.
+
+**Accepted mobile cost.** Growing every DataTables row by a few pixels tipped two mobile (360x780)
+surfaces from fitting to a small vertical overflow: Users[mobile] (+5px) and Cam[mobile] (+29px). Both
+are recorded as annotated exceptions in the table-census baseline, explicitly flagged
+"pending owner verdict," and were accepted as-is at this project's verification gate (no code change)
+rather than reverting the rhythm or carving out per-surface padding - a small, page-length-only cost
+judged worth the alignment/contrast/rhythm consistency gained everywhere else.
+
+### Viewport Fit
+
+Two chrome-sizing bugs, unrelated to alignment/padding, surfaced in the same census and were fixed as
+part of this project because they blocked a clean "no page overflow" reading on tables-bearing pages:
+
+- **`#/Log` desktop (145px chrome constant).** Core's `.log-console-container` sizes itself as
+  `calc(100vh - 110px)`, core's guess at the chrome above/below it. Machinon's actual chrome measures
+  145px (43px `#holder > .container-fluid` padding + 80px `.bannercontent` padding/margin, a
+  `css/nav.css` override of core's own smaller padding + 2px of this container's own border), so the
+  console overflowed the viewport by a flat 35px regardless of viewport height. Fixed in
+  `css/logpage.css` by overriding the constant to `calc(100vh - 145px)`, scoped to
+  `@media (min-width: 980px)` (the desktop widths where that 145px total actually holds - `sidemenu.css`
+  zeroes the same padding below that breakpoint). The derivation and its arithmetic live in
+  `css/logpage.css`'s own comment above the override.
+- **Mobile app-shell (60px).** At <=979px `css/sidemenu.css` forces the navbar out of
+  `position: fixed` into normal document flow (so it can slide out as the mobile side menu), which
+  puts 60px of navbar (40px min-height + 20px margin-bottom) into the document that isn't there on
+  desktop. Core's `#holder { min-height: 100% }` resolves against the full viewport height with no
+  awareness that a sibling above it just claimed 60px of it, so any page shorter than a full viewport
+  overflowed by exactly that 60px. Fixed in `css/sidemenu.css` (the same file that flips the navbar to
+  static) with `#holder { min-height: calc(100% - 60px) }`. Because this is an app-shell bug, not a
+  Log-page bug, the one fix also cleared the identical overflow on Users, Mobile, and Cam at
+  360x780 for free.
+
+### The Table Contract (enforcement)
+
+Unlike the [Button Contract](#the-button-contract-enforcement), tables have **no static grep-style
+checker** (no `scripts/check-tables.sh` alongside `check-typography.sh`/`check-buttons.sh`) - by
+design, not an oversight. `check-buttons.sh` works because it asks a lexical question a regex can
+answer: does this CSS declaration's value resolve through a `var(--dz-btn-*)` token? Table correctness
+isn't a lexical property of any one CSS rule: whether a column is text, numeric, datetime, or icon
+depends on what data actually renders in it (a live-DOM fact core itself sometimes contradicts, e.g.
+`.myrighttable td` blankly right-aligning every cell regardless of type), and totals-row contrast
+depends on resolving real computed colors through inheritance and cascade, including values core
+injects as inline styles at runtime. None of that is answerable by grepping source text, so the
+entire contract is the live, rendered census below.
+
+**`dz-table-census.js`** (Playwright, run against the Docker test instance) runs three viewport
+passes per full run:
+
+1. **1440x900** - full census: column alignment + totals-row contrast + page overflow.
+2. **1024x768** - overflow only (a second, narrower desktop viewport; the "#/Log class" of bug is a
+   page that fits horizontally but overflows vertically at exactly this width).
+3. **360x780 (Galaxy S24 emulation)** - full census again, against whatever mobile markup actually
+   renders (some routes swap card layouts for `table.mobileitem` at this width). This pass runs the
+   complete set of checks, not a subset: per-route navigation and settle waits dominate the harness's
+   runtime and are paid regardless, so sampling "on a subset to save time" would save nothing
+   measurable.
+
+Four checks per pass:
+
+1. **Header/data alignment per policy** (see Alignment Policy above).
+2. **Totals-row contrast >= 4.5:1** (WCAG AA, normal text; see Totals Rows above).
+3. **Page overflow** - `scrollWidth` AND `scrollHeight` must not exceed the viewport.
+4. **Padding conformity to the two pad tokens** - still a report-only placeholder in the harness's
+   output; not implemented even now that the tokens exist (a gap in the harness, not in the theme's
+   CSS, carried forward from the harness's original TB1 shipment).
+
+Every violation is checked against a committed, annotated-exception baseline
+(`scripts/baselines/table-contract.json`, docker-test): 178 entries, one per censused
+column/totals-row/overflow-viewport combination, snapshotting the live census whether it passes or
+fails. 25 are hand-annotated `policy: "exception"` with a `reason` string - all overflow, none
+alignment or contrast (both of those categories are 0 FAILs, clean): 22 are pages that genuinely have
+more content than fits the viewport at that width (Devices, Hardware, the report pages, Setup,
+Timers - scrolling by design, not a layout bug), 1 is Users@1024x768's always-visible Add/Edit User
+form tipping from a small pre-existing margin into overflow once the padding rhythm landed, and 2 are
+the accepted mobile padding-rhythm cost noted above. A plain run PASSes (exit 0) unless a violation's
+key has no matching exception entry.
+
+**Deliberate rebaseline.** `--rebaseline` regenerates the baseline from a fresh census but preserves
+every existing `policy: "exception"` entry by key (the same pattern `dz-button-contract.js` uses for
+its `tier`/`layoutException` annotations), so a routine rebaseline can never silently re-arm a
+previously-accepted exception into a failing gate. A `staleExceptions` check flags (informationally,
+never failing) any baseline exception whose key matched nothing live in that run, so a future fix that
+actually resolves a violation doesn't leave a dead, misleading annotation behind unnoticed.
+
+### Core-Region Takeover
+
+Regions core renders and styles itself, each needing the theme's own alignment/padding/totals rules
+layered on top:
+
+- **Devices** (`#devices`, 14 columns) - state-icon and actions columns centered, Idx/ID/Unit/
+  SignalLevel/BatteryLevel/Last Seen right-aligned, the rest left (text); Last Seen also gets a
+  positional `nowrap` rule so Inter (wider than the original theme's Open Sans) doesn't wrap it onto
+  two lines.
+- **Hardware** (`#hardwaretable`, 7 columns) - only the Idx column needs a rule; core's own
+  `align="center"` HTML attribute on Port/Data Timeout never mattered (an HTML alignment hint is always
+  beaten by the base header rule, and both columns' live data classifies as text, not numeric).
+- **Cam** (`#cameratable`, 10 columns, plus `#activetable`, 3 columns for the active-devices sub-table)
+  - Idx/Port right, Preview/capture-snapshot/stream-video icons centered.
+- **Mobile** (`#mobiletable`, 6 columns) - Idx right, Last Seen right (datetime + an inline "Test"
+  icon; classified datetime because the date text dominates the cell).
+- **Device Timers** (`.js-device-timers` container; DataTables assigns this table no static id) - only
+  the Time column needs a rule.
+- **Report tables** (`#reporttable.myrighttable`, every report type: Counter, Temperature, Rain, Wind,
+  Energy) - base right-align (most columns are numeric quantities), the year-view leading label column
+  and month-view weekday column left (see the aria-fingerprint note above), the trailing trend column
+  centered (a single trend icon), and the totals band override (see Totals Rows above). Core's own
+  `.myrighttable td` blanket right-aligns every cell regardless of type; these rules also fix the
+  header side of that mismatch.
+- **DataTables pager** (`.fg-button`) - ghost-tier styling; documented under
+  [Buttons > Core-Region Takeover](#core-region-takeover), since it's a button family, not a table
+  concern, even though the rule lives in `css/tables.css` for cascade-ordering reasons.
+
 ## Components
 
 ### Device Cards
@@ -805,20 +1026,6 @@ Handle translates `34px` right on toggle, `0.4s` transition.
 **Sub-tabs / Nav-tabs**: underline style. Inactive: transparent bottom border. Active/hover: `2px solid var(--dz-accent-color)` bottom border, blue text color. No background change.
 
 **Mobile hamburger** (max-width: 979px): fixed-position 25x25px toggle. Three 4px bars animate to X via `rotate(135deg)` / `rotate(-135deg)` transforms, `0.2s ease-in-out`. Gets blue background pill with `{rounded.container}` bottom corners after 50px scroll.
-
-### Data Tables
-
-Wrapped in a container with `{elevation.card}` shadow and `{rounded.container}` radius.
-
-| Element | Style |
-|---------|-------|
-| Header | `var(--dz-widget-bg)` background, 35px height, no border |
-| Odd rows | `var(--dz-status-disabled)` background |
-| Even rows | `var(--dz-widget-bg)` background |
-| Row border | `1px solid var(--dz-input-border)` |
-| Selected row | `var(--dz-accent-color)` background, 75% opacity |
-| Filter/info text | `var(--secondary-text-color)` |
-| Bottom margin | 10px |
 
 ### Charts (Highcharts)
 
@@ -1010,8 +1217,8 @@ would have to change, not a reason to copy the current behaviour.
 - Disabled button contrast below WCAG AA: light theme `{colors.light-text-secondary}` on
   `{colors.light-disabled}` is 3.42:1, dark theme `{colors.dark-text-secondary}` on
   `{colors.dark-disabled}` is 2.46:1. WCAG exempts disabled controls, but readability would benefit
-  from dedicated disabled text/background tokens. `--dz-status-disabled` is shared with odd table
-  rows and input borders, so it cannot be changed in isolation.
+  from dedicated disabled text/background tokens. `--dz-status-disabled` is shared with
+  `--dz-input-border` (see the gap above), so it cannot be changed in isolation.
 - Navbar shadow uses `10px 2px` spread instead of the card tier's `10px 1px`
 - `css/login.css` still carries nine hardcoded literals (`#fff`, `#f1f1f1`, `#ccc`, `#1a1a1a`)
   alongside its 22 `--dz-*` usages, so parts of the login page do not follow the dark scheme
