@@ -247,6 +247,19 @@ header.logo {
     margin: 0 auto;
     position: relative;
 }
+/* overflow-x: auto + max-width: 100% mirror css/tables.css's
+   .dataTables_wrapper containment (task TB5 of tables-holistic, Hardware
+   [mobile] +167px sideways scroll): this wrapper holds each page's
+   "Add/Edit" params form (Hardware/Cam/Mobile/Devices/Timers/...), and at
+   least one of those forms carries a core-authored FIXED pixel width wider
+   than a mobile viewport - www/app/hardware/Hardware.html:463's
+   `<select id="combotype" style="width:410px">` (410px > 360px), confirmed
+   live as the exact element whose bounding box drove #/Hardware's mobile
+   page past the viewport (its wrapper, .dataTables_wrapper, was already
+   properly contained; #hardwareparamstable is a plain
+   `table:not(.dataTable)`, styled two rules below, but never scrollable
+   until now). Scroll happens INSIDE this panel, never the page, at zero
+   cost when a form already fits (auto only shows a scrollbar on overflow). */
 .page-content-container {
     background: var(--dz-widget-bg) !important;
     border: 1px solid var(--dz-accent-color) !important;
@@ -255,6 +268,8 @@ header.logo {
     padding: 10px 0;
     margin-top: 10px;
     color: var(--dz-body-text);
+    overflow-x: auto;
+    max-width: 100%;
 }
 
 .page-content-container a,

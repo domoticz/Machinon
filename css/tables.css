@@ -105,15 +105,33 @@ table.dataTable {
     cursor: default;
 }
 
+/* Base header alignment: LEFT is correct for the majority of DataTables
+   columns (text: Name/Type/Address/... across Devices/Hardware/Users/
+   Mobile/Cam/Timers). Task TB5 of the tables-holistic project replaces the
+   legacy "-webkit-left" keyword with the standard value (both render
+   identically; the vendor prefix was never load-bearing, see task TB1's
+   census notes on how Chromium reports it verbatim instead of folding it to
+   "left") and layers the per-column numeric/datetime/icon overrides below
+   on top of this default, rather than leaving every column stuck at left
+   regardless of type (the census's TB1 finding: numeric data was never
+   right-aligned anywhere in this theme). Padding uses the TB2 cell-padding
+   tokens so header height/rhythm matches the body rows below. */
 table.dataTable thead th,
 table.dataTable thead th.ui-state-default {
     background: var(--dz-table-header-bg) !important;
     background-image: none !important;
     color: var(--dz-table-header-text);
     height: 35px;
-    padding-right: 10px;
-    text-align: -webkit-left;
+    padding: var(--dz-table-header-pad);
+    text-align: left;
     border: none !important;
+}
+
+/* Body-cell padding rhythm (TB2 tokens), same rationale as the header
+   above: DataTables/core ship a 3px 10px default (demo_table_jui.css);
+   this brings body cells onto the theme's own token instead. */
+table.dataTable tbody td {
+    padding: var(--dz-table-cell-pad);
 }
 
 .dataTables_wrapper .dataTable tr {
@@ -162,6 +180,131 @@ tr.odd td.sorting_1, tr.even td.sorting_1 {
    layout is affected by the position-based selector. */
 #devices td:nth-child(14) {
     white-space: nowrap;
+}
+
+/* ====================================================================
+   DataTables per-column alignment (task TB5 of tables-holistic; the
+   census's remaining FAIL inventory after TB3/TB4 - 28 columns, mirrored
+   1:1 on mobile - was every numeric/datetime/icon column below, still
+   stuck at the header default (left) set above while their data cells
+   render at the browser default (also left), because nothing in the
+   theme ever right-aligned a number or centered an icon outside the
+   report tables (TB3's section, a separate bug in the opposite
+   direction). Policy: text->left (the default above, untouched),
+   numeric/datetime->right, icon->center - both header AND data, per
+   column, so the two always agree. Most of these columns carry no
+   class of their own (core assigns none), so they are targeted
+   positionally with nth-child, scoped to each table's own id exactly
+   like the Last Seen nowrap rule just above; the two columns core DOES
+   class (.devices-data-col, .actions-column) are targeted by class
+   instead, which survives a future column reorder that a positional
+   rule would not. */
+
+/* Devices (#devices), 14 columns - www/app/devices/Devices.js columns
+   array, confirmed live (DOM dump, task TB5): 0 row-selector(text)
+   1 state-icon(icon) 2 Idx(numeric) 3 Hardware(text) 4 ID(numeric)
+   5 Unit(numeric) 6 Name(text) 7 Type(text) 8 SubType(text)
+   9 Data(text, .devices-data-col) 10 SignalLevel(numeric)
+   11 BatteryLevel(numeric) 12 actions(.actions-column, icon)
+   13 Last Seen(datetime, nth-child(14) above already owns its nowrap). */
+#devices thead th:nth-child(2),
+#devices tbody td:nth-child(2) {
+    text-align: center;
+}
+#devices thead th:nth-child(3),
+#devices tbody td:nth-child(3),
+#devices thead th:nth-child(5),
+#devices tbody td:nth-child(5),
+#devices thead th:nth-child(6),
+#devices tbody td:nth-child(6),
+#devices thead th:nth-child(11),
+#devices tbody td:nth-child(11),
+#devices thead th:nth-child(12),
+#devices tbody td:nth-child(12),
+#devices thead th:nth-child(14),
+#devices tbody td:nth-child(14) {
+    text-align: right;
+}
+#devices thead th.actions-column,
+#devices tbody td.actions-column {
+    text-align: center;
+}
+
+/* Hardware (#hardwaretable), 7 columns - www/app/hardware/Hardware.html
+   markup (plain <th>, no DataTables JS columns array): 0 Idx(numeric)
+   1 Name 2 Enabled 3 Type 4 Address 5 Port 6 Data Timeout (all text -
+   core's own align="center" on Port/Data Timeout never mattered: an
+   HTML align attribute is the lowest-priority presentation hint, always
+   beaten by the base thead th rule above, and both columns' live data
+   classifies as text - e.g. serial ports like "/dev/ttyUSB0" - not
+   numeric, so they already pass at left; only Idx needs a rule). */
+#hardwaretable thead th:nth-child(1),
+#hardwaretable tbody td:nth-child(1) {
+    text-align: right;
+}
+
+/* Cam (#cameratable), 10 columns - www/views/cam.html markup +
+   fnAddData column map (confirmed live): 0 Idx(numeric) 1 Preview(icon,
+   a snapshot <img>) 2 Name(text) 3 capture-snapshot link(icon)
+   4 stream-video link(icon) 5 Enabled(text) 6 Protocol(text)
+   7 Address(text) 8 Port(numeric) 9 ImageURL(text). */
+#cameratable thead th:nth-child(1),
+#cameratable tbody td:nth-child(1),
+#cameratable thead th:nth-child(9),
+#cameratable tbody td:nth-child(9) {
+    text-align: right;
+}
+#cameratable thead th:nth-child(2),
+#cameratable tbody td:nth-child(2),
+#cameratable thead th:nth-child(4),
+#cameratable tbody td:nth-child(4),
+#cameratable thead th:nth-child(5),
+#cameratable tbody td:nth-child(5) {
+    text-align: center;
+}
+
+/* Cam active-devices (#activetable), 3 columns - www/views/cam.html
+   RefreshActiveDevicesTable(): 0 Name(text) 1 When(text, "On"/"Off")
+   2 Delay(numeric, seconds). Written structurally alongside the rest of
+   this table's columns even though the test instance's census could not
+   sample it: core only populates this table's rows after a camera row
+   is clicked in the UI (RefreshActiveDevicesTable(idx), fired from the
+   #cameratable row click handler), which the census harness's plain
+   page-navigation never does, so the table stays empty (0 rows) in every
+   census run despite a real active-device row existing in the database
+   (seeded via json.htm addcamactivedevice and confirmed via
+   getcamactivedevices) - see task TB5's report for the exception entry. */
+#activetable thead th:nth-child(3),
+#activetable tbody td:nth-child(3) {
+    text-align: right;
+}
+
+/* Mobile (#mobiletable), 6 columns - www/views/mobile_notifications.html
+   markup + RefreshMobileTable() column map: 0 Idx(numeric) 1 Enabled(text)
+   2 Name(text) 3 UUID(text) 4 Type(text) 5 Last Seen(datetime, text +
+   an inline "Test" icon appended after the date - classifies datetime
+   because the date text itself dominates the cell). */
+#mobiletable thead th:nth-child(1),
+#mobiletable tbody td:nth-child(1),
+#mobiletable thead th:nth-child(6),
+#mobiletable tbody td:nth-child(6) {
+    text-align: right;
+}
+
+/* Device Timers (#/Devices/<idx>/Timers), www/app/timers/components.js
+   columns array: 0 Active(text) 1 Type(text) 2 Date(text; empty for
+   non-fixed-date timer types) 3 Time(datetime, "HH:MM") 4 Randomness(text)
+   5 Persistent(text) 6 Command(text) 7 Days(text). Only Time needs a
+   rule. DataTables gives this table no static id (core initializes it
+   from a directive-local $element, not a selector with an id in markup),
+   so it is auto-assigned "DataTables_Table_0" at runtime - stable today
+   (the only DataTable this page creates) but fragile if that ever
+   changes, so it is scoped through the page's own container class
+   instead (views/timers/timers.html's #deviceTimers.js-device-timers),
+   which core does control directly. */
+.js-device-timers table.dataTable thead th:nth-child(4),
+.js-device-timers table.dataTable tbody td:nth-child(4) {
+    text-align: right;
 }
 
 /* Devices-table battery bar: core's style.css hardcodes scheme-blind hexes

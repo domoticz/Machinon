@@ -90,6 +90,22 @@
     background: rgba(255, 255, 255, 0.25);
 }
 
+/* Log[mobile] +11px sideways scroll (task TB5 of tables-holistic). Core's
+   own .log-toolbar (www/css/style.css) already wraps onto separate rows at
+   narrow widths (flex-wrap: wrap) - filter chips / search / actions each
+   get their own row, as intended - but the chip row itself
+   (.log-level-toggles, core style.css, 3 "btnstyle3 log-filter-btn"
+   chips: Normal/Status/Error) is its own nested flex row with NO
+   flex-wrap of its own, so at 360px the three chips simply overflow
+   sideways instead of wrapping to a second line. Confirmed live (task
+   TB5 DOM walk): .log-level-toggles was the sole element whose bounding
+   box exceeded the 360px viewport, by exactly the census's measured
+   11px. wrap has no effect at any width where the chips already fit
+   (desktop, and most mobile widths), so this is safe unconditionally. */
+.log-level-toggles {
+    flex-wrap: wrap;
+}
+
 .log-level-norm {
     color: var(--dz-body-text);
 }
