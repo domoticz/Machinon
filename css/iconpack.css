@@ -1,6 +1,36 @@
 /* Icons tab (src/js/iconpack.js): icon pack browser grid.
    Sizes from the DESIGN.md type scale (11/12/14/16/22/26). */
 .iconpack-intro { font-size: var(--dz-text-xs); max-width: 640px; }
+/* Blue UI / Color / Fun style picker (role=tablist, button[data-tab] from
+   src/js/iconpack.js; .active moves on click). This nested control sits
+   inside the "Icons" tab, which is itself one entry of Setup's top-level
+   .nav-tabs strip, so it reuses that same flat-underline tab language
+   (css/nav.css .sub-tabs/.nav-tabs) instead of inventing a local pill or
+   segmented-button look: a tab reads as a tab everywhere in the theme.
+   Radius stays 0, matching the underline idiom (no corner to round). */
+.iconpack-tabs { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; border-bottom: 1px solid var(--dz-input-border); }
+.iconpack-tabs button {
+    font-size: var(--dz-text-sm);
+    font-weight: var(--dz-weight-semibold);
+    padding: 6px 2px;
+    margin-bottom: -1px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    color: var(--dz-body-text);
+    cursor: pointer;
+}
+.iconpack-tabs button:hover,
+.iconpack-tabs button.active {
+    border-bottom-color: var(--dz-accent-color);
+    color: var(--dz-accent-color);
+}
+.iconpack-tabs button:focus-visible {
+    outline: none;
+    border-bottom-color: var(--dz-accent-color);
+    box-shadow: var(--dz-btn-focus-ring);
+}
 .iconpack-toolbar { display: flex; align-items: center; gap: 10px; margin: 10px 0 15px; flex-wrap: wrap; }
 .iconpack-toolbar input[type="search"] { flex: 1 1 200px; max-width: 320px; font-size: var(--dz-text-sm); }
 #iconpackCounter { font-size: var(--dz-text-xs); opacity: .75; white-space: nowrap; }

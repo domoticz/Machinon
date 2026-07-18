@@ -491,7 +491,7 @@ The Setup menu is replaced by a tile grid (`settings_page.js`, `.machinon_ul`): 
 |-------|-------|-------|
 | `{rounded.xs}` | 2px | Checkboxes, `.label`, `.badge`, textarea |
 | `{rounded.sm}` | 3px | Slider track, timer mode blocks, log toggle count |
-| `{rounded.interactive}` | 5px | Nav links/tabs, the "you are here" nav-active pair (top navbar tab + Setup dropdown active item), input select borders |
+| `{rounded.interactive}` | 5px | Top navbar links, the "you are here" nav-active pair (top navbar tab + Setup dropdown active item), input select borders. Flat-underline sub-tabs (Setup tab strip, icon-pack Blue UI/Color/Fun tabs) are a separate idiom, not this token: radius 0, no corner to round. |
 | `{rounded.button}` | 10px | Every button and button-styled control (see [Buttons](#buttons)): filled/ghost/toggle-selected/icon-quiet/label-as-button. Deliberately larger than the card radius; see Radius Rationale below |
 | `{rounded.container}` | 6px | Device cards, DataTables, dropdown menus, popups, dialogs, log console, settings panels |
 | `{rounded.circle}` | 50% | Radio buttons, slider handle, user avatars |

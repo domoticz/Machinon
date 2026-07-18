@@ -5,7 +5,8 @@
    action, never bookkept client-side, so every operation is idempotent.
    Pack strings only ever reach the DOM via textContent. */
 
-var ICONPACK = { state: [], busy: false }; /* [{base, name, description, idx|null, outdated}] */
+var ICONPACK = { state: [], busy: false, tab: "blue" };
+/* [{base, name, description, tab, idx|null, outdated}] */
 
 /* One DB-writing operation at a time: uploads and deletes share the guard,
    cleared before the post-action refresh re-renders the buttons. */
@@ -52,7 +53,17 @@ function initIconPack() {
     $("#iconpack").i18n();
     $("#iconpackSearch").on("input", renderIconPackGrid);
     $("#iconpackInstallAll").on("click", installAllPackIcons);
+    $("#iconpackTabs").on("click", "button[data-tab]", function() {
+        setIconPackTab($(this).attr("data-tab"));
+    });
     refreshIconPack();
+}
+
+function setIconPackTab(tab) {
+    ICONPACK.tab = tab;
+    $("#iconpackTabs button").removeClass("active");
+    $('#iconpackTabs button[data-tab="' + tab + '"]').addClass("active");
+    renderIconPackGrid();
 }
 
 function packPreviewUrl(base, state) {
@@ -91,14 +102,15 @@ function refreshIconPack() {
             var inst = installed[icon.base];
             if (!inst) {
                 return Promise.resolve({ base: icon.base, name: icon.name,
-                    description: icon.description, idx: null, outdated: false });
+                    description: icon.description, tab: icon.tab, idx: null, outdated: false });
             }
             return packIconOutdated(icon, inst).then(function(outdated) {
                 return { base: icon.base, name: icon.name,
-                    description: icon.description, idx: inst.idx, outdated: outdated };
+                    description: icon.description, tab: icon.tab, idx: inst.idx, outdated: outdated };
             });
         }));
     }).then(function(state) {
+        state.sort(function(a, b) { return a.name.localeCompare(b.name); });
         ICONPACK.state = state;
         renderIconPackGrid();
     }).catch(function(e) {
@@ -107,11 +119,15 @@ function refreshIconPack() {
     });
 }
 
-/* The icons matching the current search: the set the grid shows AND the set
-   the install-all button acts on (its toolbar placement implies exactly that). */
+function activeTabIcons() {
+    return ICONPACK.state.filter(function(ic) { return ic.tab === ICONPACK.tab; });
+}
+
+/* The icons matching the current tab AND search: the set the grid shows AND
+   the set the install-all button acts on (its toolbar placement implies exactly that). */
 function visiblePackIcons() {
     var q = ($("#iconpackSearch").val() || "").toLowerCase();
-    return ICONPACK.state.filter(function(ic) {
+    return activeTabIcons().filter(function(ic) {
         return !q || (ic.base + " " + ic.name + " " + ic.description).toLowerCase().indexOf(q) !== -1;
     });
 }
@@ -119,13 +135,14 @@ function visiblePackIcons() {
 function renderIconPackGrid() {
     var grid = document.getElementById("iconpackGrid");
     if (!grid) return;
+    var tabIcons = activeTabIcons();
     var shown = visiblePackIcons();
-    var installedCount = ICONPACK.state.filter(function(ic) { return ic.idx !== null; }).length;
+    var installedCount = tabIcons.filter(function(ic) { return ic.idx !== null; }).length;
     document.getElementById("iconpackCounter").textContent =
-        installedCount + " of " + ICONPACK.state.length + " installed";
+        installedCount + " of " + tabIcons.length + " installed";
     var allBtn = document.getElementById("iconpackInstallAll");
     if (allBtn) {
-        allBtn.textContent = shown.length === ICONPACK.state.length
+        allBtn.textContent = shown.length === tabIcons.length
             ? "Install / update all"
             : "Install / update shown (" + shown.length + ")";
     }
@@ -315,7 +332,7 @@ function installAllPackIcons() {
     var todo = pool.filter(function(ic) { return ic.idx === null || ic.outdated; });
     var current = pool.length - todo.length;
     if (!todo.length) {
-        generate_noty("success", pool.length === ICONPACK.state.length
+        generate_noty("success", pool.length === activeTabIcons().length
             ? "All " + pool.length + " pack icons are installed and current"
             : "All " + pool.length + " shown pack icons are installed and current", 3000);
         ICONPACK.busy = false;
