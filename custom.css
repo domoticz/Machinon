@@ -1,6 +1,28 @@
 /**** ./custom.css ***/
 @charset "UTF-8";
 
+/* ONE-LEVEL IMPORT RULE: every @import below must point at a leaf CSS file
+   (a file with no @import of its own), never at an aggregator file that itself
+   imports further files. Reason (measured, task-9 perf audit, section 4): the
+   browser cannot start fetching an @imported file until the file that imports
+   it has itself fully downloaded and been parsed, so each extra level of
+   nesting serializes one full round trip before its children even start. On a
+   Fast 3G mobile profile the theme's imported children did not begin
+   downloading until ~1019 ms, well after custom.css itself was requested at
+   ~200 ms - that gap IS the round trip. A three-level chain
+   (custom.css -> aggregator.css -> leaf.css) would add a second one on top.
+   Keeping every import one level deep here is what keeps that cost to exactly
+   one RTT instead of compounding it. If a future feature file needs splitting
+   further, add the new file directly to this list; do not nest it behind a
+   grouping file.
+
+   This is a SOURCE-only rule. It does not by itself remove the RTT (the
+   browser still fetches custom.css, then its 26 children, which is
+   unavoidable once @import exists at all); scripts/build-dist.sh concatenates
+   the whole chain into one flat file for release artifacts, which is what
+   actually removes the request fan-out for real users. Source stays modular
+   (one @import per leaf file, easy to find/edit); releases ship flat. */
+
 /* Machinon --dz-* token contract (must stay first, before component rules).
    dz-tokens.css: light :root --dz-* token contract. dark.css: dark scheme block.
    Machinon imports NOTHING from core (no legacy.css/base.css): core's #itemtable* layout and
