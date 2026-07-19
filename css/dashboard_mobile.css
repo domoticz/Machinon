@@ -216,3 +216,27 @@ body.dashMobile table.mobileitem .selectorlevels {
 body.dashMobile table.mobileitem .selectorlevels > select {
     padding: 0;
 }
+
+/* Timers form actions: core's #updelclr is a rigid 3-cell table (views/
+   timers.html:35-47) that wraps its buttons with zero gap on phones. Flex
+   with a gap makes wrapping intentional instead of collision-shaped.
+   (mobile-polish task 3; census key squash::Timers::#updelclr) */
+@media (max-width: 979px) {
+    #updelclr, #updelclr tbody, #updelclr tr { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; } /* future --dz-gap token site (spacing project) */
+    #updelclr td { display: contents; }
+}
+
+/* Events file header: core's form.form-inline (app/events/EventViewer.html:2)
+   packs the name input, the Disabled/Enabled state buttons, and .pull-right
+   (EventViewer.html:25-105, itself holding the ace-editor controls AND the
+   Save/Delete button group stacked with plain block flow, zero gap) with no
+   reflow, so on phones the state buttons squash against the wrapped
+   ace-editor row, and the ace-editor row squashes against Save/Delete, both
+   with near-zero gap. Flex with a gap at both levels makes the wrap
+   intentional. Scope is the wrap gap only, not the Events page's horizontal
+   overflow (owned elsewhere).
+   (mobile-polish task 3; census key squash::Events::form.form-inline[1]) */
+@media (max-width: 979px) {
+    .events-editor-file__header form.form-inline { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; } /* future --dz-gap token site (spacing project), matches #updelclr gap above */
+    .events-editor-file__header form.form-inline .pull-right { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; } /* future --dz-gap token site (spacing project), matches #updelclr gap above */
+}
