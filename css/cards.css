@@ -278,13 +278,95 @@ div.bannercontent .row > .item {
     overflow: hidden;
 }
 
-/* Dynamic Dashboard: tighten the tile row gaps so the Machinon card fits the fixed-height GridStack cell
-   (default gs-h=2 = 120px). At the classic 10px gap the card is ~128px and its bottom border /
-   rounded corners get clipped by the cell's overflow:hidden. Placed after the span4 grid rule
-   so it wins by source order (no !important). */
-.dd-widget-body .item.itemBlock table[id^="item"] > tbody > tr {
+/* Dynamic Dashboard: make the Machinon card FIT the fixed-height GridStack cell
+   (default gs-h=2 = 120px) instead of growing to its natural content height and
+   being cropped by the cell's overflow:hidden.
+
+   WHY the card overflowed. Core lays the card out top-aligned in a flex column
+   that does NOT stretch it: core dashboard.css:1195-1205 sets
+   `.dd-dz-inner { display:flex; align-items:flex-start; overflow:hidden }`, so
+   the `.item` takes its own content height and anything past the cell bottom is
+   clipped away (the icon/toggle is still there in layout, just painted-clipped -
+   which is why census check (d) measured img.lcursor +22px and the selector's
+   stacked level buttons +31/64/97px past the widget at a narrow card width,
+   where the device NAME wraps to a second line and pushes the lower rows down).
+
+   THE FIX, all layout (no font shrink):
+   (1) stretch the card to the cell: align the `.dd-dz-inner` flex child to
+       `stretch` so `.item` fills the cell's definite height (the cell height is
+       core's, ddDzDevice.widget.js minH:2 -> 120px; .dd-dz-inner is flex:1 with
+       min-height:0 so it already has that definite height). The two-class
+       compound outranks core's one-class rule without !important.
+   (2) let the card's own row grid compress into that definite height: the
+       status row floor drops from 58px to 0 (minmax(0,1fr)) and every grid cell
+       gets min-height:0/min-width:0, so the rows give up their hard minimums and
+       the 48px icon simply centres inside the compressed status row, its box
+       staying within the 120px cell instead of being pushed below it. At a wide
+       (desktop) card the name is one line, the status row keeps ~64px and the
+       toggle/slider/icon are unaffected - this only bites when space is short.
+   EVERY rule here is scoped to the dz-device widget (.dd-widget--dz-device):
+   core's .dd-dz-inner and .item.itemBlock are SHARED markup, not device-only.
+   dz-scene.html:8 renders the same .dd-dz-inner for scene widgets (those keep
+   core's align-items:flex-start, dashboard.css:1203, until this system is
+   measured against the scene card too), the classic dashboard cards keep their
+   58px floor and natural height, and the dz-favorites widget - which re-renders
+   classic cards in a SCROLLING list (also .item.itemBlock inside a
+   .dd-widget-body) - keeps its natural card height (the unscoped first version
+   squashed each favorites card from 118px to 103px, verified live). grid-gap
+   stays 4px (was: the old rounded corners got clipped at the classic 10px gap). */
+.dd-widget--dz-device .dd-dz-inner {
+    align-items: stretch;
+}
+.dd-widget--dz-device .item.itemBlock,
+.dd-widget--dz-device .item.itemBlock table[id^="item"],
+.dd-widget--dz-device .item.itemBlock table[id^="item"] > tbody {
+    height: 100%;
+}
+.dd-widget--dz-device .item.itemBlock table[id^="item"] > tbody > tr {
+    height: 100%;
+    min-height: 0;
     grid-gap: 4px;
     gap: 4px;
+    grid-template-rows: minmax(0, auto) minmax(0, 1fr) minmax(0, 20px);
+}
+.dd-widget--dz-device .item.itemBlock table[id^="item"] > tbody > tr > td {
+    min-height: 0;
+    min-width: 0;
+}
+
+/* Multi-level selector buttons on the Dynamic Dashboard (the .btn-group of
+   core views/widgets/light_widget.html:75, the ONLY .btn-group in the
+   device-card templates). The theme's content-adaptive flex wrap (the .item
+   .btn-group rule below this section) is deliberately KEPT at every width; a
+   2-column wrapped grid was prototyped and measured, and fails:
+   - Narrow tiles (the case that needed help; 150px tile, status content box
+     66px): the grid's 2-column min-content is 66+45+3 = 114px ("Fan Only" +
+     "Heat" + gap), which cannot fit the 66px box, so the grid tracks force the
+     status cell 40px past its grid area and the level buttons paint OVER the
+     device icon (measured overlap 40x17px) - trading a scroll for a collision.
+     Shrinking buttons below label min-content instead would clip button text.
+   - Vertically it fails h:2 regardless: even at the 24px touch-target floor,
+     3 rows x 24 + 2 x 3 gaps = 78px exceeds the ~66px an h:2 cell can give the
+     status row, and the real 30px buttons need 96px.
+   - Wide tiles: flex already packs 2-3 per row by content (328px tile: 2 rows,
+     64px, fits h:2 with 18px to spare) and a forced 2-col grid REGRESSES that
+     to 3 rows (+15px past the cell).
+   So at h:2 a 5-level selector scrolls inside the status cell's 60px window
+   (overflow-y: auto, the #status rule above; verified operable: scroll + click
+   "Fan Only" sets the level). What the theme CAN give is the resize path: from
+   h:3 up (cell 180px+) the height-gated container query below releases the
+   60px scroll cap so the level stack gets the whole freed status row (a 126px
+   window at h:3, everything visible from h:4) - making the documented "user
+   resizes the widget to reveal it" story real. The query needs container-type:
+   size (height queries) on the widget body; its height is definite (flex:1 of
+   the fixed cell), so size containment cannot collapse it. */
+.dd-widget--dz-device > .dd-widget-body {
+    container-type: size;
+}
+@container (min-height: 150px) {
+    .dd-widget--dz-device .item #status {
+        max-height: none;
+    }
 }
 
 /* name */
@@ -304,6 +386,26 @@ table.mobileitem td.name {
     white-space: normal;
     word-wrap: break-word;
     min-width: 0;
+}
+
+/* Dynamic Dashboard only: clamp the device name to at most two lines so it
+   cannot grow the fixed-height tile past its cell. The theme overrides core's
+   nowrap+ellipsis with white-space:normal above (nice on the flexible classic
+   dashboard), but in a 120px GridStack cell a long name like "Living Room
+   Temperature" wrapped to four lines (82px), which drove the whole card grid to
+   155px and pushed the icon 7px below the cell (census check (d)). Two lines
+   caps the name row at ~46px, which - with the compressed status row set in the
+   Dash2 tile-fit block above - keeps every card within its 120px cell. The full
+   name is still reachable via the hover tooltip (.item #name[data-desc]) and
+   core's title attribute. -webkit-line-clamp is the standard cross-browser
+   (Blink/WebKit/Firefox) multi-line ellipsis mechanism and leaves the grid-area
+   placement intact. Scoped to .dd-widget--dz-device (the fixed-cell tiles) so the
+   scrolling dz-favorites list keeps full, unclamped names. */
+.dd-widget--dz-device .item.itemBlock td#name {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 /* Anchors the description tooltip below. */
