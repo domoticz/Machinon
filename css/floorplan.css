@@ -67,3 +67,78 @@ image#twisty {
     border: 1px solid var(--dz-accent-color) !important;
     background: var(--dz-accent-color) !important;
 }
+
+/* Mobile stage containment (mobile-polish task 2, owner defect 1: swiping to
+   another plan slides the menu off-screen).
+
+   Core lays the floorplans side by side in the DOCUMENT, one
+   full-viewport-wide .imageparent per plan (FloorplanController.js:514-515,
+   sized at :179-180), and switches plans by scrolling the document
+   horizontally (ScrollFloorplans, :81/:85). Below 980px the theme's navbar is
+   position:static in flow by design (css/sidemenu.css .navbar-fixed-top), so
+   that document scroll carries the whole menu out of the viewport. Contain
+   the overflow inside the stage instead: #floorplancontent (the plans'
+   containing block, position:absolute per views/floorplans.html:2) becomes
+   the horizontal scroll box, and src/js/floorplan-stage.js redirects core's
+   plan switching to the stage's own scrollLeft.
+
+   The body class is set by that module ONLY after it has verified and
+   wrapped core's hooks; if core drifts, the class never appears and these
+   rules stay inert, so core behavior is never half-applied (containment
+   without the JS redirect would leave every plan-switch a silent no-op).
+
+   overflow-x hidden, not auto: gestures must keep flowing through core's own
+   swipe handler (FPtouchend, :48-55), exactly as they do today with the
+   document clipped by body overflow (:588); programmatic scrollLeft still
+   works on a hidden overflow box.
+
+   Breakpoint mirrors the sidemenu takeover guard, custom.css:
+   @import css/sidemenu.css (max-width: 979px). At desktop widths the navbar
+   is fixed again, so core's document scrolling loses nothing and stays
+   untouched. */
+@media (max-width: 979px) {
+    /* overflow-y is pinned too: making the stage a scroll container on the x
+       axis flips its computed overflow-y from visible to auto (CSS overflow
+       rule: one non-visible axis converts the other axis's visible to auto),
+       and the stage's inline content is ~20px taller than the height core
+       gives it (FloorplanController.js:174, innerHeight - navbar - 52): the
+       stray svg hidden below opens a 17px first line box above the plans,
+       and the plans' inline baseline leaves ~3px of empty descent under
+       them. That overplus used to paint harmlessly past the stage bottom
+       (overflow visible); as auto it became a 20px vertical scroll that cut
+       off the bottom of the plan. With the stray svg gone the plan spans the
+       stage exactly, and hidden clips only the empty descent, so the whole
+       plan fits the viewport with no vertical scroll (measured at 360x780
+       and 412x915, holds across plan switches and core's resize
+       re-sizing). */
+    body.machinon-fp-stage #floorplancontent {
+        overflow-x: hidden;
+        overflow-y: hidden;
+    }
+
+    /* Core's view template leaves a stray 1x1 inline svg at the top of the
+       stage (views/floorplans.html:6, copied in as a direct child by
+       ShowFloorplans, FloorplanController.js:437-439; a renderer-bootstrap
+       leftover with no id and no references, and Device.checkDefs injects
+       the shared defs into the FIRST PLAN's svg, domoticzdevices.js:911-920,
+       never this one). As inline content it opens the ~17px first line box
+       that pushes every plan down and out of the contained stage. The child
+       combinator only matches this stray svg: the plan svgs sit deeper,
+       inside .imageparent inside #fpwrapper. */
+    body.machinon-fp-stage #floorplancontent > svg {
+        display: none;
+    }
+
+    /* Route-scoped navbar bleed: core bootstrap-responsive.css:810-820 pairs
+       20px body side padding with -20px navbar side margins below 768px, but
+       the floorplan view zeroes the body padding (views/floorplans.html:8-11)
+       while the navbar margins remain, so the navbar spans 20px past the
+       viewport on both sides and keeps the document 20px wider than the
+       screen even with the stage contained. Zero the margins while the route
+       is active so the navbar edges match the route's zero body padding
+       (a no-op at 768-979px, where bootstrap sets no navbar side margins). */
+    body.machinon-fp-stage .navbar-fixed-top {
+        margin-left: 0;
+        margin-right: 0;
+    }
+}
