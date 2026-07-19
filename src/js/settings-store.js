@@ -34,10 +34,15 @@ function loadSettings() {
                     themeName = theme.name;
                     if (isEmptyObject(theme) === false) {
                         cacheThemeSettings();
-                        setTimeout(function() {
-                            location.reload();
-                        }, 3000);
                     }
+                    /* Perf-report F3 (task-9-perf-report.md 2.2): this branch used to
+                       schedule setTimeout(location.reload, 3000) after caching the
+                       defaults, so the Domoticz-stored settings could paint on a second
+                       full boot. That doubled a ~11s mobile load to ~19-20s and opened a
+                       visible race: defaults paint, then the async DB merge + delayed
+                       reload swap the settled state in mid-window (task-2-report.md
+                       "pre-existing settings race"). The defaults paint now stands and
+                       reconcileDomoticzSettingsInPlace() applies the DB delta live. */
                     console.log(themeName + " - local theme settingsfile loaded and saved to localStorage");
                 })
                 .catch(function(error) {
@@ -69,17 +74,29 @@ function loadSettings() {
 
 var unableCreateUserVariable = false;
 
+/* Fetch the theme's Domoticz-stored settings and merge them into the in-memory
+   theme object. Resolves once every present user variable has been read (or on
+   any failure, so the barrier never hangs). Fail closed: a failed fetch leaves
+   the theme.json defaults in place, and the resolved promise carries no error
+   so the caller simply finds no delta to apply. */
 function checkUserVariableThemeSettings() {
-    $.ajax({
-        url: "json.htm?type=command&param=getuservariables",
-        async: true,
-        dataType: "json",
-        success: function(data) {
-            if (data.status == "ERR") {
-                $.get("json.htm?type=command&param=addlogmessage&message=Theme Error - The theme was unable to load your preferences from Domoticz.");
-            }
-            if (data.status == "OK") {
+    return new Promise(function(resolve) {
+        $.ajax({
+            url: "json.htm?type=command&param=getuservariables",
+            async: true,
+            dataType: "json",
+            success: function(data) {
+                if (data.status == "ERR") {
+                    $.get("json.htm?type=command&param=addlogmessage&message=Theme Error - The theme was unable to load your preferences from Domoticz.");
+                    resolve();
+                    return;
+                }
+                if (data.status != "OK") {
+                    resolve();
+                    return;
+                }
                 var didDomoticzHaveSettings = false;
+                var pending = [];
                 var featuresVarName = "theme-" + themeFolder + "-features";
                 var customVarName = "theme-" + themeFolder + "-custom";
                 var colorsVarName = "theme-" + themeFolder + "-colors";
@@ -88,33 +105,39 @@ function checkUserVariableThemeSettings() {
                         console.log(themeName + " - found theme feature settings in Domoticz database (user variable Idx: " + value.idx + ")");
                         didDomoticzHaveSettings = true;
                         theme.userfeaturesvariable = value.idx;
-                        getFeatureThemeSettings(value.idx);
+                        pending.push(getFeatureThemeSettings(value.idx));
                     }
                     if (value.Name == customVarName) {
                         console.log(themeName + " - found theme custom settings in Domoticz database (user variable Idx: " + value.idx + ")");
                         didDomoticzHaveSettings = true;
                         theme.usercustomsvariable = value.idx;
-                        getCustomThemeSettings(value.idx);
+                        pending.push(getCustomThemeSettings(value.idx));
                     }
                     if (value.Name == colorsVarName) {
                         console.log(themeName + " - found theme colors settings in Domoticz database (user variable Idx: " + value.idx + ")");
                         didDomoticzHaveSettings = true;
                         theme.usercolorsvariable = value.idx;
-                        getColorsThemeSettings(value.idx);
+                        pending.push(getColorsThemeSettings(value.idx));
                     }
                 });
                 if (didDomoticzHaveSettings === false) {
+                    /* First-ever visit: persist the current (default) theme so future
+                       visits have a profile. Nothing to reconcile, DB == what painted. */
                     if (unableCreateUserVariable == false) {
                         storeUserVariableThemeSettings("add");
                     } else {
                         storeUserVariableThemeSettings("update");
                     }
+                    resolve();
+                    return;
                 }
+                Promise.all(pending).then(function() { resolve(); });
+            },
+            error: function() {
+                console.log("The theme was unable to check if Domoticz had theme settings. Permission denied? Still on login page? No connection? Stopping..");
+                resolve();
             }
-        },
-        error: function() {
-            console.log("The theme was unable to check if Domoticz had theme settings. Permission denied? Still on login page? No connection? Stopping..");
-        }
+        });
     });
 }
 
@@ -165,30 +188,44 @@ function storeUserVariableThemeSettings(action) {
 
 /* Fetch one theme settings user variable and hand its parsed JSON value to
    applyFn; caching the merged theme to localStorage happens here, so appliers
-   only mutate the in-memory theme object. */
+   only mutate the in-memory theme object. Resolves when the read completes (or
+   fails), so reconcileDomoticzSettingsInPlace can wait for all reads before it
+   diffs and applies the delta. */
 function getThemeUserVar(idx, settingType, applyFn) {
-    $.ajax({
-        url: "json.htm?type=command&param=getuservariable" + "&idx=" + idx,
-        async: true,
-        dataType: "json",
-        success: function(data) {
-            if (data.status == "ERR") {
-                console.log(themeName + " - Although they seem to exist, there was an error loading theme preferences from Domoticz");
-                $.get("json.htm?type=command&param=addlogmessage&message=Theme Error - The theme was unable to load your user variable.");
+    return new Promise(function(resolve) {
+        $.ajax({
+            url: "json.htm?type=command&param=getuservariable" + "&idx=" + idx,
+            async: true,
+            dataType: "json",
+            success: function(data) {
+                if (data.status == "ERR") {
+                    console.log(themeName + " - Although they seem to exist, there was an error loading theme preferences from Domoticz");
+                    $.get("json.htm?type=command&param=addlogmessage&message=Theme Error - The theme was unable to load your user variable.");
+                }
+                if (data.status == "OK") {
+                    /* Malformed stored JSON (hand-edited user variable) must not
+                       throw past resolve(): a dangling promise would leave the
+                       reconcile barrier waiting forever. Catch, warn, and fall
+                       through to resolve so fail-closed stays airtight. */
+                    try {
+                        applyFn(JSON.parse(data.result[0].Value));
+                        cacheThemeSettings();
+                    } catch (e) {
+                        console.warn(themeName + " - stored " + settingType + " settings in user variable #" + idx + " are not valid JSON, keeping current values: " + e.message);
+                    }
+                }
+                resolve();
+            },
+            error: function() {
+                console.log(themeName + " - ERROR reading " + settingType + " settings from Domoticz for theme " + theme.name + " from user variable #" + idx);
+                resolve();
             }
-            if (data.status == "OK") {
-                applyFn(JSON.parse(data.result[0].Value));
-                cacheThemeSettings();
-            }
-        },
-        error: function() {
-            console.log(themeName + " - ERROR reading " + settingType + " settings from Domoticz for theme " + theme.name + " from user variable #" + idx);
-        }
+        });
     });
 }
 
 function getFeatureThemeSettings(idx) {
-    getThemeUserVar(idx, "feature", function(enabledFeatureIds) {
+    return getThemeUserVar(idx, "feature", function(enabledFeatureIds) {
         $.each(theme.features, function(key, feature) {
             feature.enabled = $.inArray(feature.id, enabledFeatureIds) > -1;
         });
@@ -196,7 +233,7 @@ function getFeatureThemeSettings(idx) {
 }
 
 function getCustomThemeSettings(idx) {
-    getThemeUserVar(idx, "custom", function(customThemeSettings) {
+    return getThemeUserVar(idx, "custom", function(customThemeSettings) {
         theme.standby_after = customThemeSettings[0];
         theme.button_name = customThemeSettings[1];
         theme.custom_url = customThemeSettings[2];
@@ -217,9 +254,97 @@ function getCustomThemeSettings(idx) {
 }
 
 function getColorsThemeSettings(idx) {
-    getThemeUserVar(idx, "colors", function(colorScheme) {
+    return getThemeUserVar(idx, "colors", function(colorScheme) {
         theme.color_scheme = colorScheme;
     });
+}
+
+/* Fingerprint of only the settings that drive visible state. The in-place
+   reconcile compares before/after to decide whether the Domoticz-stored
+   settings actually differ from what the defaults/cache already painted, and
+   skips re-applying when they match, so the common case (DB == what is on
+   screen) never re-flashes the page. */
+function themeSettingsFingerprint(t) {
+    if (!t) return "";
+    var feats = {};
+    if (t.features) {
+        for (var k in t.features) {
+            if (Object.prototype.hasOwnProperty.call(t.features, k)) {
+                feats[k] = t.features[k] && t.features[k].enabled === true;
+            }
+        }
+    }
+    return JSON.stringify({
+        features: feats,
+        scheme: t.scheme, scheme_base: t.scheme_base, color_scheme: t.color_scheme,
+        card_min_width: t.card_min_width, card_max_width: t.card_max_width,
+        logo: t.logo, background_img: t.background_img, background_type: t.background_type
+    });
+}
+
+/* Perf-report F3 (task-9-perf-report.md 2.2): the replacement for the
+   first-visit setTimeout(location.reload). init_theme's ready block has already
+   painted the defaults (cold) or the cache (warm); this merges the
+   Domoticz-stored settings and applies ONLY the delta to the live document, so
+   a first visit is a single boot instead of two (~11s saved on Fast-3G mobile)
+   and the defaults->DB swap no longer needs a reload to become visible.
+   Fail closed: checkUserVariableThemeSettings resolves without error on a failed
+   fetch, so the defaults simply stand (no retry, no half-applied state). */
+function reconcileDomoticzSettingsInPlace() {
+    /* Snapshot the state the ready block just applied, before the DB merge
+       mutates the theme object in place. */
+    var before = JSON.parse(JSON.stringify(theme));
+    return checkUserVariableThemeSettings().then(function() {
+        applyThemeDeltaInPlace(before);
+    });
+}
+
+function applyThemeDeltaInPlace(before) {
+    if (!before || isEmptyObject(theme)) return;
+    /* No visible setting changed between what painted and the DB merge: nothing
+       to re-apply, so nothing re-flashes. */
+    if (themeSettingsFingerprint(before) === themeSettingsFingerprint(theme)) return;
+
+    /* Feature files must be diffed precisely: loading a file twice would stack a
+       duplicate <link>/requirejs entry, and an already-executed feature script
+       cannot be un-executed (feature-loader.js header). */
+    var reloadNeeded = false;
+    if (before.features && theme.features) {
+        $.each(theme.features, function(key, feature) {
+            var was = !!(before.features[key] && before.features[key].enabled === true);
+            var now = feature.enabled === true;
+            if (was === now) return;
+            var files = feature.files || [];
+            var hasJs = files.some(function(f) { return f.split(".").pop() === "js"; });
+            if (now && !was) {
+                /* Newly enabled by the stored profile: load its files in place. */
+                if (files.length) { loadThemeFeatureFiles(key); }
+            } else if (hasJs) {
+                /* The ONE residual reload (task-9-perf-report.md F3): a JS-backed
+                   feature the defaults enable but the stored profile disables.
+                   An executed script cannot be unloaded, so only a document boot
+                   truly turns it off. Reached solely on a first visit from a
+                   browser with an empty cache while the account already stored a
+                   profile with such a feature turned off; a warm visit paints
+                   from that same profile, so it does not hit this path. */
+                reloadNeeded = true;
+            } else if (files.length) {
+                /* CSS-only feature newly disabled: unload its stylesheet in place. */
+                unloadThemeFeatureFiles(key);
+            }
+        });
+    }
+    if (reloadNeeded) { location.reload(); return; }
+
+    /* Idempotent visual appliers: each reduces its stored value through
+       setProperty/attr/class, so re-applying an unchanged value is a no-op
+       paint. Flag-driven card details (time_ago, switch scenes, ...) with no
+       files re-render on the next Domoticz device poll. */
+    setColorScheme();
+    applyCardWidths();
+    setLogo();
+    applyBackground();
+    applyNavbarIconsText();
 }
 
 function resetTheme() {

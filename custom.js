@@ -75,7 +75,6 @@ fetch('json.htm?type=command&param=getsettings', {
 });
 
 function init_theme() {
-    checkUserVariableThemeSettings();
     loadSettings().then(function() {
 
     window.onhashchange = locationHashChanged;
@@ -112,17 +111,7 @@ function init_theme() {
             }
         });
 
-        if (theme.background_img && theme.background_img.length) {
-            var bg_url;
-            if (theme.background_img.startsWith("http")) {
-                bg_url = theme.background_img;
-            } else {
-                bg_url = "./images/" + theme.background_img;
-            }
-            $("html").addClass(theme.background_type);
-            $("html").css("background-image", "url(" + bg_url + ")");
-            $("body").attr('style', function(i,s) { return (s || '') + 'background: transparent !important;' });
-        }
+        applyBackground();
         $("#cSetup").click(function() {
             showThemeSettings();
         });
@@ -142,9 +131,7 @@ function init_theme() {
         $(window).scroll(function() {
             50 < $(this).scrollTop() ? $("div.menu-toggle").addClass("scrolled") : $("div.menu-toggle").removeClass("scrolled");
         });
-        if (theme.features.navbar_icons_text.enabled !== false) {
-            $(".navbar").addClass("notext");
-        }
+        applyNavbarIconsText();
 
         // ACE measures glyph width at init; when JetBrains Mono arrives later than the
         // editor (font-display: swap), cursor/selection metrics go stale. Re-measure
@@ -158,6 +145,12 @@ function init_theme() {
                 });
             });
         }
+
+        /* Perf-report F3: the defaults (cold) or cache (warm) are now painted and
+           wired above. Merge the Domoticz-stored settings and apply only the delta
+           in place. Runs last so the DOM the appliers touch (navbar, logo header)
+           exists, and replaces the old first-visit setTimeout(location.reload). */
+        reconcileDomoticzSettingsInPlace();
     });
     }); /* end loadSettings().then() */
 }

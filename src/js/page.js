@@ -88,6 +88,34 @@ function setLogo() {
     img.toggle(!(theme.features.hide_logo && theme.features.hide_logo.enabled));
 }
 
+/* Apply the user's dashboard background image (settings -> theme.background_img).
+   Extracted from custom.js's ready block so the in-place settings reconcile
+   (settings-store.js applyThemeDeltaInPlace, perf-report F3) can re-run it when
+   the Domoticz-stored value differs from what the defaults painted. An empty
+   value sets no background, matching the original inline behavior (the defaults
+   ship none). */
+function applyBackground() {
+    if (theme.background_img && theme.background_img.length) {
+        var bg_url;
+        if (theme.background_img.startsWith("http")) {
+            bg_url = theme.background_img;
+        } else {
+            bg_url = "./images/" + theme.background_img;
+        }
+        $("html").addClass(theme.background_type);
+        $("html").css("background-image", "url(" + bg_url + ")");
+        $("body").attr("style", function(i, s) { return (s || "") + "background: transparent !important;"; });
+    }
+}
+
+/* Toggle the navbar label suppression (navbar_icons_text feature). Extracted for
+   the same in-place reconcile path; toggleClass so a live change either way is
+   honored without a reload. */
+function applyNavbarIconsText() {
+    var feat = theme.features && theme.features.navbar_icons_text;
+    $(".navbar").toggleClass("notext", !!feat && feat.enabled !== false);
+}
+
 // Core positions its device popups (index.html: rgbw_popup, setpoint_popup,
 // thermostat3_popup, rfy_popup) at the raw click coordinates with no viewport clamping
 // (js/domoticz.js, ShowRGBWPopupInt: top = mouseY, left = mouseX + 15), so a popup opened
