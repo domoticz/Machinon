@@ -239,4 +239,125 @@ body.dashMobile table.mobileitem .selectorlevels > select {
 @media (max-width: 979px) {
     .events-editor-file__header form.form-inline { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; } /* future --dz-gap token site (spacing project), matches #updelclr gap above */
     .events-editor-file__header form.form-inline .pull-right { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; } /* future --dz-gap token site (spacing project), matches #updelclr gap above */
+
+    /* core's Disabled/Enabled .btn-group carries an inline margin-left:8px
+       (EventViewer.html:9); with the flex gap above the two spacings stack
+       additively (16px effective) once the button wraps onto its own line.
+       Zero the inline margin so the flex gap is the only spacing, a
+       consistent 8px like every other gap in this file.
+       (task 5 leftover from task 3) */
+    .events-editor-file__header form.form-inline .btn-group {
+        margin-left: 0;
+    }
+}
+
+/* Events split view: core's .events-editor (app/events/Events.css:1-8) lays
+   the file tree (fixed width: 300px) beside the editor pane (flex: 1) in a
+   row. At 360px that alone is wider than the viewport before either pane's
+   own content (ACE gutter, toolbar, Save/Delete) is even considered, so the
+   whole page scrolls sideways and the editor is mostly off-screen (census
+   keys edge::Events::*, task-5 report). Stack tree above editor instead:
+   the tree gets the full width and a bounded, independently-scrolling
+   height (its child nav.events-editor-tree is already flex:1 + overflow-y:
+   scroll, Events.css:119-124, so it just needs a definite parent height to
+   size against); the editor takes the rest of .events-editor's fixed
+   height (Events.css:1-8, position:absolute top/bottom). */
+@media (max-width: 979px) {
+    .events-editor {
+        flex-direction: column;
+    }
+
+    .events-editor__tree {
+        width: 100%;
+        height: min(30vh, 220px); /* scales with short viewports, caps on tall ones so the wrapped file header (see the next rule block, ~164px measured at 360px) and the ACE content still get a workable share of the remaining height */
+        margin-right: 0;
+        margin-bottom: 8px; /* future --dz-gap token site (spacing project), matches #updelclr gap above */
+    }
+
+    /* core's tree/editor splitter toggle (.events-editor__splitter,
+       Events.html:153-158) sits between the tree and editor panes. Its
+       row-layout margin (Events.css:53-59: margin: 36px 8px 0 0, meant to
+       vertically-center a 16px-wide bar against the row's header) becomes
+       a ~60px dead gap once the panes stack into a column: the 36px top
+       margin now pushes the whole tree/editor split down before either
+       pane's content starts. Zero it so the toggle sits flush between the
+       two stacked panes. */
+    .events-editor__splitter {
+        margin: 0;
+    }
+
+    /* Flex column children default to a content-based min-height (min-
+       height: auto), which refuses to shrink the editor pane below its own
+       content (the ACE editor + toolbar); without this the pane simply
+       overflows .events-editor's fixed height instead of respecting it.
+       overflow-x: hidden closes a second, narrower leak on the same
+       element: core's .events-editor__editor (app/events/Events.css:46-51)
+       is a flex column with no overflow of its own, so at ~400px and
+       below its automatic cross-axis min-width (driven by the ACE
+       renderer's internal content width, which is intentionally wider
+       than the viewport for long code lines) bubbles up into a several-
+       px horizontal document scroll even though every individual element
+       is already correctly clipped by .ace_scroller's own overflow:hidden
+       (measured: 402-424px range on a 412px viewport, no single offending
+       element, only visible via document.scrollWidth - see task-5 report). */
+    .events-editor__editor {
+        min-height: 0;
+        overflow-x: hidden;
+    }
+}
+
+/* Events file header height: core hardcodes .events-editor-file__header to a
+   single-line height:30px and positions .events-editor-file__content
+   (the ACE host) at a matching absolute top:46px (app/events/Events.css:
+   256-286), assuming the header form never wraps.
+   The task-3 flex-wrap fix (above) makes the header wrap onto multiple
+   rows on phones, but the fixed height/top pair does not grow with it, so
+   the wrapped Enabled/Disabled and Save/Delete rows visually sit on top of
+   the editor's first lines instead of pushing it down. Let the header
+   flow to its wrapped content height and lay the content pane out after
+   it instead of pinning it with a hardcoded offset. Scoped to the same
+   breakpoint as the wrap fix; desktop keeps core's single-line layout
+   untouched. */
+@media (max-width: 979px) {
+    /* .events-editor-file is itself a flex item of the outer editor column
+       (it also carries .events-editor__file-content, Events.css:108-110,
+       which is what gives it flex:1 there) AND, with the rule below, a flex
+       container in its own right for header+content. Without min-height:0
+       here too, the SAME auto-min-height collapse that .events-editor__
+       editor needed min-height:0 for above happens one level deeper: the wrapped
+       header's real content height (measured ~164px at 360px, 5-6 wrapped
+       button rows) becomes this element's own auto floor, so it grows past
+       what the outer flex-grow allocated it and the content pane below
+       gets squeezed to 0 instead of "small". */
+    .events-editor-file {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .events-editor-file__header {
+        height: auto;
+    }
+
+    /* position: relative, not static: ACE mounts its internal scroller/
+       gutter layers (.ace_scroller etc) as position:absolute children of
+       THIS element and expects it to be their containing block. Switching
+       to static (tried first) un-anchors them from their real parent; they
+       fall back to the next positioned ancestor up the tree
+       (.events-editor-file, Events.css:252-254) and render starting at
+       ITS top instead - i.e. under the header instead of after it, visibly
+       overlapping the wrapped Disabled/Enabled row (measured: .ace_line
+       top landed at the same y as .events-editor-file__header's top).
+       relative keeps it a normal, in-flow flex item (so flex:1 still sizes
+       it against the header's real height) while staying a valid
+       containing block for ACE's own absolute children. top/bottom reset
+       neutralize core's absolute-positioning offsets (top:46px; bottom:0),
+       which would otherwise still nudge a relatively-positioned box. */
+    .events-editor-file__content {
+        position: relative !important; /* beats core's position:absolute !important, app/events/Events.css:281 */
+        top: 0;
+        bottom: auto;
+        flex: 1;
+        min-height: 0; /* same shrink-to-fit need as .events-editor__editor above */
+    }
 }
