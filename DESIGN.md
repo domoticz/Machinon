@@ -876,10 +876,11 @@ part of this project because they blocked a clean "no page overflow" reading on 
   `.bannercontent`, matching Log's own two components exactly - Devices carries no extra border of its
   own, so no "+2px" term), 70px at mobile (`<=979px`; sidemenu.css's zeroed `.bannercontent` plus the
   in-flow navbar leave only 50px above `#main-view` + 20px `container-fluid` bottom padding). Tested at
-  both (per the owner's standing directive); it holds cleanly at mobile too, despite `.page-devices`
-  staying a `flex-direction: row` split (filters | splitter | table) at 360px with no stacking
-  breakpoint of its own - out of this task's scope, but noted as a pre-existing mobile-density
-  question for a future pass.
+  both (per the owner's standing directive); it holds cleanly at mobile too. `.page-devices` itself
+  stacks into a column at the same `<=979px` boundary (mobile-polish task 6, see
+  [Mobile Layout](#mobile-layout)), filters above table with the splitter turned into a horizontal
+  expander bar, so the 70px mobile budget above is shared by a capped filters panel
+  (`max-height: 50vh`) and the table panel rather than a fixed three-column row.
 
   What scrolls: core's `dataTableDefaultSettings` (`app/app.constants.js`) never sets `scrollY`, so
   the Devices DataTable renders no `.dataTables_scrollBody` - its `dom` option
@@ -981,6 +982,197 @@ layered on top:
 - **DataTables pager** (`.fg-button`) - ghost-tier styling; documented under
   [Buttons > Core-Region Takeover](#core-region-takeover), since it's a button family, not a table
   concern, even though the rule lives in `css/tables.css` for cascade-ordering reasons.
+
+## Mobile Layout
+
+The mobile-polish project (2026-07-19, `css/floorplan.css`, `css/dashboard_mobile.css`,
+`css/cards.css`, `css/dynamic-dashboard.css`, `css/tables.css`, `src/js/floorplan-stage.js`)
+closed the theme's mobile layout defects: controls squashing into each other, the navbar
+scrolling out of reach, and content clipped past its container. It landed one boundary
+(979px), one form pattern (wrap with a gap), a set of viewport-fit pages, four Dash2 density
+rules, and a live contract that keeps all of it from regressing.
+
+### The 979px Boundary
+
+Below 979px, `custom.css`'s one media-conditioned `@import` (`@import url("css/sidemenu.css")
+(max-width: 979px)`) loads `css/sidemenu.css`, which forces the navbar out of
+`position: fixed` into normal document flow (`.navbar-fixed-top { position: static
+!important }`) so its `.navbar-inner` can slide out as the mobile side menu. That single
+change reframes every page below the boundary: the navbar is no longer chrome floating above
+the content, it is 60px of in-flow content (40px `.navbar-inner` min-height + 20px
+margin-bottom) sitting above whatever the route renders. Above 979px a page can let content
+scroll under the fixed navbar or spill past the viewport bottom with no consequence to menu
+access; below it, a page that overflows pushes the whole app-shell (and the menu-access
+hamburger with it) along with it, so pages need to genuinely fit rather than pin their own
+chrome over a scrolling document.
+
+Core's own `#holder { min-height: 100% }` (`style.css`) has no awareness that the navbar just
+claimed 60px of that 100%, so `css/sidemenu.css` compensates with `#holder { min-height:
+calc(100% - 60px) }` - the fix that clears the identical 60px overflow on every short mobile
+page at once (Users, Mobile, Cam; see [Viewport Fit](#viewport-fit) above). Every mobile-polish
+media query in this project keys off the same pair of numbers, `@media (max-width: 979px)`
+paired with `@media (min-width: 980px)` for the matching desktop-only rule, so a page's mobile
+and desktop treatment never straddle a gap or an overlap at the boundary.
+
+### Viewport-Fit Pages
+
+Three pages needed their own fit treatment; two are a vertical `calc(100vh - Npx)` chrome
+budget (the `#/Log` technique, see [Viewport Fit](#viewport-fit) under Tables), one is a
+horizontal containment problem with no vertical calc at all:
+
+| Page | Desktop | Mobile | Derivation comment |
+|------|---------|--------|---------------------|
+| `#/Log` | `calc(100vh - 145px)`, `>=980px` | No page-specific override: `sidemenu.css` zeroes the same padding this 145px accounts for below 979px, so core's own `calc(100vh - 110px)` applies unmodified there, and the app-shell `#holder` fix above is what closes its mobile gap | `css/logpage.css`, above `.log-console-container`'s `@media (min-width: 980px)` block |
+| `#/Devices` | `calc(100vh - 143px)`, `>=980px` | `calc(100vh - 70px)`, `<=979px` (its own explicit mobile budget, not the app-shell fallback) | `css/tables.css`, above `.page-devices-wrapper`'s two `@media` blocks |
+| `#/Floorplans` | Core's own layout; navbar stays fixed, nothing to contain | Stage containment, gated on `body.machinon-fp-stage`, `<=979px` | `css/floorplan.css` (the `@media (max-width: 979px)` block) + `src/js/floorplan-stage.js` (the module header comment) |
+
+**Floorplans: stage containment.** Unlike Log and Devices, Floorplans' mobile problem is
+horizontal, not vertical: core lays every floor plan side by side in the DOCUMENT (one
+full-viewport-wide `.imageparent` per plan, `FloorplanController.js`) and switches between
+plans by scrolling the document horizontally (`ScrollFloorplans`, `window.scrollTo`). Below
+979px, with the navbar in flow (see the boundary above), that document-level scroll drags the
+whole navbar off-screen the moment a user swipes to another plan, the menu becomes unreachable
+mid-navigation (owner defect 1). `css/floorplan.css` turns `#floorplancontent` itself into the
+horizontal scroll box (`overflow-x: hidden`) under the `body.machinon-fp-stage` gate, and
+`src/js/floorplan-stage.js` redirects every one of core's plan-switch entry points (swipe, nav
+arrows, keyboard, bullet clicks, resize realign) to the stage's own `scrollLeft` instead of the
+document's; `window.scrollTo` cannot be retargeted from CSS alone, and clipping the overflow
+without the JS redirect would leave every plan switch a silent no-op.
+
+The gate is fail-closed in both directions: the CSS containment only activates once the JS
+module has added the `machinon-fp-stage` class, which it does only after verifying it could
+wrap core's `ScrollFloorplans` hook and confirming the stage DOM (`#floorplancontent` with
+`.imageparent` children) exists; if core's markup or wiring ever drifts, the class never
+appears, the containment CSS stays inert, and the page falls back to core's stock (broken on
+mobile) behavior rather than a half-applied state. The wrapper itself also fails closed: it only
+redirects when the containment is actually live (checked by computed `overflow-x` at call time,
+never by duplicating the 979px number), so on desktop it no-ops and core scrolls the document
+exactly as before. A stray 1x1 `<svg>` core leaves at the top of the stage
+(`views/floorplans.html`) is hidden in the same media block, since it opened a spurious first line box
+that pushed the contained plan out of the viewport.
+
+### The Wrap-With-Gap Form Pattern
+
+Several of core's forms render as rigid multi-cell tables or fixed-width flex rows with zero
+inter-control gap: fine at desktop width, but the row has nowhere to go at 360px, so buttons
+collide or wrap with a sub-2px seam between them (a "squash", the census's own term - see the
+Mobile Layout Contract below). The fix is the same recipe everywhere it appears: `display: flex;
+flex-wrap: wrap; gap: 8px` on the row, plus `display: contents` on whatever rigid wrapper core
+puts between the row and its buttons (a `<td>` in a table, an `ng-repeat`'s `<span>`), so that
+wrapper stops taking part in layout and its children become direct flex items sharing the gap.
+
+The exemplar is `#updelclr` (the Timers Update/Delete/Clear row, `css/dashboard_mobile.css`,
+census key `squash::Timers::#updelclr`):
+
+```css
+@media (max-width: 979px) {
+    #updelclr, #updelclr tbody, #updelclr tr {
+        display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    }
+    #updelclr td { display: contents; }
+}
+```
+
+The same flex-wrap-plus-gap-plus-`display: contents` recipe is reused, unchanged in shape, at
+three more collision sites: the Events file-header form and its `.pull-right` button group
+(`css/dashboard_mobile.css`), and the HVAC/Scene selector row (`td#status`, using
+`:has(> span > .btn-mini)` to target only the nested selector-button host so no other row type
+is touched, with the ng-repeat's `<span>` wrapper flattened via `display: contents` the same way
+`#updelclr`'s `<td>` is). Five further sites in the same project reuse the plain `gap: 8px` or
+`margin-bottom: 8px` half of the pattern, without a rigid wrapper to flatten, because their
+layout is a simple stack rather than a collision: the Events file-tree's bottom margin, the
+Devices filters/splitter stacking margins (`css/tables.css`), the Quick Stats compact list's
+item gap (`css/dynamic-dashboard.css`), and the blinds slider's icon-clearance offset
+(`css/cards.css`). Every one of the nine sites lands on the existing `{spacing.xs}` cluster value
+(8px), not a new number, and every one is commented `future --dz-gap token site (spacing
+project)`: they are the first candidates to move onto a `--dz-gap` custom property once the
+spacing-token migration in [Spacing](#spacing) lands.
+
+### Dash2 Card Density
+
+Four density rules fit the Machinon device card, and its widgets, into the Dynamic Dashboard's
+fixed-height GridStack cell:
+
+1. **Stretch to the cell.** `.dd-widget--dz-device .dd-dz-inner { align-items: stretch }`, plus
+   `height: 100%` / `min-height: 0` down the card's own table/row/cell chain, lets the card's
+   grid rows compress into the cell's definite height instead of rendering at natural height and
+   being clipped by the cell's `overflow: hidden`. Scoped to `.dd-widget--dz-device` only: scene
+   widgets and the `dz-favorites` widget's scrolling re-render of the same card markup both keep
+   their natural, uncompressed height.
+2. **The h:2 floor.** Core's GridStack config (`ddDzDevice.widget.js`) sets `minH: 2` (120px at
+   `rowHeight: 60`), the size the compressed card must fit into at minimum. A two-line name clamp
+   (`-webkit-line-clamp: 2` on `.dd-widget--dz-device .item.itemBlock td#name`) keeps a long
+   device name from growing the card past that floor; the full name stays reachable via the
+   existing hover tooltip and `title` attribute.
+3. **The h:3+ scroll-cap release.** A multi-level selector (HVAC mode, Scene) scrolls inside its
+   own `#status` cell at h:2 (`overflow-y: auto`, a ~60px window); a `container-type: size` query
+   on the widget body releases that cap (`max-height: none`) from `@container (min-height:
+   150px)` up, i.e. h:3 and taller, so resizing the widget is what reveals the rest of the
+   selector. This is the accepted `HVAC 5-level selector cutoff at h:2` baseline exception (see
+   the Contract below): every alternative layout was measured and rejected at h:2 (a 1-column
+   button stack needs 150px against 120px available; a 2-column grid's min-content forces a
+   40x17px collision with the device icon; the real 30px buttons need 96px of vertical room
+   against a ~66px status row).
+4. **Width-aware slider placement.** The blinds slider's multi-icon track defaults to a bottom
+   strip (the safe fallback compact tiles use, and what an unsupported browser degrades to), and
+   a `@container (min-width: 200px)` / `(min-width: 220px)` pair on the same size-contained
+   widget body moves it beside the icons once the tile is wide enough to give the track a usable
+   width there (200px for the double-icon variant, 220px for triple).
+
+The same project also gave the Quick Stats widget a compact single-column row list
+(`@container (max-width: 340px)` on its own `inline-size`-contained body, replacing core's
+multi-column icon/label/value grid once a tile is too narrow to keep all entries inside the
+cell) and squared away a stray Bootstrap 2 caret-margin rule that was dropping the Dash2
+edit-toolbar and view-mode-topbar dropdown carets ~4.5px below their labels
+(`css/dynamic-dashboard.css`, `.dd-topbar .caret, .dd-toolbar .caret`).
+
+### The Mobile Layout Contract (enforcement)
+
+**`dz-mobile-layout-census.js`** (Playwright, run against the Docker test instance, foreground
+only, same as the button and table censuses) censuses 16 routes at a single Galaxy S24 (360x780)
+emulation profile and runs five checks per route:
+
+1. **Control overlap + squash.** Any two visible interactive elements whose bounding boxes
+   intersect more than 4px in both axes fail as overlap (ancestor/descendant pairs, an icon
+   inside its own button, are excluded); column-aligned controls in the same cluster with less
+   than 2px of vertical gap fail as squash, the `#updelclr` class of bug the wrap-with-gap
+   pattern above fixes.
+2. **Chrome occlusion + menu-scroll-away.** A fixed/absolute element covering more than 30% of
+   the navbar's box fails as occlusion. A route fails as menu-scroll-away when its navbar is not
+   fixed/sticky (the mobile in-flow navbar, see the 979px boundary above) AND the page overflows
+   horizontally AND scrolling to the horizontal extreme actually removes the navbar from the
+   viewport - the class of bug Floorplans had before its fix, kept in the contract to catch a
+   regression.
+3. **Viewport.** Document `scrollWidth` over 360px (+4px tolerance) fails; any visible element
+   whose clip-aware edge draws outside the `[-10, 370]` band fails as drawn-outside (the
+   off-canvas side menu is excluded, since it is clipped, not stray).
+4. **Dash2 card cutoff** (the forced-desktop Dynamic Dashboard route only). Any icon, toggle, or
+   button exceeding its `.dd-widget`'s clip rect by more than 2px fails, as does text overflowing
+   without an ellipsis - the Quick Stats overflow class the density rules above address.
+5. **Touch targets.** Interactive elements under 24x24 CSS px are recorded, report-only, never a
+   FAIL. The `--json` output persists this dataset alongside every measured inter-control gap
+   (clustered and unclustered) as seed data for a future spacing-scale project.
+
+Every violation is checked against a committed baseline
+(`scripts/baselines/mobile-layout-contract.json`, docker-test), one entry per censused violation, snapshotting the
+live census whether it passes or fails. A plain run PASSes (exit 0) unless a violation's key has
+no matching baseline entry. Two entries currently carry `policy: "exception"` with a mandatory
+`reason` string:
+
+- `cutoff::Dashboard-dash2::dz-device::button.btn.btn-small` - the HVAC 5-level selector cutoff
+  at h:2 (see Dash2 Card Density above).
+- `overlap::Setup::a.btn-danger.sub-tabs-apply|input#enableautobackup` - the Setup mobile CTA bar
+  (`css/settings.css`, a `position: fixed` Apply/Save bar) transiently overlapping in-flow
+  settings content; not a rigid-table squash, so flex/gap cannot resolve it, and the fixed-CTA
+  positioning strategy itself is a parked owner decision tied to the menus-redesign track.
+
+**Rebaseline workflow.** `--rebaseline` regenerates the baseline from a fresh census but
+preserves every existing `policy: "exception"` entry by key, the same pattern
+`dz-table-census.js` and `dz-button-contract.js` use, so a routine rebaseline can never silently re-arm a
+previously accepted exception into a failing gate. Like those two contracts, rebaselining is a
+deliberate act taken only after a reviewed layout change, never run reflexively to turn a red
+gate green: run it, inspect the printed adds/removes summary against the previous file, and
+commit the updated baseline on its own, separate from the change that caused it.
 
 ## Components
 
@@ -1194,23 +1386,31 @@ Toggled via `theme.json` features object. Each feature has an `enabled` boolean 
 
 | Name | Width | Key changes |
 |------|-------|-------------|
-| Mobile | < 720px | Single column cards. Hamburger menu. Search expands full-width on focus. Dialog tables fixed-layout. |
+| Mobile | < 720px | Single column cards. |
 | Tablet | 720 - 1059px | 2-column card grid. |
-| Desktop | 1060 - 1499px | 3-column card grid. Navbar fully visible. |
+| Desktop | 1060 - 1499px | 3-column card grid. |
 | Wide | 1500 - 1899px | 4-column card grid. Dimmer slider narrows to 55%. |
 | Ultra-wide | 1900px+ | 5-column card grid. |
+
+These widths are the card grid's column-count ladder only: [Responsive Grid](#responsive-grid)
+above explains that the grid is actually container-width-driven (`auto-fill`), and this table
+reproduces the former viewport ladder at common widths for reference, not a live breakpoint.
+They are not the theme's app-chrome breakpoints: the navbar/hamburger switch and every
+mobile-polish layout rule key off 979px, and dialogs/search key off 767px - see
+[Mobile Layout](#mobile-layout) and Mobile Adaptations below.
 
 ### Mobile Adaptations
 
 - Hamburger menu replaces horizontal navbar (max-width: 979px)
-- Search input collapses to icon, expands on focus with blue background pill
+- Search input collapses to icon, expands on focus with blue background pill (max-width: 767px)
 - Message toast repositions to left edge
 - Settings buttons become fixed bottom bar
-- Dialog content tables switch to `table-layout: fixed` with word-wrap
+- Dialog content tables switch to `table-layout: fixed` with word-wrap (max-width: 767px)
 - Edit-form tables (`.table-details`, sub-device picker) stack label above field, inputs full-width (releases core's inline 356px/250px widths and the theme's 250px input cap; < 768px)
 - Page-title rows: title owns the flex row (button column content-sized, core split it 50/50); h1 steps `{typography.display}` 26px -> `{typography.md}` 16px
 - Settings grid tiles shrink to `100px` with hidden labels
 - Compact card button groups become vertical scroll-snap columns
+- Devices, Events, and Timers/HVAC form rows wrap with a deliberate gap instead of squashing; Devices and Floorplans additionally stack/contain their layout so the page fits the viewport - see [Mobile Layout](#mobile-layout) for the full breakpoint story, the viewport-fit pages, and the wrap-with-gap pattern
 
 ## Source Layout
 
@@ -1242,6 +1442,20 @@ every static stylesheet.
 Because `@import` must precede all inline rules, an extracted file loads *before* the rest of
 `custom.css`. Only features whose selectors appear nowhere else may be extracted, or the extracted
 rules would lose to the rules they now jump over.
+
+**Import depth is one level, by design.** Every `@import` in `custom.css` must point at a leaf
+file with no `@import` of its own; a file may never import an aggregator that itself imports
+further files. The browser cannot start fetching an `@import`ed file until the file that imports
+it has fully downloaded and parsed, so each extra nesting level serializes one more full network
+round trip before its children even begin downloading (measured on Fast 3G: the theme's imported
+children did not start until ~1019ms, well after `custom.css` itself was requested at ~200ms -
+that gap is the round trip; a three-level chain would add a second one on top). This is a
+source-only invariant, documented in a comment at the top of `custom.css`: it does not by itself
+remove the round trip (the browser still fetches `custom.css`, then its 26 children), it only
+stops the cost from compounding. `scripts/build-dist.sh` is what actually removes the request
+fan-out for real users: it recursively inlines the whole `@import` chain, depth-first, into
+`dist/custom.css` for release artifacts (`dist/` is gitignored, not committed) so a release ships
+one flat file while the source stays modular, one `@import` per leaf, easy to find and edit.
 
 ## Gaps
 
