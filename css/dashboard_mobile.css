@@ -161,26 +161,53 @@ body.dashMobile table.mobileitem .btn-group .btn {
     border-radius: 5px !important;
 }
 
+/* Mobile-row button chip (.btn-mini: On/Off, Contact, Siren, selector levels;
+   core views/dashboard_mobile.html renders every row control with this class).
+   Aligned to the DESIGN.md xs button tier (owner fix wave 2026-07-19): padding
+   and font come from the tier's tokens (--dz-btn-pad-xs, --dz-text-micro, the
+   tier DESIGN.md declares explicit on .btn-mini) instead of the raw 4px 10px /
+   xs-size pair this rule carried; height is unchanged (the forced
+   --dz-btn-line-height keeps the chip at 30px, so the touch target is
+   untouched). The old border-radius: 5px was dead weight: buttons.css's
+   .btn-mini radius token (var(--dz-btn-radius)) loads later and always won the
+   plain-declaration tie, so the computed radius was already the token; removed
+   rather than restated. */
 body.dashMobile table.mobileitem .btn-mini {
     margin-left: 2px;
     background: var(--dz-widget-bg) !important;
     background-image: none !important;
     border: 1px solid var(--dz-accent-color);
-    border-radius: 5px;
     color: var(--dz-body-text) !important;
-    padding: 4px 10px !important;
-    font-size: var(--dz-text-xs);
+    padding: var(--dz-btn-pad-xs) !important;
+    font-size: var(--dz-text-micro);
     min-width: 40px;
     text-align: center;
     box-sizing: border-box;
 }
 
+/* Padding restatement dropped (cleanup): the base rule above already pins the
+   same tier padding with !important on every .btn-mini state. */
 body.dashMobile table.mobileitem .btn-mini.btn-info,
 body.dashMobile table.mobileitem .btn-mini.active,
 body.dashMobile table.mobileitem .btn-mini:active {
     background: var(--dz-accent-color) !important;
     color: var(--dz-accent-text) !important;
-    padding: 4px 10px !important;
+}
+
+/* Selected selector level. Core marks the active level with .btn-selected
+   (views/dashboard_mobile.html:208, ng-class btn-selected/btn-default), NOT
+   .active - and the theme's own token rule for it (buttons.css .btn-selected,
+   --dz-btn-toggle-selected-*) lost to this file's higher-specificity white
+   .btn-mini background above (both !important, (0,4,0) beats (0,1,0)
+   regardless of load order), so the active level rendered white-on-white with
+   only the pressed inset shadow to distinguish it (measured live). Restate the
+   selected tokens at the same specificity so the active level wears the same
+   selected fill as every other toggle in the theme. (border-color is NOT
+   restated: buttons.css's .btn-selected rule already sets the same token with
+   !important, which this plain declaration could never outrank.) */
+body.dashMobile table.mobileitem .btn-mini.btn-selected {
+    background: var(--dz-btn-toggle-selected-bg) !important;
+    color: var(--dz-btn-toggle-selected-text) !important;
 }
 
 body.dashMobile table.mobileitem .dimslider {
@@ -215,6 +242,34 @@ body.dashMobile table.mobileitem .selectorlevels {
 
 body.dashMobile table.mobileitem .selectorlevels > select {
     padding: 0;
+}
+
+/* Favorited SelectorStyle-0 selector rows (HVAC Mode / Scene Selector class):
+   core renders the level buttons as span[ng-repeat] > button.btn-mini inside a
+   plain block span in td#status (views/dashboard_mobile.html:204-213), which
+   wraps the five chips at 360px with exactly 0px vertical gap (the squash
+   class the Timers #updelclr fix below covers for forms; census key
+   squash::Dashboard-classic::#status, task-7 addendum incident writeup).
+   Same treatment: the ng-if host span becomes a wrapping flex row and the
+   ng-repeat wrapper spans become display:contents so each chip is a flex item
+   spaced by the gap (the #updelclr td pattern below). :has(> span > .btn-mini)
+   matches ONLY the selector host: every other switch type in that template
+   renders its buttons as direct children of the ng-if span (span > button),
+   never nested span > span > button. justify-content keeps the td#status
+   rule's flex-end alignment; the chips' own 2px margin is zeroed inside the
+   row so the gap is the single spacing source. */
+body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px; /* future --dz-gap token site (spacing project), matches #updelclr gap below */
+}
+body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) > span {
+    display: contents;
+}
+body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) .btn-mini {
+    margin: 0;
 }
 
 /* Timers form actions: core's #updelclr is a rigid 3-cell table (views/
