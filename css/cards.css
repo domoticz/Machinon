@@ -369,6 +369,68 @@ div.bannercontent .row > .item {
     }
 }
 
+/* Blinds slider on the Dynamic Dashboard (owner defect + wide-card refinement,
+   fix wave 2026-07-19): the multi-icon slider variants collided with the blind
+   icons. The theme's blinds rule further down this file (".span4 td#img2 ~ ...
+   .dimslider" { left: 14px }) anchors the track at the card's left edge and
+   relies on core's inline margin-left (94-132px per variant) to clear the
+   fixed-width icons - but core's Dynamic Dashboard ZEROES exactly those
+   margins (core css/dashboard.css:1156-1163, ".dd-widget--dz-device
+   .dimslidersmalldouble { margin-left: 0 !important }"), so in a Dash2 tile
+   the track started at x=14 and ran straight through the icons (measured:
+   icons x 15-101 double / 15-119 tripple, track y 65-73 inside the icons'
+   y 52-92 band, at BOTH a 150px and a 328px tile).
+
+   Placement is WIDTH-AWARE (owner refinement), via the same container the
+   selector cap-release above already queries (container-type: size on the
+   dz-device widget body):
+   - COMPACT tiles (default, no query, so an unsupported browser degrades to
+     this safe placement): no horizontal room exists past two 40px icons on a
+     150px tile, so pin the track to the card's free bottom strip (the 20px
+     third grid row: lastupdate is display:none here per dynamic-dashboard.css
+     and no favorite star renders on Dash2 tiles, both verified live). The
+     slider is absolutely positioned against the widget body (core
+     dashboard.css:1153 position: relative), so bottom pins to the tile edge:
+     the 5px track sits in the strip at y 105-110 in a 120px tile, 13px clear
+     of the icons, handle (15px, top:-5) within the tile.
+   - WIDE tiles: the owner wants the track BESIDE the icons, matching how the
+     wide dimmer card reads (its track sits in the icon band, anchored by the
+     base dimmer rule's right:20px + width:calc(100% - 100px), which resolves
+     to a fixed 80px left edge clear of its single icon). Same recipe here:
+     bottom:auto returns the track to its natural in-band y (65-73, mid-icon,
+     matching the dimmer's 72), and left restates the icon clearance core's
+     zeroed margin no longer provides: measured icon end (101 double / 119
+     tripple) + the handle's 12px overhang at 0% (per the classic blinds
+     rule's derivation below) + an 8px gap (a future --dz-gap token site,
+     spacing project) = 121px / 139px. left needs !important because the
+     classic blinds rule this overrides carries td#img2 in its selector, an id
+     (1,3,1) no class-only compound can outrank; same load-bearing pattern
+     that rule itself documents against the JS-set inline width. The width
+     thresholds are where the remaining track (tile - left - right:20)
+     reaches ~60px, above the usable-track floor the dimmer itself ships at a
+     150px tile (50px track): 200px for double, 220px for tripple; below them
+     the bottom strip stays. On the tripple card the stop glyph's line box
+     (transform-grown per the 19b46ae note, visible circle ~y 55-90) extends
+     to y 108 and nominally meets the compact strip's track box by 3px; the
+     visible glyph stays 15px clear (verified on the tile screenshot). */
+.dd-widget--dz-device .item .dimslidersmalldouble,
+.dd-widget--dz-device .item .dimslidersmalltripple {
+    top: auto;
+    bottom: 10px;
+}
+@container (min-width: 200px) {
+    .dd-widget--dz-device .item .dimslidersmalldouble {
+        bottom: auto;
+        left: 121px !important;
+    }
+}
+@container (min-width: 220px) {
+    .dd-widget--dz-device .item .dimslidersmalltripple {
+        bottom: auto;
+        left: 139px !important;
+    }
+}
+
 /* name */
 .item #name,
 div.item.statusNormal td#name,
