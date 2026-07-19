@@ -129,6 +129,102 @@
     flex: 1;
     min-height: 0;
 }
+
+/* #/Devices stacking breakpoint (<=979px, Task 6 mobile-polish, owner defect 5).
+   Core's own app/devices/Devices.css:10-12 sets `.page-devices { display: flex; }`
+   with NO flex-direction and no media query of its own (grepped Devices.css and
+   Devices.html: nothing responsive), so it stays a ROW - filters | splitter |
+   table side by side - at every width. That row's fixed 200px filters column
+   (Devices.css:15, "width: 200px; min-width: 150px") plus the 28px splitter
+   (buttons.css:863, --dz-btn-icon-box) leaves so little width for the table on a
+   360-412px phone that the DataTable's own overflow-x:auto (this file, line ~29)
+   quietly absorbs the squeeze INSIDE the table's cell instead of the page
+   overflowing - confirmed live (task6-before-360x780-expanded.png): scrollWidth
+   stays exactly at the viewport width (no page-level scrollbar, so the census's
+   overflow check passes), but the table itself renders unusable at ~130px wide -
+   the pager wraps ("revious" instead of "Previous"), most columns are clipped.
+   Stack the three children in a column instead, filters above table, matching
+   core's own DOM order (Devices.html:15-29: filters, then splitter, then
+   devices-table) so no markup/JS change is needed for the reflow.
+
+   Splitter decision: core's isListExpanded starts false (Devices.js:658) and the
+   splitter <button> is the ONLY control that flips it (Devices.html:22-27,
+   ng-click="$ctrl.isListExpanded = !$ctrl.isListExpanded"); .filters itself
+   carries ng-show="$ctrl.isListExpanded" (Devices.html:18), so it is invisible
+   until that button is clicked - on every viewport, not just mobile. Hiding the
+   splitter in stacked mode would strand phone users with no way to ever reveal
+   filters, so it keeps its job as core's collapse control; only its geometry
+   changes. Desktop's row layout stretches the button's fixed 28px width into a
+   thin vertical strip spanning the row's full height (flex row's default
+   align-items:stretch acting on the cross axis); in a column stack that same
+   fixed-width button would render as a small square marooned at the left edge
+   instead of a control that reads as "spans the stack." Turned into a squat
+   horizontal bar instead (width:100%, small fixed height) - the same button,
+   quite literally rotated 90 degrees to fit the new axis, which is what "rotated
+   to a horizontal expander" means here. The chevron glyph itself is a plain CSS
+   transform, not a template change (core's ng-class only ever picks between
+   icon-chevron-left/-right, Devices.html:26, both 14x14 sprite icons from
+   bootstrap.css:1848-1856, not a font glyph, so rotating the <i> box rotates the
+   sprite cleanly): rotating both 90deg clockwise turns the closed state's
+   right-pointing chevron into a down-pointing one ("tap to expand downward") and
+   the open state's left-pointing chevron into an up-pointing one ("tap to
+   collapse upward"), which matches the vertical stack's actual expand/collapse
+   direction instead of the horizontal metaphor core drew it for.
+
+   Filters width/margin: core's 200px width and 8px right-margin (Devices.css:15,
+   17) exist to open a horizontal gap to the table in the row layout; in the
+   stacked column they are replaced with a full-width panel and a bottom gap
+   instead. 8px matches the established vertical rhythm already used in this
+   exact area (Devices.css:7's `.top-panel { margin-bottom: 8px; }` sibling, and
+   core's own splitter right-margin of 8px overridden below) - not a new spacing
+   value. `.page-devices > .filters` already carries `min-height: 0;
+   overflow-y: auto;` unconditionally (this file, few lines above), so when
+   filters is expanded it still caps itself to whatever space is left in the
+   fixed-height column (the 70px-chrome viewport-fit budget above) and scrolls
+   its own content internally instead of pushing the table off-screen or growing
+   the page past that budget.
+
+   Two more measured fixes were needed once filters actually had real content to
+   fight the table for: (1) with no bound on filters' own size, its 15 filter
+   groups (1064px of content at 360px wide, measured live) claimed the ENTIRE
+   available column before flex ever reached the table, leaving devices-table at
+   0x0 - reachable in principle (collapse filters again) but a dead end while
+   filters is open, not "usable" for either panel at once. `max-height: 50vh`
+   below caps filters to roughly half the phone screen so table + pager keep a
+   real, live area under it. (2) that same size fight also flex-shrank the
+   splitter bar itself from its declared 28px down to 16px (measured), because a
+   flex item's `height` sets its flex-basis, not a floor, and shrink was still
+   at its default (1); `flex-shrink: 0` pins the splitter to its accessible
+   28px hit-box (buttons.css:859's >=24px floor) regardless of how much its
+   siblings want.
+
+   min-width: 0 on .filters is a defensive reset, not part of the squeeze fix:
+   in column direction width is the CROSS axis (stretched to the container), so
+   the min-width:auto flex-refuses-to-shrink mechanism documented earlier in
+   this file (the .devices-table min-width:0 rule) does not apply here. What it
+   does do is neutralize core's own `min-width: 150px` floor (Devices.css:15),
+   which would force the panel to overflow any future sub-150px container
+   instead of letting width:100% track it. */
+@media (max-width: 979px) {
+    .page-devices {
+        flex-direction: column;
+    }
+    .page-devices > .filters {
+        width: 100%;
+        min-width: 0;
+        max-height: 50vh;
+        margin: 0 0 8px 0; /* future --dz-gap token site (spacing project) */
+    }
+    .page-devices > .splitter {
+        width: 100%;
+        height: var(--dz-btn-icon-box);
+        flex-shrink: 0;
+        margin: 0 0 8px 0; /* future --dz-gap token site (spacing project) */
+    }
+    .page-devices > .splitter i {
+        transform: rotate(90deg);
+    }
+}
 .page-devices > .filters {
     min-height: 0;
     overflow-y: auto;
