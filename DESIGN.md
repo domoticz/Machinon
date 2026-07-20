@@ -1129,8 +1129,9 @@ edit-toolbar and view-mode-topbar dropdown carets ~4.5px below their labels
 ### The Mobile Layout Contract (enforcement)
 
 **`dz-mobile-layout-census.js`** (Playwright, run against the Docker test instance, foreground
-only, same as the button and table censuses) censuses 16 routes at a single Galaxy S24 (360x780)
-emulation profile and runs five checks per route:
+only, same as the button and table censuses) censuses 16 routes (17 surfaces, the Setup route's
+Theme-tab sub-census counting as its own censused surface) at a single Galaxy S24 (360x780)
+emulation profile and runs five geometry checks per route, plus a sixth fail-closed guard class:
 
 1. **Control overlap + squash.** Any two visible interactive elements whose bounding boxes
    intersect more than 4px in both axes fail as overlap (ancestor/descendant pairs, an icon
@@ -1152,12 +1153,24 @@ emulation profile and runs five checks per route:
 5. **Touch targets.** Interactive elements under 24x24 CSS px are recorded, report-only, never a
    FAIL. The `--json` output persists this dataset alongside every measured inter-control gap
    (clustered and unclustered) as seed data for a future spacing-scale project.
+6. **Fail-closed guards**, three violation kinds with no baseline exception ever defined for
+   them, by design: `themecensus::<route>::theme-tab-not-active` when the Setup route's
+   Theme-tab sub-census (the 17th censused surface) never became the active, visible pane;
+   `routeerror::<route>` when a route's navigation or measurement threw, or produced no
+   geometry, so it would otherwise be silently dropped instead of censused; and
+   `dash2render::Dashboard-dash2` when the forced-desktop Dynamic Dashboard did not actually
+   render, or its `MobileCensus` layout failed to seed, so check 4 above would otherwise pass
+   vacuously against zero widgets. Each closes a fail-OPEN path where an unmeasured surface
+   could exit the gate green.
 
 Every violation is checked against a committed baseline
 (`scripts/baselines/mobile-layout-contract.json`, docker-test), one entry per censused violation, snapshotting the
-live census whether it passes or fails. A plain run PASSes (exit 0) unless a violation's key has
-no matching baseline entry. Two entries currently carry `policy: "exception"` with a mandatory
-`reason` string:
+live census whether it passes or fails, but only an entry carrying `policy: "exception"`
+exempts its key from failing the gate; a plain snapshot entry (no `policy` field) does not, by
+design, so a routine `--rebaseline` can never quietly turn a red gate green by re-snapshotting a
+live violation. A plain run PASSes (exit 0) unless a violation's key has no matching
+`policy: "exception"` entry. Two entries currently carry that policy with a mandatory `reason`
+string:
 
 - `cutoff::Dashboard-dash2::dz-device::button.btn.btn-small` - the HVAC 5-level selector cutoff
   at h:2 (see Dash2 Card Density above).
@@ -1166,13 +1179,17 @@ no matching baseline entry. Two entries currently carry `policy: "exception"` wi
   settings content; not a rigid-table squash, so flex/gap cannot resolve it, and the fixed-CTA
   positioning strategy itself is a parked owner decision tied to the menus-redesign track.
 
-**Rebaseline workflow.** `--rebaseline` regenerates the baseline from a fresh census but
-preserves every existing `policy: "exception"` entry by key, the same pattern
-`dz-table-census.js` and `dz-button-contract.js` use, so a routine rebaseline can never silently re-arm a
-previously accepted exception into a failing gate. Like those two contracts, rebaselining is a
-deliberate act taken only after a reviewed layout change, never run reflexively to turn a red
-gate green: run it, inspect the printed adds/removes summary against the previous file, and
-commit the updated baseline on its own, separate from the change that caused it.
+**Rebaseline workflow.** `--rebaseline` regenerates the baseline from a fresh census and
+preserves every existing `policy: "exception"` entry by key UNCONDITIONALLY - even one whose key
+does not fire as a live violation on the rebaseline run itself (a stale one is kept and flagged
+informational in the run log, not dropped), the same pattern `dz-table-census.js` and
+`dz-button-contract.js` use. That is what makes it true that a routine rebaseline can never
+silently re-arm a previously accepted exception: an exception is a human decision, not a live
+measurement, so it survives a rebaseline regardless of what that one run happened to reproduce.
+Like those two contracts, rebaselining is a deliberate act taken only after a reviewed layout
+change, never run reflexively to turn a red gate green: run it, inspect the printed summary
+against the previous file, and commit the updated baseline on its own, separate from the change
+that caused it.
 
 ## Components
 
