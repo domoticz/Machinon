@@ -73,10 +73,40 @@ function loadSettings() {
 }
 
 /* Uservariable transport (getters, setters, the three-variable read/write)
-   lives in settings-transport.js now. These wrappers keep the call sites in
-   this file (and schemes.js/settings-ui.js) unchanged; Task 3 replaces them
-   with the overlay-aware versions built on dzMergeSettingsLayers. */
-function checkUserVariableThemeSettings() { return dzThemeSettingsLoad().then(function() {}); }
+   lives in settings-transport.js now; these are the public entry points call
+   sites in this file (and schemes.js/settings-ui.js) use. */
+
+/* Server settings load through the seam, resolved as the specced ordered
+   overlay layers: what painted (defaults or cache) <- stored uservariable
+   snapshot <- per-user (null until FR #6907). The overlay call is readiness
+   scaffolding for that future per-user layer: today's transport appliers fully
+   populate theme from the stored vars, so stored has no gaps for defaults to
+   fill and the merge is a functional no-op on load; it becomes meaningful when
+   perUser arrives as a partial third layer without touching this call site.
+   Keeps the localStorage cache write and the genuine first-visit seed.
+   Fail closed: dzThemeSettingsLoad returns a tri-state so a transient failure
+   (DZ_LOAD_FAILED) leaves the theme object exactly as it painted and writes
+   NOTHING; only a real success-but-empty (DZ_LOAD_EMPTY) seeds. Name kept:
+   settings-ui.js and reconcileDomoticzSettingsInPlace call this. */
+function checkUserVariableThemeSettings() {
+    var defaults = dzSettingsSnapshot(theme);
+    return dzThemeSettingsLoad().then(function(outcome) {
+        if (outcome === DZ_LOAD_LOADED) {
+            var stored = dzSettingsSnapshot(theme); /* dzThemeSettingsLoad already merged the vars into theme; snapshot captures them */
+            dzApplySnapshot(theme, dzMergeSettingsLayers(defaults, stored, null));
+            cacheThemeSettings();
+            return;
+        }
+        if (outcome === DZ_LOAD_EMPTY) {
+            /* First-ever visit (load succeeded, no theme vars yet): persist
+               current defaults as the profile. */
+            return storeUserVariableThemeSettings(dzUnableToCreateUserVariable() ? "update" : "add");
+        }
+        /* DZ_LOAD_FAILED: state unknown, the vars may already exist. Do nothing:
+           defaults stand, no write on failure. */
+    });
+}
+
 function storeUserVariableThemeSettings(action) { return dzThemeSettingsSave(action); }
 
 /* Fingerprint of only the settings that drive visible state. The in-place

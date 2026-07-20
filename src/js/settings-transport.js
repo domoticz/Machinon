@@ -107,6 +107,22 @@ function dzMergeSettingsLayers(defaultsSnap, storedSnap, perUserSnap) {
 
 var unableCreateUserVariable = false;
 
+/* Getter so settings-store.js does not reach across files for the raw flag;
+   both are global-script scope at runtime, but the getter keeps the read
+   explicit at the call site (task-3-brief.md Step 2). */
+function dzUnableToCreateUserVariable() { return unableCreateUserVariable; }
+
+/* Tri-state load outcome. The caller (checkUserVariableThemeSettings) must tell
+   a genuine first visit (DZ_LOAD_EMPTY: the request succeeded and none of the
+   three theme vars exist yet, so seed them) apart from a transient failure
+   (DZ_LOAD_FAILED: server ERR/non-OK or an ajax error, where the vars may well
+   exist and a blind "add" would be an active write on failure). Collapsing both
+   into a single false, as the boolean version did, made the first-visit seed
+   fire on every network blip, contradicting the fail-closed contract. */
+var DZ_LOAD_LOADED = "loaded"; /* at least one theme var found and read */
+var DZ_LOAD_EMPTY = "empty";   /* request OK, but no theme vars present (true first visit) */
+var DZ_LOAD_FAILED = "failed"; /* server error or unreachable; state unknown, do not write */
+
 function dzThemeSettingsLoad() {
     return new Promise(function(resolve) {
         $.ajax({
@@ -115,9 +131,9 @@ function dzThemeSettingsLoad() {
             success: function(data) {
                 if (data.status == "ERR") {
                     $.get("json.htm?type=command&param=addlogmessage&message=Theme Error - The theme was unable to load your preferences from Domoticz.");
-                    resolve(false); return;
+                    resolve(DZ_LOAD_FAILED); return;
                 }
-                if (data.status != "OK") { resolve(false); return; }
+                if (data.status != "OK") { resolve(DZ_LOAD_FAILED); return; }
                 var had = false, pending = [];
                 var featuresVarName = "theme-" + themeFolder + "-features";
                 var customVarName = "theme-" + themeFolder + "-custom";
@@ -127,12 +143,12 @@ function dzThemeSettingsLoad() {
                     if (value.Name == customVarName) { console.log(themeName + " - found theme custom settings in Domoticz database (user variable Idx: " + value.idx + ")"); had = true; theme.usercustomsvariable = value.idx; pending.push(getCustomThemeSettings(value.idx)); }
                     if (value.Name == colorsVarName) { console.log(themeName + " - found theme colors settings in Domoticz database (user variable Idx: " + value.idx + ")"); had = true; theme.usercolorsvariable = value.idx; pending.push(getColorsThemeSettings(value.idx)); }
                 });
-                if (!had) { resolve(false); return; }
-                Promise.all(pending).then(function() { resolve(true); });
+                if (!had) { resolve(DZ_LOAD_EMPTY); return; }
+                Promise.all(pending).then(function() { resolve(DZ_LOAD_LOADED); });
             },
             error: function() {
                 console.warn(themeName + " - could not reach Domoticz to load theme settings (permission, login, or connection); keeping current values");
-                resolve(false);
+                resolve(DZ_LOAD_FAILED);
             }
         });
     });
