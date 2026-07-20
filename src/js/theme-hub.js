@@ -553,7 +553,7 @@ function dzHubBuildReloadNote(entry) {
     btn.type = "button";
     btn.className = "dz-hub-reload-btn";
     btn.textContent = "Reload now";
-    btn.addEventListener("click", function () { location.reload(); });
+    btn.addEventListener("click", dzHubReloadIntoHub);
     note.appendChild(span);
     note.appendChild(btn);
     return note;
@@ -661,6 +661,50 @@ function dzApplyHubSetting(entry, value) {
     storeUserVariableThemeSettings("update");   // persist to Domoticz (the storage seam)
 }
 
+/* The hub is a click pseudo-route with NO url of its own (dzOpenThemeHub just
+   hides #main-view and shows the sibling hub div). A plain location.reload()
+   from inside the hub therefore reloads whatever real route the user was on
+   BEFORE they opened the hub (e.g. #/LightSwitches) and dumps them there, not
+   back in the hub. So a hub-triggered reload sets a one-shot localStorage flag
+   first; dzMaybeReopenHub (init) honours it once and reopens the hub, so
+   "Reload now" returns the user to where they were. */
+var DZ_HUB_REOPEN_FLAG = "machinon_reopen_hub";
+
+function dzHubReloadIntoHub() {
+    try { localStorage.setItem(DZ_HUB_REOPEN_FLAG, "1"); } catch (e) { /* private mode: fall through, plain reload */ }
+    location.reload();
+}
+
+/* FAIL CLOSED: clear the flag BEFORE reopening, so a build/timing failure can
+   never leave the flag set and loop-reload.
+
+   The reopen must survive Angular's boot: dzOpenThemeHub arms a hashchange
+   close-on-leave handler, and Angular fires an initial routing hashchange
+   (-> #/Dashboard) shortly after boot. Opening the hub before that fires would
+   immediately trip the close handler and dump the user on the route anyway
+   (observed: hub built then re-hidden). So debounce on hashchange: open the hub
+   only once the boot navigation has been quiet for a short window, by which
+   point the next hashchange is a genuine user navigation the close handler
+   should honour. Opens even if no hashchange comes (the initial schedule). */
+function dzMaybeReopenHub() {
+    var flag;
+    try { flag = localStorage.getItem(DZ_HUB_REOPEN_FLAG); } catch (e) { return; }
+    if (flag !== "1") return;
+    try { localStorage.removeItem(DZ_HUB_REOPEN_FLAG); } catch (e) { /* ignore */ }
+
+    var timer = null;
+    function openHubOnce() {
+        window.removeEventListener("hashchange", reschedule);
+        if (typeof dzOpenThemeHub === "function") { dzOpenThemeHub(); } // fail closed: dzBuildThemeHub warns+bails if #main-view absent
+    }
+    function reschedule() {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(openHubOnce, 700); // quiet window after the last (boot) hashchange
+    }
+    window.addEventListener("hashchange", reschedule);
+    reschedule();
+}
+
 /* Wire the menu entry once the navbar has rendered. whenElementRenders (page.js)
    runs the callback immediately if the ul is already present, or when it renders,
    with no long-lived polling. */
@@ -671,4 +715,5 @@ function dzApplyHubSetting(entry, value) {
         // page.js not loaded yet in some ordering; try on DOM ready as a fallback.
         if (window.jQuery) jQuery(dzInsertHubMenuEntry);
     }
+    dzMaybeReopenHub(); // honour a pending "Reload now" -> return to the hub
 })();
