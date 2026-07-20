@@ -121,6 +121,9 @@ function dzBuildThemeHub() {
         h.className = "dz-hub-section-title";
         h.textContent = group.label;
         section.appendChild(h);
+        // General tab carries a SHORT about intro (owner, hub-completion
+        // 2026-07-20); the full About is its own tab (the "about" group below).
+        if (group.id === "general") { section.appendChild(dzBuildShortAbout()); }
         dzRenderGroupRows(section, group); // task 3: fill the section with setting rows
         panel.appendChild(section);
 
@@ -130,12 +133,9 @@ function dzBuildThemeHub() {
     container.appendChild(tabs);
     container.appendChild(panel);
 
-    // About area: a persistent footer under the group panel (visible whatever
-    // group tab is active), NOT a ninth group section. dzBuildHubAbout returns
-    // null on any failure; the hub still renders without it (fail open on the
-    // About, the hub itself never depends on it).
-    var about = dzBuildHubAbout();
-    if (about) container.appendChild(about);
+    // The About used to be a persistent footer under every tab; it is now the
+    // last tab (the manifest "about" group, hosted by dzHubAboutMount), plus a
+    // short intro on the General tab. No footer append here anymore.
 
     mainView.parentNode.insertBefore(container, mainView.nextSibling);
 
@@ -238,6 +238,278 @@ function dzHubExternalLink(href, text) {
     a.rel = "noopener noreferrer";
     a.textContent = text;
     return a;
+}
+
+/* SHORT about for the General tab (owner, hub-completion 2026-07-20): name +
+   live version and a one-line description, so the first tab introduces the
+   theme without the full credits/links (those live on the About tab). Type on
+   --dz-text-* tokens (css/theme-hub.css .dz-hub-short-about). */
+function dzBuildShortAbout() {
+    var box = document.createElement("div");
+    box.id = "dz-hub-short-about";
+    box.className = "dz-hub-short-about";
+
+    var title = document.createElement("div");
+    title.className = "dz-hub-short-about-title";
+    title.textContent = "Machinon theme V." + dzHubVersionLabel();
+    box.appendChild(title);
+
+    var desc = document.createElement("p");
+    desc.className = "dz-hub-short-about-desc";
+    desc.textContent = "A responsive Machinon theme for Domoticz with light and dark "
+        + "colour schemes, tabbed icon packs, and a mobile layout. See the About "
+        + "tab for details and maintenance.";
+    box.appendChild(desc);
+    return box;
+}
+
+/* The About tab's hosted mount (owner, hub-completion 2026-07-20): the expansive
+   About (dzBuildHubAbout: name+version, modern description, repo/wiki links, the
+   Icons8 credit) followed by the theme MAINTENANCE actions. Replaces the old
+   persistent About footer; dzHubCustomMount dispatches the manifest "about"
+   entry here. FAIL OPEN on the About content (dzBuildHubAbout returns null while
+   theme.json is not loaded) so the maintenance actions still render. */
+function dzHubAboutMount(entry) {
+    var mount = document.createElement("div");
+    mount.className = "dz-hub-custom-mount";
+    mount.setAttribute("data-custom", entry.key);
+    var about = dzBuildHubAbout();
+    if (about) mount.appendChild(about);
+    mount.appendChild(dzBuildMaintenanceBlock());
+    return mount;
+}
+
+/* Theme maintenance actions (owner placement: bottom of the About tab). These
+   are the coverage-gate affordances the old Theme tab exposed and the hub
+   lacked: reset to defaults, clear the browser cache, reset custom colours to
+   the selected scheme. Each runs behind a confirm (dzHubConfirm). Wired to the
+   SAME functions the legacy tab used (resetTheme in settings-store.js; the cache
+   clear + getSchemeDefaults reset-colours logic the old reset dialog /
+   resetschemebtn ran), so this is a UI relocation, not new behaviour. */
+function dzBuildMaintenanceBlock() {
+    var block = document.createElement("section");
+    block.id = "dz-hub-maintenance";
+    block.className = "dz-hub-maintenance";
+    block.setAttribute("aria-label", "Theme maintenance");
+
+    var title = document.createElement("h3");
+    title.className = "dz-hub-maintenance-title";
+    title.textContent = "Maintenance";
+    block.appendChild(title);
+
+    var note = document.createElement("p");
+    note.className = "dz-hub-maintenance-note";
+    note.textContent = "Each action asks for confirmation first.";
+    block.appendChild(note);
+
+    var actions = document.createElement("div");
+    actions.className = "dz-hub-maintenance-actions";
+    actions.appendChild(dzHubMaintenanceButton(
+        "dz-hub-reset-theme", "Reset theme to defaults",
+        "Reset all theme settings to their defaults? This deletes the stored theme settings and reloads the page.",
+        dzHubDoResetTheme));
+    actions.appendChild(dzHubMaintenanceButton(
+        "dz-hub-clear-cache", "Clear cached settings",
+        "Clear this browser's cached theme settings and reload? Your settings saved on the server are kept.",
+        dzHubDoClearCache));
+    actions.appendChild(dzHubMaintenanceButton(
+        "dz-hub-reset-colors", "Reset colours to the selected scheme",
+        "Reset the custom colours to the selected scheme's default palette?",
+        dzHubDoResetColors));
+    block.appendChild(actions);
+    return block;
+}
+
+/* One maintenance button: label + a confirm-gated click. */
+function dzHubMaintenanceButton(id, label, confirmMsg, action) {
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.id = id;
+    btn.className = "btn btn-danger dz-hub-maintenance-btn"; // house Filled-danger family (css/buttons.css); identity class kept for harnesses
+    btn.textContent = label;
+    btn.addEventListener("click", function () { dzHubConfirm(confirmMsg, action); });
+    return btn;
+}
+
+/* Confirm gate. Uses bootbox (the same confirm library the legacy reset dialog
+   used); falls back to window.confirm so a maintenance action is never fired
+   without a confirmation. */
+function dzHubConfirm(message, onConfirm) {
+    if (typeof bootbox !== "undefined" && bootbox.confirm) {
+        bootbox.confirm({
+            className: "rubberBand animated",
+            message: message,
+            callback: function (result) { if (result) onConfirm(); }
+        });
+        return;
+    }
+    if (window.confirm(message)) { onConfirm(); }
+}
+
+/* Reset to defaults: settings-store.js resetTheme() deletes the theme
+   uservariables, clears the localStorage cache, and reloads (unchanged). */
+function dzHubDoResetTheme() {
+    if (typeof resetTheme === "function") { resetTheme(); }
+}
+
+/* Clear only the browser cache (the old reset dialog's "clear localStorage"
+   button): drop the cached theme settings and reload; the server-stored settings
+   are kept, so the reload re-seeds the cache from them. */
+function dzHubDoClearCache() {
+    try {
+        if (typeof Storage !== "undefined") { localStorage.removeItem(themeFolder + ".themeSettings"); }
+    } catch (e) { /* private mode: nothing cached to clear */ }
+    location.reload();
+}
+
+/* Reset custom colours to the selected scheme's default palette (the old
+   resetschemebtn): read the base scheme's token defaults (scheme.js
+   getSchemeDefaults), write them into theme.color_scheme, apply live, refresh
+   the hub swatches, and persist. Mirrors the legacy handler
+   (settings-ui.js resetschemebtn), but instant-apply instead of Save-batched. */
+function dzHubDoResetColors() {
+    if (typeof getSchemeDefaults !== "function") return;
+    var d = getSchemeDefaults();
+    theme.color_scheme = {
+        background: d.bg, main_color: d.main, navbar: d.navbar, item: d.item,
+        main_text: d.text, alt_text: d.alt_text, disabled: d.disabled
+    };
+    if (typeof applyCustomColorScheme === "function") { applyCustomColorScheme(theme.color_scheme); }
+    if (typeof dzHubSyncSchemeSwatches === "function") { dzHubSyncSchemeSwatches(); }
+    cacheThemeSettings();
+    storeUserVariableThemeSettings("update");
+}
+
+/* ---- Device-image editor (icon_image / theme.icons) ---------------------- *
+   Rebuilds the legacy #textareaIcons editor (settings-ui.js addImgInsteadofIcon)
+   as structured rows in the icon_image row's expanded area. theme.icons is the
+   SAME array devices.js setDeviceCustomIcon reads ({idx, img}) and
+   settings-transport.js persists; only the editing UI is new. */
+
+/* The editor: a list of the current idx -> image mappings (each removable) plus
+   an add row (device idx + image filename). Hidden while icon_image is off. */
+function dzHubBuildImageEditor() {
+    var editor = document.createElement("div");
+    editor.id = "dz-hub-image-editor";
+    editor.className = "dz-hub-image-editor";
+    var on = !!(theme.features && theme.features.icon_image && theme.features.icon_image.enabled === true);
+    editor.hidden = !on;
+
+    var help = document.createElement("p");
+    help.className = "dz-hub-image-help";
+    help.textContent = "Map a device (by Idx) to an image file in the theme's images folder. "
+        + "Works with light devices shown with a bulb icon.";
+    editor.appendChild(help);
+
+    var list = document.createElement("div");
+    list.className = "dz-hub-image-list";
+    editor.appendChild(list);
+
+    var addRow = document.createElement("div");
+    addRow.className = "dz-hub-image-add";
+    var idxInput = document.createElement("input");
+    idxInput.type = "number";
+    idxInput.min = "1";
+    idxInput.className = "dz-hub-image-idx";
+    idxInput.setAttribute("aria-label", "Device Idx");
+    idxInput.placeholder = "Idx";
+    var imgInput = document.createElement("input");
+    imgInput.type = "text";
+    imgInput.className = "dz-hub-image-img";
+    imgInput.setAttribute("aria-label", "Image file name");
+    imgInput.placeholder = "image.png";
+    var addBtn = document.createElement("button");
+    addBtn.type = "button";
+    addBtn.className = "btn btn-primary dz-hub-image-add-btn"; // house Filled-primary family (css/buttons.css)
+    addBtn.textContent = "Add";
+    addBtn.addEventListener("click", function () {
+        var idx = idxInput.value.trim();
+        var img = imgInput.value.trim();
+        // Fail closed: need a numeric idx and a non-empty filename.
+        if (!/^\d+$/.test(idx) || !img) { return; }
+        dzHubImageAdd(idx, img);
+        idxInput.value = "";
+        imgInput.value = "";
+        dzHubRenderImageList(list);
+    });
+    addRow.appendChild(idxInput);
+    addRow.appendChild(imgInput);
+    addRow.appendChild(addBtn);
+    editor.appendChild(addRow);
+
+    dzHubRenderImageList(list);
+    return editor;
+}
+
+/* Render the current theme.icons mappings, each with a remove button. Values
+   reach the DOM through textContent/value only (never composed markup), so a
+   stored filename cannot inject. */
+function dzHubRenderImageList(list) {
+    list.textContent = "";
+    var icons = (theme && Array.isArray(theme.icons)) ? theme.icons : [];
+    if (!icons.length) {
+        var empty = document.createElement("p");
+        empty.className = "dz-hub-image-empty";
+        empty.textContent = "No device images yet.";
+        list.appendChild(empty);
+        return;
+    }
+    icons.forEach(function (m, i) {
+        var row = document.createElement("div");
+        row.className = "dz-hub-image-row";
+
+        var idxCell = document.createElement("span");
+        idxCell.className = "dz-hub-image-cell";
+        idxCell.textContent = "Idx " + m.idx;
+
+        var imgCell = document.createElement("span");
+        imgCell.className = "dz-hub-image-cell dz-hub-image-name";
+        imgCell.textContent = m.img;
+
+        var rm = document.createElement("button");
+        rm.type = "button";
+        rm.className = "btn btn-danger dz-hub-image-remove"; // house Filled-danger family (css/buttons.css)
+        rm.textContent = "Remove";
+        rm.setAttribute("aria-label", "Remove image for device " + m.idx);
+        rm.addEventListener("click", function () { dzHubImageRemove(i); dzHubRenderImageList(list); });
+
+        row.appendChild(idxCell);
+        row.appendChild(imgCell);
+        row.appendChild(rm);
+        list.appendChild(row);
+    });
+}
+
+/* Add/replace a mapping, then persist. One entry per idx (not stacked): the
+   legacy setDeviceCustomIcon reads the FIRST match, so keeping one per idx keeps
+   the list truthful and lets a re-add update the image. */
+function dzHubImageAdd(idx, img) {
+    theme.icons = Array.isArray(theme.icons) ? theme.icons : [];
+    theme.icons = theme.icons.filter(function (m) { return String(m.idx) !== String(idx); });
+    theme.icons.push({ idx: idx, img: img });
+    dzHubPersistImages();
+}
+
+function dzHubImageRemove(i) {
+    if (!Array.isArray(theme.icons)) return;
+    theme.icons.splice(i, 1);
+    dzHubPersistImages();
+}
+
+/* Cache + persist theme.icons through the seam, then re-render device cards so a
+   mapping change shows on the next pass (the hub itself renders no device
+   cards). */
+function dzHubPersistImages() {
+    cacheThemeSettings();
+    storeUserVariableThemeSettings("update");
+    if (typeof setAllDevicesFeatures === "function") { setAllDevicesFeatures(); }
+}
+
+/* Reveal/hide the image editor with the icon_image toggle. */
+function dzHubToggleImageEditor(show) {
+    var hub = document.getElementById(DZ_HUB_ID);
+    var ed = hub && hub.querySelector("#dz-hub-image-editor");
+    if (ed) ed.hidden = !show;
 }
 
 /* Show one group's section, hide the rest, mark its tab active. One group
@@ -395,6 +667,7 @@ function dzHubCustomMount(entry) {
     if (entry.key === "scheme") return dzHubSchemeMount(entry);
     if (entry.key === "custom_color_scheme") return dzHubCustomColorsMount(entry);
     if (entry.key === "iconpacks") return dzHubIconPacksMount(entry);
+    if (entry.key === "about") return dzHubAboutMount(entry);
     return dzHubCustomPlaceholder(entry);
 }
 
@@ -477,7 +750,7 @@ function dzHubCustomColorsMount(entry) {
     actions.className = "dz-hub-swatch-actions";
     var saveBtn = document.createElement("button");
     saveBtn.type = "button";
-    saveBtn.className = "dz-hub-swatch-save-btn";
+    saveBtn.className = "btn btn-primary dz-hub-swatch-save-btn"; // house Filled-primary family (css/buttons.css); identity class kept for harnesses
     saveBtn.textContent = "Save as preset";
     saveBtn.addEventListener("click", function () {
         if (typeof bootbox === "undefined" || typeof saveCurrentColorsAsScheme !== "function") return;
@@ -615,6 +888,13 @@ function dzRenderHubRow(entry) {
         kids.className = "dz-hub-children";
         row.appendChild(kids);
     }
+    // icon_image ("Device photos instead of icons") carries the per-device
+    // idx/img editor in its expanded area (spec rationalization table: "the
+    // per-device idx/img list editor moves into the row's expanded area").
+    // Rebuilt in the hub (owner, hub-completion 2026-07-20): same theme.icons
+    // storage + persistence path, only the UI is new. Shown only while the
+    // toggle is on (dzHubBuildImageEditor sets the initial hidden state).
+    if (entry.key === "icon_image") { row.appendChild(dzHubBuildImageEditor()); }
     return row;
 }
 
@@ -656,6 +936,8 @@ function dzHubBuildControl(entry) {
         var value = (entry.control === "toggle") ? el.checked : el.value;
         dzApplyHubSetting(entry, value);
         if (entry.control === "toggle") dzHubSyncChildren(entry, el.checked);
+        // icon_image: reveal/hide its per-device image editor with the toggle.
+        if (entry.key === "icon_image") dzHubToggleImageEditor(el.checked);
     });
     return el;
 }
@@ -674,7 +956,7 @@ function dzHubBuildReloadNote(entry) {
     span.textContent = "Takes effect after reload";
     var btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "dz-hub-reload-btn";
+    btn.className = "btn btn-primary dz-hub-reload-btn"; // house Filled-primary family (css/buttons.css); identity class kept for harnesses
     btn.textContent = "Reload now";
     btn.addEventListener("click", dzHubReloadIntoHub);
     note.appendChild(span);

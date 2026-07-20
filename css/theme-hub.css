@@ -293,25 +293,13 @@
     display: none;
 }
 
-/* Reload button: on the button tokens (--dz-btn-* padding/radius/focus scale),
-   font on --dz-text-xs per the typography contract. */
-.dz-hub-reload-btn {
-    font-family: var(--dz-font-family);
-    font-size: var(--dz-text-xs);
-    font-weight: var(--dz-weight-semibold);
-    line-height: var(--dz-btn-line-height);
-    padding: var(--dz-btn-pad-sm);
-    border: none;
-    border-radius: var(--dz-btn-radius);
-    color: var(--dz-btn-primary-text);
-    background: var(--dz-btn-primary-bg);
-    cursor: pointer;
-}
-
-.dz-hub-reload-btn:focus-visible {
-    outline: none;
-    box-shadow: var(--dz-btn-focus-ring);
-}
+/* Reload button: styled by the house Filled-primary family, not here (owner
+   directive, hub-completion 2026-07-20: hub controls match the established
+   treatment, never a hub-local divergence). The element carries
+   class="btn btn-primary dz-hub-reload-btn" (theme-hub.js), so
+   css/buttons.css's soft-elevated base + .btn-primary own its radius, shadow,
+   hover, focus ring, and padding; the identity class remains only as a
+   harness/JS hook. No rules needed here. */
 
 /* Fail-closed message (missing applier). */
 .dz-hub-fail-note {
@@ -469,34 +457,20 @@
     margin-top: 4px; /* future --dz-gap token site (spacing project) */
 }
 
-/* Save-as-preset: the shared small-button convention (--dz-btn-* tokens),
-   same as .dz-hub-reload-btn above. */
-.dz-hub-swatch-save-btn {
-    font-family: var(--dz-font-family);
-    font-size: var(--dz-text-xs);
-    font-weight: var(--dz-weight-semibold);
-    line-height: var(--dz-btn-line-height);
-    padding: var(--dz-btn-pad-sm);
-    border: none;
-    border-radius: var(--dz-btn-radius);
-    color: var(--dz-btn-primary-text);
-    background: var(--dz-btn-primary-bg);
-    cursor: pointer;
-}
+/* Save-as-preset: house Filled-primary family via class="btn btn-primary
+   dz-hub-swatch-save-btn" (see the reload-button note above); identity class
+   kept as a harness/JS hook only. */
 
-.dz-hub-swatch-save-btn:focus-visible {
-    outline: none;
-    box-shadow: var(--dz-btn-focus-ring);
-}
-
-/* ---- Task 7: About footer -------------------------------------------------
-   A persistent footer under the group panel (src/js/theme-hub.js
-   dzBuildHubAbout), NOT a group section, so it shows whatever group tab is
-   active. Name + live version, the modernized description, the repo/wiki links
-   and the Icons8 free-tier attribution. Type on --dz-text-* tokens only; the
-   8px rhythm is annotated for the future --dz-gap token; min-width:0 +
-   overflow-wrap keep long links from widening the page at 360px (containment,
-   the mobile harness asserts scrollWidth <= viewport). */
+/* ---- About content (task 7, RESTRUCTURED hub-completion 2026-07-20) -------
+   dzBuildHubAbout's content now lives INSIDE the About tab (the manifest's
+   ninth group, hosted by dzHubAboutMount), no longer as a persistent footer
+   under every tab; the General tab carries the separate short intro
+   (.dz-hub-short-about below). Name + live version, the modernized
+   description, the repo/wiki links and the Icons8 free-tier attribution. Type
+   on --dz-text-* tokens only; the 8px rhythm is annotated for the future
+   --dz-gap token; min-width:0 + overflow-wrap keep long links from widening
+   the page at 360px (containment, the mobile harness asserts scrollWidth <=
+   viewport). */
 .dz-hub-about {
     margin-top: 8px; /* future --dz-gap token site (spacing project) */
     padding-top: 8px; /* future --dz-gap token site (spacing project) */
@@ -526,8 +500,16 @@
     line-height: 1.45;
 }
 
-/* Links wrap rather than widen the row at 360px. */
-.dz-hub-about-link {
+/* Links wrap rather than widen the row at 360px. COLOUR (owner bug,
+   hub-completion 2026-07-20): the about links rendered white-on-white,
+   unreadable. The bare .dz-hub-about-link colour (0,1,0) lost to a
+   higher-specificity / later-loaded core anchor rule. Scoping under
+   #dz-theme-hub with the element + :link/:visited states raises specificity to
+   (1,1,1) so the accent colour wins in BOTH schemes without !important; the
+   accent token is always a contrasting colour on the widget background. */
+#dz-theme-hub a.dz-hub-about-link,
+#dz-theme-hub a.dz-hub-about-link:link,
+#dz-theme-hub a.dz-hub-about-link:visited {
     color: var(--dz-accent-color);
     overflow-wrap: anywhere;
 }
@@ -536,7 +518,160 @@
     margin-left: 8px; /* future --dz-gap token site (spacing project) */
 }
 
-.dz-hub-about-link:hover,
-.dz-hub-about-link:focus-visible {
+#dz-theme-hub a.dz-hub-about-link:hover,
+#dz-theme-hub a.dz-hub-about-link:focus-visible {
+    color: var(--dz-accent-color);
     text-decoration: underline;
+}
+
+/* ---- Hub-completion (owner, 2026-07-20): short About, maintenance, images -- */
+
+/* SHORT about on the General tab: name + version + one line. Sits under the
+   section title as an intro card; muted description, type on --dz-text-* tokens.
+   min-width:0 + wrapping keep it contained at 360px. */
+.dz-hub-short-about {
+    margin: 0 0 8px; /* future --dz-gap token site (spacing project) */
+    padding: 8px; /* future --dz-gap token site (spacing project) */
+    border: 1px solid var(--dz-input-border);
+    border-radius: 6px;
+    min-width: 0;
+}
+
+.dz-hub-short-about-title {
+    font-size: var(--dz-text-sm);
+    font-weight: var(--dz-weight-semibold);
+    color: var(--dz-body-text);
+}
+
+.dz-hub-short-about-desc {
+    margin: 4px 0 0; /* quarter-step under the title */
+    font-size: var(--dz-text-xs);
+    line-height: 1.45;
+    /* Muted body text: house pattern (color-mix over --dz-body-text), matches
+       .dz-hub-desc / .dz-hub-about-desc. */
+    color: color-mix(in srgb, var(--dz-body-text) 62%, transparent);
+}
+
+/* Maintenance block: bottom of the About tab. A titled section with the three
+   confirm-gated action buttons wrapping on narrow widths (containment). */
+.dz-hub-maintenance {
+    margin-top: 8px; /* future --dz-gap token site (spacing project) */
+    padding-top: 8px; /* future --dz-gap token site (spacing project) */
+    border-top: 1px solid var(--dz-input-border);
+    min-width: 0;
+}
+
+.dz-hub-maintenance-title {
+    margin: 0 0 4px; /* quarter-step over the note */
+    font-size: var(--dz-text-md);
+    color: var(--dz-body-text);
+}
+
+.dz-hub-maintenance-note {
+    margin: 0 0 8px; /* future --dz-gap token site (spacing project) */
+    font-size: var(--dz-text-xs);
+    line-height: 1.45;
+    color: color-mix(in srgb, var(--dz-body-text) 62%, transparent);
+}
+
+.dz-hub-maintenance-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px; /* future --dz-gap token site (spacing project) */
+    max-width: 100%;
+}
+
+/* Action buttons: house Filled-danger family (DESIGN.md Family Roles:
+   destructive actions) via class="btn btn-danger dz-hub-maintenance-btn";
+   css/buttons.css owns the look, the identity class is a harness/JS hook. */
+
+/* Per-device image editor (icon_image / theme.icons): lives in the icon_image
+   row's expanded area, spans the full row width, hidden while the toggle is off
+   (the [hidden] attribute; guarded like .dz-hub-reload-note so the display rule
+   does not defeat it). Rows wrap at 360px so the editor never widens the page. */
+.dz-hub-image-editor {
+    grid-column: 1 / -1;
+    margin-top: 8px; /* future --dz-gap token site (spacing project) */
+    padding: 8px; /* future --dz-gap token site (spacing project) */
+    border: 1px solid var(--dz-input-border);
+    border-radius: 6px;
+    min-width: 0;
+}
+
+.dz-hub-image-editor[hidden] {
+    display: none;
+}
+
+.dz-hub-image-help,
+.dz-hub-image-empty {
+    margin: 0 0 8px; /* future --dz-gap token site (spacing project) */
+    font-size: var(--dz-text-xs);
+    line-height: 1.45;
+    color: color-mix(in srgb, var(--dz-body-text) 62%, transparent);
+}
+
+.dz-hub-image-list {
+    margin: 0 0 8px; /* future --dz-gap token site (spacing project) */
+    min-width: 0;
+}
+
+.dz-hub-image-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px; /* future --dz-gap token site (spacing project) */
+    padding: 4px 0; /* future --dz-gap token site (spacing project) */
+    border-bottom: 1px solid var(--dz-input-border);
+    min-width: 0;
+}
+
+.dz-hub-image-cell {
+    font-size: var(--dz-text-xs);
+    color: var(--dz-body-text);
+}
+
+/* The filename can be long: let it take the free space and wrap, never widen. */
+.dz-hub-image-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+/* Add row: idx + filename + Add, wrapping at narrow widths. */
+.dz-hub-image-add {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px; /* future --dz-gap token site (spacing project) */
+    max-width: 100%;
+}
+
+#dz-theme-hub .dz-hub-image-idx,
+#dz-theme-hub .dz-hub-image-img {
+    font-family: var(--dz-font-family);
+    font-size: var(--dz-text-sm);
+    color: var(--dz-input-text);
+    background: var(--dz-input-bg);
+    border: 1px solid var(--dz-input-border);
+    border-radius: 6px;
+    padding: 4px 8px; /* future --dz-gap token site (spacing project) */
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+#dz-theme-hub .dz-hub-image-idx { width: 5em; }
+#dz-theme-hub .dz-hub-image-img { flex: 1 1 8em; min-width: 0; }
+
+#dz-theme-hub .dz-hub-image-idx:focus-visible,
+#dz-theme-hub .dz-hub-image-img:focus-visible {
+    outline: none;
+    border-color: var(--dz-accent-color);
+    box-shadow: var(--dz-btn-focus-ring);
+}
+
+/* Add + Remove buttons: house families (Add = Filled primary, Remove = Filled
+   danger; class="btn btn-primary ..." / "btn btn-danger ..." in theme-hub.js),
+   so css/buttons.css owns their look. Only row layout lives here. */
+.dz-hub-image-remove {
+    flex: 0 0 auto;
 }

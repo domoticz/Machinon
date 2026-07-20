@@ -11,8 +11,11 @@
    Schema:
      THEME_MANIFEST = [ group, ... ]
      group = {
-       id:      stable group id, one of the eight spec groups, in this order:
-                "general","menus","dashboard","cards","charts","background","colors","iconpacks".
+       id:      stable group id, one of the nine spec groups, in this order:
+                "general","menus","dashboard","cards","charts","background","colors","iconpacks","about".
+                ("about" is the owner-added last tab, hub-completion 2026-07-20:
+                a hosted-custom section carrying the expansive About + the theme
+                maintenance actions; its short summary also renders on General.)
        label:   display heading for the group.
        entries: [ entry, ... ]
      }
@@ -369,6 +372,25 @@ var THEME_MANIFEST = [
                 key: "iconpacks", storageKey: null, control: "custom",
                 label: "Icon packs", description: "Install and switch device icon packs (tabbed installer)",
                 appliesTo: "Device icons", previewId: null, parent: null,
+                reloadOnDisable: false, status: "keep"
+            }
+        ]
+    },
+    {
+        /* Owner-added last tab (hub-completion 2026-07-20). A hosted-custom
+           section (like iconpacks: storageKey null, no theme.json key of its
+           own) that renders the expansive About and the theme maintenance
+           actions (reset to defaults, clear cache, reset colours). The General
+           tab additionally shows a SHORT summary (name + version + one line);
+           this tab is the full surface. Kept out of the coverage check the same
+           way iconpacks is (null storageKey, control:"custom"). */
+        id: "about",
+        label: "About",
+        entries: [
+            {
+                key: "about", storageKey: null, control: "custom",
+                label: "About Machinon", description: "Theme version, description, credits, links, and maintenance actions",
+                appliesTo: "Theme", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep"
             }
         ]
