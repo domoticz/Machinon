@@ -59,9 +59,15 @@ function buildStandby() {
 }
 
 function disableStandby() {
-    if (standbyActive == true) {
-        standbyTime = 0;
+    // Only restore the screen when standby actually blanked it. Every click
+    // and (on desktop) every mousemove calls this function, so without this
+    // guard it unconditionally re-shows #main-view even when standby never
+    // activated, clobbering any other feature (e.g. the Theme hub) that
+    // legitimately hid #main-view for its own purpose.
+    if (standbyActive != true) {
+        return;
     }
+    standbyTime = 0;
     $(".screenstandby").remove();
     $("body").removeClass("standby");
     $("#main-view").show();
