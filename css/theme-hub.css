@@ -106,3 +106,178 @@
     margin: 0 0 8px; /* future --dz-gap token site (spacing project) */
     font-size: var(--dz-text-lg);
 }
+
+/* ---- Task 3: setting rows -------------------------------------------------
+   Each row is [ control | text block | preview ]; dependent rows nest below
+   their parent (a .dz-hub-children block spanning the full grid width). Grid
+   over flex so the control column stays aligned across rows and the children
+   block can span every column. min-width:0 on the text cell lets long
+   descriptions wrap instead of widening the page (containment: the mobile
+   harness asserts scrollWidth <= viewport WITH rows). Type is on --dz-text-*
+   tokens only; the 8px rhythm is annotated for the future --dz-gap token. */
+.dz-hub-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: start;
+    column-gap: 8px; /* future --dz-gap token site (spacing project) */
+    padding: 8px 0; /* future --dz-gap token site (spacing project) */
+    border-bottom: 1px solid var(--dz-input-border);
+    min-width: 0;
+}
+
+/* The control column: a fixed lane so labels line up down the section. Inputs
+   sit at the top so they align with the first text line. */
+.dz-hub-control {
+    display: flex;
+    align-items: center;
+    min-height: 20px; /* --dz-btn-line-height: one text-box height, keeps rows even */
+}
+
+.dz-hub-text {
+    min-width: 0; /* allow the description to wrap, never widen the row */
+}
+
+.dz-hub-label-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px; /* future --dz-gap token site (spacing project) */
+}
+
+.dz-hub-label {
+    font-size: var(--dz-text-sm);
+    font-weight: var(--dz-weight-semibold);
+    color: var(--dz-body-text);
+    cursor: pointer;
+}
+
+/* appliesTo chip: small accent-tinted pill, the house tag idiom (accent-alpha
+   fill, accent text). Font on the smallest token (--dz-text-micro, 11px). */
+.dz-hub-tag {
+    flex: 0 0 auto;
+    font-size: var(--dz-text-micro);
+    font-weight: var(--dz-weight-semibold);
+    line-height: 1.4;
+    padding: 0 8px; /* future --dz-gap token site (spacing project) */
+    border-radius: 10px; /* pill; matches --dz-btn-radius */
+    color: var(--dz-accent-color);
+    background: rgba(var(--dz-accent-values), 0.12);
+    white-space: nowrap;
+}
+
+.dz-hub-desc {
+    margin: 4px 0 0; /* quarter-step under the label line */
+    font-size: var(--dz-text-xs);
+    line-height: 1.45;
+    /* Muted body text: house pattern (color-mix over --dz-body-text), no new token. */
+    color: color-mix(in srgb, var(--dz-body-text) 62%, transparent);
+}
+
+/* Preview placeholder (Task 4 fills it). Zero-size until it has content, so an
+   empty placeholder never reserves space or widens the row. */
+.dz-hub-preview {
+    min-width: 0;
+}
+
+/* Text inputs, number spinners and selects: the shared input contract
+   (--dz-input-* tokens), sized on the type scale. Scoped under #dz-theme-hub so
+   the full border + width win over core's element-level form rules (core styles
+   input[type=number] as a narrow bottom-border-only field, which otherwise
+   clips "320" to one digit). max-width keeps a long text field from stretching
+   the row on desktop. */
+#dz-theme-hub .dz-hub-input-number,
+#dz-theme-hub .dz-hub-input-text,
+#dz-theme-hub .dz-hub-input-select {
+    font-family: var(--dz-font-family);
+    font-size: var(--dz-text-sm);
+    color: var(--dz-input-text);
+    background: var(--dz-input-bg);
+    border: 1px solid var(--dz-input-border);
+    border-radius: 6px;
+    padding: 4px 8px; /* future --dz-gap token site (spacing project) */
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+#dz-theme-hub .dz-hub-input-number { width: 6em; }
+#dz-theme-hub .dz-hub-input-text { width: 16em; }
+
+#dz-theme-hub .dz-hub-input:focus-visible {
+    outline: none;
+    border-color: var(--dz-accent-color);
+    box-shadow: var(--dz-btn-focus-ring);
+}
+
+/* Dependent rows: nested block, indented under the parent with an accent rule
+   so the parent/child relationship reads at a glance. */
+.dz-hub-children {
+    grid-column: 1 / -1;
+}
+
+.dz-hub-children:not(:empty) {
+    margin-top: 8px; /* future --dz-gap token site (spacing project) */
+    padding-left: 8px; /* future --dz-gap token site (spacing project) */
+    border-left: 2px solid var(--dz-input-border);
+}
+
+.dz-hub-row-child {
+    border-bottom: none;
+}
+
+/* Disabled (parent off, or fail-closed): dim the whole row. */
+.dz-hub-row.is-disabled {
+    opacity: 0.5;
+}
+
+/* Reload disclosure (reloadOnDisable rows, shown on a live disable). Hidden
+   until then via the [hidden] attribute; the display rule below must not defeat
+   it, so [hidden] is guarded (a class-level display would otherwise beat the
+   UA [hidden]{display:none} on specificity). */
+.dz-hub-reload-note {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px; /* future --dz-gap token site (spacing project) */
+    margin-top: 8px; /* future --dz-gap token site (spacing project) */
+    font-size: var(--dz-text-xs);
+    color: var(--dz-body-text);
+}
+
+.dz-hub-reload-note[hidden] {
+    display: none;
+}
+
+/* Reload button: on the button tokens (--dz-btn-* padding/radius/focus scale),
+   font on --dz-text-xs per the typography contract. */
+.dz-hub-reload-btn {
+    font-family: var(--dz-font-family);
+    font-size: var(--dz-text-xs);
+    font-weight: var(--dz-weight-semibold);
+    line-height: var(--dz-btn-line-height);
+    padding: var(--dz-btn-pad-sm);
+    border: none;
+    border-radius: var(--dz-btn-radius);
+    color: var(--dz-btn-primary-text);
+    background: var(--dz-btn-primary-bg);
+    cursor: pointer;
+}
+
+.dz-hub-reload-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--dz-btn-focus-ring);
+}
+
+/* Fail-closed message (missing applier). */
+.dz-hub-fail-note {
+    margin: 4px 0 0;
+    font-size: var(--dz-text-xs);
+    color: var(--dz-accent-red, var(--dz-body-text));
+}
+
+/* Hosted custom-section placeholder (scheme picker, colors, icon packs;
+   Tasks 5/6 replace it). */
+.dz-hub-custom-mount {
+    padding: 8px 0; /* future --dz-gap token site (spacing project) */
+    border-bottom: 1px solid var(--dz-input-border);
+    min-width: 0;
+}
