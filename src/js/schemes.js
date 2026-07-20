@@ -180,6 +180,21 @@ function setDarkFeature(enabled) {
     if (!enabled && was) { unloadThemeFeatureFiles("dark_theme"); }
 }
 
+/* Suffix -> color_scheme field + display label, in swatch order (Background,
+   Main, Menu, Item, Text, Secondary Text, Disabled). Shared source for the
+   hub-hosted swatches (theme-hub.js, hub-task-5): syncColorInputs below keeps
+   its own inline map for the legacy themevar39_* ids (untouched, removed
+   with themesettings.html in Task 8), this array is the one the hub reads. */
+var DZ_COLOR_SCHEME_FIELDS = [
+    { suffix: "bg", field: "background", label: "Background" },
+    { suffix: "main_color", field: "main_color", label: "Main" },
+    { suffix: "navbar", field: "navbar", label: "Menu" },
+    { suffix: "item", field: "item", label: "Item" },
+    { suffix: "text", field: "main_text", label: "Text" },
+    { suffix: "alt_text", field: "alt_text", label: "Secondary Text" },
+    { suffix: "disabled", field: "disabled", label: "Disabled" }
+];
+
 /* The Save button harvests the colour INPUTS back into theme.color_scheme,
    so after a scheme pick the inputs must reflect the scheme's colours or
    saving would clobber them with the previous values. */
@@ -218,12 +233,30 @@ function syncSchemeFromFeatures() {
     renderSchemePicker();
 }
 
-/* Render the scheme cards into #schemePicker (themesettings.html). All DOM
-   is built with createElement/textContent; scheme values only ever reach
-   style properties, never markup. */
+/* Scheme-picker card mount points: the legacy themesettings.html #schemePicker
+   div (kept until Task 8 removes the old page) plus any hub-hosted container
+   registered via registerSchemePickerContainer (theme-hub.js, hub-task-5:
+   the hub PARAMETERIZES the mount by registering its own container id rather
+   than this file hardcoding one). Rendering into every registered id that is
+   actually present in the document keeps both surfaces in sync while they
+   coexist; an id not currently in the DOM (page/hub not open) is skipped. */
+var DZ_SCHEME_PICKER_CONTAINER_IDS = ["schemePicker"];
+
+function registerSchemePickerContainer(id) {
+    if (id && DZ_SCHEME_PICKER_CONTAINER_IDS.indexOf(id) === -1) {
+        DZ_SCHEME_PICKER_CONTAINER_IDS.push(id);
+    }
+}
+
+/* Render the scheme cards into every registered container (see
+   DZ_SCHEME_PICKER_CONTAINER_IDS above). All DOM is built with
+   createElement/textContent; scheme values only ever reach style properties,
+   never markup. */
 function renderSchemePicker() {
-    var container = document.getElementById("schemePicker");
-    if (!container) return;
+    var containers = DZ_SCHEME_PICKER_CONTAINER_IDS
+        .map(function(id) { return document.getElementById(id); })
+        .filter(function(el) { return !!el; });
+    if (!containers.length) return;
     syncCustomCheckbox();
     loadBuiltinSchemes().then(function(schemes) {
         /* Every card previews the SAME seven colours in the SAME order as the
@@ -252,47 +285,56 @@ function renderSchemePicker() {
            colours at render time below. */
         cards.push({ slug: "custom", name: "Custom", colors: null });
 
-        container.textContent = "";
-        cards.forEach(function(card) {
-            var el = document.createElement("div");
-            el.className = "scheme-card" + (theme.scheme === card.slug ? " selected" : "");
-            el.setAttribute("data-scheme", card.slug);
+        // Build fresh DOM per container (a node cannot have two parents); the
+        // `cards` data above is computed once and shared read-only across them.
+        containers.forEach(function(container) {
+            container.textContent = "";
+            cards.forEach(function(card) {
+                var el = document.createElement("div");
+                el.className = "scheme-card" + (theme.scheme === card.slug ? " selected" : "");
+                el.setAttribute("data-scheme", card.slug);
 
-            var swatches = document.createElement("div");
-            swatches.className = "swatches";
-            var cs = card.colors || theme.color_scheme || {};
-            SWATCH_KEYS.forEach(function(key) {
-                var sw = document.createElement("span");
-                if (cs[key]) sw.style.backgroundColor = cs[key];
-                swatches.appendChild(sw);
-            });
-            el.appendChild(swatches);
-
-            var label = document.createElement("div");
-            label.className = "scheme-name";
-            label.textContent = card.name;
-            el.appendChild(label);
-
-            if (card.deletable) {
-                var del = document.createElement("span");
-                del.className = "scheme-delete";
-                del.textContent = "×";
-                del.title = "Delete preset";
-                del.addEventListener("click", function(e) {
-                    e.stopPropagation();
-                    deleteUserScheme(card.name);
+                var swatches = document.createElement("div");
+                swatches.className = "swatches";
+                var cs = card.colors || theme.color_scheme || {};
+                SWATCH_KEYS.forEach(function(key) {
+                    var sw = document.createElement("span");
+                    if (cs[key]) sw.style.backgroundColor = cs[key];
+                    swatches.appendChild(sw);
                 });
-                el.appendChild(del);
-            }
+                el.appendChild(swatches);
 
-            el.addEventListener("click", function() {
-                applyScheme(card.slug).then(function() {
-                    container.querySelectorAll(".scheme-card").forEach(function(c) { c.classList.remove("selected"); });
-                    el.classList.add("selected");
-                    syncCustomCheckbox();
+                var label = document.createElement("div");
+                label.className = "scheme-name";
+                label.textContent = card.name;
+                el.appendChild(label);
+
+                if (card.deletable) {
+                    var del = document.createElement("span");
+                    del.className = "scheme-delete";
+                    del.textContent = "×";
+                    del.title = "Delete preset";
+                    del.addEventListener("click", function(e) {
+                        e.stopPropagation();
+                        deleteUserScheme(card.name);
+                    });
+                    el.appendChild(del);
+                }
+
+                el.addEventListener("click", function() {
+                    applyScheme(card.slug).then(function() {
+                        container.querySelectorAll(".scheme-card").forEach(function(c) { c.classList.remove("selected"); });
+                        el.classList.add("selected");
+                        syncCustomCheckbox();
+                        // theme-hub.js hub-task-5: keep the hub's own custom-colour
+                        // swatches (value + enabled state) in step with the pick.
+                        // Guarded: schemes.js must not hard-depend on the hub module.
+                        if (typeof dzHubSyncSchemeSwatches === "function") { dzHubSyncSchemeSwatches(); }
+                    });
                 });
+                container.appendChild(el);
             });
-            container.appendChild(el);
         });
+        if (typeof dzHubSyncSchemeSwatches === "function") { dzHubSyncSchemeSwatches(); }
     });
 }

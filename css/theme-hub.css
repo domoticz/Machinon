@@ -301,9 +301,160 @@
 }
 
 /* Hosted custom-section placeholder (scheme picker, colors, icon packs;
-   Tasks 5/6 replace it). */
+   Tasks 5/6 replace it). Still backs the un-hosted control:"custom" entries
+   (iconpacks, Task 6) and wraps the task-5 mounts below. */
 .dz-hub-custom-mount {
     padding: 8px 0; /* future --dz-gap token site (spacing project) */
     border-bottom: 1px solid var(--dz-input-border);
     min-width: 0;
+}
+
+/* ---- Task 5: scheme picker + custom-colour swatches, hosted --------------
+   src/js/theme-hub.js mounts the SAME src/js/schemes.js renderSchemePicker
+   cards and 7 colour swatches here (registerSchemePickerContainer, not a
+   rewrite). Card styling mirrors css/settings.css #schemePicker (kept there
+   until Task 8 removes themesettings.html); duplicated here scoped to the
+   hub's own container id so both surfaces render side by side without
+   sharing a DOM id. Spacing on the hub's 8px rhythm, fonts on --dz-text-*
+   tokens only. */
+.dz-hub-scheme-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px; /* future --dz-gap token site (spacing project); css/settings.css #schemePicker uses 10px, kept at 8px here for the hub's rhythm */
+    margin: 8px 0; /* future --dz-gap token site (spacing project) */
+    max-width: 100%;
+}
+
+.dz-hub-scheme-picker .scheme-card {
+    position: relative;
+    cursor: pointer;
+    width: 108px;
+    padding: 6px; /* future --dz-gap token site (spacing project) */
+    border: 1px solid var(--dz-input-border);
+    border-radius: var(--dz-btn-radius);
+    transition: border-color 0.15s ease;
+}
+
+.dz-hub-scheme-picker .scheme-card:hover {
+    border-color: var(--dz-accent-color);
+}
+
+.dz-hub-scheme-picker .scheme-card.selected {
+    border-color: var(--dz-accent-color);
+    box-shadow: 0 0 0 1px var(--dz-accent-color);
+}
+
+.dz-hub-scheme-picker .swatches {
+    display: flex;
+    height: 22px;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--dz-input-border);
+}
+
+.dz-hub-scheme-picker .swatches span {
+    flex: 1;
+}
+
+.dz-hub-scheme-picker .scheme-name {
+    margin-top: 6px; /* future --dz-gap token site (spacing project) */
+    font-size: var(--dz-text-micro);
+    text-align: center;
+    color: var(--dz-body-text);
+}
+
+.dz-hub-scheme-picker .scheme-delete {
+    position: absolute;
+    top: -2px;
+    right: 4px;
+    font-size: var(--dz-text-sm);
+    line-height: 1;
+    color: var(--secondary-text-color);
+    cursor: pointer;
+}
+
+.dz-hub-scheme-picker .scheme-delete:hover {
+    color: var(--dz-accent-red);
+}
+
+/* The 7-swatch custom-colour editor (Background, Main, Menu, Item, Text,
+   Secondary Text, Disabled; same order as the legacy themesettings.html
+   themevar39_* inputs). Each swatch is enabled only while theme.scheme ===
+   "custom" (dzHubSyncSchemeSwatches, theme-hub.js), mirroring the legacy
+   syncCustomCheckbox() gating (schemes.js). Fixed narrow cells + flex-wrap so
+   all 7 stay contained at 360px (wrap to two rows there; the containment
+   requirement is page scrollWidth, not a single row). */
+.dz-hub-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px; /* future --dz-gap token site (spacing project) */
+    margin: 8px 0; /* future --dz-gap token site (spacing project) */
+    max-width: 100%;
+}
+
+.dz-hub-swatch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px; /* future --dz-gap token site (spacing project) */
+    /* 72px: the longest single-word label ("Background", measured 67px at
+       --dz-text-micro) must fit on one line. .dz-hub-panel's overflow-y:auto
+       computes its overflow-x to auto too (CSS overflow quirk: one axis
+       non-visible forces the other off "visible"), so a centered label wider
+       than its cell is CLIPPED at the panel edge, not just visually spilling;
+       48px clipped the leading "B" of "Background" (found via screenshot). */
+    width: 72px;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+.dz-hub-swatch-label {
+    font-size: var(--dz-text-micro);
+    line-height: 1.2;
+    text-align: center;
+    color: var(--dz-body-text);
+}
+
+.dz-hub-swatch-input {
+    width: 100%;
+    height: 26px;
+    padding: 0;
+    border: 1px solid var(--dz-input-border);
+    border-radius: 4px;
+    background: var(--dz-input-bg);
+    cursor: pointer;
+}
+
+.dz-hub-swatch-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.dz-hub-swatch-input:focus-visible {
+    outline: none;
+    box-shadow: var(--dz-btn-focus-ring);
+}
+
+.dz-hub-swatch-actions {
+    margin-top: 4px; /* future --dz-gap token site (spacing project) */
+}
+
+/* Save-as-preset: the shared small-button convention (--dz-btn-* tokens),
+   same as .dz-hub-reload-btn above. */
+.dz-hub-swatch-save-btn {
+    font-family: var(--dz-font-family);
+    font-size: var(--dz-text-xs);
+    font-weight: var(--dz-weight-semibold);
+    line-height: var(--dz-btn-line-height);
+    padding: var(--dz-btn-pad-sm);
+    border: none;
+    border-radius: var(--dz-btn-radius);
+    color: var(--dz-btn-primary-text);
+    background: var(--dz-btn-primary-bg);
+    cursor: pointer;
+}
+
+.dz-hub-swatch-save-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--dz-btn-focus-ring);
 }

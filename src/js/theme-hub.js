@@ -131,6 +131,13 @@ function dzBuildThemeHub() {
     container.appendChild(panel);
     mainView.parentNode.insertBefore(container, mainView.nextSibling);
 
+    // schemes.js renderSchemePicker() resolves its containers with
+    // getElementById, which only finds nodes attached to the live document;
+    // the colors section's picker mount (dzHubSchemeMount, registered via
+    // registerSchemePickerContainer) exists only as a detached DOM node until
+    // the insertBefore above runs, so the first real render happens here, once.
+    if (typeof renderSchemePicker === "function") { renderSchemePicker(); }
+
     dzHubShowGroup(dzHubActiveGroup); // default to the first group
     return container;
 }
@@ -233,7 +240,7 @@ function dzRenderGroupRows(section, group) {
     var byKey = {};
     group.entries.forEach(function (entry) {
         if (entry.parent) return; // children handled in the second pass
-        if (entry.control === "custom") { section.appendChild(dzHubCustomPlaceholder(entry)); return; }
+        if (entry.control === "custom") { section.appendChild(dzHubCustomMount(entry)); return; }
         var row = dzRenderHubRow(entry);
         byKey[entry.key] = row;
         section.appendChild(row);
@@ -250,22 +257,174 @@ function dzRenderGroupRows(section, group) {
     });
 }
 
-/* A hosted-section placeholder for a control:"custom" entry: keeps the group
-   from being empty and gives Tasks 5/6 a stable mount to replace
-   (.dz-hub-custom-mount[data-custom=<key>]). */
-function dzHubCustomPlaceholder(entry) {
-    var mount = document.createElement("div");
-    mount.className = "dz-hub-custom-mount";
-    mount.setAttribute("data-custom", entry.key);
+/* The label + description header every control:"custom" mount starts with
+   (hosted content, if any, follows). Shared by the generic placeholder below
+   and the task-5 scheme/custom-colour mounts so the three .dz-hub-custom-mount
+   entries (scheme, custom_color_scheme, iconpacks) read consistently. */
+function dzHubCustomHeader(entry) {
+    var frag = document.createDocumentFragment();
     var label = document.createElement("div");
     label.className = "dz-hub-label";
     label.textContent = entry.label;
     var desc = document.createElement("p");
     desc.className = "dz-hub-desc";
     desc.textContent = entry.description;
-    mount.appendChild(label);
-    mount.appendChild(desc);
+    frag.appendChild(label);
+    frag.appendChild(desc);
+    return frag;
+}
+
+/* A hosted-section placeholder for a control:"custom" entry with no hosted
+   content yet: keeps the group from being empty
+   (.dz-hub-custom-mount[data-custom=<key>]). Still backs "iconpacks" (Task 6). */
+function dzHubCustomPlaceholder(entry) {
+    var mount = document.createElement("div");
+    mount.className = "dz-hub-custom-mount";
+    mount.setAttribute("data-custom", entry.key);
+    mount.appendChild(dzHubCustomHeader(entry));
     return mount;
+}
+
+/* Dispatch a control:"custom" entry to its hosted mount. "scheme" and
+   "custom_color_scheme" (hub-task-5) host the real scheme picker and
+   custom-colour swatches (schemes.js/scheme.js, logic unchanged, only the
+   mount point moves); any other control:"custom" entry (iconpacks, Task 6)
+   still gets the generic placeholder above. */
+function dzHubCustomMount(entry) {
+    if (entry.key === "scheme") return dzHubSchemeMount(entry);
+    if (entry.key === "custom_color_scheme") return dzHubCustomColorsMount(entry);
+    return dzHubCustomPlaceholder(entry);
+}
+
+/* Fixed DOM ids the hub exposes to schemes.js. The scheme-picker container is
+   registered with schemes.js's renderSchemePicker (registerSchemePickerContainer)
+   rather than schemes.js hardcoding it: this is the "parameterize the mount"
+   approach the brief called for, kept a one-line registration instead of
+   threading a container argument through every renderSchemePicker call site
+   (saveCurrentColorsAsScheme/deleteUserScheme/syncSchemeFromFeatures all call
+   it with no arguments and must keep refreshing every registered mount). */
+var DZ_HUB_SCHEME_PICKER_ID = "dzHubSchemePicker";
+var DZ_HUB_COLOR_INPUT_PREFIX = "dz-hub-color-";
+
+/* Mounts schemes.js's renderSchemePicker cards (built-in schemes, user
+   presets with their delete affordance, the Custom card) into the colors
+   section. The cards themselves, click handling and applyScheme() call are
+   100% schemes.js code, unchanged; this only provides the container and
+   registers it. */
+function dzHubSchemeMount(entry) {
+    var mount = document.createElement("div");
+    mount.className = "dz-hub-custom-mount";
+    mount.setAttribute("data-custom", entry.key);
+    mount.appendChild(dzHubCustomHeader(entry));
+
+    var picker = document.createElement("div");
+    picker.id = DZ_HUB_SCHEME_PICKER_ID;
+    picker.className = "dz-hub-scheme-picker";
+    mount.appendChild(picker);
+
+    if (typeof registerSchemePickerContainer === "function") {
+        registerSchemePickerContainer(DZ_HUB_SCHEME_PICKER_ID);
+    }
+    // The actual card render happens once, after this mount is attached to
+    // the live document (dzBuildThemeHub, right after the insertBefore call);
+    // getElementById cannot find a still-detached node.
+    return mount;
+}
+
+/* Mounts the 7-swatch custom-colour editor (Background, Main, Menu, Item,
+   Text, Secondary Text, Disabled: same fields/order as the legacy
+   themesettings.html themevar39_* inputs, DZ_COLOR_SCHEME_FIELDS in
+   schemes.js) plus a "Save as preset" action (saveCurrentColorsAsScheme,
+   schemes.js) so a user-saved preset from the hub can be deleted again via
+   the picker card's own delete affordance (schemes.js renderSchemePicker). */
+function dzHubCustomColorsMount(entry) {
+    var mount = document.createElement("div");
+    mount.className = "dz-hub-custom-mount";
+    mount.setAttribute("data-custom", entry.key);
+    mount.appendChild(dzHubCustomHeader(entry));
+
+    var row = document.createElement("div");
+    row.className = "dz-hub-swatches";
+    DZ_COLOR_SCHEME_FIELDS.forEach(function (field) {
+        row.appendChild(dzHubBuildColorSwatch(field));
+    });
+    mount.appendChild(row);
+
+    var actions = document.createElement("div");
+    actions.className = "dz-hub-swatch-actions";
+    var saveBtn = document.createElement("button");
+    saveBtn.type = "button";
+    saveBtn.className = "dz-hub-swatch-save-btn";
+    saveBtn.textContent = "Save as preset";
+    saveBtn.addEventListener("click", function () {
+        if (typeof bootbox === "undefined" || typeof saveCurrentColorsAsScheme !== "function") return;
+        bootbox.prompt("Preset name", function (name) {
+            if (name) { saveCurrentColorsAsScheme(name); } // schemes.js: persists + re-renders every registered picker mount
+        });
+    });
+    actions.appendChild(saveBtn);
+    mount.appendChild(actions);
+
+    return mount;
+}
+
+/* One swatch: a type=color input bound directly to theme.color_scheme[field],
+   instant-apply (like every other hub control, DZ_HUB_APPLIERS above) rather
+   than the legacy form's Save-button batch harvest (settings-ui.js
+   showThemeSettings -> #saveSettingsButton handler). Enabled only while
+   theme.scheme === "custom" (dzHubSyncSchemeSwatches keeps this live as the
+   picker selection changes), mirroring schemes.js syncCustomCheckbox()'s
+   gating of the legacy inputs. */
+function dzHubBuildColorSwatch(field) {
+    var cell = document.createElement("label");
+    cell.className = "dz-hub-swatch";
+
+    var span = document.createElement("span");
+    span.className = "dz-hub-swatch-label";
+    span.textContent = field.label;
+
+    var input = document.createElement("input");
+    input.type = "color";
+    input.className = "dz-hub-swatch-input";
+    input.id = DZ_HUB_COLOR_INPUT_PREFIX + field.suffix;
+    input.setAttribute("data-color-key", field.suffix);
+    input.value = (theme.color_scheme && theme.color_scheme[field.field]) || "#000000";
+    input.disabled = theme.scheme !== "custom";
+    input.addEventListener("change", function () {
+        theme.color_scheme = theme.color_scheme || {};
+        theme.color_scheme[field.field] = input.value;
+        // scheme.js applyCustomColorScheme: the same setProperty applier a
+        // scheme pick runs, unchanged.
+        applyCustomColorScheme(theme.color_scheme);
+        cacheThemeSettings();
+        storeUserVariableThemeSettings("update");
+        // schemes.js warnIfContrastFails: the same WCAG gate the legacy
+        // Save handler runs (settings-ui.js showThemeSettings), preserved.
+        warnIfContrastFails(theme.color_scheme, "The custom colour scheme");
+    });
+
+    cell.appendChild(span);
+    cell.appendChild(input);
+    return cell;
+}
+
+/* Keeps the hub's swatches in step with the scheme picker: called by
+   schemes.js (renderSchemePicker's refresh + the per-card click handler)
+   after theme.scheme/theme.color_scheme change. No-op if the hub is not
+   built yet (fail-open: schemes.js calls this unconditionally, guarded by
+   typeof at the call site, so a pre-hub-build call is simply impossible, and
+   a post-build call while the hub happens to be closed is harmless). */
+function dzHubSyncSchemeSwatches() {
+    var hub = document.getElementById(DZ_HUB_ID);
+    if (!hub) return;
+    var isCustom = theme.scheme === "custom";
+    var cs = theme.color_scheme || {};
+    DZ_COLOR_SCHEME_FIELDS.forEach(function (field) {
+        var input = hub.querySelector("#" + DZ_HUB_COLOR_INPUT_PREFIX + field.suffix);
+        if (!input) return;
+        if (cs[field.field]) { input.value = cs[field.field]; }
+        input.disabled = !isCustom;
+    });
 }
 
 /* Build one setting row: [control | text block | preview placeholder]. The
