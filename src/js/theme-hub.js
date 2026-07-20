@@ -129,6 +129,14 @@ function dzBuildThemeHub() {
 
     container.appendChild(tabs);
     container.appendChild(panel);
+
+    // About area: a persistent footer under the group panel (visible whatever
+    // group tab is active), NOT a ninth group section. dzBuildHubAbout returns
+    // null on any failure; the hub still renders without it (fail open on the
+    // About, the hub itself never depends on it).
+    var about = dzBuildHubAbout();
+    if (about) container.appendChild(about);
+
     mainView.parentNode.insertBefore(container, mainView.nextSibling);
 
     // schemes.js renderSchemePicker() resolves its containers with
@@ -146,6 +154,90 @@ function dzBuildThemeHub() {
 
     dzHubShowGroup(dzHubActiveGroup); // default to the first group
     return container;
+}
+
+/* Fixed dom id for the About footer (the harness dz-hub-about.js keys on it). */
+var DZ_HUB_ABOUT_ID = "dz-hub-about";
+
+/* The theme's live version string, mirroring settings-ui.js loadSettingsHTML
+   (lines 110-113): the beta build appends the branch name. `theme` is the
+   loaded theme.json (settings-store.js), so the version is ALWAYS live from
+   theme.json, never a hardcoded copy. */
+function dzHubVersionLabel() {
+    var v = (typeof theme !== "undefined" && theme && theme.version) ? theme.version : "";
+    if (typeof branch !== "undefined" && branch === "beta") return v + " " + branch;
+    return v;
+}
+
+/* Build the About footer: name + live version, an accurate one-paragraph
+   description of the modernized theme (replacing the outdated themesettings.html
+   "Theme is in progress..." copy, themesettings.html:92-93), the existing
+   repo/wiki links (from theme.homepage/theme.wiki, unchanged this task), and the
+   Icons8 free-tier attribution the theme is obliged to show ("Icons by Icons8"
+   linking icons8.com; confirmed against Icons8's current freebie terms 2026-07-20,
+   intercom.help/icons8 "How to use the Icons8 freebie": a visible, clickable
+   "Icons by Icons8" -> https://icons8.com/).
+
+   FAIL CLOSED: if the theme object is not loaded yet (no theme.version to show),
+   return null and let the hub render without the About footer, rather than an
+   empty or half-populated box. Type on --dz-text-* tokens (css/theme-hub.css). */
+function dzBuildHubAbout() {
+    if (typeof theme === "undefined" || !theme || !theme.version) {
+        console.warn("machinon_theme_hub", "about_theme_absent", "theme.json not loaded; About footer omitted (fail closed)");
+        return null;
+    }
+
+    var about = document.createElement("section");
+    about.id = DZ_HUB_ABOUT_ID;
+    about.className = "dz-hub-about";
+    about.setAttribute("aria-label", "About this theme");
+
+    var title = document.createElement("h2");
+    title.className = "dz-hub-about-title";
+    // Matches the legacy "Machinon theme V.<version>" heading (themesettings.html:92),
+    // version live from theme.json via dzHubVersionLabel.
+    title.textContent = "Machinon theme V." + dzHubVersionLabel();
+    about.appendChild(title);
+
+    var desc = document.createElement("p");
+    desc.className = "dz-hub-about-desc";
+    desc.textContent = "A responsive Machinon theme for Domoticz with multiple "
+        + "light and dark color schemes plus custom colors, tabbed icon packs, "
+        + "dynamic-dashboard support, and a mobile layout that fits phone viewports.";
+    about.appendChild(desc);
+
+    // Links row: repo + wiki, from theme.json (unchanged this task). Built only
+    // for links that actually exist, so a missing theme.homepage/theme.wiki
+    // never renders a dead "undefined" anchor.
+    var links = document.createElement("p");
+    links.className = "dz-hub-about-links";
+    if (theme.homepage) links.appendChild(dzHubExternalLink(theme.homepage, "GitHub repository"));
+    if (theme.wiki) {
+        if (links.childNodes.length) links.appendChild(document.createTextNode(" "));
+        links.appendChild(dzHubExternalLink(theme.wiki, "Wiki"));
+    }
+    if (links.childNodes.length) about.appendChild(links);
+
+    // Icons8 attribution (free-tier licence obligation, not optional polish):
+    // a visible, clickable "Icons by Icons8" linking icons8.com.
+    var credit = document.createElement("p");
+    credit.className = "dz-hub-about-credit";
+    credit.appendChild(dzHubExternalLink("https://icons8.com/", "Icons by Icons8"));
+    about.appendChild(credit);
+
+    return about;
+}
+
+/* One external link: new tab, rel hardened (noopener noreferrer) so a linked
+   page can never reach back through window.opener. */
+function dzHubExternalLink(href, text) {
+    var a = document.createElement("a");
+    a.className = "dz-hub-about-link";
+    a.href = href;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.textContent = text;
+    return a;
 }
 
 /* Show one group's section, hide the rest, mark its tab active. One group

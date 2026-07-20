@@ -488,3 +488,55 @@
     outline: none;
     box-shadow: var(--dz-btn-focus-ring);
 }
+
+/* ---- Task 7: About footer -------------------------------------------------
+   A persistent footer under the group panel (src/js/theme-hub.js
+   dzBuildHubAbout), NOT a group section, so it shows whatever group tab is
+   active. Name + live version, the modernized description, the repo/wiki links
+   and the Icons8 free-tier attribution. Type on --dz-text-* tokens only; the
+   8px rhythm is annotated for the future --dz-gap token; min-width:0 +
+   overflow-wrap keep long links from widening the page at 360px (containment,
+   the mobile harness asserts scrollWidth <= viewport). */
+.dz-hub-about {
+    margin-top: 8px; /* future --dz-gap token site (spacing project) */
+    padding-top: 8px; /* future --dz-gap token site (spacing project) */
+    border-top: 1px solid var(--dz-input-border);
+    min-width: 0;
+}
+
+.dz-hub-about-title {
+    margin: 0 0 8px; /* future --dz-gap token site (spacing project) */
+    font-size: var(--dz-text-lg);
+    color: var(--dz-body-text);
+}
+
+.dz-hub-about-desc {
+    margin: 0 0 8px; /* future --dz-gap token site (spacing project) */
+    font-size: var(--dz-text-xs);
+    line-height: 1.45;
+    /* Muted body text: house pattern (color-mix over --dz-body-text), no new
+       token; matches .dz-hub-desc. */
+    color: color-mix(in srgb, var(--dz-body-text) 62%, transparent);
+}
+
+.dz-hub-about-links,
+.dz-hub-about-credit {
+    margin: 0 0 4px; /* quarter-step between the stacked link/credit lines */
+    font-size: var(--dz-text-xs);
+    line-height: 1.45;
+}
+
+/* Links wrap rather than widen the row at 360px. */
+.dz-hub-about-link {
+    color: var(--dz-accent-color);
+    overflow-wrap: anywhere;
+}
+
+.dz-hub-about-link + .dz-hub-about-link {
+    margin-left: 8px; /* future --dz-gap token site (spacing project) */
+}
+
+.dz-hub-about-link:hover,
+.dz-hub-about-link:focus-visible {
+    text-decoration: underline;
+}
