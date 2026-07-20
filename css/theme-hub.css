@@ -118,22 +118,41 @@
 .dz-hub-row {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: "control text preview";
     align-items: start;
     column-gap: 8px; /* future --dz-gap token site (spacing project) */
+    row-gap: 8px; /* future --dz-gap token site (spacing project); the stacked-input second row */
     padding: 8px 0; /* future --dz-gap token site (spacing project) */
     border-bottom: 1px solid var(--dz-input-border);
     min-width: 0;
 }
 
-/* The control column: a fixed lane so labels line up down the section. Inputs
-   sit at the top so they align with the first text line. */
+/* Value inputs (number/text/select) STACK: the label + applies-to tag +
+   description read ON TOP and the control sits BELOW (owner UX, hub-task-5
+   FIX 2). A left-of-text input read awkwardly and squeezed the description on
+   mobile; stacking scales cleanly to 360px. Toggles keep the inline
+   [toggle | label | preview] layout (the default template above), because a
+   checkbox reads naturally to the left of its label. dzRenderHubRow adds
+   .dz-hub-row-input to non-toggle rows. */
+.dz-hub-row-input {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+        "text    preview"
+        "control control";
+}
+
+/* The control column: a fixed lane so toggles line up down the section. The
+   toggle sits at the top so it aligns with the first text line. On a stacked
+   input row the control is the full-width second grid row instead. */
 .dz-hub-control {
+    grid-area: control;
     display: flex;
     align-items: center;
     min-height: 20px; /* --dz-btn-line-height: one text-box height, keeps rows even */
 }
 
 .dz-hub-text {
+    grid-area: text;
     min-width: 0; /* allow the description to wrap, never widen the row */
 }
 
@@ -177,6 +196,7 @@
    until it has content, so an empty placeholder (null previewId) never reserves
    space or widens the row. flex centers the mini in the column. */
 .dz-hub-preview {
+    grid-area: preview;
     min-width: 0;
     display: flex;
     align-items: center;
@@ -408,7 +428,17 @@
     cursor: pointer;
 }
 
+/* Reserve a uniform TWO-line height for every label and bottom-align the text,
+   so a one-word label ("Background") and a two-word one ("Secondary Text",
+   which wraps) occupy the same vertical box and their inputs below line up on
+   one baseline (owner report: the wrapped "Secondary Text" pushed its swatch
+   ~13px down, misaligning the row). 2.4em = 2 lines at line-height 1.2, on the
+   label's own --dz-text-micro font. */
 .dz-hub-swatch-label {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    min-height: 2.4em;
     font-size: var(--dz-text-micro);
     line-height: 1.2;
     text-align: center;

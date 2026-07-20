@@ -438,6 +438,9 @@ function dzRenderHubRow(entry) {
     row.className = "dz-hub-row";
     row.setAttribute("data-setting", entry.key);
     if (entry.parent) row.classList.add("dz-hub-row-child");
+    // Value inputs (number/text/select) stack label-above-control; toggles stay
+    // inline (hub-task-5 FIX 2, see .dz-hub-row-input in css/theme-hub.css).
+    if (entry.control !== "toggle") row.classList.add("dz-hub-row-input");
 
     var controlCell = document.createElement("div");
     controlCell.className = "dz-hub-control";
