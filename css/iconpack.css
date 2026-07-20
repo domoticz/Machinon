@@ -1,13 +1,13 @@
-/* Icons tab (src/js/iconpack.js): icon pack browser grid.
+/* Icon-packs section of the theme hub (src/js/iconpack.js, mounted via
+   src/js/theme-hub.js dzHubIconPacksMount): icon pack browser grid.
    Sizes from the DESIGN.md type scale (11/12/14/16/22/26). */
 .iconpack-intro { font-size: var(--dz-text-xs); max-width: 640px; }
 /* Blue UI / Color / Fun style picker (role=tablist, button[data-tab] from
-   src/js/iconpack.js; .active moves on click). This nested control sits
-   inside the "Icons" tab, which is itself one entry of Setup's top-level
-   .nav-tabs strip, so it reuses that same flat-underline tab language
-   (css/nav.css .sub-tabs/.nav-tabs) instead of inventing a local pill or
-   segmented-button look: a tab reads as a tab everywhere in the theme.
-   Radius stays 0, matching the underline idiom (no corner to round). */
+   src/js/iconpack.js; .active moves on click). This nested control reuses
+   the theme's flat-underline tab language (css/nav.css .sub-tabs/.nav-tabs)
+   instead of inventing a local pill or segmented-button look: a tab reads
+   as a tab everywhere in the theme. Radius stays 0, matching the underline
+   idiom (no corner to round). */
 .iconpack-tabs { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; border-bottom: 1px solid var(--dz-input-border); }
 .iconpack-tabs button {
     font-size: var(--dz-text-sm);

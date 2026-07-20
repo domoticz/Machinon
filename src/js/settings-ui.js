@@ -34,10 +34,8 @@ function injectThemeTabs() {
         btn = $();
     }
     if (!btn.length) {
-        /* keep tab order stable: Theme sits left of Icons */
         var themeLi = $('<li id="themeTabButton"><a data-target="#tabtheme" data-toggle="tab" data-i18n="Theme">Theme</a></li>');
-        var iconsBtn = $("#iconPackTabButton");
-        themeLi.insertBefore(iconsBtn.length ? iconsBtn : anchor);
+        themeLi.insertBefore(anchor);
         $("#themeTabButton").i18n();
         /* a missing button means the row is fresh (or rebuilt): (re)bind the
            row-level handlers on the new elements; namespaced+delegated so a
@@ -58,7 +56,6 @@ function injectThemeTabs() {
         $("#my-tab-content").append('<div class="tab-pane" id="tabtheme"><section id="theme">Loading..</section></div>');
         $("#my-tab-content #theme").load("styles/" + themeFolder + "/themesettings.html", loadSettingsHTML);
     }
-    injectIconPackTab();
 }
 
 /* The in-place recompile fires no hashchange, so nothing re-runs the

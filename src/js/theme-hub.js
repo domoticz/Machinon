@@ -138,6 +138,12 @@ function dzBuildThemeHub() {
     // the insertBefore above runs, so the first real render happens here, once.
     if (typeof renderSchemePicker === "function") { renderSchemePicker(); }
 
+    // iconpack.js mountIconPackInHub() loads iconsettings.html into the
+    // iconpacks section's #iconpack container (dzHubIconPacksMount below) and
+    // wires it via initIconPack; same live-document requirement as the scheme
+    // picker above, so it also runs here, once, right after attach.
+    if (typeof mountIconPackInHub === "function") { mountIconPackInHub(); }
+
     dzHubShowGroup(dzHubActiveGroup); // default to the first group
     return container;
 }
@@ -276,7 +282,9 @@ function dzHubCustomHeader(entry) {
 
 /* A hosted-section placeholder for a control:"custom" entry with no hosted
    content yet: keeps the group from being empty
-   (.dz-hub-custom-mount[data-custom=<key>]). Still backs "iconpacks" (Task 6). */
+   (.dz-hub-custom-mount[data-custom=<key>]). Every current control:"custom"
+   entry now has a real mount (dzHubCustomMount below); this is the fallback
+   for a future one that has not been wired up yet. */
 function dzHubCustomPlaceholder(entry) {
     var mount = document.createElement("div");
     mount.className = "dz-hub-custom-mount";
@@ -288,12 +296,35 @@ function dzHubCustomPlaceholder(entry) {
 /* Dispatch a control:"custom" entry to its hosted mount. "scheme" and
    "custom_color_scheme" (hub-task-5) host the real scheme picker and
    custom-colour swatches (schemes.js/scheme.js, logic unchanged, only the
-   mount point moves); any other control:"custom" entry (iconpacks, Task 6)
-   still gets the generic placeholder above. */
+   mount point moves); "iconpacks" (hub-task-6) hosts the icon-pack
+   installer (src/js/iconpack.js, same deal); any other control:"custom"
+   entry still gets the generic placeholder above. */
 function dzHubCustomMount(entry) {
     if (entry.key === "scheme") return dzHubSchemeMount(entry);
     if (entry.key === "custom_color_scheme") return dzHubCustomColorsMount(entry);
+    if (entry.key === "iconpacks") return dzHubIconPacksMount(entry);
     return dzHubCustomPlaceholder(entry);
+}
+
+/* Mounts the icon-pack installer (src/js/iconpack.js) into the icon-packs
+   section: a fixed #iconpack container (the id iconpack.js's initIconPack
+   already targets via jQuery #id selectors -- unchanged, only the parent
+   moves) that mountIconPackInHub loads iconsettings.html into once this
+   mount is attached to the live document (dzBuildThemeHub, right after the
+   insertBefore call, same timing as the scheme picker above). FAIL CLOSED:
+   iconpack.js itself no-ops if #iconpack is ever absent. */
+function dzHubIconPacksMount(entry) {
+    var mount = document.createElement("div");
+    mount.className = "dz-hub-custom-mount";
+    mount.setAttribute("data-custom", entry.key);
+    mount.appendChild(dzHubCustomHeader(entry));
+
+    var container = document.createElement("section");
+    container.id = "iconpack";
+    container.textContent = "Loading..";
+    mount.appendChild(container);
+
+    return mount;
 }
 
 /* Fixed DOM ids the hub exposes to schemes.js. The scheme-picker container is

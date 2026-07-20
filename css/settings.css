@@ -10,16 +10,15 @@ input#AcceptNewHardware:checked ~ button {
 /* Popups */
 
 /* Theme tab in Settings: core's "Apply Settings" CTA (the .sub-tabs strip's
-   li.pull-right) stores CORE settings; on the theme's own injected tabs the
-   theme's Reset/Save buttons are the real actions, so the core CTA is hidden
-   while a theme tab is active. General sibling (~), not adjacent (+): the
-   injected Icons tab (#iconPackTabButton) sits between #themeTabButton and
-   the pull-right li in the strip, which silently killed the old + selector
-   (owner report 2026-07-17, mobile: the un-hidden fixed-bottom Apply bar
-   stacked on top of Reset/Save). Both injected tab ids get the same rule so
-   the Icons tab cannot regress the same way. */
-#settingscontent #themeTabButton.active ~ li.pull-right,
-#settingscontent #iconPackTabButton.active ~ li.pull-right {
+   li.pull-right) stores CORE settings; on the theme's own injected Theme tab
+   the theme's Reset/Save buttons are the real actions, so the core CTA is
+   hidden while the theme tab is active. General sibling (~), not adjacent
+   (+): other li's can sit between #themeTabButton and the pull-right li in
+   the strip (owner report 2026-07-17, mobile: the un-hidden fixed-bottom
+   Apply bar stacked on top of Reset/Save), which killed the old + selector.
+   (The icon-pack installer used to inject a second tab here too, #iconPackTabButton;
+   it is hosted in the theme hub now, src/js/theme-hub.js, so only Theme remains.) */
+#settingscontent #themeTabButton.active ~ li.pull-right {
     display: none !important;
 }
 
