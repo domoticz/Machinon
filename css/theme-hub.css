@@ -159,7 +159,7 @@
     font-weight: var(--dz-weight-semibold);
     line-height: 1.4;
     padding: 0 8px; /* future --dz-gap token site (spacing project) */
-    border-radius: 10px; /* pill; matches --dz-btn-radius */
+    border-radius: var(--dz-btn-radius); /* pill, on the shared button radius token */
     color: var(--dz-accent-color);
     background: rgba(var(--dz-accent-values), 0.12);
     white-space: nowrap;
@@ -173,10 +173,36 @@
     color: color-mix(in srgb, var(--dz-body-text) 62%, transparent);
 }
 
-/* Preview placeholder (Task 4 fills it). Zero-size until it has content, so an
-   empty placeholder never reserves space or widens the row. */
+/* Preview column (Task 4 fills it via src/js/theme-hub-previews.js). Zero-size
+   until it has content, so an empty placeholder (null previewId) never reserves
+   space or widens the row. flex centers the mini in the column. */
 .dz-hub-preview {
     min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* A preview mini: a small, fully contained schematic. CONTAINMENT is owned here,
+   not by the builders: a fixed small width with max-width:100% so it never
+   overflows a narrow (360px) row, overflow hidden so no inner shape can spill,
+   and a fixed aspect via height. Builders only set the mini's INTERNAL layout
+   and paint from --dz-* tokens (so live minis follow the scheme). The size sits
+   under the harness's 120px cap with headroom. */
+.dz-hub-mini {
+    box-sizing: border-box;
+    width: 88px;        /* < the harness 120px cap; the auto grid column holds it */
+    max-width: 100%;    /* shrink, never widen, the row */
+    height: 52px;
+    overflow: hidden;
+    border-radius: 6px; /* card radius (dz-tokens.css --dz-btn-radius stays for buttons) */
+}
+
+/* SVG sketch minis (scheme-neutral fallbacks): the svg fills the padded box. */
+.dz-hub-sketch svg {
+    display: block;
+    width: 100%;
+    height: 100%;
 }
 
 /* Text inputs, number spinners and selects: the shared input contract

@@ -311,9 +311,16 @@ function dzRenderHubRow(entry) {
 
     var preview = document.createElement("div");
     preview.className = "dz-hub-preview";
-    // previewId is null throughout task 1's manifest; still emit the placeholder
-    // so Task 4 can target .dz-hub-preview per row.
-    if (entry.previewId) preview.setAttribute("data-preview", entry.previewId);
+    // Fill the preview from the registry (src/js/theme-hub-previews.js): a live
+    // token mini or an SVG sketch, per entry.previewId. Null previewId -> the box
+    // stays empty (the row is still valid). dzRenderPreview is loaded before this
+    // module (custom.js THEME_MODULES), but guard anyway (fail closed: no mini,
+    // never a broken row) in case of a load-order regression.
+    if (entry.previewId) {
+        preview.setAttribute("data-preview", entry.previewId);
+        var mini = (typeof dzRenderPreview === "function") ? dzRenderPreview(entry.previewId, entry) : null;
+        if (mini) preview.appendChild(mini);
+    }
 
     row.appendChild(controlCell);
     row.appendChild(textCell);

@@ -47,9 +47,23 @@
                          Inherited verbatim by child/bundled entries from
                          their parent row (the table gives one tag per row,
                          covering the whole bundle).
-       previewId:        id Task 4's preview registry will look up, or null
-                         (left null throughout: the registry does not exist
-                         yet, so no id is guessed here).
+       previewId:        id the preview registry (src/js/theme-hub-previews.js,
+                         DZ_HUB_PREVIEWS) looks up to build this row's mini, or
+                         null for a row that has no meaningful preview (the row
+                         is still valid, it just renders no mini). Two kinds of
+                         id: a LIVE TOKEN MINI (card-toggle, card-dim,
+                         card-lastseen, navbar-strip, menu-tilegrid,
+                         dash-columns, dialog-center, card-width, chart-bands)
+                         built from --dz-* tokens so it follows the scheme, and
+                         a scheme-neutral SVG SKETCH (sketch-standby,
+                         sketch-update, sketch-notification) for the three
+                         non-visualizable settings. card_min_width and
+                         card_max_width share "card-width" (one width-range
+                         picture). Null is used where no faithful token mini
+                         exists (image-backed background/logo settings), the mini
+                         would duplicate another (time_ago vs the last-seen line),
+                         or the setting is a child/variant/retire-candidate; see
+                         theme-hub-task-4-report.md for the full rationale.
        parent:            the manifest key this entry indents under and is
                          disabled together with, or null. Set ONLY for the
                          five checkbox-gated pairs the current
@@ -100,7 +114,7 @@ var THEME_MANIFEST = [
             {
                 key: "standby", storageKey: "standby", control: "toggle",
                 label: "Screen standby", description: "Screen standby (after N minutes)",
-                appliesTo: "Whole UI", previewId: null, parent: null,
+                appliesTo: "Whole UI", previewId: "sketch-standby", parent: null,
                 reloadOnDisable: true, status: "keep"
             },
             {
@@ -112,19 +126,19 @@ var THEME_MANIFEST = [
             {
                 key: "check_update", storageKey: "check_update", control: "toggle",
                 label: "Update notice", description: "Update notice for the theme",
-                appliesTo: "Navbar badge", previewId: null, parent: null,
+                appliesTo: "Navbar badge", previewId: "sketch-update", parent: null,
                 reloadOnDisable: true, status: "audit"
             },
             {
                 key: "notification", storageKey: "notification", control: "toggle",
                 label: "Device warnings", description: "Device warnings (battery, timed out)",
-                appliesTo: "Navbar / toasts", previewId: null, parent: null,
+                appliesTo: "Navbar / toasts", previewId: "sketch-notification", parent: null,
                 reloadOnDisable: false, status: "keep"
             },
             {
                 key: "center_popups", storageKey: "center_popups", control: "toggle",
                 label: "Center popup dialogs", description: "Center popup dialogs",
-                appliesTo: "All dialogs", previewId: null, parent: null,
+                appliesTo: "All dialogs", previewId: "dialog-center", parent: null,
                 reloadOnDisable: false, status: "keep"
             },
             {
@@ -142,13 +156,13 @@ var THEME_MANIFEST = [
             {
                 key: "custom_settings_menu", storageKey: "custom_settings_menu", control: "toggle",
                 label: "Settings menu as tile grid", description: "Settings menu as tile grid",
-                appliesTo: "Setup menu", previewId: null, parent: null,
+                appliesTo: "Setup menu", previewId: "menu-tilegrid", parent: null,
                 reloadOnDisable: true, status: "keep"
             },
             {
                 key: "navbar_icons", storageKey: "navbar_icons", control: "toggle",
                 label: "Navbar icons", description: "Icons in the navbar (optionally icon-only)",
-                appliesTo: "Navbar", previewId: null, parent: null,
+                appliesTo: "Navbar", previewId: "navbar-strip", parent: null,
                 reloadOnDisable: false, status: "keep"
             },
             {
@@ -191,13 +205,13 @@ var THEME_MANIFEST = [
             {
                 key: "dashboard_show_last_update", storageKey: "dashboard_show_last_update", control: "toggle",
                 label: "Last-seen line on dashboard cards", description: "Last-seen line on dashboard cards",
-                appliesTo: "Classic dashboard", previewId: null, parent: null,
+                appliesTo: "Classic dashboard", previewId: "card-lastseen", parent: null,
                 reloadOnDisable: false, status: "keep"
             },
             {
                 key: "dashboard_columns", storageKey: "dashboard_columns", control: "toggle",
                 label: "Column layout on wide screens", description: "Column layout on wide screens (>1200px)",
-                appliesTo: "Classic dashboard", previewId: null, parent: null,
+                appliesTo: "Classic dashboard", previewId: "dash-columns", parent: null,
                 reloadOnDisable: false, status: "keep"
             },
             {
@@ -236,14 +250,14 @@ var THEME_MANIFEST = [
             {
                 key: "fade_off_items", storageKey: "fade_off_items", control: "toggle",
                 label: "Dim off devices", description: "Dim cards of devices that are off",
-                appliesTo: "All device pages", previewId: null, parent: null,
+                appliesTo: "All device pages", previewId: "card-dim", parent: null,
                 reloadOnDisable: false, status: "keep"
             },
             {
                 key: "switch_instead_of_bigtext", storageKey: "switch_instead_of_bigtext", control: "toggle",
                 label: "Toggles instead of status text",
                 description: "Toggles instead of status text (+ also on scenes)",
-                appliesTo: "Device + scene cards", previewId: null, parent: null,
+                appliesTo: "Device + scene cards", previewId: "card-toggle", parent: null,
                 reloadOnDisable: true, status: "keep"
             },
             {
@@ -269,13 +283,13 @@ var THEME_MANIFEST = [
             {
                 key: "card_min_width", storageKey: "card_min_width", control: "number",
                 label: "Card min width", description: "Card width range (min/max px)",
-                appliesTo: "All card grids", previewId: null, parent: null,
+                appliesTo: "All card grids", previewId: "card-width", parent: null,
                 reloadOnDisable: false, status: "keep"
             },
             {
                 key: "card_max_width", storageKey: "card_max_width", control: "number",
                 label: "Card max width", description: "Card width range (min/max px)",
-                appliesTo: "All card grids", previewId: null, parent: null,
+                appliesTo: "All card grids", previewId: "card-width", parent: null,
                 reloadOnDisable: false, status: "keep"
             }
         ]
@@ -287,7 +301,7 @@ var THEME_MANIFEST = [
             {
                 key: "log_plot_bands", storageKey: "log_plot_bands", control: "toggle",
                 label: "Range bands in log graphs", description: "Range bands in log graphs",
-                appliesTo: "Device log charts", previewId: null, parent: null,
+                appliesTo: "Device log charts", previewId: "chart-bands", parent: null,
                 reloadOnDisable: true, status: "keep"
             }
         ]
