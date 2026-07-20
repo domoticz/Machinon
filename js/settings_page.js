@@ -144,10 +144,7 @@ if (mSettings.length > 0) {
             grid.append(entry.links ? buildDropdownTile(entry) : buildTile(entry));
         });
         grid.on("click", "li[data-target]", function () {
-            const target = $(this).attr("data-target");
-            location.href = target;
-            // The theme's own settings panel hangs off core's Settings page.
-            if (target === "#Setup" && typeof showThemeSettings === "function") showThemeSettings();
+            location.href = $(this).attr("data-target");
         });
 
         $("#machinoSettings").i18n();

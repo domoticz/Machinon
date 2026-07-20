@@ -9,63 +9,6 @@ input#AcceptNewHardware:checked ~ button {
 /* =Footer */
 /* Popups */
 
-/* Theme tab in Settings: core's "Apply Settings" CTA (the .sub-tabs strip's
-   li.pull-right) stores CORE settings; on the theme's own injected Theme tab
-   the theme's Reset/Save buttons are the real actions, so the core CTA is
-   hidden while the theme tab is active. General sibling (~), not adjacent
-   (+): other li's can sit between #themeTabButton and the pull-right li in
-   the strip (owner report 2026-07-17, mobile: the un-hidden fixed-bottom
-   Apply bar stacked on top of Reset/Save), which killed the old + selector.
-   (The icon-pack installer used to inject a second tab here too, #iconPackTabButton;
-   it is hosted in the theme hub now, src/js/theme-hub.js, so only Theme remains.) */
-#settingscontent #themeTabButton.active ~ li.pull-right {
-    display: none !important;
-}
-
-#settingscontent p.two_cols {
-    display: flex;
-    flex-flow: row wrap;
-}
-
-#settingscontent p > span {
-    display: block;
-}
-
-#settingscontent span.cols_span {
-    flex: 0 0 100%;
-}
-
-#settingscontent p.two_cols > span.option {
-    width: 50%;
-}
-
-#settingscontent p:not(.two_cols) > span.option {
-    margin-left: 2em;
-}
-
-#settingscontent span.option.label_right > label {
-    display: inline-block;
-    min-width: 100px;
-    text-align: right;
-    padding-right: 10px;
-}
-
-/* if a sub-setting needs the parent settings to be checked. */
-#settingscontent input.parentrequired:not(:checked) ~ span.option,
-#settingscontent input.parentrequired:not(:checked) ~ span.option > input.parentrequiredchild,
-#settingscontent input.parentrequired:not(:checked) ~ span.option > textarea.parentrequiredchild {
-    color: var(--dz-status-disabled);
-}
-
-/* Box properties (padding, hit-box, radius, box-shadow) live with the rest of
-   the icon-only button family in css/buttons.css (Phase B, 2026-07-17); only
-   the glyph's own typography/colour stay here. */
-a.resetschemebtn,
-a.saveschemebtn {
-    font-size: var(--dz-text-md);
-    color: var(--dz-accent-color);
-}
-
 /*System page*/
 #settings .row-fluid {
     height: auto;
@@ -95,17 +38,6 @@ a.saveschemebtn {
 
 #settings textarea {
     width: 100% !important;
-}
-
-#settings input[type=color] {
-    border: 0;
-    background: transparent;
-}
-
-#textareaIcons {
-    resize: none;
-    width: 100%;
-    margin: 1em 0;
 }
 
 .blocklyText {
@@ -216,22 +148,6 @@ ul.machinon_ul li {
     display: block;
 }
 
-.forkme {
-    margin: -21px -21px 0 0;
-}
-
-#themesettings p {
-    margin: 2px 0;
-}
-
-#themesettings h3 {
-    margin-top: 20px;
-}
-
-#themesettings h4 {
-    margin-top: 10px;
-}
-
 #settings .norm-link, #settings .norm-link a, #settings .norm-link a:link, #settings .norm-link a:active, #settings .norm-link a:visited, #settings .norm-link href, #settings a:link {
     color: var(--dz-accent-color);
 }
@@ -286,14 +202,12 @@ ul.machinon_ul li {
         margin-bottom: 50px;
     }
 
-    /* Phone widths: the action row (core's Apply li, or the theme tabs'
-       Reset/Save div) becomes one fixed bottom bar. Only ONE of the two can
-       be visible at a time: the theme-tab rule at the top of this file hides
-       core's li.pull-right while a theme tab is active, which is what keeps
-       these two fixed bars from stacking on each other (owner report
-       2026-07-17; the broken hide selector was the actual bug, see there). */
-    #settings li.pull-right,
-    #settings div.pull-right {
+    /* Phone widths: core's Apply Settings row (the .sub-tabs strip's
+       li.pull-right) becomes one fixed bottom bar. (The second fixed bar this
+       used to coordinate with, the injected Theme tab's Reset/Save div, is
+       gone: Task 8 deleted the injected tabs; theme settings live in the
+       hub.) */
+    #settings li.pull-right {
         position: fixed;
         left: 0;
         bottom: 5px;
@@ -302,11 +216,7 @@ ul.machinon_ul li {
         z-index: 10;
     }
 
-    /* a for core's Apply link, button for the theme's Reset/Save pair
-       (themesettings.html renders them as <button>s; the button arm keeps
-       them spaced side by side in the fixed bar instead of touching). */
-    #settings .pull-right a,
-    #settings .pull-right button {
+    #settings .pull-right a {
         margin: 0 20px;
         box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
     }
@@ -327,69 +237,4 @@ ul.machinon_ul li {
     #settings section > br {
         display: none;
     }
-}
-
-/* Scheme picker (Theme tab, Colour Options). Cards are rendered by
-   src/js/schemes.js from schemes/*.json; swatch colours arrive via
-   element.style.backgroundColor, never composed markup. */
-#schemePicker {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 6px 0 12px;
-}
-
-#schemePicker .scheme-card {
-    cursor: pointer;
-    width: 128px;
-    padding: 7px;
-    border: 2px solid var(--dz-input-border);
-    border-radius: 8px;
-    background: var(--dz-widget-bg);
-    transition: border-color 0.15s ease;
-}
-
-#schemePicker .scheme-card:hover {
-    border-color: var(--dz-accent-color);
-}
-
-#schemePicker .scheme-card.selected {
-    border-color: var(--dz-accent-color);
-    box-shadow: 0 0 0 1px var(--dz-accent-color);
-}
-
-#schemePicker .swatches {
-    display: flex;
-    height: 26px;
-    border-radius: 4px;
-    overflow: hidden;
-    border: 1px solid var(--dz-input-border);
-}
-
-#schemePicker .swatches span {
-    flex: 1;
-}
-
-#schemePicker .scheme-name {
-    margin-top: 6px;
-    font-size: var(--dz-text-xs);
-    text-align: center;
-    color: var(--dz-body-text);
-}
-
-#schemePicker .scheme-card {
-    position: relative;
-}
-
-#schemePicker .scheme-delete {
-    position: absolute;
-    top: -2px;
-    right: 4px;
-    font-size: var(--dz-text-sm);
-    line-height: 1;
-    color: var(--secondary-text-color);
-}
-
-#schemePicker .scheme-delete:hover {
-    color: var(--dz-accent-red);
 }

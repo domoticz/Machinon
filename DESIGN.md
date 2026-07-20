@@ -583,7 +583,7 @@ the ones that need to differ.
 | `xs` | `--dz-btn-pad-xs` | `4px 8px` | `--dz-text-micro` (11px), explicit on `.btn-mini`/`.btn-xs`/`.btn-small` | Chart zoom buttons, HVAC/Scene segmented pills, Events A-/A+, label-as-button chips |
 | `sm` | `--dz-btn-pad-sm` | `4px 12px` | Inherits the ambient `--dz-text-sm` (14px); no tier-level override | Back/Forecast nav links, `.btnsmall`/`.btnsmall-sel` ghost buttons, grid-view `.btnstyle3` |
 | `md` | `--dz-btn-pad-md` | `6px 14px` | Split: `.btn-primary`/`.btn-info`/`.btn-warning`/`.btn-danger` pin `--dz-text-xs` (12px) explicitly; `.btnstyle3`/`.btnstyle3-sel` inherit the ambient `--dz-text-sm` (14px) instead | Save/Delete toolbars, Hardware/Users "Add", sub-device editor buttons, Setup "Apply Settings" |
-| `lg` | `--dz-btn-pad-lg` | `10px 20px` | `--dz-text-sm` (14px), explicit on `.btn-modern`/`.btn-modern-warning`; `.resetbtn`/`.savebtn` inherit the same ambient size | Login/Verify/Passkey (`.btn-modern`), Theme Settings Reset/Save |
+| `lg` | `--dz-btn-pad-lg` | `10px 20px` | `--dz-text-sm` (14px), explicit on `.btn-modern`/`.btn-modern-warning` | Login/Verify/Passkey (`.btn-modern`). (The `.resetbtn`/`.savebtn` classes that also sat at this tier were the legacy Theme tab's Reset/Save buttons; the tab was deleted in Task 8 and the now-consumerless selectors were removed from `css/buttons.css` in the same change.) |
 
 Three more names appear in the button contract's tier field, but they are not padding-driven sizes,
 so they sit outside the table above:
@@ -601,12 +601,12 @@ so they sit outside the table above:
 
 | Family | Look | Classes | Notes |
 |--------|------|---------|-------|
-| **Filled primary/info** | Accent fill, `--dz-accent-text` text | `.btn-primary`, `.btn-info`, `.btnstyle3`, `.savebtn`, `.btn-modern` | Primary actions, save, login |
-| **Filled danger** | `--dz-accent-red` fill | `.btn-danger`, `.resetbtn`, `.btn-modern-warning` | Destructive actions |
+| **Filled primary/info** | Accent fill, `--dz-accent-text` text | `.btn-primary`, `.btn-info`, `.btnstyle3`, `.btn-modern` | Primary actions, save, login (the legacy Theme tab's `.savebtn` left this family when Task 8 deleted the tab and its now-dead selector) |
+| **Filled danger** | `--dz-accent-red` fill | `.btn-danger`, `.btn-modern-warning` | Destructive actions (the legacy Theme tab's `.resetbtn` left this family when Task 8 deleted the tab and its now-dead selector) |
 | **Filled success/warning** | Semantic fill | `.btn-success`, `.btn-warning` | Declared and token-correct; **no live instance** in the current button-contract crawl (same as the original 2026-07-16 inventory) |
 | **Ghost** | Transparent, `1px solid` accent border, tint only on hover | `.btn-default`, `.btnsmall`, `.btn-small` | Secondary/filter/toolbar actions; no resting elevation |
 | **Toggle-selected** | Accent fill + pressed inset shadow | `.btn-selected`, `.btn-group .btn.active`, `.btn.active`, `.zoom-button-active` | One pressed language for both the theme's own selected class and Bootstrap's native `.active`, replacing two divergent inset shadows the original inventory flagged (finding F2) |
-| **Icon-quiet** | Fully transparent, no border, no resting shadow | `.btn-icon`, `.resetschemebtn`, `.saveschemebtn` | Hit-box only (`--dz-btn-icon-box`); hover is a tonal glyph filter (`saturate`/`brightness`), never a background wash, so device/card icon glyphs don't start looking like buttons |
+| **Icon-quiet** | Fully transparent, no border, no resting shadow | `.btn-icon` | Hit-box only (`--dz-btn-icon-box`); hover is a tonal glyph filter (`saturate`/`brightness`), never a background wash, so device/card icon glyphs don't start looking like buttons. (The legacy Theme tab's `.resetschemebtn`/`.saveschemebtn` anchors left this family when the injected tab was deleted, Task 8.) |
 | **Accent-pill** | Accent-tinted wash at rest, `--dz-accent-color` glyph, strengthens to `--dz-btn-hover-bg` on hover | `.page-devices > .splitter` | The one icon-quiet-adjacent control that needs to read as an affordance *before* the pointer arrives (it collapses/expands the whole filter column); moved off icon-quiet 2026-07-18 for exactly that reason - see Core-Region Takeover |
 | **Label-as-button** | Accent fill, xs padding | `.label-info[href]`, `.badge-info[href]`, `.label.lcursor`, `.badge.lcursor` | Core renders several clickable actions as `<span>`/`<a>` labels, not `<button>`; only the clickable ones (`[href]`/`.lcursor`) join the button system - static `.label`/`.badge` chips stay flat informational chips |
 | **Disabled** | Flat grey, no shadow | `[disabled]`, `.disabled`, `.btnstyle3-dis`, `.btnsmall-dis` | Same `--dz-btn-disabled-bg`/`-text` pair across every family; `cursor: default`/`not-allowed`, `pointer-events: none` in most paths |

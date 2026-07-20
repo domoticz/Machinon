@@ -2,8 +2,9 @@ var theme = {}, themeName = "", isMobile, lang, themeFolder;
 isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 var supported_lang = "en fr de sv nl pl";
 // The scheme colour palette now lives solely in the --dz-* tokens (dz-tokens.css / dark.css). The
-// theme-settings "reset scheme" button reads the current scheme's defaults via getSchemeDefaults()
-// in src/js/scheme.js, so no duplicated light_theme/dark_theme JS objects are needed here.
+// hub's "Reset colours to the selected scheme" action reads the current scheme's defaults via
+// getSchemeDefaults() in src/js/scheme.js, so no duplicated light_theme/dark_theme JS objects are
+// needed here.
 
 /* The theme's always-loaded modules, in load order. Feature-toggled files
    (theme.json "files") are separate and load on demand via the feature loader. */
@@ -12,7 +13,6 @@ var THEME_MODULES = [
     "src/js/settings-store.js",
     "src/js/feature-loader.js",
     "src/js/theme-manifest.js",
-    "src/js/settings-ui.js",
     "src/js/scheme.js",
     "src/js/schemes.js",
     "src/js/iconpack.js",
@@ -116,9 +116,6 @@ function init_theme() {
         });
 
         applyBackground();
-        $("#cSetup").click(function() {
-            showThemeSettings();
-        });
 
         $(".navbar").append('<div class="menu-toggle"><div></div></div>')
         var navBarInner = $(".navbar-inner"), navBarToggle = $(".menu-toggle");

@@ -159,24 +159,33 @@ function dzBuildThemeHub() {
 /* Fixed dom id for the About footer (the harness dz-hub-about.js keys on it). */
 var DZ_HUB_ABOUT_ID = "dz-hub-about";
 
-/* The theme's live version string, mirroring settings-ui.js loadSettingsHTML
-   (lines 110-113): the beta build appends the branch name. `theme` is the
-   loaded theme.json (settings-store.js), so the version is ALWAYS live from
-   theme.json, never a hardcoded copy. */
+/* The theme's live version string (the beta build appends the branch name),
+   carried over from the deleted legacy Theme tab's version label. `theme` is
+   the loaded theme.json (settings-store.js), so the version is ALWAYS live
+   from theme.json, never a hardcoded copy. */
 function dzHubVersionLabel() {
     var v = (typeof theme !== "undefined" && theme && theme.version) ? theme.version : "";
     if (typeof branch !== "undefined" && branch === "beta") return v + " " + branch;
     return v;
 }
 
-/* Build the About footer: name + live version, an accurate one-paragraph
-   description of the modernized theme (replacing the outdated themesettings.html
-   "Theme is in progress..." copy, themesettings.html:92-93), the existing
-   repo/wiki links (from theme.homepage/theme.wiki, unchanged this task), and the
-   Icons8 free-tier attribution the theme is obliged to show ("Icons by Icons8"
-   linking icons8.com; confirmed against Icons8's current freebie terms 2026-07-20,
-   intercom.help/icons8 "How to use the Icons8 freebie": a visible, clickable
-   "Icons by Icons8" -> https://icons8.com/).
+/* Build the About content: name + live version, an accurate one-paragraph
+   description LEADING WITH what makes Machinon unique (owner, 2026-07-20
+   rework) rather than generic "responsive theme" phrasing, the maintainer
+   credits, the existing repo/wiki links (from theme.homepage/theme.wiki), and
+   the Icons8 free-tier attribution the theme is obliged to show ("Icons by
+   Icons8" linking icons8.com; confirmed against Icons8's current freebie
+   terms 2026-07-20, intercom.help/icons8 "How to use the Icons8 freebie": a
+   visible, clickable "Icons by Icons8" -> https://icons8.com/).
+
+   The description order is deliberate: the icon-pack INSTALLER first (it
+   writes packs straight into the Domoticz device database, so a pack is
+   usable from every device's own icon picker, not just this theme's cards;
+   the installer's tabs, css/iconpack.css, are its UI, not the headline), then
+   this live settings hub (instant apply, live previews), then the scheme
+   system (light/dark schemes plus custom colours with WCAG contrast
+   checking), with the responsive/mobile-viewport work last as supporting
+   detail rather than the opening line.
 
    FAIL CLOSED: if the theme object is not loaded yet (no theme.version to show),
    return null and let the hub render without the About footer, rather than an
@@ -194,17 +203,58 @@ function dzBuildHubAbout() {
 
     var title = document.createElement("h2");
     title.className = "dz-hub-about-title";
-    // Matches the legacy "Machinon theme V.<version>" heading (themesettings.html:92),
-    // version live from theme.json via dzHubVersionLabel.
+    // Matches the legacy "Machinon theme V.<version>" heading of the deleted
+    // Theme tab, version live from theme.json via dzHubVersionLabel.
     title.textContent = "Machinon theme V." + dzHubVersionLabel();
     about.appendChild(title);
 
     var desc = document.createElement("p");
     desc.className = "dz-hub-about-desc";
-    desc.textContent = "A responsive Machinon theme for Domoticz with multiple "
-        + "light and dark color schemes plus custom colors, tabbed icon packs, "
-        + "dynamic-dashboard support, and a mobile layout that fits phone viewports.";
+    desc.textContent = "Machinon ships a built-in icon pack installer that writes packs "
+        + "straight into the Domoticz device database, so every installed pack is "
+        + "available from any device's own icon picker, not just this theme's cards. "
+        + "This settings hub applies every change live with instant previews, offers "
+        + "light and dark color schemes plus a custom palette with automatic contrast "
+        + "checking, and the theme itself is fully responsive with a mobile layout "
+        + "that fits phone viewports.";
     about.appendChild(desc);
+
+    // Contributions / credits, restored verbatim from the published
+    // attribution the deleted legacy Theme tab carried (themesettings.html
+    // "Contributions" section): a Design line and a Code line, every name
+    // linked to its GitHub profile, none highlighted over the others. These are
+    // already-published open-source credits (public attribution, not PII), so
+    // they are reproduced exactly as they appeared. Kept as data so the markup
+    // is built by DOM API, never string-concatenated HTML (no injection
+    // surface, same rule the rest of the hub follows). */
+    var credits = document.createElement("div");
+    credits.className = "dz-hub-about-credits";
+    var creditsHeading = document.createElement("h3");
+    creditsHeading.className = "dz-hub-about-credits-title";
+    creditsHeading.textContent = "Contributions";
+    credits.appendChild(creditsHeading);
+    [
+        { role: "Design", people: [["EdddieN", "https://github.com/EdddieN"]] },
+        { role: "Code", people: [
+            ["davidlb", "https://github.com/davidlb"],
+            ["DewGew", "https://github.com/DewGew"],
+            ["landaisbenj", "https://github.com/landaisbenj"],
+            ["Rouzax", "https://github.com/Rouzax"]
+        ] }
+    ].forEach(function(group) {
+        var line = document.createElement("p");
+        line.className = "dz-hub-about-credit-line";
+        var label = document.createElement("span");
+        label.className = "dz-hub-about-credit-role";
+        label.textContent = group.role + ": ";
+        line.appendChild(label);
+        group.people.forEach(function(person, i) {
+            if (i) line.appendChild(document.createTextNode(", "));
+            line.appendChild(dzHubExternalLink(person[1], person[0]));
+        });
+        credits.appendChild(line);
+    });
+    about.appendChild(credits);
 
     // Links row: repo + wiki, from theme.json (unchanged this task). Built only
     // for links that actually exist, so a missing theme.homepage/theme.wiki
@@ -283,9 +333,9 @@ function dzHubAboutMount(entry) {
    are the coverage-gate affordances the old Theme tab exposed and the hub
    lacked: reset to defaults, clear the browser cache, reset custom colours to
    the selected scheme. Each runs behind a confirm (dzHubConfirm). Wired to the
-   SAME functions the legacy tab used (resetTheme in settings-store.js; the cache
-   clear + getSchemeDefaults reset-colours logic the old reset dialog /
-   resetschemebtn ran), so this is a UI relocation, not new behaviour. */
+   SAME functions the legacy tab used (resetTheme in settings-store.js; the
+   cache clear + getSchemeDefaults reset-colours logic of the old reset dialog
+   and reset-colours icon), so this is a UI relocation, not new behaviour. */
 function dzBuildMaintenanceBlock() {
     var block = document.createElement("section");
     block.id = "dz-hub-maintenance";
@@ -362,11 +412,11 @@ function dzHubDoClearCache() {
     location.reload();
 }
 
-/* Reset custom colours to the selected scheme's default palette (the old
-   resetschemebtn): read the base scheme's token defaults (scheme.js
-   getSchemeDefaults), write them into theme.color_scheme, apply live, refresh
-   the hub swatches, and persist. Mirrors the legacy handler
-   (settings-ui.js resetschemebtn), but instant-apply instead of Save-batched. */
+/* Reset custom colours to the selected scheme's default palette (the legacy
+   Theme tab's reset-colours icon): read the base scheme's token defaults
+   (scheme.js getSchemeDefaults), write them into theme.color_scheme, apply
+   live, refresh the hub swatches, and persist. Same logic as the deleted
+   legacy handler, but instant-apply instead of Save-batched. */
 function dzHubDoResetColors() {
     if (typeof getSchemeDefaults !== "function") return;
     var d = getSchemeDefaults();
@@ -381,8 +431,8 @@ function dzHubDoResetColors() {
 }
 
 /* ---- Device-image editor (icon_image / theme.icons) ---------------------- *
-   Rebuilds the legacy #textareaIcons editor (settings-ui.js addImgInsteadofIcon)
-   as structured rows in the icon_image row's expanded area. theme.icons is the
+   Rebuilds the deleted legacy Theme tab's raw-JSON textarea editor as
+   structured rows in the icon_image row's expanded area. theme.icons is the
    SAME array devices.js setDeviceCustomIcon reads ({idx, img}) and
    settings-transport.js persists; only the editing UI is new. */
 
@@ -564,13 +614,13 @@ function dzCloseThemeHubOnLeave() {
    Changing a control applies the setting LIVE through the SAME appliers the
    in-place reconcile uses (settings-store.js applyThemeDeltaInPlace) and then
    persists through the storage seam (storeUserVariableThemeSettings("update")).
-   The applier mapping below MIRRORS applyThemeDeltaInPlace + settings-ui.js
-   verbatim; it never invents a different mapping. control:"custom" entries
+   The applier mapping below MIRRORS applyThemeDeltaInPlace (and the deleted
+   legacy Theme tab's handlers) verbatim; it never invents a different mapping. control:"custom" entries
    (scheme, custom colors, icon packs) are NOT rows here: Tasks 5/6 host those,
    so a placeholder mount stands in their place. */
 
 /* Per-storageKey live visual applier. MIRRORS settings-store.js
-   applyThemeDeltaInPlace() (lines cited) and settings-ui.js. Feature FILE
+   applyThemeDeltaInPlace() (lines cited). Feature FILE
    load/unload is handled generically in dzApplyHubSetting
    (loadThemeFeatureFiles/unloadThemeFeatureFiles); this map only names the
    ADDITIONAL idempotent visual applier a setting drives on top of that. */
@@ -578,21 +628,22 @@ var DZ_HUB_APPLIERS = {
     card_min_width: applyCardWidths,     // scheme.js applyCardWidths -> --dz-card-min/max-width (settings-store.js:194 setColorScheme/applyCardWidths block)
     card_max_width: applyCardWidths,     // "
     logo: setLogo,                       // page.js setLogo -> header.logo img (settings-store.js:195 setLogo())
-    hide_logo: setLogo,                  // settings-ui.js:221 -> setLogo() on hide_logo toggle (feature with files:[])
+    hide_logo: setLogo,                  // setLogo() re-applies on the hide_logo toggle (feature with files:[])
     background_img: applyBackground,     // page.js applyBackground -> html background (settings-store.js:197 applyBackground())
     background_type: applyBackground,    // "
     navbar_icons_text: applyNavbarIconsText // page.js applyNavbarIconsText -> .navbar.notext (settings-store.js:197 applyNavbarIconsText())
 };
 
-/* Number min/max and select options, transcribed from themesettings.html so the
-   hub inputs carry the same bounds as the legacy form. Appliers still clamp
-   (scheme.js applyCardWidths), so these are UX hints, not the safety net. */
+/* Number min/max and select options, carried over verbatim from the deleted
+   legacy Theme tab's form so the hub inputs keep the same bounds. Appliers
+   still clamp (scheme.js applyCardWidths), so these are UX hints, not the
+   safety net. */
 var DZ_HUB_INPUT_META = {
-    standby_after:            { min: 1 },                                   // themesettings.html themevar14
-    dashboard_camera_refresh: { min: 1 },                                   // themesettings.html themevar37
-    card_min_width:           { min: 200, max: 800 },                       // themesettings.html themevar40
-    card_max_width:           { min: 250, max: 1200 },                      // themesettings.html themevar41
-    background_type:          { options: [["cover", "Cover"], ["pattern", "Pattern"]] } // themesettings.html themevar35
+    standby_after:            { min: 1 },
+    dashboard_camera_refresh: { min: 1 },
+    card_min_width:           { min: 200, max: 800 },
+    card_max_width:           { min: 250, max: 1200 },
+    background_type:          { options: [["cover", "Cover"], ["pattern", "Pattern"]] }
 };
 
 /* Current stored value for a plain (number/text/select) entry; "" when unset so
@@ -697,8 +748,8 @@ function dzHubIconPacksMount(entry) {
    rather than schemes.js hardcoding it: this is the "parameterize the mount"
    approach the brief called for, kept a one-line registration instead of
    threading a container argument through every renderSchemePicker call site
-   (saveCurrentColorsAsScheme/deleteUserScheme/syncSchemeFromFeatures all call
-   it with no arguments and must keep refreshing every registered mount). */
+   (saveCurrentColorsAsScheme/deleteUserScheme all call it with no arguments
+   and must keep refreshing every registered mount). */
 var DZ_HUB_SCHEME_PICKER_ID = "dzHubSchemePicker";
 var DZ_HUB_COLOR_INPUT_PREFIX = "dz-hub-color-";
 
@@ -728,8 +779,8 @@ function dzHubSchemeMount(entry) {
 }
 
 /* Mounts the 7-swatch custom-colour editor (Background, Main, Menu, Item,
-   Text, Secondary Text, Disabled: same fields/order as the legacy
-   themesettings.html themevar39_* inputs, DZ_COLOR_SCHEME_FIELDS in
+   Text, Secondary Text, Disabled: same fields/order as the deleted legacy
+   Theme tab's colour inputs, DZ_COLOR_SCHEME_FIELDS in
    schemes.js) plus a "Save as preset" action (saveCurrentColorsAsScheme,
    schemes.js) so a user-saved preset from the hub can be deleted again via
    the picker card's own delete affordance (schemes.js renderSchemePicker). */
@@ -766,11 +817,9 @@ function dzHubCustomColorsMount(entry) {
 
 /* One swatch: a type=color input bound directly to theme.color_scheme[field],
    instant-apply (like every other hub control, DZ_HUB_APPLIERS above) rather
-   than the legacy form's Save-button batch harvest (settings-ui.js
-   showThemeSettings -> #saveSettingsButton handler). Enabled only while
-   theme.scheme === "custom" (dzHubSyncSchemeSwatches keeps this live as the
-   picker selection changes), mirroring schemes.js syncCustomCheckbox()'s
-   gating of the legacy inputs. */
+   than the deleted legacy form's Save-button batch harvest. Enabled only
+   while theme.scheme === "custom" (dzHubSyncSchemeSwatches keeps this live as
+   the picker selection changes). */
 function dzHubBuildColorSwatch(field) {
     var cell = document.createElement("label");
     cell.className = "dz-hub-swatch";
@@ -794,8 +843,8 @@ function dzHubBuildColorSwatch(field) {
         applyCustomColorScheme(theme.color_scheme);
         cacheThemeSettings();
         storeUserVariableThemeSettings("update");
-        // schemes.js warnIfContrastFails: the same WCAG gate the legacy
-        // Save handler runs (settings-ui.js showThemeSettings), preserved.
+        // schemes.js warnIfContrastFails: the same WCAG gate the deleted
+        // legacy Save handler ran, preserved.
         warnIfContrastFails(theme.color_scheme, "The custom colour scheme");
     });
 
@@ -1032,7 +1081,7 @@ function dzApplyHubSetting(entry, value) {
             if (files.length) loadThemeFeatureFiles(key);
             // A JS feature re-enabled after a live disable: its reload note no longer applies.
             if (entry.reloadOnDisable) dzHubToggleReloadNote(entry, false);
-            // log_plot_bands re-reads its enabled flag (settings-ui.js:223).
+            // log_plot_bands re-reads its enabled flag (loaded JS cannot be unloaded).
             if (key === "log_plot_bands" && typeof dzApplyLogPlotBands === "function") dzApplyLogPlotBands();
         } else if (!now && was) {
             if (hasJs) {

@@ -69,9 +69,9 @@
                          theme-hub-task-4-report.md for the full rationale.
        parent:            the manifest key this entry indents under and is
                          disabled together with, or null. Set ONLY for the
-                         five checkbox-gated pairs the current
-                         themesettings.html marks with the
-                         parentrequired/parentrequiredchild CSS classes:
+                         five checkbox-gated pairs the legacy Theme tab
+                         expressed as parent/child checkboxes (tab deleted in
+                         Task 8; the pairs live on here):
                          standby_after<-standby, navbar_icons_text<-navbar_icons,
                          button_name+custom_url<-custom_page_menu,
                          dashboard_camera_refresh+dashboard_camera_section<-dashboard_camera,

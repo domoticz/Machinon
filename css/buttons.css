@@ -15,7 +15,7 @@
    One radius, one elevation language, one focus ring for every button-like
    control the theme owns. !important mirrors the Bootstrap-2 constraint
    documented on the reset block below (state rules outrank base rules). */
-.btn, .btnstyle3, .btnstyle3-sel, .btnstyle3-dis, .savebtn, .resetbtn,
+.btn, .btnstyle3, .btnstyle3-sel, .btnstyle3-dis,
 .btnsmall, .btnsmall-sel, .btnsmall-dis, .btn-modern, .btn-modern-warning {
     border-radius: var(--dz-btn-radius) !important;
     box-shadow: var(--dz-btn-shadow) !important;
@@ -49,23 +49,23 @@
     border: 1px solid transparent;
     transition: background-color .12s ease, box-shadow .12s ease;
 }
-.btn:hover, .btnstyle3:hover, .btnstyle3-sel:hover, .savebtn:hover, .resetbtn:hover,
+.btn:hover, .btnstyle3:hover, .btnstyle3-sel:hover,
 .btnsmall:hover, .btn-modern:hover, .btn-modern-warning:hover {
     box-shadow: var(--dz-btn-shadow-hover) !important;
 }
-.btn:focus-visible, .btnstyle3:focus-visible, .savebtn:focus-visible,
-.resetbtn:focus-visible, .btnsmall:focus-visible, .btn-modern:focus-visible,
+.btn:focus-visible, .btnstyle3:focus-visible,
+.btnsmall:focus-visible, .btn-modern:focus-visible,
 .btn-modern-warning:focus-visible {
     outline: none;
     box-shadow: var(--dz-btn-shadow), var(--dz-btn-focus-ring) !important;
 }
-.btn:active, .btnstyle3:active, .savebtn:active, .resetbtn:active,
+.btn:active, .btnstyle3:active,
 .btn-modern:active, .btn-modern-warning:active {
     box-shadow: var(--dz-btn-shadow-pressed) !important;
 }
 /* Disabled controls do not float and do not react. */
 .btn[disabled], .btn.disabled, .btnstyle3-dis, .btnsmall-dis,
-button.savebtn:disabled, .btnstyle3:disabled,
+.btnstyle3:disabled,
 .btn-group .btn-primary[disabled], .btn-group .btn-primary.disabled {
     background: var(--dz-btn-disabled-bg) !important;
     color: var(--dz-btn-disabled-text) !important;
@@ -117,22 +117,6 @@ a.btnstyle {
     color: var(--dz-body-text);
 }
 
-/* Reset/save theme button: prominent tier, lg. */
-.resetbtn {
-    background: var(--dz-btn-danger-bg);
-    color: var(--dz-btn-primary-text);
-    padding: var(--dz-btn-pad-lg);
-    cursor: pointer;
-}
-
-.savebtn {
-    background: var(--dz-btn-primary-bg);
-    color: var(--dz-btn-primary-text);
-    padding: var(--dz-btn-pad-lg);
-    cursor: pointer;
-}
-/* button.savebtn:disabled is covered by the Soft-elevated base's disabled
-   selector list above (background/color/cursor, !important). */
 /* Label-as-button family (owner report 2026-07-17): core uses clickable
    .label/.badge spans and links as buttons too (e.g. Hardware's "Create
    Virtual Sensors" <span class="label label-info lcursor" onclick=...>,
@@ -181,9 +165,7 @@ a.btnstyle {
 .btn-mini,
 .btnstyle3,
 .btnstyle3-sel,
-.btnstyle3-dis,
-.savebtn,
-.resetbtn {
+.btnstyle3-dis {
     text-shadow: none;
     background-image: none;
     transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, filter 0.15s ease;
@@ -271,7 +253,6 @@ a.btnstyle {
 }
 
 .btn-danger:hover,
-.resetbtn:hover,
 .btn-modern-warning:hover {
     background-color: color-mix(in srgb, var(--dz-btn-danger-bg) 90%, black) !important;
 }
@@ -302,8 +283,10 @@ a.btnstyle {
    none, so only the tonal hover pop (filter, on .btn-icon img below) and the
    min hit-box are visible; border-radius only shapes that hover highlight,
    not a resting box. min-width/min-height give every icon button (Devices
-   row actions, RoomPlans, the scheme-picker reset/save icons) the same
-   square-ish hit target regardless of its glyph's intrinsic size.
+   row actions, RoomPlans) the same square-ish hit target regardless of its
+   glyph's intrinsic size. (The legacy Theme tab's a.resetschemebtn /
+   a.saveschemebtn icon anchors used to sit in this family; deleted with the
+   injected tab, Task 8.)
 
    F1 root cause (diagnosed live via CDP CSS.getMatchedStylesForNode on
    #/Devices): core's own www/css/style.css ships a ".btn.btn-icon" rule that
@@ -321,9 +304,7 @@ a.btnstyle {
    already exceeds the 28px floor (e.g. wider glyphs); !important is the same
    load-bearing pattern documented on the "Universal button reset" block
    below, applied here so the declared box actually wins. */
-.btn-icon,
-a.resetschemebtn,
-a.saveschemebtn {
+.btn-icon {
     background: transparent;
     border: none;
     box-sizing: border-box;
@@ -460,7 +441,6 @@ a.saveschemebtn {
 }
 
 .btnstyle3:hover, .btnstyle3-sel:hover,
-.savebtn:hover,
 .btn-modern:hover {
     background-color: color-mix(in srgb, var(--dz-btn-primary-bg) 90%, black) !important;
 }

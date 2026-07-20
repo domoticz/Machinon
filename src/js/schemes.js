@@ -115,7 +115,7 @@ function deleteUserScheme(name) {
 }
 
 /* Apply a scheme by slug: "light"/"dark" are the token bases, "custom" is
-   the user's own colours (colour inputs), "user:<name>" a saved preset,
+   the user's own colours (the hub's swatch editor), "user:<name>" a saved preset,
    anything else a built-in preset. Applies live, caches, and persists to
    the Domoticz user variables immediately (see persistSchemeChoice). */
 function applyScheme(slug) {
@@ -145,7 +145,6 @@ function applyScheme(slug) {
         theme.color_scheme = Object.assign({}, preset.colors);
         theme.features.custom_color_scheme.enabled = true;
         setDarkFeature(false);
-        syncColorInputs();
         setColorScheme();
         cacheThemeSettings();
         persistSchemeChoice();
@@ -159,7 +158,6 @@ function applyScheme(slug) {
         theme.color_scheme = Object.assign({}, scheme.colors);
         theme.features.custom_color_scheme.enabled = true;
         setDarkFeature(false);
-        syncColorInputs();
         setColorScheme();
         cacheThemeSettings();
         persistSchemeChoice();
@@ -181,10 +179,10 @@ function setDarkFeature(enabled) {
 }
 
 /* Suffix -> color_scheme field + display label, in swatch order (Background,
-   Main, Menu, Item, Text, Secondary Text, Disabled). Shared source for the
-   hub-hosted swatches (theme-hub.js, hub-task-5): syncColorInputs below keeps
-   its own inline map for the legacy themevar39_* ids (untouched, removed
-   with themesettings.html in Task 8), this array is the one the hub reads. */
+   Main, Menu, Item, Text, Secondary Text, Disabled). The source the hub's
+   custom-colour swatches render from (theme-hub.js dzHubCustomColorsMount /
+   dzHubSyncSchemeSwatches). The legacy Theme-tab colour inputs that also read
+   it were deleted with the injected tab (Task 8). */
 var DZ_COLOR_SCHEME_FIELDS = [
     { suffix: "bg", field: "background", label: "Background" },
     { suffix: "main_color", field: "main_color", label: "Main" },
@@ -195,52 +193,13 @@ var DZ_COLOR_SCHEME_FIELDS = [
     { suffix: "disabled", field: "disabled", label: "Disabled" }
 ];
 
-/* The Save button harvests the colour INPUTS back into theme.color_scheme,
-   so after a scheme pick the inputs must reflect the scheme's colours or
-   saving would clobber them with the previous values. */
-function syncColorInputs() {
-    var cs = theme.color_scheme || {};
-    var map = { bg: "background", main_color: "main_color", navbar: "navbar", item: "item", text: "main_text", alt_text: "alt_text", disabled: "disabled" };
-    Object.keys(map).forEach(function(suffix) {
-        var input = document.getElementById("themevar39_" + suffix);
-        if (input && cs[map[suffix]]) { input.value = cs[map[suffix]]; }
-    });
-}
-
-/* The custom_color_scheme FEATURE flag means "the colour-override applier is
-   active", which is true for built-in schemes and user presets too (they ride
-   the same plumbing). The legacy Custom Color Scheme CHECKBOX means "the
-   Custom card is selected": integrated schemes must not read as custom. So
-   the checkbox mirrors the card, never the flag, and the colour inputs
-   enable only while it is checked. */
-function syncCustomCheckbox() {
-    var isCustom = theme.scheme === "custom";
-    var box = $("#themevar39");
-    if (!box.length) return;
-    box.prop("checked", isCustom);
-    box.siblings("span.option").children(".parentrequiredchild").prop("disabled", !isCustom);
-}
-
-/* The legacy Dark Theme / Custom Color Scheme checkboxes still exist; when
-   one is toggled directly, re-derive the picker selection from them. */
-function syncSchemeFromFeatures() {
-    theme.scheme = theme.features.custom_color_scheme.enabled ? "custom"
-        : (theme.features.dark_theme.enabled ? "dark" : "light");
-    theme.scheme_base = theme.features.dark_theme.enabled ? "dark" : "light";
-    setColorScheme();
-    cacheThemeSettings();
-    persistSchemeChoice();
-    renderSchemePicker();
-}
-
-/* Scheme-picker card mount points: the legacy themesettings.html #schemePicker
-   div (kept until Task 8 removes the old page) plus any hub-hosted container
-   registered via registerSchemePickerContainer (theme-hub.js, hub-task-5:
-   the hub PARAMETERIZES the mount by registering its own container id rather
-   than this file hardcoding one). Rendering into every registered id that is
-   actually present in the document keeps both surfaces in sync while they
-   coexist; an id not currently in the DOM (page/hub not open) is skipped. */
-var DZ_SCHEME_PICKER_CONTAINER_IDS = ["schemePicker"];
+/* Scheme-picker card mount points, registered by their hosts via
+   registerSchemePickerContainer (the hub registers #dzHubSchemePicker,
+   theme-hub.js dzHubSchemeMount). Starts EMPTY: the injected Theme tab's
+   #schemePicker div is gone (Task 8), so no container id is hardcoded here.
+   Rendering targets every registered id actually present in the document; an
+   id not currently in the DOM (hub not open) is skipped. */
+var DZ_SCHEME_PICKER_CONTAINER_IDS = [];
 
 function registerSchemePickerContainer(id) {
     if (id && DZ_SCHEME_PICKER_CONTAINER_IDS.indexOf(id) === -1) {
@@ -257,7 +216,6 @@ function renderSchemePicker() {
         .map(function(id) { return document.getElementById(id); })
         .filter(function(el) { return !!el; });
     if (!containers.length) return;
-    syncCustomCheckbox();
     loadBuiltinSchemes().then(function(schemes) {
         /* Every card previews the SAME seven colours in the SAME order as the
            custom colour editor's inputs (Background, Main, Menu, Item, Text,
@@ -325,7 +283,6 @@ function renderSchemePicker() {
                     applyScheme(card.slug).then(function() {
                         container.querySelectorAll(".scheme-card").forEach(function(c) { c.classList.remove("selected"); });
                         el.classList.add("selected");
-                        syncCustomCheckbox();
                         // theme-hub.js hub-task-5: keep the hub's own custom-colour
                         // swatches (value + enabled state) in step with the pick.
                         // Guarded: schemes.js must not hard-depend on the hub module.

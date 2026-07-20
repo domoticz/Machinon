@@ -225,22 +225,29 @@
     height: 100%;
 }
 
-/* Text inputs, number spinners and selects: the shared input contract
-   (--dz-input-* tokens), sized on the type scale. Scoped under #dz-theme-hub so
-   the full border + width win over core's element-level form rules (core styles
-   input[type=number] as a narrow bottom-border-only field, which otherwise
-   clips "320" to one digit). max-width keeps a long text field from stretching
-   the row on desktop. */
+/* Text inputs, number spinners and selects: the theme's HOUSE UNDERLINE style
+   (DESIGN.md Form Inputs), the same treatment core-rendered Domoticz inputs get
+   everywhere else in the theme, so the hub's fields read as the theme's fields,
+   not a bespoke boxed variant. Transparent background, bottom-border only in the
+   accent colour, no radius; secondary text colour. Every value is a real theme
+   token (--dz-accent-color / --secondary-text-color / --dz-text-* / --dz-font-*),
+   both scheme-aware, so this is a one-place restyle that stays readable in the
+   light and dark schemes. Scoped under #dz-theme-hub only to pin an explicit
+   WIDTH on the number/text fields: core sizes input[type=number] too narrow and
+   clips "320" to one digit, so width is set here while the visual style matches
+   the house underline. max-width keeps a long text field from stretching the row
+   on desktop. */
 #dz-theme-hub .dz-hub-input-number,
 #dz-theme-hub .dz-hub-input-text,
 #dz-theme-hub .dz-hub-input-select {
     font-family: var(--dz-font-family);
     font-size: var(--dz-text-sm);
-    color: var(--dz-input-text);
-    background: var(--dz-input-bg);
-    border: 1px solid var(--dz-input-border);
-    border-radius: 6px;
-    padding: 4px 8px; /* future --dz-gap token site (spacing project) */
+    color: var(--secondary-text-color);
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--dz-accent-color);
+    border-radius: 0;
+    padding: 4px 2px; /* future --dz-gap token site (spacing project) */
     box-sizing: border-box;
     max-width: 100%;
 }
@@ -320,10 +327,10 @@
 /* ---- Task 5: scheme picker + custom-colour swatches, hosted --------------
    src/js/theme-hub.js mounts the SAME src/js/schemes.js renderSchemePicker
    cards and 7 colour swatches here (registerSchemePickerContainer, not a
-   rewrite). Card styling mirrors css/settings.css #schemePicker (kept there
-   until Task 8 removes themesettings.html); duplicated here scoped to the
-   hub's own container id so both surfaces render side by side without
-   sharing a DOM id. Spacing on the hub's 8px rhythm, fonts on --dz-text-*
+   rewrite). Card styling started as a copy of the legacy Theme tab's
+   #schemePicker rules, scoped to the hub's own container id; the legacy page
+   and its rules are deleted (Task 8), so this block is now the only scheme
+   card styling. Spacing on the hub's 8px rhythm, fonts on --dz-text-*
    tokens only. */
 .dz-hub-scheme-picker {
     display: flex;
@@ -386,10 +393,10 @@
 }
 
 /* The 7-swatch custom-colour editor (Background, Main, Menu, Item, Text,
-   Secondary Text, Disabled; same order as the legacy themesettings.html
-   themevar39_* inputs). Each swatch is enabled only while theme.scheme ===
-   "custom" (dzHubSyncSchemeSwatches, theme-hub.js), mirroring the legacy
-   syncCustomCheckbox() gating (schemes.js). Fixed narrow cells + flex-wrap so
+   Secondary Text, Disabled; same order as the deleted legacy Theme tab's
+   colour inputs). Each swatch is enabled only while theme.scheme ===
+   "custom" (dzHubSyncSchemeSwatches, theme-hub.js). Fixed narrow cells +
+   flex-wrap so
    all 7 stay contained at 360px (wrap to two rows there; the containment
    requirement is page scrollWidth, not a single row). */
 .dz-hub-swatches {
@@ -490,6 +497,31 @@
     line-height: 1.45;
     /* Muted body text: house pattern (color-mix over --dz-body-text), no new
        token; matches .dz-hub-desc. */
+    color: color-mix(in srgb, var(--dz-body-text) 62%, transparent);
+}
+
+/* Contributions / credits block (restored published attribution). The heading
+   sits on the type scale; each role line is muted body text like the
+   description, and the names inside are .dz-hub-about-link anchors so they
+   inherit the same accent colour + readability rules as the repo/wiki/Icons8
+   links below (contrast-checked in both schemes). */
+.dz-hub-about-credits {
+    margin: 0 0 8px; /* future --dz-gap token site (spacing project) */
+}
+
+.dz-hub-about-credits-title {
+    margin: 0 0 4px; /* quarter-step above the role lines */
+    font-size: var(--dz-text-sm);
+    font-weight: var(--dz-weight-semibold);
+    color: var(--dz-body-text);
+}
+
+.dz-hub-about-credit-line {
+    margin: 0 0 4px; /* quarter-step between the stacked role lines */
+    font-size: var(--dz-text-xs);
+    line-height: 1.45;
+    /* Muted body text: house pattern (color-mix over --dz-body-text), matches
+       .dz-hub-about-desc. */
     color: color-mix(in srgb, var(--dz-body-text) 62%, transparent);
 }
 

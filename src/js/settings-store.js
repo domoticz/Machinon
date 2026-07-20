@@ -1,7 +1,7 @@
 /* Settings persistence: the theme object's round-trip between the browser
    (localStorage cache) and Domoticz (three theme-<folder>-* user variables,
    so settings follow the user across browsers). UI wiring lives in
-   settings-ui.js; feature file loading in feature-loader.js. */
+   theme-hub.js (the settings hub); feature file loading in feature-loader.js. */
 
 /* The theme object's localStorage cache. Plain functions instead of the old
    Storage.prototype monkey-patch: no global prototype pollution, and every
@@ -52,8 +52,8 @@ function loadSettings() {
             theme = readCachedThemeSettings();
             themeName = theme.name;
             console.log(themeName + " - theme settings was already found in the browser.");
-            // Features added after a user's settings were cached: seed a default instead of
-            // hitting the unknown-feature reset prompt in loadSettingsHTML.
+            // Features added after a user's settings were cached: seed a default so
+            // downstream feature reads never hit an unknown key.
             if (theme.features && !theme.features.hide_logo) {
                 theme.features.hide_logo = { id: 42, enabled: false, files: [] };
             }
@@ -74,7 +74,7 @@ function loadSettings() {
 
 /* Uservariable transport (getters, setters, the three-variable read/write)
    lives in settings-transport.js now; these are the public entry points call
-   sites in this file (and schemes.js/settings-ui.js) use. */
+   sites in this file (and schemes.js/theme-hub.js) use. */
 
 /* Server settings load through the seam, resolved as the specced ordered
    overlay layers: what painted (defaults or cache) <- stored uservariable
@@ -87,7 +87,7 @@ function loadSettings() {
    Fail closed: dzThemeSettingsLoad returns a tri-state so a transient failure
    (DZ_LOAD_FAILED) leaves the theme object exactly as it painted and writes
    NOTHING; only a real success-but-empty (DZ_LOAD_EMPTY) seeds. Name kept:
-   settings-ui.js and reconcileDomoticzSettingsInPlace call this. */
+   theme-hub.js and reconcileDomoticzSettingsInPlace call this. */
 function checkUserVariableThemeSettings() {
     var defaults = dzSettingsSnapshot(theme);
     return dzThemeSettingsLoad().then(function(outcome) {

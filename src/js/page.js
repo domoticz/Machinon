@@ -40,9 +40,9 @@ function locationHashChanged() {
     if (location.hash == "#/CustomIcons") {
         setCustomIconsPage();
     }
-    if (location.hash == "#/Setup") {
-        showThemeSettings();
-    }
+    /* #/Setup needs no theme hook anymore: the injected Theme tab is gone
+       (Task 8); theme settings live in the hub (src/js/theme-hub.js), a click
+       pseudo-route with no hash of its own. */
 }
 
 function setPageTitle() {
