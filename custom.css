@@ -73,6 +73,7 @@
 @import url("css/search.css");
 @import url("css/device-status.css");
 @import url("css/users.css");
+@import url("css/theme-hub.css");
 
 /* Display sidemenu on low resolution devices */
 @import url("css/sidemenu.css") (max-width: 979px);

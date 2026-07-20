@@ -18,6 +18,7 @@ var THEME_MODULES = [
     "src/js/iconpack.js",
     "src/js/search.js",
     "src/js/page.js",
+    "src/js/theme-hub.js",
     "src/js/devices.js",
     "src/js/card-drag-handle.js",
     "src/js/floorplan-stage.js",

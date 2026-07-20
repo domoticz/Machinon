@@ -41,7 +41,10 @@ if (mSettings.length > 0) {
         "Plans": "plan.png",
         "Data push": "contact.png",
         "Check for Update": "update.png",
-        "SecurityPanel": "security.png"
+        "SecurityPanel": "security.png",
+        // Theme hub (src/js/theme-hub.js): the hub menu <li> has no href to key
+        // on (an href would route through Angular), so its tile keys on the label.
+        "Theme": "paint-palette.png"
     };
     const DEFAULT_ICON = "setup.png";
 

@@ -1,0 +1,108 @@
+/**** ./theme-hub.css ***/
+/* Theme hub page shell (src/js/theme-hub.js, theme-hub project task 2).
+
+   Group navigation is a HORIZONTAL underlined-tab bar on both desktop and
+   mobile, mirroring the theme's flat-underline tab language (css/nav.css
+   .nav-tabs, which overrides core's glass tabs on the Setup sub-tabs, and its
+   nested reuse css/iconpack.css .iconpack-tabs): a row of tabs, the active one
+   underlined with the accent, and the group's content panel below. One group's
+   .dz-hub-section is visible at a time; src/js/theme-hub.js toggles section
+   display and the .is-active tab marker, so this file never hides sections
+   itself. The hub owns its own classes (rather than borrowing .nav-tabs markup)
+   because it needs one behaviour the settings tabs do not: on narrow widths the
+   bar scrolls horizontally INSIDE its own box instead of wrapping, so it never
+   widens the page. The underline/hover/active treatment below is copied from
+   those two files verbatim in spirit (tokens, 2px accent border, radius 0).
+
+   Type on --dz-text-* tokens (no invented sizes). Tabs are <button>s; radius is
+   0 (the underline idiom has no corner to round) and the focus ring is the
+   shared --dz-btn-focus-ring token. */
+
+#dz-theme-hub {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* future --dz-gap token site (spacing project) */
+    padding: 8px; /* future --dz-gap token site (spacing project) */
+    /* Never let the hub itself widen the page: the tab bar scrolls inside its
+       own box, it does not stretch the container. */
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* The tab bar: a self-contained horizontal scroll box. width + min-width:0 are
+   both required so the bar can be narrower than the summed tab width and scroll
+   its tabs INSIDE that width, rather than sizing to content and dragging the
+   whole page into a page-wide horizontal scroll. */
+.dz-hub-tabs {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 15px; /* matches css/iconpack.css .iconpack-tabs; future --dz-gap token site (spacing project) */
+    border-bottom: 1px solid var(--dz-input-border);
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    /* Faint themed scrollbar (house pattern: css/cards.css .btn-group,
+       css/tables.css): thin, accent thumb on a --dz-body-bg track. */
+    scrollbar-width: thin;
+    scrollbar-color: var(--dz-accent-color) var(--dz-body-bg);
+    padding-bottom: 4px; /* keeps the 4px scrollbar off the tab labels */
+}
+
+.dz-hub-tabs::-webkit-scrollbar {
+    height: 4px;
+}
+
+.dz-hub-tabs::-webkit-scrollbar-thumb {
+    background: var(--dz-accent-color);
+    border-radius: 5px;
+}
+
+/* Each tab mirrors css/nav.css .nav-tabs > li > a and css/iconpack.css
+   .iconpack-tabs button: flat and borderless with a 2px transparent bottom
+   border that turns accent on hover/active. flex:0 0 auto + nowrap keep each
+   tab at its intrinsic width so the BAR scrolls, the tabs never squash. */
+.dz-hub-tab {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-family: var(--dz-font-family);
+    font-size: var(--dz-text-sm);
+    font-weight: var(--dz-weight-semibold);
+    padding: 6px 2px; /* verbatim from css/iconpack.css .iconpack-tabs button */
+    margin-bottom: -1px; /* overlap the bar's 1px border, like .iconpack-tabs */
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    color: var(--dz-body-text);
+    cursor: pointer;
+}
+
+.dz-hub-tab:hover,
+.dz-hub-tab.is-active {
+    border-bottom-color: var(--dz-accent-color);
+    color: var(--dz-accent-color);
+}
+
+.dz-hub-tab:focus-visible {
+    outline: none;
+    border-bottom-color: var(--dz-accent-color);
+    box-shadow: var(--dz-btn-focus-ring);
+}
+
+/* Content panel below the tab bar; min-width:0 lets long future rows shrink
+   instead of forcing a horizontal overflow. */
+.dz-hub-panel {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-y: auto;
+}
+
+.dz-hub-section-title {
+    margin: 0 0 8px; /* future --dz-gap token site (spacing project) */
+    font-size: var(--dz-text-lg);
+}
