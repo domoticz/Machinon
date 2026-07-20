@@ -11,6 +11,7 @@ var THEME_MODULES = [
     "src/js/settings-transport.js",
     "src/js/settings-store.js",
     "src/js/feature-loader.js",
+    "src/js/theme-manifest.js",
     "src/js/settings-ui.js",
     "src/js/scheme.js",
     "src/js/schemes.js",
