@@ -289,6 +289,20 @@ the same edit, or record the difference as a gap.
 > user presets and hand-picked customs are contrast-checked at save time
 > (schemeContrastFailures: body/secondary 4.5, on-accent 3.0) with a warning, never silently.
 >
+> **Settings persistence** runs through a transport seam (`src/js/settings-transport.js`):
+> every read and write of theme preferences passes through it and lands in three theme user
+> variables (`theme-<folder>-features`, `theme-<folder>-custom`, `theme-<folder>-colors`).
+> These are isolated from Domoticz core preferences and cannot clobber them. Card min/max
+> widths now persist too, appended to the custom array at positions 10 and 11; before the seam
+> they were cache-only and reset to the token default (320px) on a cold reload. Consumers
+> resolve settings through `dzMergeSettingsLayers(defaults, stored, perUser)` carrying a
+> `schemaVersion` of 1; the per-user layer is scaffolding for per-user readiness (FR #6907)
+> and is a functional no-op on today's load path (`perUser` is null until Domoticz core ships
+> per-user storage, at which point it becomes a third layer here without touching callers).
+> Native `ThemeSettings` storage was evaluated and rejected: the core `storesettings` command
+> rewrites the whole settings form and blanks any preference absent from the payload
+> (see `dz-themesettings-probe.js`), so the user variables were kept.
+>
 > Machinon publishes the `--dz-*` token names that Domoticz core's globally-linked stylesheets
 > (`css/dashboard.css`, `css/style.css`) consume. It deliberately does not import core's
 > `legacy.css`, so any token core reads must be defined here.
