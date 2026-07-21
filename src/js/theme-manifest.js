@@ -128,9 +128,10 @@ var THEME_MANIFEST = [
             },
             {
                 key: "check_update", storageKey: "check_update", control: "toggle",
-                label: "Update notice", description: "Update notice for the theme",
+                label: "Update notice",
+                description: "Checks the theme's upstream repo for a newer theme version and shows a notice (separate from Domoticz's own app-update check)",
                 appliesTo: "Navbar badge", previewId: "sketch-update", parent: null,
-                reloadOnDisable: true, status: "audit"
+                reloadOnDisable: true, status: "keep"
             },
             {
                 key: "notification", storageKey: "notification", control: "toggle",
@@ -194,10 +195,10 @@ var THEME_MANIFEST = [
             },
             {
                 key: "sidemenu", storageKey: "sidemenu", control: "toggle",
-                label: "Side menu (legacy)",
-                description: "RETIRE CANDIDATE: docs pass found sidemenu.css loads unconditionally via custom.css's media-gated import; flag appears dead. Verify feature-loader does nothing meaningful, then retire flag + feature entry",
-                appliesTo: "Navigation", previewId: null, parent: null,
-                reloadOnDisable: false, status: "audit"
+                label: "Side menu on desktop",
+                description: "Use the side menu layout on desktop screens (phones always use the side menu)",
+                appliesTo: "Desktop layout", previewId: null, parent: null,
+                reloadOnDisable: false, status: "keep"
             }
         ]
     },
@@ -354,14 +355,17 @@ var THEME_MANIFEST = [
                 label: "Custom colors", description: "Custom colors (7 swatches)",
                 appliesTo: "Whole UI", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep"
-            },
-            {
-                key: "dark_theme", storageKey: "dark_theme", control: "toggle",
-                label: "Dark theme (legacy)",
-                description: "AUDIT: legacy dark_theme.css feature vs the scheme system's dark base; if the scheme system fully supersedes it, retire; else expose honestly in S",
-                appliesTo: "Whole UI", previewId: null, parent: null,
-                reloadOnDisable: false, status: "audit"
             }
+            /* dark_theme has NO standalone toggle row here on purpose. It is a
+               live theme.json feature (drives applyScheme("dark") / Machinon
+               Dark via setDarkFeature + setColorScheme, and loads
+               dark_theme.css), but dark is chosen through the scheme picker
+               above, not a manual flag. A manual flip of dark_theme desyncs
+               <html data-dz-scheme> from the loaded dark_theme.css (light
+               token base + dark-only overrides = a broken half-dark render),
+               so the standalone toggle was retired (hub Task 9). Coverage for
+               the dark_theme feature key is asserted via HOSTED_CUSTOM_KEYS in
+               dz-manifest-contract.js instead of a row. */
         ]
     },
     {
