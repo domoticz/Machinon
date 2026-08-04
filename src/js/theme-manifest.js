@@ -273,8 +273,12 @@ var THEME_MANIFEST = [
             },
             {
                 key: "wind_direction", storageKey: "wind_direction", control: "toggle",
-                label: "Wind direction as an icon", description: "Wind direction as an icon",
-                appliesTo: "Weather cards", previewId: null, parent: null,
+                label: "Wind arrow points where the wind goes",
+                description: "Domoticz reports the direction wind comes FROM, and the arrow "
+                    + "normally points that way. Turn this on to point it the opposite way, "
+                    + "at where the wind is blowing TO. The compass label (N, SW) always "
+                    + "stays the reported one.",
+                appliesTo: "Wind device cards", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep"
             },
             {

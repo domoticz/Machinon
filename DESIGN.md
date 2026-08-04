@@ -1467,7 +1467,7 @@ Toggled via `theme.json` features object. Each feature has an `enabled` boolean 
 | Fade off items | `fade_off_items` | off | (none) | Reduces opacity to 0.5 on "Off" status devices. |
 | Time ago | `time_ago` | on | (none) | Converts timestamps to relative format via livestamp.js/moment.js. |
 | Standby | `standby` | off | `standby.js`, `standby.css` | Screen dimming after configurable idle timeout. |
-| Wind direction | `wind_direction` | on | (none) | Custom wind direction arrow icons on weather devices. |
+| Wind direction | `wind_direction` | on | (none) | Points the wind arrow at where the wind is blowing TO instead of where it comes FROM. Core reports the meteorological origin (it reads met.no's `wind_from_direction` verbatim) and both core's compass art and the theme's default `images/Wind<DIR>.png` point at it; this swaps in `images/wind-direction/Wind<DIR>.png`, the same glyphs with the pointer moved to the opposite side and the compass label left upright. The two sets must never be the same art: see `images-machinon/scripts/glyph_flip.py`. |
 | Custom colors | `custom_color_scheme` | off | (none) | Enables user-defined color overrides via settings UI. |
 | Custom icons | `icon_image` | off | (none) | Per-device custom icon images from `theme.json` icons array. |
 | Check update | `check_update` | on | `check_update.js` | Checks for Domoticz software updates. |
