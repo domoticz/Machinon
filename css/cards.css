@@ -107,12 +107,12 @@ div.clearfix {
    card grid, no auto-fill columns, but still functional. */
 div.bannercontent .row.divider:has(.item),
 div.bannercontent .row:not(.divider):has(.item) {
-    padding: 5px 0;
+    padding: var(--dz-card-space-sm) 0;
     margin: 0 !important;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(var(--dz-card-min-width), 100%), 1fr));
     justify-content: center;
-    gap: 15px;
+    gap: var(--dz-card-space-xl);
     justify-items: stretch;
     align-items: stretch;
 }
@@ -130,7 +130,7 @@ div.bannercontent .row > .item {
 
     #holder .row .span4 table[id^="item"] > tbody > tr,
     #holder .row .item.span4 table[id^="item"] > tbody > tr {
-        row-gap: 2px !important;
+        row-gap: var(--dz-card-space-2xs) !important;
     }
 }
 
@@ -145,9 +145,9 @@ div.bannercontent .row > .item {
 #holder .row .item table[id^="item"] > tbody > tr {
     position: relative;
     display: block;
-	margin-left: 2px;
+	margin-left: var(--dz-card-space-2xs);
     padding: 0;
-    width: 99%;
+    width: var(--dz-card-fill-width);
     height: 100%;
 }
 
@@ -158,7 +158,7 @@ div.bannercontent .row > .item {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(var(--dz-card-min-width), 100%), 1fr));
     justify-content: center;
-    gap: 15px;
+    gap: var(--dz-card-space-xl);
     justify-items: stretch;
     align-items: stretch;
 }
@@ -176,9 +176,9 @@ div.bannercontent .row > .item {
 .rectangle-8-dropdown,
 #settings .row-fluid > div {
     background: var(--dz-widget-bg);
-    border: 1.5px solid;
+    border: var(--dz-card-border-width) solid;
     border-color: transparent;
-    border-radius: 6px;
+    border-radius: var(--dz-card-radius);
     box-shadow: var(--dz-elev-card);
 }
 
@@ -220,14 +220,14 @@ div.bannercontent .row > .item {
 
 /* Drop target feedback while dragging — target the visible card (tr), not the outer wrapper */
 .ui-droppable-active table[id^="item"] > tbody > tr {
-    outline: 2px dashed rgba(var(--dz-accent-values), 0.3);
-    outline-offset: 3px;
+    outline: var(--dz-card-drop-outline-width) dashed rgba(var(--dz-accent-values), 0.3);
+    outline-offset: var(--dz-card-drop-outline-offset);
 }
 
 .ui-droppable-hover table[id^="item"] > tbody > tr {
-    outline: 2px solid var(--dz-accent-color);
-    outline-offset: 3px;
-    background-color: rgba(var(--dz-accent-values), 0.08);
+    outline: var(--dz-card-drop-outline-width) solid var(--dz-accent-color);
+    outline-offset: var(--dz-card-drop-outline-offset);
+    background-color: rgba(var(--dz-accent-values), var(--dz-card-drop-hover-bg-alpha));
     transition: background-color 0.15s ease;
 }
 
@@ -239,8 +239,8 @@ div.bannercontent .row > .item {
 #holder .row .span4 table[id^="item"] > tbody > tr,
 #holder .row .item.span4 table[id^="item"] > tbody > tr,
 .dd-widget-body .item.itemBlock table[id^="item"] > tbody > tr {
-    grid-template-rows: auto minmax(58px,1fr) minmax(0,20px);
-    grid-template-columns: 48px 18px minmax(0,1fr) minmax(0, auto) minmax(0, auto) 15px;
+    grid-template-rows: auto minmax(var(--dz-card-row-status-min),1fr) minmax(0,var(--dz-card-row-lastupdate-h));
+    grid-template-columns: var(--dz-card-col-icon) var(--dz-card-col-icon2) minmax(0,1fr) minmax(0, auto) minmax(0, auto) var(--dz-card-col-trailing);
     grid-gap: 10px;
     gap: 10px;
     grid-template-areas: 'name name name bigtext bigtext options'
@@ -254,7 +254,7 @@ div.bannercontent .row > .item {
 #holder .row .item.span4 table[id="itemtablesmalldoubleicon"] > tbody > tr,
 .dd-widget-body .item.itemBlock table[id="itemtabledoubleicon"] > tbody > tr,
 .dd-widget-body .item.itemBlock table[id="itemtablesmalldoubleicon"] > tbody > tr {
-    grid-template-columns: 48px 48px minmax(0,1fr) minmax(0, auto) minmax(0, auto) 15px;
+    grid-template-columns: var(--dz-card-col-icon) var(--dz-card-col-icon) minmax(0,1fr) minmax(0, auto) minmax(0, auto) var(--dz-card-col-trailing);
     grid-template-areas: 'name name name bigtext bigtext options'
     'img img2 status status status status'
     'favorite lastupdate lastupdate lastupdate tools tools';
@@ -277,7 +277,7 @@ div.bannercontent .row > .item {
 
 #holder #dashcontent .row .span4 .item table[id^="item"] > tbody > tr,
 #holder #dashcontent .row .item.span4 table[id^="item"] > tbody > tr {
-    grid-template-rows: 40px minmax(58px,1fr) 0;
+    grid-template-rows: var(--dz-card-row-name-h-dash) minmax(var(--dz-card-row-status-min),1fr) 0;
     overflow: hidden;
 }
 
@@ -330,7 +330,7 @@ div.bannercontent .row > .item {
     min-height: 0;
     grid-gap: 4px;
     gap: 4px;
-    grid-template-rows: minmax(0, auto) minmax(0, 1fr) minmax(0, 20px);
+    grid-template-rows: minmax(0, auto) minmax(0, 1fr) minmax(0, var(--dz-card-row-lastupdate-h));
 }
 .dd-widget--dz-device .item.itemBlock table[id^="item"] > tbody > tr > td {
     min-height: 0;
@@ -419,18 +419,18 @@ div.bannercontent .row > .item {
 .dd-widget--dz-device .item .dimslidersmalldouble,
 .dd-widget--dz-device .item .dimslidersmalltripple {
     top: auto;
-    bottom: 10px;
+    bottom: var(--dz-card-dash2-slider-bottom);
 }
 @container (min-width: 200px) {
     .dd-widget--dz-device .item .dimslidersmalldouble {
         bottom: auto;
-        left: 121px !important;
+        left: var(--dz-card-dash2-slider-left-double) !important;
     }
 }
 @container (min-width: 220px) {
     .dd-widget--dz-device .item .dimslidersmalltripple {
         bottom: auto;
-        left: 139px !important;
+        left: var(--dz-card-dash2-slider-left-triple) !important;
     }
 }
 
@@ -443,10 +443,10 @@ div.item.statusLowBattery td#name,
 div.item.statusDisabled td#name,
 table.mobileitem td#name,
 table.mobileitem td.name {
-    padding: 10px 0 0 10px;
+    padding: var(--dz-card-space-lg) 0 0 var(--dz-card-space-lg);
     color: var(--dz-body-text);
     background: transparent !important;
-    line-height: 18px;
+    line-height: var(--dz-card-name-line-height);
     grid-area: name;
     white-space: normal;
     word-wrap: break-word;
@@ -487,13 +487,13 @@ table.mobileitem td.name {
     left: 0;
     right: 0;
     top: 100%;
-    margin-top: 4px;
+    margin-top: var(--dz-card-tooltip-gap);
     background: var(--dz-widget-bg);
     color: var(--secondary-text-color);
     font-size: var(--dz-text-micro);
     font-weight: var(--dz-weight-regular);
-    padding: 6px 10px;
-    border-radius: 4px;
+    padding: var(--dz-card-tooltip-pad);
+    border-radius: var(--dz-card-tooltip-radius);
     box-shadow: var(--dz-elev-popup);
     white-space: normal;
     overflow-wrap: anywhere;
@@ -516,11 +516,11 @@ table.mobileitem td.name {
     color: var(--dz-accent-color);
     background: transparent;
     font-size: var(--dz-text-lg);
-    line-height: 20px;
+    line-height: var(--dz-card-value-line-height);
     grid-area: bigtext;
     justify-self: right;
     text-align: right;
-    padding: 10px 0 0 10px;
+    padding: var(--dz-card-space-lg) 0 0 var(--dz-card-space-lg);
     min-width: 0;
     overflow-wrap: break-word;
 }
@@ -537,13 +537,13 @@ table.mobileitem td.name {
     top: 0;
     left: 0;
     right: 0;
-    height: 4px;
+    height: var(--dz-card-bar-height);
     margin: 0;
-    border-radius: 6px 6px 0 0;
+    border-radius: var(--dz-card-radius) var(--dz-card-radius) 0 0;
 }
 
 .item .dz-uw-bar .dz-uw-bar-fill {
-    border-radius: 6px 0 0 0;
+    border-radius: var(--dz-card-radius) 0 0 0;
 }
 
 /* last update */
@@ -553,7 +553,7 @@ table.mobileitem td.name {
     grid-column: 1 / -1;
     justify-self: end;
     align-self: center;
-    padding-right: 50px;
+    padding-right: var(--dz-card-lastupdate-pad-right);
     font-size: var(--dz-text-xs);
 }
 /* type */
@@ -562,7 +562,7 @@ table.mobileitem td.name {
     grid-area: status;
     justify-self: right;
     align-self: center;
-    padding-right: 20px;
+    padding-right: var(--dz-card-space-2xl);
     max-width: 100%;
     font-size: 0;
 }
@@ -571,11 +571,11 @@ table.mobileitem td.name {
 .item .status {
     color: var(--dz-body-text);
     grid-area: status;
-    padding-right: 20px;
+    padding-right: var(--dz-card-space-2xl);
     align-self: center;
     justify-self: right;
     text-align: left;
-    max-height: 60px;
+    max-height: var(--dz-card-status-max-height);
 	white-space: normal;
     overflow-y: auto;
     scrollbar-width: thin;
@@ -585,16 +585,16 @@ table.mobileitem td.name {
 .btn-group::-webkit-scrollbar,
 .item #status::-webkit-scrollbar,
 .item .status::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-    border-radius: 5px;
+    width: var(--dz-card-scrollbar-size);
+    height: var(--dz-card-scrollbar-size);
+    border-radius: var(--dz-card-radius-chrome);
 }
 
 /* Button groups in device cards: pills with gap */
 .item .btn-group {
     display: flex !important;
     flex-flow: row wrap;
-    gap: 3px;
+    gap: var(--dz-card-space-xs);
     justify-content: center;
     scrollbar-width: thin;
     scrollbar-color: var(--dz-accent-color) var(--dz-body-bg);
@@ -604,25 +604,25 @@ table.mobileitem td.name {
 .item .btn-group > .btn,
 .item .btn-group > .btn:first-child,
 .item .btn-group > .btn:last-child {
-    border-radius: 5px !important;
+    border-radius: var(--dz-card-radius-chrome) !important;
     margin: 0 !important;
 }
 
 .item .btn-group > .btn:not(:first-child):not(:last-child) {
-    border-radius: 5px !important;
+    border-radius: var(--dz-card-radius-chrome) !important;
 }
 
 .item .btn-group::-webkit-scrollbar-thumb,
 .item #status::-webkit-scrollbar-thumb,
 .item .status::-webkit-scrollbar-thumb {
     background: var(--dz-accent-color);
-    border-radius: 5px;
+    border-radius: var(--dz-card-radius-chrome);
 }
 
 /* item subnav applying by click*/
 .options-cell {
-    padding: 0 3px !important;
-    margin-right: 5px !important;
+    padding: 0 var(--dz-card-space-xs) !important;
+    margin-right: var(--dz-card-space-sm) !important;
     color: var(--dz-accent-color);
     background: transparent;
     font-size: var(--dz-icon-size-md);
@@ -635,7 +635,7 @@ table.mobileitem td.name {
    #itemtable cards and shrink the full-width row highlight band. */
 body table#itemtable tr > .options {
     display: none;
-    padding: 8px 0;
+    padding: var(--dz-card-space-md) 0;
 }
 
 /* Flyout container geometry (owner feedback 2026-07-17, second pass): the
@@ -655,14 +655,14 @@ body table#itemtable tr > .options {
        --dz-menu-bg token separates the flyout from the card it floats over;
        the navbar dropdown (css/nav.css) consumes the same token. */
     background: var(--dz-menu-bg);
-    border-radius: 5px;
-    right: 5px;
-    top: 8px;
+    border-radius: var(--dz-card-radius-chrome);
+    right: var(--dz-card-options-offset);
+    top: var(--dz-card-options-top);
     box-shadow: var(--dz-elev-overlay);
     z-index: 1;
-    padding: 8px 0;
+    padding: var(--dz-card-space-md) 0;
     width: max-content;
-    min-width: 120px;
+    min-width: var(--dz-card-options-min-width);
     font-size: 0;
 }
 
@@ -736,9 +736,9 @@ body table#itemtable tr > .options {
     grid-row: 3;
     grid-column: 1 / -1;
     justify-self: start;
-    margin-left: 10px !important;
+    margin-left: var(--dz-card-space-lg) !important;
     font-size: var(--dz-text-md);
-    line-height: 16px;
+    line-height: var(--dz-card-favorite-line-height);
     color: var(--dz-accent-color);
 }
 
@@ -746,7 +746,7 @@ body table#itemtable tr > .options {
     grid-row: 3;
     grid-column: 1 / -1;
     justify-self: end;
-    padding-right: 5px;
+    padding-right: var(--dz-card-space-sm);
 }
 
 /* Card Log/Timer icon pair: quiet icon treatment, not a button (owner
@@ -760,9 +760,9 @@ body table#itemtable tr > .options {
 .timers_log .btnsmall,
 .timers_log .btnsmall-sel {
     display: inline;
-    padding: 0 5px;
+    padding: 0 var(--dz-card-space-sm);
     font-size: 0;
-    line-height: 16px;
+    line-height: var(--dz-card-favorite-line-height);
     color: var(--dz-accent-color);
     border: none !important;
 }
@@ -771,33 +771,33 @@ body table#itemtable tr > .options {
 .item #img {
     grid-area: img;
     align-self: end;
-    padding: 0 10px;
+    padding: 0 var(--dz-card-space-lg);
 }
 
 .item .img img,
 .item #img img {
-    width: 40px;
-    height:40px;
+    width: var(--dz-card-img-size);
+    height: var(--dz-card-img-size);
 }
 
 .item #img1 {
     grid-area: img;
     align-self: end;
-    padding: 0 10px;
+    padding: 0 var(--dz-card-space-lg);
 }
 
 /* The active scene icon (core scene_widget.html puts it in #img1) rendered at the
    PNG's intrinsic size while #img is pinned to 40px on the same card: a 96px master
    measured 48x48 next to its 40x40 sibling. Same box as .item #img img. */
 .item #img1 img {
-    width: 40px;
-    height: 40px;
+    width: var(--dz-card-img-size);
+    height: var(--dz-card-img-size);
     object-fit: contain;
 }
 
 #itemtabledoubleicon #img2 img,
 #itemtablesmalldoubleicon #img2 img {
-    width: 40px;
+    width: var(--dz-card-img-size);
 }
 
 /* Blinds stop button: centre it in place. The slider keeps its narrow column and
@@ -810,7 +810,7 @@ body table#itemtable tr > .options {
 #itemtabletrippleicon #img2 img,
 #itemtablesmalltrippleicon #img2 img {
     width: 100%;
-    height: 40px;
+    height: var(--dz-card-img-size);
     object-fit: contain;
     /* The stop column is ~18px wide while its neighbours render 40px, and
        object-fit caps the square glyph at column width. Scale is paint-only
@@ -849,8 +849,8 @@ body table#itemtable tr > .options {
 
 .item .img3 img,
 .item #img3 img {
-    width: 40px;
-    height: 40px;
+    width: var(--dz-card-img-size);
+    height: var(--dz-card-img-size);
 }
 
 /* Hover/focus affordance for clickable device icons: an in-place tonal pop
@@ -892,7 +892,7 @@ body table#itemtable tr > .options {
     grid-area: status;
     justify-self: right;
     align-self: center;
-    padding-right: 20px;
+    padding-right: var(--dz-card-space-2xl);
     max-width: 100%;
 }
 
@@ -903,7 +903,7 @@ body table#itemtable tr > .options {
 }
 
 .selectorlevels > select {
-    padding: 5px;
+    padding: var(--dz-card-space-sm);
     color: var(--dz-accent-color) !important;
     outline: 0;
     max-width: 100%;
@@ -918,7 +918,7 @@ body table#itemtable tr > .options {
 #dashcontent #timeago {
     display: inline-table;
     grid-area: lastupdate / lastupdate / tools / tools;
-    padding-right: 20px;
+    padding-right: var(--dz-card-space-2xl);
 }
 
 .item #timeago {
@@ -948,13 +948,13 @@ body table#itemtable tr > .options {
 .input .dimslider,
 .statusNormal .dimslider,
 .statusProtected .dimslider {
-    background: rgba(0, 0, 0, 0.26);
+    background: var(--dz-card-slider-track-bg);
     border: none;
-    border-radius: 3px;
+    border-radius: var(--dz-card-slider-radius);
     box-shadow: none;
-    height: 5px;
-    right: 20px;
-    width: calc(100% - 100px) !important;
+    height: var(--dz-card-slider-height);
+    right: var(--dz-card-slider-right);
+    width: calc(100% - var(--dz-card-slider-inset)) !important;
 }
 
 /* Blinds sliders (any card with a second icon cell). Anchor BOTH edges instead
@@ -969,7 +969,7 @@ body table#itemtable tr > .options {
 .span4 td#img2 ~ .input .dimslider,
 .span4 td#img2 ~ .statusNormal .dimslider,
 .span4 td#img2 ~ .statusProtected .dimslider {
-    left: 14px;
+    left: var(--dz-card-blinds-slider-left);
     width: auto !important;
     margin-top: 0 !important;
 }
@@ -985,16 +985,16 @@ body table#itemtable tr > .options {
 .input .dimslider .ui-slider-handle,
 .statusNormal .dimslider .ui-slider-handle,
 .statusProtected .dimslider .ui-slider-handle {
-    width: 15px;
-    height: 15px;
+    width: var(--dz-card-slider-handle-size);
+    height: var(--dz-card-slider-handle-size);
     background: var(--dz-accent-color);
     border-radius: 50%;
-    top: -5px;
+    top: var(--dz-card-slider-handle-offset);
 }
 
 @media (min-width: 1200px) {
     #type .dimslider, .input .dimslider {
-        width: 55% !important;
+        width: var(--dz-card-slider-width-wide) !important;
     }
 }
 

@@ -34,13 +34,13 @@ body.dashMobile #tbTimeSun .fa-sun {
 }
 
 body.dashMobile section:first-of-type table.mobileitem {
-    margin-top: 20px;
+    margin-top: var(--dz-card-space-2xl);
 }
 
 body.dashMobile table.mobileitem {
     width: 100%;
     padding: 0;
-    margin-top: 10px;
+    margin-top: var(--dz-card-space-lg);
     box-shadow: var(--dz-elev-popup);
 }
 
@@ -80,13 +80,13 @@ body.dashMobile table.mobileitem td {
     flex-grow: 1;
     flex-shrink: 1;
     align-items: center;
-    padding: 5px!important;
+    padding: var(--dz-card-space-sm)!important;
     border-color: var(--dz-body-bg);
 }
 
 body.dashMobile table.mobileitem td:last-child {
     font-weight: var(--dz-weight-semibold);
-    min-height: 25px;
+    min-height: var(--dz-mobile-card-value-min-height);
 }
 
 body.dashMobile table.mobileitem td[colspan="2"]:last-child {
@@ -117,9 +117,9 @@ body.dashMobile table.mobileitem td.name a {
     text-decoration: none;
     border-radius: 50%;
     display: block;
-    height: 18px;
-    width: 18px;
-    margin-right: 5px;
+    height: var(--dz-mobile-card-name-badge-size);
+    width: var(--dz-mobile-card-name-badge-size);
+    margin-right: var(--dz-card-space-sm);
 }
 
 body.dashMobile table.mobileitem th a:after,
@@ -130,12 +130,12 @@ body.dashMobile table.mobileitem td.name a:after {
     color: inherit;
     font-size: var(--dz-text-xs);
     text-align: center;
-    width: 18px;
+    width: var(--dz-mobile-card-name-badge-size);
 }
 
 body.dashMobile table.mobileitem td#status,
 body.dashMobile table.mobileitem td.status {
-    max-width: 60%;
+    max-width: var(--dz-mobile-card-status-max-width);
     justify-content: flex-end;
     flex-grow: 1;
     flex-shrink: 1;
@@ -143,22 +143,22 @@ body.dashMobile table.mobileitem td.status {
 }
 
 body.dashMobile table.mobileitem .status > span > span {
-    margin-right: 7px;
+    margin-right: var(--dz-mobile-card-status-inner-gap);
 }
 
 body.dashMobile table.mobileitem .btn-group {
     white-space: normal;
-    padding: 10px 5px;
-    margin-top: 15px !important;
+    padding: var(--dz-card-space-lg) var(--dz-card-space-sm);
+    margin-top: var(--dz-card-space-xl) !important;
 }
 
 body.dashMobile table.mobileitem .btn-group .btn {
     padding-top: 0 !important;
     padding-bottom: 0 !important;
     font-size: var(--dz-text-sm);
-    margin-left: 2px !important;
-    margin-bottom: 2px !important;
-    border-radius: 5px !important;
+    margin-left: var(--dz-card-space-2xs) !important;
+    margin-bottom: var(--dz-card-space-2xs) !important;
+    border-radius: var(--dz-mobile-card-btn-radius) !important;
 }
 
 /* Mobile-row button chip (.btn-mini: On/Off, Contact, Siren, selector levels;
@@ -173,14 +173,14 @@ body.dashMobile table.mobileitem .btn-group .btn {
    plain-declaration tie, so the computed radius was already the token; removed
    rather than restated. */
 body.dashMobile table.mobileitem .btn-mini {
-    margin-left: 2px;
+    margin-left: var(--dz-card-space-2xs);
     background: var(--dz-widget-bg) !important;
     background-image: none !important;
-    border: 1px solid var(--dz-accent-color);
+    border: var(--dz-mobile-card-btnmini-border-width) solid var(--dz-accent-color);
     color: var(--dz-body-text) !important;
     padding: var(--dz-btn-pad-xs) !important;
     font-size: var(--dz-text-micro);
-    min-width: 40px;
+    min-width: var(--dz-mobile-card-btnmini-min-width);
     text-align: center;
     box-sizing: border-box;
 }
@@ -211,11 +211,11 @@ body.dashMobile table.mobileitem .btn-mini.btn-selected {
 }
 
 body.dashMobile table.mobileitem .dimslider {
-    background: rgba(0, 0, 0, 0.26);
+    background: var(--dz-card-slider-track-bg);
     border: none;
-    border-radius: 3px;
+    border-radius: var(--dz-card-slider-radius);
     box-shadow: none;
-    height: 5px;
+    height: var(--dz-card-slider-height);
     margin-top: unset !important;
 }
 
@@ -224,11 +224,11 @@ body.dashMobile table.mobileitem .dimslider .ui-slider-range {
 }
 
 body.dashMobile table.mobileitem .dimslider .ui-slider-handle {
-    width: 15px;
-    height: 15px;
+    width: var(--dz-card-slider-handle-size);
+    height: var(--dz-card-slider-handle-size);
     background: var(--dz-accent-color);
     border-radius: 50%;
-    top: -6px;
+    top: var(--dz-mobile-card-slider-handle-offset);
 }
 
 body.dashMobile table.mobileitem .selectorlevels .ui-selectmenu-button {
@@ -236,7 +236,7 @@ body.dashMobile table.mobileitem .selectorlevels .ui-selectmenu-button {
 }
 
 body.dashMobile table.mobileitem .selectorlevels {
-    margin-top: -30px !important;
+    margin-top: var(--dz-mobile-card-selectorlevels-margin) !important;
     width: 100%;
 }
 
@@ -263,7 +263,9 @@ body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) {
     flex-wrap: wrap;
     justify-content: flex-end;
     align-items: center;
-    gap: 8px; /* future --dz-gap token site (spacing project), matches #updelclr gap below */
+    gap: var(--dz-card-space-md); /* inside a card, so it joins the card scale; the 3 sibling
+      "future --dz-gap token site" spots below (Timers/Events forms, not card anatomy) are out
+      of the cards-polish audit's scope and stay literal, see cards-polish task-2 report */
 }
 body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) > span {
     display: contents;

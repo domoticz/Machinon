@@ -6,7 +6,7 @@
 */
 /* Compact mode */
 section.compact {
-    margin-bottom: 20px;
+    margin-bottom: var(--dz-card-space-2xl);
 }
 
 section.compact h2 {
@@ -16,10 +16,10 @@ section.compact h2 {
 section.compact .row.divider,
 section.compact .row:not(.divider) {
     display: grid;
-    grid-template-columns: repeat(auto-fill, 180px);
+    grid-template-columns: repeat(auto-fill, var(--dz-card-compact-width));
     grid-auto-flow: row dense;
     justify-content: space-evenly;
-    row-gap: 20px;
+    row-gap: var(--dz-card-space-2xl);
     padding: 0;
 }
 
@@ -30,8 +30,8 @@ section.compact .row:not(.divider) {
 }
 
 .span3 #name {
-    padding: 2px 10px;
-    line-height: 14px;
+    padding: var(--dz-card-space-2xs) var(--dz-card-space-lg);
+    line-height: var(--dz-card-compact-name-line-height);
     text-overflow: ellipsis;
     overflow: hidden;
 }
@@ -41,14 +41,14 @@ section.compact .row:not(.divider) {
 }
 
 .span3 td.input {
-    padding: 10px 15px;
-    width: calc(100% - 10px);
-    max-width: 100px;
+    padding: var(--dz-card-space-lg) var(--dz-card-space-xl);
+    width: calc(100% - var(--dz-card-compact-input-inset));
+    max-width: var(--dz-card-compact-input-max-width);
     text-align: right;
 }
 
 .span3 td#img2 ~ td.input {
-     width: calc(100% - 60px);
+     width: calc(100% - var(--dz-card-compact-input-inset-icon));
 }
 
 .span3 td.input .btn-group,
@@ -57,7 +57,7 @@ section.compact .row:not(.divider) {
     justify-content: start;
     white-space: normal;
     margin-top: 0 !important;
-    height: 50px;
+    height: var(--dz-card-compact-btngroup-height);
     width: 100%;
     /* the group itself is the scroll container: without this the
        non-selected buttons stack past the 50px design height and hang
@@ -79,7 +79,7 @@ section.compact .row:not(.divider) {
 .span3 td#status .btn-group button.btn-selected {
     color: var(--dz-accent-text) !important;
     font-size: var(--dz-text-md);
-    min-height: 50px;
+    min-height: var(--dz-card-compact-btngroup-height);
     order: 1;
 }
 
@@ -90,7 +90,7 @@ section.compact .row:not(.divider) {
 .span3 .switch-cell {
     grid-area: status;
     align-self: start;
-    padding: 0 10px;
+    padding: 0 var(--dz-card-space-lg);
 }
 
 #dashSwitches .span3 #bigtext,
@@ -108,17 +108,17 @@ section.compact .row:not(.divider) {
 #dashTemperature .span3 #bigtext,
 #dashUtility .span3 #bigtext {
     grid-area: status;
-    padding: 0 10px;
+    padding: 0 var(--dz-card-space-lg);
     align-self: center;
     font-size: var(--dz-text-lg);
 }
 
 #holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr,
 #holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr {
-    grid-template-rows: 28px 50px 12px;
-    grid-template-columns: 58px 5px 1fr;
-    grid-gap: 2px;
-    gap: 2px;
+    grid-template-rows: var(--dz-card-compact-row-heights);
+    grid-template-columns: var(--dz-card-compact-col-widths);
+    grid-gap: var(--dz-card-space-2xs);
+    gap: var(--dz-card-space-2xs);
     grid-template-areas:
         'name name name'
         'img img2 bigtext'
@@ -131,7 +131,7 @@ section.compact .row:not(.divider) {
     grid-area: bigtext;
     font-size: var(--dz-text-lg);
     font-weight: var(--dz-weight-semibold);
-    padding: 2px 8px 0 0;
+    padding: var(--dz-card-space-2xs) var(--dz-card-space-md) 0 0;
     text-align: right;
     align-self: center;
     color: var(--dz-accent-color);
@@ -152,14 +152,14 @@ section.compact .row:not(.divider) {
     display: block;
     grid-area: bigtext;
     align-self: center;
-    padding: 10px 15px;
+    padding: var(--dz-card-space-lg) var(--dz-card-space-xl);
     overflow: auto;
 }
 
 #holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr td#lastupdate,
 #holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr td#lastupdate {
     grid-area: lastupdate;
-    padding: 0 8px 2px 0;
+    padding: 0 var(--dz-card-space-md) var(--dz-card-space-2xs) 0;
     text-align: right;
     align-self: center;
     font-size: var(--dz-text-micro);
@@ -180,7 +180,7 @@ section.compact .row:not(.divider) {
 
 #holder #dashcontent .row .span3 .item table[id="itemtablesmalltrippleicon"] > tbody > tr,
 #holder #dashcontent .row .item.span3 table[id="itemtablesmalltrippleicon"] > tbody > tr {
-    grid-template-columns: 58px 45px 58px;
+    grid-template-columns: var(--dz-card-compact-col-widths-triple);
     grid-template-areas: 'name name name'
     'img img2 img3'
     'lastupdate lastupdate lastupdate';
