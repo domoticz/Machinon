@@ -212,7 +212,7 @@ components:
   dropdown-menu:
     backgroundColor: "{colors.light-navbar}"
     rounded: "{rounded.container}"
-    elevation: "--dz-elev-overlay"
+    elevation: "--dz-elev-popup"
     hoverBg: "rgba({colors.light-primary}, 0.15)"
   dialog:
     backgroundColor: "{colors.light-bg}"
@@ -525,9 +525,9 @@ identically until a future pass deliberately tunes them.
 |-------|------|-------|-------|-------|
 | 0 | flat | none | `none` | Default state, transparent backgrounds |
 | 1 | card | `--dz-elev-card` | `0px 0px 10px 1px rgba(0, 0, 0, 0.2)` | Device cards, DataTables, log console, page-content containers |
-| 2 | popup | `--dz-elev-popup` | `0px 0px 10px 2px rgba(0, 0, 0, 0.2)` | Options popup, message toast, setpoint popup, dropdown-menu family |
+| 2 | popup | `--dz-elev-popup` | `0px 0px 10px 2px rgba(0, 0, 0, 0.2)` | Navbar inner and dropdown menus (nav, sidemenu, settings), Highcharts export menu, card tooltips, mobile item cards, mobile search input |
 | 3 | button | `--dz-btn-shadow` | see [Buttons](#buttons) Token Table | Resting shadow for every filled button; the value lives in the Buttons section's token table, referenced here rather than duplicated, along with the hover/pressed/focus-ring variants |
-| 4 | overlay | `--dz-elev-overlay` | `-2px 2px 20px 0px rgba(0, 0, 0, 0.2)` | Dropdown menus, options card flyout, setpoint popup surface, mobile search |
+| 4 | overlay | `--dz-elev-overlay` | `-2px 2px 20px 0px rgba(0, 0, 0, 0.2)` | Card options flyout, setpoint popup, search message toast |
 | 5 | drag | `--dz-elev-drag` | `0 8px 24px rgba(0, 0, 0, 0.3)` | Drag ghost during card reorder |
 
 Each value derives from the measured de facto majority across the theme's `box-shadow`
@@ -591,15 +591,21 @@ fixed here.
 
 ### Dark Underlay
 
-`dark.css` currently redefines every `--dz-elev-*`, `--dz-glow-*`, and `--dz-ring-*` token to the
-identical light-scheme value. This is by design, not an oversight: dark-specific shadow tuning
-(stronger alphas so a shadow reads against a dark surface, for example) was deliberately deferred
-and is offered as an owner decision at the Task 8 gate, not assumed here.
+`dark.css` redefines every `--dz-elev-*`, `--dz-glow-*`, and `--dz-ring-*` token to the identical
+light-scheme value. This is by design, not an oversight: dark-specific shadow tuning (stronger
+alphas so a shadow reads against a dark surface, for example) was deliberately deferred to the
+Task 8 gate. That gate closed 2026-08-07 with the verdict "keep identical, nothing queued," so
+light and dark render identically until a future pass reopens the question.
 
 ### Exceptions
 
-Three declarations in the theme are not, and are not meant to become, tokens. Each carries a
-`dz-shadow-exception` marker comment at its declaration site so the checker (below) skips it:
+Three declarations in the theme carry a `dz-shadow-exception` marker comment at their
+declaration site, documenting why each is intentionally not a named elevation/glow/ring token.
+The marker is documentation, not a functional skip: the two CSS exceptions below already pass
+`scripts/check-shadows.sh` on their own merit, since each layer pairs literal geometry with a
+token-driven color, which the checker accepts per the per-layer rule described below. The JS
+exception sits outside the checker's `*.css` scope entirely, so it is never scanned regardless
+of the marker.
 
 - **`css/device-status.css`**, the `updatePulse` keyframe's 50% peak (see Update pulse above):
   an animated intermediate value, not a resting or hover state.
@@ -614,10 +620,12 @@ Three declarations in the theme are not, and are not meant to become, tokens. Ea
 ### The Shadow Contract (enforcement)
 
 `scripts/check-shadows.sh` checks every `box-shadow` declaration in theme CSS (excluding
-`dz-tokens.css`, `dark.css`, and vendor CSS): each comma-separated layer must resolve through a
-`var(--dz-*)` token, be a `none` reset, or sit on a line carrying a `dz-shadow-exception` marker.
-It gates `makerelease.sh` alongside `check-typography.sh` and `check-buttons.sh`: a release cannot
-ship with a raw shadow value in theme CSS.
+`dz-tokens.css`, `dark.css`, and vendor CSS), one comma-separated layer at a time: a layer passes
+when it contains a `var(--dz-*)` reference anywhere in it, so literal geometry paired with a
+token-driven color (`0px 0px 0px 2px rgb(var(--dz-status-timeout-values))`, the live shape of
+device-status.css's status rings) passes by design. A layer with no token reference fails unless
+the whole declaration is a `none` reset or its line carries a `dz-shadow-exception` marker. It
+gates `makerelease.sh` alongside `check-typography.sh` and `check-buttons.sh`.
 
 ## Buttons
 
@@ -1370,7 +1378,7 @@ Handle translates `34px` right on toggle, `0.4s` transition.
 
 - **Active page**: `rgba(blue, 0.4)` background, `1px solid blue` border
 - **Dropdown hover**: `rgba(blue, 0.15)` background
-- **Dropdown menu**: `var(--dz-body-bg)` background, `{rounded.container}` radius, `--dz-elev-overlay` shadow
+- **Dropdown menu**: `var(--dz-body-bg)` background, `{rounded.container}` radius, `--dz-elev-popup` shadow
 
 **Sub-tabs / Nav-tabs**: underline style. Inactive: transparent bottom border. Active/hover: `2px solid var(--dz-accent-color)` bottom border, blue text color. No background change.
 

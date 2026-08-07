@@ -183,7 +183,10 @@ div.bannercontent .row > .item {
 }
 
 /* box-shadow is a single property, so a hover rule that lists only the ring DELETES the
-   card's drop shadow. Always restate the resting shadow first, then add the ring. */
+   card's drop shadow. Use var(--dz-ring-hover): it composes var(--dz-elev-card) with the
+   ring so the resting shadow is never dropped. (The restate-then-add pattern still applies
+   where the ring is a raw literal instead of the composed token, e.g. the status-ring
+   hovers in css/device-status.css.) */
 #holder .row .item table[id^="item"] > tbody > tr:hover,
 .rectangle-8:hover,
 .rectangle-8-dropdown:hover,
@@ -192,8 +195,9 @@ div.bannercontent .row > .item {
 }
 
 /* Dynamic dashboard only: the card is full-bleed in a clipped cell (see the note above), so
-   an outer ring would be shaved off on all four sides. Inset is the only ring that survives.
-   Change this back to an outer ring ONLY together with a card that is ~4px shorter here. */
+   an outer ring is clipped top/bottom (measured 2026-08-07: L/R 4px clearance, T/B 0px).
+   Inset is the only ring that survives today; the outer-ring plan (breathing-room tweak,
+   verified across widget types) is scoped in the todo's Cards polish item. */
 .dd-widget-body .item table[id^="item"] > tbody > tr:hover {
     box-shadow: var(--dz-ring-hover-inset);
 }

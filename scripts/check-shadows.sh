@@ -4,6 +4,21 @@
 # none reset, or carry a dz-shadow-exception marker. See DESIGN.md and the
 # 2026-08-07 shadow audit (docs/superpowers/2026-08-07-shadow-audit.md).
 # Exit 0 clean, 1 violations.
+#
+# Scope note: this gate only ever looks at *.css files (see the `files=`
+# glob below); it does not, and cannot, see the one inline shadow in
+# src/js/theme-hub-previews.js. That JS declaration carries its own
+# dz-shadow-exception marker for documentation, but the marker is not what
+# exempts it, the checker never reads the file at all. If more JS-side
+# shadows show up, add a narrow grep over src/js here rather than assuming
+# this script already covers them.
+#
+# Validation note: like the sibling checkers (check-typography.sh,
+# check-buttons.sh), this one validates that a value REFERENCES a --dz-*
+# token, not that the token EXISTS. A typoed custom property name
+# (`var(--dz-elv-card)`) still matches the `var(--dz-` pattern and passes,
+# then computes to `none` at runtime because the browser can't resolve it.
+# This script cannot catch that class of bug.
 set -u
 cd "$(dirname "$0")/.."
 fail=0
