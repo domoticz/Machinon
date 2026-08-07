@@ -85,11 +85,12 @@ spacing:
   # xxl: 32px (future)
 
 elevation:
-  card: "0 0 10px 1px rgba(0,0,0,0.2)"
-  popup: "-2px 2px 20px rgba(0,0,0,0.2)"
-  button: "0 1px 3px rgba(0,0,0,.18), 0 1px 2px rgba(0,0,0,.10)"
-  overlay: "0 5px 10px rgba(0,0,0,0.5)"
-  drag: "0 8px 24px rgba(0,0,0,0.3)"
+  # Level 3 (button) is not restated here: it is owned by --dz-btn-shadow in the
+  # Buttons section's Token Table, referenced from the Elevation table, never duplicated.
+  card: "0px 0px 10px 1px rgba(0, 0, 0, 0.2)"
+  popup: "0px 0px 10px 2px rgba(0, 0, 0, 0.2)"
+  overlay: "-2px 2px 20px 0px rgba(0, 0, 0, 0.2)"
+  drag: "0 8px 24px rgba(0, 0, 0, 0.3)"
 
 components:
   # Buttons: soft-elevated redesign (2026-07-17). Every filled/ghost/toggle/
@@ -156,12 +157,12 @@ components:
     backgroundColor: "{colors.light-surface}"
     border: "1.5px solid transparent"
     rounded: "{rounded.container}"
-    elevation: "{elevation.card}"
+    elevation: "--dz-elev-card"
     gap: "{spacing.sm}"
   device-card-hover:
-    boxShadow: "{elevation.card}, 0 0 0 2px {colors.light-primary}"
+    boxShadow: "--dz-ring-hover"
     # On the Dynamic Dashboard the card is full-bleed in a clipped cell, so the ring is
-    # drawn inset: "inset 0 0 0 2px {colors.light-primary}"
+    # drawn inset: "--dz-ring-hover-inset"
   text-input:
     backgroundColor: "transparent"
     textColor: "{colors.light-text-secondary}"
@@ -191,7 +192,7 @@ components:
     handleColor: "{colors.light-primary}"
   data-table:
     rounded: "{rounded.container}"
-    elevation: "{elevation.card}"
+    elevation: "--dz-elev-card"
     headerHeight: "35px (declared; renders 52px content-box with the Tables section's header-pad token, measured live)"
     headerBg: "{colors.light-surface}"
     oddRowBg: "derived: color-mix(in srgb, {colors.light-surface} 92%, {colors.light-text})"
@@ -203,7 +204,7 @@ components:
     headerPad: "8px 10px"
   navbar:
     backgroundColor: "{colors.light-navbar}"
-    elevation: "0 0 10px 2px rgba(0,0,0,0.2)"
+    elevation: "--dz-elev-popup"
     linkFont: "{typography.semibold}"
     linkSize: "{typography.sm}"
     activeBg: "rgba({colors.light-primary}, 0.4)"
@@ -211,7 +212,7 @@ components:
   dropdown-menu:
     backgroundColor: "{colors.light-navbar}"
     rounded: "{rounded.container}"
-    elevation: "{elevation.overlay}"
+    elevation: "--dz-elev-overlay"
     hoverBg: "rgba({colors.light-primary}, 0.15)"
   dialog:
     backgroundColor: "{colors.light-bg}"
@@ -516,26 +517,107 @@ denser visual language than the buttons floating on top of it. See Buttons > Rad
 
 ## Elevation
 
-| Level | Name | Shadow | Usage |
-|-------|------|--------|-------|
-| 0 | flat | none | Default state, transparent backgrounds |
-| 1 | card | `{elevation.card}` | Device cards, DataTables, log console, page-content containers |
-| 2 | popup | `{elevation.popup}` | Options popup, message toast, setpoint popup |
-| 3 | button | `{elevation.button}` (= `--dz-btn-shadow`) | Resting shadow for every filled button; see [Buttons](#buttons) for the hover/pressed/focus-ring variants |
-| 4 | overlay | `{elevation.overlay}` | Dropdown menus |
-| 5 | drag | `{elevation.drag}` | Drag ghost during card reorder |
+All tokens live in `dz-tokens.css`. Values below are the light-scheme definitions; `dark.css`
+currently repeats every one of them verbatim (see Dark Underlay below), so light and dark render
+identically until a future pass deliberately tunes them.
+
+| Level | Name | Token | Value | Usage |
+|-------|------|-------|-------|-------|
+| 0 | flat | none | `none` | Default state, transparent backgrounds |
+| 1 | card | `--dz-elev-card` | `0px 0px 10px 1px rgba(0, 0, 0, 0.2)` | Device cards, DataTables, log console, page-content containers |
+| 2 | popup | `--dz-elev-popup` | `0px 0px 10px 2px rgba(0, 0, 0, 0.2)` | Options popup, message toast, setpoint popup, dropdown-menu family |
+| 3 | button | `--dz-btn-shadow` | see [Buttons](#buttons) Token Table | Resting shadow for every filled button; the value lives in the Buttons section's token table, referenced here rather than duplicated, along with the hover/pressed/focus-ring variants |
+| 4 | overlay | `--dz-elev-overlay` | `-2px 2px 20px 0px rgba(0, 0, 0, 0.2)` | Dropdown menus, options card flyout, setpoint popup surface, mobile search |
+| 5 | drag | `--dz-elev-drag` | `0 8px 24px rgba(0, 0, 0, 0.3)` | Drag ghost during card reorder |
+
+Each value derives from the measured de facto majority across the theme's `box-shadow`
+declarations, captured in the 2026-08-07 shadow audit (`docs/superpowers/2026-08-07-shadow-audit.md`):
+the token is the value most instances already used, not an invented number. Per the
+token-derivation policy that already governs Colors (see above): a token's definition must either
+derive from another token or document why its value is fixed. The elevation, glow, and ring values
+below are fixed by design (shadow geometry and alpha, not a color that a scheme overrides), so they
+are literal `rgba()`/`px` values rather than `var()` references; what they derive from is the
+audit's majority-value measurement, not another token.
+
+### Status Glows
+
+Semantic light, not depth: these ring the card in a status color instead of a resting drop shadow.
+Consumed by `css/device-status.css` (timeout/protected/low-battery card states).
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--dz-glow-timeout` | `0px 0px 10px 2px rgba(var(--dz-status-timeout-values), 0.5)` | Timeout status glow |
+| `--dz-glow-protected` | `0px 0px 10px 2px rgba(var(--dz-status-protected-values), 0.4)` | Protected status glow |
+| `--dz-glow-battery` | `0px 0px 10px 2px rgba(var(--dz-status-lowbat-values), 0.4)` | Low-battery status glow |
+
+Each derives its color from the matching `--dz-status-*-values` RGB triplet (see
+[CSS Custom Property Mapping](#css-custom-property-mapping)); only the alpha and geometry are
+fixed here.
+
+### Accent Rings
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--dz-ring-accent` | `0px 0px 0px 2px var(--dz-accent-color)` | Bare 2px accent ring primitive, for selectors with no resting card shadow of their own (icon list hover, scheme-card selection border) |
+| `--dz-ring-hover` | `var(--dz-elev-card), var(--dz-ring-accent)` | Card hover: composes the resting card shadow with the accent ring |
+| `--dz-ring-hover-inset` | `inset 0px 0px 0px 2px var(--dz-accent-color)` | Card hover on the Dynamic Dashboard (see below) |
 
 ### Interactive States
 
-- **Card hover**: keeps the card shadow and adds an accent ring:
-  `0 0 10px 1px rgba(0,0,0,0.2), 0 0 0 2px var(--dz-accent-color)`. `box-shadow` is a single
-  property, so a hover rule that lists only the ring deletes the resting shadow.
-- **Card hover (Dynamic Dashboard)**: `inset 0 0 0 2px var(--dz-accent-color)`. The card is
-  full-bleed inside a cell that core wraps in five nested `overflow: hidden` ancestors, so an
-  outer ring cannot show there.
-- **Update pulse**: keyframe animation that flashes the blue outline ring over 0.8s
+- **Card hover**: `--dz-ring-hover`, which is *composed* from `var(--dz-elev-card),
+  var(--dz-ring-accent)` rather than restated as a fresh literal. `box-shadow` is a single
+  property, so historically a hover rule that listed only the ring deleted the resting card
+  shadow; composing the token from the card token itself makes that trap structurally
+  impossible; a rule that applies `--dz-ring-hover` can never drop the card layer, because the
+  card layer is part of the token's own definition, not something the call site has to remember
+  to restate.
+- **Card hover (Dynamic Dashboard)**: `--dz-ring-hover-inset`. The card is full-bleed inside a
+  cell that core wraps in five nested `overflow: hidden` ancestors (`dd-dz-inner`,
+  `dd-dz-device`, `dd-widget-body`, `dd-widget`, `dd-widget-cell`), confirmed by a live 2026-08-07
+  probe on beta build 18200 across 6 sampled `.dd-widget--dz-device` cards: the ancestor count
+  was verified by explicit node-by-node enumeration, not name-matching. Measured clearance
+  between the ring target and the nearest clip boundary was 4px left/right but 0px top/bottom on
+  every sampled card; an outer ring is invisible top and bottom on any card whose content
+  reaches minimum grid height, so the outer form is not just undesirable there, it is clipped.
+  Using the inset token is the only option that renders correctly; a screenshot test injection
+  confirmed the un-clipped left/right edges and the flush-cut top/bottom edges (details in the
+  audit's Task 2 section).
+- **Update pulse**: keyframe animation (`css/device-status.css`) that flashes the accent ring
+  outward to a 3px peak over 0.8s. The 50% keyframe carries a `dz-shadow-exception` marker: it is
+  an animated intermediate value, intentionally wider than the static `--dz-ring-accent` (2px),
+  and collapsing it to the token would flatten the pulse's peak.
 - **Drag target (active)**: `2px dashed rgba(blue, 0.3)` outline, `3px` offset
 - **Drag target (hover)**: `2px solid blue` outline, `3px` offset, `rgba(blue, 0.08)` background tint, `0.15s ease` transition
+
+### Dark Underlay
+
+`dark.css` currently redefines every `--dz-elev-*`, `--dz-glow-*`, and `--dz-ring-*` token to the
+identical light-scheme value. This is by design, not an oversight: dark-specific shadow tuning
+(stronger alphas so a shadow reads against a dark surface, for example) was deliberately deferred
+and is offered as an owner decision at the Task 8 gate, not assumed here.
+
+### Exceptions
+
+Three declarations in the theme are not, and are not meant to become, tokens. Each carries a
+`dz-shadow-exception` marker comment at its declaration site so the checker (below) skips it:
+
+- **`css/device-status.css`**, the `updatePulse` keyframe's 50% peak (see Update pulse above):
+  an animated intermediate value, not a resting or hover state.
+- **`custom.css`**, the About page `.version-badge` glow: a blur-only halo with no spread,
+  matching none of the three families' geometry (elevation shadows all carry a spread value,
+  status glows use the `--dz-status-*-values` triads, ring tokens are spread-only with no blur).
+- **`src/js/theme-hub-previews.js`**, the Theme Hub's `dzPreviewDialogCenter()` mini-mockup
+  dialog swatch: a decorative miniature preview element illustrating the "center popups"
+  setting, deliberately subdued at its small scale rather than carrying a full-strength overlay
+  token.
+
+### The Shadow Contract (enforcement)
+
+`scripts/check-shadows.sh` checks every `box-shadow` declaration in theme CSS (excluding
+`dz-tokens.css`, `dark.css`, and vendor CSS): each comma-separated layer must resolve through a
+`var(--dz-*)` token, be a `none` reset, or sit on a line carrying a `dz-shadow-exception` marker.
+It gates `makerelease.sh` alongside `check-typography.sh` and `check-buttons.sh`: a release cannot
+ship with a raw shadow value in theme CSS.
 
 ## Buttons
 
@@ -1209,7 +1291,7 @@ that caused it.
 
 ### Device Cards
 
-Cards are `<table>` rows styled as CSS grid containers. The card surface uses `{colors.light-surface}` background, `1.5px solid transparent` border, `{rounded.container}` radius, and `{elevation.card}` shadow.
+Cards are `<table>` rows styled as CSS grid containers. The card surface uses `{colors.light-surface}` background, `1.5px solid transparent` border, `{rounded.container}` radius, and `--dz-elev-card` shadow.
 
 **Standard card (`.span4`):**
 ```
@@ -1284,11 +1366,11 @@ Handle translates `34px` right on toggle, `0.4s` transition.
 
 ### Navigation
 
-**Top navbar**: `var(--dz-nav-bg)` background with `0 0 10px 2px rgba(0,0,0,0.2)` shadow. Links distributed via `display: flex; justify-content: space-around`. Link style: Inter semibold (`{typography.semibold}`), `{typography.sm}`, `var(--dz-body-text)`, `{rounded.interactive}` radius.
+**Top navbar**: `var(--dz-nav-bg)` background with `--dz-elev-popup` shadow. Links distributed via `display: flex; justify-content: space-around`. Link style: Inter semibold (`{typography.semibold}`), `{typography.sm}`, `var(--dz-body-text)`, `{rounded.interactive}` radius.
 
 - **Active page**: `rgba(blue, 0.4)` background, `1px solid blue` border
 - **Dropdown hover**: `rgba(blue, 0.15)` background
-- **Dropdown menu**: `var(--dz-body-bg)` background, `{rounded.container}` radius, `{elevation.overlay}` shadow
+- **Dropdown menu**: `var(--dz-body-bg)` background, `{rounded.container}` radius, `--dz-elev-overlay` shadow
 
 **Sub-tabs / Nav-tabs**: underline style. Inactive: transparent bottom border. Active/hover: `2px solid var(--dz-accent-color)` bottom border, blue text color. No background change.
 
@@ -1303,7 +1385,7 @@ Handle translates `34px` right on toggle, `0.4s` transition.
 | Tooltip box | `var(--dz-body-bg)` fill, 60% opacity, no stroke |
 | Grid lines | `var(--dz-body-bg)` |
 | Export button | card surface, `4px` radius, blue icon stroke |
-| Export menu | card surface, `{rounded.container}` radius, `{elevation.card}` shadow |
+| Export menu | card surface, `{rounded.container}` radius, `--dz-elev-card` shadow |
 | Zoom buttons | outlined style, `{rounded.interactive}` radius |
 | Zoom reset | outlined with `var(--dz-accent-red)` border |
 
@@ -1497,8 +1579,8 @@ Toggled via `theme.json` features object. Each feature has an `enabled` boolean 
 - Use Inter regular (`--dz-weight-regular`) for body text and Inter semibold (`--dz-weight-semibold`) for headings and emphasis
 - Keep device cards as CSS grid layouts; the `grid-template-areas` pattern is the foundation of the card system
 - Use the outlined button style for secondary/toggle actions and filled for primary actions
-- Apply `{elevation.card}` for any new card-like container
-- Use the blue outline ring (`0 0 0 2px var(--dz-accent-color)`) for card hover/focus states
+- Apply `--dz-elev-card` for any new card-like container
+- Use the accent ring token (`--dz-ring-accent` at rest, `--dz-ring-hover` composed for card hover/focus) rather than a raw outline value
 - Test all changes in both light and dark mode
 - Use the current spacing clusters (4/8/10/15/20px) until the 4px grid migration
 
@@ -1640,7 +1722,7 @@ would have to change, not a reason to copy the current behaviour.
 3. Always check both light and dark mode after changes
 4. Add new button variants following the family roles (filled primary/danger/success/warning, ghost, toggle-selected, icon-quiet, label-as-button, disabled) and 4-size system (xs/sm/md/lg); see Buttons
 5. New spacing values must come from the current clusters (4/8/10/15/20px) or the target 4px grid
-6. New containers use `{rounded.container}` (6px) and `{elevation.card}`
+6. New containers use `{rounded.container}` (6px) and `--dz-elev-card`
 7. New interactive elements (nav links, dropdown borders) use `{rounded.interactive}` (5px); new buttons use `{rounded.button}` (10px) via `--dz-btn-radius`, never a raw value
 8. Test on mobile (< 720px) and desktop (1060px+) at minimum
 9. Check upstream Domoticz source before fixing styling issues
