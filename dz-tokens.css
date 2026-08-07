@@ -153,11 +153,12 @@
     --dz-btn-shadow-hover:    0 2px 6px rgba(0,0,0,.22), 0 1px 3px rgba(0,0,0,.12);
     --dz-btn-shadow-pressed:  inset 0 1px 2px rgba(0,0,0,.12);
     --dz-btn-focus-ring:      0 0 0 2px rgba(var(--dz-accent-values), .35);
-    /* Elevation (DESIGN.md levels 1/2/4/5; level 3 = the --dz-btn-shadow triple) */
-    --dz-elev-card:    0px 0px 10px 1px rgba(0, 0, 0, 0.2);
-    --dz-elev-popup:   0px 0px 10px 2px rgba(0, 0, 0, 0.2);
-    --dz-elev-overlay: -2px 2px 20px 0px rgba(0, 0, 0, 0.2);
-    --dz-elev-drag:    0 8px 24px rgba(0, 0, 0, 0.3);
+    /* Elevation (DESIGN.md levels 1/2/4/5; level 3 = the --dz-btn-shadow triple).
+       Crisp tight direction, owner-picked 2026-08-07 shadow-value-tuning gate. */
+    --dz-elev-card:    0 1px 4px rgba(0,0,0,0.25);
+    --dz-elev-popup:   0 2px 6px rgba(0,0,0,0.28);
+    --dz-elev-overlay: 0 3px 10px rgba(0,0,0,0.30);
+    --dz-elev-drag:    0 6px 14px rgba(0,0,0,0.35);
     /* Status glows (semantic light, not depth; alphas from device-status.css today) */
     --dz-glow-timeout:   0px 0px 10px 2px rgba(var(--dz-status-timeout-values), 0.5);
     --dz-glow-protected: 0px 0px 10px 2px rgba(var(--dz-status-protected-values), 0.4);
