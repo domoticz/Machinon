@@ -87,10 +87,11 @@ spacing:
 elevation:
   # Level 3 (button) is not restated here: it is owned by --dz-btn-shadow in the
   # Buttons section's Token Table, referenced from the Elevation table, never duplicated.
-  card: "0px 0px 10px 1px rgba(0, 0, 0, 0.2)"
-  popup: "0px 0px 10px 2px rgba(0, 0, 0, 0.2)"
-  overlay: "-2px 2px 20px 0px rgba(0, 0, 0, 0.2)"
-  drag: "0 8px 24px rgba(0, 0, 0, 0.3)"
+  # Light-scheme values; dark.css deepens the alpha per level, see Dark Underlay below.
+  card: "0 1px 4px rgba(0,0,0,0.25)"
+  popup: "0 2px 6px rgba(0,0,0,0.28)"
+  overlay: "0 3px 10px rgba(0,0,0,0.30)"
+  drag: "0 6px 14px rgba(0,0,0,0.35)"
 
 components:
   # Buttons: soft-elevated redesign (2026-07-17). Every filled/ghost/toggle/
@@ -518,26 +519,27 @@ denser visual language than the buttons floating on top of it. See Buttons > Rad
 ## Elevation
 
 All tokens live in `dz-tokens.css`. Values below are the light-scheme definitions; `dark.css`
-currently repeats every one of them verbatim (see Dark Underlay below), so light and dark render
-identically until a future pass deliberately tunes them.
+now overrides each one to a deepened alpha (see Dark Underlay below), owner-tuned 2026-08-07.
 
 | Level | Name | Token | Value | Usage |
 |-------|------|-------|-------|-------|
 | 0 | flat | none | `none` | Default state, transparent backgrounds |
-| 1 | card | `--dz-elev-card` | `0px 0px 10px 1px rgba(0, 0, 0, 0.2)` | Device cards, DataTables, log console, page-content containers |
-| 2 | popup | `--dz-elev-popup` | `0px 0px 10px 2px rgba(0, 0, 0, 0.2)` | Navbar inner and dropdown menus (nav, sidemenu, settings), Highcharts export menu, card tooltips, mobile item cards, mobile search input |
+| 1 | card | `--dz-elev-card` | `0 1px 4px rgba(0,0,0,0.25)` | Device cards, DataTables, log console, page-content containers |
+| 2 | popup | `--dz-elev-popup` | `0 2px 6px rgba(0,0,0,0.28)` | Navbar inner and dropdown menus (nav, sidemenu, settings), Highcharts export menu, card tooltips, mobile item cards, mobile search input |
 | 3 | button | `--dz-btn-shadow` | see [Buttons](#buttons) Token Table | Resting shadow for every filled button; the value lives in the Buttons section's token table, referenced here rather than duplicated, along with the hover/pressed/focus-ring variants |
-| 4 | overlay | `--dz-elev-overlay` | `-2px 2px 20px 0px rgba(0, 0, 0, 0.2)` | Card options flyout, setpoint popup, search message toast |
-| 5 | drag | `--dz-elev-drag` | `0 8px 24px rgba(0, 0, 0, 0.3)` | Drag ghost during card reorder |
+| 4 | overlay | `--dz-elev-overlay` | `0 3px 10px rgba(0,0,0,0.30)` | Card options flyout, setpoint popup, search message toast |
+| 5 | drag | `--dz-elev-drag` | `0 6px 14px rgba(0,0,0,0.35)` | Drag ghost during card reorder |
 
-Each value derives from the measured de facto majority across the theme's `box-shadow`
-declarations, captured in the 2026-08-07 shadow audit (`docs/superpowers/2026-08-07-shadow-audit.md`):
-the token is the value most instances already used, not an invented number. Per the
-token-derivation policy that already governs Colors (see above): a token's definition must either
-derive from another token or document why its value is fixed. The elevation, glow, and ring values
-below are fixed by design (shadow geometry and alpha, not a color that a scheme overrides), so they
-are literal `rgba()`/`px` values rather than `var()` references; what they derive from is the
-audit's majority-value measurement, not another token.
+The values above are owner-tuned as of 2026-08-07 (shadow-value-tuning pass): crisp tight
+direction, picked from rendered strips against the alternatives (current/soft-modern/crisp-tight,
+each shown on representative surfaces in both underlays). They replace the values the 2026-08-07
+shadow-consistency pass had frozen at the measured de facto majority across the theme's
+`box-shadow` declarations (`docs/superpowers/2026-08-07-shadow-audit.md`); that majority-value
+history is the provenance for how the token set was first established, not the current value. Per
+the token-derivation policy that already governs Colors (see above): a token's definition must
+either derive from another token or document why its value is fixed. The elevation, glow, and ring
+values below are fixed by design (shadow geometry and alpha, not a color that a scheme overrides),
+so they are literal `rgba()`/`px` values rather than `var()` references.
 
 ### Status Glows
 
@@ -591,11 +593,21 @@ fixed here.
 
 ### Dark Underlay
 
-`dark.css` redefines every `--dz-elev-*`, `--dz-glow-*`, and `--dz-ring-*` token to the identical
-light-scheme value. This is by design, not an oversight: dark-specific shadow tuning (stronger
-alphas so a shadow reads against a dark surface, for example) was deliberately deferred to the
-Task 8 gate. That gate closed 2026-08-07 with the verdict "keep identical, nothing queued," so
-light and dark render identically until a future pass reopens the question.
+`dark.css` redefines `--dz-elev-*` to a deepened alpha per level, owner-picked at the 2026-08-07
+shadow-value-tuning gate: crisp tight direction, dark underlay deepened so the same geometry still
+reads against a dark surface. `--dz-elev-drag`'s alpha is capped at 0.6 rather than continuing the
+linear scale from its light-scheme value; the cap was disclosed to the owner before the pick.
+`--dz-glow-*` and `--dz-ring-*` are unchanged between schemes: glow derives its color from the
+matching `--dz-status-*-values` token so it already adapts per scheme, and `--dz-ring-hover`
+composes `var(--dz-elev-card)` so it follows the elevation change automatically without a
+dark.css override of its own.
+
+| Level | Token | Light value | Dark value |
+|-------|-------|--------------|------------|
+| 1 | `--dz-elev-card` | `0 1px 4px rgba(0,0,0,0.25)` | `0 1px 4px rgba(0,0,0,0.50)` |
+| 2 | `--dz-elev-popup` | `0 2px 6px rgba(0,0,0,0.28)` | `0 2px 6px rgba(0,0,0,0.56)` |
+| 4 | `--dz-elev-overlay` | `0 3px 10px rgba(0,0,0,0.30)` | `0 3px 10px rgba(0,0,0,0.60)` |
+| 5 | `--dz-elev-drag` | `0 6px 14px rgba(0,0,0,0.35)` | `0 6px 14px rgba(0,0,0,0.60)` (capped) |
 
 ### Exceptions
 
