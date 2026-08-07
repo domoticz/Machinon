@@ -47,7 +47,7 @@
 .ui-popup.ui-corner-all {
     background: var(--dz-widget-bg);
     border-radius: 6px;
-    box-shadow: -2px 2px 20px 0px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--dz-elev-overlay);
     color: var(--dz-widget-text);
     border-bottom: none;
 }

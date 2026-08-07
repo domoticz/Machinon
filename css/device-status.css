@@ -7,9 +7,12 @@
 */
 /* Device update pulse */
 @keyframes updatePulse {
-    0% { box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2); }
+    0% { box-shadow: var(--dz-elev-card); }
+    /* dz-shadow-exception: pulse peak, animated intermediate value. Intentionally wider
+       (3px) than the static --dz-ring-accent (2px): the momentary crescendo is the point
+       of the pulse, collapsing it to the resting ring token would flatten the animation. */
     50% { box-shadow: 0px 0px 0px 3px var(--dz-accent-color); }
-    100% { box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2); }
+    100% { box-shadow: var(--dz-elev-card); }
 }
 
 tr.update-pulse {
@@ -25,7 +28,7 @@ tr.update-pulse {
    edge and doubles up with the tr hover ring. !important beats the resting card shadow in
    cards.css, whose #holder selector outranks a class chain. */
 .item.statusTimeout tr {
-    box-shadow: 0px 0px 10px 2px rgba(var(--dz-status-timeout-values), 0.5) !important;
+    box-shadow: var(--dz-glow-timeout) !important;
 }
 .item.statusTimeout {
     opacity: 0.5;
@@ -35,7 +38,7 @@ tr.update-pulse {
    only the ring would delete the card's shadow on hover (see cards.css). Inset on the dynamic
    dashboard, where the card is full-bleed in a clipped cell and an outer ring is shaved off. */
 .item.statusTimeout tr:hover {
-    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2),
+    box-shadow: var(--dz-elev-card),
                 0px 0px 0px 2px rgb(var(--dz-status-timeout-values)) !important;
 }
 .dd-widget-body .item.statusTimeout tr:hover {
@@ -43,19 +46,19 @@ tr.update-pulse {
 }
 /* Switch is protected */
 .item.statusProtected tr {
-    box-shadow: 0px 0px 10px 2px rgba(var(--dz-status-protected-values), 0.4) !important;
+    box-shadow: var(--dz-glow-protected) !important;
 }
 .item.statusProtected tr:hover {
-    box-shadow: 0px 0px 10px 2px rgba(var(--dz-status-protected-values), 0.4) !important;
+    box-shadow: var(--dz-glow-protected) !important;
 }
 
 /* Device has low battery */
 .item.statusLowBattery tr {
-    box-shadow: 0px 0px 10px 2px rgba(var(--dz-status-lowbat-values), 0.4) !important;
+    box-shadow: var(--dz-glow-battery) !important;
 }
 
 .item.statusLowBattery tr:hover {
-    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2),
+    box-shadow: var(--dz-elev-card),
                 0px 0px 0px 2px rgb(var(--dz-status-lowbat-values)) !important;
 }
 .dd-widget-body .item.statusLowBattery tr:hover {

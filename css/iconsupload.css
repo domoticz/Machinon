@@ -61,7 +61,7 @@
 #iconsmain .iconlist .iconlistitemselected {
     border-radius: 2px;
     background-color: var(--dz-body-bg) !important;
-    box-shadow: 0px 0px 0px 2px var(--dz-accent-color);
+    box-shadow: var(--dz-ring-accent);
 }
 
 #iconsmain .iconcell {
@@ -83,7 +83,7 @@
 		border: 1.5px solid;
     border-color: transparent;
     border-radius: 6px;
-    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--dz-elev-card);
 }
 
 /* Selected-icon preview row (core customicons.html renders the three files

@@ -183,6 +183,10 @@ function dzPreviewDashColumns() {
 function dzPreviewDialogCenter() {
     var box = dzMiniBox("background:var(--dz-body-bg);padding:0;position:relative;");
     var frame = dzMiniEl("div", "position:absolute;inset:0;display:flex;align-items:center;justify-content:center;");
+    // dz-shadow-exception: mini dialog mockup rendered at 52%x46% scale of a small preview
+    // box, not a real dialog. The full-strength --dz-elev-overlay/--dz-elev-popup token
+    // would read oversized and heavy-handed at that scale; kept literal and deliberately
+    // subdued to match the mockup's proportions.
     var dialog = dzMiniEl("div",
         "width:52%;height:46%;border-radius:4px;background:var(--dz-modal-bg);" +
         "border:1px solid var(--dz-input-border);box-shadow:0 1px 3px rgba(0,0,0,.25);");

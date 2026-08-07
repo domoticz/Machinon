@@ -356,7 +356,7 @@
 
 .dz-hub-scheme-picker .scheme-card.selected {
     border-color: var(--dz-accent-color);
-    box-shadow: 0 0 0 1px var(--dz-accent-color);
+    box-shadow: var(--dz-ring-accent);
 }
 
 .dz-hub-scheme-picker .swatches {

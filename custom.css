@@ -134,6 +134,10 @@ h4,
        hardcodes rgba(100,200,255,...). Text color above already adapted. */
     background: rgba(var(--dz-accent-values), 0.18) !important;
     border-color: rgba(var(--dz-accent-values), 0.4) !important;
+    /* dz-shadow-exception: blur-only halo, no spread. Matches none of the elevation
+       (always spread), status-glow (--dz-status-* triads), or ring (spread, no blur)
+       families; already accent-token-driven for color so no scheme-drift risk, the
+       shape itself is a deliberate one-off for this single badge. */
     box-shadow: 0 0 11px rgba(var(--dz-accent-values), 0.3) !important;
 }
 .section-title,
