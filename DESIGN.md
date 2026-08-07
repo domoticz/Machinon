@@ -1359,7 +1359,7 @@ Material-style slider. Track: 40x15px, `{rounded.container}` radius. Handle: 20x
 
 | State | Track | Handle | Handle shadow |
 |-------|-------|--------|--------------|
-| Off | `rgba(blue, 0.2)` | `var(--secondary-text-color)` | `0 2px 3px rgba(0,0,0,0.7)` |
+| Off | `rgba(blue, 0.2)` | `var(--secondary-text-color)` | `var(--dz-elev-card)` |
 | On | `rgba(blue, 0.5)` | `var(--dz-accent-color)` | same |
 
 Handle translates `34px` right on toggle, `0.4s` transition.
