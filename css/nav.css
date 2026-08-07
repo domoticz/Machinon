@@ -257,7 +257,8 @@ div.menu-toggle.scrolled {
    the imgs). Keep labels visible: the class only exists above 979px, where
    this theme renders its designed desktop navbar. The !important matches
    core's hiding rule so source order (theme loads after core) decides.
-   Remove when core measures wrap on the nav list itself. */
+   FIXED UPSTREAM in 753a92ac0 (#6952, 2026-08-07): remove this rule once the
+   installed beta contains that commit. */
 .navbar.nav-compact .nav li > a .hidden-tablet {
     display: inline !important;
 }
