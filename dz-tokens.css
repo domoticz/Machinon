@@ -103,6 +103,116 @@
     --dz-card-min-width:        320px;
     --dz-card-max-width:        500px;
 
+    /* ---- Card anatomy tokens (css/cards.css, css/compact.css, css/dashboard_mobile.css) ----
+       Minted from the 2026-08-07 cards-anatomy audit (docs/superpowers/2026-08-07-cards-anatomy-audit.md,
+       local-only). Every value below is byte-equal to what the theme computed before this pass (pure
+       tokenization, zero visual change) - refine work (text hierarchy, accent Log/timer icons, the
+       Dash2 outer ring) lands in later cards-polish tasks against these names, not this one.
+
+       Shape B (audit Section 10a, controller ruling): genuine spacing (padding/margin/gap) collapses
+       onto the 7-step scale below instead of minting one name per site; radii collapse onto 3 tiers.
+       The remaining structural values (column/row tracks, image/handle sizes, position offsets,
+       negative margins, the leftover raw slider-track color) stay one token per site: they carry no
+       shared "spacing rhythm", and coupling two sites that land on the same px by coincidence is the
+       exact trap the audit's Judgment call 5 flags. table.mobileitem is a third real card-rendering
+       context (audit Section 10c): its own values get the --dz-mobile-card-* namespace; where a mobile
+       site is a verified duplicate of a desktop one (the dimmer-slider family) it reuses the desktop
+       token directly instead of a redundant mobile alias. */
+
+    /* Card spacing scale - padding/margin/gap only. Extends DESIGN.md's page-level 4/8/10/15/20
+       cluster with the two finer steps (2px, 3px) the card system actually uses. */
+    --dz-card-space-2xs: 2px;
+    --dz-card-space-xs:  3px;
+    --dz-card-space-sm:  5px;
+    --dz-card-space-md:  8px;
+    --dz-card-space-lg:  10px;
+    --dz-card-space-xl:  15px;
+    --dz-card-space-2xl: 20px;
+
+    /* Card radius tiers: frame (the card box itself, plus the bar-gauge corners composed from the
+       same curve), chrome (in-card interactive surfaces - options flyout, scrollbar, buttons), fine
+       (small standalone details whose radii don't coincide: tooltip vs slider track, kept as two
+       names rather than forced to share one). */
+    --dz-card-radius:         6px;  /* frame; --dz-btn-radius above documents the split */
+    --dz-card-radius-chrome:  5px;  /* options flyout, scrollbar thumb/track, in-card buttons */
+    --dz-card-tooltip-radius: 4px;  /* fine */
+    --dz-card-slider-radius:  3px;  /* fine; also table.mobileitem's dimslider (verified duplicate) */
+
+    /* Grid / container (classic #holder .row + Dynamic Dashboard .dd-widget-body share these) */
+    --dz-card-fill-width:               99%;    /* .row .item wrapper fill (paired with grid-pad-y's row) */
+    --dz-card-border-width:             1.5px;
+    --dz-card-drop-outline-width:       2px;    /* drag-drop feedback outline */
+    --dz-card-drop-outline-offset:      3px;
+    --dz-card-drop-hover-bg-alpha:      0.08;   /* drop-hover tint, rgba(accent, N) */
+    --dz-card-row-status-min:           58px;   /* status row floor */
+    --dz-card-row-lastupdate-h:         20px;   /* last-update row height */
+    --dz-card-col-icon:                 48px;   /* primary icon column */
+    --dz-card-col-icon2:                18px;   /* secondary icon column */
+    --dz-card-col-trailing:             15px;   /* trailing (options) column */
+    --dz-card-row-name-h-dash:          40px;   /* #dashcontent name row */
+    --dz-card-dash2-slider-bottom:      10px;   /* Dash2 blinds slider, compact placement */
+    --dz-card-dash2-slider-left-double: 121px;  /* Dash2 blinds slider, wide placement (2-icon) */
+    --dz-card-dash2-slider-left-triple: 139px;  /* Dash2 blinds slider, wide placement (3-icon) */
+
+    /* Name */
+    --dz-card-name-line-height: 18px;
+    --dz-card-tooltip-gap:      4px;      /* name-description tooltip offset */
+    --dz-card-tooltip-pad:      6px 10px;
+
+    /* Bigtext (device value) */
+    --dz-card-value-line-height: 20px;
+
+    /* Bar-ranges gauge (core <dz-bar>, drawn along the card's top edge) */
+    --dz-card-bar-height: 4px;
+
+    /* Value region: type / status / last-update */
+    --dz-card-lastupdate-pad-right: 50px;
+    --dz-card-status-max-height:    60px;
+    --dz-card-scrollbar-size:       4px;
+
+    /* Options flyout (3-dot menu) */
+    --dz-card-options-offset:    5px;   /* right */
+    --dz-card-options-top:       8px;
+    --dz-card-options-min-width: 120px;
+
+    /* Favorite star / Log-timer icon pair */
+    --dz-card-favorite-line-height: 16px;
+
+    /* Device images */
+    --dz-card-img-size: 40px;
+
+    /* Sliders (dimmer/blinds) */
+    --dz-card-slider-track-bg:      rgba(0, 0, 0, 0.26);  /* leftover raw color, no accent tie */
+    --dz-card-slider-height:        5px;
+    --dz-card-slider-right:         20px;
+    --dz-card-slider-inset:         100px;  /* width: calc(100% - N) */
+    --dz-card-blinds-slider-left:   14px;
+    --dz-card-slider-handle-size:   15px;
+    --dz-card-slider-handle-offset: -5px;
+    --dz-card-slider-width-wide:    55%;    /* >=1200px */
+
+    /* Compact mode (.span3, third real card density inside classic) */
+    --dz-card-compact-width:             180px;
+    --dz-card-compact-name-line-height:  14px;
+    --dz-card-compact-input-inset:       10px;  /* width: calc(100% - N) */
+    --dz-card-compact-input-max-width:   100px;
+    --dz-card-compact-input-inset-icon:  60px;  /* width: calc(100% - N), icon-column variant */
+    --dz-card-compact-btngroup-height:   50px;
+    --dz-card-compact-row-heights:       28px 50px 12px;
+    --dz-card-compact-col-widths:        58px 5px 1fr;
+    --dz-card-compact-col-widths-triple: 58px 45px 58px;
+
+    /* Mobile card (table.mobileitem, css/dashboard_mobile.css - a third card-rendering context) */
+    --dz-mobile-card-value-min-height:      25px;
+    --dz-mobile-card-name-badge-size:       18px;
+    --dz-mobile-card-status-max-width:      60%;
+    --dz-mobile-card-status-inner-gap:      7px;
+    --dz-mobile-card-btn-radius:            5px;
+    --dz-mobile-card-btnmini-border-width:  1px;
+    --dz-mobile-card-btnmini-min-width:     40px;
+    --dz-mobile-card-slider-handle-offset:  -6px;  /* desktop is -5px (--dz-card-slider-handle-offset); kept as measured, see cards-polish task-2 report */
+    --dz-mobile-card-selectorlevels-margin: -30px;
+
     /* jQuery UI ships white icon sprites (ui-darkness theme): invert to dark on light
        surfaces; dark.css resets to none. Consumed by css/users.css. */
     --dz-ui-icon-filter:        invert(1);
@@ -173,7 +283,7 @@
        never had a resting card-shadow layer of their own (icon list hover, scheme-card
        selection border). */
     --dz-ring-accent: 0px 0px 0px 2px var(--dz-accent-color);
-    --dz-btn-radius:          10px;  /* cards stay 6px: dense card corners, deliberate split */
+    --dz-btn-radius:          10px;  /* cards stay 6px: dense card corners, deliberate split (--dz-card-radius, below) */
     /* Size scale: padding only; font sizes stay --dz-text-* (typography contract).
        md widened from the de facto 6px 12px on purpose (soft-elevated = roomier). */
     --dz-btn-pad-xs:          4px 8px;
