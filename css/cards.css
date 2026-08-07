@@ -179,7 +179,7 @@ div.bannercontent .row > .item {
     border: 1.5px solid;
     border-color: transparent;
     border-radius: 6px;
-    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--dz-elev-card);
 }
 
 /* box-shadow is a single property, so a hover rule that lists only the ring DELETES the
@@ -188,15 +188,14 @@ div.bannercontent .row > .item {
 .rectangle-8:hover,
 .rectangle-8-dropdown:hover,
 #settings .row-fluid > div:hover {
-    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2),
-                0px 0px 0px 2px var(--dz-accent-color);
+    box-shadow: var(--dz-ring-hover);
 }
 
 /* Dynamic dashboard only: the card is full-bleed in a clipped cell (see the note above), so
    an outer ring would be shaved off on all four sides. Inset is the only ring that survives.
    Change this back to an outer ring ONLY together with a card that is ~4px shorter here. */
 .dd-widget-body .item table[id^="item"] > tbody > tr:hover {
-    box-shadow: inset 0px 0px 0px 2px var(--dz-accent-color);
+    box-shadow: var(--dz-ring-hover-inset);
 }
 
 /* Drag constraint for dashboard/tab card reordering — scoped to avoid affecting dialogs */
@@ -212,7 +211,7 @@ div.bannercontent .row > .item {
 
 .ui-draggable-dragging:not(.ui-dialog) tr {
     transform: scale(0.98);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--dz-elev-drag);
 }
 
 /* Drop target feedback while dragging — target the visible card (tr), not the outer wrapper */
@@ -491,7 +490,7 @@ table.mobileitem td.name {
     font-weight: var(--dz-weight-regular);
     padding: 6px 10px;
     border-radius: 4px;
-    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--dz-elev-popup);
     white-space: normal;
     overflow-wrap: anywhere;
     z-index: 9999;
@@ -655,7 +654,7 @@ body table#itemtable tr > .options {
     border-radius: 5px;
     right: 5px;
     top: 8px;
-    box-shadow: -2px 2px 20px 0px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--dz-elev-overlay);
     z-index: 1;
     padding: 8px 0;
     width: max-content;

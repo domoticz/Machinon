@@ -41,7 +41,7 @@ body.dashMobile table.mobileitem {
     width: 100%;
     padding: 0;
     margin-top: 10px;
-    box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--dz-elev-popup);
 }
 
 body.dashMobile table.mobileitem > thead > tr {
