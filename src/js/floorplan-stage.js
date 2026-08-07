@@ -40,7 +40,6 @@
     var STAGE_CLASS = 'machinon-fp-stage';
     var coreFn = null;
     var installed = false;
-    var scheduled = false;
 
     function getStage() {
         return document.getElementById('floorplancontent');
@@ -103,7 +102,6 @@
     }
 
     function applyClass() {
-        scheduled = false;
         var stage = getStage();
         var hooksLive = installed && typeof coreFn === 'function' &&
             !!stage && !!stage.querySelector('.imageparent');
@@ -112,23 +110,18 @@
         }
     }
 
-    function schedule() {
-        if (scheduled) return;
-        scheduled = true;
-        window.setTimeout(applyClass, 50);
-    }
-
     function start() {
         applyClass();
         /* The stage and its plans only exist while #/Floorplans is loaded, so
-           presence-toggle the class from a debounced observer, same pattern
-           as card-drag-handle. Observe #holder, not #main-view: ngView
-           replaces the #main-view ELEMENT itself on every route change, which
-           would leave an observer bound to a detached node. */
-        var target = document.getElementById('holder') || document.body;
-        if (target) {
-            new MutationObserver(schedule).observe(target, { childList: true, subtree: true });
-        }
+           presence-toggle the class from devices.js's shared DOM-settled
+           debounce (dzOnDomSettled), same pattern as card-drag-handle; devices.js
+           already debounces 50ms, so this registers the work directly rather
+           than debouncing a second time. That observer watches #holder, not
+           #main-view: ngView replaces the #main-view ELEMENT itself on every
+           route change, which would leave an observer bound to a detached
+           node. applyClass() itself is a cheap no-op off #/Floorplans
+           (getStage() finds nothing). */
+        dzOnDomSettled(applyClass);
     }
 
     installWrap();

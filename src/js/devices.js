@@ -456,10 +456,22 @@ function initDeviceLiveUpdates($scope) {
     });
 }
 
+/* Shared debounce registry: other modules that need to react once the DOM
+   settles after a mutation burst (card-drag-handle.js, floorplan-stage.js)
+   register here instead of running their own MutationObserver, so one burst
+   schedules one 50ms flush instead of one per module. devices.js loads first
+   (custom.js THEME_MODULES), so this is defined before any caller runs. */
+var domSettledCallbacks = [];
+function dzOnDomSettled(callback) {
+    domSettledCallbacks.push(callback);
+}
+
 /* The theme's central re-enhancement pass: one debounced MutationObserver on
    #holder re-applies the progressive enhancements (and the page chrome that
-   Angular rerenders wipe) after every digest. Registered once by the
-   bootstrap (custom.js) on DOM ready. */
+   Angular rerenders wipe) after every digest, then flushes dzOnDomSettled
+   subscribers. Registered once by the bootstrap (custom.js) on DOM ready.
+   Watches attributes/class too: card-drag-handle needs class mutations
+   (jQuery UI marking elements ui-draggable) alongside childList/subtree. */
 function initDeviceObserver() {
     MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
     var mutationTimer = null;
@@ -533,11 +545,14 @@ function initDeviceObserver() {
                     }
                 });
             }
+            domSettledCallbacks.forEach(function(callback) { callback(mutations); });
         }, 50);
     });
-    observer.observe(document.getElementById("holder"), {
+    observer.observe(document.getElementById("holder") || document.body, {
         childList: true,
-        subtree: true
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["class"]
     });
 }
 

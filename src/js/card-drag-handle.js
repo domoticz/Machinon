@@ -14,16 +14,16 @@
       (.SliderHandle, called as .draggable() with no options) and string commands
       (.draggable('destroy')) pass through untouched. This catches every init made
       after the wrap is installed, including core's burst re-inits.
-   2. A debounced observer that (re-)applies handle:'.item-name' to any already
-      .ui-draggable card whose handle is not yet set. This heals the load-order
-      race (cards made draggable before the wrap installed) and any init the wrap
-      missed, and re-applies after a re-init before the next mousedown.
+   2. A callback on devices.js's shared DOM-settled debounce (dzOnDomSettled)
+      that (re-)applies handle:'.item-name' to any already .ui-draggable card
+      whose handle is not yet set. This heals the load-order race (cards made
+      draggable before the wrap installed) and any init the wrap missed, and
+      re-applies after a re-init before the next mousedown.
 
    See the spec: docs/superpowers/specs/2026-07-16-card-drag-handle-design.md */
 (function () {
     'use strict';
     var HANDLE = '.item-name';
-    var scheduled = false;
 
     function isCardSet($set) {
         // true if any element in the target set is a card (contains a name cell);
@@ -34,7 +34,6 @@
     }
 
     function applyHandle() {
-        scheduled = false;
         var $ = window.jQuery;
         if (!$) return;
         $('.ui-draggable').each(function () {
@@ -44,12 +43,6 @@
                 $c.draggable('option', 'handle', HANDLE);
             }
         });
-    }
-
-    function schedule() {
-        if (scheduled) return;
-        scheduled = true;
-        window.setTimeout(applyHandle, 50);
     }
 
     function installWrap() {
@@ -69,12 +62,10 @@
     function start() {
         installWrap();
         applyHandle();
-        var target = document.getElementById('holder') || document.body;
-        if (target) {
-            new MutationObserver(schedule).observe(target, {
-                childList: true, subtree: true, attributes: true, attributeFilter: ['class']
-            });
-        }
+        /* devices.js runs the shared observer (childList/subtree/class, union
+           of what all three modules need) and its own 50ms debounce, so this
+           registers the work directly rather than debouncing a second time. */
+        dzOnDomSettled(applyHandle);
     }
 
     installWrap();                 // as early as possible (module load)
