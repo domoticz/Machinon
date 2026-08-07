@@ -153,6 +153,21 @@
     --dz-btn-shadow-hover:    0 2px 6px rgba(0,0,0,.22), 0 1px 3px rgba(0,0,0,.12);
     --dz-btn-shadow-pressed:  inset 0 1px 2px rgba(0,0,0,.12);
     --dz-btn-focus-ring:      0 0 0 2px rgba(var(--dz-accent-values), .35);
+    /* Elevation (DESIGN.md levels 1/2/4/5; level 3 = the --dz-btn-shadow triple) */
+    --dz-elev-card:    0px 0px 10px 1px rgba(0, 0, 0, 0.2);
+    --dz-elev-popup:   0px 0px 10px 2px rgba(0, 0, 0, 0.2);
+    --dz-elev-overlay: -2px 2px 20px 0px rgba(0, 0, 0, 0.2);
+    --dz-elev-drag:    0 8px 24px rgba(0, 0, 0, 0.3);
+    /* Status glows (semantic light, not depth; alphas from device-status.css today) */
+    --dz-glow-timeout:   0px 0px 10px 2px rgba(var(--dz-status-timeout-values), 0.5);
+    --dz-glow-protected: 0px 0px 10px 2px rgba(var(--dz-status-protected-values), 0.4);
+    --dz-glow-battery:   0px 0px 10px 2px rgba(var(--dz-status-lowbat-values), 0.4);
+    /* Accent rings; ring-hover COMPOSES the resting card shadow so a hover rule can
+       never delete it (the single-property trap, DESIGN.md Elevation). ring-hover-inset
+       is the Dynamic Dashboard variant (Task 2 measured 0px vertical ancestor clearance,
+       so the outer ring form clips; inset never does). */
+    --dz-ring-hover:       0px 0px 10px 1px rgba(0, 0, 0, 0.2), 0px 0px 0px 2px var(--dz-accent-color);
+    --dz-ring-hover-inset: inset 0px 0px 0px 2px var(--dz-accent-color);
     --dz-btn-radius:          10px;  /* cards stay 6px: dense card corners, deliberate split */
     /* Size scale: padding only; font sizes stay --dz-text-* (typography contract).
        md widened from the de facto 6px 12px on purpose (soft-elevated = roomier). */
