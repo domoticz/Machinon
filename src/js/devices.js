@@ -473,7 +473,7 @@ function dzOnDomSettled(callback) {
    Watches attributes/class too: card-drag-handle needs class mutations
    (jQuery UI marking elements ui-draggable) alongside childList/subtree. */
 function initDeviceObserver() {
-    MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+    var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
     var mutationTimer = null;
     var observer = new MutationObserver(function(mutations) {
         /* Debounce: wait for Angular digest to settle */
@@ -545,7 +545,22 @@ function initDeviceObserver() {
                     }
                 });
             }
-            domSettledCallbacks.forEach(function(callback) { callback(mutations); });
+            domSettledCallbacks.forEach(function(callback, index) {
+                try {
+                    callback(mutations);
+                } catch (e) {
+                    console.warn("dzOnDomSettled callback " + index + " (" + (callback.name || "anonymous") + ") threw", e);
+                }
+            });
+
+            /* The class swap above (and possibly a registered callback) mutates
+               attributes under the observed subtree, which the attributes:true
+               filter picks up as new records. Drain them now, synchronously,
+               before the pending delivery microtask runs: an emptied record
+               queue is skipped by that microtask (spec: notify only fires for
+               observers with a non-empty queue), so the observer re-arms clean
+               instead of re-triggering this same debounce for its own writes. */
+            observer.takeRecords();
         }, 50);
     });
     observer.observe(document.getElementById("holder") || document.body, {
