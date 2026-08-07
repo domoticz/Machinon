@@ -166,8 +166,12 @@
        never delete it (the single-property trap, DESIGN.md Elevation). ring-hover-inset
        is the Dynamic Dashboard variant (Task 2 measured 0px vertical ancestor clearance,
        so the outer ring form clips; inset never does). */
-    --dz-ring-hover:       0px 0px 10px 1px rgba(0, 0, 0, 0.2), 0px 0px 0px 2px var(--dz-accent-color);
+    --dz-ring-hover:       var(--dz-elev-card), var(--dz-ring-accent);
     --dz-ring-hover-inset: inset 0px 0px 0px 2px var(--dz-accent-color);
+    /* Bare accent ring primitive: the single-layer form of ring-hover, for selectors that
+       never had a resting card-shadow layer of their own (icon list hover, scheme-card
+       selection border). */
+    --dz-ring-accent: 0px 0px 0px 2px var(--dz-accent-color);
     --dz-btn-radius:          10px;  /* cards stay 6px: dense card corners, deliberate split */
     /* Size scale: padding only; font sizes stay --dz-text-* (typography contract).
        md widened from the de facto 6px 12px on purpose (soft-elevated = roomier). */

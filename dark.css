@@ -54,6 +54,10 @@ html[data-dz-scheme="dark"] {
   --dz-glow-timeout:   0px 0px 10px 2px rgba(var(--dz-status-timeout-values), 0.5);
   --dz-glow-protected: 0px 0px 10px 2px rgba(var(--dz-status-protected-values), 0.4);
   --dz-glow-battery:   0px 0px 10px 2px rgba(var(--dz-status-lowbat-values), 0.4);
-  --dz-ring-hover:       0px 0px 10px 1px rgba(0, 0, 0, 0.2), 0px 0px 0px 2px var(--dz-accent-color);
+  --dz-ring-hover:       var(--dz-elev-card), var(--dz-ring-accent);
   --dz-ring-hover-inset: inset 0px 0px 0px 2px var(--dz-accent-color);
+  /* Bare accent ring primitive: the single-layer form of ring-hover, for selectors that
+     never had a resting card-shadow layer of their own (icon list hover, scheme-card
+     selection border). */
+  --dz-ring-accent: 0px 0px 0px 2px var(--dz-accent-color);
 }
