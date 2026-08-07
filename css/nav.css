@@ -67,7 +67,7 @@ div.menu-toggle.scrolled {
 .navbar-inverse .navbar-inner {
     border: none;
     background: var(--dz-nav-bg);
-    box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--dz-elev-popup);
 }
 
 .navbar-inverse .nav li.dropdown > .dropdown-toggle .caret {
@@ -164,7 +164,7 @@ div.menu-toggle.scrolled {
        the card 3-dot flyout (css/cards.css .options) consumes the same
        token. */
     background: var(--dz-menu-bg);
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--dz-elev-popup);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     border-radius: 6px;
