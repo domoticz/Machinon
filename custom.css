@@ -114,9 +114,20 @@ h4,
 .machinoText,
 .mHeader,
 .ui-widget,
-.item #status,
 .item #name {
     font-weight: var(--dz-weight-semibold) !important;
+}
+
+/* Owner gate verdict N2 "quiet status" (cards-polish, 2026-08-07): #status
+   used to share the semibold rule above with #name, so a card carried two
+   equal-weight full-contrast anchors (#name + #status) right next to
+   #bigtext's 22px accent-colored anchor - three simultaneous emphasis
+   points read as heavy. Dropping #status alone to regular weight leaves
+   #name as the card's one anchor by repetition/contrast; #bigtext is
+   untouched (that was N3, not picked). Paired with the metadata
+   line-height tighten on .item #type/#lastupdate (css/cards.css). */
+.item #status {
+    font-weight: var(--dz-weight-regular) !important;
 }
 
 #aboutcontent #canvas2 {

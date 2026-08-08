@@ -169,6 +169,11 @@
     --dz-card-lastupdate-pad-right: 50px;
     --dz-card-status-max-height:    60px;
     --dz-card-scrollbar-size:       4px;
+    /* Metadata (#type/#lastupdate) line-height, tightened one step below the
+       browser's unset "normal" per the owner gate verdict N2 "quiet status"
+       (cards-polish, 2026-08-07): paired with #status dropping to regular
+       weight below so the metadata row reads quieter alongside it. */
+    --dz-card-meta-line-height:     14px;
 
     /* Options flyout (3-dot menu) */
     --dz-card-options-offset:    5px;   /* right */

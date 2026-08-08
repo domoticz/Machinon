@@ -555,6 +555,10 @@ table.mobileitem td.name {
     align-self: center;
     padding-right: var(--dz-card-lastupdate-pad-right);
     font-size: var(--dz-text-xs);
+    /* Owner gate verdict N2 "quiet status" (cards-polish, 2026-08-07): one
+       step tighter than the browser's unset "normal" (~14.4-16px at this
+       font-size), paired with #status dropping to regular weight below. */
+    line-height: var(--dz-card-meta-line-height);
 }
 /* type */
 .item #type {
@@ -565,6 +569,7 @@ table.mobileitem td.name {
     padding-right: var(--dz-card-space-2xl);
     max-width: 100%;
     font-size: 0;
+    line-height: var(--dz-card-meta-line-height);
 }
 
 .item #status,
