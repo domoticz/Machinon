@@ -1311,21 +1311,57 @@ that caused it.
 
 ### Device Cards
 
-Cards are `<table>` rows styled as CSS grid containers. The card surface uses `{colors.light-surface}` background, `1.5px solid transparent` border, `{rounded.container}` radius, and `--dz-elev-card` shadow.
+Cards render across **three markup contexts sharing one visual language**: classic dashboard
+rows (`#holder .row`), the Dynamic Dashboard (`.dd-widget-body`, core's own name for the
+GridStack board - never call it "Dash2" in code or docs, see `css/cards.css`'s header comment),
+and the mobile dashboard (`table.mobileitem`, `body.dashMobile`). All three consume one **66-token**
+`--dz-card-*` / `--dz-mobile-card-*` family in `dz-tokens.css`: a 7-step spacing scale, 4 radius
+properties across 3 conceptual tiers, and ~55 per-site structural values. Landed by the
+2026-08-07/08 cards-polish pass (audit: `docs/superpowers/2026-08-07-cards-anatomy-audit.md`,
+local-only) as a zero-visual-change tokenization followed by three owner-gated refinements: text
+hierarchy, the Log/Timer icon accent, and the Dynamic Dashboard hover ring. Card surface: `var(--dz-widget-bg)`
+background, `1.5px solid transparent` border (`--dz-card-border-width`), `{rounded.container}`
+radius (`--dz-card-radius`, 6px), `--dz-elev-card` shadow - see [Border Radius](#border-radius) and
+[Elevation](#elevation).
 
-**Standard card (`.span4`):**
+#### Anatomy
+
+Cards are `<table>` rows styled as CSS grid containers: `.item table[id^="item"] > tbody > tr` is
+the visible card box (background, border, radius, shadow), not the wrapping `.item` element.
+Classic and Dynamic Dashboard share **one dual-selector rule** for nearly every card-box and
+grid-anatomy declaration, e.g.
+
+```
+#holder .row .item table[id^="item"] > tbody > tr,
+.dd-widget-body .item table[id^="item"] > tbody > tr { ... }
+```
+
+This is settled architecture, not incidental duplication: both contexts render the exact same
+widget-template markup (`.item table[id^="item"]`), differing only in their wrapping chrome
+(Bootstrap `.span4` cell vs. GridStack tile) and clip ancestors. One rule serving both means a
+future anatomy change (a new grid track, a new region) lands in both contexts automatically by
+construction, instead of needing to be remembered twice. Where the two contexts must genuinely
+diverge - the hover ring, the Dynamic Dashboard's height-compression grid - a second, narrowly
+scoped rule follows immediately after the shared one, always with a comment naming which core
+constraint forces the split (see Traps below).
+
+**Standard card (classic `.span4` / Dynamic Dashboard):**
 ```
 grid-template-areas:
   'name    name    name    bigtext bigtext options'
   'img     img2    status  status  status  status'
   'favorite lastupdate ... lastupdate tools tools'
 
-Rows: auto | minmax(58px, 1fr) | minmax(0, 20px)
-Columns: 48px 18px minmax(0,1fr) minmax(0,auto) minmax(0,auto) 15px
-Gap: 10px
+Rows:    auto | minmax(--dz-card-row-status-min, 1fr) | minmax(0, --dz-card-row-lastupdate-h)
+                 (58px)                                                (20px)
+Columns: --dz-card-col-icon  --dz-card-col-icon2  minmax(0,1fr)  minmax(0,auto)  minmax(0,auto)  --dz-card-col-trailing
+                (48px)              (18px)                                                              (15px)
+Gap: 10px (literal, not tokenized - see Traps)
 ```
 
-**Dashboard card**: hides third row (`grid-template-rows: 40px minmax(58px,1fr) 0`, `overflow: hidden`).
+**Dashboard card** (the standard/`#dashcontent` view): hides the third row
+(`grid-template-rows: var(--dz-card-row-name-h-dash) minmax(var(--dz-card-row-status-min),1fr) 0`,
+i.e. `40px minmax(58px,1fr) 0`, `overflow: hidden`).
 
 **Compact card (`.span3`):**
 ```
@@ -1334,36 +1370,381 @@ grid-template-areas:
   'img        img2    bigtext'
   'lastupdate lastupdate lastupdate'
 
-Rows: 28px 50px 12px
-Columns: 58px 5px 1fr
-Gap: 2px
-Fixed tile width: 180px
+Rows:    --dz-card-compact-row-heights  (28px 50px 12px)
+Columns: --dz-card-compact-col-widths   (58px 5px 1fr)
+Gap: --dz-card-space-2xs (2px)
+Fixed tile width: --dz-card-compact-width (180px)
 ```
 
-**Double/triple icon variants**: wider icon columns (48px + 48px for double, adds `img3` area for triple).
+**Double/triple icon variants**: the double variant overrides `grid-template-columns` to
+`var(--dz-card-col-icon) var(--dz-card-col-icon)` (48px 48px, both columns reuse the same token -
+a verified duplicate, not two independent 48px values); the triple variant keeps the base columns
+and adds an `img3` area inside the existing `1fr` column instead.
 
-**Card icon boxes are pinned**: `#img img` and `#img1 img` (the scene widget's active icon) render in a fixed `40x40` box with `object-fit: contain`, so 96px masters (2x art) stay crisp and never resize the row. An unpinned `#img1` used to render scene icons at intrinsic size (caught by the icon facts engine's slot-mismatch check).
+**Card icon boxes are pinned**: `#img img` and `#img1 img` (the scene widget's active icon) render
+in a fixed `--dz-card-img-size` (40px) box with `object-fit: contain`, so 96px masters (2x art)
+stay crisp and never resize the row. An unpinned `#img1` used to render scene icons at intrinsic
+size (caught by the icon facts engine's slot-mismatch check).
 
 **Bar-ranges gauge**: core renders its `<dz-bar>` threshold gauge inside the last-update cell;
-the theme repositions it as a 4px full-bleed status edge along the card top (top corners follow
-the card radius). Core's inline placement would overflow the 20px bottom row. Track color comes
-from `--dz-bar-track-bg` (0.2 neutral grey, both schemes). Applies to classic pages and the
-standard dashboard; on the Dynamic Dashboard the gauge stays hidden with its host cell.
+the theme repositions it as a `--dz-card-bar-height` (4px) full-bleed status edge along the card
+top (top corners follow the card radius). Core's inline placement would overflow the 20px bottom
+row. Track color comes from `--dz-bar-track-bg` (0.2 neutral grey, both schemes). Applies to
+classic pages and the standard dashboard; on the Dynamic Dashboard the gauge stays hidden with its
+host cell.
 
 **Dynamic Dashboard card** (Constraint): the same card, mounted in a GridStack cell. Core sets
 `defaultH: 2` and `minH: 2` (`ddDzDevice.widget.js`) against a `rowHeight` of 60
 (`ddGrid.directive.js`), so the cell is always at least 120px and there is no theme hook for
-either. Measured natural card heights are
-116px (switch), 118px (dimmer, blinds) and 120px (selector), so the tallest card needs the whole
-cell. Consequences:
+either. Measured natural card heights are 116px (switch), 118px (dimmer, blinds) and 120px
+(selector), so the tallest card needs the whole cell. Consequences:
 
-- The row gap is tightened to `4px` (from `{spacing.sm}`); at the classic gap the card is ~128px.
-- The card keeps its natural height. Forcing `height: 100%` compresses its grid rows and squeezes
-  the switch pill and icons.
-- No padding may be reserved around the card, which is why the hover ring is inset.
+- The row gap is tightened to `4px` (`.dd-widget--dz-device` scope, literal not tokenized - see
+  Traps) from the classic `10px`; at the classic gap the card clips.
+- The card keeps its natural height. Forcing `height: 100%` compresses its grid rows (measured
+  30/60/20 -> 28/58/20px) and squeezes the switch pill and icons.
+- No padding may be reserved around the card, which is why the hover ring is inset - see States.
 - Core clips every cell of the card (`dashboard.css`: `.dd-dz-inner table[id^="itemtable"] td
   { overflow: hidden }`), so an icon that overhangs its `td` is shaved here though it is visible on
   the classic dashboard. Not fixable from the theme.
+
+**Mobile card (`table.mobileitem`, the third context).** Confirmed live, not merely assumed: this
+is a genuinely different widget template, not a scaled-down `.item` card. It carries no `.item`
+class, no `#bigtext`, and no separate `#type`/`#lastupdate` cells - the whole status/value string
+lives in one `<td id="status">`. Its rows are `display: flex` inside an outer element that stays
+`display: table` (`css/dashboard_mobile.css:40-45,68-85`), which is exactly why it gets its own
+`--dz-mobile-card-*` token namespace rather than folding into `--dz-card-*`: the values genuinely
+differ site-by-site (e.g. `14px` name line-height here vs. `18px` on desktop), and the two contexts
+don't even share a layout algorithm. Two mobile-specific behaviors, both landed 2026-08-08 (Task
+5d, fixing pre-existing defects the cards-polish pass did not introduce, confirmed by bisecting
+against the pre-pass tree):
+
+- **Arrow-badge scoping.** The round name badge (`--dz-mobile-card-name-badge-size`, 18px) and its
+  `::after` arrow glyph (`\2794`) were written for exactly one target: the row-level "view log"
+  badge on Temperature/Weather/Utility rows (`td#name a`/`td.name a`). The shared selector list
+  also matched `th a` - the section banner's own plain icon link - so the arrow spilled a second
+  line below the 18px-tall banner icon into the first data row. Fix: the `::after` arm is now
+  scoped to `td#name a:after, td.name a:after` only (`th a:after` dropped); the base badge-circle
+  rule is deliberately left unscoped, since it's invisible on the banner anyway (the badge's accent
+  background matches the `<th>`'s own accent background) and narrowing it wasn't needed to fix the
+  defect. Scenes/Switches rows have no `<a>` inside `td#name` at all (core's template renders plain
+  text there), so they were never in scope either way.
+- **Nowrap mitigation.** Core sets an inline `style="white-space: nowrap"` on the Temperature
+  section's status cell only (`dashboard_mobile.html:469`, core commit `ae507c7aae`, 2026-03-30;
+  Weather/Utility carry no equivalent). Because the outer `<table>` still runs the CSS2.1
+  auto-table-layout min-content algorithm despite its flexed rows/cells, that one unbreakable cell
+  forces the whole table wider than its container, and core's own
+  `SECTION.dashCategory{overflow:hidden}` (`style.css:2268`) then silently amputates the overflow
+  17px inside the true viewport edge - a hard clip, not a visible scrollbar. The theme mitigates
+  with `white-space: normal !important` (required to beat the inline style) plus
+  `overflow-wrap: anywhere` as a defensive belt against any future long, naturally-unbreakable
+  status string, not just today's nowrap instance. Tracked in `todo.md`'s MITIGATIONS list with the
+  theme's standard removal-trigger convention: drop the override once core fixes or removes the
+  inline nowrap, not before.
+
+#### Tokens
+
+All values below are byte-equal to what the theme rendered before the cards-polish pass (a pure
+tokenization; refine work landed separately, on top). Live in `dz-tokens.css`; none are mirrored in
+`dark.css` - every card structural token is geometry (padding/margin/gap/size/radius), never color,
+so dark mode already inherits the correct value from `:root` with no override needed (the one
+exception, `--dz-card-icon-accent`, is a color and *is* overridden - see Log/Timer Icon Accent).
+
+**Spacing scale** (7 steps, padding/margin/gap only - extends the page-level 4/8/10/15/20 cluster,
+[Spacing](#spacing) > Current Clusters, with the two finer steps the card system needs that the
+page scale doesn't):
+
+| Token | Value |
+|-------|-------|
+| `--dz-card-space-2xs` | 2px |
+| `--dz-card-space-xs` | 3px |
+| `--dz-card-space-sm` | 5px |
+| `--dz-card-space-md` | 8px |
+| `--dz-card-space-lg` | 10px |
+| `--dz-card-space-xl` | 15px |
+| `--dz-card-space-2xl` | 20px |
+
+**Radius tiers** (4 properties across 3 conceptual tiers - frame, chrome, fine):
+
+| Token | Value | Tier | Usage |
+|-------|-------|------|-------|
+| `--dz-card-radius` | 6px | Frame | The card box itself; the bar-gauge's top corners reuse it via composition (`var(--dz-card-radius) var(--dz-card-radius) 0 0`), not a separate alias token |
+| `--dz-card-radius-chrome` | 5px | Chrome | Options flyout, scrollbar thumb/track, in-card buttons |
+| `--dz-card-tooltip-radius` | 4px | Fine | Name-description tooltip |
+| `--dz-card-slider-radius` | 3px | Fine | Dimmer/blinds slider track (also `table.mobileitem`'s dimslider, a verified duplicate) |
+
+Tooltip (4px) and slider (3px) don't share a value, so the "fine" tier stays two named properties
+under one grouping comment rather than being forced onto one shared property - collapsing them
+would silently change one of the two, breaking the pass's zero-visual-change contract. `--dz-card-radius`
+closes a gap `--dz-btn-radius`'s own comment ("cards stay 6px: dense card corners, deliberate
+split") had anticipated since before this token existed.
+
+**Grid / container** (14 tokens, classic + Dynamic Dashboard shared):
+
+| Token | Value | Notes |
+|-------|-------|-------|
+| `--dz-card-fill-width` | 99% | `.item` wrapper fill width (classic); the anti-clip judgment call - kept verbatim, see Traps |
+| `--dz-card-border-width` | 1.5px | Card `tr` border width |
+| `--dz-card-drop-outline-width` | 2px | Drag-drop feedback outline |
+| `--dz-card-drop-outline-offset` | 3px | Drag-drop outline offset |
+| `--dz-card-drop-hover-bg-alpha` | 0.08 | Drop-hover tint, `rgba(accent, N)` |
+| `--dz-card-row-status-min` | 58px | Status row floor |
+| `--dz-card-row-lastupdate-h` | 20px | Last-update row height |
+| `--dz-card-col-icon` | 48px | Primary icon column |
+| `--dz-card-col-icon2` | 18px | Secondary icon column |
+| `--dz-card-col-trailing` | 15px | Trailing (options) column |
+| `--dz-card-row-name-h-dash` | 40px | `#dashcontent` (standard dashboard) name row |
+| `--dz-card-dash2-slider-bottom` | 10px | Dynamic Dashboard blinds slider, compact placement |
+| `--dz-card-dash2-slider-left-double` | 121px | Dynamic Dashboard blinds slider, wide placement (2-icon) |
+| `--dz-card-dash2-slider-left-triple` | 139px | Dynamic Dashboard blinds slider, wide placement (3-icon) |
+
+**Name / bigtext / bar gauge / value region** (9 tokens):
+
+| Token | Value | Notes |
+|-------|-------|-------|
+| `--dz-card-name-line-height` | 18px | `#name` line-height |
+| `--dz-card-tooltip-gap` | 4px | Name-description tooltip offset (`margin-top`) |
+| `--dz-card-tooltip-pad` | 6px 10px | Tooltip padding |
+| `--dz-card-value-line-height` | 20px | `#bigtext` line-height |
+| `--dz-card-bar-height` | 4px | Bar-ranges gauge height |
+| `--dz-card-lastupdate-pad-right` | 50px | `#lastupdate` right padding (wider than the 20px family below - verified, not a typo) |
+| `--dz-card-meta-line-height` | 14px | `#type`/`#lastupdate` line-height; N2 verdict, see Text Hierarchy |
+| `--dz-card-status-max-height` | 60px | `#status` scroll cap |
+| `--dz-card-scrollbar-size` | 4px | `#status` scrollbar width/height |
+
+**Options flyout / favorite / Log-Timer icon** (5 tokens):
+
+| Token | Value | Notes |
+|-------|-------|-------|
+| `--dz-card-options-offset` | 5px | 3-dot flyout right offset |
+| `--dz-card-options-top` | 8px | 3-dot flyout top offset |
+| `--dz-card-options-min-width` | 120px | 3-dot flyout min width |
+| `--dz-card-favorite-line-height` | 16px | Favorite star and Log/Timer icon line-height (shared value) |
+| `--dz-card-icon-accent` | `var(--dz-accent-color)` light / `rgb(77, 184, 228)` dark | Log/Timer icon color; see Log/Timer Icon Accent |
+
+**Images / sliders** (9 tokens):
+
+| Token | Value | Notes |
+|-------|-------|-------|
+| `--dz-card-img-size` | 40px | Device image box (`#img`/`#img1`/`#img2`-double/`#img3`) |
+| `--dz-card-slider-track-bg` | `rgba(0, 0, 0, 0.26)` | Dimmer/blinds slider track; leftover raw color, no accent tie |
+| `--dz-card-slider-height` | 5px | Slider track height |
+| `--dz-card-slider-right` | 20px | Slider right inset |
+| `--dz-card-slider-inset` | 100px | Slider width: `calc(100% - N)` |
+| `--dz-card-blinds-slider-left` | 14px | Blinds slider left anchor (classic) |
+| `--dz-card-slider-handle-size` | 15px | Slider handle box |
+| `--dz-card-slider-handle-offset` | -5px | Slider handle top offset (desktop; mobile is -6px - see Traps) |
+| `--dz-card-slider-width-wide` | 55% | Slider width at >=1200px |
+
+**Compact mode** (`.span3`, 9 tokens):
+
+| Token | Value | Notes |
+|-------|-------|-------|
+| `--dz-card-compact-width` | 180px | Fixed tile width |
+| `--dz-card-compact-name-line-height` | 14px | `#name` line-height |
+| `--dz-card-compact-input-inset` | 10px | `td.input` width: `calc(100% - N)` |
+| `--dz-card-compact-input-max-width` | 100px | `td.input` max-width |
+| `--dz-card-compact-input-inset-icon` | 60px | `td.input` width inset, icon-column variant |
+| `--dz-card-compact-btngroup-height` | 50px | Scroll-column `btn-group` height |
+| `--dz-card-compact-row-heights` | 28px 50px 12px | `grid-template-rows` |
+| `--dz-card-compact-col-widths` | 58px 5px 1fr | `grid-template-columns` |
+| `--dz-card-compact-col-widths-triple` | 58px 45px 58px | `grid-template-columns`, triple-icon variant |
+
+**Mobile card** (`--dz-mobile-card-*`, `table.mobileitem`, 9 tokens):
+
+| Token | Value | Notes |
+|-------|-------|-------|
+| `--dz-mobile-card-value-min-height` | 25px | Value cell min-height |
+| `--dz-mobile-card-name-badge-size` | 18px | Name/log-link round badge size |
+| `--dz-mobile-card-status-max-width` | 60% | Status cell max-width |
+| `--dz-mobile-card-status-inner-gap` | 7px | Status inner span `margin-right` |
+| `--dz-mobile-card-btn-radius` | 5px | In-row button radius |
+| `--dz-mobile-card-btnmini-border-width` | 1px | `.btn-mini` border width (color stays `--dz-accent-color`) |
+| `--dz-mobile-card-btnmini-min-width` | 40px | `.btn-mini` min-width |
+| `--dz-mobile-card-slider-handle-offset` | -6px | Dimslider handle top offset (desktop is -5px - see Traps) |
+| `--dz-mobile-card-selectorlevels-margin` | -30px | Selector-levels negative-margin hack (kept as measured - see Traps) |
+
+#### Text Hierarchy
+
+**Verdict (owner, 2026-08-07): N2 "quiet status."** A dense card used to carry three simultaneous
+full-emphasis anchors, not one: `#name` and `#status` shared a single rule
+(`.item #status, .item #name { font-weight: var(--dz-weight-semibold) !important; }`, the old
+`custom.css:117-120`), so every card carried two full-weight, full-contrast text blocks before
+`#bigtext` - the largest element on the card, 22px, accent-colored - added a third. Meanwhile
+`#type`/`#lastupdate` were already exactly quiet (secondary color, regular weight); the elements
+that actually made a card feel heavy were `#name`, `#status`, and `#bigtext`, and the first two
+shared one rule. N2 splits that rule:
+
+```css
+/* custom.css */
+.item #name {                     /* stays in the existing semibold heading/emphasis list */
+    font-weight: var(--dz-weight-semibold) !important;
+}
+.item #status {                   /* new rule, dropped alone */
+    font-weight: var(--dz-weight-regular) !important;
+}
+```
+
+paired with the metadata line-height tighten (`--dz-card-meta-line-height`, 14px, one step below
+the browser's unset `normal`) on `.item #type`/`.item #lastupdate` in `css/cards.css`. `#name`
+remains the card's one anchor by repetition and full contrast; `#bigtext` is untouched (still 22px,
+accent-colored, `font-weight` still computed `400` by absence, not an explicit declaration - a
+future pass could make that explicit and token-driven, that was the N3 candidate, not picked).
+`#status` keeps its color (`var(--dz-body-text)`, unaffected); only its weight changed.
+
+Two other candidates were rendered and rejected at the gate: N1 ("one anchor," dropping `#name`
+too) and N3 (N2 plus an explicit `#bigtext: regular`). Both stayed within the existing weight scale
+(`--dz-weight-regular`/`--dz-weight-semibold`, no new weight introduced). The gate strips required
+a switch-card control (no `#bigtext`, no `#status` text - the toggle pill replaces it) precisely
+because that card isolates what each candidate changes when the other two anchors aren't in play;
+N2/N3 render pixel-identical to CONTROL there, only N1's `#name` change is visible.
+
+**Mobile is structurally unaffected**, not merely unchanged by choice for half the story: N2's
+selectors (`.item #status`, `.item #name`) cannot match `table.mobileitem`'s markup at all - it has
+no `.item` class and no `#bigtext`. Mobile bolds its status text via a completely separate,
+single-purpose rule (`table.mobileitem td:last-child { font-weight: semibold }`,
+`css/dashboard_mobile.css`), and confirmed live testing found `#name` there is *already* regular by
+default - there is no dual-anchor rule to split on mobile in the first place. The owner's verdict
+text named the desktop rule specifically, so mobile's status text was left bold; this is a
+deliberate scope decision, not an oversight, and stands as a one-line follow-up if the owner later
+wants mobile brought in line.
+
+#### States
+
+- **Card hover (classic)**: `--dz-ring-hover`, composing the resting `--dz-elev-card` shadow with
+  the accent ring so a hover rule can never delete the drop shadow (`box-shadow` is a single
+  property - see Traps). Full token definitions: [Elevation](#elevation) > Accent Rings.
+- **Card hover (Dynamic Dashboard)**: `--dz-ring-hover-inset`. **Closed for good by the owner,
+  2026-08-08**, after a full evidence trail:
+  1. **Baseline measurement** (shadow-elevation pass, 2026-08-07): the Dynamic Dashboard card sits
+     inside five nested `overflow: hidden` ancestors core wraps around every GridStack cell
+     (`dd-dz-inner`, `dd-dz-device`, `dd-widget-body`, `dd-widget`, `dd-widget-cell`); measured
+     clearance between the ring target and the nearest clip boundary was `4px` left/right but `0px`
+     top/bottom on every sampled card, so an outer ring is invisible top and bottom on any card
+     whose content reaches the grid's minimum height.
+  2. **Six-widget-type verification** (cards-polish Task 3, 2026-08-07): a `+3px` vertical
+     breathing-room tweak was tried across every Dynamic Dashboard widget type - `dz-device`,
+     `SELECTOR`-type `dz-device` (flagged "especially," the worst case), `dz-favorites`, `dz-room`,
+     quick-stat, energy-dashboard. Only the first two are subject to the ring rule at all
+     (favorites/room already carry 65-90px of natural bottom clearance; quick-stat/energy-dashboard
+     use unrelated DOM never in the ring rule's scope). Neither in-scope type cleared: `dz-device`
+     landed `1.5px`/side (`0.5px` short of the `2px` target), and `SELECTOR` went *negative*
+     (`-1.5px` bottom, worse than the untweaked baseline) because its `<table>`/`<tbody>` ancestors
+     grow to fit the HVAC-mode button group's 64px content height regardless of what the row's own
+     height is told to be - a CSS2.1 table-height-as-minimum behavior that absorbs the entire tweak
+     before it can shrink anything.
+  3. **Owner reopened the verdict** (2026-08-08) and requested three fresh options, rendered without
+     the padding tweak (natural geometry, matching how each would actually ship): **R1** (no hover
+     ring at all), **R2** (straddle: `1px` inset + `1px` outer, meant to halve the clearance need
+     and self-degrade gracefully on tight cards), **R3** (global inset, applied to classic cards
+     too, rendered once as a labeled reference point).
+  4. **R2, pixel-sampled** (not eyeballed): on roomy cards it renders exactly as designed, a clean
+     double ring. On the tight cards (`dz-device`/`SELECTOR`, `4px` L/R but `0px` T/B), it does
+     **not** degrade to "a bit thinner" - the `4px` sides render the full double ring, the `0px`
+     sides render *zero* outer ring (not a faint sliver), producing a ring that looks different
+     depending which edge you look at. Rejected: an asymmetric collapse reads as a rendering defect,
+     not a deliberate thin-ring look, and is worse than either R1 (nothing) or the existing inset
+     (uniform).
+  5. **R3**, rendered once on a classic card for reference, read closer to a "selected" look (a
+     flush line hugging the edge) than a "hovered" one (the composed outer glow+shadow) - consistent
+     with the owner's earlier disfavor.
+  6. **Final verdict**: keep the inset ring on the Dynamic Dashboard. R1 and R3 declined, R2's
+     straddle rejected on the asymmetric-collapse evidence above. No code change - the shipped
+     `--dz-ring-hover-inset` rule already implements this. Classic cards are unaffected either way,
+     still on the composed outer `--dz-ring-hover`. A future pass could revisit an outer look only
+     by making the Dynamic Dashboard card shorter on every widget type (a density change, per
+     `css/cards.css`'s own comment), not by changing which ring token is used.
+- **Status glows** (timeout/protected/low-battery): semantic ring color instead of a resting drop
+  shadow, `!important` (beats the resting card shadow's own `#holder` specificity). Full token
+  values and dark-underlay deltas: [Elevation](#elevation) > Status Glows.
+- **Update pulse**: `tr.update-pulse` plays an 0.8s keyframe that flashes the accent ring outward to
+  a `3px` peak, then settles back to the resting card shadow (`css/device-status.css`). The peak
+  carries a `dz-shadow-exception` marker - an animated intermediate value, intentionally wider than
+  the static 2px ring token, collapsing it to the token would flatten the pulse. See
+  [Elevation](#elevation) > Interactive States.
+- **Drag (dragging card)**: `scale(0.98)` + `--dz-elev-drag`. **Drop target (idle)**:
+  `--dz-card-drop-outline-width` (2px) dashed accent outline at 0.3 alpha, `--dz-card-drop-outline-offset`
+  (3px). **Drop target (hover)**: same outline solid, plus a `--dz-card-drop-hover-bg-alpha` (0.08)
+  accent background tint, `0.15s ease` transition.
+
+#### Log/Timer Icon Accent
+
+**Verdict (owner, 2026-08-07): accent color, with a dark-scheme fix.** The Log/Timer icon pair
+(`.timers_log .btnsmall`/`.btnsmall-sel`) had carried an accent-color declaration in `css/cards.css`
+since before this pass, but it was **dead code**: `css/buttons.css`'s shared "ghost" family rule
+(`.btn-default, .btn-group .btn-default, .btnsmall, .btnsmall-sel, .btn-small { color:
+var(--dz-btn-ghost-text) !important; ... }`) always won the tie, because a plain declaration can
+never outrank `!important` regardless of selector specificity. The icons rendered quiet gray, not
+accent, on every card, always.
+
+**Fix: matching-force**, not narrowing the shared rule. `css/cards.css`'s declaration gained its own
+`!important`; `.timers_log .btnsmall`/`.timers_log .btnsmall-sel`'s two-class specificity (`0,2,0`)
+then beats the ghost rule's one-class `.btnsmall` (`0,1,0`) once both carry `!important`. This
+follows an existing in-repo precedent rather than inventing a new pattern: `.aw-footer .btn-default`
+(`css/buttons.css`, ~line 895) already overrides the same ghost rule for one context via the
+identical mechanism, and `css/cards.css`'s own comment for this rule already used the same
+mechanism to win the `border` property. Documented in both files with cross-reference comments so a
+future reader finds the explanation from either side.
+
+**Token**: `--dz-card-icon-accent` (`dz-tokens.css`, light `:root`) = `var(--dz-accent-color)`.
+Contrast is judged against **WCAG SC 1.4.11 (Non-text Contrast, 3:1)**, not SC 1.4.3's 4.5:1 text
+threshold - these are graphical Ionicon glyphs with no text label, not text. Light already clears
+3:1 as-is (measured **4.51:1** resting / **3.96:1** hover against the light card background). The
+raw dark accent (`#0b9eda`, `rgb(11,158,218)`) does not: measured **2.48:1** resting / **2.29:1**
+hover against the dark card background, both below the 3:1 floor. `dark.css` overrides the token to
+a derived value, **`rgb(77, 184, 228)`**: the accent RGB blended **27% toward white**, the first
+1%-step blend that cleared 3:1 against *both* measured dark-underlay backgrounds (resting
+`rgb(81,85,88)`, hover `rgb(74,92,101)`, the tonal `--dz-btn-hover-bg` tint composited over the card
+background). Re-measured live after shipping, not just computed: **3.33:1** resting / **3.08:1**
+hover, both passing with a real but narrow margin above the 3:1 floor - flagged in the `dark.css`
+token comment as a spot to revisit for more headroom in a future pass.
+
+#### Traps
+
+Load-bearing quirks a future edit could break without realizing it:
+
+- **The Dynamic Dashboard card is deliberately not stretched to its cell.** `height: 100%` looks
+  like the obvious fix for "card doesn't fill its GridStack cell," but it compresses the card's own
+  grid rows (measured 30/60/20px -> 28/58/20px) and squeezes the switch pill and icons. The cell is
+  already guaranteed >= the tallest natural card height (120px, via core's `minH: 2`); the card
+  needs no forced height, only `align-items: stretch` on its flex parent.
+- **`:has(.item)` scopes every card-grid rule to rows that actually hold device cards.** Without it,
+  the plain Bootstrap `.row` class - reused by unrelated Angular views (e.g. the Events page's
+  `<timesun>` topbar) - gets treated as a card grid and stretched to a full track. `.item` is a
+  device-card-only class; `:has(.item)` is what makes the broader `.row` selector safe. Browsers
+  without `:has()` support fall back to plain Bootstrap float layout (functional, no card grid),
+  not breakage.
+- **Matched reset+override pairs travel together.** The Bootstrap-span wrapper reset
+  (`:is(.span2, .span3, ...):has(> .item) { padding: 0; margin: 0; box-sizing: border-box }`) and
+  the card's own `box-sizing: border-box` (`.item, .item table[id^="item"], .item table[id^="item"]
+  > tbody > tr`) are two halves of one contract: the wrapper reset is what makes any *future*
+  wrapper padding safe (insets instead of grows the cell), and the card's own border-box is what
+  keeps its `1.5px` border from adding to its rendered height. Editing one half without the other
+  silently breaks the pairing.
+- **`box-shadow` is a single property.** A hover or status rule that lists only a ring or glow
+  deletes the resting `--dz-elev-card` shadow outright - CSS does not merge multiple `box-shadow`
+  declarations on the same element, a later one replaces the whole property. Every card-hover/status
+  rule in the theme either composes the resting shadow into its token (`--dz-ring-hover`) or
+  restates it explicitly alongside the new layer (`device-status.css`'s status hovers). See
+  [Elevation](#elevation) > The Shadow Contract for the enforcement gate (`scripts/check-shadows.sh`).
+- **A handful of geometric values are kept verbatim, not "cleaned up," because their purpose is
+  unconfirmed.** `--dz-card-fill-width` (99%, paired with a `2px` `margin-left`) reads like an old
+  sub-pixel anti-clip hack; `--dz-mobile-card-slider-handle-offset` (-6px) differs by 1px from
+  desktop's -5px; `--dz-mobile-card-selectorlevels-margin` (-30px) is a negative-margin hack of
+  unconfirmed necessity. All three were tokenized at their current value rather than investigated or
+  "fixed" (the tokenization pass was explicitly zero-visual-change); each carries a source comment
+  flagging it as a possible drift, not a deliberate design value, so a future pass can grep for them
+  before removing anything.
+- **`.span3 #status` is accent-colored while classic `#status` is body-text colored** - an open,
+  unresolved question (could be deliberate density-driven emphasis at the 180px compact tile, or
+  drift from an earlier pass), not a bug the N2 verdict was meant to touch.
+- **The mobile dashboard's camera section loads late.** `#dashCameras` is injected asynchronously
+  (thumbnail `blob:` URLs) by non-Angular JS - it carries no `ng-scope` class, so it never joins the
+  Angular digest the other sections settle on, and a plain `networkidle` wait does not guarantee it
+  has finished pushing content down. Any geometry measurement or screenshot of the mobile dashboard
+  should poll for `#dashCameras` present in the DOM **and** its height stable across two consecutive
+  polls before capturing; card positions below the cameras section can still shift after a naive
+  "page loaded" signal.
 
 ### Form Inputs
 
