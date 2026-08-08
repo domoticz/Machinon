@@ -598,36 +598,80 @@ table.mobileitem td.name {
     border-radius: var(--dz-card-radius-chrome);
 }
 
-/* Selector-level buttons (SelectorStyle 0): ONE joined segmented control
-   (selector-segmented spec, 2026-08-08), container-clip mechanism. `.item
-   .btn-group` is the ONLY use of .btn-group inside a card (verified against
-   core views/widgets/light_widget.html and light_widget_tab.html: the
-   SelectorStyle-0 markup is the sole emitter, shared by the classic tab-list
-   page (LightSwitches, td#type), the classic desktop Dashboard and the
-   Dynamic Dashboard tile (both td#status) - one shell rule covers all three
-   desktop surfaces because they render the identical directive markup.
-   The shell IS the control: border-radius from the card button-chrome token
-   (the radius every other in-card button already carries), overflow:hidden,
-   and a 1px gap that lets the shell's own accent-colored background read as
-   the segment dividers - no per-position corner logic needed (the old
-   first-child/last-child/middle trio below did that for a single row; a
-   shell that clips whatever shape the wrap produces makes the question moot
-   for any row count). width:fit-content (not 100%) so the accent-colored
-   shell hugs the actual button rows instead of painting a colored band
-   across the whole status cell; margin-left:auto keeps it pinned to the
-   cell's right edge, matching the group's previous position. Horizontal
-   scroll is retired (joined wrap is the owner-picked overflow strategy, no
-   scroll/menu fallback), so the old scrollbar-width/-color cosmetics and the
-   ::-webkit-scrollbar(-thumb) rules for .btn-group are dropped: overflow:
-   hidden never shows a scrollbar, so they were dead weight. The Dash2 zero-
-   slack constraint (DESIGN.md Device Cards ring section) is honoured: only
-   border/gap/radius change here, no button padding/line-height/border-width
-   touched, so button height (30px, measured) is unchanged. */
+/* Button groups in device cards: pills with gap. BASE layout, byte-identical
+   to pre-selector-segmented-task values, shared by every context INCLUDING
+   compact (DashboardType 1, .span3 tiles): flex row, wraps, centered, thin
+   themed scrollbar cosmetic. Left unscoped deliberately - compact.css below
+   builds on top of this (it restates flex-flow:column and width:100% but
+   never restates display or its own gap), so compact still needs display:
+   flex and SOME gap value to come from here. The joined-segment SHELL
+   (background/radius/overflow-hidden/fit-content width/1px gap) is a
+   separate, more specific, compact-EXCLUDED rule directly below - see its
+   comment for why compact cannot share it. */
 .item .btn-group {
     display: flex !important;
     flex-flow: row wrap;
-    gap: 1px;
+    gap: var(--dz-card-space-xs);
     justify-content: center;
+    scrollbar-width: thin;
+    scrollbar-color: var(--dz-accent-color) var(--dz-body-bg);
+    width: 100%;
+}
+
+/* Selector-level buttons (SelectorStyle 0): ONE joined segmented control
+   (selector-segmented spec, 2026-08-08), container-clip mechanism, layered
+   on the base rule above. `.item .btn-group` is the ONLY use of .btn-group
+   inside a card (verified against core views/widgets/light_widget.html and
+   light_widget_tab.html: the SelectorStyle-0 markup is the sole emitter,
+   shared by the classic tab-list page (LightSwitches, td#type), the classic
+   desktop Dashboard and the Dynamic Dashboard tile (both td#status) - one
+   shell rule covers all three desktop surfaces because they render the
+   identical directive markup. The shell IS the control: border-radius from
+   the card button-chrome token (the radius every other in-card button
+   already carries), overflow:hidden, and a 1px gap that lets the shell's own
+   accent-colored background read as the segment dividers - no per-position
+   corner logic needed (the old first-child/last-child/middle trio below did
+   that for a single row; a shell that clips whatever shape the wrap produces
+   makes the question moot for any row count). width:fit-content (not 100%,
+   overriding the base rule's width above) so the accent-colored shell hugs
+   the actual button rows instead of painting a colored band across the whole
+   status cell; margin-left:auto keeps it pinned to the cell's right edge,
+   matching the group's previous position. Horizontal scroll is retired
+   (joined wrap is the owner-picked overflow strategy, no scroll/menu
+   fallback), so the old scrollbar-width/-color cosmetics on THIS rule (the
+   base rule above still carries them, for compact) and the ::-webkit-
+   scrollbar(-thumb) rules for .btn-group are dropped: overflow:hidden never
+   shows a scrollbar, so they were dead weight. The Dash2 zero-slack
+   constraint (DESIGN.md Device Cards ring section) is honoured: only
+   border/gap/radius change here, no button padding/line-height/border-width
+   touched, so button height (30px, measured) is unchanged.
+
+   :not(.span3 *) EXCLUDES the compact dashboard (DashboardType 1; core marks
+   every compact tile's wrapper with .span3 via ng-class in dashboard_desktop.
+   html, verified: dashboardType==1 ? 'span3' : 'span4', never mixed with any
+   other card context - .span2/.span4/.span6/.span12 above are unrelated
+   Bootstrap grid widths). Compact is a PERMANENT, by-design exception, not a
+   gap to close later: compact.css already gives .btn-group there a
+   completely different, deliberate treatment for a structurally different
+   constraint - a FIXED card height with no room for multi-row wrap, so the
+   group is its own vertical scroll-snap list instead
+   (.span3 ... .btn-group { height: var(--dz-card-compact-btngroup-height);
+   overflow-y: auto; scroll-snap-type: y mandatory; background: var(--dz-
+   widget-bg) !important }). Tried the shell there first without the
+   exclusion (twice): unscoped, this rule's overflow:hidden !important beat
+   compact's overflow-y:auto (importance beats specificity regardless of load
+   order), locking the scroll and stranding every non-selected level
+   off-screen and unreachable (measured: scrollHeight 175px vs clientHeight
+   51px, frozen). Excluding the WHOLE original single-rule shell also
+   silently dropped display:flex/gap that compact.css depends on inheriting
+   from the base rule (compact fell back to display:block, collapsing the
+   list) - which is why this shell is now its OWN rule layered on top of an
+   UNSCOPED base, so excluding it never removes anything compact needs.
+   Exclude at the selector, not by piling a THIRD counter-!important rule on
+   top - compact.css stays the sole, fully authoritative owner of .btn-group
+   inside .span3. */
+.item .btn-group:not(.span3 *) {
+    gap: 1px;
     background: var(--dz-accent-color);
     border-radius: var(--dz-card-radius-chrome);
     overflow: hidden !important; /* !important: beats the #type .btn-group / .input .btn-group overflow-x:auto rule below (an ID selector, higher specificity, predates this shell and still serves other .btn-group contexts) without touching that rule */
@@ -636,17 +680,30 @@ table.mobileitem td.name {
     margin-left: auto;
 }
 
+/* Corner + margin: byte-identical value to pre-task (the old three first-
+   child/last-child/middle selectors always resolved to this one value
+   anyway, so collapsing them changes nothing anywhere, compact included -
+   compact.css's OWN more specific button rule already forces radius:0
+   regardless of what this contributes). Left UNSCOPED on purpose. */
+.item .btn-group > .btn {
+    border-radius: var(--dz-card-radius-chrome) !important;
+    margin: 0 !important;
+}
+
 /* Flat/borderless shape for every segment, selected or not: the shell's
    own background now reads as the divider, so each button's individual
    border would double it up. border-color (not `border: none`) preserves
    the exact border-box height (box-sizing:border-box on the base .btn rule
    makes the border part of the box; dropping it entirely would shrink the
    button by the border width) - the same transparent-border technique the
-   soft-elevated base block already uses for filled vs ghost buttons. */
-.item .btn-group > .btn {
+   soft-elevated base block already uses for filled vs ghost buttons.
+   :not(.span3 *) exclusion: compact's buttons keep the accent border
+   (buttons.css `.btn-group .btn`) between its vertically stacked pills -
+   this is compact.css's divider language, not this shell's, and border-
+   color was never touched by either file before this task. */
+.item .btn-group:not(.span3 *) > .btn {
     border-radius: 0 !important;
     border-color: transparent !important;
-    margin: 0 !important;
 }
 
 /* Unselected segments need an OPAQUE face for the container-clip trick to
@@ -656,8 +713,14 @@ table.mobileitem td.name {
    ng-class keeps the two mutually exclusive) rather than widened to every
    .btn-group > .btn, which would also have to fight (and could lose, given
    equal 0,3,0 specificity and cards.css loading after buttons.css) the
-   selected-state token rule for the fill that must stay unchanged. */
-.item .btn-group > .btn.btn-default {
+   selected-state token rule for the fill that must stay unchanged.
+   :not(.span3 *) exclusion: compact's ghost buttons must keep reacting to
+   :hover with the normal ghost tint (--dz-btn-hover-bg); this rule's own
+   specificity would otherwise beat that hover rule and paint a flat,
+   non-reactive widget-bg fill over it, on top of compact already painting
+   the same fill on its GROUP background (no visible difference at rest,
+   but a real, undisclosed hover regression). */
+.item .btn-group:not(.span3 *) > .btn.btn-default {
     background: var(--dz-widget-bg) !important;
 }
 
@@ -671,12 +734,16 @@ table.mobileitem td.name {
    Swaps in --dz-btn-focus-ring-inset (dz-tokens.css, same accent/opacity,
    inset geometry) in place of the outward ring token everywhere the base
    button system would otherwise draw one, at higher specificity so it wins
-   over both the ghost and the selected-state focus rules in buttons.css. */
-.item .btn-group > .btn:focus-visible {
+   over both the ghost and the selected-state focus rules in buttons.css.
+   :not(.span3 *) exclusion: compact never got the overflow:hidden shell, so
+   it never had a ring-amputation problem to begin with; the outward
+   --dz-btn-focus-ring (buttons.css) still applies there unchanged, exactly
+   as before this task. */
+.item .btn-group:not(.span3 *) > .btn:focus-visible {
     box-shadow: var(--dz-btn-shadow), var(--dz-btn-focus-ring-inset) !important;
 }
 
-.item .btn-group > .btn.btn-selected:focus-visible {
+.item .btn-group:not(.span3 *) > .btn.btn-selected:focus-visible {
     box-shadow: var(--dz-btn-shadow-pressed), var(--dz-btn-focus-ring-inset) !important;
 }
 
