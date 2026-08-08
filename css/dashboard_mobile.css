@@ -144,6 +144,21 @@ body.dashMobile table.mobileitem td.name a:after {
     width: var(--dz-mobile-card-name-badge-size);
 }
 
+/* MITIGATION (core ae507c7aae, 2026-03-30): core sets an inline
+   white-space:nowrap on the Temperature status cell only (dashboard_mobile.
+   html:469; Weather/Utility have no equivalent). table.mobileitem stays
+   display:table while its rows/cells are overridden to flex (above), so the
+   browser still runs the table auto-layout min-content algorithm on it; an
+   unbreakable status string (e.g. "58 % (Comfortable)") forces the whole
+   table wider than its 100%-of-container target, and core's own
+   SECTION.dashCategory{overflow:hidden} (style.css:2268) then silently
+   clips the oversized table inside the screen edge instead of showing a
+   visible overflow (cards-polish task-5d investigation). !important beats
+   the inline style, which an external rule can't outrank otherwise.
+   overflow-wrap covers the same failure mode for any future long,
+   naturally-unbreakable status content (no core nowrap involved) so the
+   table can't be blown out by a single long word either, not just today's
+   nowrap instance. */
 body.dashMobile table.mobileitem td#status,
 body.dashMobile table.mobileitem td.status {
     max-width: var(--dz-mobile-card-status-max-width);
@@ -151,6 +166,8 @@ body.dashMobile table.mobileitem td.status {
     flex-grow: 1;
     flex-shrink: 1;
     text-align: end;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
 }
 
 body.dashMobile table.mobileitem .status > span > span {
