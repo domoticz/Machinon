@@ -127,8 +127,8 @@
        site is a verified duplicate of a desktop one (the dimmer-slider family) it reuses the desktop
        token directly instead of a redundant mobile alias. */
 
-    /* Card spacing scale - padding/margin/gap only. Extends DESIGN.md's page-level 4/8/10/15/20
-       cluster with the two finer steps (2px, 3px) the card system actually uses. */
+    /* Card spacing scale - padding/margin/gap only. Shares the page-level 8/10/15/20 cluster
+       values and adds the finer 2/3/5px card-internal steps. */
     --dz-card-space-2xs: 2px;
     --dz-card-space-xs:  3px;
     --dz-card-space-sm:  5px;

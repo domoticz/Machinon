@@ -1450,9 +1450,8 @@ tokenization; refine work landed separately, on top). Live in `dz-tokens.css`; n
 so dark mode already inherits the correct value from `:root` with no override needed (the one
 exception, `--dz-card-icon-accent`, is a color and *is* overridden - see Log/Timer Icon Accent).
 
-**Spacing scale** (7 steps, padding/margin/gap only - extends the page-level 4/8/10/15/20 cluster,
-[Spacing](#spacing) > Current Clusters, with the two finer steps the card system needs that the
-page scale doesn't):
+**Spacing scale** (7 steps, padding/margin/gap only - shares the page-level 8/10/15/20 cluster
+values and adds the finer 2/3/5px card-internal steps; see [Spacing](#spacing) > Current Clusters):
 
 | Token | Value |
 |-------|-------|
@@ -1745,6 +1744,12 @@ Load-bearing quirks a future edit could break without realizing it:
   should poll for `#dashCameras` present in the DOM **and** its height stable across two consecutive
   polls before capturing; card positions below the cameras section can still shift after a naive
   "page loaded" signal.
+- **Two grid-gap values stay untokenized:** the classic 10px card-grid gap and the Dynamic Dashboard's
+  4px tightened gap remain as literals in `css/cards.css` instead of joining the `--dz-card-space-*`
+  scale. Both were audit WART rows reserved for a hierarchy candidate that was superseded at the gate
+  (the N-series replaced the "airy" H3 direction), and the 4px value is not a step on the 7-step card-space
+  scale, so tokenizing the pair symmetrically is impossible without either adding an off-scale token or
+  changing a value; they remain refine candidates for a future density decision.
 
 ### Form Inputs
 
