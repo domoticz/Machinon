@@ -618,136 +618,192 @@ table.mobileitem td.name {
     width: 100%;
 }
 
-/* Selector-level buttons (SelectorStyle 0): ONE joined segmented control
-   (selector-segmented spec, 2026-08-08), container-clip mechanism, layered
-   on the base rule above. `.item .btn-group` is the ONLY use of .btn-group
-   inside a card (verified against core views/widgets/light_widget.html and
-   light_widget_tab.html: the SelectorStyle-0 markup is the sole emitter,
-   shared by the classic tab-list page (LightSwitches, td#type), the classic
-   desktop Dashboard and the Dynamic Dashboard tile (both td#status) - one
-   shell rule covers all three desktop surfaces because they render the
-   identical directive markup. The shell IS the control: border-radius from
-   the card button-chrome token (the radius every other in-card button
-   already carries), overflow:hidden, and a 1px gap that lets the shell's own
-   accent-colored background read as the segment dividers - no per-position
-   corner logic needed (the old first-child/last-child/middle trio below did
-   that for a single row; a shell that clips whatever shape the wrap produces
-   makes the question moot for any row count). width:fit-content (not 100%,
-   overriding the base rule's width above) so the accent-colored shell hugs
-   the actual button rows instead of painting a colored band across the whole
-   status cell; margin-left:auto keeps it pinned to the cell's right edge,
-   matching the group's previous position. Horizontal scroll is retired
-   (joined wrap is the owner-picked overflow strategy, no scroll/menu
-   fallback), so the old scrollbar-width/-color cosmetics on THIS rule (the
-   base rule above still carries them, for compact) and the ::-webkit-
-   scrollbar(-thumb) rules for .btn-group are dropped: overflow:hidden never
-   shows a scrollbar, so they were dead weight. The Dash2 zero-slack
-   constraint (DESIGN.md Device Cards ring section) is honoured: only
-   border/gap/radius change here, no button padding/line-height/border-width
-   touched, so button height (30px, measured) is unchanged.
+/* Selector-level buttons (SelectorStyle 0): ONE joined segmented control.
+   OWNER-PICKED DIRECTION (2026-08-08, gate round 3): the theme's OWN,
+   already-shipped connected-toolbar family (css/buttons.css:500-529,
+   "Button groups in toolbars/dialogs: connected" - visible today on e.g.
+   #/Events' Disabled/Enabled toggle), re-declared here at a higher,
+   :not(.span3 *)-scoped specificity instead of a bespoke mechanism.
 
-   :not(.span3 *) EXCLUDES the compact dashboard (DashboardType 1; core marks
-   every compact tile's wrapper with .span3 via ng-class in dashboard_desktop.
-   html, verified: dashboardType==1 ? 'span3' : 'span4', never mixed with any
-   other card context - .span2/.span4/.span6/.span12 above are unrelated
-   Bootstrap grid widths). Compact is a PERMANENT, by-design exception, not a
-   gap to close later: compact.css already gives .btn-group there a
-   completely different, deliberate treatment for a structurally different
-   constraint - a FIXED card height with no room for multi-row wrap, so the
-   group is its own vertical scroll-snap list instead
-   (.span3 ... .btn-group { height: var(--dz-card-compact-btngroup-height);
-   overflow-y: auto; scroll-snap-type: y mandatory; background: var(--dz-
-   widget-bg) !important }). Tried the shell there first without the
-   exclusion (twice): unscoped, this rule's overflow:hidden !important beat
-   compact's overflow-y:auto (importance beats specificity regardless of load
-   order), locking the scroll and stranding every non-selected level
-   off-screen and unreachable (measured: scrollHeight 175px vs clientHeight
-   51px, frozen). Excluding the WHOLE original single-rule shell also
-   silently dropped display:flex/gap that compact.css depends on inheriting
-   from the base rule (compact fell back to display:block, collapsing the
-   list) - which is why this shell is now its OWN rule layered on top of an
-   UNSCOPED base, so excluding it never removes anything compact needs.
-   Exclude at the selector, not by piling a THIRD counter-!important rule on
-   top - compact.css stays the sole, fully authoritative owner of .btn-group
-   inside .span3. */
+   History (full evidence trail in .superpowers/sdd/2026-08-08-selector-
+   segmented/task-1-report.md and task-3-report.md): a container-clip shell
+   (accent-fill, then neutral-fill, then flex-grow-tiled) went through three
+   owner gate rounds and was rejected each time as visually disconnected
+   from the theme's other buttons ("an option like the joined buttons we
+   have now"). Task 3's strip gate rendered five candidates against a live
+   ANCHOR screenshot of the Events toggle and settled on this one ("S3").
+   Gate round 3 (this implementation) added one tweak: wrapped segments
+   keep their NATURAL content width - S3 as strip-tested still had the
+   earlier flex-grow rule active underneath, and a full-width lone wrapped
+   button read as "a large base button", not a segment of this family.
+
+   `.item .btn-group` is the ONLY use of .btn-group inside a card (verified
+   against core views/widgets/light_widget.html and light_widget_tab.html:
+   SelectorStyle-0 is the sole emitter, shared by the classic tab-list page
+   (LightSwitches, td#type) and the classic/Dash2 Dashboard (td#status) -
+   one rule set covers all three desktop surfaces). :not(.span3 *) EXCLUDES
+   the compact dashboard (DashboardType 1; core marks every compact tile's
+   wrapper with .span3 via ng-class in dashboard_desktop.html, verified:
+   dashboardType==1 ? 'span3' : 'span4', never mixed with any other card
+   context - .span2/.span4/.span6/.span12 above are unrelated Bootstrap grid
+   widths). Compact is a PERMANENT, by-design exception (task-1-report.md's
+   controller-review addendum): its fixed-height vertical scroll-snap list
+   is unaffected by this rewrite, unchanged since that fix. The .item
+   .btn-group > .btn membership this selector defines is also exactly what
+   the mobile-layout census's structural squash exemption keys on
+   (task-2-report.md, segGroup) - unchanged by this rewrite. */
 .item .btn-group:not(.span3 *) {
-    gap: 1px;
-    background: var(--dz-btn-border); /* neutral seam (owner gate round 2, 2026-08-08): was --dz-accent-color, which made the selected fill (same token) nearly indistinguishable from the shell and washed every empty pixel in loud color; --dz-btn-border is the button family's own border token (= --dz-input-border), a subtle neutral line color no button here previously carried as a FILL, so it only reads as a seam, never competes with the selected accent. */
-    border-radius: var(--dz-card-radius-chrome);
-    overflow: hidden !important; /* !important: beats the #type .btn-group / .input .btn-group overflow-x:auto rule below (an ID selector, higher specificity, predates this shell and still serves other .btn-group contexts) without touching that rule */
+    background: transparent !important;
+    gap: 0 !important;
+    /* WRAP-ROW GEOMETRY decision (gate round 3, evidence-based, both
+       variants actually rendered before picking - see the report for the
+       loser): a wrapped row anchors to the group's own right edge (the
+       same edge margin-left:auto below pins the whole shell to) and sits
+       FLUSH against the row above (0 row-gap), so it reads as one
+       continuous connected shape - "Fan Only" sitting directly under
+       "Auto", both edges aligned. The rejected alternative (a small
+       2-3px gap between rows, the "separate mini connected run" look) read
+       as two distinct toolbars stacked, undermining the ONE-control goal
+       this whole project exists for. Honest caveat, disclosed not hidden:
+       this is a visual TOUCH, not a true sub-pixel border collapse - no
+       reliable CSS selector exists for "first item in a wrapped flex row"
+       the way :first-child identifies the group's true first child (the
+       horizontal seam-collapse below works per-row automatically, flex-
+       wrap naturally resets the negative-margin overlap at each line
+       break; the vertical case has no equivalent), so the row junction is
+       two adjacent 1px borders (~2px combined), marginally thicker than
+       the 1px horizontal seams. Verified live, not assumed. */
+    justify-content: flex-end !important;
+    /* Family radius (--dz-btn-radius, not --dz-card-radius-chrome): the
+       owner's picked direction is the LIVING buttons.css connected block
+       verbatim, which itself uses --dz-btn-radius for its first/last-child
+       corners - this shell radius only needs to agree with that, not with
+       other in-card buttons (nothing else in a card looks like this
+       control anymore). */
+    border-radius: var(--dz-btn-radius);
+    /* Still needed even with real per-button corner radii below: buttons.
+       css's first/last-child logic only knows the group's absolute first/
+       last child, not "first/last in this particular wrapped row" - a
+       square-cornered INTERIOR button can land at the shell's own rounded-
+       corner position after wrap (measured: "Auto", the HVAC 5-level
+       case's row-1-last-but-not-group-last button). This clip rounds the
+       group's actual exterior boundary regardless of which button occupies
+       a corner. !important still beats the #type .btn-group / .input
+       .btn-group overflow-x:auto rule below (an ID selector, predates this
+       shell, still serves other .btn-group contexts, untouched). */
+    overflow: hidden !important;
     width: fit-content;
     max-width: 100%;
+    /* Pins the shell to the cell's right edge; the wrapped row's flex-end
+       alignment above anchors to this same edge, so both rows' right
+       edges line up exactly - required for the flush vertical seam above
+       to read as connected rather than staggered. */
     margin-left: auto;
 }
 
-/* Corner + margin: byte-identical value to pre-task (the old three first-
-   child/last-child/middle selectors always resolved to this one value
-   anyway, so collapsing them changes nothing anywhere, compact included -
-   compact.css's OWN more specific button rule already forces radius:0
-   regardless of what this contributes). Left UNSCOPED on purpose. */
+/* Margin reset, UNSCOPED (applies inside compact too) - byte-identical to
+   pre-task. buttons.css's own generic connected-toolbar rule
+   (`.btn-group .btn { margin: 0 0 0 -1px !important }`, buttons.css:500)
+   has ALWAYS applied to every .btn-group everywhere, compact included -
+   compact never wanted that seam-collapse margin (its buttons are a
+   vertical scroll-snap list, not a connected horizontal run), and
+   previously relied on cards.css's own (then differently-shaped) unscoped
+   button rule to cancel it back to 0. Self-caught while re-verifying
+   compact byte-identically for this round: removing that old unscoped
+   rule wholesale (replaced below by the :not(.span3 *)-scoped -1px rule)
+   silently re-exposed compact to the buttons.css default, measured live as
+   a real 1px width shift on 3 of 5 compact buttons (marginLeft -1px where
+   baseline has 0px) before this line was added back. Left here, unscoped,
+   specifically so compact keeps landing on it while every other context's
+   higher-specificity :not(.span3 *) rule below overrides it back to -1px. */
 .item .btn-group > .btn {
-    border-radius: var(--dz-card-radius-chrome) !important;
     margin: 0 !important;
 }
 
-/* Flat/borderless shape for every segment, selected or not: the shell's
-   own background now reads as the divider, so each button's individual
-   border would double it up. border-color (not `border: none`) preserves
-   the exact border-box height (box-sizing:border-box on the base .btn rule
-   makes the border part of the box; dropping it entirely would shrink the
-   button by the border width) - the same transparent-border technique the
-   soft-elevated base block already uses for filled vs ghost buttons.
-   flex:1 0 auto (owner gate round 2, 2026-08-08): every segment GROWS to
-   fill its row, so a wrapped row is fully tiled edge-to-edge instead of
-   shrink-wrapped-and-centered with the shell's seam color flooding the
-   leftover space as slabs - a lone button in the last row grows alone and
-   spans the full row width (the deliberate "keypad" look the owner asked
-   for), matching what happens when a phone numpad's last row holds one key.
-   :not(.span3 *) exclusion: compact's buttons keep the accent border
-   (buttons.css `.btn-group .btn`) between its vertically stacked pills -
-   this is compact.css's divider language, not this shell's, and border-
-   color was never touched by either file before this task; compact also
-   never wraps (single column, scroll-snap), so flex-grow would be a no-op
-   there anyway, but the exclusion keeps compact's rule the sole owner. */
+/* Family connected-toolbar seam mechanics (buttons.css:500-529),
+   re-declared at this higher, :not(.span3 *)-scoped specificity so the
+   shell above and the compact exclusion both apply. Longhand corner radii,
+   not the shorthand, matching buttons.css's own convention (a single-token
+   shorthand form has no way to carry the radius token on one corner and 0
+   on the other three). */
 .item .btn-group:not(.span3 *) > .btn {
-    flex: 1 0 auto;
+    /* Pulls every non-first button 1px left so its own left border
+       overlaps the PREVIOUS button's right border into one shared 1px
+       hairline instead of doubling to 2px - the family's existing seam-
+       collapse trick, reused verbatim; works correctly per wrapped row
+       automatically (a line break resets which button is "previous" in
+       flex-wrap's own layout, no extra rule needed). Overrides the
+       unscoped margin:0 reset above by specificity (this selector adds
+       :not(.span3 *), the reset rule doesn't match compact so it never
+       competes there). */
+    margin: 0 0 0 -1px !important;
+}
+
+.item .btn-group:not(.span3 *) > .btn:first-child {
+    margin-left: 0 !important;
+    border-top-left-radius: var(--dz-btn-radius) !important;
+    border-bottom-left-radius: var(--dz-btn-radius) !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+.item .btn-group:not(.span3 *) > .btn:last-child {
+    border-top-right-radius: var(--dz-btn-radius) !important;
+    border-bottom-right-radius: var(--dz-btn-radius) !important;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+}
+
+.item .btn-group:not(.span3 *) > .btn:not(:first-child):not(:last-child) {
     border-radius: 0 !important;
-    border-color: transparent !important;
 }
 
-/* Unselected segments need an OPAQUE face for the container-clip trick to
-   read as dividers instead of an accent-colored wash: .btn-default is a ghost
-   (background:transparent) everywhere else in the theme, so the fill is
-   scoped to .btn-default specifically (never matches .btn-selected, core's
-   ng-class keeps the two mutually exclusive) rather than widened to every
-   .btn-group > .btn, which would also have to fight (and could lose, given
-   equal 0,3,0 specificity and cards.css loading after buttons.css) the
-   selected-state token rule for the fill that must stay unchanged.
-   :not(.span3 *) exclusion: compact's ghost buttons must keep reacting to
-   :hover with the normal ghost tint (--dz-btn-hover-bg); this rule's own
-   specificity would otherwise beat that hover rule and paint a flat,
-   non-reactive widget-bg fill over it, on top of compact already painting
-   the same fill on its GROUP background (no visible difference at rest,
-   but a real, undisclosed hover regression). */
+/* Defensive addition beyond the literal gated payload, matching a
+   precedent buttons.css already carries for its own generic .btn-group
+   (see that file's comment): a group with exactly ONE button matches
+   :first-child AND :last-child simultaneously, and CSS resolves the
+   conflicting corner values by source order, not "both apply" - without
+   this, a pathological single-level Selector (misconfigured device; no
+   fixture in this project has fewer than 2 levels) would render half-pill
+   instead of fully rounded. Cheap, consistent with the family, never
+   observed to fire live. */
+.item .btn-group:not(.span3 *) > .btn:only-child {
+    border-radius: var(--dz-btn-radius) !important;
+}
+
+/* Unselected segments: a true ghost, no fill - the container-clip shell's
+   opaque-face requirement (this project's first two owner-gate rounds) no
+   longer applies, since the shell itself carries no fill to seam against
+   (background: transparent above). border-color is restated here even
+   though buttons.css's own `.btn-group .btn` rule already sets the same
+   accent value, because this selector's specificity already has to claim
+   the territory (for the :not(.span3 *) exclusion and the radius rules
+   above) - leaving border-color unstated would depend on a cross-file
+   cascade tie this project has already been burned by once (an earlier
+   round's missing !important silently losing to a same-specificity rule
+   in a different file). .btn-selected's own border-color (already
+   --dz-btn-toggle-selected-bg, which resolves to the same accent value) is
+   deliberately left untouched - the existing buttons.css rule for it is
+   already correct. */
 .item .btn-group:not(.span3 *) > .btn.btn-default {
-    background: var(--dz-widget-bg) !important;
+    background: transparent !important;
+    border-color: var(--dz-accent-color) !important;
 }
 
-/* Focus ring, inset (selector-segmented spec focus-treatment decision):
-   the shell's overflow:hidden clips the normal outward ring
-   (--dz-btn-focus-ring, a non-inset box-shadow) on any segment touching the
-   shell's own edge - and with a hugging, zero-padding shell and joined wrap,
-   EVERY segment ends up on some edge (top/bottom row, first/last per row),
-   so the amputation is not an edge case here, it is the common case. Applied
-   uniformly (not conditionally per position) for one predictable rule.
-   Swaps in --dz-btn-focus-ring-inset (dz-tokens.css, same accent/opacity,
-   inset geometry) in place of the outward ring token everywhere the base
-   button system would otherwise draw one, at higher specificity so it wins
-   over both the ghost and the selected-state focus rules in buttons.css.
-   :not(.span3 *) exclusion: compact never got the overflow:hidden shell, so
-   it never had a ring-amputation problem to begin with; the outward
-   --dz-btn-focus-ring (buttons.css) still applies there unchanged, exactly
-   as before this task. */
+/* Focus ring, inset - RE-VERIFIED for this gate round, not carried over on
+   assumption. With real per-button borders (no longer transparent) and the
+   shell clip still in place (still needed, see above), the outward ring
+   (--dz-btn-focus-ring) was tested live against the family's own standard
+   treatment before deciding: it renders correctly for the group's TRUE
+   first/last child (their own rounded corners already match the shell
+   clip's curve), but for a SQUARE-cornered interior button that lands at
+   the wrap boundary (measured: "Auto" in the HVAC 5-level case, the same
+   button the corner-radius artifact affects) the outward ring is clipped
+   down to almost nothing. Kept inset, uniformly: with a clipping shell in
+   play, which segment lands at that artifact position depends on level
+   count and label length, so the safe default stays inset rather than
+   "usually fine, occasionally amputated depending on the device's own
+   level names." */
 .item .btn-group:not(.span3 *) > .btn:focus-visible {
     box-shadow: var(--dz-btn-shadow), var(--dz-btn-focus-ring-inset) !important;
 }

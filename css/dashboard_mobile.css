@@ -275,42 +275,37 @@ body.dashMobile table.mobileitem .selectorlevels > select {
    buttons as direct children of the ng-if span (span > button), never
    nested span > span > button.
 
-   ONE joined segmented control (selector-segmented spec, 2026-08-08),
-   container-clip mechanism, same recipe as the desktop shell in
-   css/cards.css: border-radius from --dz-btn-radius (the radius .btn-mini
-   already carries unrestated from buttons.css, so the shell matches its own
-   segments), overflow:hidden, 1px gap so the shell's background reads as the
-   divider between segments, no per-position corner logic. width:fit-content
-   + margin-left:auto (replacing justify-content:flex-end as the primary
-   alignment mechanism, though flex-end is kept - see below) hugs the shell
-   to the actual chip rows instead of a flood of seam color washing across
-   the full-width host span. This is also the fix for the squash class the
-   Timers #updelclr rule below covers for forms (census key
-   squash::Dashboard-classic::#status): the OLD flex-wrap-plus-gap fix
-   (2026-07-19) traded a 0px squash for the current --dz-card-space-md gap,
-   which the 1px joined gap now deliberately re-introduces on purpose (an
-   intentional joined control, not accidental cramming) - the census gains a
-   group-scoped exemption for exactly this shape in a companion rig commit,
-   never fixed here by widening the gap back out.
+   ONE joined segmented control. OWNER-PICKED DIRECTION (2026-08-08, gate
+   round 3): the theme's OWN connected-toolbar family (css/buttons.css:
+   500-529), the same mechanism as the desktop shell in css/cards.css - see
+   that file's comment for the full gate history (three rejected container-
+   clip rounds, Task 3's five-candidate strip gate, the round-3 natural-
+   width tweak). border-radius from --dz-btn-radius (the radius .btn-mini
+   already carries unrestated from buttons.css, so the shell agrees with its
+   own segments), overflow:hidden (still needed: rounds the group's actual
+   exterior regardless of which chip lands at a wrap corner, same reasoning
+   as the desktop shell), no shell fill (background: transparent - the
+   ghost-style ONLY needs a border seam now, not an opaque shell to divide
+   against). This is also the fix for the squash class the Timers #updelclr
+   rule below covers for forms (census key squash::Dashboard-classic::
+   #status): the census's structural, group-scoped exemption (task-2-
+   report.md) is unaffected by this rewrite - it keys on DOM shape
+   (span > span > .btn-mini under this exact host), not on fill/border.
 
-   Seam color (owner gate round 2, 2026-08-08): --dz-btn-border (=
-   --dz-input-border), not --dz-accent-color - the same fix and the same
-   reasoning as the desktop shell in css/cards.css (accent-as-seam made the
-   selected chip's own accent fill nearly indistinguishable from the shell
-   and turned every empty pixel loud); a subtle neutral line no chip here
-   ever carried as a fill, so it only reads as a seam. flex:1 0 auto on
-   .btn-mini below (same round) makes every chip GROW to fill its row edge-
-   to-edge instead of shrink-wrapped-and-flex-end'd with the seam color
-   flooding the leftover space as a slab; flex-end is kept only for how a
-   short trailing row settles once grown (a lone last-row chip still grows
-   alone and spans the full row, the deliberate keypad look). */
+   WRAP-ROW GEOMETRY (same decision as the desktop shell, rendered and
+   compared on this exact mobile surface, not assumed to transfer):
+   justify-content:flex-end anchors a wrapped row to the group's own right
+   edge (margin-left:auto below pins the same edge), gap:0 sits it flush
+   against the row above so the borders touch and read as one connected
+   shape. The rejected alternative (a small gap between rows) read as two
+   separate mini-groups here too. */
 body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) {
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
     align-items: center;
-    gap: 1px;
-    background: var(--dz-btn-border);
+    gap: 0;
+    background: transparent;
     border-radius: var(--dz-btn-radius);
     overflow: hidden;
     width: fit-content;
@@ -320,26 +315,69 @@ body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) {
 body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) > span {
     display: contents;
 }
+
+/* Family connected-toolbar seam mechanics, adapted for the span > span >
+   .btn-mini shape: display:contents on the inner wrapper spans (above)
+   means .btn-mini's actual DOM parent is that inner span, so :first-child/
+   :last-child ON .btn-mini itself would each trivially match (every inner
+   span wraps exactly one chip, so a chip is always both the first AND last
+   child of ITS OWN parent) - the position tests below target the INNER
+   SPAN's position among the host's direct children instead, then reach
+   into it for the .btn-mini, matching the selector shape this project's
+   S1/S2 gate-round payloads already established for this exact markup. */
 body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) .btn-mini {
-    flex: 1 0 auto;
-    margin: 0;
-    /* !important on both: buttons.css's soft-elevated base block sets
-       border-radius on the shared .btn class (which .btn-mini also carries)
-       with !important, so a plain declaration here loses regardless of this
-       selector's own much higher specificity - importance is compared
-       before specificity. border-color needs no fight today (no competing
-       !important on that property) but carries it too so the flat/borderless
-       shape stays correct if that ever changes. */
+    /* Pulls every non-row-first chip 1px left so its own left border
+       overlaps the previous chip's right border into one shared 1px
+       hairline - the family's seam-collapse trick, same as desktop. */
+    margin: 0 0 0 -1px !important;
+}
+body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) > span:first-child > .btn-mini {
+    margin-left: 0 !important;
+    border-top-left-radius: var(--dz-btn-radius) !important;
+    border-bottom-left-radius: var(--dz-btn-radius) !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) > span:last-child > .btn-mini {
+    border-top-right-radius: var(--dz-btn-radius) !important;
+    border-bottom-right-radius: var(--dz-btn-radius) !important;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+}
+body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) > span:not(:first-child):not(:last-child) > .btn-mini {
     border-radius: 0 !important;
-    border-color: transparent !important;
+}
+/* Defensive addition, same reasoning as the desktop shell's :only-child
+   rule: a pathological single-level Selector would otherwise render
+   half-pill (matches both the first-child and last-child rules above,
+   whichever is declared later in the cascade wins the conflicting corner
+   values). No fixture in this project has fewer than 2 levels. */
+body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) > span:only-child > .btn-mini {
+    border-radius: var(--dz-btn-radius) !important;
+}
+/* Unselected chips: true ghost, no fill (mirrors the desktop shell's
+   .btn-default rule) - overrides the mobile-polish base rule's opaque
+   --dz-widget-bg fill (dashboard_mobile.css above, "Mobile-row button
+   chip"), which every OTHER .btn-mini on this page correctly keeps (that
+   fill is right for a standalone On/Off/Contact/Siren chip; only the
+   selector-level segments, joined into this family-connected shell,
+   need to go back to a true ghost). :not(.btn-info):not(.active) mirrors
+   how the active-state rule two sections up in this file identifies the
+   selected chip - the same two classes core/the theme use for "on". */
+body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) .btn-mini:not(.btn-info):not(.active) {
+    background: transparent !important;
+    border-color: var(--dz-accent-color) !important;
 }
 
-/* Focus ring, inset: same reasoning as the desktop shell (css/cards.css,
-   selector-segmented spec) - the shell's overflow:hidden clips the normal
-   outward --dz-btn-focus-ring on any segment touching its edge, which under
-   wrap is every segment. .btn-mini carries no selected-state box-shadow of
-   its own (the active level is a background/color restatement above, not a
-   pressed inset), so only the resting-shadow pairing is needed here. */
+/* Focus ring, inset - RE-VERIFIED for gate round 3 (see the desktop shell's
+   matching comment in css/cards.css for the live test): with real per-chip
+   borders now in play, the outward ring was tested against the family's
+   own standard treatment and still clips down to almost nothing on a
+   square-cornered chip that lands at the shell's rounded wrap-corner
+   position - kept inset, uniformly, for the same reason as the desktop
+   shell. .btn-mini carries no selected-state box-shadow of its own (the
+   active level is a background/color restatement above, not a pressed
+   inset), so only the resting-shadow pairing is needed here. */
 body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) .btn-mini:focus-visible {
     box-shadow: var(--dz-btn-shadow), var(--dz-btn-focus-ring-inset) !important;
 }
