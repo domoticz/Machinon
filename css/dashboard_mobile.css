@@ -122,7 +122,18 @@ body.dashMobile table.mobileitem td.name a {
     margin-right: var(--dz-card-space-sm);
 }
 
-body.dashMobile table.mobileitem th a:after,
+/* Row-level "view log" badge arrow only: td#name/td.name a is the round badge
+   wrapping each row's log-link (Temperature/Weather/Utility rows,
+   views/dashboard_mobile.html:467/505/545). The base badge rule above also
+   matches th a (the section banner's plain SwitchLayout icon link, e.g.
+   dashboard_mobile.html:74) because it shares the same selector list, but
+   that link was never meant to carry this arrow: its anchor is
+   display:block;height:18px with only the icon as in-flow content, so this
+   block-level ::after started a second line and spilled the glyph below the
+   18px box into the first data row (cards-polish task-5d). th is dropped
+   here, not from the base badge rule above, since the badge's background/
+   size there is invisible on the banner anyway (it matches the th's own
+   accent background) and removing it isn't needed to fix the defect. */
 body.dashMobile table.mobileitem td#name a:after,
 body.dashMobile table.mobileitem td.name a:after {
     content: "\2794";
