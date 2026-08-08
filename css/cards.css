@@ -588,15 +588,9 @@ table.mobileitem td.name {
 }
 
 /* .btn-group dropped from this pair (selector-segmented spec, 2026-08-08):
-   the shell rule below sets overflow:hidden, which never shows a scrollbar,
-   so a webkit scrollbar-thumb rule for it was dead weight. #status/.status
-   keep their own vertical scroll (the Dash2 zero-slack cap, unrelated). */
-.item #status::-webkit-scrollbar,
-.item .status::-webkit-scrollbar {
-    width: var(--dz-card-scrollbar-size);
-    height: var(--dz-card-scrollbar-size);
-    border-radius: var(--dz-card-radius-chrome);
-}
+   the shell rule below sets overflow:hidden, which never shows a scrollbar.
+   #status/.status keep their own vertical scroll (the Dash2 zero-slack cap,
+   unrelated) and rely on scrollbar-width/scrollbar-color. */
 
 /* Button groups in device cards: pills with gap. BASE layout, byte-identical
    to pre-selector-segmented-task values, shared by every context INCLUDING
@@ -605,7 +599,7 @@ table.mobileitem td.name {
    builds on top of this (it restates flex-flow:column and width:100% but
    never restates display or its own gap), so compact still needs display:
    flex and SOME gap value to come from here. The joined-segment SHELL
-   (background/radius/overflow-hidden/fit-content width/1px gap) is a
+   (transparent background, collapsed-border seams, clip for wrap corners) is a
    separate, more specific, compact-EXCLUDED rule directly below - see its
    comment for why compact cannot share it. */
 .item .btn-group {
