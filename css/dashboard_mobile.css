@@ -214,28 +214,21 @@ body.dashMobile table.mobileitem .btn-mini {
 }
 
 /* Padding restatement dropped (cleanup): the base rule above already pins the
-   same tier padding with !important on every .btn-mini state. */
+   same tier padding with !important on every .btn-mini state. Also covers
+   the active selector level: core marks it with .btn-info (views/
+   dashboard_mobile.html, verified live), so this rule alone already renders
+   it correctly (--dz-accent-color/--dz-accent-text are the exact values
+   --dz-btn-toggle-selected-bg/-text alias). A dedicated ".btn-mini.btn-
+   selected" rule this file carried for the active level (targeting a class
+   core emitted at the time the rule was written) was removed as dead code
+   (selector-segmented spec, 2026-08-08 cleanup): core PR #6871 replaced
+   .btn-selected with .btn-info in this exact template that same day, after
+   the rule landed, so it never matched live markup. */
 body.dashMobile table.mobileitem .btn-mini.btn-info,
 body.dashMobile table.mobileitem .btn-mini.active,
 body.dashMobile table.mobileitem .btn-mini:active {
     background: var(--dz-accent-color) !important;
     color: var(--dz-accent-text) !important;
-}
-
-/* Selected selector level. Core marks the active level with .btn-selected
-   (views/dashboard_mobile.html:208, ng-class btn-selected/btn-default), NOT
-   .active - and the theme's own token rule for it (buttons.css .btn-selected,
-   --dz-btn-toggle-selected-*) lost to this file's higher-specificity white
-   .btn-mini background above (both !important, (0,4,0) beats (0,1,0)
-   regardless of load order), so the active level rendered white-on-white with
-   only the pressed inset shadow to distinguish it (measured live). Restate the
-   selected tokens at the same specificity so the active level wears the same
-   selected fill as every other toggle in the theme. (border-color is NOT
-   restated: buttons.css's .btn-selected rule already sets the same token with
-   !important, which this plain declaration could never outrank.) */
-body.dashMobile table.mobileitem .btn-mini.btn-selected {
-    background: var(--dz-btn-toggle-selected-bg) !important;
-    color: var(--dz-btn-toggle-selected-text) !important;
 }
 
 body.dashMobile table.mobileitem .dimslider {
@@ -274,32 +267,69 @@ body.dashMobile table.mobileitem .selectorlevels > select {
 
 /* Favorited SelectorStyle-0 selector rows (HVAC Mode / Scene Selector class):
    core renders the level buttons as span[ng-repeat] > button.btn-mini inside a
-   plain block span in td#status (views/dashboard_mobile.html:204-213), which
-   wraps the five chips at 360px with exactly 0px vertical gap (the squash
-   class the Timers #updelclr fix below covers for forms; census key
-   squash::Dashboard-classic::#status, task-7 addendum incident writeup).
-   Same treatment: the ng-if host span becomes a wrapping flex row and the
-   ng-repeat wrapper spans become display:contents so each chip is a flex item
-   spaced by the gap (the #updelclr td pattern below). :has(> span > .btn-mini)
-   matches ONLY the selector host: every other switch type in that template
-   renders its buttons as direct children of the ng-if span (span > button),
-   never nested span > span > button. justify-content keeps the td#status
-   rule's flex-end alignment; the chips' own 2px margin is zeroed inside the
-   row so the gap is the single spacing source. */
+   plain block span in td#status (views/dashboard_mobile.html:204-213). The
+   ng-if host span is the wrapping flex row and the ng-repeat wrapper spans
+   are display:contents so each chip is a flex item spaced by the gap (the
+   #updelclr td pattern below); :has(> span > .btn-mini) matches ONLY the
+   selector host - every other switch type in that template renders its
+   buttons as direct children of the ng-if span (span > button), never
+   nested span > span > button.
+
+   ONE joined segmented control (selector-segmented spec, 2026-08-08),
+   container-clip mechanism, same recipe as the desktop shell in
+   css/cards.css: border-radius from --dz-btn-radius (the radius .btn-mini
+   already carries unrestated from buttons.css, so the shell matches its own
+   segments), overflow:hidden, 1px gap so the shell's accent-colored
+   background reads as the divider between segments, no per-position corner
+   logic. width:fit-content + margin-left:auto (replacing justify-content:
+   flex-end, now moot once the shell shrinks to its content) hugs the shell
+   to the actual chip rows instead of the accent color washing across the
+   full-width host span; flex-end is kept for how a SHORT wrapped remainder
+   row settles inside that hugged width. This is also the fix for the squash
+   class the Timers #updelclr rule below covers for forms (census key
+   squash::Dashboard-classic::#status): the OLD flex-wrap-plus-gap fix
+   (2026-07-19) traded a 0px squash for the current --dz-card-space-md gap,
+   which the 1px joined gap now deliberately re-introduces on purpose (an
+   intentional joined control, not accidental cramming) - the census gains a
+   group-scoped exemption for exactly this shape in a companion rig commit,
+   never fixed here by widening the gap back out. */
 body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) {
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
     align-items: center;
-    gap: var(--dz-card-space-md); /* inside a card, so it joins the card scale; the 3 sibling
-      "future --dz-gap token site" spots below (Timers/Events forms, not card anatomy) are out
-      of the cards-polish audit's scope and stay literal, see cards-polish task-2 report */
+    gap: 1px;
+    background: var(--dz-accent-color);
+    border-radius: var(--dz-btn-radius);
+    overflow: hidden;
+    width: fit-content;
+    max-width: 100%;
+    margin-left: auto;
 }
 body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) > span {
     display: contents;
 }
 body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) .btn-mini {
     margin: 0;
+    /* !important on both: buttons.css's soft-elevated base block sets
+       border-radius on the shared .btn class (which .btn-mini also carries)
+       with !important, so a plain declaration here loses regardless of this
+       selector's own much higher specificity - importance is compared
+       before specificity. border-color needs no fight today (no competing
+       !important on that property) but carries it too so the flat/borderless
+       shape stays correct if that ever changes. */
+    border-radius: 0 !important;
+    border-color: transparent !important;
+}
+
+/* Focus ring, inset: same reasoning as the desktop shell (css/cards.css,
+   selector-segmented spec) - the shell's overflow:hidden clips the normal
+   outward --dz-btn-focus-ring on any segment touching its edge, which under
+   wrap is every segment. .btn-mini carries no selected-state box-shadow of
+   its own (the active level is a background/color restatement above, not a
+   pressed inset), so only the resting-shadow pairing is needed here. */
+body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) .btn-mini:focus-visible {
+    box-shadow: var(--dz-btn-shadow), var(--dz-btn-focus-ring-inset) !important;
 }
 
 /* Timers form actions: core's #updelclr is a rigid 3-cell table (views/

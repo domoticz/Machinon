@@ -587,7 +587,10 @@ table.mobileitem td.name {
     scrollbar-color: var(--dz-accent-color) var(--dz-body-bg);
 }
 
-.btn-group::-webkit-scrollbar,
+/* .btn-group dropped from this pair (selector-segmented spec, 2026-08-08):
+   the shell rule below sets overflow:hidden, which never shows a scrollbar,
+   so a webkit scrollbar-thumb rule for it was dead weight. #status/.status
+   keep their own vertical scroll (the Dash2 zero-slack cap, unrelated). */
 .item #status::-webkit-scrollbar,
 .item .status::-webkit-scrollbar {
     width: var(--dz-card-scrollbar-size);
@@ -595,33 +598,86 @@ table.mobileitem td.name {
     border-radius: var(--dz-card-radius-chrome);
 }
 
-/* Button groups in device cards: pills with gap */
+/* Selector-level buttons (SelectorStyle 0): ONE joined segmented control
+   (selector-segmented spec, 2026-08-08), container-clip mechanism. `.item
+   .btn-group` is the ONLY use of .btn-group inside a card (verified against
+   core views/widgets/light_widget.html and light_widget_tab.html: the
+   SelectorStyle-0 markup is the sole emitter, shared by the classic tab-list
+   page (LightSwitches, td#type), the classic desktop Dashboard and the
+   Dynamic Dashboard tile (both td#status) - one shell rule covers all three
+   desktop surfaces because they render the identical directive markup.
+   The shell IS the control: border-radius from the card button-chrome token
+   (the radius every other in-card button already carries), overflow:hidden,
+   and a 1px gap that lets the shell's own accent-colored background read as
+   the segment dividers - no per-position corner logic needed (the old
+   first-child/last-child/middle trio below did that for a single row; a
+   shell that clips whatever shape the wrap produces makes the question moot
+   for any row count). width:fit-content (not 100%) so the accent-colored
+   shell hugs the actual button rows instead of painting a colored band
+   across the whole status cell; margin-left:auto keeps it pinned to the
+   cell's right edge, matching the group's previous position. Horizontal
+   scroll is retired (joined wrap is the owner-picked overflow strategy, no
+   scroll/menu fallback), so the old scrollbar-width/-color cosmetics and the
+   ::-webkit-scrollbar(-thumb) rules for .btn-group are dropped: overflow:
+   hidden never shows a scrollbar, so they were dead weight. The Dash2 zero-
+   slack constraint (DESIGN.md Device Cards ring section) is honoured: only
+   border/gap/radius change here, no button padding/line-height/border-width
+   touched, so button height (30px, measured) is unchanged. */
 .item .btn-group {
     display: flex !important;
     flex-flow: row wrap;
-    gap: var(--dz-card-space-xs);
+    gap: 1px;
     justify-content: center;
-    scrollbar-width: thin;
-    scrollbar-color: var(--dz-accent-color) var(--dz-body-bg);
-    width: 100%;
+    background: var(--dz-accent-color);
+    border-radius: var(--dz-card-radius-chrome);
+    overflow: hidden !important; /* !important: beats the #type .btn-group / .input .btn-group overflow-x:auto rule below (an ID selector, higher specificity, predates this shell and still serves other .btn-group contexts) without touching that rule */
+    width: fit-content;
+    max-width: 100%;
+    margin-left: auto;
 }
 
-.item .btn-group > .btn,
-.item .btn-group > .btn:first-child,
-.item .btn-group > .btn:last-child {
-    border-radius: var(--dz-card-radius-chrome) !important;
+/* Flat/borderless shape for every segment, selected or not: the shell's
+   own background now reads as the divider, so each button's individual
+   border would double it up. border-color (not `border: none`) preserves
+   the exact border-box height (box-sizing:border-box on the base .btn rule
+   makes the border part of the box; dropping it entirely would shrink the
+   button by the border width) - the same transparent-border technique the
+   soft-elevated base block already uses for filled vs ghost buttons. */
+.item .btn-group > .btn {
+    border-radius: 0 !important;
+    border-color: transparent !important;
     margin: 0 !important;
 }
 
-.item .btn-group > .btn:not(:first-child):not(:last-child) {
-    border-radius: var(--dz-card-radius-chrome) !important;
+/* Unselected segments need an OPAQUE face for the container-clip trick to
+   read as dividers instead of an accent-colored wash: .btn-default is a ghost
+   (background:transparent) everywhere else in the theme, so the fill is
+   scoped to .btn-default specifically (never matches .btn-selected, core's
+   ng-class keeps the two mutually exclusive) rather than widened to every
+   .btn-group > .btn, which would also have to fight (and could lose, given
+   equal 0,3,0 specificity and cards.css loading after buttons.css) the
+   selected-state token rule for the fill that must stay unchanged. */
+.item .btn-group > .btn.btn-default {
+    background: var(--dz-widget-bg) !important;
 }
 
-.item .btn-group::-webkit-scrollbar-thumb,
-.item #status::-webkit-scrollbar-thumb,
-.item .status::-webkit-scrollbar-thumb {
-    background: var(--dz-accent-color);
-    border-radius: var(--dz-card-radius-chrome);
+/* Focus ring, inset (selector-segmented spec focus-treatment decision):
+   the shell's overflow:hidden clips the normal outward ring
+   (--dz-btn-focus-ring, a non-inset box-shadow) on any segment touching the
+   shell's own edge - and with a hugging, zero-padding shell and joined wrap,
+   EVERY segment ends up on some edge (top/bottom row, first/last per row),
+   so the amputation is not an edge case here, it is the common case. Applied
+   uniformly (not conditionally per position) for one predictable rule.
+   Swaps in --dz-btn-focus-ring-inset (dz-tokens.css, same accent/opacity,
+   inset geometry) in place of the outward ring token everywhere the base
+   button system would otherwise draw one, at higher specificity so it wins
+   over both the ghost and the selected-state focus rules in buttons.css. */
+.item .btn-group > .btn:focus-visible {
+    box-shadow: var(--dz-btn-shadow), var(--dz-btn-focus-ring-inset) !important;
+}
+
+.item .btn-group > .btn.btn-selected:focus-visible {
+    box-shadow: var(--dz-btn-shadow-pressed), var(--dz-btn-focus-ring-inset) !important;
 }
 
 /* item subnav applying by click*/

@@ -276,6 +276,12 @@
     --dz-btn-shadow-hover:    0 2px 6px rgba(0,0,0,.22), 0 1px 3px rgba(0,0,0,.12);
     --dz-btn-shadow-pressed:  inset 0 1px 2px rgba(0,0,0,.12);
     --dz-btn-focus-ring:      0 0 0 2px rgba(var(--dz-accent-values), .35);
+    /* Inset variant (selector-segmented spec, 2026-08-08): the joined-
+       segment shell clips outward box-shadow at its own overflow:hidden
+       edge, which every segment touches under wrap, so the ring for a
+       button INSIDE that shell draws inward instead. Same accent/opacity as
+       --dz-btn-focus-ring, only the geometry differs; no new color. */
+    --dz-btn-focus-ring-inset: inset 0 0 0 2px rgba(var(--dz-accent-values), .35);
     /* Elevation (DESIGN.md levels 1/2/4/5; level 3 = the --dz-btn-shadow triple).
        Crisp tight direction, owner-picked 2026-08-07 shadow-value-tuning gate. */
     --dz-elev-card:    0 1px 4px rgba(0,0,0,0.25);
