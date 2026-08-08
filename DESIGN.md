@@ -1767,7 +1767,13 @@ this mechanism. See [Compact Dashboard Grid](#compact-dashboard-grid).
   group-scoped exemption lives directly in `dz-mobile-layout-census.js` (docker-test rig), keyed on
   real DOM group membership (the actual `.btn-group` node two elements share), never on
   fill/border/color - deliberately not cluster-keyed, because core duplicates `id=status`/`id=type`
-  across every row, which would make a cluster-keyed exemption unsound.
+  across every row, which would make a cluster-keyed exemption unsound. Provenance: the plan and brief
+  that dispatched this work both cited a "nativeToggle exemption" as an existing precedent to mirror.
+  It did not exist - a full rig-history grep (`git grep -i nativeToggle` across every commit) returned
+  zero hits, and the squash loop had never carried any pair-skip exemption before this task. Caught
+  before any code was written; the exemption above was built from the file's real, closest precedent
+  instead (the overlap check's own ancestor/descendant exclusion, the same "structurally one unit, not
+  two independent controls" shape applied to a different check), not from the fabricated reference.
 - The Dynamic Dashboard's h:2 GridStack cell still cannot fit a 5-level selector without scrolling (see
   [Dash2 Card Density](#dash2-card-density) > point 3): the accepted baseline exception
   (`cutoff::Dashboard-dash2::dz-device::button.btn.btn-small`, `mobile-layout-contract.json`) stays,
