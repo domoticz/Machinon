@@ -548,7 +548,11 @@ a.btnstyle {
    wins the specificity tie against that block's resting shadow token -
    .btnsmall/.btnsmall-sel are two of that base block's selectors, so this
    is the rule that actually zeroes their elevation; .btn-default/.btn-small
-   aren't in that list and so only need the radius here. */
+   aren't in that list and so only need the radius here.
+   Known override: the card Log/Timer icon pair (css/cards.css, ".timers_log
+   .btnsmall, .timers_log .btnsmall-sel") intentionally repaints `color` away
+   from --dz-btn-ghost-text, using the same two-class-beats-one-class !important
+   tie-break as .aw-footer .btn-default further down this file. */
 .btn-default,
 .btn-group .btn-default,
 .btnsmall,

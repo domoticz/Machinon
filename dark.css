@@ -63,4 +63,16 @@ html[data-dz-scheme="dark"] {
      never had a resting card-shadow layer of their own (icon list hover, scheme-card
      selection border). */
   --dz-ring-accent: 0px 0px 0px 2px var(--dz-accent-color);
+
+  /* Card Log/Timer icon pair, dark-compliant tint (owner gate verdict, accent
+     icons pass, cards-polish 2026-08-07). The raw --dz-accent-color (#0b9eda)
+     only measures 2.48:1 resting / 2.29:1 hover against the dark card
+     background, below WCAG SC 1.4.11's 3:1 non-text threshold. Derived by
+     blending the accent RGB (11,158,218) 27% toward white, the first step
+     that cleared 3:1 against BOTH measured underlays (resting: card bg
+     rgb(81,85,88); hover: --dz-btn-hover-bg tint composited over card bg,
+     rgb(74,92,101)); confirmed live via getComputedStyle, not just computed:
+     3.33:1 resting / 3.08:1 hover. Real but narrow margin above the floor -
+     revisit if a future pass wants more headroom. */
+  --dz-card-icon-accent: rgb(77, 184, 228);
 }

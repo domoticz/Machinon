@@ -37,6 +37,14 @@
        dark value; keep contrast vs --dz-accent-color at 3:1 or better
        (gated by dz-scheme-picker.js). */
     --dz-accent-text:         #ffffff;
+    /* Card Log/Timer icon pair (owner gate verdict, accent icons pass,
+       cards-polish 2026-08-07): plain --dz-accent-color on the light card
+       background (--dz-widget-bg #ffffff) already clears WCAG SC 1.4.11's
+       3:1 non-text threshold (measured 4.51:1 resting / 3.96:1 hover), so
+       light reuses it as-is. Dark overrides this to a lightened value; see
+       dark.css for the derivation (the raw dark accent only measures
+       2.48:1 / 2.29:1 against the dark card background, below 3:1). */
+    --dz-card-icon-accent:    var(--dz-accent-color);
     /* Device status glows (card shadows), as r,g,b triplets so consumers
        can alpha them with rgba(). */
     --dz-status-timeout-values:    199, 67, 67;

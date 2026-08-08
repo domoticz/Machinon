@@ -754,21 +754,33 @@ body table#itemtable tr > .options {
     padding-right: var(--dz-card-space-sm);
 }
 
-/* Card Log/Timer icon pair: quiet icon treatment, not a button (owner
-   feedback 2026-07-17, item b; glyph itself is a CSS ::before Ionicon, see
+/* Card Log/Timer icon pair (glyph itself is a CSS ::before Ionicon, see
    custom.css ~197-218). Background/box-shadow already resolve to
    transparent/none from the buttons.css ghost rule (.btnsmall/.btnsmall-sel
    are two of its selectors); only the border needs killing here (more
    specific, and cards.css loads after buttons.css). Hover stays exactly
    that ghost rule's tonal tint (--dz-btn-hover-bg) - no extra background is
-   added here so the icons don't grow a pill/circle. */
+   added here so the icons don't grow a pill/circle.
+   Color (owner gate verdict, accent icons pass, cards-polish 2026-08-07):
+   ACCENT with a dark-compliant fix, not the quiet ghost-text default this
+   card used to render (buttons.css's ghost rule sets
+   "color: var(--dz-btn-ghost-text) !important" on plain .btnsmall/
+   .btnsmall-sel, which always won here before this rule carried its own
+   !important - the color declaration below was dead code). --dz-card-icon-
+   accent (dz-tokens.css, overridden per-scheme in dark.css) is
+   --dz-accent-color on light (already >=3:1 per WCAG SC 1.4.11) and a
+   lightened derived value on dark (raw accent measured under 3:1 there);
+   see dz-tokens.css/dark.css for the measurements. !important plus this
+   selector's two-class specificity (0,2,0) beats the ghost rule's one-class
+   .btnsmall (0,1,0) on the cascade tie, same mechanism as .aw-footer
+   .btn-default in buttons.css. */
 .timers_log .btnsmall,
 .timers_log .btnsmall-sel {
     display: inline;
     padding: 0 var(--dz-card-space-sm);
     font-size: 0;
     line-height: var(--dz-card-favorite-line-height);
-    color: var(--dz-accent-color);
+    color: var(--dz-card-icon-accent) !important;
     border: none !important;
 }
 /* images */
