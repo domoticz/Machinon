@@ -838,11 +838,12 @@ each citing the exact core selector/specificity that forced it:
 
 ### Button Groups
 
-**In device cards** (`css/cards.css`, `.item .btn-group`): flex row wrap with `3px` gap. Each button
-still gets a **raw `border-radius: 5px !important`** here, not `--dz-btn-radius` - `css/buttons.css`'s
-own header comment scopes this layout to stay with the device-card CSS, and it was explicitly out of
-this redesign's touched scope. This is the one place in the app where a "button" still renders at the
-pre-redesign radius; see Gaps.
+**In device cards** (`css/cards.css`, `.item .btn-group`): SelectorStyle-0's sole emitter inside a
+card (HVAC Mode, Scene Selector, any multi-level Selector switch). Since the 2026-08-08
+selector-segmented pass, level buttons no longer render as separate pills at a diverged radius: they
+join into one connected-toolbar run at the family radius (`--dz-btn-radius`) itself, reusing the exact
+mechanism described in the paragraph below rather than diverging from it. Full mechanism, wrap
+behavior, and evidence trail: [Selector Levels](#selector-levels).
 
 **In toolbars/dialogs** (`css/buttons.css`, `.btn-group`): connected segments, all at `--dz-btn-radius`
 (10px). First child: outer corners rounded, inner corners squared. Last child: mirrored. Middle
@@ -1698,6 +1699,115 @@ background). Re-measured live after shipping, not just computed: **3.33:1** rest
 hover, both passing with a real but narrow margin above the 3:1 floor - flagged in the `dark.css`
 token comment as a spot to revisit for more headroom in a future pass.
 
+#### Selector Levels
+
+Multi-level Selector-switch devices (SelectorStyle-0: HVAC Mode, Scene Selector, any device with 2+
+named levels) render their level buttons as ONE joined segmented control, reusing the theme's own
+already-shipped connected-toolbar family (`css/buttons.css:500-529`, the same mechanism visible today
+on the Events page's Disabled/Enabled toggle) rather than a bespoke mechanism. Desktop:
+`.item .btn-group:not(.span3 *)` (`css/cards.css`), covering the classic list (`#/LightSwitches`), the
+classic Dashboard, and the Dynamic Dashboard tile - `.btn-group` is SelectorStyle-0's sole emitter
+inside a card, so one rule set serves all three. Mobile:
+`table.mobileitem td#status > span:has(> span > .btn-mini)` (`css/dashboard_mobile.css`), adapted for
+core's `span > span > .btn-mini` markup shape.
+
+**Look.** Accent-bordered ghost segments (`.btn-default`: `background: transparent`,
+`border-color: var(--dz-accent-color)`), collapsed 1px seams (`margin: 0 0 0 -1px !important`, the
+family's existing seam-collapse trick), family radius only at the group's true first/last child
+(`var(--dz-btn-radius)`, 10px - interior buttons stay square), the existing `toggle-selected` fill left
+untouched (`.btn-selected` desktop, `.btn-info` mobile, both already `--dz-btn-toggle-selected-bg/-text`
+or the equivalent accent tokens). Wrapped segments keep their natural content width, no `flex-grow`
+stretch, so a lone wrapped segment reads as a small connected segment rather than "a large base
+button" (an earlier, rejected pass - see the evidence trail below).
+
+**Wrap behavior.** `flex-wrap: wrap`; a wrapped row anchors flush against the row above (`gap: 0`) and
+right-aligned to the group's own edge (`justify-content: flex-end`, `margin-left: auto` on the shell) -
+reads as one continuous connected shape (a stair-step silhouette) rather than two stacked
+mini-toolbars. A small-gap "separate toolbar run" variant was built and screenshot-compared on the live
+HVAC 5-level wrap case and rejected: at real viewing size it read as two distinct controls, undermining
+the reason this control exists (one control, never a ragged disconnected wrap).
+
+**Mechanism notes:**
+
+- **Wrap-corner clip.** The shell (`overflow: hidden`, `border-radius: var(--dz-btn-radius)`) still
+  rounds the group's actual exterior boundary even though every button also carries its own
+  first/last-child radius: `:first-child`/`:last-child` only know the group's absolute first/last
+  button, not "first/last of whichever row the wrap happens to produce," so a square-cornered INTERIOR
+  button can land at a wrap corner (measured: "Auto", the HVAC 5-level case). The clip papers over that
+  gap; without it, that button's square corner would show through the shell's rounded position.
+- **Inset focus ring** (`--dz-btn-focus-ring-inset`, `dz-tokens.css`), re-verified live under this
+  mechanism, not carried over on assumption from an earlier round: with the shell clip still in place,
+  the family's standard outward ring (`--dz-btn-focus-ring`) renders fine on the group's TRUE first/last
+  child (their own rounded corners roughly match the clip curve) but is amputated down to almost
+  nothing on the same square-cornered interior button the clip note above describes. Which segment
+  lands at that position depends on a device's own level count and label lengths, so "usually fine,
+  occasionally amputated" was rejected as a default; every segment in both contexts uses the inset ring
+  uniformly instead.
+- **The ~2px wrapped-row junction.** The horizontal (within-row) seam collapses to a true 1px hairline
+  automatically, because `flex-wrap` resets which button counts as "previous" at every line break, so
+  the `margin: 0 0 0 -1px` trick applies per row with no extra rule. There is no equivalent CSS
+  selector for "first item in a wrapped row" the way `:first-child` identifies the group's true first
+  child, so nothing collapses the VERTICAL row-to-row junction the same way: it stays two adjacent 1px
+  borders (~2px combined), measured directly (`border-bottom-width`/`border-top-width` both compute
+  `1px`, both accent-colored) rather than assumed. This is a structural limit of flex-wrap, not an
+  oversight - visually marginal at normal viewing size (not visible in a screenshot strip without
+  zooming past ~3x), disclosed rather than chased.
+
+**Compact exception.** The Compact Dashboard (`DashboardType=1`, `.span3` tiles) is permanently
+excluded (`:not(.span3 *)` scoping throughout both files): its fixed ~50px-tall card has no room for a
+multi-row wrap at all, so it keeps its own pre-existing, deliberate vertical scroll-snap list
+(`height`, `overflow-y: auto`, `scroll-snap-type: y mandatory`, `css/compact.css`) instead of joining
+this mechanism. See [Compact Dashboard Grid](#compact-dashboard-grid).
+
+**Census exemptions**, at two different layers:
+
+- The mobile-layout census's generic squash rule (any two column-aligned controls with under 2px of
+  vertical gap fail as "stacked controls") would otherwise flag every segment inside this joined group,
+  since a connected control's collapsed seams are structurally exactly that shape. A structural,
+  group-scoped exemption lives directly in `dz-mobile-layout-census.js` (docker-test rig), keyed on
+  real DOM group membership (the actual `.btn-group` node two elements share), never on
+  fill/border/color - deliberately not cluster-keyed, because core duplicates `id=status`/`id=type`
+  across every row, which would make a cluster-keyed exemption unsound.
+- The Dynamic Dashboard's h:2 GridStack cell still cannot fit a 5-level selector without scrolling (see
+  [Dash2 Card Density](#dash2-card-density) > point 3): the accepted baseline exception
+  (`cutoff::Dashboard-dash2::dz-device::button.btn.btn-small`, `mobile-layout-contract.json`) stays,
+  re-verified rather than assumed still needed or auto-removed. This is a vertical-space constraint
+  (how many rows N segments need at a given width, versus the ~66px a h:2 cell leaves), independent of
+  whether the segments render as separate pills or one connected run - this mechanism change neither
+  adds nor removes rows, so it does not change the constraint. Directly re-measured for this
+  codification, not assumed from the mechanism change alone: the live HVAC Mode device still clips its
+  wrapped rows past the widget edge at h:2/360px (25-85px past the edge across its three wrapped
+  buttons).
+
+**Candidate evidence trail.** Five candidates were rendered against a live ANCHOR (the Events page's
+Disabled/Enabled toggle, the existing connected-toolbar family the owner pointed at) before this
+mechanism shipped:
+
+| Candidate | What it was |
+|---|---|
+| CONTROL | Pre-pass separate pills (baseline, via git interception) |
+| S1 | Container-clip shell: accent-fill background/1px gap dividers, later a neutral-token fill, `flex-grow` edge-to-edge tiling |
+| S1b | S1 plus a 1px outer border on the container (the "standard enclosed segmented" look) |
+| S2 | A heritage joined style excavated from `upstream/master`-era CSS, rebuilt on current tokens |
+| **S3** | The theme's own current connected-toolbar family, applied verbatim - **shipped** |
+
+Two rounds were rejected before S3 shipped:
+
+1. **Design-disconnect (CONTROL/S1/S1b/S2, all four).** Rejected on a live screenshot as
+   "design-disconnected from the theme's other buttons." The owner's own reference point, "an option
+   like the joined buttons we have now," was the LIVE connected-toolbar rendering already in the theme,
+   which S2 had modernized past recognition: an instruction to "modernize [S2] to neutral tokens"
+   stripped the accent-bordered character that made the heritage style read as this theme's own family
+   in the first place (**the S2 neutralization miss** - provenance for why S3 reuses the family
+   verbatim rather than reintroducing a modernized heritage look).
+2. **The giant-base-button stretch (S3, first pass).** S3 itself was accepted in shape, but as
+   strip-tested it still carried the earlier round's `flex: 1 0 auto` tiling, so a lone wrapped segment
+   stretched to the full row width and read as "a large base button," not a segment of the family.
+   Fixed by dropping the stretch (natural-width wrap, as shipped).
+
+Full round-by-round detail, screenshots, and measurements:
+`.superpowers/sdd/2026-08-08-selector-segmented/task-1-report.md` and `task-3-report.md`.
+
 #### Traps
 
 Load-bearing quirks a future edit could break without realizing it:
@@ -2107,12 +2217,10 @@ would have to change, not a reason to copy the current behaviour.
   the card is squeezed to fit rather than designed for it, which costs the outer hover ring and the
   resting drop shadow on that board. Closing it needs either a compact card drawn for 120px, or a
   themeable `minH`/`defaultH` upstream.
-- In-card button groups (`.item .btn-group`, `css/cards.css`: HVAC mode pills, dimmer level selector,
-  scene buttons) still render each button at a raw `border-radius: 5px !important`, not
-  `--dz-btn-radius`. This was an explicit scope decision (`css/buttons.css`'s own header comment:
-  card-specific `.item .btn-group` layout "stays... with the device cards"), not an oversight, but it
-  means the in-card pill-group radius and the rest of the button system have deliberately diverged
-  since the 2026-07-17 redesign.
+- Selector-level segments' wrapped-row vertical junction is ~2px (two adjacent 1px borders), not a
+  true 1px hairline like the horizontal seams: no CSS selector exists for "first item in a wrapped
+  flex row" to collapse it the way `:first-child` collapses the group's true first button. Visually
+  marginal (not visible without zooming past ~3x); see [Selector Levels](#selector-levels).
 - Two declared `--dz-btn-*` tokens have no current CSS consumer: `--dz-btn-danger-bg-alpha` and
   `--dz-btn-text-shadow` (the base rule applies a literal `text-shadow: none !important` instead of
   the token). Candidates for removal in a future cleanup pass.
