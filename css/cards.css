@@ -672,7 +672,7 @@ table.mobileitem td.name {
    inside .span3. */
 .item .btn-group:not(.span3 *) {
     gap: 1px;
-    background: var(--dz-accent-color);
+    background: var(--dz-btn-border); /* neutral seam (owner gate round 2, 2026-08-08): was --dz-accent-color, which made the selected fill (same token) nearly indistinguishable from the shell and washed every empty pixel in loud color; --dz-btn-border is the button family's own border token (= --dz-input-border), a subtle neutral line color no button here previously carried as a FILL, so it only reads as a seam, never competes with the selected accent. */
     border-radius: var(--dz-card-radius-chrome);
     overflow: hidden !important; /* !important: beats the #type .btn-group / .input .btn-group overflow-x:auto rule below (an ID selector, higher specificity, predates this shell and still serves other .btn-group contexts) without touching that rule */
     width: fit-content;
@@ -697,11 +697,20 @@ table.mobileitem td.name {
    makes the border part of the box; dropping it entirely would shrink the
    button by the border width) - the same transparent-border technique the
    soft-elevated base block already uses for filled vs ghost buttons.
+   flex:1 0 auto (owner gate round 2, 2026-08-08): every segment GROWS to
+   fill its row, so a wrapped row is fully tiled edge-to-edge instead of
+   shrink-wrapped-and-centered with the shell's seam color flooding the
+   leftover space as slabs - a lone button in the last row grows alone and
+   spans the full row width (the deliberate "keypad" look the owner asked
+   for), matching what happens when a phone numpad's last row holds one key.
    :not(.span3 *) exclusion: compact's buttons keep the accent border
    (buttons.css `.btn-group .btn`) between its vertically stacked pills -
    this is compact.css's divider language, not this shell's, and border-
-   color was never touched by either file before this task. */
+   color was never touched by either file before this task; compact also
+   never wraps (single column, scroll-snap), so flex-grow would be a no-op
+   there anyway, but the exclusion keeps compact's rule the sole owner. */
 .item .btn-group:not(.span3 *) > .btn {
+    flex: 1 0 auto;
     border-radius: 0 !important;
     border-color: transparent !important;
 }

@@ -279,27 +279,38 @@ body.dashMobile table.mobileitem .selectorlevels > select {
    container-clip mechanism, same recipe as the desktop shell in
    css/cards.css: border-radius from --dz-btn-radius (the radius .btn-mini
    already carries unrestated from buttons.css, so the shell matches its own
-   segments), overflow:hidden, 1px gap so the shell's accent-colored
-   background reads as the divider between segments, no per-position corner
-   logic. width:fit-content + margin-left:auto (replacing justify-content:
-   flex-end, now moot once the shell shrinks to its content) hugs the shell
-   to the actual chip rows instead of the accent color washing across the
-   full-width host span; flex-end is kept for how a SHORT wrapped remainder
-   row settles inside that hugged width. This is also the fix for the squash
-   class the Timers #updelclr rule below covers for forms (census key
+   segments), overflow:hidden, 1px gap so the shell's background reads as the
+   divider between segments, no per-position corner logic. width:fit-content
+   + margin-left:auto (replacing justify-content:flex-end as the primary
+   alignment mechanism, though flex-end is kept - see below) hugs the shell
+   to the actual chip rows instead of a flood of seam color washing across
+   the full-width host span. This is also the fix for the squash class the
+   Timers #updelclr rule below covers for forms (census key
    squash::Dashboard-classic::#status): the OLD flex-wrap-plus-gap fix
    (2026-07-19) traded a 0px squash for the current --dz-card-space-md gap,
    which the 1px joined gap now deliberately re-introduces on purpose (an
    intentional joined control, not accidental cramming) - the census gains a
    group-scoped exemption for exactly this shape in a companion rig commit,
-   never fixed here by widening the gap back out. */
+   never fixed here by widening the gap back out.
+
+   Seam color (owner gate round 2, 2026-08-08): --dz-btn-border (=
+   --dz-input-border), not --dz-accent-color - the same fix and the same
+   reasoning as the desktop shell in css/cards.css (accent-as-seam made the
+   selected chip's own accent fill nearly indistinguishable from the shell
+   and turned every empty pixel loud); a subtle neutral line no chip here
+   ever carried as a fill, so it only reads as a seam. flex:1 0 auto on
+   .btn-mini below (same round) makes every chip GROW to fill its row edge-
+   to-edge instead of shrink-wrapped-and-flex-end'd with the seam color
+   flooding the leftover space as a slab; flex-end is kept only for how a
+   short trailing row settles once grown (a lone last-row chip still grows
+   alone and spans the full row, the deliberate keypad look). */
 body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) {
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
     align-items: center;
     gap: 1px;
-    background: var(--dz-accent-color);
+    background: var(--dz-btn-border);
     border-radius: var(--dz-btn-radius);
     overflow: hidden;
     width: fit-content;
@@ -310,6 +321,7 @@ body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) > span
     display: contents;
 }
 body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) .btn-mini {
+    flex: 1 0 auto;
     margin: 0;
     /* !important on both: buttons.css's soft-elevated base block sets
        border-radius on the shared .btn class (which .btn-mini also carries)
