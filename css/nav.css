@@ -250,19 +250,6 @@ div.menu-toggle.scrolled {
     display: none;
 }
 
-/* MITIGATION (core 17bfa9314, 2026-08-05): core's runtime wrap check compares
-   the menu list's top to the brand's top, so this theme's two-band navbar
-   (logo band above, menu row below) always measures as "wrapped" and gets
-   icon-only .nav-compact, which hides every label (and the rule above hides
-   the imgs). Keep labels visible: the class only exists above 979px, where
-   this theme renders its designed desktop navbar. The !important matches
-   core's hiding rule so source order (theme loads after core) decides.
-   FIXED UPSTREAM in 753a92ac0 (#6952, 2026-08-07): remove this rule once the
-   installed beta contains that commit. */
-.navbar.nav-compact .nav li > a .hidden-tablet {
-    display: inline !important;
-}
-
 .sub-tabs > li > a,
 .sub-tabs > li > a:hover,
 .sub-tabs > li > a:focus,
