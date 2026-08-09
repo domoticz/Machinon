@@ -178,11 +178,14 @@ function dzApiLoad() {
    loses that race (confirmed via TDD: task-4 harness, brief Step 1),
    silently skipping the whole migration with no log and no retry (theme
    stays on factory defaults for the session instead of the legacy-loaded
-   values). Poll
-   briefly instead of trusting the instant read, same bounded-setInterval
-   idiom as checkAngular: ~3s is generous against a real Angular bootstrap
-   but still resolves promptly for a genuinely anonymous/non-admin viewer
-   once my_config never shows up. Never rejects. */
+   values). Poll briefly instead of trusting the instant read, same
+   setInterval mechanism as checkAngular -- but bounded, unlike
+   checkAngular's unconditional poll-forever: checkAngular has nothing to
+   fall back to if Angular never boots, while this path already has a safe
+   default (treat as non-admin, skip, retry next load), so capping at ~30
+   attempts (~3s, generous against a real Angular bootstrap) lets a
+   genuinely anonymous/non-admin viewer resolve promptly instead of leaving
+   a dangling timer for the rest of the page's life. Never rejects. */
 function dzWaitForAdminKnown() {
     if (window.my_config) return Promise.resolve(dzIsAdmin());
     return new Promise(function(resolve) {
