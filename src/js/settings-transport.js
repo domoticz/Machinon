@@ -166,11 +166,68 @@ function dzApiLoad() {
         });
 }
 
-/* Task 4 stub: the real first-visit migration (copy a legacy uservariable
-   profile into the native store) lands in the seeding task. This name only
-   needs to exist now so checkUserVariableThemeSettings' DZ_LOAD_EMPTY branch
-   (settings-store.js) is runnable ahead of that task. */
-function dzSeedFromLegacyIfPossible() { return Promise.resolve(); } /* replaced in the seeding task */
+/* window.my_config (userrights, dzIsAdmin's only source) is set
+   asynchronously by core's Angular permissions bootstrap
+   (app/app.permissions.js setPermissions()), which races the synchronous
+   jQuery boot chain the theme runs on -- the same root cause custom.js's
+   checkAngular poll already documents ("core owns Angular, so there is no
+   event a theme can subscribe to before it has booted"). dzApiSaveSettings'
+   dzIsAdmin() check fires long after boot (a user-triggered save), so it
+   never meets an unset my_config; this seeding path runs automatically at
+   cold-boot time instead, and an instant read of dzIsAdmin() here reliably
+   loses that race (confirmed via TDD: task-4 harness, brief Step 1),
+   silently skipping the whole migration with no log and no retry (theme
+   stays on factory defaults for the session instead of the legacy-loaded
+   values). Poll
+   briefly instead of trusting the instant read, same bounded-setInterval
+   idiom as checkAngular: ~3s is generous against a real Angular bootstrap
+   but still resolves promptly for a genuinely anonymous/non-admin viewer
+   once my_config never shows up. Never rejects. */
+function dzWaitForAdminKnown() {
+    if (window.my_config) return Promise.resolve(dzIsAdmin());
+    return new Promise(function(resolve) {
+        var attempts = 0;
+        var poll = setInterval(function() {
+            attempts++;
+            if (window.my_config || attempts >= 30) {
+                clearInterval(poll);
+                resolve(dzIsAdmin());
+            }
+        }, 100);
+    });
+}
+
+/* API core, no native rows yet: if this session may write the instance
+   layer and legacy uservariables exist, migrate them once into the
+   instance defaults. The legacy loader (dzThemeSettingsLoad) already
+   applies onto theme, so a full snapshot afterwards IS the migrated
+   single-layer state. Legacy variables are left in place, frozen (the
+   downgrade story, spec): a core rolled back to a version without the
+   native API still finds its uservariables untouched. Fail closed
+   (task-3 review carry-forward): dzThemeSettingsLoad and
+   dzApiWriteInstanceFull never reject on their own (traced: the ajax/fetch
+   layers underneath both resolve tri-state/ok-flag outcomes rather than
+   rejecting), but the synchronous cacheThemeSettings()/JSON.stringify call
+   in between can still throw (e.g. localStorage quota in private
+   browsing), and a throw inside a .then callback becomes a rejection of
+   this promise. The outer .catch is the backstop: log and stop, keep the
+   legacy-loaded values already painted onto theme for this session, and
+   retry the migration on a future load. Never rejects. */
+function dzSeedFromLegacyIfPossible() {
+    return dzWaitForAdminKnown().then(function(isAdmin) {
+        if (!isAdmin) return;
+        return dzThemeSettingsLoad().then(function(outcome) {
+            if (outcome !== DZ_LOAD_LOADED) return; /* no legacy vars or unreachable: nothing to seed */
+            cacheThemeSettings();
+            return dzApiWriteInstanceFull(dzSettingsSnapshot(theme)).then(function(res) {
+                if (res.ok) console.log(themeName + " - legacy theme settings migrated to native instance defaults");
+                else console.warn("machinon_themesettings", "seed_failed", "error=" + res.error, "will retry next load");
+            });
+        });
+    }).catch(function(e) {
+        console.warn("machinon_themesettings", "seed_failed", "error=" + ((e && e.message) || "unexpected"), "will retry next load");
+    });
+}
 
 /* ---- Native ThemeSettings transport: writes (setdefault/set, promote,
    resets, conflict retry). ---- */
