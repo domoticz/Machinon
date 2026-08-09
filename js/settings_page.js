@@ -127,15 +127,15 @@ if (mSettings.length > 0) {
         return li;
     }
 
-    mSettings.click(function () {
+    // Build the grid into `host`. Routed (#/SetupMenu), the host is the routed
+    // template's div inside core's ng-view; unrouted, it is #main-view itself,
+    // emptied by the click handler below. Either way the tiles are harvested
+    // from the LIVE hidden ul on every build (see CONTRACT above), never cloned.
+    function buildSettingsGrid(host) {
         $("#machinoSettings").remove();
-        $("#appnavbar li").removeClass("current_page_item");
-        $("#mSettings").addClass("current_page_item");
         $("#search").addClass("readonly");
-        $(".navbar-inner").removeClass("slide");
         $("body").css("overflow", "auto");
-        $("#holder #main-view").empty();
-        $("#holder #main-view").append('<div id="machinoSettings" class="container-fluid">');
+        $(host).append('<div id="machinoSettings" class="container-fluid">');
         $("#machinoSettings").append('<ul class="mHeaderBtn">').append('<div class="page-header-small"><h1 data-i18n="Settings">Settings</h2></div>').append('<ul class="machinon_ul">');
         $("#machinoSettings ul.mHeaderBtn").append('<li class="btn btn-danger" onclick="javascript:SwitchLayout(\'Restart\')"><i class="ion-ios-refresh"></i><div data-i18n="Restart System">Restart System</div></li><li class="btn btn-danger" onclick="javascript:SwitchLayout(\'Shutdown\')"><i class="ion-ios-power"></i><div data-i18n="Shutdown System">Shutdown System</div></li><li class="btn btn-danger" onclick="location.href=\'#Logout\'"><i class="ion-ios-log-out"></i><div data-i18n="Logout">Logout</div></li>');
 
@@ -149,5 +149,40 @@ if (mSettings.length > 0) {
 
         $("#machinoSettings").i18n();
         if (!isAdmin()) $("#machinoSettings").remove();
+    }
+
+    mSettings.click(function (event) {
+        // Clicks that originate inside the hidden source ul (the Theme hub entry
+        // is one of its <li>s) are that entry's own navigation bubbling up, not a
+        // request for the grid: let them through untouched.
+        if ($(event.target).closest(mSettings.children("ul")).length) return;
+        $(".navbar-inner").removeClass("slide");
+        if (window.dzRoutesActive) {
+            location.hash = "#/SetupMenu"; // the route builds the grid; one open path
+            return;
+        }
+        $("#appnavbar li").removeClass("current_page_item");
+        mSettings.addClass("current_page_item");
+        buildSettingsGrid($("#holder #main-view").empty());
     });
+
+    // Routed mode: the grid page belongs to this feature file, which core's menu
+    // markup knows nothing about, so mirror core's
+    // ng-class="{'current_page_item':getClass(...)}" on the Setup entry by hand.
+    function syncSettingsMenuActive() {
+        mSettings.toggleClass("current_page_item",
+            window.dzRoutesActive === true && location.hash.indexOf("#/SetupMenu") === 0);
+    }
+
+    // Registered unconditionally: this file can execute before Angular has
+    // booted, so dzRoutesActive is not settled yet; the handler re-checks it per
+    // call and is a no-op without routes.
+    window.addEventListener("hashchange", syncSettingsMenuActive);
+    syncSettingsMenuActive();
+
+    // The #/SetupMenu route controller (custom.js) waits for this milestone:
+    // this file is a feature file loaded through RequireJS, so it can execute
+    // long after the route has already rendered its empty host.
+    window.dzBuildSettingsGrid = buildSettingsGrid;
+    if (typeof dzRouteMilestone === "function") dzRouteMilestone("settingsGrid");
 }

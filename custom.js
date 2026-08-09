@@ -42,6 +42,182 @@ function loadThemeScripts(files) {
     }));
 }
 
+/* ===================================================================== *
+ *  Real routes for the theme's own pages                                 *
+ * ===================================================================== *
+
+   The theme owns two real, bookmarkable Angular routes: #/Theme (plus
+   #/Theme/:tab) for the theme hub and #/SetupMenu for the settings tile grid.
+   Core owns the Angular app, so they are registered by appending ONE .config()
+   block to core's 'app.routes' module. No core path is replaced, so no .run()
+   block is needed (a config block runs before core's own .when() calls and
+   would lose a key it shares with them).
+
+   THIS BLOCK MUST STAY AT CUSTOM.JS TOP LEVEL. index.html loads the theme's
+   custom.js synchronously and only then RequireJS, which pulls Angular in
+   asynchronously, so top-level code here is the last chance to reach
+   $routeProvider; the THEME_MODULES files above are injected as async=false
+   scripts and land after Angular has booted. Angular also assigns
+   window.angular EARLY as a bare object and attaches .module later
+   (setupModuleLoader), so the hook intercepts the .module assignment, not just
+   the window.angular one. Both traps are proven by the rig harnesses
+   ~/docker/domoticz-test/scripts/dz-route-feasibility.js and
+   dz-route-multipage.js.
+
+   FAIL CLOSED: dzRoutesActive turns true only once the config block has
+   actually run. Both pages keep their pre-route entry path (the Setup menu
+   click pseudo-route), so if core ever moves the hook out of reach the theme
+   degrades to that behaviour with one structured warning, and the guard
+   harness (dz-route-guard.js) fails loudly. */
+window.dzRoutesActive = false;
+
+var DZ_HUB_TEMPLATE = "styles/default/templates/dz-theme-hub.html";
+var DZ_GRID_TEMPLATE = "styles/default/templates/dz-setup-grid.html";
+/* Templates are requested under styles/default/ on purpose: core rewrites
+   /styles/default/<path> to the ACTIVE theme folder per file when the file
+   exists there (cWebem.cpp), which is how a theme ships its own templates. */
+
+/* Routed pages can be entered by URL long before the code that renders them
+   exists: the theme's init (settings + THEME_MODULES) and the feature files it
+   loads through RequireJS both land well after Angular has routed. So a routed
+   controller waits for a named milestone instead of guessing, and gives up with
+   one structured warning rather than leaving a page silently blank. */
+var DZ_ROUTE_WAIT_MS = 12000; // theme boot takes seconds; this only catches a broken boot
+var dzRouteMilestones = {};
+var dzRouteMilestoneWaiters = {};
+
+function dzRouteMilestone(name) {
+    dzRouteMilestones[name] = true;
+    var waiting = dzRouteMilestoneWaiters[name];
+    delete dzRouteMilestoneWaiters[name];
+    if (waiting) waiting.forEach(function (fn) { fn(); });
+}
+
+function dzWhenRouteMilestone(name, onReady, onMissing) {
+    if (dzRouteMilestones[name]) { onReady(); return; }
+    var done = false;
+    var timer = setTimeout(function () {
+        if (done) return;
+        done = true;
+        onMissing();
+    }, DZ_ROUTE_WAIT_MS);
+    dzRouteMilestoneWaiters[name] = dzRouteMilestoneWaiters[name] || [];
+    dzRouteMilestoneWaiters[name].push(function () {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        onReady();
+    });
+}
+
+/* Both routed pages mount the same way: wait for the milestone that makes the
+   page renderable, then hand the host element from the routed template to the
+   page's builder. $timeout(0) lets ngView attach the compiled template first,
+   so the host is in the document when the builder looks it up. */
+function dzRoutedController(hostId, milestone, mount, onMissing) {
+    return ["$routeParams", "$timeout", function ($routeParams, $timeout) {
+        $timeout(function () {
+            /* The route can be left again while the theme is still booting;
+               ngView then destroys the host, and neither the mount nor the
+               give-up path may touch a page the user is no longer on. */
+            function liveHost() {
+                var host = document.getElementById(hostId);
+                return (host && document.body.contains(host)) ? host : null;
+            }
+            dzWhenRouteMilestone(milestone, function () {
+                var host = liveHost();
+                if (host) mount(host, $routeParams);
+            }, function () {
+                if (liveHost()) onMissing();
+            });
+        }, 0);
+    }];
+}
+
+function dzHubRouteController() {
+    return dzRoutedController("dz-theme-hub-host", "theme", function (host, params) {
+        if (typeof dzMountThemeHubIn !== "function") {
+            console.warn("machinon_routes", "hub_builder_absent", "dzMountThemeHubIn missing; #/Theme left empty");
+            return;
+        }
+        dzMountThemeHubIn(host, params.tab || null);
+    }, function () {
+        console.warn("machinon_routes", "theme_not_ready", "theme init never completed; #/Theme left empty");
+    });
+}
+
+function dzSetupGridRouteController() {
+    return dzRoutedController("dz-setup-grid-host", "settingsGrid", function (host) {
+        window.dzBuildSettingsGrid(host);
+    }, function () {
+        /* The grid ships as the custom_settings_menu feature file (theme.json),
+           and registers itself only when core's Setup menu is present. Switched
+           off, or no menu to harvest, there is no grid to render: say so once
+           and hand the user core's own Settings page rather than a blank route. */
+        console.warn("machinon_routes", "grid_builder_absent", "custom_settings_menu did not register a grid; redirecting to #Setup");
+        location.hash = "#Setup";
+    });
+}
+
+function dzRegisterThemeRoutes(routesModule) {
+    routesModule.config(["$routeProvider", function ($routeProvider) {
+        $routeProvider
+            /* No permission key on purpose: the hub opens at every rights level
+               and right-sizes its own content. #/SetupMenu is admin-only, which
+               core's $routeChangeStart enforces for us (app.js). */
+            .when("/Theme", { templateUrl: DZ_HUB_TEMPLATE, controller: dzHubRouteController() })
+            .when("/Theme/:tab", { templateUrl: DZ_HUB_TEMPLATE, controller: dzHubRouteController() })
+            .when("/SetupMenu", { templateUrl: DZ_GRID_TEMPLATE, permission: "Admin", controller: dzSetupGridRouteController() });
+        window.dzRoutesActive = true;
+    }]);
+}
+
+/* Wrap angular.module so the theme's config block is appended the moment core
+   DEFINES 'app.routes' (a definition passes a dependency array; a plain
+   angular.module('x') is a getter call and must pass straight through). */
+function dzWrapAngularModule(ng, realModule) {
+    var wrapped = function (name, deps) {
+        var m = realModule.apply(this, arguments);
+        if (name === "app.routes" && deps) dzRegisterThemeRoutes(m);
+        return m;
+    };
+    Object.defineProperty(ng, "module", { configurable: true, writable: true, value: wrapped });
+}
+
+function dzHookAngular(ng) {
+    if (!ng || ng.__dzRoutesPatched) return;
+    ng.__dzRoutesPatched = true;
+    if (ng.module) { dzWrapAngularModule(ng, ng.module); return; }
+    Object.defineProperty(ng, "module", {
+        configurable: true,
+        get: function () { return undefined; },
+        set: function (realModule) { dzWrapAngularModule(ng, realModule); }
+    });
+}
+
+(function dzInstallRouteShim() {
+    /* Test hook, honoured first (same convention as __dzForceNoApi): forces the
+       pre-route behaviour so the fallback path stays covered by the harness. */
+    if (window.__dzForceNoRoutes) {
+        console.warn("machinon_routes", "forced_off", "__dzForceNoRoutes set; theme routes not registered (test hook)");
+        return;
+    }
+    if (window.angular) { dzHookAngular(window.angular); return; }
+    try {
+        var loaded;
+        Object.defineProperty(window, "angular", {
+            configurable: true,
+            get: function () { return loaded; },
+            set: function (ng) {
+                loaded = ng;
+                dzHookAngular(ng);
+            }
+        });
+    } catch (e) {
+        console.warn("machinon_routes", "hook_absent", "window.angular is not interceptable; theme routes not registered", String(e));
+    }
+})();
+
 fetch('json.htm?type=command&param=getsettings', {
     method: 'GET',
     headers: {
@@ -152,6 +328,12 @@ function init_theme() {
            in place. Runs last so the DOM the appliers touch (navbar, logo header)
            exists, and replaces the old first-visit setTimeout(location.reload). */
         reconcileDomoticzSettingsInPlace();
+
+        /* The theme is initialised: settings loaded, THEME_MODULES executed,
+           feature files requested. #/Theme waits for this milestone before it
+           builds the hub, so a page entered by URL renders with real settings
+           instead of defaults. */
+        dzRouteMilestone("theme");
     });
     }); /* end loadSettings().then() */
 }

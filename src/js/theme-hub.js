@@ -1,15 +1,21 @@
-/* Theme hub pseudo-route + page shell.
+/* Theme hub page shell: the routed page behind #/Theme, with the original click
+   pseudo-route kept as its fallback.
 
-   WHY a pseudo-route: the theme cannot register an Angular route (core owns
-   app.routes.js, and any unknown hash falls through to `.otherwise` ->
-   redirectTo:'/Dashboard', app/app.routes.js:324). So the hub follows the
-   js/custom_page.js technique: inject ONE <li> into core's Setup menu ul and,
-   on click, HIDE core's routed content (#main-view, the ng-view container at
-   index.html:1373) and SHOW the theme's own #dz-theme-hub, then restore core's
-   content when the route changes. The hub container is a SIBLING of #main-view,
-   never a child: Angular re-renders ng-view on every digest and would wipe any
-   content placed inside it (the same way it wiped the injected Setup tabs), but
-   it never touches DOM outside its own view, so a sibling survives.
+   ROUTED (window.dzRoutesActive; route table at the top of custom.js): the hub
+   is built into the host div of the routed template templates/dz-theme-hub.html,
+   so it lives INSIDE core's ng-view, which is legitimate because the route owns
+   the view. ngView destroys that host when the route is left, so every entry
+   rebuilds the hub, exactly as any real page does. #/Theme/:tab deep-links a
+   group (dzMountThemeHubIn).
+
+   FALLBACK (custom.js could not reach $routeProvider and failed closed): the
+   original js/custom_page.js technique: on the menu click, HIDE core's routed
+   content (#main-view, the ng-view container at index.html:1373) and SHOW the
+   theme's own #dz-theme-hub, then restore core's content when the route
+   changes. In this mode the hub container must be a SIBLING of #main-view,
+   never a child: Angular re-renders ng-view and would wipe any content placed
+   inside it (the same way it wiped the injected Setup tabs), but it never
+   touches DOM outside its own view, so a sibling survives.
 
    The single menu insertion feeds BOTH surfaces at once: it shows in the Setup
    dropdown AND, because js/settings_page.js builds its tile grid from the very
@@ -32,10 +38,16 @@ function dzThemeHubMounted() {
 
 /* Insert the single Setup-menu <li> that opens the hub. Idempotent (re-arm safe)
    and fail-closed: no ul -> structured warning, no entry. Mirrors
-   js/custom_page.js: an <a class="lcursor"> with NO href (so clicking it never
-   changes the hash and Angular never routes/redirects), an <img> icon, and a
+   js/custom_page.js: an <a class="lcursor"> with NO href, an <img> icon, and a
    <span> label. settings_page.js harvests this li (anchor + onclick) into a
-   grid tile automatically. */
+   grid tile automatically.
+
+   NO href in either mode, on purpose. dzOpenThemeHub() already routes when the
+   routes are live, and it is the one open path; an href would have to be decided
+   at insertion time, which is too early to know (the navbar markup is static, so
+   this runs long before Angular has booted and set dzRoutesActive), and an
+   href="#/Theme" left over in fallback mode would route to .otherwise ->
+   Dashboard. */
 function dzInsertHubMenuEntry() {
     var ul = document.querySelector("#appnavbar li[has-permission='Admin'] > ul");
     if (!ul) {
@@ -74,28 +86,44 @@ function dzInsertHubMenuEntry() {
         return;
     }
     settingsLi.insertAdjacentElement("afterend", li);
+    dzHubSyncMenuActive();
+}
+
+/* The entry is injected after core compiled the navbar, so it has no ng-class of
+   its own: mirror core's ng-class="{'current_page_item':getClass('/Theme')}" by
+   hand while the hub route is open. Same prefix test core's getClass uses, so
+   #/Theme/colors highlights the entry too. No-op without routes, where the hub
+   has no hash to key on. */
+function dzHubSyncMenuActive() {
+    if (!window.dzRoutesActive) return;
+    var li = document.getElementById(DZ_HUB_MENU_ID);
+    if (li) li.classList.toggle("current_page_item", location.hash.indexOf("#/Theme") === 0);
 }
 
 /* Build the hub shell from THEME_MANIFEST: an underlined-tab bar (one tab per
-   group) and a panel holding one empty .dz-hub-section[data-group] per group (rows arrive in
-   task 3). Appended after #main-view inside .bannercontent so it is a sibling of
-   the ng-view, hidden until opened. Returns the container, or null if the mount
-   point or the manifest is missing (fail closed). */
-function dzBuildThemeHub() {
+   group) and a panel holding one .dz-hub-section[data-group] per group.
+
+   `routeHost` is the host element of the routed template (dzMountThemeHubIn):
+   the hub is appended into it and shown straight away, because the route is
+   already the page. Without it (fallback pseudo-route) the hub is inserted
+   after #main-view inside .bannercontent, as a hidden sibling of the ng-view.
+   Returns the container, or null if the mount point or the manifest is missing
+   (fail closed). */
+function dzBuildThemeHub(routeHost) {
     if (dzThemeHubMounted()) return document.getElementById(DZ_HUB_ID);
     if (typeof THEME_MANIFEST === "undefined" || !THEME_MANIFEST.length) {
         console.warn("machinon_theme_hub", "manifest_absent", "THEME_MANIFEST missing; hub not built (fail closed)");
         return null;
     }
     var mainView = document.getElementById("main-view");
-    if (!mainView || !mainView.parentNode) {
+    if (!routeHost && (!mainView || !mainView.parentNode)) {
         console.warn("machinon_theme_hub", "main_view_absent", "no #main-view mount point; hub not built (fail closed)");
         return null;
     }
 
     var container = document.createElement("div");
     container.id = DZ_HUB_ID;
-    container.style.display = "none";
+    if (!routeHost) container.style.display = "none";
 
     var tabs = document.createElement("div");
     tabs.className = "dz-hub-tabs";
@@ -137,13 +165,14 @@ function dzBuildThemeHub() {
     // last tab (the manifest "about" group, hosted by dzHubAboutMount), plus a
     // short intro on the General tab. No footer append here anymore.
 
-    mainView.parentNode.insertBefore(container, mainView.nextSibling);
+    if (routeHost) routeHost.appendChild(container);
+    else mainView.parentNode.insertBefore(container, mainView.nextSibling);
 
     // schemes.js renderSchemePicker() resolves its containers with
     // getElementById, which only finds nodes attached to the live document;
     // the colors section's picker mount (dzHubSchemeMount, registered via
     // registerSchemePickerContainer) exists only as a detached DOM node until
-    // the insertBefore above runs, so the first real render happens here, once.
+    // the attach above runs, so the first real render happens here, once.
     if (typeof renderSchemePicker === "function") { renderSchemePicker(); }
 
     // iconpack.js mountIconPackInHub() loads iconsettings.html into the
@@ -579,12 +608,41 @@ function dzHubShowGroup(groupId) {
     });
 }
 
-/* Open the hub: build it if needed, hide core's ng-view content, show the hub,
-   and arm a one-time hashchange handler that restores core content when the user
-   navigates away (so the hub is a pseudo-page, not a permanent hijack).
-   addEventListener is used, not window.onhashchange, so page.js's
-   locationHashChanged handler (set in custom.js init_theme) is left intact. */
+/* Routed entry (#/Theme, #/Theme/:tab): build the hub into the routed template's
+   host and honour the optional group deep link. Same builder as the fallback
+   path, only the parent differs. Called by the route controller in custom.js. */
+function dzMountThemeHubIn(host, tab) {
+    var hub = dzBuildThemeHub(host);
+    if (!hub) return null; // dzBuildThemeHub already warned
+    if (tab) {
+        if (dzHubHasGroup(tab)) dzHubShowGroup(tab);
+        else console.warn("machinon_routes", "unknown_hub_group", "no hub group '" + tab + "'; showing " + dzHubActiveGroup);
+    }
+    dzHubSyncMenuActive();
+    return hub;
+}
+
+/* Is `id` one of THEME_MANIFEST's group ids? Answered from the manifest, never
+   by building a selector out of the url parameter. */
+function dzHubHasGroup(id) {
+    if (typeof THEME_MANIFEST === "undefined") return false;
+    return THEME_MANIFEST.some(function (group) { return group.id === id; });
+}
+
+/* Open the hub from anywhere (menu entry, grid tile, feature code).
+
+   Routed: hand over to the route, so every caller gains the URL for free and
+   there is exactly one open path. Fallback: build it if needed, hide core's
+   ng-view content, show the hub, and arm a one-time hashchange handler that
+   restores core content when the user navigates away (so the hub is a
+   pseudo-page, not a permanent hijack). addEventListener is used, not
+   window.onhashchange, so page.js's locationHashChanged handler (set in
+   custom.js init_theme) is left intact. */
 function dzOpenThemeHub() {
+    if (window.dzRoutesActive) {
+        location.hash = "#/Theme";
+        return;
+    }
     var hub = dzBuildThemeHub();
     var mainView = document.getElementById("main-view");
     if (!hub || !mainView) return; // dzBuildThemeHub already warned
@@ -1115,17 +1173,20 @@ function dzApplyHubSetting(entry, value) {
     storeUserVariableThemeSettings("update");   // persist to Domoticz (the storage seam)
 }
 
-/* The hub is a click pseudo-route with NO url of its own (dzOpenThemeHub just
-   hides #main-view and shows the sibling hub div). A plain location.reload()
-   from inside the hub therefore reloads whatever real route the user was on
-   BEFORE they opened the hub (e.g. #/LightSwitches) and dumps them there, not
-   back in the hub. So a hub-triggered reload sets a one-shot localStorage flag
-   first; dzMaybeReopenHub (init) honours it once and reopens the hub, so
-   "Reload now" returns the user to where they were. */
+/* Routed, the hub HAS a url (#/Theme), so a reload lands right back on it and
+   no flag is needed. In fallback mode the hub is a click pseudo-route with no
+   url of its own (dzOpenThemeHub just hides #main-view and shows the sibling hub
+   div), so a plain location.reload() would reload whatever real route the user
+   was on BEFORE they opened the hub (e.g. #/LightSwitches) and dump them there.
+   There, a hub-triggered reload sets a one-shot localStorage flag first;
+   dzMaybeReopenHub (init) honours it once and reopens the hub, so "Reload now"
+   returns the user to where they were. */
 var DZ_HUB_REOPEN_FLAG = "machinon_reopen_hub";
 
 function dzHubReloadIntoHub() {
-    try { localStorage.setItem(DZ_HUB_REOPEN_FLAG, "1"); } catch (e) { /* private mode: fall through, plain reload */ }
+    if (!window.dzRoutesActive) {
+        try { localStorage.setItem(DZ_HUB_REOPEN_FLAG, "1"); } catch (e) { /* private mode: fall through, plain reload */ }
+    }
     location.reload();
 }
 
@@ -1169,5 +1230,10 @@ function dzMaybeReopenHub() {
         // page.js not loaded yet in some ordering; try on DOM ready as a fallback.
         if (window.jQuery) jQuery(dzInsertHubMenuEntry);
     }
+    // Keep the menu entry's highlight in step with the hash. Registered
+    // unconditionally: at this point Angular may not have booted yet, so
+    // dzRoutesActive is not settled; dzHubSyncMenuActive re-checks it per call
+    // and is a no-op without routes.
+    window.addEventListener("hashchange", dzHubSyncMenuActive);
     dzMaybeReopenHub(); // honour a pending "Reload now" -> return to the hub
 })();
