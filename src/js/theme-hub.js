@@ -391,6 +391,34 @@ function dzBuildMaintenanceBlock() {
         "dz-hub-reset-colors", "Reset colours to the selected scheme",
         "Reset the custom colours to the selected scheme's default palette?",
         dzHubDoResetColors));
+
+    /* ThemeSettings migration: promote + scoped resets, additive to the three
+       actions above (which stay verbatim in every mode) and gated per mode.
+       Promote needs BOTH admin (only an admin may write the house layer) AND
+       a personal layer to promote FROM (dzSettingsMode().perUser); with no
+       per-user storage the session's current settings already ARE the house
+       defaults (dzApiSaveSettings writes a single shared layer), so there is
+       nothing to promote and the button would be a no-op. House reset needs
+       only admin. Personal reset needs only a personal layer to reset. None
+       of the three render in legacy mode (!mode.api). */
+    var mode = dzSettingsMode();
+    if (mode.api) {
+        if (mode.admin && mode.perUser) {
+            actions.appendChild(dzHubActionButton(
+                "dz-hub-promote", "btn btn-primary dz-hub-promote-btn",
+                "Save my current preferences as house defaults", dzHubPromote));
+        }
+        if (mode.perUser) {
+            actions.appendChild(dzHubActionButton(
+                "dz-hub-reset-mine", "btn btn-danger dz-hub-reset-mine-btn",
+                "Reset my personal settings", dzHubResetMine));
+        }
+        if (mode.admin) {
+            actions.appendChild(dzHubActionButton(
+                "dz-hub-reset-house", "btn btn-danger dz-hub-reset-house-btn",
+                "Reset the house defaults", dzHubResetHouse));
+        }
+    }
     block.appendChild(actions);
     return block;
 }
@@ -403,6 +431,19 @@ function dzHubMaintenanceButton(id, label, confirmMsg, action) {
     btn.className = "btn btn-danger dz-hub-maintenance-btn"; // house Filled-danger family (css/buttons.css); identity class kept for harnesses
     btn.textContent = label;
     btn.addEventListener("click", function () { dzHubConfirm(confirmMsg, action); });
+    return btn;
+}
+
+/* Same shape as dzHubMaintenanceButton, for an action whose handler already
+   gates itself behind a confirm (dzHubPromote/dzHubResetMine/dzHubResetHouse
+   below, ThemeSettings migration): a bare click, no second confirm wrapper. */
+function dzHubActionButton(id, className, label, onClick) {
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.id = id;
+    btn.className = className;
+    btn.textContent = label;
+    btn.addEventListener("click", onClick);
     return btn;
 }
 
@@ -421,10 +462,37 @@ function dzHubConfirm(message, onConfirm) {
     if (window.confirm(message)) { onConfirm(); }
 }
 
-/* Reset to defaults: settings-store.js resetTheme() deletes the theme
-   uservariables, clears the localStorage cache, and reloads (unchanged). */
+/* Reset to defaults ("mode collapse", ThemeSettings migration). Legacy
+   transport: settings-store.js resetTheme() deletes the theme uservariables,
+   clears the localStorage cache, and reloads (unchanged, kept verbatim).
+   Native transport: resetTheme() only ever deletes uservariables that exist,
+   and the native path never creates any (checkThemeSettingsAPI's seed step
+   only READS the legacy vars once to migrate them; a capable core never
+   writes theme-<folder>-* vars itself), so calling resetTheme() alone is a
+   silent no-op there -- a "reset to defaults" that leaves the server-stored
+   settings untouched. Reset every native row this identity can reach instead
+   (house row when admin, personal row when perUser; ThemeSettingsSetDefault/
+   Set are gated the same way server-side, WebServerCmds.cpp
+   Cmd_ThemeSettingsSetDefault/Set), then clear the cache and reload only once
+   every attempted reset actually succeeded (fail closed: a partial failure,
+   already warned by dzApiFail, must not also claim a clean reset). */
 function dzHubDoResetTheme() {
-    if (typeof resetTheme === "function") { resetTheme(); }
+    var mode = dzSettingsMode();
+    if (!mode.api) {
+        if (typeof resetTheme === "function") { resetTheme(); }
+        return;
+    }
+    var jobs = [];
+    if (mode.admin) jobs.push(dzApiResetHouse());
+    if (mode.perUser) jobs.push(dzApiResetUser());
+    if (!jobs.length) { location.reload(); return; } // nothing this identity can reset server-side
+    Promise.all(jobs).then(function (results) {
+        if (!results.every(function (r) { return r.ok; })) return; // a failure already warned; keep current state
+        if (typeof Storage !== "undefined") {
+            try { localStorage.removeItem(themeFolder + ".themeSettings"); } catch (e) { /* private mode: nothing cached to clear */ }
+        }
+        location.reload();
+    });
 }
 
 /* Clear only the browser cache (the old reset dialog's "clear localStorage"
@@ -452,7 +520,42 @@ function dzHubDoResetColors() {
     if (typeof applyCustomColorScheme === "function") { applyCustomColorScheme(theme.color_scheme); }
     if (typeof dzHubSyncSchemeSwatches === "function") { dzHubSyncSchemeSwatches(); }
     cacheThemeSettings();
-    storeUserVariableThemeSettings("update");
+    dzHubPersist();
+}
+
+/* ---- Per-user actions (ThemeSettings migration): promote personal settings
+   to house defaults, and scoped resets. Visibility is decided in
+   dzBuildMaintenanceBlock (mode-gated); each handler here only needs to gate
+   its own confirm + API call. Routed through dzHubConfirm, the same bootbox
+   convention every other maintenance action in this file uses (fallback to
+   window.confirm, never fires without a confirmation). */
+function dzHubPromote() {
+    dzHubConfirm(
+        "Copy your current personal settings over the house defaults? Your own settings stay yours; this changes what new and reset users get.",
+        function () {
+            dzApiPromote().then(function (r) {
+                if (r.ok && typeof ShowNotify === "function") ShowNotify("House defaults updated", 3000);
+            });
+        }
+    );
+}
+
+function dzHubResetMine() {
+    dzHubConfirm(
+        "Reset your personal theme settings? You fall back to the house defaults.",
+        function () {
+            dzApiResetUser().then(function (r) { if (r.ok) location.reload(); });
+        }
+    );
+}
+
+function dzHubResetHouse() {
+    dzHubConfirm(
+        "Reset the HOUSE defaults to factory values? Personal settings of users are untouched.",
+        function () {
+            dzApiResetHouse().then(function (r) { if (r.ok) location.reload(); });
+        }
+    );
 }
 
 /* ---- Device-image editor (icon_image / theme.icons) ---------------------- *
@@ -576,7 +679,7 @@ function dzHubImageRemove(i) {
    cards). */
 function dzHubPersistImages() {
     cacheThemeSettings();
-    storeUserVariableThemeSettings("update");
+    dzHubPersist();
     if (typeof setAllDevicesFeatures === "function") { setAllDevicesFeatures(); }
 }
 
@@ -910,7 +1013,7 @@ function dzHubBuildColorSwatch(field) {
         // scheme pick runs, unchanged.
         applyCustomColorScheme(theme.color_scheme);
         cacheThemeSettings();
-        storeUserVariableThemeSettings("update");
+        dzHubPersist();
         // schemes.js warnIfContrastFails: the same WCAG gate the deleted
         // legacy Save handler ran, preserved.
         warnIfContrastFails(theme.color_scheme, "The custom colour scheme");
@@ -974,6 +1077,25 @@ function dzRenderHubRow(entry) {
         tag.className = "dz-hub-tag";
         tag.textContent = entry.appliesTo;
         labelLine.appendChild(tag);
+    }
+    // House-scope indicator (ThemeSettings migration): a per-user session sees
+    // which rows are shared house defaults rather than their own personal
+    // setting. Admins may still edit a house row (they own the house layer);
+    // a non-admin per-user session cannot, so its control locks. A session with
+    // no personal layer at all (dzSettingsMode().perUser === false: single
+    // shared identity) has nothing to distinguish house from personal, so
+    // neither the chip nor the lock applies there -- every row behaves like
+    // the legacy page, editable by whoever can reach it.
+    if (entry.scope === "house" && dzSettingsMode().perUser) {
+        var houseChip = document.createElement("span");
+        houseChip.className = "dz-hub-chip-house";
+        houseChip.title = "House setting, managed by an admin";
+        houseChip.textContent = "house";
+        labelLine.appendChild(houseChip);
+        if (!dzSettingsMode().admin) {
+            row.classList.add("dz-hub-row-locked");
+            if (control) control.disabled = true;
+        }
     }
     textCell.appendChild(labelLine);
     if (entry.description) {
@@ -1123,6 +1245,45 @@ function dzHubFailClosed(entry, message) {
     note.textContent = message;
 }
 
+/* First-failure no_identity handling (ThemeSettings migration, controller
+   notes): dzSettingsMode().noIdentity flips true lazily, set by
+   settings-transport.js's dzApiFail on the first write the server refuses for
+   lacking a resolvable identity (an application-token session has no Users
+   row to attach a personal layer to; Cmd_ThemeSettingsSet returns
+   "no_identity"). No proactive detection needed or possible: this only reacts
+   once a real write has failed that way, via dzHubPersist below. */
+var dzHubNoIdentityLocked = false;
+
+function dzHubApplyNoIdentityLock() {
+    if (dzHubNoIdentityLocked) return;
+    dzHubNoIdentityLocked = true;
+    var hub = document.getElementById(DZ_HUB_ID);
+    if (!hub) return;
+    hub.querySelectorAll(".dz-hub-row").forEach(function (row) {
+        row.classList.add("dz-hub-row-locked");
+        row.querySelectorAll("input, select").forEach(function (c) { c.disabled = true; });
+    });
+    var about = hub.querySelector('.dz-hub-custom-mount[data-custom="about"]');
+    if (about && !about.querySelector("#dz-hub-no-identity-note")) {
+        var note = document.createElement("p");
+        note.id = "dz-hub-no-identity-note";
+        note.className = "dz-hub-no-identity-note";
+        note.textContent = "This session cannot store settings (application token).";
+        about.insertBefore(note, about.firstChild);
+    }
+}
+
+/* Every hub write funnels through here (instead of calling
+   storeUserVariableThemeSettings directly) so a no_identity failure locks the
+   hub reactively right after the write settles, wherever it originated (a
+   setting row, a colour swatch, the image editor, reset-colours). */
+function dzHubPersist() {
+    return storeUserVariableThemeSettings("update").then(function (res) {
+        if (dzSettingsMode().noIdentity) dzHubApplyNoIdentityLock();
+        return res;
+    });
+}
+
 /* Apply one setting LIVE then persist. Toggles update
    theme.features[storageKey].enabled and run the feature's file load/unload +
    any live visual applier; values update theme[storageKey] and run the mapped
@@ -1179,8 +1340,8 @@ function dzApplyHubSetting(entry, value) {
         // own cycle, so persistence below is the whole instant-apply.
     }
 
-    cacheThemeSettings();                       // settings-store.js localStorage cache
-    storeUserVariableThemeSettings("update");   // persist to Domoticz (the storage seam)
+    cacheThemeSettings();   // settings-store.js localStorage cache
+    dzHubPersist();         // persist to Domoticz (the storage seam) + react to a no_identity failure
 }
 
 /* Routed, the hub HAS a url (#/Theme), so a reload lands right back on it and

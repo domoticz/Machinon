@@ -184,6 +184,25 @@
     white-space: nowrap;
 }
 
+/* House-scope chip (ThemeSettings migration): tells a per-user session which
+   rows are shared house defaults rather than their own personal setting.
+   Outlined rather than filled, so it reads as a distinct idiom from the
+   accent-filled appliesTo .dz-hub-tag pill above; same 11px micro type and
+   pill radius. dzRenderHubRow (theme-hub.js) only renders this while
+   dzSettingsMode().perUser is true (a session with no personal layer has
+   nothing to distinguish house from). */
+.dz-hub-chip-house {
+    flex: 0 0 auto;
+    font-size: var(--dz-text-micro);
+    font-weight: var(--dz-weight-semibold);
+    line-height: 1.4;
+    padding: 0 8px; /* future --dz-gap token site (spacing project) */
+    border: 1px solid var(--dz-accent-color);
+    border-radius: var(--dz-btn-radius); /* same pill radius as .dz-hub-tag */
+    color: var(--dz-body-text);
+    white-space: nowrap;
+}
+
 .dz-hub-desc {
     margin: 4px 0 0; /* quarter-step under the label line */
     font-size: var(--dz-text-xs);
@@ -282,6 +301,21 @@
     opacity: 0.5;
 }
 
+/* House-row lock (ThemeSettings migration): a non-admin per-user session sees
+   a house-scope row (the chip above) but cannot edit it -- the house layer
+   belongs to admins. Also applied hub-wide by dzHubApplyNoIdentityLock on the
+   first no_identity write failure. Same dim as the dependency-gated
+   .is-disabled above; pointer-events is belt-and-braces on top of the
+   control's own disabled attribute (dzRenderHubRow / dzHubApplyNoIdentityLock
+   both set it), so a locked control cannot be dragged/scrubbed either. */
+.dz-hub-row-locked {
+    opacity: 0.5;
+}
+
+.dz-hub-row-locked .dz-hub-control {
+    pointer-events: none;
+}
+
 /* Reload disclosure (reloadOnDisable rows, shown on a live disable). Hidden
    until then via the [hidden] attribute; the display rule below must not defeat
    it, so [hidden] is guarded (a class-level display would otherwise beat the
@@ -312,6 +346,18 @@
 .dz-hub-fail-note {
     margin: 4px 0 0;
     font-size: var(--dz-text-xs);
+    color: var(--dz-accent-red, var(--dz-body-text));
+}
+
+/* No-identity lock note (ThemeSettings migration): inserted once, at the top
+   of the About tab, the first time a write comes back "no_identity" (an
+   application-token session with no Users row to store a personal layer
+   against; dzHubApplyNoIdentityLock, theme-hub.js). Same warning colour as
+   the fail-closed row note above. */
+.dz-hub-no-identity-note {
+    margin: 0 0 8px; /* future --dz-gap token site (spacing project) */
+    font-size: var(--dz-text-xs);
+    line-height: 1.45;
     color: var(--dz-accent-red, var(--dz-body-text));
 }
 
@@ -616,6 +662,12 @@
 /* Action buttons: house Filled-danger family (DESIGN.md Family Roles:
    destructive actions) via class="btn btn-danger dz-hub-maintenance-btn";
    css/buttons.css owns the look, the identity class is a harness/JS hook. */
+
+/* Promote/reset-mine/reset-house (ThemeSettings migration, mode-gated in
+   dzBuildMaintenanceBlock): the same house Filled-primary/Filled-danger
+   families via class="btn btn-primary ..." / "btn btn-danger ...", appended
+   into this same .dz-hub-maintenance-actions row. No rules needed here
+   either; the identity classes (dz-hub-promote-btn etc.) are harness hooks. */
 
 /* Per-device image editor (icon_image / theme.icons): lives in the icon_image
    row's expanded area, spans the full row width, hidden while the toggle is off
