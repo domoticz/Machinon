@@ -40,7 +40,23 @@ function searchFunction() {
 		}
     });
     $("div.row.divider, #dashcontent div.row").show();
-    $("section").show();
+    // Scoped to #dashcontent (task 10 fix): this undoes whatever
+    // removeEmptySectionDashboard hid on the PREVIOUS keyup, before
+    // recomputing below, so it only ever needs the same container that
+    // function already scopes to. The old unscoped $("section").show() hit
+    // EVERY <section> in the document, including the theme hub's
+    // .dz-hub-section group panels (also <section> elements) whenever this
+    // ran for ANY reason on ANY page -- and initDeviceLiveUpdates
+    // (devices.js) calls searchFunction() on every live device_update
+    // push, not just on a real keystroke. With the hub open, that blew away
+    // dzHubShowGroup's per-group display:none on every background device
+    // update, showing all groups at once until the user clicked a tab
+    // again (the reported "sometimes ALL groups render as one long list"
+    // bug). #dashcontent is the only container search ever needs this
+    // reveal step for: weatherwidgets/tempwidgets (the other two search
+    // surfaces referenced above) use <div class="row divider">, not
+    // <section>, so they were never part of what this line was for.
+    $("#dashcontent section").show();
     if (value.length) {
         removeEmptySectionDashboard();
     }
