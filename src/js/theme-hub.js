@@ -51,6 +51,11 @@ var DZ_HUB_ID = "dz-theme-hub";
 var DZ_HUB_MENU_ID = "dzThemeHubMenu";
 var DZ_HUB_MENU_OTHER_ID = "dzThemeHubMenuOther";
 var DZ_HUB_LABEL = "Theme"; // data-i18n key; settings_page.js LABEL_ICONS keys the tile on this
+// The session's currently/last selected group id. dzHubShowGroup() keeps this
+// current on every tab click and every routed :tab deep link; dzBuildThemeHub()
+// reads it back after a full rebuild (close+reopen, route re-entry) so the
+// selection survives, falling back to the first manifest group only when this
+// is still null (fresh session) or names a group the manifest no longer has.
 var dzHubActiveGroup = null;
 
 /* Shared <li> builder for both hub menu entries: identical anchor markup
@@ -202,7 +207,7 @@ function dzBuildThemeHub(routeHost) {
     var panel = document.createElement("div");
     panel.className = "dz-hub-panel";
 
-    THEME_MANIFEST.forEach(function (group, i) {
+    THEME_MANIFEST.forEach(function (group) {
         var item = document.createElement("button");
         item.type = "button";
         item.className = "dz-hub-tab";
@@ -224,8 +229,6 @@ function dzBuildThemeHub(routeHost) {
         if (group.id === "general") { section.appendChild(dzBuildShortAbout()); }
         dzRenderGroupRows(section, group); // task 3: fill the section with setting rows
         panel.appendChild(section);
-
-        if (i === 0) dzHubActiveGroup = group.id;
     });
 
     container.appendChild(tabs);
@@ -251,7 +254,19 @@ function dzBuildThemeHub(routeHost) {
     // picker above, so it also runs here, once, right after attach.
     if (typeof mountIconPackInHub === "function") { mountIconPackInHub(); }
 
-    dzHubShowGroup(dzHubActiveGroup); // default to the first group
+    /* Restore the durable tab anchor across a full rebuild (task 10 fix: a
+       close+reopen or a route re-entry used to stomp dzHubActiveGroup to the
+       first manifest group unconditionally, inside the forEach above, before
+       it was ever read here). A routed :tab deep link still wins: it is
+       applied by dzMountThemeHubIn's own dzHubShowGroup(tab) call right
+       after dzBuildThemeHub returns, overriding whatever this line shows.
+       Absent a :tab param, dzHubActiveGroup (the last tab picked this
+       session; Task 6 tab clicks do not rewrite the hash, so this variable
+       is the ONLY thing carrying that selection) restores it; only a
+       genuinely fresh session (still null) or a stale id no current manifest
+       group matches falls back to the first group. */
+    var dzHubRestoreGroup = (dzHubActiveGroup && dzHubHasGroup(dzHubActiveGroup)) ? dzHubActiveGroup : THEME_MANIFEST[0].id;
+    dzHubShowGroup(dzHubRestoreGroup);
     return container;
 }
 
