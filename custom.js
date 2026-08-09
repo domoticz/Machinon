@@ -397,13 +397,32 @@ function init_theme() {
            wired above. Merge the Domoticz-stored settings and apply only the delta
            in place. Runs last so the DOM the appliers touch (navbar, logo header)
            exists, and replaces the old first-visit setTimeout(location.reload). */
-        reconcileDomoticzSettingsInPlace();
+        var dzSettingsReconciled = reconcileDomoticzSettingsInPlace();
 
         /* The theme is initialised: settings loaded, THEME_MODULES executed,
            feature files requested. #/Theme waits for this milestone before it
            builds the hub, so a page entered by URL renders with real settings
-           instead of defaults. */
-        dzRouteMilestone("theme");
+           instead of defaults. THIS MUST WAIT ON reconcileDomoticzSettingsInPlace
+           SETTLING (bug found in ThemeSettings-migration review): that call
+           resolves checkUserVariableThemeSettings(), which is what actually
+           populates dzApiState.capable/perUser (settings-transport.js
+           dzProbeThemeSettingsAPI/dzApiLoad, both async fetches). Firing the
+           milestone synchronously right after the unawaited call (as this used
+           to) let a session whose FIRST navigation is directly #/Theme (bookmark,
+           deep link, F5 on the hub) build the hub against the pre-settle mode
+           default (api:false, perUser:false) -- no chips, no locks, no
+           promote/reset buttons, for the rest of the session, since
+           dzBuildThemeHub caches the hub by DOM id and never rebuilds. Fail
+           open on a reconcile failure (applyThemeDeltaInPlace could in
+           principle throw): the milestone must still fire so the hub renders
+           against whatever settled rather than staying blank forever. */
+        dzSettingsReconciled.then(function () {
+            dzRouteMilestone("theme");
+        }).catch(function (e) {
+            console.warn("machinon_routes", "reconcile_failed",
+                "settings reconcile did not complete cleanly; building the hub against whatever settled", String(e));
+            dzRouteMilestone("theme");
+        });
     });
     }); /* end loadSettings().then() */
 }
