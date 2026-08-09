@@ -31,11 +31,6 @@ var DZ_HUB_MENU_ID = "dzThemeHubMenu";
 var DZ_HUB_LABEL = "Theme"; // data-i18n key; settings_page.js LABEL_ICONS keys the tile on this
 var dzHubActiveGroup = null;
 
-/* True once the hub DOM exists (built lazily on first open). */
-function dzThemeHubMounted() {
-    return !!document.getElementById(DZ_HUB_ID);
-}
-
 /* Insert the single Setup-menu <li> that opens the hub. Idempotent (re-arm safe)
    and fail-closed: no ul -> structured warning, no entry. Mirrors
    js/custom_page.js: an <a class="lcursor"> with NO href, an <img> icon, and a
@@ -110,7 +105,8 @@ function dzHubSyncMenuActive() {
    Returns the container, or null if the mount point or the manifest is missing
    (fail closed). */
 function dzBuildThemeHub(routeHost) {
-    if (dzThemeHubMounted()) return document.getElementById(DZ_HUB_ID);
+    var built = document.getElementById(DZ_HUB_ID);
+    if (built) return routeHost ? dzAdoptHubInto(built, routeHost) : built;
     if (typeof THEME_MANIFEST === "undefined" || !THEME_MANIFEST.length) {
         console.warn("machinon_theme_hub", "manifest_absent", "THEME_MANIFEST missing; hub not built (fail closed)");
         return null;
@@ -606,6 +602,20 @@ function dzHubShowGroup(groupId) {
         it.classList.toggle("is-active", on);
         it.setAttribute("aria-selected", on ? "true" : "false");
     });
+}
+
+/* A hub built BEFORE the routes settled (dzMaybeReopenHub's debounced reopen is
+   the real case: it can fire while dzRoutesActive is still false) is a hidden
+   SIBLING of #main-view. Handing that node back to a routed mount would leave
+   #/Theme blank for the rest of the session, so adopt it into the routed host
+   instead: move it, show it, and undo the legacy path's #main-view hide, since
+   the routed hub lives inside #main-view and would be hidden with it. */
+function dzAdoptHubInto(hub, routeHost) {
+    if (hub.parentNode !== routeHost) routeHost.appendChild(hub);
+    hub.style.display = "";
+    var mainView = document.getElementById("main-view");
+    if (mainView && mainView.style.display === "none") mainView.style.display = "";
+    return hub;
 }
 
 /* Routed entry (#/Theme, #/Theme/:tab): build the hub into the routed template's

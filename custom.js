@@ -49,9 +49,10 @@ function loadThemeScripts(files) {
    The theme owns two real, bookmarkable Angular routes: #/Theme (plus
    #/Theme/:tab) for the theme hub and #/SetupMenu for the settings tile grid.
    Core owns the Angular app, so they are registered by appending ONE .config()
-   block to core's 'app.routes' module. No core path is replaced, so no .run()
-   block is needed (a config block runs before core's own .when() calls and
-   would lose a key it shares with them).
+   block to core's 'app.routes' module, plus one .run() block that only listens
+   for $routeChangeError (no core path is REPLACED, which is the thing a .run()
+   would otherwise be needed for: a config block runs before core's own .when()
+   calls and would lose a key it shares with them).
 
    THIS BLOCK MUST STAY AT CUSTOM.JS TOP LEVEL. index.html loads the theme's
    custom.js synchronously and only then RequireJS, which pulls Angular in
@@ -159,6 +160,19 @@ function dzSetupGridRouteController() {
     });
 }
 
+/* The pre-route way into each page, used when a routed template cannot load.
+   dzRoutesActive is already back to false by the time this runs, so both calls
+   take their legacy branch. The grid's legacy entry is the Setup menu click
+   handler (settings_page.js), so it is triggered rather than reimplemented: one
+   build path, not a second copy. */
+function dzOpenThemeLegacyPage(templateUrl) {
+    if (templateUrl === DZ_HUB_TEMPLATE) {
+        if (typeof dzOpenThemeHub === "function") dzOpenThemeHub();
+        return;
+    }
+    if (window.jQuery) window.jQuery("#appnavbar li[has-permission='Admin']").click();
+}
+
 function dzRegisterThemeRoutes(routesModule) {
     routesModule.config(["$routeProvider", function ($routeProvider) {
         $routeProvider
@@ -170,6 +184,24 @@ function dzRegisterThemeRoutes(routesModule) {
             .when("/SetupMenu", { templateUrl: DZ_GRID_TEMPLATE, permission: "Admin", controller: dzSetupGridRouteController() });
         window.dzRoutesActive = true;
     }]);
+
+    /* Core has no $routeChangeError handler, so a template that fails to load
+       (404, offline, a theme folder that lost templates/) would leave the URL on
+       the theme path with the PREVIOUS page still rendered, silently, and with
+       the legacy path already switched off. Catch it for the theme's own two
+       templates only: warn once, turn the routes back off (they cannot render
+       without their templates) and open the page the legacy way, so the user
+       still gets it. */
+    routesModule.run(["$rootScope", function ($rootScope) {
+        $rootScope.$on("$routeChangeError", function (event, current) {
+            var route = current && current.$$route;
+            var templateUrl = route && route.templateUrl;
+            if (templateUrl !== DZ_HUB_TEMPLATE && templateUrl !== DZ_GRID_TEMPLATE) return;
+            console.warn("machinon_routes", "template_absent", "route template did not load: " + templateUrl + "; falling back to the legacy open");
+            window.dzRoutesActive = false;
+            dzOpenThemeLegacyPage(templateUrl);
+        });
+    }]);
 }
 
 /* Wrap angular.module so the theme's config block is appended the moment core
@@ -178,44 +210,82 @@ function dzRegisterThemeRoutes(routesModule) {
 function dzWrapAngularModule(ng, realModule) {
     var wrapped = function (name, deps) {
         var m = realModule.apply(this, arguments);
-        if (name === "app.routes" && deps) dzRegisterThemeRoutes(m);
+        /* This runs INSIDE core's angular.module() call, so a throw here would
+           abort core's own module definition. Contain it: the theme losing its
+           routes is a degradation, breaking the app is not. */
+        if (name === "app.routes" && deps) {
+            try {
+                dzRegisterThemeRoutes(m);
+            } catch (e) {
+                console.warn("machinon_routes", "hook_error", "route registration failed; theme pages stay on the legacy path", String(e));
+            }
+        }
         return m;
     };
-    Object.defineProperty(ng, "module", { configurable: true, writable: true, value: wrapped });
+    try {
+        Object.defineProperty(ng, "module", { configurable: true, writable: true, value: wrapped });
+    } catch (e) {
+        console.warn("machinon_routes", "hook_error", "angular.module is not replaceable; theme pages stay on the legacy path", String(e));
+    }
 }
 
+/* Contained on purpose: this can run from the window.angular setter below, i.e.
+   inside Angular's own publishExternalAPI, where a throw would take the whole
+   app down. Fail closed means degrade to the legacy path, never break core. */
 function dzHookAngular(ng) {
     if (!ng || ng.__dzRoutesPatched) return;
-    ng.__dzRoutesPatched = true;
-    if (ng.module) { dzWrapAngularModule(ng, ng.module); return; }
-    Object.defineProperty(ng, "module", {
-        configurable: true,
-        get: function () { return undefined; },
-        set: function (realModule) { dzWrapAngularModule(ng, realModule); }
-    });
+    try {
+        ng.__dzRoutesPatched = true;
+        if (ng.module) { dzWrapAngularModule(ng, ng.module); return; }
+        Object.defineProperty(ng, "module", {
+            configurable: true,
+            get: function () { return undefined; },
+            set: function (realModule) { dzWrapAngularModule(ng, realModule); }
+        });
+    } catch (e) {
+        console.warn("machinon_routes", "hook_error", "cannot hook angular.module; theme pages stay on the legacy path", String(e));
+    }
 }
+
+/* Installing the hook is not the same as reaching $routeProvider: core could
+   rename app.routes, define it before this file runs, or never load Angular at
+   all, and the theme would sit in fallback mode with nothing said. One bounded
+   timer turns that silence into a single structured warning. */
+var DZ_ROUTE_HOOK_WAIT_MS = 15000; // Angular boots in ~1-2s; this only catches a broken hook
 
 (function dzInstallRouteShim() {
     /* Test hook, honoured first (same convention as __dzForceNoApi): forces the
-       pre-route behaviour so the fallback path stays covered by the harness. */
+       pre-route behaviour so the fallback path stays covered by the harness. It
+       warns for itself, so no hook_absent timer is armed below. */
     if (window.__dzForceNoRoutes) {
         console.warn("machinon_routes", "forced_off", "__dzForceNoRoutes set; theme routes not registered (test hook)");
         return;
     }
-    if (window.angular) { dzHookAngular(window.angular); return; }
     try {
-        var loaded;
-        Object.defineProperty(window, "angular", {
-            configurable: true,
-            get: function () { return loaded; },
-            set: function (ng) {
-                loaded = ng;
-                dzHookAngular(ng);
-            }
-        });
+        if (window.angular) {
+            dzHookAngular(window.angular);
+        } else {
+            var loaded;
+            Object.defineProperty(window, "angular", {
+                configurable: true,
+                get: function () { return loaded; },
+                set: function (ng) {
+                    loaded = ng;
+                    dzHookAngular(ng);
+                }
+            });
+        }
     } catch (e) {
-        console.warn("machinon_routes", "hook_absent", "window.angular is not interceptable; theme routes not registered", String(e));
+        // A throw here would abort the rest of custom.js top level, including the
+        // getsettings fetch below that boots the whole theme.
+        console.warn("machinon_routes", "hook_error", "window.angular is not interceptable; theme routes not registered", String(e));
     }
+
+    setTimeout(function () {
+        if (window.dzRoutesActive) return;
+        console.warn("machinon_routes", "hook_absent",
+            "no app.routes definition reached the hook within " + DZ_ROUTE_HOOK_WAIT_MS + "ms; theme pages stay on the legacy path");
+    }, DZ_ROUTE_HOOK_WAIT_MS);
 })();
 
 fetch('json.htm?type=command&param=getsettings', {
