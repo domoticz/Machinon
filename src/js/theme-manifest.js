@@ -442,11 +442,15 @@ function dzManifestAllEntries() {
     return all;
 }
 
-/* Scope for snapshot keys that have no manifest row: scheme companions ride
-   the colors classification (user); the per-device photo list is house data. */
+/* Scope for snapshot keys that have no manifest row of their own: the scheme
+   companions ride the colors classification (user), dark_theme is the feature
+   key behind the retired standalone toggle (see the colors group above), and
+   the per-device photo list is house data. custom_color_scheme is NOT listed
+   here: it has a real manifest row in the colors group, which dzSettingScope
+   resolves first, so an entry here would never be reached. */
 var DZ_SCOPE_EXTRAS = {
     scheme_base: "user", color_scheme: "user", user_schemes: "user",
-    dark_theme: "user", custom_color_scheme: "user", icons: "house"
+    dark_theme: "user", icons: "house"
 };
 
 /* "user" | "house" for any persisted settings key, null for unknown keys. */

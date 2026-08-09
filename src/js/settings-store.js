@@ -94,8 +94,9 @@ function loadSettings() {
 
 /* Settings load entry point: probes the native ThemeSettingsAPI
    (settings-transport.js) and routes to it when the running core supports
-   it, falling back to the legacy uservariable transport otherwise. Name
-   kept: theme-hub.js and reconcileDomoticzSettingsInPlace call this. */
+   it, falling back to the legacy uservariable transport otherwise. Name kept:
+   reconcileDomoticzSettingsInPlace (below) is its only caller, reached from
+   custom.js's boot chain. */
 function checkUserVariableThemeSettings() {
     return dzProbeThemeSettingsAPI().then(function(capable) {
         if (!capable) return checkUserVariableThemeSettingsLegacy();

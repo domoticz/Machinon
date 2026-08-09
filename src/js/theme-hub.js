@@ -1365,7 +1365,12 @@ function dzHubApplyNoIdentityLock() {
 /* Every hub write funnels through here (instead of calling
    storeUserVariableThemeSettings directly) so a no_identity failure locks the
    hub reactively right after the write settles, wherever it originated (a
-   setting row, a colour swatch, the image editor, reset-colours). */
+   setting row, a colour swatch, the image editor, reset-colours).
+   Instant-apply means several of these can be fired in quick succession and
+   none of them is awaited by its caller (a change handler); they do not race
+   because the transport serializes every write on one chain (dzEnqueueWrite,
+   settings-transport.js), so each save snapshots theme after the previous one
+   has settled and both edits land. */
 function dzHubPersist() {
     return storeUserVariableThemeSettings("update").then(function (res) {
         if (dzSettingsMode().noIdentity) dzHubApplyNoIdentityLock();
