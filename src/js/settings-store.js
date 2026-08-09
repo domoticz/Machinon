@@ -8,8 +8,11 @@
 /* Pristine theme.json defaults, snapshotted once on a cold boot (see
    loadSettings below) before any cache or server overlay touches theme.
    Stays null on a warm boot (theme paints from the localStorage cache
-   instead of a fresh theme.json fetch); populated by the transport for
-   callers that specifically need the factory baseline (Tasks 3 and 5). */
+   instead of a fresh theme.json fetch) unless a native-API write later
+   needs the factory baseline and lazily resolves it itself: see
+   dzEnsureDefaultsSnap in settings-transport.js, the only other writer of
+   this var, used by dzBuildInstanceWrite's fallback base (Task 3) and the
+   seeding path (Task 4). */
 var dzDefaultsSnap = null;
 
 /* The theme object's localStorage cache. Plain functions instead of the old
@@ -134,7 +137,15 @@ function checkUserVariableThemeSettingsLegacy() {
     });
 }
 
-function storeUserVariableThemeSettings(action) { return dzThemeSettingsSave(action); }
+/* Save entry point: routes to the native ThemeSettingsAPI writer when the
+   running core supports it, falling back to the legacy uservariable writer
+   otherwise. action ("add"/"update") is legacy-only -- dzThemeSettingsSave
+   still needs it to pick the right uservariable command, but the native API
+   upserts unconditionally, so dzApiSaveSettings ignores it. */
+function storeUserVariableThemeSettings(action) {
+    if (dzApiState.capable === true) return dzApiSaveSettings();
+    return dzThemeSettingsSave(action);
+}
 
 /* Fingerprint of only the settings that drive visible state. The in-place
    reconcile compares before/after to decide whether the Domoticz-stored
