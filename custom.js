@@ -369,7 +369,19 @@ function init_theme() {
         navBarToggle.click(function() {
             navBarInner.toggleClass("slide");
         });
-        navBarInner.find(".container li").not(".dropdown").not(".dropdown-submenu").click(function() {
+        // Exclude dropdown containers from "tap closes the flyout": each owns its
+        // own open/close state and must not also be slammed shut by this blanket
+        // handler. class="dropdown" catches Setup's <li> (index.html ~1293), but
+        // core does not mark every dropdown container that way -- the non-admin
+        // "Other" entry (li#mLogout, ~1354) carries the same Bootstrap
+        // data-toggle="dropdown" toggle with no class="dropdown" at all, so the
+        // class-only check let a tap on it open the submenu and slide the whole
+        // flyout away in the same gesture. Exclude by the actual Bootstrap
+        // marker too, on the toggle <a> itself, not just the class core happens
+        // to add sometimes.
+        navBarInner.find(".container li").not(".dropdown").not(".dropdown-submenu").filter(function() {
+            return !$(this).children("a[data-toggle='dropdown']").length;
+        }).click(function() {
             navBarInner.removeClass("slide");
         });
         $("#holder").click(function() {
