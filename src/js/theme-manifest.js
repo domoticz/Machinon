@@ -8,6 +8,12 @@
    docs/superpowers/specs/2026-07-20-theme-hub-design.md; see that table for
    the owner-approved label/description/appliesTo/status per row.
 
+   Scope classification (ThemeSettings migration task 1): every entry with a
+   storageKey is tagged "user" or "house" so the per-user overlay (task 3+)
+   knows which keys it may ever write. The rule: per-user = anything that
+   only changes how your own browser renders; house = shared content,
+   branding, infrastructure, and per-device data.
+
    Schema:
      THEME_MANIFEST = [ group, ... ]
      group = {
@@ -98,6 +104,14 @@
                          Task 9 owns resolving these; this manifest keeps
                          them visible and correctly flagged, never drops
                          them silently.
+       scope:            "user" or "house" for every entry with a storageKey
+                         (see classification rule above); null on the two
+                         control:"custom" entries whose storageKey is also
+                         null (iconpacks, about), which have no single key to
+                         scope. Read through dzSettingScope(storageKey)
+                         below, never off entry.scope directly, so callers
+                         also resolve the snapshot keys that have no manifest
+                         row (DZ_SCOPE_EXTRAS).
      }
 
    reloadOnDisable:true determinations (theme.json features[].files, .js present):
@@ -118,38 +132,38 @@ var THEME_MANIFEST = [
                 key: "standby", storageKey: "standby", control: "toggle",
                 label: "Screen standby", description: "Screen standby (after N minutes)",
                 appliesTo: "Whole UI", previewId: "sketch-standby", parent: null,
-                reloadOnDisable: true, status: "keep"
+                reloadOnDisable: true, status: "keep", scope: "user"
             },
             {
                 key: "standby_after", storageKey: "standby_after", control: "number",
                 label: "Standby after (minutes)", description: "Screen standby (after N minutes)",
                 appliesTo: "Whole UI", previewId: null, parent: "standby",
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "check_update", storageKey: "check_update", control: "toggle",
                 label: "Update notice",
                 description: "Checks the theme's upstream repo for a newer theme version and shows a notice (separate from Domoticz's own app-update check)",
                 appliesTo: "Navbar badge", previewId: "sketch-update", parent: null,
-                reloadOnDisable: true, status: "keep"
+                reloadOnDisable: true, status: "keep", scope: "user"
             },
             {
                 key: "notification", storageKey: "notification", control: "toggle",
                 label: "Device warnings", description: "Device warnings (battery, timed out)",
                 appliesTo: "Navbar / toasts", previewId: "sketch-notification", parent: null,
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "center_popups", storageKey: "center_popups", control: "toggle",
                 label: "Center popup dialogs", description: "Center popup dialogs",
                 appliesTo: "All dialogs", previewId: "dialog-center", parent: null,
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "footer_text_disabled", storageKey: "footer_text_disabled", control: "toggle",
                 label: "Hide the footer text", description: "Hide the footer text",
                 appliesTo: "Page footer", previewId: null, parent: null,
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "user"
             }
         ]
     },
@@ -161,44 +175,44 @@ var THEME_MANIFEST = [
                 key: "custom_settings_menu", storageKey: "custom_settings_menu", control: "toggle",
                 label: "Settings menu as tile grid", description: "Settings menu as tile grid",
                 appliesTo: "Setup menu", previewId: "menu-tilegrid", parent: null,
-                reloadOnDisable: true, status: "keep"
+                reloadOnDisable: true, status: "keep", scope: "user"
             },
             {
                 key: "navbar_icons", storageKey: "navbar_icons", control: "toggle",
                 label: "Navbar icons", description: "Icons in the navbar (optionally icon-only)",
                 appliesTo: "Navbar", previewId: "navbar-strip", parent: null,
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "navbar_icons_text", storageKey: "navbar_icons_text", control: "toggle",
                 label: "Icon-only navbar (hide text)", description: "Icons in the navbar (optionally icon-only)",
                 appliesTo: "Navbar", previewId: null, parent: "navbar_icons",
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "custom_page_menu", storageKey: "custom_page_menu", control: "toggle",
                 label: "Custom menu page", description: "Custom menu page (iframe)",
                 appliesTo: "Navbar + new page", previewId: null, parent: null,
-                reloadOnDisable: true, status: "keep"
+                reloadOnDisable: true, status: "keep", scope: "house"
             },
             {
                 key: "button_name", storageKey: "button_name", control: "text",
                 label: "Custom page button name", description: "Custom menu page (iframe)",
                 appliesTo: "Navbar + new page", previewId: null, parent: "custom_page_menu",
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "house"
             },
             {
                 key: "custom_url", storageKey: "custom_url", control: "text",
                 label: "Custom page URL", description: "Custom menu page (iframe)",
                 appliesTo: "Navbar + new page", previewId: null, parent: "custom_page_menu",
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "house"
             },
             {
                 key: "sidemenu", storageKey: "sidemenu", control: "toggle",
                 label: "Side menu on desktop",
                 description: "Use the side menu layout on desktop screens (phones always use the side menu)",
                 appliesTo: "Desktop layout", previewId: null, parent: null,
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "user"
             }
         ]
     },
@@ -210,34 +224,34 @@ var THEME_MANIFEST = [
                 key: "dashboard_show_last_update", storageKey: "dashboard_show_last_update", control: "toggle",
                 label: "Last-seen line on dashboard cards", description: "Last-seen line on dashboard cards",
                 appliesTo: "Classic dashboard", previewId: "card-lastseen", parent: null,
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "dashboard_columns", storageKey: "dashboard_columns", control: "toggle",
                 label: "Column layout on wide screens", description: "Column layout on wide screens (>1200px)",
                 appliesTo: "Classic dashboard", previewId: "dash-columns", parent: null,
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "dashboard_camera", storageKey: "dashboard_camera", control: "toggle",
                 label: "Camera previews on the dashboard",
                 description: "Camera previews on the dashboard (+refresh seconds, dedicated section)",
                 appliesTo: "Classic dashboard", previewId: null, parent: null,
-                reloadOnDisable: true, status: "keep"
+                reloadOnDisable: true, status: "keep", scope: "house"
             },
             {
                 key: "dashboard_camera_refresh", storageKey: "dashboard_camera_refresh", control: "number",
                 label: "Camera preview refresh (seconds)",
                 description: "Camera previews on the dashboard (+refresh seconds, dedicated section)",
                 appliesTo: "Classic dashboard", previewId: null, parent: "dashboard_camera",
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "house"
             },
             {
                 key: "dashboard_camera_section", storageKey: "dashboard_camera_section", control: "toggle",
                 label: "Dedicated cameras section",
                 description: "Camera previews on the dashboard (+refresh seconds, dedicated section)",
                 appliesTo: "Classic dashboard", previewId: null, parent: "dashboard_camera",
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "house"
             }
         ]
     },
@@ -249,27 +263,27 @@ var THEME_MANIFEST = [
                 key: "time_ago", storageKey: "time_ago", control: "toggle",
                 label: "Relative times", description: "Relative times (\"5 minutes ago\")",
                 appliesTo: "All device pages", previewId: null, parent: null,
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "fade_off_items", storageKey: "fade_off_items", control: "toggle",
                 label: "Dim off devices", description: "Dim cards of devices that are off",
                 appliesTo: "All device pages", previewId: "card-dim", parent: null,
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "switch_instead_of_bigtext", storageKey: "switch_instead_of_bigtext", control: "toggle",
                 label: "Toggles instead of status text",
                 description: "Toggles instead of status text (+ also on scenes)",
                 appliesTo: "Device + scene cards", previewId: "card-toggle", parent: null,
-                reloadOnDisable: true, status: "keep"
+                reloadOnDisable: true, status: "keep", scope: "user"
             },
             {
                 key: "switch_instead_of_bigtext_scenes", storageKey: "switch_instead_of_bigtext_scenes", control: "toggle",
                 label: "Also toggles on scene cards",
                 description: "Toggles instead of status text (+ also on scenes)",
                 appliesTo: "Device + scene cards", previewId: null, parent: "switch_instead_of_bigtext",
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "wind_direction", storageKey: "wind_direction", control: "toggle",
@@ -279,26 +293,26 @@ var THEME_MANIFEST = [
                     + "at where the wind is blowing TO. The compass label (N, SW) always "
                     + "stays the reported one.",
                 appliesTo: "Wind device cards", previewId: null, parent: null,
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "icon_image", storageKey: "icon_image", control: "toggle",
                 label: "Device photos instead of icons",
                 description: "Device photos instead of icons (per-device list)",
                 appliesTo: "Device cards", previewId: null, parent: null,
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "card_min_width", storageKey: "card_min_width", control: "number",
                 label: "Card min width", description: "Card width range (min/max px)",
                 appliesTo: "All card grids", previewId: "card-width", parent: null,
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "card_max_width", storageKey: "card_max_width", control: "number",
                 label: "Card max width", description: "Card width range (min/max px)",
                 appliesTo: "All card grids", previewId: "card-width", parent: null,
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "user"
             }
         ]
     },
@@ -310,7 +324,7 @@ var THEME_MANIFEST = [
                 key: "log_plot_bands", storageKey: "log_plot_bands", control: "toggle",
                 label: "Range bands in log graphs", description: "Range bands in log graphs",
                 appliesTo: "Device log charts", previewId: "chart-bands", parent: null,
-                reloadOnDisable: true, status: "keep"
+                reloadOnDisable: true, status: "keep", scope: "user"
             }
         ]
     },
@@ -322,25 +336,25 @@ var THEME_MANIFEST = [
                 key: "background_img", storageKey: "background_img", control: "text",
                 label: "Background image", description: "Page background image (cover or pattern)",
                 appliesTo: "Whole UI", previewId: null, parent: null,
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "background_type", storageKey: "background_type", control: "select",
                 label: "Background type", description: "Page background image (cover or pattern)",
                 appliesTo: "Whole UI", previewId: null, parent: null,
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "logo", storageKey: "logo", control: "text",
                 label: "Custom logo", description: "Custom logo / hide logo",
                 appliesTo: "Navbar", previewId: null, parent: null,
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "house"
             },
             {
                 key: "hide_logo", storageKey: "hide_logo", control: "toggle",
                 label: "Hide logo", description: "Custom logo / hide logo",
                 appliesTo: "Navbar", previewId: null, parent: null,
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "house"
             }
         ]
     },
@@ -352,13 +366,13 @@ var THEME_MANIFEST = [
                 key: "scheme", storageKey: "scheme", control: "custom",
                 label: "Color scheme", description: "Scheme picker (light/dark base and named schemes)",
                 appliesTo: "Whole UI", previewId: null, parent: null,
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "custom_color_scheme", storageKey: "custom_color_scheme", control: "custom",
                 label: "Custom colors", description: "Custom colors (7 swatches)",
                 appliesTo: "Whole UI", previewId: null, parent: null,
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: "user"
             }
             /* dark_theme has NO standalone toggle row here on purpose. It is a
                live theme.json feature (drives applyScheme("dark") / Machinon
@@ -380,7 +394,7 @@ var THEME_MANIFEST = [
                 key: "iconpacks", storageKey: null, control: "custom",
                 label: "Icon packs", description: "Install and switch device icon packs (tabbed installer)",
                 appliesTo: "Device icons", previewId: null, parent: null,
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: null
             }
         ]
     },
@@ -399,7 +413,7 @@ var THEME_MANIFEST = [
                 key: "about", storageKey: null, control: "custom",
                 label: "About Machinon", description: "Theme version, description, credits, links, and maintenance actions",
                 appliesTo: "Theme", previewId: null, parent: null,
-                reloadOnDisable: false, status: "keep"
+                reloadOnDisable: false, status: "keep", scope: null
             }
         ]
     }
@@ -426,4 +440,19 @@ function dzManifestAllEntries() {
         all = all.concat(THEME_MANIFEST[i].entries);
     }
     return all;
+}
+
+/* Scope for snapshot keys that have no manifest row: scheme companions ride
+   the colors classification (user); the per-device photo list is house data. */
+var DZ_SCOPE_EXTRAS = {
+    scheme_base: "user", color_scheme: "user", user_schemes: "user",
+    dark_theme: "user", custom_color_scheme: "user", icons: "house"
+};
+
+/* "user" | "house" for any persisted settings key, null for unknown keys. */
+function dzSettingScope(storageKey) {
+    var entry = dzManifestEntryByStorageKey(storageKey);
+    if (entry && entry.scope) return entry.scope;
+    if (Object.prototype.hasOwnProperty.call(DZ_SCOPE_EXTRAS, storageKey)) return DZ_SCOPE_EXTRAS[storageKey];
+    return null;
 }

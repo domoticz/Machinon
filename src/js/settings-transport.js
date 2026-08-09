@@ -45,7 +45,8 @@ function dzSettingsSnapshot(t) {
             background_img: t.background_img, background_type: t.background_type,
             scheme: t.scheme, scheme_base: t.scheme_base,
             user_schemes: dzCloneValue(t.user_schemes), color_scheme: dzCloneValue(t.color_scheme),
-            card_min_width: t.card_min_width, card_max_width: t.card_max_width
+            card_min_width: t.card_min_width, card_max_width: t.card_max_width,
+            dashboard_camera_refresh: t.dashboard_camera_refresh
         }
     };
 }
@@ -95,6 +96,19 @@ function dzMergeSettingsLayers(defaultsSnap, storedSnap, perUserSnap) {
                 }
             }
         }
+    });
+    return out;
+}
+
+/* Filter a snapshot to one scope. The overlay writes ONLY the "user" subset,
+   so house keys structurally cannot be overridden per user (spec). */
+function dzSnapshotSubset(snap, scope) {
+    var out = { schemaVersion: snap.schemaVersion, features: {}, values: {} };
+    Object.keys(snap.features).forEach(function(k) {
+        if (dzSettingScope(k) === scope) out.features[k] = snap.features[k];
+    });
+    Object.keys(snap.values).forEach(function(k) {
+        if (dzSettingScope(k) === scope) out.values[k] = dzCloneValue(snap.values[k]);
     });
     return out;
 }
@@ -161,13 +175,14 @@ function dzThemeSettingsSave(action) {
 
     /* Positional contract: readers index into this array, APPEND ONLY. 0-6
        original; 7/8 scheme + base; 9 saved colour presets; 10/11 card widths
-       (new: previously cache-only). getCustomThemeSettings tolerates short
-       arrays via length guards. */
+       (previously cache-only); 12 camera refresh seconds, closing the
+       cache-only gap like 10/11 did for card widths. getCustomThemeSettings
+       tolerates short arrays via length guards. */
     var custom = [
         theme.standby_after, theme.button_name, theme.custom_url,
         theme.logo, theme.icons, theme.background_img, theme.background_type,
         theme.scheme, theme.scheme_base, theme.user_schemes,
-        theme.card_min_width, theme.card_max_width
+        theme.card_min_width, theme.card_max_width, theme.dashboard_camera_refresh
     ];
 
     function saveVariable(varName, value) {
@@ -232,6 +247,7 @@ function getCustomThemeSettings(idx) {
         if (c.length > 8) { theme.scheme = c[7]; theme.scheme_base = c[8]; }
         if (c.length > 9 && Array.isArray(c[9])) { theme.user_schemes = c[9]; }
         if (c.length > 11) { if (c[10] !== undefined) theme.card_min_width = c[10]; if (c[11] !== undefined) theme.card_max_width = c[11]; }
+        if (c.length > 12 && c[12] !== undefined) theme.dashboard_camera_refresh = c[12];
     });
 }
 
