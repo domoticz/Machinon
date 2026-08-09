@@ -113,6 +113,65 @@ function dzSnapshotSubset(snap, scope) {
     return out;
 }
 
+/* ---- Native ThemeSettings transport (core ThemeSettingsAPI: 1). Wiki:
+   core docs/Theming.wiki "Theme settings storage". Legacy uservariable
+   transport below remains the store for cores without the API. ---- */
+
+var dzApiState = { capable: null, perUser: false, tokens: { instance: "", user: "" },
+                   instanceSnap: null, userSnap: null, noIdentity: false };
+
+function dzIsAdmin() { return !!(window.my_config && window.my_config.userrights === 2); }
+
+function dzSettingsMode() {
+    return { api: dzApiState.capable === true, perUser: dzApiState.perUser,
+             admin: dzIsAdmin(), noIdentity: dzApiState.noIdentity };
+}
+
+function dzProbeThemeSettingsAPI() {
+    /* Test hook (same pattern as the rig's DZ_FAULT env-var injections, but
+       set via page.addInitScript since it must be visible before any theme
+       script runs): forces the legacy uservariable path so the harness can
+       assert the fallback without needing a core that lacks the API. */
+    if (window.__dzForceNoApi) { dzApiState.capable = false; return Promise.resolve(false); }
+    if (dzApiState.capable !== null) return Promise.resolve(dzApiState.capable);
+    return fetch("json.htm?type=command&param=getversion", { credentials: "include" })
+        .then(function(r) { return r.json(); })
+        .then(function(d) { dzApiState.capable = d && d.ThemeSettingsAPI === 1; return dzApiState.capable; })
+        .catch(function() { dzApiState.capable = false; return false; });
+}
+
+/* Reads both layers + tokens, applies instance then user onto the theme
+   object (which already holds theme.json defaults, so this IS the
+   three-layer merge). Fail closed: FAILED keeps current values. */
+function dzApiLoad() {
+    return fetch("json.htm?type=command&param=themesettings_get&theme=" + encodeURIComponent(themeFolder),
+                 { credentials: "include" })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            if (!d || d.status !== "OK") return DZ_LOAD_FAILED;
+            dzApiState.perUser = d.PerUser === true;
+            dzApiState.instanceSnap = (d.instance && d.instance.present) ? d.instance.value : null;
+            dzApiState.userSnap = (d.user && d.user.present) ? d.user.value : null;
+            dzApiState.tokens.instance = (d.instance && d.instance.present) ? d.instance.lastupdate : "";
+            dzApiState.tokens.user = (d.user && d.user.present) ? d.user.lastupdate : "";
+            if (!dzApiState.instanceSnap && !dzApiState.userSnap) return DZ_LOAD_EMPTY;
+            if (dzApiState.instanceSnap) dzApplySnapshot(theme, dzApiState.instanceSnap);
+            if (dzApiState.userSnap) dzApplySnapshot(theme, dzApiState.userSnap);
+            cacheThemeSettings();
+            return DZ_LOAD_LOADED;
+        })
+        .catch(function() {
+            console.warn("machinon_themesettings", "load_unreachable", "keeping current values");
+            return DZ_LOAD_FAILED;
+        });
+}
+
+/* Task 4 stub: the real first-visit migration (copy a legacy uservariable
+   profile into the native store) lands in the seeding task. This name only
+   needs to exist now so checkUserVariableThemeSettings' DZ_LOAD_EMPTY branch
+   (settings-store.js) is runnable ahead of that task. */
+function dzSeedFromLegacyIfPossible() { return Promise.resolve(); } /* replaced in the seeding task */
+
 /* ---- uservariable transport (moved verbatim from settings-store.js, with
    the two documented changes: card widths appended to the custom array, and
    bootbox.alert replaced by structured console.warn per the fail-closed
@@ -126,11 +185,12 @@ var unableCreateUserVariable = false;
    explicit at the call site (task-3-brief.md Step 2). */
 function dzUnableToCreateUserVariable() { return unableCreateUserVariable; }
 
-/* Tri-state load outcome. The caller (checkUserVariableThemeSettings) must tell
-   a genuine first visit (DZ_LOAD_EMPTY: the request succeeded and none of the
-   three theme vars exist yet, so seed them) apart from a transient failure
-   (DZ_LOAD_FAILED: server ERR/non-OK or an ajax error, where the vars may well
-   exist and a blind "add" would be an active write on failure). Collapsing both
+/* Tri-state load outcome, shared by dzApiLoad above (native transport) and
+   dzThemeSettingsLoad below (legacy transport). Each caller must tell a
+   genuine first visit (DZ_LOAD_EMPTY: the request succeeded and nothing is
+   stored yet, so seed it) apart from a transient failure (DZ_LOAD_FAILED:
+   server ERR/non-OK or an ajax error, where the store may well already exist
+   and a blind write would be an active write on failure). Collapsing both
    into a single false, as the boolean version did, made the first-visit seed
    fire on every network blip, contradicting the fail-closed contract. */
 var DZ_LOAD_LOADED = "loaded"; /* at least one theme var found and read */

@@ -1,7 +1,16 @@
 /* Settings persistence: the theme object's round-trip between the browser
-   (localStorage cache) and Domoticz (three theme-<folder>-* user variables,
-   so settings follow the user across browsers). UI wiring lives in
-   theme-hub.js (the settings hub); feature file loading in feature-loader.js. */
+   (localStorage cache) and Domoticz (native ThemeSettingsAPI where the core
+   supports it, else three theme-<folder>-* user variables; both transports
+   live in settings-transport.js so settings follow the user across
+   browsers). UI wiring lives in theme-hub.js (the settings hub); feature
+   file loading in feature-loader.js. */
+
+/* Pristine theme.json defaults, snapshotted once on a cold boot (see
+   loadSettings below) before any cache or server overlay touches theme.
+   Stays null on a warm boot (theme paints from the localStorage cache
+   instead of a fresh theme.json fetch); populated by the transport for
+   callers that specifically need the factory baseline (Tasks 3 and 5). */
+var dzDefaultsSnap = null;
 
 /* The theme object's localStorage cache. Plain functions instead of the old
    Storage.prototype monkey-patch: no global prototype pollution, and every
@@ -32,6 +41,10 @@ function loadSettings() {
                 .then(function(localJson) {
                     theme = localJson;
                     themeName = theme.name;
+                    /* Pristine factory values, captured before any cache or
+                       server overlay touches theme: the base for native-API
+                       instance writes and promote (Tasks 3 and 5). */
+                    dzDefaultsSnap = dzSettingsSnapshot(theme);
                     if (isEmptyObject(theme) === false) {
                         cacheThemeSettings();
                     }
@@ -76,19 +89,33 @@ function loadSettings() {
    lives in settings-transport.js now; these are the public entry points call
    sites in this file (and schemes.js/theme-hub.js) use. */
 
-/* Server settings load through the seam, resolved as the specced ordered
-   overlay layers: what painted (defaults or cache) <- stored uservariable
-   snapshot <- per-user (null until FR #6907). The overlay call is readiness
-   scaffolding for that future per-user layer: today's transport appliers fully
-   populate theme from the stored vars, so stored has no gaps for defaults to
-   fill and the merge is a functional no-op on load; it becomes meaningful when
-   perUser arrives as a partial third layer without touching this call site.
+/* Settings load entry point: probes the native ThemeSettingsAPI
+   (settings-transport.js) and routes to it when the running core supports
+   it, falling back to the legacy uservariable transport otherwise. Name
+   kept: theme-hub.js and reconcileDomoticzSettingsInPlace call this. */
+function checkUserVariableThemeSettings() {
+    return dzProbeThemeSettingsAPI().then(function(capable) {
+        if (!capable) return checkUserVariableThemeSettingsLegacy();
+        return dzApiLoad().then(function(outcome) {
+            if (outcome === DZ_LOAD_EMPTY) return dzSeedFromLegacyIfPossible(); /* Task 4 */
+            return undefined; /* LOADED: dzApiLoad already merged onto theme and cached. FAILED: fail closed, no writes. */
+        });
+    });
+}
+
+/* Legacy uservariable load, resolved as the specced ordered overlay layers:
+   what painted (defaults or cache) <- stored uservariable snapshot <-
+   per-user (null; per-user storage for cores without the native API never
+   shipped, so this third layer stays permanently null here -- the native
+   transport above is what actually carries per-user data now). The overlay
+   call is readiness scaffolding kept for cores without the API: today's
+   transport appliers fully populate theme from the stored vars, so stored
+   has no gaps for defaults to fill and the merge is a functional no-op.
    Keeps the localStorage cache write and the genuine first-visit seed.
    Fail closed: dzThemeSettingsLoad returns a tri-state so a transient failure
    (DZ_LOAD_FAILED) leaves the theme object exactly as it painted and writes
-   NOTHING; only a real success-but-empty (DZ_LOAD_EMPTY) seeds. Name kept:
-   theme-hub.js and reconcileDomoticzSettingsInPlace call this. */
-function checkUserVariableThemeSettings() {
+   NOTHING; only a real success-but-empty (DZ_LOAD_EMPTY) seeds. */
+function checkUserVariableThemeSettingsLegacy() {
     var defaults = dzSettingsSnapshot(theme);
     return dzThemeSettingsLoad().then(function(outcome) {
         if (outcome === DZ_LOAD_LOADED) {
