@@ -17,47 +17,58 @@
    inside it (the same way it wiped the injected Setup tabs), but it never
    touches DOM outside its own view, so a sibling survives.
 
-   The single menu insertion feeds BOTH surfaces at once: it shows in the Setup
-   dropdown AND, because js/settings_page.js builds its tile grid from the very
-   same ul at click time, as a tile in the custom_settings_menu grid. No second
-   registration. The tile's icon is wired in settings_page.js (LABEL_ICONS,
-   keyed by the entry's data-i18n label, since this entry has no href to key on).
+   TWO menu insertions feed the hub: the Setup-dropdown entry (admin-only,
+   li[has-permission='Admin']) and the Other-dropdown entry (logged-in
+   non-admin, li[has-login-no-admin]) -- core hides each dropdown for the
+   sessions that should not see it (zero theme code, the directives in
+   app.permissions.js), so between the two every session that can reach the
+   hub gets exactly one visible way in. The Setup entry ALSO feeds the tile
+   grid: js/settings_page.js builds custom_settings_menu from the very same
+   ul at click time, so no second registration is needed there. The tile's
+   icon is wired in settings_page.js (LABEL_ICONS, keyed by the entry's
+   data-i18n label, since the tile-builder's normal href-keyed icon lookup is
+   bypassed for this entry -- see the onclick-precedence note in
+   settings_page.js buildTile).
 
-   FAIL CLOSED (card-enhancement rule): if the Setup menu ul is not present, log
-   a structured warning and add NO entry, never a broken one. */
+   ENTRY LINK POLICY (Task 6/9 review, binding): both entries carry
+   href="#/Theme" UNCONDITIONALLY, set at insertion time, plus the onclick
+   attribute calling dzOpenThemeHub() (unchanged: the one open path, kept for
+   settings_page.js to harvest onto the tile verbatim). A click listener
+   preventDefaults the href ONLY when window.dzRoutesActive is false: with
+   real routes the href is left to navigate normally, so the entry behaves
+   like a real link (middle-click, copy link address, ctrl-click all work)
+   and converges with dzOpenThemeHub()'s own location.hash write; without
+   routes there is no #/Theme route to land the href on (core's .otherwise
+   would redirect to Dashboard), so the href is blocked there and
+   dzOpenThemeHub() alone builds the fallback hub.
+
+   FAIL CLOSED (card-enhancement rule): if either target ul is not present,
+   log a structured warning and add NO entry for it, never a broken one. */
 
 var DZ_HUB_ID = "dz-theme-hub";
 var DZ_HUB_MENU_ID = "dzThemeHubMenu";
+var DZ_HUB_MENU_OTHER_ID = "dzThemeHubMenuOther";
 var DZ_HUB_LABEL = "Theme"; // data-i18n key; settings_page.js LABEL_ICONS keys the tile on this
 var dzHubActiveGroup = null;
 
-/* Insert the single Setup-menu <li> that opens the hub. Idempotent (re-arm safe)
-   and fail-closed: no ul -> structured warning, no entry. Mirrors
-   js/custom_page.js: an <a class="lcursor"> with NO href, an <img> icon, and a
-   <span> label. settings_page.js harvests this li (anchor + onclick) into a
-   grid tile automatically.
-
-   NO href in either mode, on purpose. dzOpenThemeHub() already routes when the
-   routes are live, and it is the one open path; an href would have to be decided
-   at insertion time, which is too early to know (the navbar markup is static, so
-   this runs long before Angular has booted and set dzRoutesActive), and an
-   href="#/Theme" left over in fallback mode would route to .otherwise ->
-   Dashboard. */
-function dzInsertHubMenuEntry() {
-    var ul = document.querySelector("#appnavbar li[has-permission='Admin'] > ul");
-    if (!ul) {
-        console.warn("machinon_theme_hub", "setup_menu_ul_absent", "no #appnavbar Admin ul; hub entry not added (fail closed)");
-        return;
-    }
-    if (document.getElementById(DZ_HUB_MENU_ID)) return;
-
+/* Shared <li> builder for both hub menu entries: identical anchor markup
+   (icon, label, href, onclick), differing only in id. See the ENTRY LINK
+   POLICY note above for the href/onclick/preventDefault contract. Mirrors
+   js/custom_page.js: an <a class="lcursor">, an <img> icon, and a <span>
+   label. settings_page.js harvests the Setup entry's anchor (href + onclick)
+   into a grid tile automatically. */
+function dzBuildHubMenuLi(id) {
     var li = document.createElement("li");
-    li.id = DZ_HUB_MENU_ID;
-    // onclick (attribute, not just a bound handler) so settings_page.js harvestMenu
-    // copies it verbatim onto the grid tile; the tile then opens the hub too.
+    li.id = id;
     var a = document.createElement("a");
     a.className = "lcursor";
+    a.setAttribute("href", "#/Theme");
+    // onclick (attribute, not just a bound handler) so settings_page.js harvestMenu
+    // copies it verbatim onto the grid tile; the tile then opens the hub too.
     a.setAttribute("onclick", "dzOpenThemeHub()");
+    a.addEventListener("click", function (event) {
+        if (!window.dzRoutesActive) event.preventDefault();
+    });
     var img = document.createElement("img");
     img.src = "images/settings/paint-palette.png";
     var span = document.createElement("span");
@@ -67,6 +78,20 @@ function dzInsertHubMenuEntry() {
     a.appendChild(document.createTextNode(" "));
     a.appendChild(span);
     li.appendChild(a);
+    return li;
+}
+
+/* Insert the Setup-dropdown <li> that opens the hub. Idempotent (re-arm safe)
+   and fail-closed: no ul -> structured warning, no entry. */
+function dzInsertHubMenuEntry() {
+    var ul = document.querySelector("#appnavbar li[has-permission='Admin'] > ul");
+    if (!ul) {
+        console.warn("machinon_theme_hub", "setup_menu_ul_absent", "no #appnavbar Admin ul; hub entry not added (fail closed)");
+        return;
+    }
+    if (document.getElementById(DZ_HUB_MENU_ID)) return;
+
+    var li = dzBuildHubMenuLi(DZ_HUB_MENU_ID);
 
     // Position the entry next to core's "Settings" item (index.html:1301,
     // li#mSetup / a[href="#Setup"] / span[data-i18n="Settings"]). FAIL CLOSED: if
@@ -84,15 +109,54 @@ function dzInsertHubMenuEntry() {
     dzHubSyncMenuActive();
 }
 
-/* The entry is injected after core compiled the navbar, so it has no ng-class of
-   its own: mirror core's ng-class="{'current_page_item':getClass('/Theme')}" by
-   hand while the hub route is open. Same prefix test core's getClass uses, so
-   #/Theme/colors highlights the entry too. No-op without routes, where the hub
-   has no hash to key on. */
+/* Insert the Other-dropdown <li> that opens the hub, for logged-in
+   non-admin users (core's has-login-no-admin directive, app.permissions.js,
+   hides the whole dropdown for admin and no-login sessions with zero theme
+   code, so this entry is admin-invisible for free). Idempotent and
+   fail-closed like dzInsertHubMenuEntry.
+
+   Anchor ONLY on the [has-login-no-admin] container, never on a child id:
+   core repeats #mProfile/#dLogoutSetup/#mLogoutSetup verbatim inside BOTH
+   this ul and the Setup ul (index.html), so a child-id selector run against
+   `document` would silently match whichever menu happens to come first,
+   not necessarily this one. `ul.querySelector` below is scoped to this ul's
+   own subtree, so the duplicate ids elsewhere in the document cannot leak
+   in. */
+function dzInsertHubMenuEntryOther() {
+    var ul = document.querySelector("#appnavbar li[has-login-no-admin] > ul");
+    if (!ul) {
+        console.warn("machinon_theme_hub", "other_menu_ul_absent", "no #appnavbar has-login-no-admin ul; hub entry not added (fail closed)");
+        return;
+    }
+    if (document.getElementById(DZ_HUB_MENU_OTHER_ID)) return;
+
+    var li = dzBuildHubMenuLi(DZ_HUB_MENU_OTHER_ID);
+
+    // Sit above the logout divider when present; append otherwise (no fail
+    // closed here, the divider is a placement nicety, not a correctness
+    // requirement the way the Setup entry's Settings anchor is).
+    var logoutDivider = ul.querySelector("#dLogoutSetup");
+    if (logoutDivider && logoutDivider.parentNode === ul) {
+        ul.insertBefore(li, logoutDivider);
+    } else {
+        ul.appendChild(li);
+    }
+    dzHubSyncMenuActive();
+}
+
+/* Neither entry has an ng-class of its own: they are injected after core
+   compiled the navbar, so mirror core's
+   ng-class="{'current_page_item':getClass('/Theme')}" by hand on both while
+   the hub route is open. Same prefix test core's getClass uses, so
+   #/Theme/colors highlights the entries too. No-op without routes, where the
+   hub has no hash to key on. */
 function dzHubSyncMenuActive() {
     if (!window.dzRoutesActive) return;
-    var li = document.getElementById(DZ_HUB_MENU_ID);
-    if (li) li.classList.toggle("current_page_item", location.hash.indexOf("#/Theme") === 0);
+    var onHub = location.hash.indexOf("#/Theme") === 0;
+    [DZ_HUB_MENU_ID, DZ_HUB_MENU_OTHER_ID].forEach(function (id) {
+        var li = document.getElementById(id);
+        if (li) li.classList.toggle("current_page_item", onHub);
+    });
 }
 
 /* Build the hub shell from THEME_MANIFEST: an underlined-tab bar (one tab per
@@ -1391,15 +1455,17 @@ function dzMaybeReopenHub() {
     reschedule();
 }
 
-/* Wire the menu entry once the navbar has rendered. whenElementRenders (page.js)
-   runs the callback immediately if the ul is already present, or when it renders,
-   with no long-lived polling. */
+/* Wire both menu entries once their navbar ul has rendered. whenElementRenders
+   (page.js) runs the callback immediately if the ul is already present, or
+   when it renders, with no long-lived polling; each entry re-arms under its
+   own key so the two waiters never collide. */
 (function dzThemeHubInit() {
     if (typeof whenElementRenders === "function") {
         whenElementRenders("dzThemeHubMenu", "#appnavbar li[has-permission='Admin'] > ul", dzInsertHubMenuEntry);
+        whenElementRenders("dzThemeHubMenuOther", "#appnavbar li[has-login-no-admin] > ul", dzInsertHubMenuEntryOther);
     } else {
         // page.js not loaded yet in some ordering; try on DOM ready as a fallback.
-        if (window.jQuery) jQuery(dzInsertHubMenuEntry);
+        if (window.jQuery) jQuery(function () { dzInsertHubMenuEntry(); dzInsertHubMenuEntryOther(); });
     }
     // Keep the menu entry's highlight in step with the hash. Registered
     // unconditionally: at this point Angular may not have booted yet, so

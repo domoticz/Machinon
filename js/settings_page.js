@@ -42,8 +42,9 @@ if (mSettings.length > 0) {
         "Data push": "contact.png",
         "Check for Update": "update.png",
         "SecurityPanel": "security.png",
-        // Theme hub (src/js/theme-hub.js): the hub menu <li> has no href to key
-        // on (an href would route through Angular), so its tile keys on the label.
+        // Theme hub (src/js/theme-hub.js): the hub menu <li> carries an href
+        // ("#/Theme") but buildTile below keys the tile on onclick instead (its
+        // href is Angular-routed, not in TILE_ICONS), so this keys on the label.
         "Theme": "paint-palette.png"
     };
     const DEFAULT_ICON = "setup.png";
@@ -102,11 +103,20 @@ if (mSettings.length > 0) {
         const li = $("<li>", { "class": "rectangle-8" });
         $("<img>", { src: "images/settings/" + tileIcon(entry) }).appendTo(li);
         appendLabel(li, entry.label, "machinoText");
-        if (entry.href) {
-            li.attr("data-target", entry.href);
-        } else {
+        // onclick takes precedence over href when an entry carries both (only the
+        // Theme hub entry does, src/js/theme-hub.js ENTRY LINK POLICY): its href
+        // is mode-dependent (only a real route once Angular's routes are live),
+        // while onclick="dzOpenThemeHub()" is the one open path that already
+        // knows which mode it is in, so the tile must go through it too instead
+        // of navigating the href directly (that would 404 into core's .otherwise
+        // -> Dashboard redirect whenever routes are not live). Every other entry
+        // still carries exactly one of the two, so this is behavior-preserving
+        // for them.
+        if (entry.onclick) {
             // Copied verbatim from core's own anchor markup (Check for Update), not built here.
             li.attr("onclick", entry.onclick);
+        } else if (entry.href) {
+            li.attr("data-target", entry.href);
         }
         return li;
     }
