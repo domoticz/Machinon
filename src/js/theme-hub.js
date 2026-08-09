@@ -33,13 +33,15 @@
    ENTRY LINK POLICY (Task 6/9 review, binding): both entries carry
    href="#/Theme" UNCONDITIONALLY, set at insertion time, plus the onclick
    attribute calling dzOpenThemeHub() (unchanged: the one open path, kept for
-   settings_page.js to harvest onto the tile verbatim). A click listener
-   preventDefaults the href ONLY when window.dzRoutesActive is false: with
-   real routes the href is left to navigate normally, so the entry behaves
-   like a real link (middle-click, copy link address, ctrl-click all work)
-   and converges with dzOpenThemeHub()'s own location.hash write; without
-   routes there is no #/Theme route to land the href on (core's .otherwise
-   would redirect to Dashboard), so the href is blocked there and
+   settings_page.js to harvest onto the tile verbatim). A guard listener,
+   bound to BOTH "click" and "auxclick" (a real middle-click fires auxclick,
+   not click, in every modern browser), preventDefaults the href ONLY when
+   window.dzRoutesActive is false: with real routes the href is left to
+   navigate normally, so the entry behaves like a real link (middle-click,
+   copy link address, ctrl-click all work) and converges with
+   dzOpenThemeHub()'s own location.hash write; without routes there is no
+   #/Theme route to land the href on (core's .otherwise would redirect to
+   Dashboard), so the href is blocked there, on either event, and
    dzOpenThemeHub() alone builds the fallback hub.
 
    FAIL CLOSED (card-enhancement rule): if either target ul is not present,
@@ -66,9 +68,17 @@ function dzBuildHubMenuLi(id) {
     // onclick (attribute, not just a bound handler) so settings_page.js harvestMenu
     // copies it verbatim onto the grid tile; the tile then opens the hub too.
     a.setAttribute("onclick", "dzOpenThemeHub()");
-    a.addEventListener("click", function (event) {
+    // "click" alone misses a real middle-click: modern browsers fire "auxclick"
+    // for button 1 (middle) and 2 (right), not "click", so a fallback-mode
+    // middle-click would otherwise open the raw href="#/Theme" in a new tab and
+    // land on Angular's .otherwise -> Dashboard, the exact thing the fallback
+    // preventDefault exists to stop. Same handler, both events, same
+    // dzRoutesActive-only gate.
+    function dzGuardHubMenuLinkClick(event) {
         if (!window.dzRoutesActive) event.preventDefault();
-    });
+    }
+    a.addEventListener("click", dzGuardHubMenuLinkClick);
+    a.addEventListener("auxclick", dzGuardHubMenuLinkClick);
     var img = document.createElement("img");
     img.src = "images/settings/paint-palette.png";
     var span = document.createElement("span");
