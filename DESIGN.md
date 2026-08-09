@@ -291,19 +291,21 @@ the same edit, or record the difference as a gap.
 > user presets and hand-picked customs are contrast-checked at save time
 > (schemeContrastFailures: body/secondary 4.5, on-accent 3.0) with a warning, never silently.
 >
-> **Settings persistence** runs through a transport seam (`src/js/settings-transport.js`):
-> every read and write of theme preferences passes through it and lands in three theme user
-> variables (`theme-<folder>-features`, `theme-<folder>-custom`, `theme-<folder>-colors`).
-> These are isolated from Domoticz core preferences and cannot clobber them. Card min/max
-> widths now persist too, appended to the custom array at positions 10 and 11; before the seam
-> they were cache-only and reset to the token default (320px) on a cold reload. Consumers
-> resolve settings through `dzMergeSettingsLayers(defaults, stored, perUser)` carrying a
-> `schemaVersion` of 1; the per-user layer is scaffolding for per-user readiness (FR #6907)
-> and is a functional no-op on today's load path (`perUser` is null until Domoticz core ships
-> per-user storage, at which point it becomes a third layer here without touching callers).
-> Native `ThemeSettings` storage was evaluated and rejected: the core `storesettings` command
-> rewrites the whole settings form and blanks any preference absent from the payload
-> (see `dz-themesettings-probe.js`), so the user variables were kept.
+> **Settings persistence** runs through a transport seam (`src/js/settings-transport.js`),
+> layered on Domoticz core's native `ThemeSettings` API where the core reports
+> `ThemeSettingsAPI: 1`: a shared instance (house) layer and a per-user layer, merged onto the
+> theme object on load and split by a `"user"`/`"house"` scope carried on every settings-manifest
+> entry (`src/js/theme-manifest.js`). A core without the native API falls back to the original
+> three theme user variables (`theme-<folder>-features`, `theme-<folder>-custom`,
+> `theme-<folder>-colors`, isolated from core preferences, read/written through
+> `dzThemeSettingsLoad`/`dzThemeSettingsSave`), and a one-time migration seeds the native
+> instance layer from them the first time a capable core boots. Card min/max widths persist
+> appended to the legacy custom array at positions 10 and 11; before the transport seam they
+> were cache-only and reset to the token default (320px) on a cold reload. The legacy
+> transport's own load still resolves through `dzMergeSettingsLayers(defaults, stored, null)`
+> (`schemaVersion` 1, `perUser` always null there; real per-user differentiation lives in the
+> native transport's two layers instead). See [Settings storage](#theme-hub) under Theme Hub
+> for the full two-layer model, the scope rule, and the reachability/UI contract.
 >
 > Machinon publishes the `--dz-*` token names that Domoticz core's globally-linked stylesheets
 > (`css/dashboard.css`, `css/style.css`) consume. It deliberately does not import core's
@@ -2030,6 +2032,116 @@ seam-stored value maps to exactly one manifest entry (or a `control:"custom"` ho
 `dz-mobile-layout-census.js`'s mobile-polish census opens the hub as one of its standing
 surfaces (one `ThemeHub*` entry per group, both viewports), so a future setting or group is
 measured for overlap/squash/occlusion/overflow the same as every other page, never exempted.
+
+#### Settings storage
+
+**Two-layer model.** Theme settings resolve through Domoticz core's native `ThemeSettings` API
+(`ThemeSettingsAPI: 1`, core `WebServerCmds.cpp` `Cmd_ThemeSettingsGet/Set/SetDefault`), read
+and written entirely through `src/js/settings-transport.js`. Two server-side rows exist per
+theme: an **instance layer** (`themesettings_setdefault`, one shared row for the whole
+Domoticz instance, the house defaults) and a **per-user layer** (`themesettings_set`, one row
+per logged-in identity). `dzApiLoad()` reads both and applies them onto the in-memory `theme`
+object, instance then user, so a personal override always wins over the shared default for the
+keys it is allowed to touch.
+
+**Scope rule.** Not every setting may live in the per-user layer. Every manifest entry
+(`src/js/theme-manifest.js`) and every snapshot-only extra (`DZ_SCOPE_EXTRAS`) carries a scope
+of `"user"` or `"house"`, resolved through `dzSettingScope()`, never read off `entry.scope`
+directly. The rule, verbatim from the manifest's own header comment:
+
+> per-user = anything that only changes how your own browser renders; house = shared content,
+> branding, infrastructure, and per-device data.
+
+`dzSnapshotSubset(snap, "user")` enforces this structurally: a per-user write can only ever
+carry `"user"`-scoped keys, so a house key cannot be overridden per user even by a bug.
+`dz-themesettings-contract.js` asserts the split live against the running theme.
+
+**The 29/9 split.** Every persisted key falls into exactly one scope:
+
+| Manifest group | User-scope keys (29 total) | House-scope keys (9 total) |
+|---|---|---|
+| General | `standby`, `standby_after`, `check_update`, `notification`, `center_popups`, `footer_text_disabled` | |
+| Menus and navbar | `custom_settings_menu`, `navbar_icons`, `navbar_icons_text`, `sidemenu` | `custom_page_menu`, `button_name`, `custom_url` |
+| Dashboard | `dashboard_show_last_update`, `dashboard_columns` | `dashboard_camera`, `dashboard_camera_refresh`, `dashboard_camera_section` |
+| Device cards | `time_ago`, `fade_off_items`, `switch_instead_of_bigtext`, `switch_instead_of_bigtext_scenes`, `wind_direction`, `icon_image`, `card_min_width`, `card_max_width` | |
+| Charts and log | `log_plot_bands` | |
+| Background and branding | `background_img`, `background_type` | `logo`, `hide_logo` |
+| Colors and schemes | `scheme`, `custom_color_scheme` | |
+| Snapshot-only extras (no manifest row) | `scheme_base`, `color_scheme`, `user_schemes`, `dark_theme` | `icons` |
+
+House data is shared content, branding, infrastructure, and per-device state (the custom menu
+page, dashboard camera wiring, the logo, and the per-device icon list): things that describe
+the house, not the person looking at it. Everything else, including which color scheme you
+picked and how wide you like your cards, is yours alone.
+
+**Promote and reset.** Three actions on the About tab's Maintenance block manage the two
+layers directly, each behind a confirm (`dzHubConfirm`) and each gated on `dzSettingsMode()`
+(`{api, perUser, admin, noIdentity}`), rendered only in native-API mode:
+
+- **"Save my current preferences as house defaults"** (`dzHubPromote` -> `dzApiPromote()`,
+  visible only when `admin && perUser`) copies the admin's own personal settings over the
+  house defaults. Needs both: with no personal layer at all, the session's settings already
+  *are* the house defaults (see PerUser-false collapse below), so promoting would be a no-op.
+- **"Reset my personal settings"** (`dzHubResetMine` -> `dzApiResetUser()`, visible when
+  `perUser`) deletes the caller's personal row; the session falls back to the house defaults.
+- **"Reset the house defaults"** (`dzHubResetHouse` -> `dzApiResetHouse()`, visible when
+  `admin`) deletes the shared instance row, resetting it to theme.json factory values.
+  Personal settings of other users are untouched.
+
+"Reset theme to defaults" (`dzHubDoResetTheme`), unlike the three above, is mode-aware rather
+than mode-gated: it resets every native layer this identity can reach (house when admin,
+personal when `perUser`) and only then clears the localStorage cache and reloads, so a partial
+failure (already warned by `dzApiFail`) never masquerades as a clean reset.
+
+**PerUser-false collapse.** A shared, non-differentiated session (this rig's default primary
+instance under `-nowwwpwd`, or any core that resolves every request to the same identity)
+reports `dzSettingsMode().perUser === false`. `dzApiSaveSettings()` takes its single-layer
+branch there, writing only the instance row; the house-scope indicator's own render condition
+(`entry.scope === "house" && dzSettingsMode().perUser`, `theme-hub.js`) never fires, so no
+house chip and no locked row ever appear. The hub collapses to behave exactly like the legacy
+single-shared-settings page: every row editable by whoever can reach it, since there is no
+second layer to distinguish a personal setting from a shared one.
+
+**Legacy fallback and seed-once migration.** `dzProbeThemeSettingsAPI()` checks `getversion`
+for `ThemeSettingsAPI: 1`. When the core lacks it (or the probe fails), `dzSettingsMode().api`
+is false and every read/write routes through the original uservariable transport
+(`dzThemeSettingsLoad`/`dzThemeSettingsSave`, the three `theme-<folder>-features/-custom/-colors`
+variables), unchanged from before this migration. On a capable core, `dzSeedFromLegacyIfPossible()`
+runs once per cold boot for a session that may write the instance layer: if the native instance
+row is empty (`DZ_LOAD_EMPTY`) but the three legacy variables exist, it loads them through the
+legacy transport, snapshots the resulting `theme` object, and writes that snapshot into the
+instance layer (`dzApiWriteInstanceFull`). The three legacy variables are left in place,
+unchanged, frozen: a core rolled back to a version without the native API still finds them
+intact and boots from them exactly as before the migration. The migration is idempotent: once
+the instance row exists, `dzApiLoad()` reports `DZ_LOAD_LOADED` on every later boot and the
+seed step never runs again.
+
+**Reachability.** Two menu entries feed one hub, so every session that can reach it gets
+exactly one visible way in. `dzInsertHubMenuEntry()` inserts `<li id="dzThemeHubMenu">`
+immediately after the Settings item inside `#appnavbar li[has-permission='Admin'] > ul` (the
+Setup dropdown, admin-only; core hides it from everyone else with zero theme code). `dzInsertHubMenuEntryOther()`
+inserts `<li id="dzThemeHubMenuOther">` into `#appnavbar li[has-login-no-admin] > ul` (the
+Other dropdown, shown only to a logged-in non-admin). Both anchors carry the identical
+`href="#/Theme"` plus `onclick="dzOpenThemeHub()"` markup. With real Angular routes active
+(`window.dzRoutesActive`, `dzRegisterThemeRoutes` in `custom.js`), `#/Theme` and `#/Theme/:tab`
+are registered routes rendering the hub inside core's own `ng-view`; the `:tab` segment
+deep-links straight to a manifest group (e.g. `#/Theme/colors`) via `dzMountThemeHubIn`.
+`#/SetupMenu`, the routed settings tile grid, is gated `permission: "Admin"` at the route
+table itself, so the admin-only surface stays admin-only even reached by a direct URL, not
+only through the hidden menu entry.
+
+**House chip and locked rows.** A per-user row for a house-scope setting renders a
+`.dz-hub-chip-house` pill next to its label (`theme-hub.js` `dzRenderHubRow`, only while
+`dzSettingsMode().perUser` is true): 11px semibold text (`--dz-text-micro` /
+`--dz-weight-semibold`), an accent-colored 1px outline (`border: 1px solid var(--dz-accent-color)`)
+rather than the accent-filled `.dz-hub-tag` pill it sits beside, same pill radius
+(`var(--dz-btn-radius)`), body-text color (`css/theme-hub.css`). A non-admin session additionally
+gets `.dz-hub-row-locked` on the row (`opacity: 0.5`, `.dz-hub-row-locked .dz-hub-control { pointer-events: none; }`)
+and its control's native `disabled` attribute set, so a house row is visibly distinct and
+provably inert for anyone who cannot write the house layer. The same `.dz-hub-row-locked`
+class (hub-wide, every row) is reused by `dzHubApplyNoIdentityLock()` the first time a write
+fails `no_identity` (an application-token session with no Users row to attach a personal layer
+to), paired with a one-time `.dz-hub-no-identity-note` banner at the top of the About tab.
 
 #### Icon Packs
 
