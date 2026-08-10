@@ -166,7 +166,12 @@ if (mSettings.length > 0) {
         $("body").css("overflow", "auto");
         $(host).append('<div id="machinoSettings" class="container-fluid">');
         $("#machinoSettings").append('<ul class="mHeaderBtn">').append('<div class="page-header-small"><h1 data-i18n="Settings">Settings</h2></div>').append('<ul class="machinon_ul">');
-        $("#machinoSettings ul.mHeaderBtn").append('<li class="btn btn-danger" onclick="javascript:SwitchLayout(\'Restart\')"><i class="ion-ios-refresh"></i><div data-i18n="Restart System">Restart System</div></li><li class="btn btn-danger" onclick="javascript:SwitchLayout(\'Shutdown\')"><i class="ion-ios-power"></i><div data-i18n="Shutdown System">Shutdown System</div></li><li class="btn btn-danger" onclick="location.href=\'#Logout\'"><i class="ion-ios-log-out"></i><div data-i18n="Logout">Logout</div></li>');
+        // Logout's onclick is a static string, not a harvested entry.href, so it
+        // can't run through normalizeRouteHash() above; written pre-normalized by
+        // hand instead ("#/Logout", not core's bare "#Logout") for the same reason:
+        // /Logout is a registered Angular route, and the bare form desyncs from it
+        // the same way #Devices did (see normalizeRouteHash's comment).
+        $("#machinoSettings ul.mHeaderBtn").append('<li class="btn btn-danger" onclick="javascript:SwitchLayout(\'Restart\')"><i class="ion-ios-refresh"></i><div data-i18n="Restart System">Restart System</div></li><li class="btn btn-danger" onclick="javascript:SwitchLayout(\'Shutdown\')"><i class="ion-ios-power"></i><div data-i18n="Shutdown System">Shutdown System</div></li><li class="btn btn-danger" onclick="location.href=\'#/Logout\'"><i class="ion-ios-log-out"></i><div data-i18n="Logout">Logout</div></li>');
 
         const grid = $("#machinoSettings ul.machinon_ul");
         harvestMenu(mSettings.children("ul")).forEach(function (entry) {
