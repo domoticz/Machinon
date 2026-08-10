@@ -7,7 +7,11 @@
 #
 # Three rule classes:
 #   (a) color properties (background/background-color/color/border[-side]-color) carry
-#       no raw hex or rgb()/rgba() literal, unless marked dz-menu-exception.
+#       no raw hex or rgb()/rgba() literal, unless marked dz-menu-exception. Each
+#       declaration is assembled across however many physical lines it spans before
+#       being checked (fix round 1, 2026-08-10), so a wrapped value can't bypass the
+#       rule by putting the literal on a continuation line - the same paren-depth
+#       assembler rule (b) uses for box-shadow.
 #   (b) every box-shadow layer references var(--dz- (mirrors check-shadows.sh's
 #       per-layer comma-aware parser, scoped to these 3 files), unless marked
 #       dz-menu-exception.
@@ -161,27 +165,45 @@ for f in $files; do
   }
 
   # --- Rule (a): color properties, no raw hex/rgb(a) literal -----------------------
-  # Scoped to the properties the --dz-menu-* family actually governs (surface bg/text/
-  # border), NOT "fill" (SVG, Blockly-only) or "scrollbar-color" (browser chrome, no
-  # --dz-menu-* equivalent) - those never trip this rule and carry no marker.
-  color_props="background-color|background|color|border-color|border-top-color|border-right-color|border-bottom-color|border-left-color|border"
-  decls=$(printf '%s\n' "${stripped[@]}" | grep -niE "(^|[;{[:space:]])($color_props)[[:space:]]*:")
-  if [ -n "$decls" ]; then
-    while IFS=: read -r idx rest; do
-      # grep -n against the array (1-indexed) already gives the array position, which
-      # equals the line number since stripped has one entry per source line.
-      ln=$idx
-      value=$(printf '%s' "$rest" | cut -d: -f2- | sed 's/!important.*//; s/;.*//')
+  # Assembled per property via assemble_declarations, same as rule (b) below: a
+  # declaration wrapped across physical lines (e.g. a linear-gradient() with hex
+  # stops on a continuation line) is validated as one logical unit, not just the
+  # single line carrying the property name - fix round 1 (2026-08-10), the gap
+  # check-shadows.sh already closed for box-shadow. assemble_declarations matches
+  # the property name literally then requires the next non-space char to be ":", so
+  # scanning for "background" alone cannot false-positive on "background-color:"
+  # (the char right after "background" there is "-", not ":"), and likewise
+  # "border" alone cannot false-positive on any "border-*-color:" longhand -
+  # querying each property separately is safe. Scoped to the properties the
+  # --dz-menu-* family actually governs (surface bg/text/border), NOT "fill" (SVG,
+  # Blockly-only) or "scrollbar-color" (browser chrome, no --dz-menu-* equivalent) -
+  # those never trip this rule and carry no marker.
+  color_props=(background-color background color border-color border-top-color border-right-color border-bottom-color border-left-color border)
+  for prop in "${color_props[@]}"; do
+    decls=$(printf '%s\n' "${stripped[@]}" | assemble_declarations "$prop")
+    [ -z "$decls" ] && continue
+    while IFS=$'\t' read -r startline rawvalue; do
+      [ -z "$startline" ] && continue
+      case "$rawvalue" in
+        __UNTERMINATED__*)
+          echo "FAIL $f:$startline cannot parse $prop declaration (no terminating ;): use a token or a dz-menu-exception marker"
+          fail=1
+          continue
+          ;;
+      esac
+      value=$(printf '%s' "$rawvalue" | sed 's/!important.*//')
+      trimmed=$(printf '%s' "$value" | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//; s/[[:space:]]+/ /g')
+      [ -z "$trimmed" ] && continue
       # Hex literal, or rgb()/rgba() whose first argument is numeric (a var()-composed
       # value like "rgba(var(--dz-accent-values), 0.15)" has "var(" as the first
       # argument, not a digit, and correctly does not match).
-      if [[ "$value" =~ \#[0-9a-fA-F]{3,8}([^0-9a-fA-F]|$) ]] || [[ "$value" =~ rgba?\([[:space:]]*[0-9] ]]; then
-        has_marker "$ln" && continue
+      if [[ "$trimmed" =~ \#[0-9a-fA-F]{3,8}([^0-9a-fA-F]|$) ]] || [[ "$trimmed" =~ rgba?\([[:space:]]*[0-9] ]]; then
+        has_marker "$startline" && continue
         fail=1
-        echo "FAIL $f:$ln raw color literal: $(printf '%s' "$rest" | cut -d: -f2- | sed -E 's/^[[:space:]]+|;[[:space:]]*$//g')"
+        echo "FAIL $f:$startline raw color literal ($prop): $trimmed"
       fi
     done <<< "$decls"
-  fi
+  done
 
   # --- Rule (b): box-shadow layers reference var(--dz- ------------------------------
   decls=$(printf '%s\n' "${stripped[@]}" | assemble_declarations "box-shadow")
