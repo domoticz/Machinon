@@ -695,17 +695,17 @@ table.mobileitem td.name {
        right-anchored) - contradicting the DESIGN.md-documented stair-step
        silhouette and the shell-fill mechanism the owner had already
        rejected three times in the original selector-segmented pass. Fixed
-       for real via `js/devices.js` (retagSelectorWrapCorners): JS is the
-       only thing that can know which button is actually first/last WITHIN
-       a wrapped row (no CSS selector expresses that - the wrap-row comment
-       above documents the same limit for the vertical seam), so it tags
-       exactly those two buttons with data-wrap-corner-tr/-bl, and the two
-       rules right below this one apply the family radius to the tagged
-       corner ONLY - never to empty bounding-box space, keeping the
-       stair-step reading the design calls for. !important still beats the
-       #type .btn-group / .input .btn-group overflow-x:auto rule below (an
-       ID selector, predates this shell, still serves other .btn-group
-       contexts, untouched). */
+       for real via `src/js/devices.js` (retagSelectorWrapCorners): JS is
+       the only thing that can know which button is actually first/last
+       WITHIN a wrapped row (no CSS selector expresses that - the wrap-row
+       comment above documents the same limit for the vertical seam), so
+       it tags the buttons that need a corner change with
+       data-wrap-corner-tr/-bl/-br, and the rules right below this one
+       apply the correct radius to the tagged corner ONLY - never to empty
+       bounding-box space, keeping the stair-step reading the design calls
+       for. !important still beats the #type .btn-group / .input
+       .btn-group overflow-x:auto rule below (an ID selector, predates
+       this shell, still serves other .btn-group contexts, untouched). */
     overflow: hidden !important;
     width: fit-content;
     max-width: 100%;
@@ -722,44 +722,70 @@ table.mobileitem td.name {
     position: relative;
 }
 
-/* Wrap-corner completion, JS-tagged (Task 12 fix round 2; see the shell
+/* Wrap-corner completion, JS-tagged (Task 12 fix rounds 2-3; see the shell
    rule's own comment above for why a pure-CSS/::after attempt was
    reverted). src/js/devices.js's retagSelectorWrapCorners measures each
-   shell's actual button rows after every render/resize and tags exactly
-   two buttons, only when a real wrap makes them true exterior corners:
-   the LAST button of the FIRST (topmost) row (data-wrap-corner-tr - this
-   is the "Auto" case the original defect was measured on) and the FIRST
-   button of the LAST (bottommost) row, but ONLY when that row's left edge
-   actually reaches the shell's own left edge (data-wrap-corner-bl - stays
-   untagged for a narrower, right-anchored last row like "Fan Only" alone,
-   which is exactly the case the reverted ::after got wrong: nothing
-   renders in that empty space now, not even a bounding-box outline).
-   Every other corner is already correct without tagging: the group's true
-   :first-child (top-left) and :last-child (bottom-right, since
-   justify-content:flex-end always right-anchors every row to the same
-   edge, so the last row's own last button is always both the visual
-   bottom-right corner AND the DOM's actual last child) are handled by the
-   existing first/last-child rules above, untouched by this round.
+   shell's actual button rows after every render/resize and tags every
+   button that sits at a true convex corner of the STAIR-STEP silhouette,
+   only when a real wrap has actually happened:
 
-   Specificity note: the attribute selector is deliberately repeated THREE
-   times, measured live, not assumed. The base selector up to `.btn`
-   (.item + .btn-group + :not(.span3 *) + .btn) is already (0,4,0); the
-   interior-reset rule two rules above this one adds two more pseudo-
-   classes (:not(:first-child):not(:last-child)) to reach (0,6,0). A
-   single repeated attribute only reaches (0,5,0) (loses outright) and
-   TWO repeats only reach (0,6,0) - an exact TIE with the interior-reset
-   rule, which then wins on source order since it is declared LATER in
-   this file (confirmed live: the radius stayed 0px at both one and two
-   attribute repeats, only resolving at three). Three repeats reach
-   (0,7,0), unambiguously outranking every corner-radius rule in this
-   file (including the single-button-row edge case, where a tagged button
-   coincides with :first-child/:last-child at (0,5,0) each), with no
-   reliance on rule order either way. */
+   - data-wrap-corner-tr on the LAST button of the FIRST (topmost) row -
+     this is the "Auto" case the original defect was measured on: always a
+     true exterior corner when wrapped, since the first row is always
+     exactly as wide as the shell itself.
+   - data-wrap-corner-bl on the FIRST button of the LAST (bottommost) row -
+     UNCONDITIONALLY when wrapped (fix round 3: an earlier version only
+     tagged this when the row's left edge reached the shell's own left
+     edge, reasoning by analogy to the reverted bounding-box overlay - that
+     guard made sense for an overlay that could paint empty space, but this
+     rule rounds a REAL BUTTON's own corner, which can never paint empty
+     space no matter where the shell's bounding box extends to, so the
+     corner is always genuinely convex here, narrower last row or not -
+     "Fan Only" alone measured 0/10/10/0 pre-fix, its own bottom-left
+     square when it should read as the control's true bottom-left-most
+     button corner).
+   - data-wrap-corner-br on the LAST button of the LAST row (always the
+     group's true :last-child too) - fix round 3: buttons.css's plain
+     :last-child rule rounds BOTH right corners unconditionally, correct
+     for the unwrapped single-row case but wrong once wrapped, where this
+     button's TOP-right is an interior seam against the row above, not an
+     exterior corner - left rounded, it pinched the joined right edge
+     inward ~10px right at the seam instead of running straight down to
+     the true bottom-right corner. The rule below forces top-right back to
+     square and restates bottom-right explicitly (still the family radius,
+     a true exterior corner, unaffected by this fix) rather than leaving
+     that property to fall through to the lower-specificity :last-child
+     rule.
+
+   The one corner that never needs tagging: the group's true :first-child
+   (top-left) is handled by the existing first-child rule above, untouched
+   by this fix, correct in both the wrapped and unwrapped case.
+
+   Specificity note: every attribute selector below is deliberately
+   repeated THREE times, measured live, not assumed. The base selector up
+   to `.btn` (.item + .btn-group + :not(.span3 *) + .btn) is already
+   (0,4,0); the interior-reset rule two rules above this one adds two more
+   pseudo-classes (:not(:first-child):not(:last-child)) to reach (0,6,0),
+   and the plain :last-child rule above reaches (0,5,0). A single repeated
+   attribute only reaches (0,5,0) (loses to the interior-reset rule
+   outright, ties :last-child) and TWO repeats only reach (0,6,0) - an
+   exact TIE with the interior-reset rule, which then wins on source order
+   since it is declared LATER in this file (confirmed live: the radius
+   stayed unfixed at both one and two attribute repeats, only resolving at
+   three). Three repeats reach (0,7,0), unambiguously outranking every
+   corner-radius rule in this file (including the single-button-last-row
+   edge case, where one button carries both -bl and -br and also
+   coincides with :last-child at (0,5,0)), with no reliance on rule order
+   either way. */
 .item .btn-group:not(.span3 *) > .btn[data-wrap-corner-tr][data-wrap-corner-tr][data-wrap-corner-tr] {
     border-top-right-radius: var(--dz-btn-radius) !important;
 }
 .item .btn-group:not(.span3 *) > .btn[data-wrap-corner-bl][data-wrap-corner-bl][data-wrap-corner-bl] {
     border-bottom-left-radius: var(--dz-btn-radius) !important;
+}
+.item .btn-group:not(.span3 *) > .btn[data-wrap-corner-br][data-wrap-corner-br][data-wrap-corner-br] {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: var(--dz-btn-radius) !important;
 }
 
 /* Margin reset, UNSCOPED (applies inside compact too) - byte-identical to

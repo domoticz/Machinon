@@ -131,46 +131,62 @@ function readSwitchStatus(item) {
    row" (flex-wrap only resets its line breaks at layout time, so there is
    nothing static to select on -- css/cards.css's own comment on the shell
    rule documents the same structural limit for its ~2px wrapped-row
-   seam), so deciding which button needs the family corner radius at a
-   wrap corner is fundamentally a JS-only question. This tags exactly the
-   two buttons that can ever be a true EXTERIOR corner after a wrap:
+   seam), so deciding which button needs which corner radius at a wrap is
+   fundamentally a JS-only question. Tags every button that sits at a true
+   convex corner of the STAIR-STEP silhouette (never the shell's bounding
+   box -- a first attempt traced the bounding box with a single ::after
+   overlay and got this exact distinction wrong, see the shell rule's own
+   comment for the full history) with the corner(s) it actually needs:
 
-   - the LAST button of the FIRST (topmost) row -- always tagged when a
-     wrap happened (this is "Auto" in the HVAC 5-level case the defect was
-     first measured on: the shell's top-right corner, always exterior
-     regardless of row width, since the first row is always exactly as
-     wide as the shell itself).
-   - the FIRST button of the LAST (bottommost) row -- tagged ONLY when
-     that row's own left edge actually reaches the shell's left edge (0).
-     A narrower, right-anchored last row (justify-content:flex-end, e.g. a
-     lone "Fan Only") leaves that corner genuinely ABSENT from the
-     control's silhouette: there is no button there at all, so nothing
-     gets tagged and nothing renders in that space. A first attempt at
-     this fix (a single ::after overlay tracing the shell's whole
-     bounding box) got exactly this case wrong -- it drew a rounded
-     rectangle border around that empty space regardless, which a
-     controller review caught (see the shell rule's own comment for the
-     full history) as visually contradicting the DESIGN.md stair-step
-     silhouette. This function never paints empty space: it only ever
-     tags a real button.
+   - the LAST button of the FIRST (topmost) row -- data-wrap-corner-tr,
+     always tagged when a wrap happened (this is "Auto" in the HVAC
+     5-level case the defect was first measured on: the shell's top-right
+     corner, always exterior regardless of row width, since the first row
+     is always exactly as wide as the shell itself).
+   - the FIRST button of the LAST (bottommost) row -- data-wrap-corner-bl,
+     always tagged when a wrap happened, UNCONDITIONALLY (round 2 fix:
+     an earlier version only tagged this when the row's own left edge
+     reached the shell's left edge, reasoning by analogy to the reverted
+     bounding-box overlay -- that guard was right for an overlay tracing
+     empty space, but wrong here: this rule rounds a REAL BUTTON's own
+     corner, which can never paint empty space regardless of where the
+     shell's bounding box happens to extend to, so the corner is always a
+     genuine convex exterior point of the silhouette whenever this button
+     is first in a wrapped row, narrower last row or not).
+   - the LAST button of the LAST (bottommost) row (always the group's true
+     :last-child too) -- data-wrap-corner-br, tagged when a wrap happened,
+     to SQUARE its top-right corner. Round 2 finding: buttons.css's plain
+     ":last-child" rule rounds BOTH right corners unconditionally (correct
+     for the unwrapped single-row case, where both really are exterior),
+     but when wrapped, this button's top-right is an INTERIOR SEAM against
+     the row above, not an exterior corner -- left rounded, it pinched the
+     joined right edge inward ~10px right at the row seam instead of
+     staying a continuous straight line down to the true bottom-right
+     corner. The css/cards.css rule this tag drives forces top-right back
+     to 0 and restates bottom-right explicitly (still the family radius,
+     still a true exterior corner, unaffected) rather than leaving that
+     property to fall through to the lower-specificity :last-child rule.
 
-   The other two corners never need tagging: the group's true :first-child
-   (top-left) and :last-child (bottom-right -- justify-content:flex-end
-   always right-anchors every row to the same edge, so the last row's own
-   last button is always both the visual bottom-right corner and the DOM's
-   actual last child) are already handled by the existing first/last-child
-   CSS rules, untouched by this function.
+   The one corner that never needs tagging: the group's true :first-child
+   (top-left) is already handled by the existing first-child CSS rule,
+   untouched by this function, in both the wrapped and unwrapped case.
 
-   FAIL CLOSED: an untagged button simply stays square (the family's
-   plain interior-button look) -- if this function never runs for some
-   reason (a code path that skips it, or a future regression), the worst
-   case is the ORIGINAL, lesser defect (a plain square corner), never the
-   reverted attempt's worse one (a rounded outline around empty space).
+   FAIL CLOSED: an untagged button simply stays at whatever buttons.css's
+   plain first/last-child/interior rules already give it -- if this
+   function never runs for some reason (a code path that skips it, or a
+   future regression), the worst case is the ORIGINAL, lesser defects (a
+   plain square top-right/bottom-left corner, or the seam pinch), never
+   the reverted overlay's worse one (a rounded outline around empty
+   space): nothing this function does can ever paint space no button
+   occupies, since every rule it drives targets an actual rendered button.
 
    Idempotent and safe to call repeatedly: clears its own tags before
    recomputing every time, so a re-run after a resize or a content change
    never leaves a stale tag on the wrong button. Called from
-   setAllDevicesFeatures (initial render + the observer's re-enhance pass)
+   setAllDevicesFeatures (initial render + the observer's re-enhance pass),
+   from initDeviceObserver's own re-enhance pass directly (wrapped in that
+   function's own try/catch idiom, so a throw here can never skip the
+   options re-apply loop or the observer's takeRecords() drain after it),
    and from armSelectorWrapCornerRetag's debounced window resize listener
    below, since wrap state depends on viewport/tile width and can change
    with no DOM mutation for the MutationObserver in initDeviceObserver to
@@ -181,7 +197,7 @@ function retagSelectorWrapCorners() {
         if ($shell.closest(".span3").length) return; // compact dashboard: css/cards.css excludes it identically
 
         var $btns = $shell.children(".btn");
-        $btns.removeAttr("data-wrap-corner-tr").removeAttr("data-wrap-corner-bl");
+        $btns.removeAttr("data-wrap-corner-tr").removeAttr("data-wrap-corner-bl").removeAttr("data-wrap-corner-br");
         if ($btns.length < 2) return;
 
         /* Group by row via offsetTop, shell-relative (the shell carries
@@ -202,11 +218,8 @@ function retagSelectorWrapCorners() {
         var lastRow = rows.get(tops[tops.length - 1]).sort(function(a, b) { return a.offsetLeft - b.offsetLeft; });
 
         firstRow[firstRow.length - 1].setAttribute("data-wrap-corner-tr", "");
-
-        var lastRowFirst = lastRow[0];
-        if (Math.abs(lastRowFirst.offsetLeft) <= 1) {
-            lastRowFirst.setAttribute("data-wrap-corner-bl", "");
-        }
+        lastRow[0].setAttribute("data-wrap-corner-bl", "");
+        lastRow[lastRow.length - 1].setAttribute("data-wrap-corner-br", "");
     });
 }
 
@@ -603,8 +616,16 @@ function initDeviceObserver() {
                        run this burst, but an ALREADY-processed selector's wrap state can
                        still have changed here (e.g. a live level-name/label update that
                        reflows without adding a new, unprocessed card) -- re-tag directly
-                       so a stale corner tag never survives a settle burst untouched. */
-                    retagSelectorWrapCorners();
+                       so a stale corner tag never survives a settle burst untouched. Same
+                       try/catch idiom as the domSettledCallbacks loop below: a throw in
+                       here must never skip the switch re-apply loop right after this
+                       block, or the observer.takeRecords() drain at the very end of this
+                       debounced handler. */
+                    try {
+                        retagSelectorWrapCorners();
+                    } catch (e) {
+                        console.warn("retagSelectorWrapCorners threw", e);
+                    }
                 }
 
                 var switchEnabled = theme.features.switch_instead_of_bigtext.enabled === true ||
