@@ -349,6 +349,7 @@ function init_theme() {
         setColorScheme();
         applyCardWidths();
         clampCorePopups();
+        armFlyoutContainment();
         setLogo();
         setSearch();
         setDevicesNativeSelectorForMobile();

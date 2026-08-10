@@ -205,11 +205,20 @@ div.menu-toggle.scrolled {
    ".dropdown-submenu > .dropdown-menu", so the same rule clipped their
    third-level flyouts: the new overflow context prevented those nested
    submenus from opening/rendered them detached from their trigger. Reverted
-   in full. KNOWN ISSUE (accepted, pending): the More options list again
-   overflows the viewport at 1440x900 and 1024x768 with no scroll or size
-   limit of its own; a real fix needs viewport-aware re-anchoring and is
-   queued with the menus-family redesign, not a blanket clamp on this
-   selector. */
+   in full.
+
+   FIXED (menus-family Task 3, 2026-08-10): the More options list overflowing
+   the viewport at 1440x900 and 1024x768 (census S2 defect,
+   reports/menu-facts.json) is resolved in src/js/page.js,
+   armFlyoutContainment(), not here. The trigger's on-screen position is
+   config-dependent (HaveUpdate, EnableTabCustom change how many items sit
+   above it), so no fixed CSS breakpoint can predict it; the fix measures the
+   actual opened position on hover and nudges the SAME "top" offset this
+   file's cascade already leaves at Bootstrap's default (0), clamped so the
+   list can never trade a bottom overflow for a top one. This selector
+   (".navbar .dropdown-submenu > .dropdown-menu") is intentionally left
+   plain: no max-height, no overflow, so nothing here can re-clip Plans/Data
+   push's own third-level flyouts the way the reverted rule above did. */
 
 .navbar .nav .current_page_item > a,
 .navbar .nav .current_page_item > a:hover,

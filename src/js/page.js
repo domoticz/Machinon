@@ -140,6 +140,49 @@ function clampCorePopups() {
     });
 }
 
+// Bootstrap 2 opens a .dropdown-submenu's nested .dropdown-menu top-aligned with its
+// trigger (bootstrap.css ".dropdown-submenu > .dropdown-menu { top: 0; left: 100%; }"),
+// with no notion of the viewport below it. Fine while the trigger sits high enough for
+// the (fixed-height) nested list to fit underneath, but Setup > "More options" sits low
+// in a tall Setup list, and its own 19-item nested list (index.html ~1305-1343, the
+// theme cannot edit this markup) runs off the bottom of the viewport regardless of
+// window height: census S2 defect, reports/menu-facts.json (menus-family Task 1) --
+// rect.bottom = 923 at BOTH 1440x900 and 1024x768, the SAME on-screen anchor with a
+// different amount of room below it at each height. A max-height clamp was tried and
+// reverted (see css/nav.css, the comment above this dropdown-menu region): scoped to
+// every ".dropdown-submenu > .dropdown-menu" it also clipped Plans/Data push's own
+// third-level flyouts, which are themselves nested ".dropdown-submenu > .dropdown-menu".
+// The trigger's on-screen position is config-dependent (HaveUpdate, EnableTabCustom
+// change how many items sit above it), so no fixed CSS breakpoint can predict it; this
+// measures the ACTUAL opened position and nudges it, the same technique
+// clampCorePopups uses above for core's raw-positioned popups, generalized to a
+// CSS-anchored submenu: adjust the same axis Bootstrap's own rule already uses (top),
+// clamped so the list never simply trades a bottom overflow for a top one -- its
+// content is fixed-height but shorter than every tested viewport, so there is always
+// room to fully resolve within that clamp. Class-toggle only where CSS truly cannot
+// know the runtime position (three dropdown-submenu triggers total: More options,
+// Plans, Data push -- selector below covers all, future submenus adopt this for free.)
+function armFlyoutContainment() {
+    document.querySelectorAll(".navbar .dropdown-submenu > a").forEach(function (trigger) {
+        var menu = trigger.nextElementSibling;
+        if (!menu || !menu.classList.contains("dropdown-menu")) return;
+        trigger.addEventListener("mouseenter", function () {
+            menu.style.top = "";
+            // Below 980px (css/sidemenu.css) every nested .dropdown-menu is forced to
+            // position:relative and renders in flow inside the mobile flyout's own
+            // scroll panel, not as a floating overlay -- a viewport-relative nudge on
+            // the CSS "top" offset does not apply to that layout; fail closed (no-op).
+            if (getComputedStyle(menu).position !== "absolute") return;
+            var r = menu.getBoundingClientRect();
+            if (!r.height) return;
+            var overflow = r.bottom - (window.innerHeight - 10);
+            if (overflow > 0) {
+                menu.style.top = -Math.min(overflow, Math.max(0, r.top - 10)) + "px";
+            }
+        });
+    });
+}
+
 function setCustomIconsPage() {
     whenElementRenders("iconsmain", "#iconsmain #fileupload", function() {
         /* Already enhanced (the old 100ms poll never stopped in this case) */
