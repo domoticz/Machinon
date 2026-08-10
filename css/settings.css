@@ -164,6 +164,50 @@ ul.machinon_ul li {
     color: var(--dz-accent-color);
 }
 
+/* Settings page density and grouping (menus-family Task 5, owner gate: C2 "grouped
+   sections"). Every Setup tab uses <h2> uniformly as its subsection heading (System's
+   "User Interface"/"Location", Notifications' per-service accordion headers, etc. -
+   confirmed by grepping every <h2> in core's views/setup.html), so one scoped rule
+   covers all 10 tabs. Was an unscaled 21px/600 (core's own h2 rule, 1.5em against the
+   14px body base); moves onto the type scale (--dz-text-md, the documented "Settings
+   panels" token) plus a fieldset-style separator + rhythm below it. Each row-fluid card
+   is already visually grouped by its own background/border (#settings .row-fluid > div
+   above); this adds the missing heading-to-fields boundary within a card, which matters
+   most where a card holds several stacked headings (System's SoftwareUpdates/
+   AutoBackup/AcceptNewHardware siblings) or an accordion header (Notifications). */
+#settingscontent h2 {
+    font-size: var(--dz-text-md);
+    font-weight: var(--dz-weight-semibold);
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--dz-menu-separator);
+    margin: 0 0 10px;
+}
+
+/* Row rhythm: every Setup tab's label|value table cells move onto the 8/10 card
+   cluster, up from an inconsistent 3px 10px (measured live, core's own table.display
+   default); horizontal padding is unchanged from that default, so this carries no
+   mobile-width risk (a 15/20 candidate was gate-rejected specifically because it did -
+   task-5-report.md Concerns). */
+#settingscontent .tab-pane td {
+    padding: 8px 10px;
+}
+
+/* Core inline-width mitigation (Security tab, LocalNetworks/reverse-proxy table): an
+   HTML table sizes every cell in a column to that column's widest constraint, and
+   core's first row in this table pins the label column to an inline style="width:60px"
+   (views/setup.html) sized for "Networks:" alone. The row-rhythm padding above did not
+   change this column's horizontal room, but the resulting taller row made the sibling
+   "Reverse proxy header:" label's PRE-EXISTING 3-line wrap (same 60px column, longer
+   text, unrelated to this task) cross dz-setup-tabs.js's squeeze-detector height
+   threshold (was 57px/3 lines under threshold, now 67px/3 lines over it). Widened just
+   this column so that label holds at 2 lines (measured live: 100px -> 53px height);
+   !important is required because the constraining declaration is an inline style,
+   always higher specificity than any external stylesheet rule regardless of selector
+   weight - the same reasoning as the pre-existing input/select override below. */
+#weblocaltable td[style*="width:60px"] {
+    width: 100px !important;
+}
+
 @media all and (max-width: 767px) {
     #machinoSettings {
         padding: 0;
@@ -303,8 +347,42 @@ ul.machinon_ul li {
         min-height: 0;
     }
 
+    /* Sub-tabs strip: single-row horizontal overflow (owner direction, menus-family
+       Task 5, 2026-08-10: "Overflow seems the better option") in place of the tall
+       stacked block core's floated <li>s wrap into at phone widths (measured live,
+       pre-fix: 149px / 4 wrapped rows at 390px). Mirrors css/theme-hub.css
+       .dz-hub-tabs verbatim in spirit: flex-nowrap row that scrolls inside its own
+       box instead of widening the page, thin themed scrollbar. flex: 0 0 auto (this
+       rule's own pre-existing sizing role, Task 4) is unaffected: #tabs is
+       simultaneously a flex ITEM in #settingscontent's outer column layout and a
+       flex CONTAINER for its own <li> children - the two roles don't conflict. */
     #settingscontent #tabs {
         flex: 0 0 auto;
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: var(--dz-accent-color) var(--dz-body-bg);
+        padding-bottom: 4px;
+    }
+
+    #settingscontent #tabs::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    #settingscontent #tabs::-webkit-scrollbar-thumb {
+        background: var(--dz-accent-color);
+        border-radius: 5px;
+    }
+
+    #settingscontent #tabs > li {
+        float: none;
+        flex: 0 0 auto;
+    }
+
+    #settingscontent #tabs > li > a {
+        white-space: nowrap;
     }
 
     #settingscontent #my-tab-content {
