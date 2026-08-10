@@ -218,7 +218,83 @@ ul.machinon_ul li {
        li.pull-right) becomes one fixed bottom bar. (The second fixed bar this
        used to coordinate with, the injected Theme tab's Reset/Save div, is
        gone: Task 8 deleted the injected tabs; theme settings live in the
-       hub.) */
+       hub.)
+
+       Viewport-fit (menus-family task 4, retargeted CTA overlap defect):
+       the fixed bar paints over whatever in-flow content happens to occupy
+       its band, including at the page's first, unscrolled paint - mobile-
+       polish task 3 measured this live (System tab's AutoBackup checkbox,
+       390x844 Galaxy S24) and parked it as an accepted exception pending a
+       CTA-positioning decision "tied to the menus-redesign track" - this is
+       that track. A broader probe (390x844, 360x780, 320x568, every Setup
+       tab, top and scrolled-to-bottom, both schemes) found the same defect
+       class on several other tabs too (Log's debug checkboxes, Notifications'
+       Test button, Energy Dashboard's icon picker), so the fix has to be
+       structural, not a one-off nudge of a single control.
+
+       Reserving trailing padding (the section:last-child rule above) cannot
+       fix this: it only adds room past the document's true end, and the
+       colliding row usually is not the last one - the collision is that the
+       fixed bar's 40px band is painted OVER whatever the normal document flow
+       put there, at ANY scroll offset including zero. The only CSS-only fix
+       that holds at every offset is to stop the tab content from ever being
+       laid out in that band at all: cap #my-tab-content to the viewport
+       height minus the chrome above it and the bar's own reserve, and let it
+       scroll internally. The chrome above (#settingscontent's top offset) is
+       50px and was measured live as WIDTH-INDEPENDENT (identical at 390, 360
+       and 320) because it is just the static navbar + banner; nothing here
+       hardcodes the sub-tabs row's OWN height, since that wraps to a
+       different number of lines per width (10 tab labels) - flex hands
+       #my-tab-content whatever is left after #tabs' natural (possibly
+       multi-line) height, so the wrap is never a magic number to keep in
+       sync. The bar's own footprint (34px button height + 5px bottom offset,
+       measured live as a 38px gap from the viewport's bottom edge to the
+       bar's top edge at all three widths) rounds up to 40px, plus 10px of
+       daylight (the theme's small spacing step) between the scroll clip edge
+       and the bar itself so no row visually touches it - 50px total.
+
+       That clip edge only stops PAINT: an overflow-clipped row's own layout
+       box still exists at full, unclipped geometry, so a geometry-only
+       overlap check (dz-mobile-layout-census.js's control-overlap check
+       included - it did not consult clip context, unlike its own viewport-
+       edge check) would still see it as intersecting the fixed bar's rect
+       even though nothing is painted there. That harness gap is fixed
+       alongside this rule (scripts/dz-mobile-layout-census.js, a new
+       verticalClipRange() helper feeding the interactive inventory the
+       overlap check reads from - the edge check's own horizontal clipRange()
+       could not be reused as-is: it applies either axis's clip to both
+       ranges, which would have wrongly vertically-clipped every control
+       inside a horizontal-scroll-only container elsewhere in the app).
+       Verified empirically (Playwright probe across 390x844/360x780/320x568,
+       every Setup tab, top and scrolled-to-bottom, both schemes; then the
+       real census): zero geometric overlaps remain. */
+    #settingscontent {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 50px - 50px);
+    }
+
+    #settings,
+    #content {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        min-height: 0;
+    }
+
+    #tabs {
+        flex: 0 0 auto;
+    }
+
+    #my-tab-content {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: var(--dz-accent-color) var(--dz-body-bg);
+    }
+
     #settings li.pull-right {
         position: fixed;
         left: 0;
