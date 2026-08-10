@@ -337,7 +337,7 @@ div.menu-toggle.scrolled {
    item only, caught live before commit (owner report). */
 .navbar .nav .current_page_item > a,
 .navbar .nav .current_page_item > a:hover {
-    background: transparent !important;
+    background: var(--dz-menu-item-active-bg) !important;
     border-color: transparent !important;
     border-bottom: 2px solid var(--dz-accent-color) !important;
     border-radius: 0 !important;
@@ -417,7 +417,7 @@ div.menu-toggle.scrolled {
    Setup-only ancestor, so submenus inherit it automatically). */
 .navbar .nav .dropdown-menu .current_page_item > a,
 .navbar .nav .dropdown-menu .current_page_item > a:hover {
-    background: transparent !important;
+    background: var(--dz-menu-item-active-bg) !important;
     border: none !important;
     border-left: 2px solid var(--dz-accent-color) !important;
     border-radius: 0 !important;

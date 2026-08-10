@@ -372,12 +372,20 @@
          border-left + accent text) consumes this token for its own
          background, keeping the "no fill" semantic explicit and the token
          alive rather than hardcoding the literal. css/nav.css's own desktop
-         current-item rule composes --dz-nav-active-bg instead of this
-         token for the SAME "no fill" semantic on a different surface (the
-         mobile flyout inherited that top-level rule's underline entirely by
-         selector accident before Task 8 - see the sidemenu.css comment); the
-         two-token split across desktop/mobile is a refine candidate, not
-         resolved here.
+         current-item rules (the top-level underline at
+         ".navbar .nav .current_page_item > a", css/nav.css:340, and the
+         dropdown-nested accent-edge at ".navbar .nav .dropdown-menu
+         .current_page_item > a", css/nav.css:420) now consume this same
+         token too, unifying the "no fill" semantic across desktop and
+         mobile instead of the two-token split noted here previously - the
+         swap is byte-neutral (the token's own value is the literal
+         "transparent" it replaced, dz-tokens.css:406). --dz-nav-active-bg /
+         --dz-nav-active-text (below) are dead: nothing in the family
+         consumes either since the Task 7/8 box-to-underline/edge rework
+         replaced their fill with these bare borders. Left in place rather
+         than deleted - a ledgered follow-up removal, same cleanup-candidate
+         class as the dead --dz-btn-danger-bg-alpha/--dz-btn-text-shadow
+         pair (see Gaps in DESIGN.md).
        - --dz-menu-separator: divider between stacked items. Not measured by
          the census: dz-menu-census.js's border attribution reads only
          border-TOP-color (computedOf/attributeSource, scripts/

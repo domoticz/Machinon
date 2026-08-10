@@ -2093,12 +2093,51 @@ the reason this control exists (one control, never a ragged disconnected wrap).
 
 **Mechanism notes:**
 
-- **Wrap-corner clip.** The shell (`overflow: hidden`, `border-radius: var(--dz-btn-radius)`) still
-  rounds the group's actual exterior boundary even though every button also carries its own
-  first/last-child radius: `:first-child`/`:last-child` only know the group's absolute first/last
-  button, not "first/last of whichever row the wrap happens to produce," so a square-cornered INTERIOR
-  button can land at a wrap corner (measured: "Auto", the HVAC 5-level case). The clip papers over that
-  gap; without it, that button's square corner would show through the shell's rounded position.
+- **Wrap-corner clip, now a safety net only.** `:first-child`/`:last-child` only know the group's
+  absolute first/last button, not "first/last of whichever row the wrap happens to produce," so a
+  square-cornered INTERIOR button can land at a wrap corner (measured: "Auto", the HVAC 5-level
+  case). The shell's own `overflow: hidden` + `border-radius: var(--dz-btn-radius)`
+  (`.item .btn-group:not(.span3 *)`, `css/cards.css:649-723`) only ERASES that button's stray
+  square-corner pixel - it never paints a replacement arc, so left alone it produced a genuine
+  blank notch, not a rounded corner (measured live, Task 12 fix round 1). The shipped mechanism is
+  `src/js/devices.js`'s `retagSelectorWrapCorners()` (`src/js/devices.js:128-242`): it reads
+  each shell's actual button rows via `offsetTop`/`offsetLeft`
+  (shell-relative) and tags the TRUE convex corners of the STAIR-STEP silhouette - never the
+  shell's bounding box - with `data-wrap-corner-tr`/`-bl`/`-br`, each driving its own `!important`
+  corner-radius rule at `css/cards.css:780-789` (every attribute repeated three times to reach
+  specificity (0,7,0), the only way to outrank the interior-button radius reset in the same file;
+  see the specificity note at `css/cards.css:764-779`). Re-run on every enhancement pass and the
+  MutationObserver's debounced re-enhance settle (`setAllDevicesFeatures`, `initDeviceObserver`),
+  plus a dedicated debounced `window resize` listener (`armSelectorWrapCornerRetag`, wired into
+  `custom.js`'s bootstrap at `custom.js:353` next to `armFlyoutContainment`) since a pure viewport
+  resize changes wrap state with no DOM mutation for the observer to catch. FAIL-CLOSED: an
+  untagged button simply falls back to whatever the existing first/last-child/interior CSS already
+  gives it - if the retagger never runs, the worst case is the ORIGINAL, lesser defect (a plain
+  square corner or the right-edge seam pinch), never a rounded outline around empty space. A first
+  attempt papered over the gap with a decorative `::after` overlay tracing the shell's own bounding
+  box; that produced exactly the empty-space outline this fail-closed design avoids, and was
+  reverted (full history in `task-12-report.md`, cited below).
+- **Selected-hover state.** Hovering a SELECTED level button used to swap its solid
+  `--dz-btn-toggle-selected-bg` fill for `buttons.css`'s ghost-hover wash (`.btn-small:hover` and
+  siblings, specificity (0,2,0)), because core marks every level button `class="btn btn-small"`
+  regardless of selection, and that ghost rule outranks the bare `.btn-selected` background rule's
+  own (0,1,0) - producing white label text on a near-white background. Fixed by re-declaring
+  background/color/border-color at `.item .btn-group:not(.span3 *) > .btn.btn-selected:hover`
+  (`css/cards.css:911-916`, specificity (0,6,0), the same scope+shape already proven against this
+  ghost rule by the control's own `:focus-visible` override). Three candidates were gated on a live
+  strip before this shipped: **G1**, no reaction on hover (re-assert the resting fill, zero risk,
+  but no feedback); **G2**, darken via the theme's own filled-button hover derivation
+  (`color-mix(in srgb, var(--dz-btn-toggle-selected-bg) 90%, black)`) - **owner-picked, shipped**;
+  and **G3**, layer the existing inset focus ring on top of the resting fill. G3 was dropped: a
+  direct pixel compare against G1 found it visually indistinguishable on this control (~0.5% of
+  pixels differ) - the same accent-hued ring at low alpha adds nothing extra on a surface that is
+  already accent-filled with an accent-colored border, so it would have cost a maintenance rule for
+  no discernible benefit. G2 measured 5.38:1 (light) / 3.70:1 (dark) hover contrast
+  (screenshot-measured WCAG); the dark number stays below the 4.5:1 text floor, but that is a
+  pre-existing `--dz-accent-color`-on-dark limitation the RESTING selected state already carries
+  (measured 3.04:1 dark at rest) - G2 does not introduce or worsen it, and in fact improves the
+  dark number slightly (3.04 -> 3.70). Owner gate and measurements: `task-12-report.md`, cited
+  below.
 - **Inset focus ring** (`--dz-btn-focus-ring-inset`, `dz-tokens.css`), re-verified live under this
   mechanism, not carried over on assumption from an earlier round: with the shell clip still in place,
   the family's standard outward ring (`--dz-btn-focus-ring`) renders fine on the group's TRUE first/last
@@ -2176,7 +2215,12 @@ Two rounds were rejected before S3 shipped:
    Fixed by dropping the stretch (natural-width wrap, as shipped).
 
 Full round-by-round detail, screenshots, and measurements:
-`.superpowers/sdd/2026-08-08-selector-segmented/task-1-report.md` and `task-3-report.md`.
+`.superpowers/sdd/2026-08-08-selector-segmented/task-1-report.md` and `task-3-report.md` (the
+original candidate evidence, S1/S1b/S2/S3). The wrap-corner-clip gap and the selected-hover G1/G2/G3
+gate above, both found and fixed after this codification, are in
+`.superpowers/sdd/2026-08-10-menus-family/task-12-report.md` (three fix rounds, commits `48d7461` /
+`c0ffebb` / `1eb4981`; final state 34/34 on `zz-selector-corner-check.js`, both schemes, both wrap
+states).
 
 #### Traps
 
