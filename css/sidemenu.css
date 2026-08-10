@@ -49,6 +49,10 @@ img.header__icon {
 }
 
 .navbar-inverse .navbar-inner.slide::-webkit-scrollbar-thumb {
+    /* dz-menu-exception: scrollbar-thumb chrome, not a menu surface - out of
+       the --dz-menu-* family, not measured by reports/menu-facts.json.
+       0.4 alpha black doesn't match --dz-menu-item-hover-bg (accent 0.15) or
+       any other family token. */
     background: rgba(0,0,0, 0.4);
     border-radius: 5px;
 }
@@ -100,7 +104,9 @@ img.header__icon {
 
 .navbar .nav .current_page_item > a {
     text-align: left;
-    background-color: transparent !important;
+    /* dz-menu-item-active-bg derived from this literal (menus-family Task 2,
+       facts S3 "mobile side menu item (Weather, current)", dz-tokens.css). */
+    background-color: var(--dz-menu-item-active-bg) !important;
 }
 
 .navbar .nav li ul li ul {
@@ -169,11 +175,15 @@ img.header__icon {
     right: 50px;
     bottom: 10px;
     transform: rotate(90deg);
+    /* dz-menu-exception: CSS-triangle caret (border trick), not a menu
+       surface - out of the --dz-menu-* family, not measured by
+       reports/menu-facts.json. */
     border-left-color: #fff;
     border-width: 4px;
 }
 
 .dropdown-submenu:hover > a:after {
+    /* dz-menu-exception: CSS-triangle caret hover state, see above. */
     border-left-color: #000;
 }
 

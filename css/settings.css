@@ -41,6 +41,9 @@ input#AcceptNewHardware:checked ~ button {
 }
 
 .blocklyText {
+    /* dz-menu-exception: Blockly rule-editor text (a different embedded
+       widget, not menu chrome) - out of the --dz-menu-* family, not measured
+       by reports/menu-facts.json. */
     color: #fff !important;
     fill: #fff !important;
 }
@@ -111,6 +114,15 @@ input#AcceptNewHardware:checked ~ button {
 }
 
 .mDropdown-Text:hover {
+    /* dz-menu-exception: refine-round candidate (menus-family Task 2). This
+       is the settings-tile grouped-tile sub-menu label (js/settings_page.js
+       builds it inside .dropdown-content, a floating menu of the same family
+       as S1/S2's dropdowns), but the S4 census only measured the top-level
+       .rectangle-8 tiles, not this nested sub-menu, so
+       reports/menu-facts.json has no record for it. Found by direct
+       inspection, not a facts row: rgba(0,0,0,0.5) matches neither
+       --dz-menu-text (--dz-body-text) nor any hover token - logged in
+       task-2-report.md, not changed here. */
     color: rgba(0,0,0,0.5);
     cursor: pointer;
 }

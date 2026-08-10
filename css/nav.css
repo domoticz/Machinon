@@ -32,9 +32,16 @@ div.menu-toggle {
     padding: 0 5px;
 }
 
-.menu-toggle:after, 
-.menu-toggle:before, 
+.menu-toggle:after,
+.menu-toggle:before,
 .menu-toggle div {
+    /* dz-menu-exception: hamburger icon bars, not a menu surface - out of the
+       --dz-menu-* family (bg/text/hover/active/separator/radius/shadow of the
+       menu itself), not measured by reports/menu-facts.json. #fff happens to
+       equal --dz-menu-bg's light value but is semantically an icon glyph
+       (arguably --dz-accent-text, "text placed ON an accent surface", since
+       .menu-toggle.scrolled gives it an accent background); wiring it to
+       --dz-menu-bg would be a coincidental-value swap, not a real match. */
     background-color: #fff;
     border-radius: 3px;
     content: '';
@@ -167,7 +174,9 @@ div.menu-toggle.scrolled {
     box-shadow: var(--dz-elev-popup);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    border-radius: 6px;
+    /* dz-menu-radius derived from this literal (menus-family Task 2,
+       facts S1 "Setup/Other dropdown", 8 records, dz-tokens.css). */
+    border-radius: var(--dz-menu-radius);
 }
 
 .navbar .nav .dropdown-menu li a,

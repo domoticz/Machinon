@@ -31,6 +31,9 @@ fi
 # Shadow contract must be clean before a release is cut.
 ./scripts/check-shadows.sh || { echo "ABORT: shadow contract violations"; exit 1; }
 
+# Menu contract must be clean before a release is cut.
+./scripts/check-menus.sh || { echo "ABORT: menu contract violations"; exit 1; }
+
 # Get release number from theme.json
 VERSION=$(grep version theme.json | grep -E -o "([0-9]+\.?)*")
 FULLNAME=$NAME-$VERSION

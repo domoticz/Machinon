@@ -344,6 +344,66 @@
        directly, so the mapping stays a single-line decision. */
     --dz-menu-bg:             var(--dz-nav-bg);
 
+    /* MENU family tokens (menus-family Task 2, 2026-08-10): text/hover/active/
+       separator/radius/shadow shared by every dropdown, flyout, and the mobile
+       side menu, derived from reports/menu-facts.json (rig repo, 159 records;
+       full per-token citation in
+       .superpowers/sdd/2026-08-10-menus-family/task-2-report.md). Each value
+       is the DOMINANT AUDITED value across the family surfaces (S1 Setup/
+       Other dropdowns, S2 flyouts, S3 mobile side menu, S4 settings tile
+       grid, S7 card 3-dot flyout) - refine-round mismatches are logged in the
+       task report, not folded in here.
+       - --dz-menu-text: resting item/label text. Every family selector that
+         sets it already resolves to --dz-body-text (S1 dropdown items,
+         css/nav.css ".navbar .nav .dropdown-menu li a"; S3's current item via
+         --dz-nav-active-text, itself = --dz-body-text). No literal anywhere
+         in the family disagrees, so this is documented, not yet consumed.
+       - --dz-menu-item-hover-bg: dropdown-item hover tint. S1 "Setup/Other
+         dropdown item, hovered" (4 records, 1440/1024): css/nav.css
+         ".navbar .nav .dropdown-menu li a:hover", already
+         rgba(var(--dz-accent-values), 0.15). S3's mobile item hover
+         (css/sidemenu.css ".navbar .nav li a:hover") is a literal
+         "transparent" mismatch - refine candidate, not changed here.
+       - --dz-menu-item-active-bg: current-route item bg. S3 "mobile side
+         menu item (Weather, current)" (state=active, css/sidemenu.css
+         ".navbar .nav .current_page_item > a", literal "transparent") is the
+         only record that actually renders .current_page_item - S1's
+         "Hardware/My Profile, current" containers are honest fixture gaps
+         (the item never carried the .current_page_item class in that run, so
+         the base "li a" rule won, source literal "initial"), not evidence
+         either way. css/nav.css's own (unmeasured live) desktop current-item
+         rule composes --dz-nav-active-bg instead of this token; that split
+         is a refine candidate, not resolved here.
+       - --dz-menu-separator: divider between stacked items. Not measured by
+         the census: dz-menu-census.js's border attribution reads only
+         border-TOP-color (computedOf/attributeSource, scripts/
+         dz-menu-census.js:284-286,344), so a border-BOTTOM separator is
+         structurally invisible to it. The only border-based item separator
+         anywhere in the family is css/sidemenu.css:70 (".navbar .nav > li",
+         border-bottom, already var(--dz-status-disabled)); used as the
+         derived value on that basis alone, disclosed here as non-census-
+         derived.
+       - --dz-menu-radius: floating-menu container corner radius. S1 "Setup/
+         Other dropdown" (8 records): css/nav.css
+         ".navbar .nav .dropdown-menu", literal 6px. (S2's third-level flyout
+         radius comes from bootstrap.css, out of theme scope; S7's card
+         flyout keeps its own --dz-card-radius-chrome tier, 5px, unchanged -
+         card 3-dot flyout geometry is explicitly out of this task's scope.)
+       - --dz-menu-shadow: composes --dz-elev-popup (S1/S2 dropdown/flyout
+         boxShadow token, 8+ records; S7's card flyout stays on
+         --dz-elev-overlay, its own tier, unchanged).
+       dark.css needs no new entries for any of these: every token here is a
+       var() alias/composition of tokens dark.css already overrides
+       (--dz-body-text, --dz-accent-values, --dz-elev-popup) or a scheme-
+       independent keyword/px value (transparent, 6px) - the same alias-
+       indirection --dz-menu-bg above already relies on. */
+    --dz-menu-text:            var(--dz-body-text);
+    --dz-menu-item-hover-bg:   rgba(var(--dz-accent-values), 0.15);
+    --dz-menu-item-active-bg:  transparent;
+    --dz-menu-separator:       var(--dz-status-disabled);
+    --dz-menu-radius:          6px;
+    --dz-menu-shadow:          var(--dz-elev-popup);
+
     /* "You are here" navbar tint (owner decision 2026-07-17, Task 8 item xi):
        the top-level navbar tab marks the active route with a translucent
        accent tint over body text (css/nav.css), not a solid fill. A Setup

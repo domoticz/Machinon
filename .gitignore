@@ -8,6 +8,7 @@ machinon-*.tar.gz
 !scripts/check-typography.sh
 !scripts/check-buttons.sh
 !scripts/check-shadows.sh
+!scripts/check-menus.sh
 !scripts/build-dist.sh
 # JPEG images
 images/*.[jJ][pP][gG]
