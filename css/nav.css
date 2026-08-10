@@ -128,6 +128,19 @@ div.menu-toggle.scrolled {
     background-color: transparent;
     color: var(--dz-body-text);
     border: 1px solid transparent;
+    /* Fix round 1, menus-family Task 7 (2026-08-10): reserves the SAME 2px
+       the current-item rule below actually uses on the bottom edge, always,
+       on every item, current or not - the .sub-tabs base rule's own pattern
+       (border-bottom: 2px solid transparent), reused here for the same
+       reason. Without this, only the current item's border-top shrank from
+       1px to 0px when the old rule zeroed all four sides before re-adding
+       a 2px bottom, which visibly shifted the icon+text stack up by 1px
+       the instant an item became current - caught live (owner report:
+       "see the text jump up because of the underline"). Reserving the
+       width here means the current-item rule below only ever changes the
+       bottom border's COLOR, never its width, so content position never
+       moves. */
+    border-bottom-width: 2px;
     border-radius: 5px;
     position: relative;
 }
@@ -250,17 +263,47 @@ div.menu-toggle.scrolled {
    border-bottom, accent text, no fill, no border box. Design logic:
    underline for horizontal surfaces (this bar, matches .sub-tabs exactly),
    left edge for vertical surfaces (the dropdown current-item rule further
-   down). "border: none" is deliberate, not just "no border": the base rule
-   above (".navbar .nav li a") already spends 1px top + 1px bottom of
-   vertical border ("border: 1px solid transparent"); dropping to 0 on
-   three sides while growing border-bottom to 2px moves that SAME 2px
-   total budget entirely onto the bottom edge, so item height is unchanged
-   (measured live: byte-identical border-box height with the old box vs
-   this rule, both schemes - task-7-report.md gate-2 addendum). Split out
-   from the old 3-selector rule so a keyboard-focused NON-current link
-   still gets a visible box below - that behaviour is untouched, out of
-   this gate's scope. "transform: none" carried over from the old combined
-   rule deliberately: without it, core's own canary
+   down). border-bottom is redeclared here at the SAME 2px width the base
+   rule above (".navbar .nav li a") already reserves for every item,
+   current or not, so becoming current never shifts the icon+text stack
+   (content position, not just outer box height, was the actual bug - fix
+   round 1, 2026-08-10, owner report "see the text jump up because of the
+   underline": the first version of this rule zeroed all four sides with
+   "border: none" then re-added a 2px bottom, which shrank border-top from
+   1px to 0px the instant an item became current).
+
+   Every declaration below carries !important, discovered necessary the
+   hard way across three separate live regressions in the same fix round,
+   all with the same root cause: core's OWN canary style.css - not one
+   rule but SEVERAL, scattered across style.css:1026-1044, some sharing
+   this exact selector text, none marked !important - competing at the
+   SAME (0,3,1)/(0,4,1) specificity as this rule. The ORIGINAL 2026-07-17
+   comment (see the dropdown rule further down) already documented core's
+   BARE, no-!important current-item color rule and assumed "this file's
+   later, equal-specificity rule already wins it" - true for the OLD box
+   version (which redeclared every property core also set), false for a
+   leaner rule that only touches SOME properties: for any property this
+   rule doesn't explicitly set, or ties core loses only by assumed source
+   order, the outcome turned out to depend on exactly which of core's
+   several scattered current-item rules is involved, not a single
+   predictable "later file wins" story. Confirmed live and fixed one at a
+   time before generalizing to !important throughout: border-bottom-width
+   (computed 1px, core's shorthand leaking, until redeclared explicitly),
+   border-top/right/left-color (a visible 1px box on three sides, owner
+   report, until border-color was added), and finally color itself (text
+   rendering white - core's OWN #fff, not this rule's accent - owner
+   report "the text turns white again" on navigation, confirmed via
+   CSS.getMatchedStylesForNode that core carries a SEPARATE small rule at
+   style.css:1030 with the identical ">a, >a:hover" selector text setting
+   only color, which this rule's assumed cross-file order did not reliably
+   beat). !important closes out the whole class of leak unconditionally,
+   matching the dropdown current-item rule's own established precedent
+   below for the identical reason (a core rule this file cannot out-order
+   by assumption alone). Split out from the old 3-selector rule; the
+   fix-round-1 pass below also replaced the split-off :focus rule's box
+   with a :focus-visible ring instead, so no nav item ever repaints the
+   pre-E2N box again, on any state. "transform: none" carried over from the
+   old combined rule deliberately: without it, core's own canary
    ".navbar .nav li a:hover" (transform: translateY(-1px), same selector
    text/specificity as the Machinon override at line ~150 above) wins the
    transform property on this element's :hover state, since this rule
@@ -268,26 +311,57 @@ div.menu-toggle.scrolled {
    item only, caught live before commit (owner report). */
 .navbar .nav .current_page_item > a,
 .navbar .nav .current_page_item > a:hover {
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid var(--dz-accent-color);
-    border-radius: 0;
-    box-shadow: none;
-    text-shadow: none;
-    transform: none;
-    color: var(--dz-accent-color);
+    background: transparent !important;
+    border-color: transparent !important;
+    border-bottom: 2px solid var(--dz-accent-color) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    transform: none !important;
+    color: var(--dz-accent-color) !important;
     font-weight: var(--dz-weight-semibold);
 }
 
+/* Fix round 1, menus-family Task 7 (2026-08-10): this used to be part of
+   the pre-E2N combined 3-selector rule and carried the SAME filled box as
+   the current-item treatment (--dz-nav-active-bg fill, accent border, 5px
+   radius). The E2N split above left it standing untouched, which meant a
+   clicked (focused-not-hovered) current item still repainted the old box -
+   at (0,3,2) it beat the new bare current-item underline rule at (0,3,1),
+   since only hover (0,4,1) happened to outrank it. Confirmed live by the
+   owner and reproduced: Playwright real click + mouse moved away showed
+   the box, not the underline. Machinon owns this selector outright (core
+   ships no nav :focus rule at all), so nothing external dictates its
+   shape. Fixed two ways at once: plain mouse :focus gets an explicit
+   "outline: none" and nothing else here (an item that is also current
+   keeps only the underline above; an item that is not current gets no
+   box, no ring at all) - the outline reset is NOT redundant even though
+   :focus-visible's own heuristic usually suppresses the browser's default
+   ring after a mouse click: confirmed live, twice, that assumption does
+   NOT hold for plain <a> nav items the way it does for <button>-based
+   controls elsewhere in the theme - a real mouse click still left the
+   browser's own native outline visible on three sides (owner report,
+   reproduced in Playwright too), so it has to be silenced explicitly
+   rather than left to UA behaviour. :focus-visible below gives keyboard
+   users the theme's established ring idiom instead (--dz-btn-focus-ring,
+   the same button-family token/recipe used at css/buttons.css:56-61 and
+   this file's own .sub-tabs-apply:focus-visible) - a real ring, not a box,
+   and nothing left in the nav family repaints the pre-E2N box on any
+   state. box-shadow carries !important: the current-item rule above also
+   went !important (its own comment explains why, against core's canary),
+   and Tab-focusing the CURRENT item itself needs the ring to still show -
+   confirmed live this was a real gap, not theoretical: without !important
+   here, the current-item rule's "box-shadow: none !important" always wins
+   over this rule's box-shadow regardless of specificity (author
+   !important beats author non-important outright), silently dropping the
+   keyboard focus indicator on exactly the one item a keyboard user is
+   most likely to already be sitting on. */
 .navbar-inverse .nav > li > a:focus {
-    text-shadow: none;
-    color: var(--dz-nav-active-text);
-    background: var(--dz-nav-active-bg);
-    font-weight: var(--dz-weight-semibold);
-    border: 1px solid var(--dz-accent-color);
-    border-radius: 5px;
-    box-shadow: none;
-    transform: none;
+    outline: none;
+}
+
+.navbar-inverse .nav > li > a:focus-visible {
+    box-shadow: var(--dz-btn-focus-ring) !important;
 }
 
 /* Setup dropdown current-item accent edge (menus-family Task 7 gate 2,
