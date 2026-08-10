@@ -98,9 +98,16 @@ input#AcceptNewHardware:checked ~ button {
     margin-left: 10px;
 }
 
+/* box-shadow is not set here (menus-family Task 9 sweep): css/cards.css:175-183 gives
+   every .rectangle-8/.rectangle-8-dropdown element (also the dynamic dashboard's table
+   rows and #settings .row-fluid > div, D1's comment above documents the same sharing) a
+   --dz-elev-card drop shadow via the identical selector at equal specificity, loaded
+   after settings.css in custom.css's @import order, so it always wins outright; a
+   box-shadow: var(--dz-elev-card) line here was dead on arrival (confirmed via
+   reports/menu-facts.json S4: every tile's boxShadow source attributes to cards.css, not
+   this file) and has been removed rather than kept as misleading documentation. */
 .rectangle-8, .rectangle-8-dropdown {
     cursor: pointer;
-    box-shadow: var(--dz-elev-card);
     list-style-type: none;
     min-height: 75px;
     flex: 1 0 15%;
@@ -128,7 +135,11 @@ input#AcceptNewHardware:checked ~ button {
 .machinoText {
     font-size: var(--dz-text-md);
     letter-spacing: -0.5px;
-    color: var(--dz-body-text);
+    /* menus-family Task 9: onto the family text token (--dz-menu-text is a --dz-body-text
+       alias with no scheme override of its own, so this is byte-neutral in both schemes;
+       swapped for family membership - this is a tile's menu-entry label, the grid's
+       equivalent of an S1 dropdown item's text). */
+    color: var(--dz-menu-text);
     margin-left: 20px;
 }
 
@@ -151,7 +162,13 @@ input#AcceptNewHardware:checked ~ button {
        reports/menu-facts.json has no record for it. Found by direct
        inspection, not a facts row: rgba(0,0,0,0.5) matches neither
        --dz-menu-text (--dz-body-text) nor any hover token - logged in
-       task-2-report.md, not changed here. */
+       task-2-report.md, not changed here. Rechecked against the full family
+       (menus-family Task 9, both schemes, including the Tasks 5-8 gate
+       outcomes): still no token equals this literal, marker stays. There is
+       also no family "hover text color" token to compare against - the
+       family only defines an item hover BACKGROUND
+       (--dz-menu-item-hover-bg), not a hover text color, so this remains
+       structurally unmatchable, not merely unmatched today. */
     color: rgba(0,0,0,0.5);
     cursor: pointer;
 }
@@ -170,19 +187,31 @@ ul.machinon_ul li {
     margin: 15px 0;
 }
 
+/* background-color/border/box-shadow are not set here (menus-family Task 9 sweep):
+   js/settings_page.js:128 gives this element class "dropdown-content rectangle-8", so
+   css/cards.css:175-183's shared .rectangle-8 rule (same selector list, equal
+   specificity, loaded after settings.css) always wins for all three - confirmed live
+   (getComputedStyle on an open panel): border-color rendered transparent, never this
+   rule's var(--dz-accent-color); box-shadow rendered card-tier (0 1px 4px) via
+   --dz-elev-card, never this rule's popup-tier (0 2px 6px) --dz-elev-popup. The three
+   lines were dead on arrival and are removed rather than kept as misleading
+   documentation; background-color happened to agree with cards.css's --dz-widget-bg
+   (no visible difference either way) but was dead by the same mechanism. This panel's
+   real surface tokens are cards.css's card tier (--dz-widget-bg/--dz-card-radius/
+   --dz-elev-card), not the --dz-menu-* family - unlike S1/S2's dropdowns/flyouts, out of
+   this task's file scope (css/settings.css only) to change even if it were desired. */
 .dropdown-content {
     display: none;
-    background-color: var(--dz-widget-bg);
     min-width: 160px;
-    border: 1.5px solid var(--dz-accent-color);
-    box-shadow: var(--dz-elev-popup);
     padding: 12px 16px;
     z-index: 1;
     position: absolute;
 }
 
+/* menus-family Task 9: onto the family text token, see .machinoText above (byte-neutral,
+   same --dz-body-text alias). */
 .dropdown-content a {
-    color: var(--dz-body-text);
+    color: var(--dz-menu-text);
 }
 
 .rectangle-8-dropdown:hover .dropdown-content {
