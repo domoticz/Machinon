@@ -17,9 +17,38 @@ input#AcceptNewHardware:checked ~ button {
     justify-content: center;
 }
 
-#settings .row-fluid > div {
+/* D1 "flat modern" (menus-family Task 6, owner gate): css/cards.css:177-181 gives every
+   Setup section (#settings .row-fluid > div) a --dz-widget-bg background,
+   --dz-card-radius and a --dz-elev-card drop shadow - a rule that predates this task
+   family and also serves other surfaces (the dynamic dashboard, .rectangle-8 tiles), so it
+   is not edited here (task-6-report.md Concern 5). The card keeps its background, radius
+   and grouping role; only the shadow gives way to a quiet, always-visible
+   --dz-input-border line. Both rules share the same (1,1,1) specificity and cards.css
+   loads after settings.css in custom.css's @import order, so cards.css would otherwise win
+   outright; #settingscontent (a genuine DOM ancestor of #settings, views/setup.html) adds
+   one more id to outrank it without !important. Hover is deliberately left on cards.css's
+   own --dz-ring-hover (a flat resting state that lifts on interaction), not overridden
+   here. */
+#settingscontent #settings .row-fluid > div {
     background: var(--dz-widget-bg);
-    border: 1px solid var(--dz-widget-bg);
+    border: 1px solid var(--dz-input-border);
+    box-shadow: none;
+}
+
+/* D1 (menus-family Task 6): the missing :focus-visible ring (task-6-report.md finding 1 -
+   measured live, boxShadow: none on a focused #Latitude input). Setup's inputs/selects
+   already carry the resting house underline (css/search.css's global input rule); this
+   closes the accessible-focus gap using the hub's own idiom verbatim
+   (css/theme-hub.css #dz-theme-hub .dz-hub-input:focus-visible), so Setup's fields and the
+   hub's fields share one focus language. */
+#settingscontent input[type="text"]:focus-visible,
+#settingscontent input[type="input"]:focus-visible,
+#settingscontent input[type="number"]:focus-visible,
+#settingscontent input[type="password"]:focus-visible,
+#settingscontent select:focus-visible {
+    outline: none;
+    border-color: var(--dz-accent-color);
+    box-shadow: var(--dz-btn-focus-ring);
 }
 
 #settings .row-fluid > div:has(> #SoftwareUpdates.ng-hide) {
