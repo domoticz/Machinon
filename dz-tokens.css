@@ -361,19 +361,23 @@
        - --dz-menu-item-hover-bg: dropdown-item hover tint. S1 "Setup/Other
          dropdown item, hovered" (4 records, 1440/1024): css/nav.css
          ".navbar .nav .dropdown-menu li a:hover", already
-         rgba(var(--dz-accent-values), 0.15). S3's mobile item hover
-         (css/sidemenu.css ".navbar .nav li a:hover") is a literal
-         "transparent" mismatch - refine candidate, not changed here.
-       - --dz-menu-item-active-bg: current-route item bg. S3 "mobile side
-         menu item (Weather, current)" (state=active, css/sidemenu.css
-         ".navbar .nav .current_page_item > a", literal "transparent") is the
-         only record that actually renders .current_page_item - S1's
-         "Hardware/My Profile, current" containers are honest fixture gaps
-         (the item never carried the .current_page_item class in that run, so
-         the base "li a" rule won, source literal "initial"), not evidence
-         either way. css/nav.css's own (unmeasured live) desktop current-item
-         rule composes --dz-nav-active-bg instead of this token; that split
-         is a refine candidate, not resolved here.
+         rgba(var(--dz-accent-values), 0.15). S3's mobile item hover was a
+         literal "transparent" mismatch at Task 2; consumed as of
+         menus-family Task 8 (owner gate, 2026-08-10, F1 "same language"),
+         css/sidemenu.css ".navbar .nav li a:hover" now references this
+         token directly.
+       - --dz-menu-item-active-bg: current-route item bg, still transparent
+         (no fill) by design - Task 8's owner-gated left-edge treatment
+         (css/sidemenu.css ".navbar .nav .current_page_item > a", 2px accent
+         border-left + accent text) consumes this token for its own
+         background, keeping the "no fill" semantic explicit and the token
+         alive rather than hardcoding the literal. css/nav.css's own desktop
+         current-item rule composes --dz-nav-active-bg instead of this
+         token for the SAME "no fill" semantic on a different surface (the
+         mobile flyout inherited that top-level rule's underline entirely by
+         selector accident before Task 8 - see the sidemenu.css comment); the
+         two-token split across desktop/mobile is a refine candidate, not
+         resolved here.
        - --dz-menu-separator: divider between stacked items. Not measured by
          the census: dz-menu-census.js's border attribution reads only
          border-TOP-color (computedOf/attributeSource, scripts/

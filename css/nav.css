@@ -37,11 +37,20 @@ div.menu-toggle {
 .menu-toggle div {
     /* dz-menu-exception: hamburger icon bars, not a menu surface - out of the
        --dz-menu-* family (bg/text/hover/active/separator/radius/shadow of the
-       menu itself), not measured by reports/menu-facts.json. #fff happens to
-       equal --dz-menu-bg's light value but is semantically an icon glyph
+       menu itself), not measured by reports/menu-facts.json. This base rule
+       covers the CLOSED hamburger only (the OPEN/X state is overridden
+       below, see that rule's comment) - closed, the bars sit over the
+       header banner (a blue-gradient band, not a --dz-menu-* surface) in
+       both schemes, where #fff already reads cleanly; verified live,
+       unchanged by menus-family Task 8. Semantically an icon glyph
        (arguably --dz-accent-text, "text placed ON an accent surface", since
-       .menu-toggle.scrolled gives it an accent background); wiring it to
-       --dz-menu-bg would be a coincidental-value swap, not a real match. */
+       .menu-toggle.scrolled gives it an accent background) rather than a
+       menu-family token; wiring it to --dz-menu-bg would be a
+       coincidental-value swap, not a real match - proven wrong the hard way
+       for the OPEN state once --dz-menu-bg became the flyout's own opaque
+       fill (menus-family Task 8, 2026-08-10): white bars over white panel
+       were invisible in light scheme, exactly the coincidence this comment
+       already flagged as fragile before it broke. */
     background-color: #fff;
     border-radius: 3px;
     content: '';
@@ -57,6 +66,23 @@ div.menu-toggle.scrolled {
     padding: 0 5px 15px 5px;
     border-bottom-left-radius: 6px;
     border-bottom-right-radius: 6px;
+}
+
+/* menus-family Task 8 addendum (owner-observed live, 2026-08-10): once the
+   flyout is open (.slide), these two bars rotate into the close ("X")
+   glyph and sit directly on top of .navbar-inner's own background - now the
+   opaque --dz-menu-bg panel (see css/sidemenu.css), not the old translucent
+   glass. #fff-on-white was invisible in light scheme (measured: white bars,
+   white panel); --dz-body-text is token-based and reads correctly in both
+   schemes without a scheme-specific override - light resolves near-black
+   against the now-white panel, dark resolves white against the dark panel
+   (byte-identical to the #fff this replaces there, so no visible change in
+   dark). Deliberately scoped to the .slide sibling selector only - the
+   CLOSED hamburger (base rule above) sits on the header banner, not this
+   panel, and stays #fff unchanged. */
+.navbar-inverse .navbar-inner.slide + .menu-toggle:before,
+.navbar-inverse .navbar-inner.slide + .menu-toggle:after {
+    background-color: var(--dz-body-text);
 }
 
 .navbar-inverse .navbar-inner.slide + .menu-toggle:before {
