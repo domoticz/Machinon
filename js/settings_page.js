@@ -99,6 +99,25 @@ if (mSettings.length > 0) {
         return TILE_ICONS[entry.href] || LABEL_ICONS[entry.label.i18n] || DEFAULT_ICON;
     }
 
+    // Core's own menu hrefs are bare in-app route hashes ("#Devices", copied
+    // verbatim from index.html's Setup dropdown), but $routeProvider registers
+    // routes as "/Devices" and $locationProvider.hashPrefix('') means the bare
+    // form does not match. Angular "corrects" it on the resulting hashchange by
+    // writing the slash-prefixed hash back to the browser -- a SECOND raw hash
+    // write, which pushes its own history entry. A single tile click therefore
+    // pushes two entries instead of one, and that correction fires again on
+    // whatever hashchange browser Back produces too, re-pushing the same target
+    // and making Back a no-op (root cause of the owner report). Writing the
+    // already-normalized hash up front avoids the correction entirely. Links
+    // that are not bare in-app routes (Security Panel's
+    // "secpanel/index.html#...") don't start with "#" and pass through
+    // untouched.
+    function normalizeRouteHash(href) {
+        return (href && href.charAt(0) === "#" && href.charAt(1) !== "/")
+            ? "#/" + href.slice(1)
+            : href;
+    }
+
     function buildTile(entry) {
         const li = $("<li>", { "class": "rectangle-8" });
         $("<img>", { src: "images/settings/" + tileIcon(entry) }).appendTo(li);
@@ -116,7 +135,7 @@ if (mSettings.length > 0) {
             // Copied verbatim from core's own anchor markup (Check for Update), not built here.
             li.attr("onclick", entry.onclick);
         } else if (entry.href) {
-            li.attr("data-target", entry.href);
+            li.attr("data-target", normalizeRouteHash(entry.href));
         }
         return li;
     }
@@ -130,7 +149,7 @@ if (mSettings.length > 0) {
             const span = $("<span>", { text: link.label.text });
             if (link.label.i18n) span.attr("data-i18n", link.label.i18n);
             $("<p>").append(
-                $("<a>", { href: link.href }).append(
+                $("<a>", { href: normalizeRouteHash(link.href) }).append(
                     $("<div>", { "class": "mDropdown-Text" }).append(span)))
                 .appendTo(content);
         });
