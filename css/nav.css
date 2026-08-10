@@ -136,6 +136,11 @@ div.menu-toggle.scrolled {
     transition: none;
 }
 
+/* Known no-op (menus-family Task 7 gate 2, 2026-08-10, measured live, not
+   redesigned - out of this gate's scope): background here computes
+   byte-identical to .navbar-inner's own background in both schemes, so
+   hovering a plain top-level item shows no visible tint today; flagged for
+   whoever next touches nav hover. */
 .navbar .nav li a:hover {
     color: var(--dz-body-text);
     background: var(--dz-nav-bg);
@@ -187,10 +192,29 @@ div.menu-toggle.scrolled {
     box-shadow: none;
     transform: none;
     color: var(--dz-body-text);
+    /* menus-family Task 7 (2026-08-10, E1 "quiet refresh"): the 8/10
+       spacing cluster, replacing core's raw 8px 14px (style.css) - the
+       vertical component was already on-cluster, only the horizontal
+       moves. */
+    padding: 8px 10px;
 }
 
 .navbar .nav .dropdown-menu li a:hover {
-    background: rgba(var(--dz-accent-values), 0.15);
+    /* Task 7 (2026-08-10): token instead of the rgba(var(--dz-accent-values),
+       0.15) literal - same computed value (--dz-menu-item-hover-bg was
+       defined as an alias of this exact value back in Task 2, but the
+       consuming site here was never switched over until now). */
+    background: var(--dz-menu-item-hover-bg);
+}
+
+/* Task 7 (2026-08-10, E1): core ships no override for this divider at all
+   (confirmed by grep before Task 7) - it silently inherited core's
+   rgba(255, 255, 255, 0.1), nearly invisible against --dz-menu-bg in both
+   schemes. Tokenized so the separator between grouped dropdown entries
+   (e.g. Setup's Hardware/Devices/Energy Dashboard vs Users/Settings) is
+   actually visible. */
+.navbar .nav .dropdown-menu .divider {
+    background-color: var(--dz-menu-separator);
 }
 
 .navbar .pull-right > li > .dropdown-menu .dropdown-menu,
@@ -220,8 +244,41 @@ div.menu-toggle.scrolled {
    plain: no max-height, no overflow, so nothing here can re-clip Plans/Data
    push's own third-level flyouts the way the reverted rule above did. */
 
+/* Top-level navbar current-page item (menus-family Task 7 gate 2,
+   2026-08-10, owner verdict "E2N unified accent edge"): drops the filled
+   box for the .sub-tabs active recipe below, reused verbatim - 2px accent
+   border-bottom, accent text, no fill, no border box. Design logic:
+   underline for horizontal surfaces (this bar, matches .sub-tabs exactly),
+   left edge for vertical surfaces (the dropdown current-item rule further
+   down). "border: none" is deliberate, not just "no border": the base rule
+   above (".navbar .nav li a") already spends 1px top + 1px bottom of
+   vertical border ("border: 1px solid transparent"); dropping to 0 on
+   three sides while growing border-bottom to 2px moves that SAME 2px
+   total budget entirely onto the bottom edge, so item height is unchanged
+   (measured live: byte-identical border-box height with the old box vs
+   this rule, both schemes - task-7-report.md gate-2 addendum). Split out
+   from the old 3-selector rule so a keyboard-focused NON-current link
+   still gets a visible box below - that behaviour is untouched, out of
+   this gate's scope. "transform: none" carried over from the old combined
+   rule deliberately: without it, core's own canary
+   ".navbar .nav li a:hover" (transform: translateY(-1px), same selector
+   text/specificity as the Machinon override at line ~150 above) wins the
+   transform property on this element's :hover state, since this rule
+   doesn't otherwise compete for it - a real 1px hover jump on the current
+   item only, caught live before commit (owner report). */
 .navbar .nav .current_page_item > a,
-.navbar .nav .current_page_item > a:hover,
+.navbar .nav .current_page_item > a:hover {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--dz-accent-color);
+    border-radius: 0;
+    box-shadow: none;
+    text-shadow: none;
+    transform: none;
+    color: var(--dz-accent-color);
+    font-weight: var(--dz-weight-semibold);
+}
+
 .navbar-inverse .nav > li > a:focus {
     text-shadow: none;
     color: var(--dz-nav-active-text);
@@ -233,35 +290,46 @@ div.menu-toggle.scrolled {
     transform: none;
 }
 
-/* Setup dropdown active-item glass leak (owner report 2026-07-17; relocated
-   here from css/buttons.css 2026-07-17, Task 8 owner refinement xi - this is
-   nav/dropdown chrome, not a button, and the fix now needs a raw 5px radius
-   to match the navbar tab above, which css/buttons.css's border-radius
-   contract check would reject). With the Machinon Settings menu feature
-   (theme.json "custom_settings_menu") disabled, core's raw Admin/Setup
-   dropdown renders directly instead of the tile grid js/settings_page.js
-   normally builds, and its active entry (ng-class="current_page_item") hits
-   core's own glass selection style: domoticz/www/css/style.css:1047-1060,
-   ".navbar .nav .dropdown-menu .current_page_item > a" (and its :hover),
-   background/border/radius/color/box-shadow all !important. The bare 3-class
-   rule above (core's OWN top-level rule, style.css:1026-1038, carries no
-   !important there, so this file's later, equal-specificity rule already
-   wins it) never reaches the DROPDOWN-nested selector, which adds a 4th
-   class AND !important; repeating core's exact selector here matches its
-   specificity/!important tier so source order decides in our favour.
-   Restyled (2026-07-17, item xi) to the SAME look as the navbar tab above
-   (--dz-nav-active-bg/-text, 1px accent border, 5px radius) instead of B7's
-   original solid --dz-btn-toggle-selected-* fill, so a "you are here" marker
-   reads identically whether it's a top-level tab or a dropdown entry; this
-   generalizes to every dropdown, not just Setup's. */
+/* Setup dropdown current-item accent edge (menus-family Task 7 gate 2,
+   2026-08-10, owner verdict "E2N unified accent edge" - supersedes the
+   2026-07-17 "glass leak" fix's box treatment, itself relocated here from
+   css/buttons.css that same day, Task 8 owner refinement xi). With the
+   Machinon Settings menu feature (theme.json "custom_settings_menu")
+   disabled, core's raw Admin/Setup dropdown renders directly instead of
+   the tile grid js/settings_page.js normally builds, and its active entry
+   (ng-class="current_page_item") hits core's own glass selection style:
+   domoticz/www/css/style.css:1047-1060, ".navbar .nav .dropdown-menu
+   .current_page_item > a" (and its :hover), background/border/radius/
+   color/box-shadow all !important. The bare 2-selector rule above (core's
+   OWN top-level rule, style.css:1026-1038, carries no !important there, so
+   this file's later, equal-specificity rule already wins it) never reaches
+   the DROPDOWN-nested selector, which adds a 4th class AND !important;
+   repeating core's exact selector here matches its specificity/!important
+   tier so source order decides in our favour - inherited from the
+   2026-07-17 fix, not a new requirement, and still applies to whatever
+   replaces the fill. Restyled (2026-08-10, gate 2) to the SAME 2px-accent
+   edge language the top-level underline above uses, rotated 90 degrees for
+   a vertical surface (border-left instead of border-bottom) instead of the
+   old box (--dz-nav-active-bg/-text fill, 1px accent border, 5px radius) -
+   "you are here" now reads as a lean left edge, quieter than the box,
+   still unambiguous; generalizes to every dropdown, not just Setup's (the
+   selector keys off the shared ".navbar .nav .dropdown-menu" class, not a
+   Setup-only ancestor, so submenus inherit it automatically). */
 .navbar .nav .dropdown-menu .current_page_item > a,
 .navbar .nav .dropdown-menu .current_page_item > a:hover {
-    background: var(--dz-nav-active-bg) !important;
-    border: 1px solid var(--dz-accent-color) !important;
-    border-radius: 5px !important;
-    color: var(--dz-nav-active-text) !important;
+    background: transparent !important;
+    border: none !important;
+    border-left: 2px solid var(--dz-accent-color) !important;
+    border-radius: 0 !important;
+    color: var(--dz-accent-color) !important;
+    font-weight: var(--dz-weight-semibold);
     box-shadow: none !important;
     text-shadow: none !important;
+    padding-left: 8px !important;
+}
+
+.navbar .nav .dropdown-menu .current_page_item > a:hover {
+    background: var(--dz-menu-item-hover-bg) !important;
 }
 
 .nav li a img {
