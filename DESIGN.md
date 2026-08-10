@@ -678,7 +678,7 @@ the ones that need to differ.
 | `--dz-btn-text-shadow` | `none` | Declared; no current CSS consumer (`text-shadow: none` is applied as a literal in the base rule instead) |
 | `--dz-btn-disabled-bg` / `-text` | `var(--dz-status-disabled)` / `var(--secondary-text-color)` | Shared by every family; see the existing WCAG AA gap below |
 | `--dz-menu-bg` | `var(--dz-nav-bg)` | Shared "Menu" surface; see Menu Surface below |
-| `--dz-nav-active-bg` / `-text` | `rgba(var(--dz-accent-values), 0.4)` / `var(--dz-body-text)` | "You are here" tint; see Radius Rationale (this pair stays at 5px, not the button radius) |
+| `--dz-nav-active-bg` / `-text` | `rgba(var(--dz-accent-values), 0.4)` / `var(--dz-body-text)` | Declared; no current CSS consumer (the former "you are here" fill it drove was replaced by the Menus family's accent-edge language, Task 7, 2026-08-10; see Radius Rationale and Gaps) |
 
 ### Size Tiers
 
@@ -749,12 +749,13 @@ case, instead of the box the padding math assumed.
 
 Buttons are `10px` (`--dz-btn-radius`), device cards are `6px` (`{rounded.container}`) - a deliberate
 split, not a rounding inconsistency: buttons are a small, dense control that reads better with a
-softer, roomier corner than a large card surface would want. The one documented exception is the
-"you are here" pair - the top navbar's active-tab tint and the Setup dropdown's active-item tint
-(`--dz-nav-active-bg`/`-text`, `css/nav.css`) - which stays at `5px` (`{rounded.interactive}`) to
-match the navbar tab it sits beside, not the button system it visually resembles. `css/buttons.css`'s
-own contract check would reject a raw `5px` there, which is why that rule lives in `css/nav.css`
-instead: it is nav/dropdown chrome, not a button.
+softer, roomier corner than a large card surface would want. A former documented exception here, a
+`5px` filled "you are here" box on the top navbar's active tab and the Setup dropdown's active item,
+no longer exists: the menus-family batch (2026-08-10) replaced that filled box on every menu surface
+with the unified accent-edge language (an underline on horizontal surfaces, a left edge on vertical
+ones, no radius involved at all); see [Menus > Unified Accent-Edge](#unified-accent-edge-you-are-here-language)
+for the full mechanism and its evidence trail. `--dz-nav-active-bg`/`-text` (`dz-tokens.css`) remain
+declared but are no longer consumed anywhere, a dead pair from that change; see Gaps.
 
 ### Menu Surface
 
@@ -763,7 +764,8 @@ menu (navbar dropdown, card 3-dot flyout) share ONE color concept, the scheme's 
 the settings UI labels "Menu". Floating menus consume `--dz-menu-bg`, never `--dz-nav-bg` directly, so
 the mapping stays a single-line decision if a future scheme ever wants the two surfaces to diverge. The
 scheme JSON key itself stays `navbar` (not renamed to `menu`), since renaming it would be a scheme
-file-format break for no behavioral gain.
+file-format break for no behavioral gain. This is one token of a larger shared family; see
+[Menus](#menus) for the full token set, per-surface anatomy, and enforcement.
 
 ### The Button Contract (enforcement)
 
@@ -832,8 +834,8 @@ each citing the exact core selector/specificity that forced it:
   to the table it controls, so it now carries a resting accent wash (`rgba(var(--dz-accent-values),
   0.08)`) and an accent-colored chevron, strengthening to the shared `--dz-btn-hover-bg` wash on
   hover like every other ghost/icon-quiet control - see Family Roles
-- **Dropdown active item** - the Setup dropdown's "you are here" marker; lives in `css/nav.css` (see
-  Radius Rationale: it needs the raw 5px nav radius, which `check-buttons.sh` would reject)
+- **Dropdown active item** - every dropdown's "you are here" marker; lives in `css/nav.css` as part
+  of the `--dz-menu-*` family, not the button system (see [Menus](#menus))
 - **About page** - `.btn-modern` is used directly for Website/Forum/Wiki/Source Code and the Tips
   trigger; no override needed here, listed for completeness since it is the one region above that
   needed nothing extra
@@ -1101,6 +1103,366 @@ layered on top:
 - **DataTables pager** (`.fg-button`) - ghost-tier styling; documented under
   [Buttons > Core-Region Takeover](#core-region-takeover), since it's a button family, not a table
   concern, even though the rule lives in `css/tables.css` for cascade-ordering reasons.
+
+## Menus
+
+Every menu-shaped surface in the theme, the top navbar band, its dropdowns (Setup, Other,
+Custom), third-level flyout submenus (More options > Plans / Data push), the mobile side-menu
+flyout, the settings tile grid (`#/SetupMenu`), the standard Settings page (10 Setup tabs), and
+the card 3-dot options flyout, shares one designed family (spec 2026-08-10, `dz-tokens.css`,
+`css/nav.css`, `css/sidemenu.css`, `css/settings.css`, `css/cards.css`). The family was built in
+four phases: census first (159 measured records across eight surfaces, no theme changes), tokens
+next (byte-neutral, no visual change), two structural defect fixes, then four owner-gated
+refinement rounds in priority order (Settings page first, then desktop dropdowns, then the
+mobile flyout, then a consistency-only tile-grid sweep). Full per-task evidence trail:
+`.superpowers/sdd/2026-08-10-menus-family/task-{1..10}-report.md`.
+
+### The Eight Surfaces
+
+| Surface | What | Family tokens consumed |
+|---|---|---|
+| S1 | Desktop navbar + its dropdowns (Setup, Other, Custom) | bg, text, item-hover-bg, item-active-bg, separator, radius, shadow |
+| S2 | Third-level flyout submenus (Setup > More options > Plans, > Data push) | bg, text, item-hover-bg, radius, shadow (geometry containment is JS, not tokens) |
+| S3 | Mobile side-menu flyout (`.navbar-inverse.navbar-inner.slide`, `<979px`) | bg, text, item-hover-bg, item-active-bg, separator, shadow |
+| S4 | Settings tile grid (`#/SetupMenu`) | text only (`.machinoText`/`.dropdown-content a`); the tile box itself is card-tier, see Card-Flyout below |
+| S5 | Standard Settings page (10 Setup tabs) | separator (heading underline); everything else is the type scale, spacing clusters, and card-tier tokens, not `--dz-menu-*` |
+| S6 | Sub-tabs / nav-tabs (watch-only, not redesigned this batch) | none of `--dz-menu-*`; its own established underline recipe, see Watch-Only below |
+| S7 | Card 3-dot options flyout (`css/cards.css` `.options`) | bg only, see Card-Flyout below |
+| S8 | Setup CTA (mobile fixed Apply bar vs in-flow controls) | none; a layout defect class, not a styled surface |
+
+### Token Table
+
+All tokens live in `dz-tokens.css`, `:root` (light-scheme values below; `dark.css` needs **no**
+menu-family entries at all, every token is either a `var()` alias/composition of a token
+`dark.css` already overrides, or a scheme-independent literal).
+
+| Token | Value | Notes |
+|-------|-------|-------|
+| `--dz-menu-bg` | `var(--dz-nav-bg)` | Pre-existing (owner decision 2026-07-17): the top bar and every floating menu share one "Menu" surface colour, the scheme's navbar tint |
+| `--dz-menu-text` | `var(--dz-body-text)` | Resting item/label text; every family selector already resolved here before the token existed, so this formalizes rather than changes anything |
+| `--dz-menu-item-hover-bg` | `rgba(var(--dz-accent-values), 0.15)` | Dropdown-item hover tint (S1: 4 census records, 1440/1024) |
+| `--dz-menu-item-active-bg` | `transparent` | Current-route item background; stays transparent by design, "you are here" reads via the accent-edge language below, never a fill |
+| `--dz-menu-separator` | `var(--dz-status-disabled)` | Divider between stacked items; the census's border-attribution reads only `border-top-color` (`dz-menu-census.js:284-286,344`), so this is derived from the one existing item-separator declaration (`css/sidemenu.css`), disclosed as non-census-derived, not fabricated |
+| `--dz-menu-radius` | `6px` | Floating-menu container corner radius (S1 "Setup/Other dropdown", 8 records, `css/nav.css`) |
+| `--dz-menu-shadow` | `var(--dz-elev-popup)` | Composes the popup elevation tier (S1/S2 dropdown/flyout, 8+ records) |
+
+Two byte-neutral literal-to-token swaps shipped the family with zero visual change (Task 2,
+verified via a computed-style snapshot round-trip): `css/nav.css`'s dropdown-menu
+`border-radius: 6px` became `var(--dz-menu-radius)`, and `css/sidemenu.css`'s mobile current-item
+`background-color: transparent` became `var(--dz-menu-item-active-bg)`.
+
+### Unified Accent-Edge "You Are Here" Language
+
+The batch's design centerpiece (Task 7 gate round 2, applied 2026-08-10): every menu surface now
+marks its current item the same way, oriented to the surface's own axis.
+
+- **Horizontal surfaces** (top navbar tab, sub-tabs): a `2px solid var(--dz-accent-color)`
+  **bottom border**, no fill, no box. The top navbar's rule reuses the sub-tabs' own active
+  recipe verbatim rather than inventing a second underline mechanism (`css/nav.css`,
+  `.navbar .nav .current_page_item > a`).
+- **Vertical surfaces** (dropdown current items, mobile flyout current items): the identical
+  language rotated 90 degrees, a `2px solid var(--dz-accent-color)` **left border**, again no
+  fill (`css/nav.css` `.navbar .nav .dropdown-menu .current_page_item > a`; `css/sidemenu.css`
+  `.navbar .nav .current_page_item > a`). Every item, current or not, reserves the same
+  `border-left-width: 2px` at rest, so becoming current only ever changes that edge's colour,
+  never its width, no layout shift.
+- **Focus-visible ring** is reserved for keyboard navigation only. It replaced the pre-existing
+  filled box (a solid `--dz-nav-active-bg` accent tint, `1px` border, `5px` radius, the same look
+  the Radius Rationale section used to document as a deliberate exception; that exception no
+  longer exists, see the Gaps entry below).
+
+**The post-click owner defect story.** The E2N apply (theme `32d4948`) shipped with one leftover
+rule, `.navbar-inverse .nav > li > a:focus` (`css/nav.css`), still painting the OLD box on
+`:focus`. Because a real click focuses an element (mouse-away leaves it focused, not hovered),
+and that old rule's specificity (0,3,2) beat the new current-item rule's (0,3,1), a clicked item
+kept repainting the box the moment the pointer left it, on every click, in front of the owner
+within minutes of shipping. Fix (theme `4cdf7e6`): the box was removed from `:focus` entirely and
+a `:focus-visible` ring took its place, keyboard-only. Fixing that one leftover rule surfaced four
+further specificity fights against core's own canary rules, each caught live and fixed in the same
+round: a 1px content jump (the border budget wasn't reserved on non-current items, fixed by
+reserving the full `border-bottom-width: 2px` on every item, current or not, mirroring the
+left-edge reservation above); a thin border leaking on the other three sides (core's
+`.current_page_item > a` sets a same-specificity 4-sided border; fixed with an explicit
+`border-color: transparent`); leaked white text (core's `style.css` ties the same selector's
+`color` property; fixed by making the whole current-item rule `!important`, the same precedent the
+dropdown current-item rule already used); and a self-caught regression where `box-shadow: none
+!important` silently killed the Tab-focus ring on the current item itself, fixed by making the
+ring's own `box-shadow` `!important` too.
+
+### Defect Fixes
+
+**Third-level flyout containment (S2).** Census measurement (Task 1): the Setup > More options
+second-level submenu (`#cMoreOptions + ul`) exits the viewport at both audited desktop widths,
+bottom `923px` against a `900px` viewport at 1440x900 and against a `768px` viewport at 1024x768
+(same on-screen anchor, different overflow, because the trigger's own screen position doesn't
+move with viewport height). Root cause: Bootstrap's `.dropdown-submenu > .dropdown-menu { top: 0;
+left: 100%; }` anchors the submenu's top edge to the trigger's top edge with no viewport
+awareness, and the 19-item list (576px tall) is taller than the room below regardless of window
+height. A `max-height` clamp was tried and reverted before this task (it also clipped the Plans /
+Data push third-level flyouts sharing the same selector). Fix (`armFlyoutContainment()`,
+`src/js/page.js`, alongside the pre-existing `clampCorePopups()`): on `mouseenter` of any
+`.navbar .dropdown-submenu > a` trigger, measure the submenu's `getBoundingClientRect()`, and if
+`rect.bottom > window.innerHeight - 10`, shift it up via an inline `top` offset clamped so it
+never pushes the top edge above the 10px floor. Verified at 1024x768: overflow `165px`, `top` set
+to `-165px`, resulting rect fully contained. Fix round 1 (owner review) added a debounced
+`resize` re-arm: the original fix only recomputed on `mouseenter`, so a still-open flyout resized
+from 1440x900 to 1440x600 stayed at its stale position, `290px` past the new viewport bottom
+(measured: bottom `890px` against a `600px` viewport). The resize listener reuses the same
+containment logic via a shared `containFlyout(menu)` helper.
+
+**Setup CTA overlap (S8), the reversal story.** Task 1's census measured only the accepted
+mobile-layout-census exception pair (`a.sub-tabs-apply` / `#enableautobackup`) in its default
+state, at its own canonical viewport, and found a stable 38px gap, an honest negative that flagged
+the baseline exception as "possibly stale." Task 4 re-verified more broadly, at 390/360/320,
+across every Setup tab discovered from the DOM (not just System), at both the top of the page and
+scrolled to bottom, both schemes, and found the defect very much alive on five of ten tabs: Log
+(`#DebugPython`, `#DebugThreadIDs`), Notifications (the `Test` button), Energy Dashboard
+(`#comboEExtra1Icon`), and System (`#enableautobackup`, the exception's own pair, reproduced
+live). Task 1's negative was correct for the one state it measured; Task 4's sweep was simply
+wider. Root cause: `css/settings.css` pins core's Apply Settings row (`li.pull-right`) to
+`position: fixed; bottom: 5px` on phone widths, a fixed element that sits at a constant viewport
+position and paints over whatever in-flow content the document happens to place there, at any
+scroll offset including zero. Fix: a bounded, internally-scrolling content region rather than a
+padding nudge. `#settingscontent #settings #my-tab-content` becomes a flex `column` chain
+(`#settingscontent` auto height, `#settings`/`#my-tab-content` flexed), with `#my-tab-content`
+capped to `calc(100vh - 100px)` (falling back to `calc(100dvh - 100px)` via the invalid-value
+cascade, guarding iOS Safari's address-bar resize) and `overflow-y: auto`, mobile-only. The 100px
+reserve is measured, not guessed: 50px of chrome above `#settingscontent` (static navbar + banner,
+width-independent) plus the CTA bar's own 34px height + 5px offset rounding up to 40px, plus 10px
+of daylight. `li.pull-right` itself is untouched, still `position: fixed`; the fix stops content
+from ever being laid out in the band the bar occupies. The fix also exposed a real gap in the
+mobile-layout census's own overlap check: it compared raw, unclipped rects, so a control mostly
+scrolled out of the new internal scroll region could still numerically "overlap" the fixed bar
+even though nothing painted there (a phantom overlap, confirmed live: `56x17px` reported,
+`12px` real gap once the check became clip-aware). A `verticalClipRange()` helper fixed the
+census's own overlap check to clip against the nearest scrolling ancestor, and along the way fixed
+an unrelated axis-conflation bug in the check's borrowed clip helper that had been silently
+dropping visible controls off other routes (`#/Devices` 136 -> 49, `#/Floorplans` 31 -> 2, both
+before the fix; corrected to 49 as the real, clip-aware count and confirmed those exclusions trace
+to genuine scroll regions, not a regression). Verified: a 120-state clip-aware probe (390/320/360
+x every tab x top/scrolled x both schemes) found zero states with a >4px-both-axes overlap after
+the fix. The accepted exception was removed from `scripts/baselines/mobile-layout-contract.json`
+(rig repo); the mobile-layout census runs green without it, a floor raise, not a re-exception.
+
+One residual sub-pixel record remains in `reports/menu-facts.json` (`dz-menu-census.js`'s own,
+cruder single-scroll-state S8 check): a `14.0x3.8px` straddle between the CTA and
+`#enableautobackup` at the initial scroll position, `overlapHeight` under the 4px-both-axes floor
+Task 4's own fix guarantees. Its stored `description` string still reads "matches accepted
+baseline exception," a stale label the harness prints unconditionally whenever it measures any
+overlap at all; that exception was retired by Task 4 (see above), so the label should be read as
+inherited harness prose, not as evidence the old exception still stands.
+
+### Gate Verdict Trail
+
+Every visible refinement below went through the same mechanism: candidates rendered live on the
+rig via injected `<style>` overlays, composite screenshot strips, an owner verdict, applied only
+on the pick. "Keep as is" was always a legal outcome.
+
+**Settings page, round 1: density and grouping (Task 5).** Base layer for every candidate:
+single-row horizontal-overflow sub-tabs (owner pre-decision, "Overflow seems the better option"),
+mirroring the Theme hub's own `.dz-hub-tabs` pattern, replacing a tall wrapped block that had cost
+186px of 468px (45% of visible content) at 320x568. Candidates, measured on the busiest tab
+(Notifications: 56 inputs/selects/buttons, 45 labels, 47 rows):
+- **C1 "tightened current"**: `h2` to the type scale (`--dz-text-md`, 16px semibold), table-cell
+  padding `8px 10px` (was `3px 10px`).
+- **C2 "grouped sections"**: C1 plus a `border-bottom` + `margin-bottom` under each `h2`, turning
+  the heading into a visible section boundary.
+- **C3 "airy"**: C1 with the roomier 15/20 spacing cluster instead of 8/10. Rejected on a
+  measured mobile-floor regression: `#settings .row-fluid` is `justify-content: center`, so a
+  wrapped child wider than the viewport overflows symmetrically off BOTH edges, invisible to
+  `document.documentElement.scrollWidth` (flat at 375px on every candidate); measured via
+  `getBoundingClientRect()` instead, C3 pushed the System-tab Location card to `x: -2.9px` and
+  widened Notifications' already-overflowing card from `-18.5px`/`width 412px` to
+  `-17.5px`/`452px`.
+
+**Verdict: C2, grouped sections.** Chosen over C1 (plain tightening, no section rhythm) and C3
+(measured regression above). Re-verification surfaced one collateral squeeze on the Security tab
+(C2's own +5px vertical padding pushed an already-existing 3-line wrap from 57px to 67px, crossing
+`dz-setup-tabs.js`'s squeeze threshold); mitigated with one targeted `!important` widening that
+column from 60px to 100px (`#weblocaltable td[style*="width:60px"]`, required because the
+constraint it overrides is an inline `style` attribute, always higher specificity than any
+external rule regardless of selector weight), logged rather than silently absorbed.
+
+**Settings page, round 2: restyle depth (Task 6).** Two premise-reshaping findings changed the
+starting point before candidates were even drawn: the legacy Bootstrap-2 bevel/glow chrome the
+brief assumed existed to strip never fires on Setup's actual markup, and Setup's inputs/selects
+had no `:focus-visible` ring at all, unlike the Theme hub's own inputs. Candidates:
+- **D1 "flat modern"**: drop the card shadow to `box-shadow: none`, keep a quiet
+  `1px solid var(--dz-input-border)`, add the hub's own `:focus-visible` ring idiom verbatim.
+- **D2 "carded"**: raise the shadow to the `--dz-elev-popup` tier instead, drop C2's heading
+  separator (redundant once the card edge is itself the boundary).
+- **D3**: keep as is.
+
+**Verdict: D1, flat modern.** Rationale: a side-by-side hub-coherence panel showed the Theme hub
+itself is flat, no cards anywhere, thin border-bottom row dividers, so D1 was the structurally
+coherent pick, not merely the quieter one. Shipped: `#settingscontent #settings .row-fluid > div`
+gets `border: 1px solid var(--dz-input-border); box-shadow: none;` (the extra `#settingscontent`
+id outranks `css/cards.css`'s pre-existing same-specificity card rule without `!important`), and
+Setup's text inputs/selects gained a `:focus-visible` ring (`border-color: var(--dz-accent-color)`
++ `box-shadow: var(--dz-btn-focus-ring)`) copied from `css/theme-hub.css`'s `.dz-hub-input`
+verbatim.
+
+**Desktop dropdowns and submenus (Task 7, two rounds).** Round 1 candidates, rendered after the
+S2 containment fix so geometry was already correct: **E1 "quiet refresh"** (the 8/10 padding
+cluster; hover tint moved onto the family token, byte-neutral; the `.divider` rule tokenized,
+having previously silently inherited core's near-invisible `rgba(255,255,255,0.1)`, confirmed by
+grep that no override existed before); **E2 "accent current"** (the current-item box replaced by
+the sub-tabs' underline language rotated into a left edge, no fill, no box); **E3 "elevated"**
+(dropdown shadow raised one tier, `--dz-elev-popup` to `--dz-elev-overlay`).
+
+Owner verdict, round 1: liked E2, asked "should our top menu bar also follow that design?" That
+question produced **E2N, "unified accent edge"**: E2's left edge for vertical surfaces, plus the
+top-level navbar current-item dropping its own filled box for the sub-tabs' underline recipe.
+Measured before offering it: item height delta between the old box and the new underline is 0px
+(the box's existing 1px-top + 1px-bottom border budget relocates entirely onto the bottom edge as
+one 2px line, not absorbed by box-sizing); a dropdown-toggle caret can never coexist with the
+underline (structurally impossible, neither Setup's nor Other's toggle `<li>` is ever itself
+`current_page_item`); and top-level nav hover was found to be a pre-existing visual no-op in both
+schemes (`background: var(--dz-nav-bg)`, byte-identical to the navbar's own background), not
+something E2N caused.
+
+**Verdict, round 2 (final): E2N unified.** E1 and E3 were not separately re-offered; E2N carries
+E1's byte-neutral padding/hover/divider work forward as its base layer. The post-apply focus/click
+defect and its four riders are documented above under Unified Accent-Edge.
+
+Two defects were found while building these candidates and logged, not fixed here, being
+JS/markup issues rather than `css/nav.css` concerns: a real click on the admin Setup toggle
+redirects to `#/SetupMenu` when routes are active (`js/settings_page.js`'s own click handler on
+the whole `<li>`), which also means Task 1's own "Hardware, current" census record measured the
+wrong, non-current state; and core's `index.html` gives the Setup and Other dropdowns' shared
+entries (Energy Dashboard, My Profile, About) duplicate `id`s, so Angular's `ngClass` only ever
+marks the first (Setup's, hidden for non-admins) of the two same-id elements current, leaving the
+Other dropdown with no "you are here" marker at all for a real non-admin user today, independent
+of any CSS.
+
+**Mobile side menu (Task 8, two-axis gate).** Two live findings reshaped the starting point.
+First, the census's two S3 overhang records (10px vertical, ~14.6px horizontal) turned out to be
+one mechanism measured at two different transition-timing offsets, not two bugs:
+`.navbar-inverse .navbar-inner` was `box-sizing: content-box` with a `5px` padding on top of a
+`100%`/`100%` box, adding 10px past intended on each axis; settled geometry is a clean flush
+400x854 overhang, and the mid-transition measurement (before the 0.5s slide settles) reproduces
+the exact asymmetric horizontal figure the census recorded. Second, the flyout's current item was
+inheriting Task 7's HORIZONTAL underline by DOM/selector accident (`css/sidemenu.css`'s own
+current-item rule was already a no-op, and `css/nav.css`'s top-level rule shares the identical
+selector text with no mobile-scoped override), contradicting the batch's own
+horizontal-surfaces-underline / vertical-surfaces-edge principle. Base layer, applied under every
+candidate: `box-sizing: border-box` on the panel (collapses both S3 records into one fix) plus the
+2px accent left-edge current-item treatment.
+
+Gate axis 1, readability (owner input: "the blurred glass look is really nice but can cause
+certain items to be hard to read"), measured on the `#Scenes` page's loud, glowing backdrop, worst
+of six rows sampled per candidate against WCAG's 4.5:1 text-contrast floor:
+
+| Candidate | Mechanism | Worst light | Worst dark |
+|---|---|---|---|
+| KEEP (glass, unchanged) | `blur(3px) opacity(.8)`, transparent bg | 3.90 | 1.84 |
+| Denser scrim | `rgba(accent, 0.72)` bg + `blur(3px)` | 1.48 | 1.18 |
+| Stronger blur | `blur(20px) opacity(.8)`, transparent bg | 4.20 | 2.28 |
+| Opaque panel | `var(--dz-menu-bg)`, no backdrop-filter | 4.51 | 5.17 |
+
+Only the opaque panel clears AA in both schemes. The denser scrim measured WORSE than doing
+nothing: the panel's own accent tint and the current item's own accent-coloured left edge/text
+(the same vertical-surface language this batch just shipped) are the same hue family, a same-hue
+contrast collision, not an implementation bug.
+
+Gate axis 2, density: **F1 "same language"** (`8px 10px`, the same rhythm as the desktop
+dropdowns) vs **F2 "denser"** (`4px 8px`, roughly half row height). A third density option, F3
+(deeper nesting treatment), was decided against from the facts before rendering anything: core's
+Other dropdown is a flat list with no further nesting, and Setup's deep 3-level tree can't
+structurally expand on mobile (it navigates away instead), so there was no hierarchy problem to
+solve.
+
+**Verdict: opaque panel + F1 same language.** Glass retires on this one surface; every other menu
+surface keeps its own existing (non-glass) rendering. During apply the owner caught, live, that
+the flyout's close ("X") button had gone invisible: its bars were a pre-existing hardcoded `#fff`,
+now white-on-white against the new opaque white light-scheme panel. Fixed by switching only the
+open-state (`.slide`-sibling) bars to `var(--dz-body-text)`, leaving the closed hamburger's `#fff`
+untouched (it sits on the blue header banner, a different surface). Measured: light
+`rgb(26,26,26)` on `rgb(255,255,255)` and dark `rgb(255,255,255)` on `rgb(35,35,36)`, both
+clearing AA with the narrowest case at 3.85:1.
+
+**Tile grid (Task 9): consistency-only, no gate.** Per the owner's priority order this surface
+gets a tokens-only sweep, no redesign, unless a gate outcome pulled it in (none did). No owner
+gate was run because every change made proved byte-neutral live, in both schemes, before it
+shipped: a dead, cards.css-shadowed `box-shadow` declaration on `.rectangle-8`/`.rectangle-8-dropdown`
+was removed (cards.css's own rule already won outright at equal specificity, confirmed via
+`reports/menu-facts.json`'s own S4 `source` attribution), and two label-colour rules
+(`.machinoText`, `.dropdown-content a`) moved from a direct `--dz-body-text` reference onto the
+`--dz-menu-text` alias, a no-op swap since the token IS that same reference with no scheme
+override of its own. A `--snapshot` diff taken before and after showed exactly one changed line,
+the snapshot's own `label` field, no property or selector the census measures moved at all.
+
+### Watch-Only: Sub-Tabs (S6)
+
+Sub-tabs / nav-tabs were explicitly out of scope for redesign this batch (owner decision:
+"settled family; watch-only", `docs/superpowers/specs/2026-08-10-menus-family-design.md`). The
+census still measures the surface (three records, one per audited viewport, honest absence: no
+`.sub-tabs`/`.nav-tabs` element exists on the fixture route audited, `#/Devices`) so a future
+regression there is visible, but nothing about the surface was changed. Its existing recipe,
+documented under [Navigation](#navigation), a `2px solid var(--dz-accent-color)` bottom border on
+active/hover with no background change, is the one this batch's E2N language was built to match,
+not the other way around: the top navbar's own underline (see Unified Accent-Edge above) reuses
+this recipe verbatim rather than defining a second one.
+
+### Card-Flyout: Tokens Only
+
+The card 3-dot options flyout (S7, `.options`, `css/cards.css`) is explicitly scoped
+tokens-only in this batch (owner decision: geometry stays a cards concern). It consumes exactly
+one family token, `--dz-menu-bg`, for its background (owner-approved 2026-07-17: "the flyout is a
+menu surface, not a card surface"), and keeps every other property on its own card-chrome tier,
+deliberately not migrated onto the equivalent `--dz-menu-*` token: `--dz-card-radius-chrome`
+(5px, not the family's 6px) for its corner radius, and `--dz-elev-overlay` (not the family's
+`--dz-elev-popup`, which composes `--dz-menu-shadow`) for its shadow. The two tiers happen to
+differ (5px vs 6px, overlay vs popup elevation) and that difference is intentional, not an
+oversight this batch left unresolved.
+
+A second, easily-confused surface is explicitly NOT part of the menu family at all: the settings
+tile grid's own nested sub-menu (`.dropdown-content`, built by `js/settings_page.js` inside a
+grouped tile), despite living one file away in `css/settings.css` and looking like a dropdown.
+Its element carries the class `"dropdown-content rectangle-8"`, so `css/cards.css`'s shared
+`.rectangle-8` rule (identical selector list, equal specificity, loaded after `settings.css`)
+always wins its background, border, and shadow outright; three same-property declarations that
+used to shadow it in `css/settings.css` were dead on arrival (confirmed live via
+`getComputedStyle`) and were removed in Task 9 rather than kept as misleading documentation. Its
+real surface tokens are the card tier (`--dz-widget-bg` / `--dz-card-radius` / `--dz-elev-card`),
+not `--dz-menu-*`. Only its two text-colour rules (`.machinoText`, `.dropdown-content a`) alias
+onto `--dz-menu-text`, since label text is genuinely shared family vocabulary even where the box
+around it is not.
+
+One item logged, not resolved: `.mDropdown-Text:hover` (the same nested sub-menu's row-hover text
+colour, `rgba(0,0,0,0.5)`) matches no family token, hover or otherwise, the family only defines a
+hover BACKGROUND (`--dz-menu-item-hover-bg`), never a hover text colour, so this is structurally
+unmatchable today, not merely unmatched. Marked `dz-menu-exception`, re-checked against every
+gate outcome through Task 9, left as a future refine candidate.
+
+### The Menu Contract (enforcement)
+
+Two independent gates, at different layers, mirroring the Buttons/Tables contract pattern:
+
+- **`scripts/check-menus.sh`** (static, scoped to `css/nav.css`, `css/sidemenu.css`,
+  `css/settings.css`): three rules, mirroring `check-shadows.sh`/`check-typography.sh`'s own
+  per-declaration assembly technique so a value wrapped across physical lines can't bypass the
+  check. (a) No raw hex or `rgb()`/`rgba()` colour literal on any background/color/border-color
+  property, unless marked `dz-menu-exception` with its own justification comment. (b) Every
+  `box-shadow` layer references a `var(--dz-` token. (c) `font-size`/`font-weight` only from the
+  type-scale tokens. It is the fourth static checker (after typography, buttons, shadows),
+  makerelease-wired alongside the other three.
+- **`dz-menu-contract.js`** (rig, live, Playwright): 52 checks across 4 groups, run against both
+  the primary session (admin) and the auth sidecar (non-admin). Group 1, openability +
+  containment: every dropdown/flyout/submenu at three viewports opens and every item renders
+  fully inside the viewport, clip-aware on both axes, including the resize-while-open state and
+  the post-click-unhovered navbar state (the owner scenario from the E2N story above), plus the
+  flyout close-X's contrast against its panel in both schemes. Group 2, tile-grid reachability
+  (absorbs the retired `dz-settings-tiles.js`): every shown core menu entry is reachable as a
+  tile. Group 3, settings-tab cleanliness (absorbs the retired `dz-setup-tabs.js`): every Setup
+  tab (10, discovered from the DOM, never hardcoded) free of empty labels, cut-off text,
+  out-of-viewport controls, and invisible-ink foreground/background collisions, at both 1440 and
+  390. Group 4, token conformity: sampled computed styles resolve from the `--dz-menu-*` family
+  where the family owns the property, and from the correct OTHER family where it deliberately
+  does not (settings-heading size/weight from the type scale, tile background from the card
+  tier), matching the tokens-only rule above rather than over-generalizing `--dz-menu-*`. A third
+  interim harness, `zz-flyout-overflow-check.js` (Task 3 scaffolding for the S2 containment fix),
+  was absorbed into Group 1 and deleted in the same commit, alongside the other two.
 
 ## Mobile Layout
 
@@ -1892,13 +2254,18 @@ Handle translates `34px` right on toggle, `0.4s` transition.
 
 **Top navbar**: `var(--dz-nav-bg)` background with `--dz-elev-popup` shadow. Links distributed via `display: flex; justify-content: space-around`. Link style: Inter semibold (`{typography.semibold}`), `{typography.sm}`, `var(--dz-body-text)`, `{rounded.interactive}` radius.
 
-- **Active page**: `rgba(blue, 0.4)` background, `1px solid blue` border
-- **Dropdown hover**: `rgba(blue, 0.15)` background
-- **Dropdown menu**: `var(--dz-body-bg)` background, `{rounded.container}` radius, `--dz-elev-popup` shadow
+- **Active page**: no fill. A `2px solid var(--dz-accent-color)` bottom border (accent text), the same recipe Sub-tabs / Nav-tabs use below, reused verbatim rather than a second underline mechanism.
+- **Dropdown hover**: `--dz-menu-item-hover-bg` (accent, 0.15 alpha)
+- **Dropdown menu**: `--dz-menu-bg` background, `--dz-menu-radius` radius, `--dz-menu-shadow` shadow
 
-**Sub-tabs / Nav-tabs**: underline style. Inactive: transparent bottom border. Active/hover: `2px solid var(--dz-accent-color)` bottom border, blue text color. No background change.
+This bar and every dropdown/flyout beneath it belong to one shared token family; see
+[Menus](#menus) for the full token set, the current-item accent-edge language (underline here,
+a left edge on vertical surfaces like the dropdowns), per-surface anatomy, and the enforcement
+contract.
 
-**Mobile hamburger** (max-width: 979px): fixed-position 25x25px toggle. Three 4px bars animate to X via `rotate(135deg)` / `rotate(-135deg)` transforms, `0.2s ease-in-out`. Gets blue background pill with `{rounded.container}` bottom corners after 50px scroll.
+**Sub-tabs / Nav-tabs**: underline style. Inactive: transparent bottom border. Active/hover: `2px solid var(--dz-accent-color)` bottom border, blue text color. No background change. Watch-only in the menus-family batch (2026-08-10): measured, not redesigned; see [Menus > Watch-Only](#watch-only-sub-tabs-s6).
+
+**Mobile hamburger** (max-width: 979px): fixed-position 25x25px toggle. Three 4px bars animate to X via `rotate(135deg)` / `rotate(-135deg)` transforms, `0.2s ease-in-out`. Gets blue background pill with `{rounded.container}` bottom corners after 50px scroll. The open-state ("X") bars read `var(--dz-body-text)`, not the closed hamburger's own `#fff`, since Task 8 (2026-08-10) made the mobile flyout panel behind it opaque; see [Menus](#menus).
 
 ### Charts (Highcharts)
 
@@ -2313,9 +2680,10 @@ Where the code does not yet meet the intent stated above. Each is a debt marker:
 would have to change, not a reason to copy the current behaviour.
 
 - `:focus-visible` styles now exist for every button family (see Buttons > States) plus a handful of
-  specific spots (card device-icon images, the Setup Apply Settings button, `.modal-footer .btn`), but
-  plain nav links (`.navbar .nav li a`) and the Setup dropdown's own menu items still have no visible
-  keyboard-focus ring
+  specific spots (card device-icon images, the Setup Apply Settings button, `.modal-footer .btn`) and,
+  as of the menus-family batch (Task 7, 2026-08-10), every top-level nav link
+  (`.navbar-inverse .nav > li > a:focus-visible`, `css/nav.css`). The dropdown-menu items themselves
+  (`.navbar .nav .dropdown-menu li a`, Setup/Other/Custom) still have no visible keyboard-focus ring.
 - No CSS custom properties for shadows outside the button family (card/popup/overlay/drag elevations
   are hardcoded `rgba` values; only the button shadows are tokenized)
 - Status glow colors (timeout red, protected blue, low battery yellow) are hardcoded `rgb()` in
@@ -2342,6 +2710,10 @@ would have to change, not a reason to copy the current behaviour.
 - Two declared `--dz-btn-*` tokens have no current CSS consumer: `--dz-btn-danger-bg-alpha` and
   `--dz-btn-text-shadow` (the base rule applies a literal `text-shadow: none !important` instead of
   the token). Candidates for removal in a future cleanup pass.
+- `--dz-nav-active-bg` and `--dz-nav-active-text` (`dz-tokens.css`) have no current CSS consumer
+  either: the "you are here" filled box they drove was replaced across the whole menus family by
+  the unified accent-edge underline/left-edge language (menus-family Task 7, 2026-08-10; see
+  [Menus](#menus)). Same cleanup-candidate class as the `--dz-btn-*` pair above.
 - The legacy `#login #submit` button (old pre-glass-morphism login markup, `css/login.css`) still has
   a raw `border-radius: 5px`. The current login page (`views/login.html`) uses `.btn-modern` instead,
   which is fully on the 10px token; this raw rule only affects the superseded markup kept for older
