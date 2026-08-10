@@ -158,29 +158,66 @@ function clampCorePopups() {
 // clampCorePopups uses above for core's raw-positioned popups, generalized to a
 // CSS-anchored submenu: adjust the same axis Bootstrap's own rule already uses (top),
 // clamped so the list never simply trades a bottom overflow for a top one -- its
-// content is fixed-height but shorter than every tested viewport, so there is always
-// room to fully resolve within that clamp. Class-toggle only where CSS truly cannot
-// know the runtime position (three dropdown-submenu triggers total: More options,
-// Plans, Data push -- selector below covers all, future submenus adopt this for free.)
+// content is fixed-height but shorter than every tested viewport at the sizes this
+// theme targets, so there is normally room to fully resolve within that clamp. At a
+// very short viewport the clamp itself saturates: once r.top - 10 would go negative
+// the Math.max(0, ...) floor holds the shift at 0 (never negative -- never pushes the
+// list further down), so past that point the list simply keeps whatever residual
+// bottom overflow the viewport is too short to avoid; this is a deliberate "never make
+// it worse" floor, not a bug (verified 1440x500: shift stays at r.top - 10, some
+// bottom overflow remains, no top overflow is introduced). Class-toggle only where CSS
+// truly cannot know the runtime position (three dropdown-submenu triggers total: More
+// options, Plans, Data push -- selector below covers all, future submenus adopt this
+// for free.)
+//
+// Re-contained on window resize too (debounced ~100ms, same local-timer idiom
+// devices.js's initDeviceObserver uses), not just on open: a flyout left open across a
+// real resize (dragging the window edge, a devtools panel opening, a monitor/zoom
+// change) keeps whatever "top" offset was computed for the PREVIOUS viewport size,
+// which can under- or over-correct once the viewport actually changes. Only menus
+// Bootstrap is currently showing (display !== "none") are touched; nothing recomputes
+// for closed ones. clampCorePopups (above) has the same "no resize handling" gap for
+// core's device popups; that's pre-existing and out of this function's scope, not
+// fixed here.
+var flyoutContainmentArmed = false;
 function armFlyoutContainment() {
+    if (flyoutContainmentArmed) return; // re-entrancy guard: never double-bind
+    flyoutContainmentArmed = true;
+
+    var pairs = [];
     document.querySelectorAll(".navbar .dropdown-submenu > a").forEach(function (trigger) {
         var menu = trigger.nextElementSibling;
         if (!menu || !menu.classList.contains("dropdown-menu")) return;
+        pairs.push(menu);
         trigger.addEventListener("mouseenter", function () {
-            menu.style.top = "";
-            // Below 980px (css/sidemenu.css) every nested .dropdown-menu is forced to
-            // position:relative and renders in flow inside the mobile flyout's own
-            // scroll panel, not as a floating overlay -- a viewport-relative nudge on
-            // the CSS "top" offset does not apply to that layout; fail closed (no-op).
-            if (getComputedStyle(menu).position !== "absolute") return;
-            var r = menu.getBoundingClientRect();
-            if (!r.height) return;
-            var overflow = r.bottom - (window.innerHeight - 10);
-            if (overflow > 0) {
-                menu.style.top = -Math.min(overflow, Math.max(0, r.top - 10)) + "px";
-            }
+            containFlyout(menu);
         });
     });
+
+    var resizeTimer = null;
+    window.addEventListener("resize", function () {
+        if (resizeTimer) clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () {
+            pairs.forEach(function (menu) {
+                if (getComputedStyle(menu).display !== "none") containFlyout(menu);
+            });
+        }, 100);
+    });
+}
+
+function containFlyout(menu) {
+    menu.style.top = "";
+    // Below 980px (css/sidemenu.css) every nested .dropdown-menu is forced to
+    // position:relative and renders in flow inside the mobile flyout's own
+    // scroll panel, not as a floating overlay -- a viewport-relative nudge on
+    // the CSS "top" offset does not apply to that layout; fail closed (no-op).
+    if (getComputedStyle(menu).position !== "absolute") return;
+    var r = menu.getBoundingClientRect();
+    if (!r.height) return;
+    var overflow = r.bottom - (window.innerHeight - 10);
+    if (overflow > 0) {
+        menu.style.top = -Math.min(overflow, Math.max(0, r.top - 10)) + "px";
+    }
 }
 
 function setCustomIconsPage() {
