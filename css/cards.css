@@ -675,25 +675,37 @@ table.mobileitem td.name {
        other in-card buttons (nothing else in a card looks like this
        control anymore). */
     border-radius: var(--dz-btn-radius);
-    /* Still needed even with real per-button corner radii below: buttons.
-       css's first/last-child logic only knows the group's absolute first/
-       last child, not "first/last in this particular wrapped row" - a
-       square-cornered INTERIOR button can land at the shell's own rounded-
-       corner position after wrap (measured: "Auto", the HVAC 5-level
-       case's row-1-last-but-not-group-last button). This clip ERASES that
-       button's square corner PIXEL, but only that: overflow:hidden cuts
-       content off at the shell's rounded boundary, it does not paint a
-       replacement arc, and the interior button's own border-radius is 0 at
-       that corner, so its two straight border segments (top, right) simply
-       stop short of meeting - measured live (Task 12, corner defect
-       investigation, 8x-upscaled pixel probe): a genuine blank NOTCH sits
-       between where the top border ends and the right border begins, not a
-       rounded corner and not even a plain square one. The ::after overlay
-       two rules below is the actual fix for that gap; this clip is still
-       needed underneath it (still the thing that erases the square corner
-       in the first place, and still beats the #type .btn-group / .input
-       .btn-group overflow-x:auto rule below - an ID selector, predates this
-       shell, still serves other .btn-group contexts, untouched). */
+    /* Still needed even with the JS-tagged per-button corner radii below:
+       buttons.css's first/last-child logic only knows the group's absolute
+       first/last child, not "first/last in this particular wrapped row" -
+       a square-cornered INTERIOR button can land at the shell's own
+       rounded-corner position after wrap (measured: "Auto", the HVAC
+       5-level case's row-1-last-but-not-group-last button). This clip is
+       a SAFETY NET for that gap (and is still what the focus-ring comment
+       below relies on for the outward-ring amputation it describes), not
+       the fix itself: overflow:hidden only erases a stray square corner
+       pixel, it never paints a replacement arc (measured live, Task 12,
+       first fix round: a genuine blank NOTCH, not a rounded or even a
+       square corner - the two straight border segments either side simply
+       stopped short of meeting). A first attempt papered over that gap
+       with a decorative ::after tracing the shell's own BOUNDING-BOX
+       corners; a controller review caught that this drew a plain rounded
+       rectangle around the WHOLE bounding box, including the genuinely
+       empty space beside a narrower last row (e.g. "Fan Only" alone,
+       right-anchored) - contradicting the DESIGN.md-documented stair-step
+       silhouette and the shell-fill mechanism the owner had already
+       rejected three times in the original selector-segmented pass. Fixed
+       for real via `js/devices.js` (retagSelectorWrapCorners): JS is the
+       only thing that can know which button is actually first/last WITHIN
+       a wrapped row (no CSS selector expresses that - the wrap-row comment
+       above documents the same limit for the vertical seam), so it tags
+       exactly those two buttons with data-wrap-corner-tr/-bl, and the two
+       rules right below this one apply the family radius to the tagged
+       corner ONLY - never to empty bounding-box space, keeping the
+       stair-step reading the design calls for. !important still beats the
+       #type .btn-group / .input .btn-group overflow-x:auto rule below (an
+       ID selector, predates this shell, still serves other .btn-group
+       contexts, untouched). */
     overflow: hidden !important;
     width: fit-content;
     max-width: 100%;
@@ -702,46 +714,52 @@ table.mobileitem td.name {
        edges line up exactly - required for the flush vertical seam above
        to read as connected rather than staggered. */
     margin-left: auto;
-    /* Anchors the corner-completion overlay below (::after, position:
-       absolute) to this shell's own box rather than some further-out
-       positioned ancestor. */
+    /* Establishes this shell as the offsetParent for its .btn children, so
+       src/js/devices.js's retagSelectorWrapCorners can read offsetTop/
+       offsetLeft directly relative to the shell (no viewport-relative
+       getBoundingClientRect math needed) when deciding which button sits
+       at a true wrap corner. */
     position: relative;
 }
 
-/* Wrap-corner clip COMPLETION (Task 12 fix). The clip above only erases a
-   wrap-corner interior button's square corner pixel (see that rule's own
-   comment) - it never paints the missing arc, so the shell rendered a blank
-   notch at any corner a non-first/non-last button happened to land on
-   (measured: "Auto"'s top-right in the HVAC 5-level wrap). No CSS selector
-   can identify "the button occupying this particular wrapped corner" (same
-   structural limit the wrap-row comment above already documents for the
-   vertical seam), so this sidesteps the per-button question entirely: a
-   single decorative overlay traces the SHELL's own exterior once, at the
-   shell's own radius, regardless of which button's DOM position ends up at
-   any given corner. Its straight edges land pixel-for-pixel on top of the
-   perimeter buttons' own existing borders (identical color, identical 1px
-   width - every exterior edge pixel is already painted by some button's
-   border, so this never doubles or shifts anything visible), and its own
-   border-radius supplies the curved stroke the clip alone could not. Purely
-   decorative: no fill (shell stays the established no-fill S3 look, the
-   direction the owner explicitly picked over three container-clip-shell
-   FILL rounds - this overlay carries no background, so it does not
-   reopen that question), pointer-events:none (never intercepts clicks,
-   hover, or focus), and it sits within the shell's own overflow:hidden
-   clip at the identical radius, so it never paints outside the shell's
-   already-established boundary. Verified live at all four corners, wrapped
-   (HVAC 5-level: Off/Heat/Cool/Auto + Fan Only) and unwrapped (single row)
-   alike - the unwrapped case already had correct corners via :first-child/
-   :last-child, so the overlay there just retraces an identical curve
-   (no visible change), while the wrapped case gains the arc it lacked. */
-.item .btn-group:not(.span3 *)::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    box-sizing: border-box;
-    border: 1px solid var(--dz-accent-color);
-    border-radius: var(--dz-btn-radius);
-    pointer-events: none;
+/* Wrap-corner completion, JS-tagged (Task 12 fix round 2; see the shell
+   rule's own comment above for why a pure-CSS/::after attempt was
+   reverted). src/js/devices.js's retagSelectorWrapCorners measures each
+   shell's actual button rows after every render/resize and tags exactly
+   two buttons, only when a real wrap makes them true exterior corners:
+   the LAST button of the FIRST (topmost) row (data-wrap-corner-tr - this
+   is the "Auto" case the original defect was measured on) and the FIRST
+   button of the LAST (bottommost) row, but ONLY when that row's left edge
+   actually reaches the shell's own left edge (data-wrap-corner-bl - stays
+   untagged for a narrower, right-anchored last row like "Fan Only" alone,
+   which is exactly the case the reverted ::after got wrong: nothing
+   renders in that empty space now, not even a bounding-box outline).
+   Every other corner is already correct without tagging: the group's true
+   :first-child (top-left) and :last-child (bottom-right, since
+   justify-content:flex-end always right-anchors every row to the same
+   edge, so the last row's own last button is always both the visual
+   bottom-right corner AND the DOM's actual last child) are handled by the
+   existing first/last-child rules above, untouched by this round.
+
+   Specificity note: the attribute selector is deliberately repeated THREE
+   times, measured live, not assumed. The base selector up to `.btn`
+   (.item + .btn-group + :not(.span3 *) + .btn) is already (0,4,0); the
+   interior-reset rule two rules above this one adds two more pseudo-
+   classes (:not(:first-child):not(:last-child)) to reach (0,6,0). A
+   single repeated attribute only reaches (0,5,0) (loses outright) and
+   TWO repeats only reach (0,6,0) - an exact TIE with the interior-reset
+   rule, which then wins on source order since it is declared LATER in
+   this file (confirmed live: the radius stayed 0px at both one and two
+   attribute repeats, only resolving at three). Three repeats reach
+   (0,7,0), unambiguously outranking every corner-radius rule in this
+   file (including the single-button-row edge case, where a tagged button
+   coincides with :first-child/:last-child at (0,5,0) each), with no
+   reliance on rule order either way. */
+.item .btn-group:not(.span3 *) > .btn[data-wrap-corner-tr][data-wrap-corner-tr][data-wrap-corner-tr] {
+    border-top-right-radius: var(--dz-btn-radius) !important;
+}
+.item .btn-group:not(.span3 *) > .btn[data-wrap-corner-bl][data-wrap-corner-bl][data-wrap-corner-bl] {
+    border-bottom-left-radius: var(--dz-btn-radius) !important;
 }
 
 /* Margin reset, UNSCOPED (applies inside compact too) - byte-identical to

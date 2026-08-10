@@ -350,6 +350,7 @@ function init_theme() {
         applyCardWidths();
         clampCorePopups();
         armFlyoutContainment();
+        armSelectorWrapCornerRetag();
         setLogo();
         setSearch();
         setDevicesNativeSelectorForMobile();

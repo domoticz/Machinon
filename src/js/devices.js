@@ -125,6 +125,109 @@ function readSwitchStatus(item) {
     return status;
 }
 
+/* Wrap-corner tagging for the joined Selector-level segmented control
+   (SelectorStyle 0, css/cards.css ".item .btn-group:not(.span3 *)"). CSS
+   has no selector for "the first/last button of a particular wrapped flex
+   row" (flex-wrap only resets its line breaks at layout time, so there is
+   nothing static to select on -- css/cards.css's own comment on the shell
+   rule documents the same structural limit for its ~2px wrapped-row
+   seam), so deciding which button needs the family corner radius at a
+   wrap corner is fundamentally a JS-only question. This tags exactly the
+   two buttons that can ever be a true EXTERIOR corner after a wrap:
+
+   - the LAST button of the FIRST (topmost) row -- always tagged when a
+     wrap happened (this is "Auto" in the HVAC 5-level case the defect was
+     first measured on: the shell's top-right corner, always exterior
+     regardless of row width, since the first row is always exactly as
+     wide as the shell itself).
+   - the FIRST button of the LAST (bottommost) row -- tagged ONLY when
+     that row's own left edge actually reaches the shell's left edge (0).
+     A narrower, right-anchored last row (justify-content:flex-end, e.g. a
+     lone "Fan Only") leaves that corner genuinely ABSENT from the
+     control's silhouette: there is no button there at all, so nothing
+     gets tagged and nothing renders in that space. A first attempt at
+     this fix (a single ::after overlay tracing the shell's whole
+     bounding box) got exactly this case wrong -- it drew a rounded
+     rectangle border around that empty space regardless, which a
+     controller review caught (see the shell rule's own comment for the
+     full history) as visually contradicting the DESIGN.md stair-step
+     silhouette. This function never paints empty space: it only ever
+     tags a real button.
+
+   The other two corners never need tagging: the group's true :first-child
+   (top-left) and :last-child (bottom-right -- justify-content:flex-end
+   always right-anchors every row to the same edge, so the last row's own
+   last button is always both the visual bottom-right corner and the DOM's
+   actual last child) are already handled by the existing first/last-child
+   CSS rules, untouched by this function.
+
+   FAIL CLOSED: an untagged button simply stays square (the family's
+   plain interior-button look) -- if this function never runs for some
+   reason (a code path that skips it, or a future regression), the worst
+   case is the ORIGINAL, lesser defect (a plain square corner), never the
+   reverted attempt's worse one (a rounded outline around empty space).
+
+   Idempotent and safe to call repeatedly: clears its own tags before
+   recomputing every time, so a re-run after a resize or a content change
+   never leaves a stale tag on the wrong button. Called from
+   setAllDevicesFeatures (initial render + the observer's re-enhance pass)
+   and from armSelectorWrapCornerRetag's debounced window resize listener
+   below, since wrap state depends on viewport/tile width and can change
+   with no DOM mutation for the MutationObserver in initDeviceObserver to
+   catch. */
+function retagSelectorWrapCorners() {
+    $("#main-view .item .btn-group").each(function() {
+        var $shell = $(this);
+        if ($shell.closest(".span3").length) return; // compact dashboard: css/cards.css excludes it identically
+
+        var $btns = $shell.children(".btn");
+        $btns.removeAttr("data-wrap-corner-tr").removeAttr("data-wrap-corner-bl");
+        if ($btns.length < 2) return;
+
+        /* Group by row via offsetTop, shell-relative (the shell carries
+           position:relative, css/cards.css) so this needs no viewport-
+           relative getBoundingClientRect math. Rounded to the nearest
+           pixel: sub-pixel layout can otherwise split one visual row into
+           two row-buckets that differ by a fraction of a pixel. */
+        var rows = new Map(); // rounded offsetTop -> [button...]
+        $btns.each(function() {
+            var top = Math.round(this.offsetTop);
+            if (!rows.has(top)) rows.set(top, []);
+            rows.get(top).push(this);
+        });
+        if (rows.size < 2) return; // single row: no wrap, existing first/last-child CSS already correct
+
+        var tops = Array.from(rows.keys()).sort(function(a, b) { return a - b; });
+        var firstRow = rows.get(tops[0]).sort(function(a, b) { return a.offsetLeft - b.offsetLeft; });
+        var lastRow = rows.get(tops[tops.length - 1]).sort(function(a, b) { return a.offsetLeft - b.offsetLeft; });
+
+        firstRow[firstRow.length - 1].setAttribute("data-wrap-corner-tr", "");
+
+        var lastRowFirst = lastRow[0];
+        if (Math.abs(lastRowFirst.offsetLeft) <= 1) {
+            lastRowFirst.setAttribute("data-wrap-corner-bl", "");
+        }
+    });
+}
+
+/* Debounced window-resize re-arm for retagSelectorWrapCorners, same local-
+   timer idiom + re-entrancy guard as page.js's armFlyoutContainment (100ms
+   debounce, armed once). A pure window resize (dragging the browser edge,
+   a devtools panel opening, a monitor/zoom change, mobile rotation) never
+   mutates the DOM, so initDeviceObserver's MutationObserver-based re-
+   enhance pass has nothing to fire on even though the selector's wrap
+   state may have changed at the new width. */
+var selectorWrapCornerResizeArmed = false;
+function armSelectorWrapCornerRetag() {
+    if (selectorWrapCornerResizeArmed) return;
+    selectorWrapCornerResizeArmed = true;
+    var resizeTimer = null;
+    window.addEventListener("resize", function() {
+        if (resizeTimer) clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(retagSelectorWrapCorners, 100);
+    });
+}
+
 function setAllDevicesFeatures() {
     /* Browse all items to apply themes features and styles */
     $("#main-view .item").each(function() {
@@ -202,6 +305,10 @@ function setAllDevicesFeatures() {
             setDeviceWindDirectionIcon(idx);
         }
 	});
+
+    /* Wrap-corner tagging for any joined Selector-level control (SelectorStyle 0)
+       just (re)rendered above -- see the function's own header comment. */
+    retagSelectorWrapCorners();
 }
 
 function setAllDevicesIconsStatus() {
@@ -491,6 +598,13 @@ function initDeviceObserver() {
                 if (hasUnprocessed && typeof setAllDevicesFeatures === "function") {
                     setAllDevicesFeatures();
                     setAllDevicesIconsStatus();
+                } else {
+                    /* setAllDevicesFeatures (which already re-tags at its own end) did not
+                       run this burst, but an ALREADY-processed selector's wrap state can
+                       still have changed here (e.g. a live level-name/label update that
+                       reflows without adding a new, unprocessed card) -- re-tag directly
+                       so a stale corner tag never survives a settle burst untouched. */
+                    retagSelectorWrapCorners();
                 }
 
                 var switchEnabled = theme.features.switch_instead_of_bigtext.enabled === true ||
