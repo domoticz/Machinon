@@ -271,26 +271,46 @@ ul.machinon_ul li {
     #settingscontent {
         display: flex;
         flex-direction: column;
+        /* dvh with a vh fallback (invalid-value cascade, not a media query -
+           browsers without dvh support ignore the second declaration and
+           keep the first): iOS Safari's address bar show/hide resizes what
+           100vh resolves to mid-session (the "large viewport"), which would
+           either strand a sliver of #my-tab-content under the bar or leave
+           a gap above it depending on bar state; 100dvh tracks the actual
+           visible ("small") viewport instead. */
         height: calc(100vh - 50px - 50px);
+        height: calc(100dvh - 50px - 50px);
     }
 
-    #settings,
-    #content {
+    /* Descendant-scoped to #settingscontent (unique to views/setup.html):
+       #settings, #tabs and #my-tab-content are NOT unique ids in core - core
+       reuses #settings on app/hardware/Hardware.html (two separate forms,
+       both with that id), and #tabs / #my-tab-content on views/timers.html
+       and app/hardware/setup/ZWave.html. Bare #id selectors would have
+       flexed and height-bound those OTHER pages' elements too at phone
+       widths - e.g. Timers' own #my-tab-content (core's .tab-content class
+       only sets overflow:visible, nothing else constrains its height) would
+       have picked up this rule's flex-basis and overflow-y:auto, changing
+       the Timers form's mobile geometry for no reason connected to this fix.
+       #settingscontent itself only exists in setup.html, so scoping every
+       selector below to its descendants keeps this fix on the Setup page it
+       was built for. */
+    #settingscontent #settings,
+    #settingscontent #content {
         display: flex;
         flex-direction: column;
         flex: 1 1 auto;
         min-height: 0;
     }
 
-    #tabs {
+    #settingscontent #tabs {
         flex: 0 0 auto;
     }
 
-    #my-tab-content {
+    #settingscontent #my-tab-content {
         flex: 1 1 auto;
         min-height: 0;
         overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
         scrollbar-width: thin;
         scrollbar-color: var(--dz-accent-color) var(--dz-body-bg);
     }
