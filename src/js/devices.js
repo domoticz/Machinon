@@ -1,3 +1,40 @@
+/* SelectorStyle-1 popup containment (owner-reported 2026-08-11, "Contract Selector Menu"
+   card): app/widgets/dzLightWidget.js (core) opens the level dropdown as a jQuery UI
+   selectmenu with no `position` option of its own ($select.selectmenu({width: false,
+   change: ...})), so the widget falls back to ITS OWN default -- confirmed live in
+   jquery-ui.min.js's uncompressed source (ui/widgets/selectmenu.js): `position: {my:
+   "left top", at: "left bottom", collision: "none"}`. "none" is jQuery UI's own explicit
+   choice, not core disabling anything -- but it means $.position's built-in viewport
+   collision handling (flip/fit) never engages, so a popup opened low on a short/scrolled
+   viewport runs off the bottom uncorrected (confirmed live, 2026-08-11: at 1440x700 with
+   the card scrolled to the bottom, the closed popup's rect.bottom=787 past the
+   vh=700 viewport).
+
+   Fixed at the cause, not with a position-nudge fallback (armFlyoutContainment/
+   clampCorePopups's pattern, src/js/page.js): this default is a WIDGET-LEVEL setting on
+   $.ui.selectmenu.prototype.options, reachable from theme JS before any card ever opens
+   one, so re-pointing it here engages jQuery UI's OWN collision math instead of
+   reimplementing viewport arithmetic ourselves. "flip" (confirmed live, same 1440x700
+   repro: the popup re-opens ABOVE its button instead, fully contained) is the well-known
+   fix for this exact upstream default (jquery/jquery-ui#1272); jQuery UI's own
+   $.position() then recomputes fresh on every open() call, so this needs no resize-while-
+   open listener the way the flyout nudge does -- there is nothing to re-arm, every open
+   is a new position() call. One assignment, safe to call more than once (idempotent), so
+   unlike armFlyoutContainment there is no re-entrancy guard to write.
+
+   MUST run before the first card's initWidgets() calls .selectmenu() -- true for every
+   caller today: jquery-ui.min.js loads synchronously ahead of custom.js
+   (index.html), and custom.js's THEME_MODULES (this file included) finish executing
+   before Angular ever boots (custom.js's own comment on THIS_BLOCK_MUST_STAY_AT_TOP
+   documents the same ordering guarantee) -- long before any device card can render a
+   .selectorlevels select. The $.ui.selectmenu guard below is defensive only: this file
+   loads unconditionally, but there is no contract that jquery-ui.min.js always ships the
+   selectmenu widget (a future core swap-out is not this theme's problem to crash on). */
+function patchSelectMenuCollision() {
+    if (!$.ui || !$.ui.selectmenu) return;
+    $.ui.selectmenu.prototype.options.position.collision = "flip";
+}
+
 function setDevicesNativeSelectorForMobile() {
     if (!isMobile) return;
     $(".selectorlevels span.ui-selectmenu-button").each(function() {

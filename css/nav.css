@@ -523,3 +523,107 @@ div.menu-toggle.scrolled {
     outline: none;
     box-shadow: var(--dz-btn-shadow), var(--dz-btn-focus-ring);
 }
+
+/* ===========================================================================================
+ * SelectorStyle-1 popup (owner-reported 2026-08-11, "Contract Selector Menu" card):
+ * jQuery UI selectmenu, joined onto this file's own --dz-menu-* family
+ * ===========================================================================================
+ * The multi-level Selector-switch control past SelectorStyle-0's segmented-button threshold
+ * (app/widgets/dzLightWidget.js's initWidgets, `$select.selectmenu(...)`) opens a jQuery UI
+ * selectmenu popup: `.ui-selectmenu-menu`, APPENDED TO <body> (never a descendant of the
+ * card), wearing the bundled ui-darkness skin (css/ui-darkness/jquery-ui.min.css). This is
+ * body-level menu chrome, the same surface class as the navbar dropdown/flyout above -- the
+ * --dz-menu-* family's natural home, not css/cards.css (which only reaches the card-scoped
+ * trigger button, never an element body appends outside the card). scripts/check-menus.sh
+ * scans exactly this file (+ sidemenu.css/settings.css) for the family's token-only rule, so
+ * living here keeps this block inside that scan rather than silently exempt.
+ *
+ * ui-darkness's own precedent for de-skinning a bundled jQuery UI surface: css/users.css's
+ * dual-list retheme (.uix-multiselect, .ui-widget-content/.ui-state-default) and custom.css's
+ * dialog-titlebar retheme (.ui-widget-header). Neither of those needs --dz-ui-icon-filter
+ * here: confirmed live, this popup's items carry no ui-icon sprite (the closed trigger
+ * button's own dropdown caret does, but that button already reads fine in the owner's
+ * screenshot and is out of this defect's scope -- untouched).
+ *
+ * The VISIBLE painted box is `ul.ui-menu.ui-widget.ui-widget-content`, not the
+ * `.ui-selectmenu-menu` wrapper div: confirmed live, the wrapper itself computes a
+ * transparent, borderless, unradiused box; ui-darkness paints the ul via its generic
+ * `.ui-widget-content` rule (black background, #666 border) -- black background under our
+ * own dark --dz-body-text-colored item labels is the owner's "near-black, unreadable"
+ * report. Both selectors below stay scoped under `.ui-selectmenu-menu` so nothing here can
+ * leak onto an unrelated `.ui-menu` (e.g. a future jQuery UI autocomplete).
+ *
+ * Containment (the popup's second defect, viewport overflow) is fixed at the cause, in JS,
+ * not here: src/js/devices.js's patchSelectMenuCollision() re-points the widget's own
+ * position.collision default from jQuery UI's "none" to "flip", so $.position's built-in
+ * collision handling opens the popup upward when there is no room below. See that
+ * function's own comment for the full mechanism and why the armFlyoutContainment/
+ * clampCorePopups nudge pattern is not needed here.
+ */
+.ui-selectmenu-menu .ui-menu {
+    background: var(--dz-menu-bg);
+    color: var(--dz-menu-text);
+    border: none;
+    /* Uniform on every corner, not ui-darkness's bottom-only shape (jQuery UI's own
+       "ui-corner-bottom" class -- ui/widgets/selectmenu.js:165 -- is hardcoded at menu
+       creation and never flips to "ui-corner-top" when patchSelectMenuCollision's "flip"
+       opens the popup ABOVE its button instead of below, so upstream's own asymmetric
+       radius is already wrong half the time). Matches this file's own dropdown-menu
+       radius rule above instead. */
+    border-radius: var(--dz-menu-radius);
+    /* Clips the last item's ui-state-active fill to the rounded corner on every edge (the
+       bundled skin's 1px bottom padding only ever masked this at its old bottom-only
+       radius). */
+    overflow: hidden;
+    box-shadow: var(--dz-menu-shadow);
+}
+
+.ui-selectmenu-menu .ui-menu-item-wrapper {
+    color: var(--dz-menu-text);
+    background: transparent;
+    /* Reserves the same 2px the current-item rule below actually uses (css/sidemenu.css's
+       .current_page_item precedent), so acquiring "current" only ever changes this edge's
+       colour, never its width. */
+    border-left: 2px solid transparent;
+}
+
+/* Real mouse rollover, deliberately a plain :hover rather than reusing the widget's own
+   state class: jQuery UI's selectmenu conflates "hovered" and "keyboard-focused/currently-
+   selected" into ONE class (ui/widgets/menu.js's focus() adds ui-state-active on mouseenter,
+   keyboard nav, AND on open for whichever option matches the select's live value) -- a plain
+   CSS :hover is the only way to give an ordinary mouse rollover its own tint distinct from
+   "this is the current value" below. */
+.ui-selectmenu-menu .ui-menu-item-wrapper:hover {
+    background: var(--dz-menu-item-hover-bg);
+}
+
+/* The widget's ui-state-active is the "current" row (see the :hover comment above for why
+   it is also the hover/keyboard-focus class). Same vertical-surface "you are here" language
+   as this file's own .current_page_item rule above and css/sidemenu.css's mobile twin: 2px
+   accent left edge + accent text, transparent fill (--dz-menu-item-active-bg) rather than
+   ui-darkness's own solid accent-blue block fill. font-weight matches .current_page_item's
+   own semibold too, replacing ui-darkness's un-tokenized hardcoded bold.
+
+   margin: 0 zeroes jQuery UI's OWN base-theme rule (ui/themes/base/menu.css:
+   ".ui-menu .ui-state-focus, .ui-menu .ui-state-active { margin: -1px }"), which existed
+   to let the active row's own 1px BORDER (ui-darkness's solid accent-blue fill, removed
+   above) sit flush with the menu's outer edge instead of 1px inside it -- vestigial now
+   that this row carries no border of its own beyond the left accent edge (confirmed live,
+   this task: with the -1px margin still active, the row measured exactly 1px past the ul's
+   own left AND right edge, tripping the `overflow: hidden` clip above and this popup's own
+   dz-menu-contract.js containment assertion -- a genuine 1px overflow, not a false
+   positive). */
+.ui-selectmenu-menu .ui-menu-item-wrapper.ui-state-active {
+    background: var(--dz-menu-item-active-bg);
+    border-left-color: var(--dz-accent-color);
+    color: var(--dz-accent-color);
+    font-weight: var(--dz-weight-semibold);
+    margin: 0;
+}
+
+/* Hovering the current row: background follows the ordinary hover tint (interactive
+   feedback), the accent edge/text stay -- identical split to this file's own
+   .current_page_item > a:hover rule above. */
+.ui-selectmenu-menu .ui-menu-item-wrapper.ui-state-active:hover {
+    background: var(--dz-menu-item-hover-bg);
+}

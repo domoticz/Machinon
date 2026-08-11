@@ -839,7 +839,17 @@ select.ui-corner-all option:hover {
     }
 }
 
-/* Selector */
+/* Selector: the CLOSED trigger button only (SelectorStyle-1's ui-selectmenu-button, jQuery
+   UI's <span> replacement for the <select>). The OPEN popup this button owns
+   (.ui-selectmenu-menu, appended to <body>, never a descendant of this button) is body-level
+   menu chrome on the --dz-menu-* family instead -- css/nav.css's "SelectorStyle-1 popup"
+   block, scanned by scripts/check-menus.sh. Two dead rules removed from here 2026-08-11
+   (owner-reported unstyled-popup fix): an unscoped `.ui-menu-item-wrapper.ui-state-active`
+   that fought css/nav.css's properly-scoped replacement over cascade order rather than
+   losing to it cleanly, and `.selectorlevels-menu` (core's dzLightWidget.js's current
+   $select.selectmenu({...}) call passes no `classes` option, so core never actually adds
+   that class to the popup -- confirmed dead by grep, both here and in core's own
+   www/css/style.css, likely a leftover from an older core version that did). */
 .ui-selectmenu-button.ui-button {
     width: auto !important;
     border-radius: 0;
@@ -848,13 +858,7 @@ select.ui-corner-all option:hover {
     border-right: 1px solid transparent;
 }
 
-.ui-menu-item-wrapper.ui-state-active {
-    background: var(--dz-accent-color);
-    border: 0;
-    font-weight: var(--dz-weight-regular);
-}
-
-.ui-selectmenu-button-open, 
+.ui-selectmenu-button-open,
 .ui-button:hover, .ui-button:focus {
     background: transparent;
     outline: none;
@@ -863,12 +867,6 @@ select.ui-corner-all option:hover {
 .ui-selectmenu-text {
     color: var(--dz-accent-color);
     font-weight: var(--dz-weight-semibold);
-}
-
-.selectorlevels-menu {
-    border-color: var(--dz-accent-color) !important;
-    color: var(--dz-body-text);
-    background: var(--dz-body-bg);
 }
 
 @media (max-width: 767px) {

@@ -354,6 +354,7 @@ function init_theme() {
         setLogo();
         setSearch();
         setDevicesNativeSelectorForMobile();
+        patchSelectMenuCollision();
         $(document).ajaxSuccess(ajaxSuccessCallback);
 
         /* Set drag clone width to match the actual card width */
