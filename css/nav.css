@@ -606,15 +606,30 @@ div.menu-toggle.scrolled {
 
    margin: 0 zeroes jQuery UI's OWN base-theme rule (ui/themes/base/menu.css:
    ".ui-menu .ui-state-focus, .ui-menu .ui-state-active { margin: -1px }"), which existed
-   to let the active row's own 1px BORDER (ui-darkness's solid accent-blue fill, removed
-   above) sit flush with the menu's outer edge instead of 1px inside it -- vestigial now
-   that this row carries no border of its own beyond the left accent edge (confirmed live,
-   this task: with the -1px margin still active, the row measured exactly 1px past the ul's
-   own left AND right edge, tripping the `overflow: hidden` clip above and this popup's own
-   dz-menu-contract.js containment assertion -- a genuine 1px overflow, not a false
-   positive). */
+   to let the active row's own 1px BORDER sit flush with the menu's outer edge instead of
+   1px inside it -- vestigial now that this row's border is reduced to the left accent edge
+   below, same as the margin was.
+
+   border-top/-right/-bottom: none is the second half of that same border story, and was
+   MISSED in the first pass -- only border-left-color was overridden then, on the
+   (correct) assumption that was the row's only border. It was not: ui-darkness's own
+   ".ui-state-active,...{border:1px solid #ffaf0f}" is a FULL shorthand (all four sides),
+   and with nothing here contesting the other three, it kept painting a 1px solid YELLOW
+   border on top/right/bottom of the active row underneath the correct left edge --
+   confirmed live (owner-reported "option text jumps on hover", 2026-08-11 follow-up):
+   that extra 1px top + 1px bottom border adds 2px to the active row's own height only
+   while it IS active, so every row below it shifts vertically by that same 2px as the
+   active state moves between options on hover -- a real, measured 2px jump (top:
+   757.17px -> 755.17px on "High" in the live repro), not the horizontal text-x shift a
+   missing reserved BORDER-LEFT width would cause (that width was already reserved
+   correctly by the base rule above; this was a completely different, unreserved edge).
+   Explicit `none` on all three beats ui-darkness's shorthand the same way border-left-
+   color already does, by specificity (3 classes here vs its 2), no !important needed. */
 .ui-selectmenu-menu .ui-menu-item-wrapper.ui-state-active {
     background: var(--dz-menu-item-active-bg);
+    border-top: none;
+    border-right: none;
+    border-bottom: none;
     border-left-color: var(--dz-accent-color);
     color: var(--dz-accent-color);
     font-weight: var(--dz-weight-semibold);
