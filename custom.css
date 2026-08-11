@@ -839,17 +839,18 @@ select.ui-corner-all option:hover {
     }
 }
 
-/* Selector: the CLOSED trigger button only (SelectorStyle-1's ui-selectmenu-button, jQuery
-   UI's <span> replacement for the <select>). The OPEN popup this button owns
-   (.ui-selectmenu-menu, appended to <body>, never a descendant of this button) is body-level
-   menu chrome on the --dz-menu-* family instead -- css/nav.css's "SelectorStyle-1 popup"
-   block, scanned by scripts/check-menus.sh. Two dead rules removed from here 2026-08-11
-   (owner-reported unstyled-popup fix): an unscoped `.ui-menu-item-wrapper.ui-state-active`
-   that fought css/nav.css's properly-scoped replacement over cascade order rather than
-   losing to it cleanly, and `.selectorlevels-menu` (core's dzLightWidget.js's current
-   $select.selectmenu({...}) call passes no `classes` option, so core never actually adds
-   that class to the popup -- confirmed dead by grep, both here and in core's own
-   www/css/style.css, likely a leftover from an older core version that did). */
+/* Selector: the trigger button only, every interactive state (SelectorStyle-1's
+   ui-selectmenu-button, jQuery UI's <span> replacement for the <select>). The OPEN popup
+   this button owns (.ui-selectmenu-menu, appended to <body>, never a descendant of this
+   button) is body-level menu chrome on the --dz-menu-* family instead -- css/nav.css's
+   "SelectorStyle-1 popup" block, scanned by scripts/check-menus.sh. Two dead rules removed
+   from here 2026-08-11 (owner-reported unstyled-popup fix): an unscoped
+   `.ui-menu-item-wrapper.ui-state-active` that fought css/nav.css's properly-scoped
+   replacement over cascade order rather than losing to it cleanly, and `.selectorlevels-menu`
+   (core's dzLightWidget.js's current $select.selectmenu({...}) call passes no `classes`
+   option, so core never actually adds that class to the popup -- confirmed dead by grep,
+   both here and in core's own www/css/style.css, likely a leftover from an older core
+   version that did). */
 .ui-selectmenu-button.ui-button {
     width: auto !important;
     border-radius: 0;
@@ -862,6 +863,35 @@ select.ui-corner-all option:hover {
 .ui-button:hover, .ui-button:focus {
     background: transparent;
     outline: none;
+}
+
+/* Trigger button's remaining interactive states, owner-reported 2026-08-11: click-and-hold
+   turned the underline YELLOW. jQuery UI's own .ui-button ships one border-bottom-color
+   literal PER STATE (baseline #666 -- already replaced by the accent underline below via
+   .ui-corner-all; hover/focus #59b4d4 light-blue; :active #ffaf0f bright yellow, the
+   reported defect) -- confirmed live, this task: hover/focus/active all leaked their own
+   ui-darkness literal unchanged, only the REST state was actually themed. The open state has
+   a second, independent leak: the widget's own `classes: {"ui-selectmenu-button-open":
+   "ui-corner-top", ...}` option (below) swaps this button OFF ui-corner-all while open,
+   dropping the accent-underline rule out of the match set entirely (confirmed live: open
+   measured the same #59b4d4 as hover/focus, since a freshly-clicked button also keeps
+   :focus while open -- covered here explicitly rather than relying on that incidental
+   overlap). Every selector below is 2 classes + 1 pseudo-class/class, (0,3,0), beating
+   jQuery UI's own (0,2,0) per-state compounds on specificity alone -- no !important needed,
+   unlike css/sidemenu.css's .current_page_item fight with Bootstrap (that one loses on
+   specificity too; this one does not). background/outline already neutralize correctly via
+   the generic .ui-button:hover, .ui-button:focus rule above (confirmed live: background
+   stayed transparent in every state already; only border-bottom-color leaked, so that is
+   the only property repeated here). ui-darkness's matching selector list also names
+   `.ui-state-active`, but this widget never actually adds that CLASS to the trigger button
+   (confirmed live via a full matched-rule dump across rest/hover/active/open) -- only
+   jQuery UI's own selector text carries it, unreachable here, so it is not repeated as dead
+   weight. */
+.ui-selectmenu-button.ui-button:hover,
+.ui-selectmenu-button.ui-button:focus,
+.ui-selectmenu-button.ui-button:active,
+.ui-selectmenu-button-open.ui-button {
+    border-bottom-color: var(--dz-accent-color);
 }
 
 .ui-selectmenu-text {
