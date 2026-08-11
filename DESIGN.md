@@ -667,7 +667,7 @@ the ones that need to differ.
 | `--dz-btn-hover-bg` | `rgba(var(--dz-accent-values), 0.1)` | Ghost/icon-quiet hover tint |
 | `--dz-btn-shadow` | `0 1px 3px rgba(0,0,0,.18), 0 1px 2px rgba(0,0,0,.10)` | Resting elevation for every filled button |
 | `--dz-btn-shadow-hover` | `0 2px 6px rgba(0,0,0,.22), 0 1px 3px rgba(0,0,0,.12)` | Hover: shadow grows, it does not change color |
-| `--dz-btn-shadow-pressed` | `inset 0 1px 2px rgba(0,0,0,.12)` | `:active` and the toggle-selected family |
+| `--dz-btn-shadow-pressed` | `inset 0 1px 2px rgba(0,0,0,.12)` | Momentary `:active` only, since owner gate H1 (2026-08-11); the toggle-selected family stopped consuming it (see Family Roles and States below) |
 | `--dz-btn-focus-ring` | `0 0 0 2px rgba(var(--dz-accent-values), .35)` | `:focus-visible`; stacks on top of the resting or pressed shadow (comma-joined, never replaces it) |
 | `--dz-btn-radius` | `10px` | Every button's corner radius; see Radius Rationale |
 | `--dz-btn-pad-xs` / `-sm` / `-md` / `-lg` | `4px 8px` / `4px 12px` / `6px 14px` / `10px 20px` | Size-tier padding only; font size stays on the typography token contract, not here |
@@ -709,7 +709,7 @@ so they sit outside the table above:
 | **Filled danger** | `--dz-accent-red` fill | `.btn-danger`, `.btn-modern-warning` | Destructive actions (the legacy Theme tab's `.resetbtn` left this family when Task 8 deleted the tab and its now-dead selector) |
 | **Filled success/warning** | Semantic fill | `.btn-success`, `.btn-warning` | Declared and token-correct; **no live instance** in the current button-contract crawl (same as the original 2026-07-16 inventory) |
 | **Ghost** | Transparent, `1px solid` accent border, tint only on hover | `.btn-default`, `.btnsmall`, `.btn-small` | Secondary/filter/toolbar actions; no resting elevation |
-| **Toggle-selected** | Accent fill + pressed inset shadow | `.btn-selected`, `.btn-group .btn.active`, `.btn.active`, `.zoom-button-active` | One pressed language for both the theme's own selected class and Bootstrap's native `.active`, replacing two divergent inset shadows the original inventory flagged (finding F2) |
+| **Toggle-selected** | Accent fill, flat (no pressed inset) | `.btn-selected`, `.btn-group .btn.active`, `.btn.active`, `.zoom-button-active` | One fill language for both the theme's own selected class and Bootstrap's native `.active`, replacing two divergent inset shadows the original inventory flagged (finding F2). Went flat per owner gate H1, 2026-08-11: a persistent selected state is a resting state, not a moment of contact, so it stopped borrowing `--dz-btn-shadow-pressed` - fill + text color alone carry "selected" now. The momentary `:active` press (a genuine click, not a resting selection) still uses that token; see States below |
 | **Icon-quiet** | Fully transparent, no border, no resting shadow | `.btn-icon` | Hit-box only (`--dz-btn-icon-box`); hover is a tonal glyph filter (`saturate`/`brightness`), never a background wash, so device/card icon glyphs don't start looking like buttons. (The legacy Theme tab's `.resetschemebtn`/`.saveschemebtn` anchors left this family when the injected tab was deleted, Task 8.) |
 | **Accent-pill** | Accent-tinted wash at rest, `--dz-accent-color` glyph, strengthens to `--dz-btn-hover-bg` on hover | `.page-devices > .splitter` | The one icon-quiet-adjacent control that needs to read as an affordance *before* the pointer arrives (it collapses/expands the whole filter column); moved off icon-quiet 2026-07-18 for exactly that reason - see Core-Region Takeover |
 | **Label-as-button** | Accent fill, xs padding | `.label-info[href]`, `.badge-info[href]`, `.label.lcursor`, `.badge.lcursor` | Core renders several clickable actions as `<span>`/`<a>` labels, not `<button>`; only the clickable ones (`[href]`/`.lcursor`) join the button system - static `.label`/`.badge` chips stay flat informational chips |
@@ -725,13 +725,17 @@ so they sit outside the table above:
   those groups were out of this redesign's touched scope, not because two hover languages are
   intended
 - **Hover (ghost/icon-quiet)**: `--dz-btn-hover-bg` tint (ghost) or a tonal glyph `filter` (icon-quiet); no shadow change
-- **Pressed / toggle-selected**: `--dz-btn-shadow-pressed` (inset), replacing Bootstrap 2's own
+- **Pressed (momentary `:active`)**: `--dz-btn-shadow-pressed` (inset), replacing Bootstrap 2's own
   divergent light/dark inset shadows (finding F2)
+- **Toggle-selected (persistent)**: flat - no shadow, `box-shadow: none`. Split from the bullet
+  above by owner gate H1 (2026-08-11): selected used to share the pressed token with a genuine
+  click, which read as "permanently being clicked"; fill + text color alone carry the state now
 - **Focus-visible**: `--dz-btn-focus-ring`, stacked with a comma onto whatever shadow the element
-  already carries at rest. Two later rules (the ghost family's `box-shadow: none` and the
-  toggle-selected pressed inset) tie the base rule's ring at equal specificity and win by source
-  order, so the ring is re-asserted a second time on each of those selectors' own `:focus-visible`
-  state (documented in `css/buttons.css`'s "Focus ring, state-proof" block)
+  already carries at rest. One later rule (the ghost family's `box-shadow: none`) ties the base
+  rule's ring at equal specificity and wins by source order, so the ring is re-asserted a second
+  time on that selector's own `:focus-visible` state (documented in `css/buttons.css`'s "Focus
+  ring, state-proof" block). Toggle-selected's own `:focus-visible` composes the ring alone too,
+  now that it has no pressed layer left to stack under it
 - **Disabled**: flat - `--dz-btn-disabled-bg`/`-text`, `box-shadow: none`, no hover/focus reaction
 - **Transition**: `background-color .12s ease, box-shadow .12s ease` on the shared base rule (plus a
   slower `0.15s ease` background/color/border-color/filter transition kept on the older Bootstrap-class

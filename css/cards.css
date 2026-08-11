@@ -907,12 +907,17 @@ table.mobileitem td.name {
    ~3.0-3.7:1 (a pre-existing --dz-accent-color-on-dark limitation shared by
    the RESTING selected state too, disclosed in f9f345d, not introduced or
    worsened by this rule - fully closing it means retuning the dark accent
-   token theme-wide, out of scope here). */
+   token theme-wide, out of scope here).
+
+   box-shadow: none per owner gate H1 (2026-08-11, "flat-selected" round):
+   matches the rest-state .btn-selected rule in buttons.css, which stopped
+   consuming --dz-btn-shadow-pressed the same round - a selected segment no
+   longer reads as concave/pressed on hover either, only the fill darkens. */
 .item .btn-group:not(.span3 *) > .btn.btn-selected:hover {
     background: color-mix(in srgb, var(--dz-btn-toggle-selected-bg) 90%, black) !important;
     color: var(--dz-btn-toggle-selected-text) !important;
     border-color: color-mix(in srgb, var(--dz-btn-toggle-selected-bg) 90%, black) !important;
-    box-shadow: var(--dz-btn-shadow-pressed) !important;
+    box-shadow: none !important;
 }
 
 /* Focus ring, inset - RE-VERIFIED for this gate round, not carried over on
@@ -933,8 +938,14 @@ table.mobileitem td.name {
     box-shadow: var(--dz-btn-shadow), var(--dz-btn-focus-ring-inset) !important;
 }
 
+/* Owner gate H1 (2026-08-11): the selected segment's rest/hover box-shadow
+   above dropped --dz-btn-shadow-pressed, so its own focus ring no longer
+   composes a pressed layer either - inset ring alone, same shape as the
+   unselected sibling above but without --dz-btn-shadow (a selected segment
+   never had a SEPARATE resting elevation to stack under the ring; its
+   "elevation" was always the pressed inset this gate removed). */
 .item .btn-group:not(.span3 *) > .btn.btn-selected:focus-visible {
-    box-shadow: var(--dz-btn-shadow-pressed), var(--dz-btn-focus-ring-inset) !important;
+    box-shadow: var(--dz-btn-focus-ring-inset) !important;
 }
 
 /* item subnav applying by click*/

@@ -186,11 +186,14 @@
     border-bottom-right-radius: var(--dz-btn-radius) !important;
 }
 
+/* box-shadow: none per owner gate H1 (2026-08-11): matches css/buttons.css's
+   .btn.active, which stopped consuming --dz-btn-shadow-pressed the same
+   round - fill + text color alone carry "this is the selected range" now. */
 .zoom-button-active {
     background: var(--dz-btn-toggle-selected-bg) !important;
     color: var(--dz-btn-toggle-selected-text) !important;
     border-color: var(--dz-btn-toggle-selected-bg) !important;
-    box-shadow: var(--dz-btn-shadow-pressed) !important;
+    box-shadow: none !important;
     position: relative;
     z-index: 1;
 }

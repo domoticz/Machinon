@@ -573,20 +573,32 @@ a.btnstyle {
     box-shadow: none !important;
 }
 
-/* One pressed language for BOTH selected-state code paths (theme
-   .btn-selected, e.g. the HVAC/dimmer level selector, and Bootstrap's own
-   .active toggle-button groups), killing Bootstrap 2's divergent inset
-   highlights (F2). Placed after the ghost rule above so a selected ghost
+/* One fill language for BOTH selected-state code paths (theme .btn-selected,
+   e.g. the HVAC/dimmer level selector, and Bootstrap's own .active
+   toggle-button groups), killing Bootstrap 2's divergent inset highlights
+   (F2). Placed after the ghost rule above so a selected ghost
    (.btn-default.active, which always also carries .btn per core's markup,
-   so it matches ".btn.active" here) gets the filled/pressed look instead of
-   the ghost's transparent background. */
+   so it matches ".btn.active" here) gets the filled look instead of the
+   ghost's transparent background.
+
+   FLAT per owner gate (2026-08-11, "flat-selected" round, verdict H1): a
+   persistent SELECTED state is a resting state, not a moment of contact, so
+   it no longer borrows --dz-btn-shadow-pressed (the concave/"pushed-in"
+   read that inset gives reads as physically depressed RIGHT NOW, which is
+   only true for a genuine :active press). Fill + text color alone carry
+   "this is selected" now; box-shadow: none explicitly rather than left
+   unset, so this rule still wins the cascade tie against the ghost family's
+   own box-shadow:none at equal specificity regardless of source order.
+   --dz-btn-shadow-pressed itself is unchanged and still drives the
+   MOMENTARY .btn:active rule above - only this persistent-selected path
+   stopped consuming it. See DESIGN.md Buttons > States for the split. */
 .btn-selected,
 .btn-group .btn.active,
 .btn.active {
     background: var(--dz-btn-toggle-selected-bg) !important;
     color: var(--dz-btn-toggle-selected-text) !important;
     border-color: var(--dz-btn-toggle-selected-bg) !important;
-    box-shadow: var(--dz-btn-shadow-pressed) !important;
+    box-shadow: none !important;
 }
 
 .btn-group .btn-primary {
@@ -637,12 +649,18 @@ a.btnstyle {
    specificity, where source order then decides: the ghost family's
    ".btn-group .btn-default { box-shadow: none }" (a keyboard-focused ghost
    in any toolbar group showed NO ring, measured on #/Devices Used/Not Used)
-   and the selected-state .btn.active rule declaring the pressed inset (the
-   active toggle showed only that inset while focused). Re-assert the ring
-   with :focus-visible appended to the winning rules' own selectors, placed
-   after both, so specificity beats each culprit instead of tying: ghosts
-   get the bare ring (they have no resting elevation to stack under it),
-   selected keeps its pressed inset with the ring stacked on top. */
+   and the selected-state .btn.active rule (a keyboard-focused selected
+   toggle showed only its own box-shadow while focused, no ring visible at
+   all). Re-assert the ring with :focus-visible appended to the winning
+   rules' own selectors, placed after both, so specificity beats each
+   culprit instead of tying: ghosts get the bare ring (they have no resting
+   elevation to stack under it).
+
+   Selected went flat per owner gate H1 (2026-08-11, see the .btn-selected
+   rule above): the ring is now the ONLY shadow this state ever shows, at
+   rest or pressed - no --dz-btn-shadow-pressed composed underneath it
+   anymore (it used to stack "pressed inset, ring" comma-joined; the pressed
+   layer is simply gone, not replaced). */
 .btn-default:focus-visible,
 .btn-group .btn-default:focus-visible,
 .btnsmall:focus-visible,
@@ -654,7 +672,7 @@ a.btnstyle {
 .btn-selected:focus-visible,
 .btn-group .btn.active:focus-visible,
 .btn.active:focus-visible {
-    box-shadow: var(--dz-btn-shadow-pressed), var(--dz-btn-focus-ring) !important;
+    box-shadow: var(--dz-btn-focus-ring) !important;
 }
 
 /* ---- Sibling coherence: core assigns mismatched size classes inside one
