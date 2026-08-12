@@ -401,7 +401,7 @@
 .dz-hub-scheme-picker .scheme-card {
     position: relative;
     cursor: pointer;
-    width: 108px;
+    width: 160px; /* was 108px, tuned for the pre-2026-08-12 20-card wall; at 7 cards the row fits on one line on desktop. At 360px the hub's own chrome leaves the panel only ~277px wide, so cards wrap one-up rather than two-up; still fully contained (check 6), just a taller single column */
     padding: 6px; /* future --dz-gap token site (spacing project) */
     border: 1px solid var(--dz-input-border);
     border-radius: var(--dz-btn-radius);
@@ -419,7 +419,7 @@
 
 .dz-hub-scheme-picker .swatches {
     display: flex;
-    height: 22px;
+    height: 28px; /* was 22px; seven swatches across 160px read as colour bands rather than hairlines */
     border-radius: 4px;
     overflow: hidden;
     border: 1px solid var(--dz-input-border);
@@ -431,9 +431,21 @@
 
 .dz-hub-scheme-picker .scheme-name {
     margin-top: 6px; /* future --dz-gap token site (spacing project) */
-    font-size: var(--dz-text-micro);
+    font-size: var(--dz-text-xs);
     text-align: center;
     color: var(--dz-body-text);
+}
+
+/* Each scheme's own one-line description (schemes/*.json "description"; the two
+   base cards and Custom carry theirs in schemes.js). One step below the name on
+   the type scale, in the secondary text colour, so it supports the name without
+   competing with it. Absent on user presets, which have no description. */
+.dz-hub-scheme-picker .scheme-desc {
+    margin-top: 2px;
+    font-size: var(--dz-text-micro);
+    line-height: 1.3;
+    text-align: center;
+    color: var(--secondary-text-color);
 }
 
 .dz-hub-scheme-picker .scheme-delete {

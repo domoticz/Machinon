@@ -264,21 +264,22 @@ function renderSchemePicker() {
            preview{} block in scheme JSONs is no longer read here). */
         var SWATCH_KEYS = ["background", "main_color", "navbar", "item", "main_text", "alt_text", "disabled"];
         /* Base (schemeless) themes have no JSON; their colours mirror the
-           dz-tokens.css / dark.css token defaults. */
+           dz-tokens.css / dark.css token defaults, and their descriptions are
+           authored here for the same reason. */
         var cards = [
-            { slug: "light", name: "Machinon Light", colors: { background: "#f4f8fc", navbar: "#e9f2fb", item: "#ffffff", main_color: "#396d9e", main_text: "#1b2b3a", alt_text: "#3e5568", disabled: "#8ca0b3" } },
-            { slug: "dark", name: "Machinon Dark", colors: { background: "#0f1620", navbar: "#0a0f16", item: "#18202b", main_color: "#98ccfd", main_text: "#dce6f0", alt_text: "#9db2c6", disabled: "#5e7183" } }
+            { slug: "light", name: "Machinon Light", desc: "The default look: clean blue on white", colors: { background: "#f4f8fc", navbar: "#e9f2fb", item: "#ffffff", main_color: "#396d9e", main_text: "#1b2b3a", alt_text: "#3e5568", disabled: "#8ca0b3" } },
+            { slug: "dark", name: "Machinon Dark", desc: "The default look: blue glowing on navy", colors: { background: "#0f1620", navbar: "#0a0f16", item: "#18202b", main_color: "#98ccfd", main_text: "#dce6f0", alt_text: "#9db2c6", disabled: "#5e7183" } }
         ];
         Object.keys(schemes).forEach(function(slug) {
             var s = schemes[slug];
-            cards.push({ slug: slug, name: s.name, colors: s.colors || {} });
+            cards.push({ slug: slug, name: s.name, desc: s.description, colors: s.colors || {} });
         });
         (theme.user_schemes || []).forEach(function(p) {
             cards.push({ slug: "user:" + p.name, name: p.name, deletable: true, colors: p.colors || {} });
         });
         /* colors: null = the Custom card, resolved to the user's live
            colours at render time below. */
-        cards.push({ slug: "custom", name: "Custom", colors: null });
+        cards.push({ slug: "custom", name: "Custom", desc: "Your own seven colours", colors: null });
 
         // Build fresh DOM per container (a node cannot have two parents); the
         // `cards` data above is computed once and shared read-only across them.
@@ -303,6 +304,13 @@ function renderSchemePicker() {
                 label.className = "scheme-name";
                 label.textContent = card.name;
                 el.appendChild(label);
+
+                if (card.desc) {
+                    var desc = document.createElement("div");
+                    desc.className = "scheme-desc";
+                    desc.textContent = card.desc;
+                    el.appendChild(desc);
+                }
 
                 if (card.deletable) {
                     var del = document.createElement("span");
