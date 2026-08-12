@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Typography contract checker. Every font-family/size/weight in theme CSS must
-# come from --dz-* tokens (dz-tokens.css). See DESIGN.md Typography.
+# come from --dz-* tokens (dz-tokens.css), and the type-scale tokens themselves
+# must be declared in rem. See DESIGN.md Typography.
 # Exit 0 clean, 1 violations. Vendor css/ionicons.min.css is excluded.
 set -u
 cd "$(dirname "$0")/.."
@@ -53,6 +54,28 @@ for f in $files; do
     echo "$out" | sed -E "s|^([0-9]+):|${f}:\1: raw font shorthand: |"
   fi
 done
+
+# Type-scale token DEFINITIONS must be rem (conversion 2026-08-11), so a later edit
+# cannot quietly put px back and re-break the browser's default-font-size preference.
+# Note dz-tokens.css is deliberately NOT in $files above (that list is the consuming
+# stylesheets), so this is its own pass over the token file.
+#
+# Allowed values: a rem literal, or a var() reference - the semantic aliases
+# (--dz-text-value / -section-title / -nav-touch) forward to --dz-text-lg.
+#
+# Exempt BY NAME: the standby clock pair. Those are screen-filling display sizing rather
+# than reading text, so they must NOT follow a raised font preference (it would overflow
+# the standby surface); dz-tokens.css carries the full reasoning. Exempting by name rather
+# than by "px is fine anywhere" keeps every other type token honest, and means adding a new
+# px type token is a deliberate edit to this list, not an accident.
+clock_exempt="--dz-text-clock|--dz-text-clock-sub"
+out=$(grep -n -- "--dz-text-[a-z-]*:" dz-tokens.css \
+      | grep -vE "^[0-9]+:[[:space:]]*(${clock_exempt}):" \
+      | grep -vE ":[[:space:]]*([0-9]*\.?[0-9]+rem|var\(--dz-[a-z-]+\))[[:space:]]*;")
+if [ -n "$out" ]; then
+  fail=1
+  echo "$out" | sed -E "s|^([0-9]+):|dz-tokens.css:\1: type token must be rem (or a var alias): |"
+fi
 
 # Retired family names must not appear anywhere in the repo (js/html/json/css).
 out=$(grep -rn "main-font" --include="*.css" --include="*.js" --include="*.html" --include="*.json" . | grep -v "^\./docs/")

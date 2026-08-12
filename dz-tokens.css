@@ -66,19 +66,57 @@
 
     /* ---- Typography tokens (scheme-independent; schemes never override) ----
        The ONLY place font sizes/weights/families are defined. Enforced by
-       scripts/check-typography.sh. Scale: 11/12/14/16/22/26 (DESIGN.md). */
+       scripts/check-typography.sh. Scale: 11/12/14/16/20/26 (DESIGN.md). */
     --dz-font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     --dz-font-mono: 'JetBrains Mono', ui-monospace, Consolas, Menlo, monospace;
     --dz-font-icons: 'Ionicons';
     --dz-weight-regular: 400;
     --dz-weight-semibold: 600;
     --dz-weight-mono-bold: 700;   /* ACE syntax-highlight bold */
-    --dz-text-micro: 11px;        /* btn-mini/xs, chart zoom, compact last-update */
-    --dz-text-xs: 12px;           /* buttons, chart menus, last-update, badges */
-    --dz-text-sm: 14px;           /* BODY BASE, nav, menus, tables, ACE */
-    --dz-text-md: 16px;           /* settings panels, dropdown panes, mobile h1 */
-    --dz-text-lg: 22px;           /* device values (bigtext), section headings */
-    --dz-text-display: 26px;      /* page-title h1, login heading */
+    /* rem, not px (2026-08-11). px font sizes ignore the browser's default-font-size
+       preference: a user who sets 20px still gets 14px body text, because only ZOOM
+       scales px (which is why px never failed WCAG 1.4.4 - we were already compliant).
+       rem follows that preference, which is the whole and only gain here; it matters most
+       on the tablets and wall panels this theme gets used on. Safe because core's
+       bootstrap.css sets `html { font-size: 100% }`, i.e. the preference itself, and
+       nothing in this theme pins a root size.
+       Values are the same pixels at the 16px default, so this conversion is a NO-OP for
+       anyone who has not changed that setting - verified computed-identical across 30
+       routes at two widths. Stress-tested to 200% (root 32px) over the same 30 routes at
+       1440 and 390: no page overflows its viewport, because the card grid's tracks are
+       fr/minmax and absorb taller text. Three sites did break at 200% and were fixed
+       first: the About headings and info-label/info-value wrapping, and the Devices-Log
+       header button column's flex-shrink. Harness: dz-rem-stress-allroutes.js.
+       KEEP px when changing these: a value that must not scale with reading preference. */
+    --dz-text-micro: 0.6875rem;   /* 11px @16 - btn-mini/xs, chart zoom, compact last-update */
+    --dz-text-xs: 0.75rem;        /* 12px @16 - buttons, chart menus, last-update, badges */
+    --dz-text-sm: 0.875rem;       /* 14px @16 - BODY BASE, nav, menus, tables, ACE */
+    --dz-text-md: 1rem;           /* 16px @16 - settings panels, dropdown panes, mobile h1 */
+    --dz-text-lg: 1.25rem;        /* 20px @16 - device values (bigtext), section headings */
+    --dz-text-display: 1.625rem;  /* 26px @16 - page-title h1, login heading */
+    /* ---- Semantic type aliases ----
+       Components should say what a piece of text IS, not how big it is. --dz-text-lg was
+       carrying two unrelated jobs (device values and section headings), which is why the
+       2026-08-11 bigtext size gate needed a whole extra harness
+       (dz-textlg-consumers-strip.js) just to discover what else the token dragged along.
+       With these, "make device values smaller" is a one-line edit that cannot touch a
+       heading. All three resolve to the same value today, so introducing them is a no-op.
+
+       --dz-text-lg now has NO direct consumers - only these aliases. That is the point:
+       leaving even one raw consumer would mean editing the base still had blast radius.
+       The other scale tokens are still consumed directly, deliberately: an alias earns its
+       place when two purposes actually want to diverge, and none of the others have. Mint
+       a new one when that changes, not in advance. */
+    --dz-text-value:         var(--dz-text-lg);  /* device values: #bigtext, incl. compact */
+    --dz-text-section-title: var(--dz-text-lg);  /* section/panel headings */
+    --dz-text-nav-touch:     var(--dz-text-lg);  /* mobile flyout menu links (touch targets,
+                                                    deliberately larger than desktop nav's
+                                                    --dz-text-sm) */
+
+    /* The standby clock stays px DELIBERATELY. It is sized to fill a screen rather than to
+       be read at body scale, so a raised font preference should not enlarge it further -
+       it would simply overflow the standby surface. Not covered by the 200% sweep either
+       (standby is a feature toggle, off on the rig), so converting it would be untested. */
     --dz-text-clock: 80px;        /* standby clock */
     --dz-text-clock-sub: 60px;    /* standby date */
     --dz-icon-size-sm: 16px;      /* inline/tab ionicons */
@@ -167,8 +205,18 @@
     --dz-card-tooltip-gap:      4px;      /* name-description tooltip offset */
     --dz-card-tooltip-pad:      6px 10px;
 
-    /* Bigtext (device value) */
-    --dz-card-value-line-height: 20px;
+    /* Bigtext (device value).
+       DERIVED, never guessed: this is the measured glyph box of --dz-text-lg in Inter, i.e.
+       the smallest line box that fully contains the value's own text. It shipped at 20px
+       against a 22px value size (owner report 2026-08-10), which is BELOW the font size, so
+       the text overran its own line box by 6px and vertical centring in this row could
+       never settle. It was the only card line-height under its own font-size; the siblings
+       are comfortably above theirs (name 18/14, meta 14/12).
+       Re-derive whenever --dz-text-lg changes, by setting line-height:normal and reading a
+       value span's height - dz-bigtext-size-strip.js does exactly that per candidate:
+         16px -> 19    18px -> 22    20px -> 24    22px -> 26
+       Now 24px, following the value size to 20px (owner gate, 2026-08-11). */
+    --dz-card-value-line-height: 24px;
 
     /* Bar-ranges gauge (core <dz-bar>, drawn along the card's top edge) */
     --dz-card-bar-height: 4px;
@@ -200,6 +248,24 @@
     --dz-card-slider-right:         20px;
     --dz-card-slider-inset:         100px;  /* width: calc(100% - N) */
     --dz-card-blinds-slider-left:   14px;
+    /* Vertical alignment compensation for the card slider (item 4, 2026-08-11). Core
+       positions .dimslider absolute (www/css/style.css:843), so unlike every other card
+       control it contributes NO height to its cell: that cell collapses to zero, centres
+       as an empty box on the control track, and the slider then draws downward from that
+       point instead of straddling it. The result is a slider sitting below the toggle it
+       shares a card row with. Compounding it, core's JS then writes a DIFFERENT inline
+       margin-top per variant (7px dashboard dimslidernorm, 7px dimsmall, 12px dimsmall3,
+       none on the tab-page dimslidernorm), which is why the variants never shared a
+       baseline either; the consumers below replace that whole set with this one value,
+       which is what the !important on them is for.
+
+       This is a MEASURED constant, not a derived one: it is the offset that minimised the
+       control-centre spread across both affected surfaces in a -2..-10px sweep. At -7px
+       #/Dashboard lands within 1px and #/LightSwitches within 1.5px, the residual being
+       the blinds "% + Stop" variant. Guarded by dz-card-control-contract.js; if core drops
+       the absolute positioning or changes its inline margins, that harness is what says so
+       (and this token should then be re-swept, not nudged by hand). */
+    --dz-card-slider-align-nudge:   -7px;
     --dz-card-slider-handle-size:   15px;
     --dz-card-slider-handle-offset: -5px;
     --dz-card-slider-width-wide:    55%;    /* >=1200px */

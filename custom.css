@@ -156,6 +156,31 @@ h4,
 .donation-text {
 	color: var(--dz-body-text) !important;
 }
+
+/* About-page headings at large type sizes. The page renders its titles at
+   --dz-text-display, so once the user's font preference scales that up, a single word can
+   exceed the card's content box on its own ("Domoticz" alone measures ~230px in a 200px
+   box at 200%) and no amount of space-wrapping helps. Measured on #/About at 390px with
+   the scale at 200%: h1.about-title overhangs by 147px, h3.section-title by 22px, driving
+   45px of page overflow. Same treatment as .info-value below, same reasoning. */
+.about-title,
+.section-title {
+    overflow-wrap: break-word;
+    min-width: 0;
+}
+
+/* System Information values are unbroken machine strings - the Python version renders as
+   "3.13.5 (main, Jul 15 2026, 20:25:41) [GCC ...]" - and a long token with no break
+   opportunity cannot wrap, so it drives the whole page past the viewport rather than
+   overflowing its own cell. Measured on #/About at 390px with the type scale at 200%:
+   45px of page overflow, the version string alone accounting for 29px of it.
+   break-word only breaks a word that would not fit on a line of its own, so ordinary
+   values keep wrapping at spaces exactly as before ("anywhere" would be the heavier
+   hammer, and is not needed here). */
+.info-value {
+    overflow-wrap: break-word;
+    min-width: 0;
+}
 /* Confirmed live (both schemes): .info-item/.info-label hardcode near-white/
    light-blue text (views/about.html inline <style>) that never adapts, while
    .glass-card's own background DOES (var(--dz-widget-bg), white in light
@@ -167,6 +192,15 @@ h4,
 }
 .info-label {
     color: var(--dz-accent-color) !important;
+    /* views/about.html's inline <style> pins these labels to white-space: nowrap, so a
+       two-word label cannot break and pushes the page sideways once the type grows.
+       Measured at 390px with the scale at 200%: "dzVents Version" renders 203px inside a
+       200px cell. Labels are short, so allowing them to wrap costs nothing at normal
+       sizes and is what keeps the page inside the viewport when it is scaled.
+       !important for the same reason the color above needs it: that inline <style> is
+       injected with the view, so it sits AFTER this file in document order and wins every
+       equal-specificity tie. */
+    white-space: normal !important;
 }
 
 .user {
@@ -243,7 +277,16 @@ h4,
 }
 
 .page-header-with-button div {
-    flex: 0 0 auto;
+    /* 0 1 auto, not 0 0 auto: still sized to its content (that is the point of this
+       rule - core's flex: 1 0 100px gave the button column half the row and wrapped the
+       title into three lines on a phone), but now allowed to SHRINK when the row genuinely
+       cannot fit it. flex-shrink: 0 meant the column kept its content width no matter what,
+       so on #/Devices/27/Log at 390px with the type scale at 200% it rendered 385px wide
+       inside a 322px header and pushed the page 22px past the viewport. min-width releases
+       the flex item's automatic content floor, without which shrinking is still refused;
+       the two inline-flex links then wrap inside the column instead of overhanging. */
+    flex: 0 1 auto;
+    min-width: 0;
 }
 
 div#floorplancontent {

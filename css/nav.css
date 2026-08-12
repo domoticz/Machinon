@@ -23,7 +23,10 @@ img.header__icon {
 div.menu-toggle {
     display: none;
     cursor: pointer;
-    z-index: 1001;
+    /* 1002: stays exactly one above the flyout panel it opens and closes, which moved to
+       1001 to clear core's .dd-topbar (see css/sidemenu.css). This is the X rendered over
+       the open panel, so it must never fall behind it. */
+    z-index: 1002;
     top: 0;
     left: 10px;
     width: 25px;

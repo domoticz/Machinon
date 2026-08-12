@@ -49,19 +49,39 @@
     border: 1px solid transparent;
     transition: background-color .12s ease, box-shadow .12s ease;
 }
-.btn:hover, .btnstyle3:hover, .btnstyle3-sel:hover,
+/* :not(.btn-icon) on the .btn entries below (owner report 2026-08-10, "weird ghost
+   buttons" on the Devices row actions). The icon-only family declares a hard
+   none-shadow (!important) further down this file, and core emits every one of
+   its instances as <button class="btn btn-icon">, so these three state rules matched
+   them too. Both sides carry !important, which hands the decision to specificity, and
+   ".btn:hover" (0,2,0) beats ".btn-icon" (0,1,0) - the same losing shape as the F1 root
+   cause documented on that block. Measured live on #/Devices: hovering an action icon
+   changed box-shadow ONLY, none -> --dz-btn-shadow-hover, so a transparent borderless
+   glyph grew a floating elevated box, which is exactly the resting-chrome-free intent
+   that block states it is protecting. The tonal filter pop on .btn-icon img is the
+   affordance for this family and is unaffected. Focus is handled separately below: the
+   ring is an accessibility requirement, the elevation is not, so icon buttons keep the
+   ring without the shadow rather than being excluded outright. */
+.btn:not(.btn-icon):hover, .btnstyle3:hover, .btnstyle3-sel:hover,
 .btnsmall:hover, .btn-modern:hover, .btn-modern-warning:hover {
     box-shadow: var(--dz-btn-shadow-hover) !important;
 }
-.btn:focus-visible, .btnstyle3:focus-visible,
+.btn:not(.btn-icon):focus-visible, .btnstyle3:focus-visible,
 .btnsmall:focus-visible, .btn-modern:focus-visible,
 .btn-modern-warning:focus-visible {
     outline: none;
     box-shadow: var(--dz-btn-shadow), var(--dz-btn-focus-ring) !important;
 }
-.btn:active, .btnstyle3:active,
+.btn:not(.btn-icon):active, .btnstyle3:active,
 .btn-modern:active, .btn-modern-warning:active {
     box-shadow: var(--dz-btn-shadow-pressed) !important;
+}
+/* Keyboard focus for the icon-only family: ring only, no elevation. (0,2,0) so it
+   outranks the hard none-shadow on the .btn-icon base (0,1,0); without this rule the
+   exclusion above would leave icon buttons with no visible focus indicator at all. */
+.btn-icon:focus-visible {
+    outline: none;
+    box-shadow: var(--dz-btn-focus-ring) !important;
 }
 /* Disabled controls do not float and do not react. */
 .btn[disabled], .btn.disabled, .btnstyle3-dis, .btnsmall-dis,
@@ -497,6 +517,18 @@ a.btnstyle {
 .page-header-with-button .btnstyle3 {
     font-size: var(--dz-text-sm);
 }
+
+/* Let that header row wrap. Core declares it "display: flex" with no flex-wrap
+   (style.css:1357), so the heading and the button group are locked onto one line however
+   little room there is. NOT the fix for the overflow this pass chased - that was the
+   button column's flex-shrink, in custom.css's .page-header-with-button div rule, and the
+   page measures clean with or without this line. What it buys is the nicer outcome at
+   narrow widths: the button group takes its own line instead of squeezing the title
+   beside it. Inert whenever the row already fits. */
+.page-header-with-button {
+    flex-wrap: wrap;
+}
+
 /* Button groups in toolbars/dialogs: connected */
 .btn-group .btn {
     margin: 0 0 0 -1px !important;

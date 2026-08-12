@@ -104,7 +104,7 @@
 
 .dz-hub-section-title {
     margin: 0 0 8px; /* future --dz-gap token site (spacing project) */
-    font-size: var(--dz-text-lg);
+    font-size: var(--dz-text-section-title);
 }
 
 /* ---- Task 3: setting rows -------------------------------------------------
@@ -533,7 +533,7 @@
 
 .dz-hub-about-title {
     margin: 0 0 8px; /* future --dz-gap token site (spacing project) */
-    font-size: var(--dz-text-lg);
+    font-size: var(--dz-text-section-title);
     color: var(--dz-body-text);
 }
 

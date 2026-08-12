@@ -44,7 +44,16 @@ img.header__icon {
     border: none;
     box-shadow: var(--dz-elev-popup);
     position: fixed;
-    z-index: 1000;
+    /* 1001, not 1000 (found 2026-08-11 while capturing the flyout for a type strip).
+       Core's Dynamic Dashboard pill, .dd-topbar (www/css/dashboard.css:49), is also
+       position: fixed at z-index 1000 and overlaps this panel's first menu row. Equal
+       z-index means DOM order decides, and core's markup comes later, so the pill won:
+       elementFromPoint over the first entry ("Dashboard") returned .dd-topbar-btn, not the
+       menu anchor, i.e. the first item of the menu was unclickable whenever the Dynamic
+       Dashboard was active. Only the first row was affected - the pill is 36px tall.
+       One above the pill is all that is needed; the theme's own .menu-toggle (css/nav.css)
+       is bumped in step so the close button stays above this panel. */
+    z-index: 1001;
 }
 
 .navbar.notext .navbar-inner {
@@ -108,7 +117,7 @@ img.header__icon {
 }
 
 .navbar .nav li a {
-    font-size: var(--dz-text-lg) !important;
+    font-size: var(--dz-text-nav-touch) !important;
     text-align: left;
     /* menus-family Task 8 (2026-08-10, F1 "same language"): item padding
        onto the page-level 8/10 spacing cluster (previously Bootstrap's

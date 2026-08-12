@@ -1,7 +1,7 @@
 /**** ./iconsupload.css ***/
 /* Icon Page */
 #iconsmain h3 {
-    font-size: var(--dz-text-lg);
+    font-size: var(--dz-text-section-title);
 		color: var(--dz-body-text);
 }
 

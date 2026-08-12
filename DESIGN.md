@@ -59,7 +59,7 @@ typography:
   md:
     fontSize: 16px
   lg:
-    fontSize: 22px
+    fontSize: 20px
   display:
     fontSize: 26px
 
@@ -380,19 +380,49 @@ No other font weight is used anywhere in the theme.
 
 ### Size Scale
 
+**Units: `rem` for the type scale, `px` for fixed detail** (2026-08-11). The six scale tokens
+are declared in `rem` so they follow the browser's default-font-size preference; the sizes
+below are what they compute to at the 16px default, which is why the conversion changed
+nothing for anyone who has not altered that setting. Browser *zoom* already scaled `px`
+correctly, so this was never a WCAG 1.4.4 gap - the gain is specifically for users who raise
+their default font size without magnifying the layout.
+
+Not everything follows: the standby clock, icon sizes, borders and layout values stay `px`
+deliberately, because they are physical detail rather than reading text. `check-typography.sh`
+enforces this in both directions - consuming stylesheets must take sizes from tokens, and the
+type tokens themselves must be rem or a `var()` alias, with the standby clock pair exempt by
+name. Verified to 200%
+root size across 30 routes at 1440 and 390 (`dz-rem-stress-allroutes.js`): no page overflows
+its viewport, because the card grid's tracks are `fr`/`minmax` and absorb taller text.
+
 | Token | Size | Usage |
 |-------|------|-------|
 | `{typography.micro}` | 11px | `.btn-mini`/`.btn-xs`, chart zoom buttons, compact-card last update, description tooltips, sunrise/sunset times, Dynamic Dashboard library descriptions, log search counter, icon pack chip/description |
 | `{typography.xs}` | 12px | Standard buttons, chart menu items, device-card last update, badges, Dynamic Dashboard library labels |
 | `{typography.sm}` | 14px | **Body base**, nav links, menus, tables, ACE editor, options menu |
 | `{typography.md}` | 16px | Settings panels, dropdown panes, mobile page-title h1 |
-| `{typography.lg}` | 22px | Device values (`#bigtext`), section headings |
+| `{typography.lg}` | 20px | Device values (`#bigtext`), section headings |
 | `{typography.display}` | 26px | Page-title h1 (desktop), login heading |
 | clock (`--dz-text-clock`) | 80px (60px at <=979px) | Standby clock |
 | clock-sub (`--dz-text-clock-sub`) | 60px (40px at <=979px) | Standby date |
 | icon sm (`--dz-icon-size-sm`) | 16px | Inline/tab Ionicons |
 | icon md (`--dz-icon-size-md`) | 24px | Header buttons, card options |
 | icon lg (`--dz-icon-size-lg`) | 30px | Search icon, dialog close glyphs |
+
+**Semantic aliases.** `--dz-text-lg` is never consumed directly; three aliases name what the
+text *is*, so a size decision cannot leak between unrelated surfaces:
+
+| Alias | Resolves to | Used by |
+|-------|-------------|---------|
+| `--dz-text-value` | `--dz-text-lg` | Device values (`#bigtext`), incl. both compact variants |
+| `--dz-text-section-title` | `--dz-text-lg` | Hub section/About titles, `#iconsmain h3` |
+| `--dz-text-nav-touch` | `--dz-text-lg` | Mobile flyout menu links (touch targets, deliberately larger than desktop nav's `--dz-text-sm`) |
+
+All three resolve to the same value today, so they are a no-op; the point is that changing
+device values can no longer move a heading. The other scale tokens are still consumed
+directly on purpose: an alias earns its place when two purposes actually want to diverge,
+and only `lg` has demonstrated that (the 2026-08-11 bigtext gate). Mint a new one when that
+happens, not in advance.
 
 ### The Token Contract
 
@@ -423,7 +453,7 @@ columns.
 
 Card text sizes are fixed `--dz-text-*` tokens, not the relative (`em`/`%`) sizes the original theme
 used. Name and status are explicit `--dz-text-sm` (14px; `.item-name, .item #name, .item #status` in
-`css/typography.css`, not left to inheritance). The value (`#bigtext`) is `--dz-text-lg` (22px,
+`css/typography.css`, not left to inheritance). The value (`#bigtext`) is `--dz-text-lg` (20px,
 regular weight); last update is `--dz-text-xs` (12px). Compact-dashboard cards (`.span3`) reuse the
 same tokens: bigtext is `--dz-text-lg` at `--dz-weight-semibold`, last update steps down to
 `--dz-text-micro` (11px). There is no separate relative-size table: every card variant, standard or
@@ -1873,7 +1903,7 @@ split") had anticipated since before this token existed.
 | `--dz-card-name-line-height` | 18px | `#name` line-height |
 | `--dz-card-tooltip-gap` | 4px | Name-description tooltip offset (`margin-top`) |
 | `--dz-card-tooltip-pad` | 6px 10px | Tooltip padding |
-| `--dz-card-value-line-height` | 20px | `#bigtext` line-height |
+| `--dz-card-value-line-height` | 24px | `#bigtext` line-height. DERIVED: the measured glyph box of `--dz-text-lg` in Inter (16->19, 18->22, 20->24, 22->26). Was 20px against a 22px value size until 2026-08-11, i.e. below the font size, so the text overran its own line box. Re-derive whenever the value size changes |
 | `--dz-card-bar-height` | 4px | Bar-ranges gauge height |
 | `--dz-card-lastupdate-pad-right` | 50px | `#lastupdate` right padding (wider than the 20px family below - verified, not a typo) |
 | `--dz-card-meta-line-height` | 14px | `#type`/`#lastupdate` line-height; N2 verdict, see Text Hierarchy |
@@ -1938,7 +1968,7 @@ split") had anticipated since before this token existed.
 full-emphasis anchors, not one: `#name` and `#status` shared a single rule
 (`.item #status, .item #name { font-weight: var(--dz-weight-semibold) !important; }`, the old
 `custom.css:117-120`), so every card carried two full-weight, full-contrast text blocks before
-`#bigtext` - the largest element on the card, 22px, accent-colored - added a third. Meanwhile
+`#bigtext` - the largest element on the card, 22px at the time (20px since the 2026-08-11 size gate), accent-colored - added a third. Meanwhile
 `#type`/`#lastupdate` were already exactly quiet (secondary color, regular weight); the elements
 that actually made a card feel heavy were `#name`, `#status`, and `#bigtext`, and the first two
 shared one rule. N2 splits that rule:
@@ -1955,7 +1985,7 @@ shared one rule. N2 splits that rule:
 
 paired with the metadata line-height tighten (`--dz-card-meta-line-height`, 14px, one step below
 the browser's unset `normal`) on `.item #type`/`.item #lastupdate` in `css/cards.css`. `#name`
-remains the card's one anchor by repetition and full contrast; `#bigtext` is untouched (still 22px,
+remains the card's one anchor by repetition and full contrast; `#bigtext` is untouched (still 22px then; 20px since the 2026-08-11 size gate,
 accent-colored, `font-weight` still computed `400` by absence, not an explicit declaration - a
 future pass could make that explicit and token-driven, that was the N3 candidate, not picked).
 `#status` keeps its color (`var(--dz-body-text)`, unaffected); only its weight changed.
@@ -2345,6 +2375,55 @@ contract.
 - Width: `calc(100% - 100px)` (start point fixed relative to the card, so it never crosses the device icon), 55% on wide screens (1200px+)
 - Blinds cards (any card with a second icon cell): track anchored on BOTH edges (`left: 14px` for the handle's -12px overhang, `right: 20px`, `width: auto`); the icon clearance itself comes from core's inline `margin-left` per variant, so the track can never overlap the blind icons at any card width
 
+### Floorplan Device Popup
+
+Clicking a device on a floorplan opens core's own SVG popup (`g.DeviceDetails`, drawn by
+`www/js/domoticzdevices.js`), not an HTML card; core also ships an HTML variant
+(`div.span4.DeviceDetails`) in the same file, but it is dead code (commented "this is not
+used"). The theme cannot restyle the popup by changing its markup, so `css/floorplan.css`
+overrides SVG presentation attributes with ordinary `fill`/`stroke` declarations, which win the
+cascade over the same-property values core paints inline (an SVG presentation attribute only
+loses to a stylesheet rule that actually declares that property on that element).
+
+**Collapsed chrome.** `rect.popup`/`rect.header` fill from `--dz-widget-bg`, text from
+`--dz-body-text` (name semibold, status semibold and accent-colored). The slider
+(`rect#sliderback` -> `--dz-card-slider-track-bg`, `rect#slider` -> `--dz-accent-color`, both
+`stroke: none`) keeps core's GEOMETRY on purpose: the popup lives inside the floorplan's scaled
+SVG user-unit space, not px, so matching the card slider's literal 5px track would fight the
+floorplan zoom instead of following it. Only the LANGUAGE (flat, accent-filled, unstroked) is
+matched, not the numbers. `rect.header` gets an explicit `stroke: none`: core never actually
+paints a stroke on this rect (only a `fill` presentation attribute; SVG's initial stroke value is
+already none), so no hairline ever rendered, but the rule is kept as a stated guarantee against a
+future core change adding one. `rect#shadow`, core's own black drop-shadow rect, is softened to
+`opacity: 0.12` rather than removed outright: the popup floats over a busy floorplan and still
+needs visual separation, and 0.3 (core's default) is heavier than every `--dz-elev-*` tier
+except `--dz-elev-drag`'s 0.35.
+
+**Expanded state (opt-in).** Core's own expander (`image#twisty`, wired to
+`Device.popupExpand()`) has shipped hidden (`image#twisty { display: none }`) since 2019 with no
+recorded reason, and works correctly once revealed. Feature `floorplan_popup_details`
+(`theme.json` id 44, **default off**) re-enables it via `css/floorplan_popup_details.css`,
+appended after `css/floorplan.css` by the feature loader so source order, not `!important`,
+settles the equal-specificity override; with the feature off, popup behavior is unchanged from
+before this project. Once expanded, the Log/Notifications action pills (`rect#Log`,
+`rect#Notifications`) are not individually wrapped in the DOM (`g#Log`/`g#Notifications` do not
+exist; core's `drawButtons` appends a bare `rect` then an unnamed sibling `text` per button,
+flat inside `g#detailsgroup`), so they are themed via `--dz-btn-primary-bg`/
+`--dz-btn-primary-text`, reached through the adjacent-sibling combinator
+(`.DeviceDetails rect#Log + text`). The label override needs `!important`: the general
+`.DeviceDetails text { fill: ... !important }` rule already claims every text node under the
+popup at a precedence a plain higher-specificity rule cannot beat.
+
+**Remaining core rasters.** The slider knob (`images/handle.png`, id `sliderhandle`) and the
+expander chevron (`images/expand16.png`, id `twisty`) are still core's raster PNGs; CSS cannot
+recolor a raster the way it recolors an SVG shape via `fill`. Replacement art was deferred (none
+available yet) and is tracked upstream as issue #6959, which asks core to draw both as SVG
+shapes and to finish tokenizing `drawDetails()`.
+
+Verification: `dz-floorplan-popup-contract.js` gates this
+surface across light/dark x collapsed/expanded x feature off/on, asserting no `url(#...)`
+computed fill and no pure-black stroke survives anywhere in the popup.
+
 ### Theme Hub
 
 Every theme setting (the former injected Theme tab, the former injected Icons tab, and the
@@ -2606,6 +2685,7 @@ Toggled via `theme.json` features object. Each feature has an `enabled` boolean 
 | Settings menu | `custom_settings_menu` | on | `settings_page.js` | Renders the Setup menu as a tile grid instead of a plain dropdown list; the theme hub itself is always reachable from either. |
 | Notifications | `notification` | on | (none) | Warning toasts (noty) when a sensor times out or reports a low battery. |
 | Dashboard camera section | `dashboard_camera_section` | on | (none) | Renders the camera preview as its own dashboard section. Requires `dashboard_camera`. |
+| Expandable floorplan popups | `floorplan_popup_details` | off | `floorplan_popup_details.css` | Reveals core's floorplan popup expander (`image#twisty`), showing Type, Log, Notifications and the favorite star. Hidden by default since 2019; see [Floorplan Device Popup](#floorplan-device-popup). |
 
 ## Animations
 

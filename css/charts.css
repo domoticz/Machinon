@@ -45,6 +45,41 @@
     fill: var(--secondary-text-color) !important;
     font-family: var(--dz-font-family) !important;
 }
+
+/* Chart text sizes (owner audit 2026-08-10, measured on #/Devices/27/Report).
+   Core ships Highcharts 12.5.0, whose defaults are em-based (the bundle carries
+   fontSize:"0.8em" x10, "0.7em" x2, "0.6em" x1) resolved against the chart root's
+   16px, and core's own Highcharts.setOptions (www/app/app.js) adds px overrides for
+   some roles. The theme set font-family here but never a single font-size, so chart
+   text was entirely outside the typography contract. Three roles measured off the
+   11/12/14/16/22/26 scale and are pulled onto it below; x/y axis labels (12px) and
+   legend items (12px) already landed on --dz-text-xs by coincidence and are left alone
+   rather than restated.
+
+   Highcharts writes these as INLINE style attributes on the SVG nodes, so !important is
+   load-bearing: an author !important declaration outranks a non-important inline one.
+   That is the same mechanism the font-family rule above already relies on.
+
+     axis titles  inline 0.8em -> 12.8px  =>  --dz-text-xs    (12px)
+     data labels  inline 13px            =>  --dz-text-xs    (12px)
+     credits      inline 0.6em ->  9.6px  =>  --dz-text-micro (11px)
+
+   .highcharts-credits also never matched the font-family list above (it is a bare
+   <text> carrying the class directly, the same shape as .highcharts-axis-title), so it
+   was still rendering Highcharts' own Lucida Grande stack; it gets the family here.
+   Colour is deliberately NOT set on it: the faint credits fill is Highcharts' own and
+   restyling it was outside this audit. */
+.highcharts-axis-title,
+.highcharts-axis-title text,
+.highcharts-data-label text {
+    font-size: var(--dz-text-xs) !important;
+}
+
+.highcharts-credits {
+    font-family: var(--dz-font-family) !important;
+    font-size: var(--dz-text-micro) !important;
+}
+
 /* Charts - Tooltip */
 .highcharts-tooltip text {
     color: var(--secondary-text-color) !important;

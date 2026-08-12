@@ -515,7 +515,7 @@ table.mobileitem td.name {
 .item #bigtext {
     color: var(--dz-accent-color);
     background: transparent;
-    font-size: var(--dz-text-lg);
+    font-size: var(--dz-text-value);
     line-height: var(--dz-card-value-line-height);
     grid-area: bigtext;
     justify-self: right;
@@ -560,7 +560,20 @@ table.mobileitem td.name {
        font-size), paired with #status dropping to regular weight below. */
     line-height: var(--dz-card-meta-line-height);
 }
-/* type */
+/* type.
+   line-height is 0, not --dz-card-meta-line-height (owner report 2026-08-10, item 4 of
+   the five-visual batch, fixed 2026-08-11). This cell carries the device-type string AND,
+   for dimmers/blinds, the slider - but the string is deliberately invisible via a zero
+   glyph size (declared below). An ABSOLUTE 14px line-height still builds a full 14px line
+   box for that zero-sized text, so the cell reserved a phantom row nothing could draw
+   into, and align-self: center then centred "phantom line + control" instead of the
+   control. Measured on #/LightSwitches at 1440: control-centre disagreement within a card
+   row was up to 21.5px; zeroing this line box takes it to 7.5px. (A unitless line-height
+   would have computed to 0 against the zero glyph size by itself; the absolute value is
+   what made it load-bearing, so this is a latent-bug fix, not a taste change.)
+   The residual 7.5px is switch-vs-slider and is NOT fixable here: core positions
+   .dimslider absolute (www/css/style.css:843), so it contributes no height to this cell
+   and sits below a control that does. See the card-control contract harness. */
 .item #type {
     color: var(--secondary-text-color);
     grid-area: status;
@@ -569,7 +582,7 @@ table.mobileitem td.name {
     padding-right: var(--dz-card-space-2xl);
     max-width: 100%;
     font-size: 0;
-    line-height: var(--dz-card-meta-line-height);
+    line-height: 0;
 }
 
 .item #status,
@@ -1296,6 +1309,19 @@ body table#itemtable tr > .options {
     height: var(--dz-card-slider-height);
     right: var(--dz-card-slider-right);
     width: calc(100% - var(--dz-card-slider-inset)) !important;
+    /* Vertical only - margin-top on an absolutely-positioned box with top:auto shifts its
+       STATIC position, so this moves the track onto the same line as the toggles and
+       selectors it shares card rows with, and cannot touch left/width/right (those resolve
+       against the card, not this cell). Verified: dz-slider-geometry.js reports every
+       variant's horizontal box byte-identical across both pages and three widths.
+
+       !important is load-bearing: core's JS writes an INLINE margin-top per slider
+       variant (measured live - 7px on the dashboard dimslidernorm, 7px on dimsmall, 12px
+       on dimsmall3, none on the tab-page dimslidernorm), and those differing values are
+       the reason the variants never shared a baseline. One authored value replaces the
+       whole set so every slider lands on the same line. Only an author !important
+       outranks an inline declaration, so this cannot be done without it. */
+    margin-top: var(--dz-card-slider-align-nudge) !important;
 }
 
 /* Blinds sliders (any card with a second icon cell). Anchor BOTH edges instead
@@ -1312,7 +1338,12 @@ body table#itemtable tr > .options {
 .span4 td#img2 ~ .statusProtected .dimslider {
     left: var(--dz-card-blinds-slider-left);
     width: auto !important;
-    margin-top: 0 !important;
+    /* Was margin-top: 0 !important, which cancelled core's inline 7px/12px but parked the
+       blinds tracks on a different line from every other control (item 4). They now share
+       the one alignment constant with the rest of the family; the zeroing this replaces
+       was only ever about neutralising core's per-variant inline value, which the token
+       does too. */
+    margin-top: var(--dz-card-slider-align-nudge) !important;
 }
 
 #type .dimslider .ui-slider-range,

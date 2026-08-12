@@ -110,7 +110,7 @@ section.compact .row:not(.divider) {
     grid-area: status;
     padding: 0 var(--dz-card-space-lg);
     align-self: center;
-    font-size: var(--dz-text-lg);
+    font-size: var(--dz-text-value);
 }
 
 #holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr,
@@ -129,7 +129,7 @@ section.compact .row:not(.divider) {
 #holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr td#bigtext,
 #holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr td#bigtext {
     grid-area: bigtext;
-    font-size: var(--dz-text-lg);
+    font-size: var(--dz-text-value);
     font-weight: var(--dz-weight-semibold);
     padding: var(--dz-card-space-2xs) var(--dz-card-space-md) 0 0;
     text-align: right;
