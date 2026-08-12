@@ -214,15 +214,15 @@ function setDarkFeature(enabled) {
 }
 
 /* Suffix -> color_scheme field + display label, in swatch order (Background,
-   Main, Menu, Item, Text, Secondary Text, Disabled). The source the hub's
+   Menu, Item, Main, Text, Secondary Text, Disabled): surfaces from page to
+   card, then the accent, then text, then state. The source the hub's
    custom-colour swatches render from (theme-hub.js dzHubCustomColorsMount /
-   dzHubSyncSchemeSwatches). The legacy Theme-tab colour inputs that also read
-   it were deleted with the injected tab (Task 8). */
+   dzHubSyncSchemeSwatches). */
 var DZ_COLOR_SCHEME_FIELDS = [
     { suffix: "bg", field: "background", label: "Background" },
-    { suffix: "main_color", field: "main_color", label: "Main" },
     { suffix: "navbar", field: "navbar", label: "Menu" },
     { suffix: "item", field: "item", label: "Item" },
+    { suffix: "main_color", field: "main_color", label: "Main" },
     { suffix: "text", field: "main_text", label: "Text" },
     { suffix: "alt_text", field: "alt_text", label: "Secondary Text" },
     { suffix: "disabled", field: "disabled", label: "Disabled" }
@@ -253,14 +253,14 @@ function renderSchemePicker() {
     if (!containers.length) return;
     loadBuiltinSchemes().then(function(schemes) {
         /* Every card previews the SAME seven colours in the SAME order as the
-           custom colour editor's inputs (Background, Main, Menu, Item, Text,
+           custom colour editor's inputs (Background, Menu, Item, Main, Text,
            Secondary, Disabled), so preset cards and the Custom card are
            comparable at a glance (owner report 2026-07-17: presets showed 4
            swatches while Custom showed 7). Keys are color_scheme key-space;
            preset swatches derive from each scheme's full colors object (all
            schemes are fully fetched by loadBuiltinSchemes, the 4-key
            preview{} block in scheme JSONs is no longer read here). */
-        var SWATCH_KEYS = ["background", "main_color", "navbar", "item", "main_text", "alt_text", "disabled"];
+        var SWATCH_KEYS = ["background", "navbar", "item", "main_color", "main_text", "alt_text", "disabled"];
         /* Base (schemeless) themes have no JSON; their colours mirror the
            dz-tokens.css / dark.css token defaults, and their descriptions are
            authored here for the same reason. */

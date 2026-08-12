@@ -462,13 +462,12 @@
     color: var(--dz-accent-red);
 }
 
-/* The 7-swatch custom-colour editor (Background, Main, Menu, Item, Text,
-   Secondary Text, Disabled; same order as the deleted legacy Theme tab's
-   colour inputs). Each swatch is enabled only while theme.scheme ===
-   "custom" (dzHubSyncSchemeSwatches, theme-hub.js). Fixed narrow cells +
-   flex-wrap so
-   all 7 stay contained at 360px (wrap to two rows there; the containment
-   requirement is page scrollWidth, not a single row). */
+/* The 7-swatch custom-colour editor (Background, Menu, Item, Main, Text,
+   Secondary Text, Disabled). Each swatch is enabled only while
+   theme.scheme === "custom" (dzHubSyncSchemeSwatches, theme-hub.js). Fixed
+   narrow cells + flex-wrap so all 7 stay contained at 360px (wrap to two
+   rows there; the containment requirement is page scrollWidth, not a
+   single row). */
 .dz-hub-swatches {
     display: flex;
     flex-wrap: wrap;

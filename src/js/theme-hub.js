@@ -1038,12 +1038,12 @@ function dzHubSchemeMount(entry) {
     return mount;
 }
 
-/* Mounts the 7-swatch custom-colour editor (Background, Main, Menu, Item,
-   Text, Secondary Text, Disabled: same fields/order as the deleted legacy
-   Theme tab's colour inputs, DZ_COLOR_SCHEME_FIELDS in
-   schemes.js) plus a "Save as preset" action (saveCurrentColorsAsScheme,
-   schemes.js) so a user-saved preset from the hub can be deleted again via
-   the picker card's own delete affordance (schemes.js renderSchemePicker). */
+/* Mounts the 7-swatch custom-colour editor (Background, Menu, Item, Main,
+   Text, Secondary Text, Disabled: same fields/order as
+   DZ_COLOR_SCHEME_FIELDS in schemes.js) plus a "Save as preset" action
+   (saveCurrentColorsAsScheme, schemes.js) so a user-saved preset from the
+   hub can be deleted again via the picker card's own delete affordance
+   (schemes.js renderSchemePicker). */
 function dzHubCustomColorsMount(entry) {
     var mount = document.createElement("div");
     mount.className = "dz-hub-custom-mount";
