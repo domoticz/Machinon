@@ -10,6 +10,7 @@ machinon-*.tar.gz
 !scripts/check-shadows.sh
 !scripts/check-menus.sh
 !scripts/build-dist.sh
+!scripts/check-comments-only.sh
 # JPEG images
 images/*.[jJ][pP][gG]
 # Claude-generated working documents (local-only: specs, plans, brainstorms)
