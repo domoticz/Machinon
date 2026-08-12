@@ -155,7 +155,7 @@ components:
     textColor: "{colors.light-text-secondary}"
     rounded: "{rounded.button}"
     cursor: "not-allowed"
-    # Contrast: 3.42:1 light, 2.46:1 dark (below AA 4.5:1, but WCAG exempts disabled controls)
+    # Contrast: 2.88:1 light, 2.31:1 dark (below AA 4.5:1, but WCAG exempts disabled controls)
   device-card:
     backgroundColor: "{colors.light-surface}"
     border: "1.5px solid transparent"
@@ -2851,13 +2851,10 @@ would have to change, not a reason to copy the current behaviour.
   are hardcoded `rgba` values; only the button shadows are tokenized)
 - Status glow colors (timeout red, protected blue, low battery yellow) are hardcoded `rgb()` in
   `css/device-status.css`, not mapped to the semantic color system
-- `--dz-input-border` and `--dz-status-disabled` share the same value (`{colors.light-border}`) in
-  light mode, making borders and disabled controls visually indistinguishable
 - Disabled button contrast below WCAG AA: light theme `{colors.light-text-secondary}` on
-  `{colors.light-disabled}` is 3.42:1, dark theme `{colors.dark-text-secondary}` on
-  `{colors.dark-disabled}` is 2.46:1. WCAG exempts disabled controls, but readability would benefit
-  from dedicated disabled text/background tokens. `--dz-status-disabled` is shared with
-  `--dz-input-border` (see the gap above), so it cannot be changed in isolation.
+  `{colors.light-disabled}` is 2.88:1, dark theme `{colors.dark-text-secondary}` on
+  `{colors.dark-disabled}` is 2.31:1. WCAG exempts disabled controls, but readability would benefit
+  from dedicated disabled text/background tokens.
 - Navbar shadow uses `10px 2px` spread instead of the card tier's `10px 1px`
 - `css/login.css` still carries nine hardcoded literals (`#fff`, `#f1f1f1`, `#ccc`, `#1a1a1a`)
   alongside its 22 `--dz-*` usages, so parts of the login page do not follow the dark scheme
