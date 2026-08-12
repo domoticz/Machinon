@@ -164,6 +164,12 @@ var THEME_MANIFEST = [
                 label: "Hide the footer text", description: "Hide the footer text",
                 appliesTo: "Page footer", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
+            },
+            {
+                key: "floorplan_popup_details", storageKey: "floorplan_popup_details", control: "toggle",
+                label: "Expandable floorplan popups", description: "Adds an expander to floorplan device popups, revealing the Log and Notifications shortcuts",
+                appliesTo: "Floorplan", previewId: "sketch-floorplan-details", parent: null,
+                reloadOnDisable: false, status: "keep", scope: "user"
             }
         ]
     },

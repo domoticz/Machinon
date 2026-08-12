@@ -286,6 +286,23 @@ function dzSketchNotification() {
     return s.box;
 }
 
+/* floorplan_popup_details -> a mini popup card with a value line and a chevron beneath,
+   the chevron being what this setting reveals. Sketch rather than live-mini: the real
+   surface is SVG inside a floorplan and does not reduce to a token mini. */
+function dzSketchFloorplanDetails() {
+    var box = dzMiniBox("display:flex;align-items:center;justify-content:center;padding:6px;");
+    var card = dzMiniCard("width:100%;padding:6px;display:flex;flex-direction:column;gap:5px;");
+    var value = dzMiniEl("span",
+        "width:55%;height:7px;border-radius:3px;background:var(--dz-accent-color);");
+    var chevron = dzMiniEl("span",
+        "align-self:flex-end;width:9px;height:9px;border-right:2px solid var(--dz-accent-color);" +
+        "border-bottom:2px solid var(--dz-accent-color);transform:rotate(-135deg);");
+    card.appendChild(value);
+    card.appendChild(chevron);
+    box.appendChild(card);
+    return box;
+}
+
 /* ---- Registry + entry point ----------------------------------------------- */
 
 /* previewId -> builder(entry) -> DOM node. Assigned in src/js/theme-manifest.js;
@@ -303,9 +320,10 @@ var DZ_HUB_PREVIEWS = {
     "card-width":    dzPreviewCardWidth,
     "chart-bands":   dzPreviewChartBands,
     // SVG sketch fallbacks (scheme-neutral)
-    "sketch-standby":      dzSketchStandby,
-    "sketch-update":       dzSketchUpdate,
-    "sketch-notification": dzSketchNotification
+    "sketch-standby":           dzSketchStandby,
+    "sketch-update":            dzSketchUpdate,
+    "sketch-notification":      dzSketchNotification,
+    "sketch-floorplan-details": dzSketchFloorplanDetails
 };
 
 /* Look up and build the preview for a previewId. Returns a DOM node, or null if

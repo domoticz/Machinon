@@ -1,21 +1,49 @@
 /**** ./floorplan.css ***/
-/* Floorplan */		
+/* Floorplan */
 rect#shadow {
     rx: 5;
     ry: 5;
 }
 
+/* Core draws its own drop shadow as a black rect at opacity .3 offset by 2,2. Soften it
+   toward this theme's elevation language rather than removing it: the popup floats over a
+   busy floorplan and needs separation, but .3 black is heavier than most --dz-elev-* tiers
+   (only --dz-elev-drag's 0.35 alpha exceeds it; see dz-tokens.css). */
+.DeviceDetails rect#shadow {
+    opacity: 0.12;
+}
+
+/* No !important: this is a plain stylesheet rule, which already outranks core's inline
+   fill="url(#PopupGradient)" presentation attribute regardless of specificity (a
+   presentation attribute always loses to any author-stylesheet declaration of the same
+   property, SVG's painting-and-compositing rules) -- confirmed on a live popup that
+   dropping !important leaves the computed fill unchanged (still resolves to
+   --dz-widget-bg, never reverts to the gradient). A prior !important here was cargo-cult
+   and has been removed. */
 rect.popup {
     rx: 5;
     ry: 5;
-    fill: var(--dz-widget-bg) !important;
+    fill: var(--dz-widget-bg);
 }
 
 rect.header {
     rx: 5;
     ry: 5;
     fill: var(--dz-widget-bg) !important;
-    stroke-width: 0 !important;
+}
+
+/* Core's drawDetails() (this popup's header) and drawIcon() (the DeviceTile status-label
+   background, the same bare rect.header selector's other consumer) both paint this rect
+   via a bare `style: fill:...` presentation attribute -- neither ever sets a stroke.
+   SVG's initial stroke value is none, so no stroke of any color, let alone a black
+   hairline, has ever painted here, with or without this rule. Declared explicitly anyway
+   so the header stays stroke-free by design rather than by omission, in case a future
+   core change starts stroking it. A prior stroke-width: 0 !important rule on rect.header
+   above tried to neutralize a stroke the same way and was redundant with this one:
+   verified live (computed stroke stays none, dz-floorplan-popup-contract.js stays clean)
+   whether that declaration is present or not, so it has been removed. */
+.DeviceDetails rect.header {
+    stroke: none;
 }
 
 .DeviceDetails text {
@@ -45,6 +73,62 @@ rect.header {
     display: none;
 }
 
+/* Metadata rows, brought onto the card language (owner report 2026-08-11). The popup and the
+   device cards render the same two fields with different rules, which is what made the popup
+   read as "not themed" even after the chrome was fixed.
+
+   type: hidden, exactly as the cards hide it (css/cards.css .item #type zeroes its glyph and
+   line box, so it never renders there). Showing it here while hiding it there meant the two
+   surfaces disagreed about the same field. Hidden the same way bigtext above is.
+
+   lastseen: core gives it the body-text colour, while the cards use the muted secondary
+   (measured: cards rgb(109,110,109), popup rgb(26,26,26)). fill needs the priority flag
+   because the .DeviceDetails text rule near the top of this file already claims it with one;
+   the size does not, since core sets that as a presentation attribute and any authored
+   declaration outranks it.
+
+   Size is deliberately ONE STEP BELOW the cards (owner gate 2026-08-11): cards put this field
+   on --dz-text-xs, but the popup has core's expander chevron competing for the same line and
+   the cards do not. Measured clearance from the end of the timestamp to the chevron: 17px at
+   --dz-text-micro, 2px at --dz-text-xs. 2px survives the English string and nothing else -
+   "Last Seen" is translated, and a longer label would collide. Matching the card VALUE is not
+   the same as matching the card SITUATION, so this matches the situation.
+
+   The tspan rule is the load-bearing part. Core sizes the inner label runs at 80% of the
+   parent (www/js/domoticzdevices.js:744 lastlabel, :796 typelabel) and italicises the label,
+   so they computed to 8.96px italic: a RELATIVE size lands off the 11/12/14/16/20/26 scale by
+   construction, the same failure the Highcharts em remnants had. Pin the runs to the same
+   step as their parent and drop the italic, which appears nowhere else in this theme. */
+.DeviceDetails text#type {
+    display: none;
+}
+
+.DeviceDetails text#lastseen {
+    font-size: var(--dz-text-micro);
+    fill: var(--secondary-text-color) !important;
+}
+
+.DeviceDetails text#lastseen tspan {
+    font-size: var(--dz-text-micro);
+    font-style: normal;
+}
+
+/* Slider (core paints it with gradients + black strokes: rect#sliderback
+   fill=url(#SliderImage), rect#slider fill=url(#SliderGradient), both stroked black,
+   www/js/domoticzdevices.js drawDetails). Core's GEOMETRY is kept deliberately: this
+   slider lives in the plan's scaled SVG user-unit space, not px, so matching the card
+   slider's literal 5px track would fight the floorplan zoom. Match the LANGUAGE - flat,
+   accent-filled, unstroked - not the numbers. */
+.DeviceDetails rect#sliderback {
+    fill: var(--dz-card-slider-track-bg);
+    stroke: none;
+}
+
+.DeviceDetails rect#slider {
+    fill: var(--dz-accent-color);
+    stroke: none;
+}
+
 g text {
     fill: var(--dz-body-text) !important;
 }
@@ -57,6 +141,34 @@ g.selector .level-list .level path {
 
 image#twisty {
     display: none;
+}
+
+/* Expanded-state action pills (feature: floorplan_popup_details, css/floorplan_popup_details.css).
+   Core fills both with url(#ButtonImage1), a gradient that tracks nothing. Put them on the
+   primary button token so they read as the same control family as every other button in
+   the theme.
+
+   Real structure (dumped from a live expanded popup, feature ON -- the brief's
+   ".DeviceDetails g#Log text" guess does not exist in the DOM): core does not wrap each
+   pill in its own <g id="Log">/<g id="Notifications">. `rect#Log` and `rect#Notifications`
+   are direct children of `g#detailsgroup`, and each pill's label is an UNNAMED <text>
+   (no id, no class, presentation attribute fill="white") that is the rect's very next
+   sibling -- www/js/domoticzdevices.js drawButtons appends `rect` then `text` per button,
+   flat inside detailsgroup. Reached by adjacent-sibling combinator instead of descendant,
+   since there is no wrapper id to descend into. */
+.DeviceDetails rect#Log,
+.DeviceDetails rect#Notifications {
+    fill: var(--dz-btn-primary-bg);
+}
+
+/* !important required: the general `.DeviceDetails text { fill: ... !important; }` rule
+   above already claims every text node under .DeviceDetails, including these unnamed
+   labels, at higher precedence (importance) than this rule's higher specificity could
+   otherwise overcome -- verified via computed style on a live expanded popup: without
+   !important here the label stayed --dz-body-text, not --dz-btn-primary-text. */
+.DeviceDetails rect#Log + text,
+.DeviceDetails rect#Notifications + text {
+    fill: var(--dz-btn-primary-text) !important;
 }
 
 .bullet {

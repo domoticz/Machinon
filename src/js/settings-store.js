@@ -76,6 +76,9 @@ function loadSettings() {
             if (theme.features && !theme.features.log_plot_bands) {
                 theme.features.log_plot_bands = { id: 43, enabled: true, files: ["log_ranges.js"] };
             }
+            if (theme.features && !theme.features.floorplan_popup_details) {
+                theme.features.floorplan_popup_details = { id: 44, enabled: false, files: ["floorplan_popup_details.css"] };
+            }
             // Settings cached before the scheme picker existed: derive the
             // selection from the legacy feature flags.
             if (theme.features && !theme.scheme) {

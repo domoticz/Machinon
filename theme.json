@@ -56,6 +56,11 @@
             "enabled": true,
             "files": ["log_ranges.js"]
         },
+        "floorplan_popup_details": {
+            "id": 44,
+            "enabled": false,
+            "files": ["floorplan_popup_details.css"]
+        },
         "standby": {
             "id":13,
             "enabled":false,

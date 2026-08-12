@@ -1,0 +1,24 @@
+/**** ./floorplan_popup_details.css ***/
+/* Feature: floorplan popup details (theme.json "floorplan_popup_details", default OFF).
+
+   Reveals core's popup expander. css/floorplan.css hides it with
+   `image#twisty { display: none }`, a rule dating to 2019 ("Floorplan popup", 934a800)
+   with no recorded reason. Revealing and clicking it was verified working: the popup grows
+   73px -> 101px and shows Type, Log, Notifications and the favourite star, chevron
+   rotating, correct in both schemes. CORRECTED 2026-08-11 after the owner asked whether the 2019 hide had been
+   hiding something broken: it partly was. Clicking through every floorplan device and
+   asserting the popup actually grew (attribute-only "expanded" does not re-render, core does
+   that in JS) found one real defect - a device whose type string is long enough overflows the
+   popup's right edge, measured 28px past it on a Humidity sensor. That is a plausible reason
+   someone reached for a blanket hide in 2019. It is now moot: this theme hides the type row
+   outright to match the device cards (see css/floorplan.css), and a row that generates no
+   boxes cannot overflow, so the defect is structurally gone rather than merely unobserved.
+   Everything else in the expanded state measured clean across the zoo. The hide stays the
+   DEFAULT regardless, because it has been the shipped behaviour for six years.
+
+   feature-loader.js appends this as a <link> at runtime, i.e. after the @import-ed
+   css/floorplan.css, so at equal specificity (0-1-1 on both sides) source order carries it.
+   No !important unless the harness proves otherwise. */
+image#twisty {
+    display: inline;
+}
