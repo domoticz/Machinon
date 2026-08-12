@@ -82,9 +82,9 @@
    fills the item) is keyed on the page containers and missed this context:
    the tr painted the card at the table's CONTENT width while the absolutely
    positioned dimmer slider anchored to the full item box, hanging up to
-   ~130px past the visible card edge (dimmer, blinds %, RGBW variants;
-   measured by dz-dd-matrix.js). Full-width table = painted card == item box,
-   and card widths in the grid become uniform as a side effect. */
+   ~130px past the visible card edge (dimmer, blinds %, RGBW variants).
+   Full-width table = painted card == item box, and card widths in the
+   grid become uniform as a side effect. */
 .dd-dz-fav-item .item table[id^="item"] {
     width: 100%;
 }
@@ -118,8 +118,8 @@
    value vertically (~55-60px tall). On a narrow tile that grid collapses to a
    single 110px column, so a 6-device Quick Stat stood ~420px tall inside a 182px
    cell: the container scrolled, but the entries below the fold sat outside the
-   tile (census check (d) measured the .dd-log-icon of each hidden row +63/150/218px
-   past the widget - the owner's "Quick Stats overflow" defect).
+   tile (measured: the .dd-log-icon of each hidden row sits +63/150/218px
+   past the widget, a Quick Stats overflow).
 
    Present the entries as a compact single-column ROW list (icon | label | value
    on one line, core's own `--list` shape from dashboard.css:3503) once the tile

@@ -7,13 +7,11 @@
   style.css read these tokens; Machinon's component CSS stays authoritative over its look.
 
   Dark and future schemes override these under html[data-dz-scheme="..."] (see dark.css).
-  Values are the Blue UI light palette, adopted as the base on 2026-08-12; custom.js
-  light_theme no longer exists as a source of truth.
+  Values are the Blue UI light palette.
 
   Machinon's own component CSS (custom.css + css/*.css) consumes these --dz-* tokens directly.
-  The old --main-* back-compat aliases have been retired; the only non-core-named tokens
-  left are the aux ones below (--secondary-text-color and the --dz-accent*-values RGB triads used
-  for rgba() tints and the custom-colour picker).
+  The only non-core-named tokens are the aux ones below (--secondary-text-color and the
+  --dz-accent*-values RGB triads used for rgba() tints and the custom-colour picker).
 */
 :root {
     /* Core --dz-* tokens mapped from Machinon's palette (light) */
@@ -33,10 +31,8 @@
     /* Private base for the light danger red. Not itself a --dz-* contract
        token: it exists only so --dz-accent-red above and the html:root
        override below (see the specificity note near that block) both
-       derive from one place instead of two literals drifting apart, which
-       is how the html:root copy went stale during the 2026-08-12 Blue UI
-       rebase (found live: --dz-accent-red computed the retired #c43b3b
-       while --dz-accent-red-values already carried the new triplet). */
+       derive from one place instead of two literals silently drifting
+       apart. */
     --dz-accent-red-base:     #992f2b;
     --secondary-text-color:   #3e5568;
     --dz-accent-values: 57,109,158;
@@ -44,17 +40,11 @@
     /* Text placed ON an accent-coloured surface (buttons, active chips,
        hovered menu rows). Schemes with a light accent override this to a
        dark value; keep contrast vs --dz-accent-color at 3:1 or better
-       (gated by dz-scheme-picker.js). */
+       (WCAG SC 1.4.11 non-text threshold). */
     --dz-accent-text:         #ffffff;
-    /* Card Log/Timer icon pair (owner gate verdict, accent icons pass,
-       cards-polish 2026-08-07; re-measured for the 2026-08-12 Blue UI
-       rebase). Plain --dz-accent-color (#396d9e) on the light card
-       background (--dz-widget-bg #ffffff) measures 5.45:1 resting / 4.77:1
-       hover (hover composites --dz-btn-hover-bg's 10%-accent tint over the
-       card background), both comfortably above WCAG SC 1.4.11's 3:1
-       non-text threshold, measured live via getComputedStyle against real
-       .timers_log icons. Dark reuses the plain accent too as of this
-       rebase (9.68:1 there); see dark.css. */
+    /* Card Log/Timer icon pair. The plain accent clears WCAG SC 1.4.11's 3:1
+       non-text threshold on the card background in both schemes (5.45:1 light
+       resting, 9.68:1 dark), so no separate icon colour is needed. */
     --dz-card-icon-accent:    var(--dz-accent-color);
     /* Device status glows (card shadows), as r,g,b triplets so consumers
        can alpha them with rgba(). */
@@ -84,21 +74,17 @@
     --dz-weight-regular: 400;
     --dz-weight-semibold: 600;
     --dz-weight-mono-bold: 700;   /* ACE syntax-highlight bold */
-    /* rem, not px (2026-08-11). px font sizes ignore the browser's default-font-size
-       preference: a user who sets 20px still gets 14px body text, because only ZOOM
-       scales px (which is why px never failed WCAG 1.4.4 - we were already compliant).
-       rem follows that preference, which is the whole and only gain here; it matters most
-       on the tablets and wall panels this theme gets used on. Safe because core's
-       bootstrap.css sets `html { font-size: 100% }`, i.e. the preference itself, and
-       nothing in this theme pins a root size.
-       Values are the same pixels at the 16px default, so this conversion is a NO-OP for
-       anyone who has not changed that setting - verified computed-identical across 30
-       routes at two widths. Stress-tested to 200% (root 32px) over the same 30 routes at
-       1440 and 390: no page overflows its viewport, because the card grid's tracks are
-       fr/minmax and absorb taller text. Three sites did break at 200% and were fixed
-       first: the About headings and info-label/info-value wrapping, and the Devices-Log
-       header button column's flex-shrink. Harness: dz-rem-stress-allroutes.js.
-       KEEP px when changing these: a value that must not scale with reading preference. */
+    /* rem, not px. px font sizes ignore the browser's default-font-size
+       preference: a user who sets 20px still gets 14px body text, because only zoom
+       scales px (WCAG 1.4.4 is satisfied via zoom regardless). rem follows the
+       font-size preference too, which matters most on the tablets and wall panels
+       this theme gets used on. Safe because core's bootstrap.css sets
+       `html { font-size: 100% }`, i.e. the preference itself, and nothing in this
+       theme pins a root size. Values are the same pixels at the 16px default, so
+       this conversion is a no-op for anyone who has not changed that setting. The
+       card grid's tracks are fr/minmax and absorb taller text, so raising the root
+       font size should not overflow the layout.
+       KEEP px for a value that must not scale with the reading preference. */
     --dz-text-micro: 0.6875rem;   /* 11px @16 - btn-mini/xs, chart zoom, compact last-update */
     --dz-text-xs: 0.75rem;        /* 12px @16 - buttons, chart menus, last-update, badges */
     --dz-text-sm: 0.875rem;       /* 14px @16 - BODY BASE, nav, menus, tables, ACE */
@@ -106,14 +92,12 @@
     --dz-text-lg: 1.25rem;        /* 20px @16 - device values (bigtext), section headings */
     --dz-text-display: 1.625rem;  /* 26px @16 - page-title h1, login heading */
     /* ---- Semantic type aliases ----
-       Components should say what a piece of text IS, not how big it is. --dz-text-lg was
-       carrying two unrelated jobs (device values and section headings), which is why the
-       2026-08-11 bigtext size gate needed a whole extra harness
-       (dz-textlg-consumers-strip.js) just to discover what else the token dragged along.
-       With these, "make device values smaller" is a one-line edit that cannot touch a
-       heading. All three resolve to the same value today, so introducing them is a no-op.
+       Components should say what a piece of text IS, not how big it is. --dz-text-lg
+       carries two unrelated jobs (device values and section headings); these aliases let
+       "make device values smaller" be a one-line edit that cannot touch a heading. All
+       three resolve to the same value today, so introducing them is a no-op.
 
-       --dz-text-lg now has NO direct consumers - only these aliases. That is the point:
+       --dz-text-lg has NO direct consumers - only these aliases. That is the point:
        leaving even one raw consumer would mean editing the base still had blast radius.
        The other scale tokens are still consumed directly, deliberately: an alias earns its
        place when two purposes actually want to diverge, and none of the others have. Mint
@@ -161,20 +145,15 @@
     --dz-card-max-width:        500px;
 
     /* ---- Card anatomy tokens (css/cards.css, css/compact.css, css/dashboard_mobile.css) ----
-       Minted from the 2026-08-07 cards-anatomy audit (docs/superpowers/2026-08-07-cards-anatomy-audit.md,
-       local-only). Every value below is byte-equal to what the theme computed before this pass (pure
-       tokenization, zero visual change) - refine work (text hierarchy, accent Log/timer icons, the
-       Dash2 outer ring) lands in later cards-polish tasks against these names, not this one.
-
-       Shape B (audit Section 10a, controller ruling): genuine spacing (padding/margin/gap) collapses
-       onto the 7-step scale below instead of minting one name per site; radii collapse onto 3 tiers.
-       The remaining structural values (column/row tracks, image/handle sizes, position offsets,
-       negative margins, the leftover raw slider-track color) stay one token per site: they carry no
-       shared "spacing rhythm", and coupling two sites that land on the same px by coincidence is the
-       exact trap the audit's Judgment call 5 flags. table.mobileitem is a third real card-rendering
-       context (audit Section 10c): its own values get the --dz-mobile-card-* namespace; where a mobile
-       site is a verified duplicate of a desktop one (the dimmer-slider family) it reuses the desktop
-       token directly instead of a redundant mobile alias. */
+       Genuine spacing (padding/margin/gap) collapses onto the 7-step scale below instead of
+       minting one name per site; radii collapse onto 3 tiers. The remaining structural values
+       (column/row tracks, image/handle sizes, position offsets, negative margins, the leftover
+       raw slider-track color) stay one token per site: they carry no shared "spacing rhythm",
+       and coupling two sites that land on the same px by coincidence is a real trap.
+       table.mobileitem is a third real card-rendering context: its own values get the
+       --dz-mobile-card-* namespace; where a mobile site is a verified duplicate of a desktop
+       one (the dimmer-slider family) it reuses the desktop token directly instead of a
+       redundant mobile alias. */
 
     /* Card spacing scale - padding/margin/gap only. Shares the page-level 8/10/15/20 cluster
        values and adds the finer 2/3/5px card-internal steps. */
@@ -218,15 +197,14 @@
 
     /* Bigtext (device value).
        DERIVED, never guessed: this is the measured glyph box of --dz-text-lg in Inter, i.e.
-       the smallest line box that fully contains the value's own text. It shipped at 20px
-       against a 22px value size (owner report 2026-08-10), which is BELOW the font size, so
-       the text overran its own line box by 6px and vertical centring in this row could
-       never settle. It was the only card line-height under its own font-size; the siblings
-       are comfortably above theirs (name 18/14, meta 14/12).
+       the smallest line box that fully contains the value's own text. A line-height below the
+       font size lets the text overrun its own line box, so vertical centring in this row can
+       never settle; every other card line-height stays comfortably above its font size (name
+       18/14, meta 14/12) for the same reason.
        Re-derive whenever --dz-text-lg changes, by setting line-height:normal and reading a
-       value span's height - dz-bigtext-size-strip.js does exactly that per candidate:
+       value span's height:
          16px -> 19    18px -> 22    20px -> 24    22px -> 26
-       Now 24px, following the value size to 20px (owner gate, 2026-08-11). */
+       Current value (24px) matches the 20px --dz-text-lg via that table. */
     --dz-card-value-line-height: 24px;
 
     /* Bar-ranges gauge (core <dz-bar>, drawn along the card's top edge) */
@@ -237,9 +215,8 @@
     --dz-card-status-max-height:    60px;
     --dz-card-scrollbar-size:       4px;
     /* Metadata (#type/#lastupdate) line-height, tightened one step below the
-       browser's unset "normal" per the owner gate verdict N2 "quiet status"
-       (cards-polish, 2026-08-07): paired with #status dropping to regular
-       weight below so the metadata row reads quieter alongside it. */
+       browser's unset "normal", paired with #status dropping to regular weight
+       below so the metadata row reads quieter alongside it. */
     --dz-card-meta-line-height:     14px;
 
     /* Options flyout (3-dot menu) */
@@ -259,7 +236,7 @@
     --dz-card-slider-right:         20px;
     --dz-card-slider-inset:         100px;  /* width: calc(100% - N) */
     --dz-card-blinds-slider-left:   14px;
-    /* Vertical alignment compensation for the card slider (item 4, 2026-08-11). Core
+    /* Vertical alignment compensation for the card slider. Core
        positions .dimslider absolute (www/css/style.css:843), so unlike every other card
        control it contributes NO height to its cell: that cell collapses to zero, centres
        as an empty box on the control track, and the slider then draws downward from that
@@ -273,9 +250,8 @@
        This is a MEASURED constant, not a derived one: it is the offset that minimised the
        control-centre spread across both affected surfaces in a -2..-10px sweep. At -7px
        #/Dashboard lands within 1px and #/LightSwitches within 1.5px, the residual being
-       the blinds "% + Stop" variant. Guarded by dz-card-control-contract.js; if core drops
-       the absolute positioning or changes its inline margins, that harness is what says so
-       (and this token should then be re-swept, not nudged by hand). */
+       the blinds "% + Stop" variant. If core drops the absolute positioning or changes its
+       inline margins, re-sweep this value; do not nudge it by hand. */
     --dz-card-slider-align-nudge:   -7px;
     --dz-card-slider-handle-size:   15px;
     --dz-card-slider-handle-offset: -5px;
@@ -328,12 +304,12 @@
     --dz-table-control-text:    var(--secondary-text-color);
     /* Totals/summary rows: a quiet accent-tinted band, DERIVED so schemes
        track (a literal copy is how the zebra-stripe class of bug happens).
-       Text must hold WCAG AA vs the band; dz-table-census.js asserts it. */
+       Text must hold WCAG AA against the band. */
     --dz-table-total-bg:   color-mix(in srgb, var(--dz-accent-color) 15%, var(--dz-widget-bg));
     --dz-table-total-text: var(--dz-body-text);
     /* One cell-padding rhythm for theme-styled tables (design choice near the
-       de facto 4/8/10 cluster; owner-gated in strips; exceptions annotated in
-       the table contract baseline). */
+       de facto 4/8/10 cluster; exceptions annotated in the table contract
+       baseline, scripts/baselines/table-contract.json). */
     --dz-table-cell-pad:   6px 10px;
     --dz-table-header-pad: 8px 10px;
 
@@ -353,14 +329,13 @@
     --dz-btn-shadow-hover:    0 2px 6px rgba(0,0,0,.22), 0 1px 3px rgba(0,0,0,.12);
     --dz-btn-shadow-pressed:  inset 0 1px 2px rgba(0,0,0,.12);
     --dz-btn-focus-ring:      0 0 0 2px rgba(var(--dz-accent-values), .35);
-    /* Inset variant (selector-segmented spec, 2026-08-08): the joined-
-       segment shell clips outward box-shadow at its own overflow:hidden
-       edge, which every segment touches under wrap, so the ring for a
-       button INSIDE that shell draws inward instead. Same accent/opacity as
-       --dz-btn-focus-ring, only the geometry differs; no new color. */
+    /* Inset variant: the joined-segment shell clips outward box-shadow at its
+       own overflow:hidden edge, which every segment touches under wrap, so the
+       ring for a button INSIDE that shell draws inward instead. Same
+       accent/opacity as --dz-btn-focus-ring, only the geometry differs; no
+       new color. */
     --dz-btn-focus-ring-inset: inset 0 0 0 2px rgba(var(--dz-accent-values), .35);
-    /* Elevation (DESIGN.md levels 1/2/4/5; level 3 = the --dz-btn-shadow triple).
-       Crisp tight direction, owner-picked 2026-08-07 shadow-value-tuning gate. */
+    /* Elevation (DESIGN.md levels 1/2/4/5; level 3 = the --dz-btn-shadow triple). */
     --dz-elev-card:    0 1px 4px rgba(0,0,0,0.25);
     --dz-elev-popup:   0 2px 6px rgba(0,0,0,0.28);
     --dz-elev-overlay: 0 3px 10px rgba(0,0,0,0.30);
@@ -371,8 +346,8 @@
     --dz-glow-battery:   0px 0px 10px 2px rgba(var(--dz-status-lowbat-values), 0.4);
     /* Accent rings; ring-hover COMPOSES the resting card shadow so a hover rule can
        never delete it (the single-property trap, DESIGN.md Elevation). ring-hover-inset
-       is the Dynamic Dashboard variant (Task 2 measured 0px vertical ancestor clearance,
-       so the outer ring form clips; inset never does). */
+       is the Dynamic Dashboard variant: that context has 0px vertical ancestor clearance,
+       so the outer ring form clips there; inset never does. */
     --dz-ring-hover:       var(--dz-elev-card), var(--dz-ring-accent);
     --dz-ring-hover-inset: inset 0px 0px 0px 2px var(--dz-accent-color);
     /* Bare accent ring primitive: the single-layer form of ring-hover, for selectors that
@@ -408,78 +383,43 @@
     --dz-modal-bg:            var(--dz-widget-bg);
     --dz-modal-text:          var(--dz-body-text);
 
-    /* MENU surface family (owner decision 2026-07-17): the top menu bar and
-       every floating menu (navbar dropdown, card 3-dot flyout) share ONE
-       colour, the scheme's "navbar" colour, which the settings UI labels
-       "Menu". Schemes author it as a distinct tint from cards/page (e.g.
-       Blue UI light #E9F2FB vs #FFFFFF cards), so menus read as their own
-       chrome surface. The base light theme carries this separation itself
-       since the 2026-08-12 Blue UI rebase (nav #e9f2fb vs card #ffffff), so
-       the old "base-light menus separate by shadow only" concession is gone.
-       Floating menus consume THIS alias, never --dz-nav-bg
-       directly, so the mapping stays a single-line decision. */
+    /* MENU surface family: the top menu bar and every floating menu (navbar
+       dropdown, card 3-dot flyout) share ONE colour, the scheme's "navbar"
+       colour, which the settings UI labels "Menu". Schemes author it as a
+       distinct tint from cards/page (e.g. Blue UI light #E9F2FB vs #FFFFFF
+       cards), so menus read as their own chrome surface: the base light
+       theme's own nav (#e9f2fb) already differs from its card (#ffffff).
+       Floating menus consume THIS alias, never --dz-nav-bg directly, so the
+       mapping stays a single-line decision. */
     --dz-menu-bg:             var(--dz-nav-bg);
 
-    /* MENU family tokens (menus-family Task 2, 2026-08-10): text/hover/active/
-       separator/radius/shadow shared by every dropdown, flyout, and the mobile
-       side menu, derived from reports/menu-facts.json (rig repo, 159 records;
-       full per-token citation in
-       .superpowers/sdd/2026-08-10-menus-family/task-2-report.md). Each value
-       is the DOMINANT AUDITED value across the family surfaces (S1 Setup/
-       Other dropdowns, S2 flyouts, S3 mobile side menu, S4 settings tile
-       grid, S7 card 3-dot flyout) - refine-round mismatches are logged in the
-       task report, not folded in here.
+    /* MENU family tokens: text/hover/active/separator/radius/shadow shared by
+       every dropdown, flyout, and the mobile side menu.
        - --dz-menu-text: resting item/label text. Every family selector that
-         sets it already resolves to --dz-body-text (S1 dropdown items,
-         css/nav.css ".navbar .nav .dropdown-menu li a"; S3's current item via
-         --dz-nav-active-text, itself = --dz-body-text). No literal anywhere
-         in the family disagrees, so this is documented, not yet consumed.
-       - --dz-menu-item-hover-bg: dropdown-item hover tint. S1 "Setup/Other
-         dropdown item, hovered" (4 records, 1440/1024): css/nav.css
-         ".navbar .nav .dropdown-menu li a:hover", already
-         rgba(var(--dz-accent-values), 0.15). S3's mobile item hover was a
-         literal "transparent" mismatch at Task 2; consumed as of
-         menus-family Task 8 (owner gate, 2026-08-10, F1 "same language"),
-         css/sidemenu.css ".navbar .nav li a:hover" now references this
-         token directly.
-       - --dz-menu-item-active-bg: current-route item bg, still transparent
-         (no fill) by design - Task 8's owner-gated left-edge treatment
-         (css/sidemenu.css ".navbar .nav .current_page_item > a", 2px accent
-         border-left + accent text) consumes this token for its own
-         background, keeping the "no fill" semantic explicit and the token
-         alive rather than hardcoding the literal. css/nav.css's own desktop
-         current-item rules (the top-level underline at
-         ".navbar .nav .current_page_item > a", css/nav.css:340, and the
-         dropdown-nested accent-edge at ".navbar .nav .dropdown-menu
-         .current_page_item > a", css/nav.css:420) now consume this same
-         token too, unifying the "no fill" semantic across desktop and
-         mobile instead of the two-token split noted here previously - the
-         swap is byte-neutral (the token's own value is the literal
-         "transparent" it replaced, dz-tokens.css:406). --dz-nav-active-bg /
+         sets it already resolves to --dz-body-text; documented here even
+         though nothing currently reads the alias directly.
+       - --dz-menu-item-hover-bg: dropdown-item hover tint, consumed by
+         css/nav.css ".navbar .nav .dropdown-menu li a:hover" and
+         css/sidemenu.css ".navbar .nav li a:hover".
+       - --dz-menu-item-active-bg: current-route item background, transparent
+         (no fill) by design. css/sidemenu.css's left-edge treatment
+         (".navbar .nav .current_page_item > a", 2px accent border-left +
+         accent text) and css/nav.css's desktop underline/edge rules
+         (".navbar .nav .current_page_item > a" and ".navbar .nav
+         .dropdown-menu .current_page_item > a") all consume this one token
+         for their background, keeping the "no fill" semantic explicit
+         instead of hardcoding the literal. --dz-nav-active-bg and
          --dz-nav-active-text (below) are dead: nothing in the family
-         consumes either since the Task 7/8 box-to-underline/edge rework
-         replaced their fill with these bare borders. Left in place rather
-         than deleted - a ledgered follow-up removal, same cleanup-candidate
-         class as the dead --dz-btn-danger-bg-alpha/--dz-btn-text-shadow
-         pair (see Gaps in DESIGN.md).
-       - --dz-menu-separator: divider between stacked items. Not measured by
-         the census: dz-menu-census.js's border attribution reads only
-         border-TOP-color (computedOf/attributeSource, scripts/
-         dz-menu-census.js:284-286,344), so a border-BOTTOM separator is
-         structurally invisible to it. The only border-based item separator
-         anywhere in the family is css/sidemenu.css:70 (".navbar .nav > li",
-         border-bottom, already var(--dz-status-disabled)); used as the
-         derived value on that basis alone, disclosed here as non-census-
-         derived.
-       - --dz-menu-radius: floating-menu container corner radius. S1 "Setup/
-         Other dropdown" (8 records): css/nav.css
-         ".navbar .nav .dropdown-menu", literal 6px. (S2's third-level flyout
-         radius comes from bootstrap.css, out of theme scope; S7's card
-         flyout keeps its own --dz-card-radius-chrome tier, 5px, unchanged -
-         card 3-dot flyout geometry is explicitly out of this task's scope.)
-       - --dz-menu-shadow: composes --dz-elev-popup (S1/S2 dropdown/flyout
-         boxShadow token, 8+ records; S7's card flyout stays on
-         --dz-elev-overlay, its own tier, unchanged).
+         consumes either now that these bare-border rules replaced their
+         fill (see Gaps in DESIGN.md).
+       - --dz-menu-separator: divider between stacked items, consumed by
+         css/sidemenu.css's ".navbar .nav > li" border-bottom.
+       - --dz-menu-radius: floating-menu container corner radius (css/nav.css
+         ".navbar .nav .dropdown-menu"). The third-level flyout's radius comes
+         from bootstrap.css, outside theme scope; the card 3-dot flyout keeps
+         its own --dz-card-radius-chrome tier instead, deliberately.
+       - --dz-menu-shadow: composes --dz-elev-popup; the card flyout stays on
+         --dz-elev-overlay, its own tier.
        dark.css needs no new entries for any of these: every token here is a
        var() alias/composition of tokens dark.css already overrides
        (--dz-body-text, --dz-accent-values, --dz-elev-popup) or a scheme-
@@ -492,15 +432,15 @@
     --dz-menu-radius:          6px;
     --dz-menu-shadow:          var(--dz-elev-popup);
 
-    /* "You are here" navbar tint (owner decision 2026-07-17, Task 8 item xi):
-       the top-level navbar tab marks the active route with a translucent
-       accent tint over body text (css/nav.css), not a solid fill. A Setup
-       dropdown entry marked as the current route (core's .current_page_item)
-       is the SAME semantic state at a different nesting depth, so both
-       consume this one pair instead of nav.css hardcoding the value while
-       buttons.css invented an unrelated solid --dz-btn-toggle-selected-*
-       fill for what is really the identical marker. Derived from the
-       existing accent/body-text tokens (derive-not-copy), not a new colour. */
+    /* "You are here" navbar tint: the top-level navbar tab marks the active
+       route with a translucent accent tint over body text (css/nav.css), not
+       a solid fill. A Setup dropdown entry marked as the current route
+       (core's .current_page_item) is the SAME semantic state at a different
+       nesting depth, so both consume this one pair instead of nav.css
+       hardcoding the value while buttons.css invents an unrelated solid
+       --dz-btn-toggle-selected-* fill for what is really the identical
+       marker. Derived from the existing accent/body-text tokens
+       (derive-not-copy), not a new colour. */
     --dz-nav-active-bg:       rgba(var(--dz-accent-values), 0.4);
     --dz-nav-active-text:     var(--dz-body-text);
 }
@@ -515,8 +455,8 @@
   --dz-accent-red: without this line core's #DF2D3A overrides Machinon's red in light mode (dark
   was already correct via the higher-specificity attribute selector). References the same
   --dz-accent-red-base private token as the plain :root --dz-accent-red above (derive-not-copy:
-  a literal #992f2b here previously drifted from the :root value silently after the 2026-08-12
-  Blue UI rebase touched only the latter).
+  a literal copy here would drift from the :root value silently whenever only one of the two
+  is edited).
 */
 html:root {
     --dz-widget-accent: var(--dz-accent-color);

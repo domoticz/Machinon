@@ -4,9 +4,7 @@
   Attribute-scoped: dark applies only under html[data-dz-scheme="dark"], so Machinon is
   light-by-default and future schemes slot in as sibling blocks. Imported directly by
   custom.css (Machinon imports nothing from core). Overrides the --dz-* / aux tokens that
-  differ from the light contract in dz-tokens.css. Values are the Blue UI dark palette,
-  adopted as the base on 2026-08-12; custom.js dark_theme no longer exists as a source of
-  truth.
+  differ from the light contract in dz-tokens.css. Values are the Blue UI dark palette.
 */
 html[data-dz-scheme="dark"] {
   --dz-body-bg:         #0f1620;
@@ -26,7 +24,8 @@ html[data-dz-scheme="dark"] {
   --dz-accent-values: 152,204,253;
   --dz-accent-red-values:   250,93,87;
   /* Blue UI Dark's accent is pale, so text ON an accent surface must be dark
-     here; the light base keeps white. Gated by dz-scheme-picker.js at 3:1. */
+     here; the light base keeps white. Keep contrast at 3:1 or better (WCAG SC
+     1.4.11 non-text threshold), matching dz-tokens.css. */
   --dz-accent-text:         #0f1620;
   /* Sunrise/sunset sun, warm against the navy base (light base: #8c730e). */
   --dz-sun-color:           #fad232;
@@ -51,12 +50,11 @@ html[data-dz-scheme="dark"] {
   --dz-btn-shadow-hover:   0 2px 7px rgba(0,0,0,.60), 0 1px 3px rgba(0,0,0,.45);
   --dz-btn-shadow-pressed: inset 0 1px 2px rgba(0,0,0,.45);
 
-  /* Elevation: dark values now differ from dz-tokens.css BY OWNER VERDICT 2026-08-07
-     (shadow-value-tuning pass) - crisp tight direction, deepened dark treatment (higher
-     alpha so the same geometry still reads against a dark surface; drag is capped at 0.6
-     rather than continuing the linear scale, disclosed to the owner before the pick). Glow
-     and ring families are unaffected (glow derives from status color, ring-hover composes
-     --dz-elev-card so it follows automatically). */
+  /* Elevation: dark values differ from dz-tokens.css - deepened (higher alpha) so
+     the same shadow geometry still reads against a dark surface; drag is capped at
+     0.6 rather than continuing the linear scale. Glow and ring families are
+     unaffected (glow derives from status color, ring-hover composes --dz-elev-card
+     so it follows automatically). */
   --dz-elev-card:    0 1px 4px rgba(0,0,0,0.50);
   --dz-elev-popup:   0 2px 6px rgba(0,0,0,0.56);
   --dz-elev-overlay: 0 3px 10px rgba(0,0,0,0.60);
@@ -73,8 +71,6 @@ html[data-dz-scheme="dark"] {
 
   /* Card Log/Timer icon pair. Blue UI Dark's accent (#98ccfd) measures 9.68:1
      against the dark card background (#18202b), far above WCAG SC 1.4.11's 3:1
-     non-text threshold, so dark reuses the plain accent like light does. The
-     old rgb(77, 184, 228) literal was a 27%-toward-white blend needed by the
-     pre-2026-08-12 accent (#0b9eda, only 2.48:1); it went with the rebase. */
+     non-text threshold, so dark reuses the plain accent like light does. */
   --dz-card-icon-accent: var(--dz-accent-color);
 }

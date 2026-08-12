@@ -107,8 +107,8 @@ if (mSettings.length > 0) {
     // write, which pushes its own history entry. A single tile click therefore
     // pushes two entries instead of one, and that correction fires again on
     // whatever hashchange browser Back produces too, re-pushing the same target
-    // and making Back a no-op (root cause of the owner report). Writing the
-    // already-normalized hash up front avoids the correction entirely. Links
+    // and making Back a no-op. Writing the already-normalized hash up front
+    // avoids the correction entirely. Links
     // that are not bare in-app routes (Security Panel's
     // "secpanel/index.html#...") don't start with "#" and pass through
     // untouched.

@@ -1,5 +1,5 @@
 /**** ./theme-hub.css ***/
-/* Theme hub page shell (src/js/theme-hub.js, theme-hub project task 2).
+/* Theme hub page shell (src/js/theme-hub.js).
 
    Group navigation is a HORIZONTAL underlined-tab bar on both desktop and
    mobile, mirroring the theme's flat-underline tab language (css/nav.css
@@ -107,7 +107,7 @@
     font-size: var(--dz-text-section-title);
 }
 
-/* ---- Task 3: setting rows -------------------------------------------------
+/* ---- Setting rows ----------------------------------------------------------
    Each row is [ control | text block | preview ]; dependent rows nest below
    their parent (a .dz-hub-children block spanning the full grid width). Grid
    over flex so the control column stays aligned across rows and the children
@@ -128,8 +128,7 @@
 }
 
 /* Value inputs (number/text/select) STACK: the label + applies-to tag +
-   description read ON TOP and the control sits BELOW (owner UX, hub-task-5
-   FIX 2). A left-of-text input read awkwardly and squeezed the description on
+   description read ON TOP and the control sits BELOW. A left-of-text input read awkwardly and squeezed the description on
    mobile; stacking scales cleanly to 360px. Toggles keep the inline
    [toggle | label | preview] layout (the default template above), because a
    checkbox reads naturally to the left of its label. dzRenderHubRow adds
@@ -211,7 +210,7 @@
     color: color-mix(in srgb, var(--dz-body-text) 62%, transparent);
 }
 
-/* Preview column (Task 4 fills it via src/js/theme-hub-previews.js). Zero-size
+/* Preview column (filled via src/js/theme-hub-previews.js). Zero-size
    until it has content, so an empty placeholder (null previewId) never reserves
    space or widens the row. flex centers the mini in the column. */
 .dz-hub-preview {
@@ -334,9 +333,9 @@
     display: none;
 }
 
-/* Reload button: styled by the house Filled-primary family, not here (owner
-   directive, hub-completion 2026-07-20: hub controls match the established
-   treatment, never a hub-local divergence). The element carries
+/* Reload button: styled by the house Filled-primary family, not here: hub
+   controls match the established treatment, never a hub-local divergence.
+   The element carries
    class="btn btn-primary dz-hub-reload-btn" (theme-hub.js), so
    css/buttons.css's soft-elevated base + .btn-primary own its radius, shadow,
    hover, focus ring, and padding; the identity class remains only as a
@@ -361,22 +360,20 @@
     color: var(--dz-accent-red, var(--dz-body-text));
 }
 
-/* Hosted custom-section placeholder (scheme picker, colors, icon packs;
-   Tasks 5/6 replace it). Still backs the un-hosted control:"custom" entries
-   (iconpacks, Task 6) and wraps the task-5 mounts below. */
+/* Hosted custom-section placeholder (scheme picker, colors, icon packs).
+   Still backs the un-hosted control:"custom" entries
+   (iconpacks) and wraps the scheme/colour mounts below. */
 .dz-hub-custom-mount {
     padding: 8px 0; /* future --dz-gap token site (spacing project) */
     border-bottom: 1px solid var(--dz-input-border);
     min-width: 0;
 }
 
-/* ---- Task 5: scheme picker + custom-colour swatches, hosted --------------
+/* ---- Scheme picker + custom-colour swatches, hosted -----------------------
    src/js/theme-hub.js mounts the SAME src/js/schemes.js renderSchemePicker
    cards and 7 colour swatches here (registerSchemePickerContainer, not a
-   rewrite). Card styling started as a copy of the legacy Theme tab's
-   #schemePicker rules, scoped to the hub's own container id; the legacy page
-   and its rules are deleted (Task 8), so this block is now the only scheme
-   card styling. Spacing on the hub's 8px rhythm, fonts on --dz-text-*
+   rewrite). Card styling is scoped to the hub's own container id, and this
+   block is the only scheme card styling in the theme. Spacing on the hub's 8px rhythm, fonts on --dz-text-*
    tokens only. */
 .dz-hub-scheme-picker {
     display: flex;
@@ -384,15 +381,13 @@
     gap: 8px; /* future --dz-gap token site (spacing project); css/settings.css #schemePicker uses 10px, kept at 8px here for the hub's rhythm */
     /* 2px of the 8px block margin is spent as padding so the selected card's
        2px outer ring (--dz-ring-accent) has somewhere to draw: .dz-hub-panel's
-       overflow-y:auto computes overflow-x to auto as well (same quirk as the
-       swatch-label clip guarded by dz-hub-colors.js check 1c), so a ring at the
-       panel's content edge is clipped. Owner-reported 2026-08-12, desktop and
-       mobile. Guarded by check 1e. No horizontal margin offsets the padding:
-       a negative left margin here would cancel the very room padding-left
-       just reserved (border-box shifts left by the margin, then padding
-       shifts the card back by the same amount, netting zero), leaving the
-       first card's ring clipped exactly as before, which is what an earlier
-       version of this rule did until the gate caught it. */
+       overflow-y:auto computes overflow-x to auto as well (the same CSS
+       overflow quirk affects the swatch-label clip below), so a ring at the
+       panel's content edge would otherwise be clipped. No horizontal margin
+       offsets the padding: a negative left margin here would cancel the very
+       room padding-left just reserved (border-box shifts left by the margin,
+       then padding shifts the card back by the same amount, netting zero),
+       leaving the first card's ring clipped again. */
     padding: 2px;
     margin: 6px 0; /* future --dz-gap token site (spacing project) */
     max-width: 100%;
@@ -401,7 +396,7 @@
 .dz-hub-scheme-picker .scheme-card {
     position: relative;
     cursor: pointer;
-    width: 160px; /* was 108px, tuned for the pre-2026-08-12 20-card wall; at the current 9 cards (four families, light+dark, plus custom) the row wraps across multiple lines on desktop rather than fitting on one. At 360px the hub's own chrome leaves the panel only ~277px wide, so cards wrap one-up rather than two-up; still fully contained (check 6), just a taller single column */
+    width: 160px; /* at 9 cards (four families, light+dark, plus custom) the row wraps across multiple lines on desktop rather than fitting on one. At 360px the hub's own chrome leaves the panel only ~277px wide, so cards wrap one-up rather than two-up; still fully contained, just a taller single column */
     padding: 6px; /* future --dz-gap token site (spacing project) */
     border: 1px solid var(--dz-input-border);
     border-radius: var(--dz-btn-radius);
@@ -495,8 +490,8 @@
 /* Reserve a uniform TWO-line height for every label and bottom-align the text,
    so a one-word label ("Background") and a two-word one ("Secondary Text",
    which wraps) occupy the same vertical box and their inputs below line up on
-   one baseline (owner report: the wrapped "Secondary Text" pushed its swatch
-   ~13px down, misaligning the row). 2.4em = 2 lines at line-height 1.2, on the
+   one baseline (the wrapped "Secondary Text" pushes its swatch ~13px down
+   otherwise, misaligning the row). 2.4em = 2 lines at line-height 1.2, on the
    label's own --dz-text-micro font. */
 .dz-hub-swatch-label {
     display: flex;
@@ -537,8 +532,8 @@
    dz-hub-swatch-save-btn" (see the reload-button note above); identity class
    kept as a harness/JS hook only. */
 
-/* ---- About content (task 7, RESTRUCTURED hub-completion 2026-07-20) -------
-   dzBuildHubAbout's content now lives INSIDE the About tab (the manifest's
+/* ---- About content ---------------------------------------------------------
+   dzBuildHubAbout's content lives INSIDE the About tab (the manifest's
    ninth group, hosted by dzHubAboutMount), no longer as a persistent footer
    under every tab; the General tab carries the separate short intro
    (.dz-hub-short-about below). Name + live version, the modernized
@@ -601,9 +596,9 @@
     line-height: 1.45;
 }
 
-/* Links wrap rather than widen the row at 360px. COLOUR (owner bug,
-   hub-completion 2026-07-20): the about links rendered white-on-white,
-   unreadable. The bare .dz-hub-about-link colour (0,1,0) lost to a
+/* Links wrap rather than widen the row at 360px. COLOUR: without this rule
+   the about links render white-on-white, unreadable. The bare
+   .dz-hub-about-link colour (0,1,0) loses to a
    higher-specificity / later-loaded core anchor rule. Scoping under
    #dz-theme-hub with the element + :link/:visited states raises specificity to
    (1,1,1) so the accent colour wins in BOTH schemes without !important; the
@@ -625,7 +620,7 @@
     text-decoration: underline;
 }
 
-/* ---- Hub-completion (owner, 2026-07-20): short About, maintenance, images -- */
+/* ---- Short About, maintenance, images -------------------------------------- */
 
 /* SHORT about on the General tab: name + version + one line. Sits under the
    section title as an intro card; muted description, type on --dz-text-* tokens.

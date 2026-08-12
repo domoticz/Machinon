@@ -18,9 +18,7 @@
       that (re-)applies handle:'.item-name' to any already .ui-draggable card
       whose handle is not yet set. This heals the load-order race (cards made
       draggable before the wrap installed) and any init the wrap missed, and
-      re-applies after a re-init before the next mousedown.
-
-   See the spec: docs/superpowers/specs/2026-07-16-card-drag-handle-design.md */
+      re-applies after a re-init before the next mousedown. */
 (function () {
     'use strict';
     var HANDLE = '.item-name';

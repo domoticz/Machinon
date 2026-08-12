@@ -1,27 +1,25 @@
 /* Settings manifest: the single declarative source of truth for every
-   setting the theme hub page (src/js/theme-hub.js, task 2+) renders as a
-   group/row. This module owns no behavior; it only describes what exists.
-   The hub reads THEME_MANIFEST to build groups/rows/previews, calls the
-   existing appliers on change (settings-store.js), and persists through the
-   settings-transport.js seam. Content is transcribed VERBATIM from the
-   "Settings rationalization table" in
-   docs/superpowers/specs/2026-07-20-theme-hub-design.md; see that table for
-   the owner-approved label/description/appliesTo/status per row.
+   setting the theme hub page (src/js/theme-hub.js) renders as a group/row.
+   This module owns no behavior; it only describes what exists. The hub
+   reads THEME_MANIFEST to build groups/rows/previews, calls the existing
+   appliers on change (settings-store.js), and persists through the
+   settings-transport.js seam. Every entry below is the single source of
+   truth for its label/description/appliesTo/status; there is no separate
+   external table to keep in sync.
 
-   Scope classification (ThemeSettings migration task 1): every entry with a
-   storageKey is tagged "user" or "house" so the per-user overlay (task 3+)
-   knows which keys it may ever write. The rule: per-user = anything that
-   only changes how your own browser renders; house = shared content,
-   branding, infrastructure, and per-device data.
+   Scope classification: every entry with a storageKey is tagged "user" or
+   "house" so the per-user overlay knows which keys it may ever write. The
+   rule: per-user = anything that only changes how your own browser renders;
+   house = shared content, branding, infrastructure, and per-device data.
 
    Schema:
      THEME_MANIFEST = [ group, ... ]
      group = {
        id:      stable group id, one of the nine spec groups, in this order:
                 "general","menus","dashboard","cards","charts","background","colors","iconpacks","about".
-                ("about" is the owner-added last tab, hub-completion 2026-07-20:
-                a hosted-custom section carrying the expansive About + the theme
-                maintenance actions; its short summary also renders on General.)
+                ("about" is the last tab: a hosted-custom section carrying the
+                expansive About + the theme maintenance actions; its short
+                summary also renders on General.)
        label:   display heading for the group.
        entries: [ entry, ... ]
      }
@@ -71,13 +69,12 @@
                          picture). Null is used where no faithful token mini
                          exists (image-backed background/logo settings), the mini
                          would duplicate another (time_ago vs the last-seen line),
-                         or the setting is a child/variant/retire-candidate; see
-                         theme-hub-task-4-report.md for the full rationale.
+                         or the setting is a child/variant/retire-candidate.
        parent:            the manifest key this entry indents under and is
                          disabled together with, or null. Set ONLY for the
                          five checkbox-gated pairs the legacy Theme tab
-                         expressed as parent/child checkboxes (tab deleted in
-                         Task 8; the pairs live on here):
+                         expressed as parent/child checkboxes (that tab no
+                         longer exists; the pairs live on here):
                          standby_after<-standby, navbar_icons_text<-navbar_icons,
                          button_name+custom_url<-custom_page_menu,
                          dashboard_camera_refresh+dashboard_camera_section<-dashboard_camera,
@@ -94,16 +91,15 @@
                          enabled->disabled hits its reloadNeeded branch
                          (an executed script cannot be un-executed); a
                          CSS-only feature unloads its stylesheet live
-                         instead (see reloadOnDisable determinations below
-                         and task-1-report.md). Always false on
-                         control:"custom" and plain-value entries (they are
-                         not theme.json features and never take this path).
+                         instead (see reloadOnDisable determinations
+                         below). Always false on control:"custom" and
+                         plain-value entries (they are not theme.json
+                         features and never take this path).
        status:           "keep" (default posture, every settled row) or
-                         "audit" for the three rows the spec table leaves
-                         unresolved (sidemenu, check_update, dark_theme).
-                         Task 9 owns resolving these; this manifest keeps
-                         them visible and correctly flagged, never drops
-                         them silently.
+                         "audit" for the three rows that remain open
+                         questions (sidemenu, check_update, dark_theme);
+                         this manifest keeps them visible and correctly
+                         flagged, never drops them silently.
        scope:            "user" or "house" for every entry with a storageKey
                          (see classification rule above); null on the two
                          control:"custom" entries whose storageKey is also
@@ -387,9 +383,7 @@ var THEME_MANIFEST = [
                above, not a manual flag. A manual flip of dark_theme desyncs
                <html data-dz-scheme> from the loaded dark_theme.css (light
                token base + dark-only overrides = a broken half-dark render),
-               so the standalone toggle was retired (hub Task 9). Coverage for
-               the dark_theme feature key is asserted via HOSTED_CUSTOM_KEYS in
-               dz-manifest-contract.js instead of a row. */
+               so no standalone toggle exists for it. */
         ]
     },
     {
@@ -405,13 +399,13 @@ var THEME_MANIFEST = [
         ]
     },
     {
-        /* Owner-added last tab (hub-completion 2026-07-20). A hosted-custom
-           section (like iconpacks: storageKey null, no theme.json key of its
-           own) that renders the expansive About and the theme maintenance
-           actions (reset to defaults, clear cache, reset colours). The General
-           tab additionally shows a SHORT summary (name + version + one line);
-           this tab is the full surface. Kept out of the coverage check the same
-           way iconpacks is (null storageKey, control:"custom"). */
+        /* The last tab: a hosted-custom section (like iconpacks: storageKey
+           null, no theme.json key of its own) that renders the expansive
+           About and the theme maintenance actions (reset to defaults, clear
+           cache, reset colours). The General tab additionally shows a SHORT
+           summary (name + version + one line); this tab is the full surface.
+           Kept out of the coverage check the same way iconpacks is (null
+           storageKey, control:"custom"). */
         id: "about",
         label: "About",
         entries: [

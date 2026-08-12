@@ -17,11 +17,11 @@ input#AcceptNewHardware:checked ~ button {
     justify-content: center;
 }
 
-/* D1 "flat modern" (menus-family Task 6, owner gate): css/cards.css:177-181 gives every
+/* css/cards.css:177-181 gives every
    Setup section (#settings .row-fluid > div) a --dz-widget-bg background,
-   --dz-card-radius and a --dz-elev-card drop shadow - a rule that predates this task
-   family and also serves other surfaces (the dynamic dashboard, .rectangle-8 tiles), so it
-   is not edited here (task-6-report.md Concern 5). The card keeps its background, radius
+   --dz-card-radius and a --dz-elev-card drop shadow; that rule
+   also serves other surfaces (the dynamic dashboard, .rectangle-8 tiles), so it
+   is not edited here. The card keeps its background, radius
    and grouping role; only the shadow gives way to a quiet, always-visible
    --dz-input-border line. Both rules share the same (1,1,1) specificity and cards.css
    loads after settings.css in custom.css's @import order, so cards.css would otherwise win
@@ -35,8 +35,8 @@ input#AcceptNewHardware:checked ~ button {
     box-shadow: none;
 }
 
-/* D1 (menus-family Task 6): the missing :focus-visible ring (task-6-report.md finding 1 -
-   measured live, boxShadow: none on a focused #Latitude input). Setup's inputs/selects
+/* The missing :focus-visible ring (measured live: boxShadow: none on a
+   focused #Latitude input). Setup's inputs/selects
    already carry the resting house underline (css/search.css's global input rule); this
    closes the accessible-focus gap using the hub's own idiom verbatim
    (css/theme-hub.css #dz-theme-hub .dz-hub-input:focus-visible), so Setup's fields and the
@@ -71,8 +71,7 @@ input#AcceptNewHardware:checked ~ button {
 
 .blocklyText {
     /* dz-menu-exception: Blockly rule-editor text (a different embedded
-       widget, not menu chrome) - out of the --dz-menu-* family, not measured
-       by reports/menu-facts.json. */
+       widget, not menu chrome) - out of the --dz-menu-* family. */
     color: #fff !important;
     fill: #fff !important;
 }
@@ -98,14 +97,14 @@ input#AcceptNewHardware:checked ~ button {
     margin-left: 10px;
 }
 
-/* box-shadow is not set here (menus-family Task 9 sweep): css/cards.css:175-183 gives
+/* box-shadow is not set here: css/cards.css:175-183 gives
    every .rectangle-8/.rectangle-8-dropdown element (also the dynamic dashboard's table
-   rows and #settings .row-fluid > div, D1's comment above documents the same sharing) a
+   rows and #settings .row-fluid > div, the rule above documents the same sharing) a
    --dz-elev-card drop shadow via the identical selector at equal specificity, loaded
    after settings.css in custom.css's @import order, so it always wins outright; a
-   box-shadow: var(--dz-elev-card) line here was dead on arrival (confirmed via
-   reports/menu-facts.json S4: every tile's boxShadow source attributes to cards.css, not
-   this file) and has been removed rather than kept as misleading documentation. */
+   box-shadow: var(--dz-elev-card) line here would be dead on arrival (confirmed live:
+   every tile's boxShadow source attributes to cards.css, not
+   this file), so it is omitted rather than kept as misleading documentation. */
 .rectangle-8, .rectangle-8-dropdown {
     cursor: pointer;
     list-style-type: none;
@@ -135,10 +134,10 @@ input#AcceptNewHardware:checked ~ button {
 .machinoText {
     font-size: var(--dz-text-md);
     letter-spacing: -0.5px;
-    /* menus-family Task 9: onto the family text token (--dz-menu-text is a --dz-body-text
+    /* Onto the family text token: --dz-menu-text is a --dz-body-text
        alias with no scheme override of its own, so this is byte-neutral in both schemes;
-       swapped for family membership - this is a tile's menu-entry label, the grid's
-       equivalent of an S1 dropdown item's text). */
+       this is a tile's menu-entry label, the grid's equivalent of a
+       dropdown item's text. */
     color: var(--dz-menu-text);
     margin-left: 20px;
 }
@@ -154,19 +153,12 @@ input#AcceptNewHardware:checked ~ button {
 }
 
 .mDropdown-Text:hover {
-    /* dz-menu-exception: refine-round candidate (menus-family Task 2). This
-       is the settings-tile grouped-tile sub-menu label (js/settings_page.js
-       builds it inside .dropdown-content, a floating menu of the same family
-       as S1/S2's dropdowns), but the S4 census only measured the top-level
-       .rectangle-8 tiles, not this nested sub-menu, so
-       reports/menu-facts.json has no record for it. Found by direct
-       inspection, not a facts row: rgba(0,0,0,0.5) matches neither
-       --dz-menu-text (--dz-body-text) nor any hover token - logged in
-       task-2-report.md, not changed here. Rechecked against the full family
-       (menus-family Task 9, both schemes, including the Tasks 5-8 gate
-       outcomes): still no token equals this literal, marker stays. There is
-       also no family "hover text color" token to compare against - the
-       family only defines an item hover BACKGROUND
+    /* dz-menu-exception: this is the settings-tile grouped-tile sub-menu
+       label (js/settings_page.js builds it inside .dropdown-content, a
+       floating menu of the same family as the other dropdowns/flyouts).
+       rgba(0,0,0,0.5) matches neither --dz-menu-text (--dz-body-text) nor
+       any hover token, and there is no family "hover text color" token to
+       compare against: the family only defines an item hover BACKGROUND
        (--dz-menu-item-hover-bg), not a hover text color, so this remains
        structurally unmatchable, not merely unmatched today. */
     color: rgba(0,0,0,0.5);
@@ -187,19 +179,18 @@ ul.machinon_ul li {
     margin: 15px 0;
 }
 
-/* background-color/border/box-shadow are not set here (menus-family Task 9 sweep):
+/* background-color/border/box-shadow are not set here:
    js/settings_page.js:128 gives this element class "dropdown-content rectangle-8", so
    css/cards.css:175-183's shared .rectangle-8 rule (same selector list, equal
    specificity, loaded after settings.css) always wins for all three - confirmed live
    (getComputedStyle on an open panel): border-color rendered transparent, never this
    rule's var(--dz-accent-color); box-shadow rendered card-tier (0 1px 4px) via
    --dz-elev-card, never this rule's popup-tier (0 2px 6px) --dz-elev-popup. The three
-   lines were dead on arrival and are removed rather than kept as misleading
-   documentation; background-color happened to agree with cards.css's --dz-widget-bg
-   (no visible difference either way) but was dead by the same mechanism. This panel's
+   lines would be dead on arrival, so they are omitted rather than kept as misleading
+   documentation; background-color happens to agree with cards.css's --dz-widget-bg
+   (no visible difference either way) but is dead by the same mechanism. This panel's
    real surface tokens are cards.css's card tier (--dz-widget-bg/--dz-card-radius/
-   --dz-elev-card), not the --dz-menu-* family - unlike S1/S2's dropdowns/flyouts, out of
-   this task's file scope (css/settings.css only) to change even if it were desired. */
+   --dz-elev-card), not the --dz-menu-* family. */
 .dropdown-content {
     display: none;
     min-width: 160px;
@@ -208,7 +199,7 @@ ul.machinon_ul li {
     position: absolute;
 }
 
-/* menus-family Task 9: onto the family text token, see .machinoText above (byte-neutral,
+/* Onto the family text token, see .machinoText above (byte-neutral,
    same --dz-body-text alias). */
 .dropdown-content a {
     color: var(--dz-menu-text);
@@ -222,12 +213,11 @@ ul.machinon_ul li {
     color: var(--dz-accent-color);
 }
 
-/* Settings page density and grouping (menus-family Task 5, owner gate: C2 "grouped
-   sections"). Every Setup tab uses <h2> uniformly as its subsection heading (System's
-   "User Interface"/"Location", Notifications' per-service accordion headers, etc. -
-   confirmed by grepping every <h2> in core's views/setup.html), so one scoped rule
-   covers all 10 tabs. Was an unscaled 21px/600 (core's own h2 rule, 1.5em against the
-   14px body base); moves onto the type scale (--dz-text-md, the documented "Settings
+/* Settings page density and grouping. Every Setup tab uses <h2> uniformly as its
+   subsection heading (System's "User Interface"/"Location", Notifications' per-service
+   accordion headers, etc. - confirmed by grepping every <h2> in core's views/setup.html),
+   so one scoped rule covers all 10 tabs. Core's own h2 rule sets an unscaled 21px/600
+   (1.5em against the 14px body base); this moves onto the type scale (--dz-text-md, the documented "Settings
    panels" token) plus a fieldset-style separator + rhythm below it. Each row-fluid card
    is already visually grouped by its own background/border (#settings .row-fluid > div
    above); this adds the missing heading-to-fields boundary within a card, which matters
@@ -243,9 +233,8 @@ ul.machinon_ul li {
 
 /* Row rhythm: every Setup tab's label|value table cells move onto the 8/10 card
    cluster, up from an inconsistent 3px 10px (measured live, core's own table.display
-   default); horizontal padding is unchanged from that default, so this carries no
-   mobile-width risk (a 15/20 candidate was gate-rejected specifically because it did -
-   task-5-report.md Concerns). */
+   default); horizontal padding is deliberately left unchanged from that default -
+   widening it (e.g. to a 15/20 pair) causes mobile-width overflow. */
 #settingscontent .tab-pane td {
     padding: 8px 10px;
 }
@@ -256,9 +245,8 @@ ul.machinon_ul li {
    (views/setup.html) sized for "Networks:" alone. The row-rhythm padding above did not
    change this column's horizontal room, but the resulting taller row made the sibling
    "Reverse proxy header:" label's PRE-EXISTING 3-line wrap (same 60px column, longer
-   text, unrelated to this task) cross dz-setup-tabs.js's squeeze-detector height
-   threshold (was 57px/3 lines under threshold, now 67px/3 lines over it). Widened just
-   this column so that label holds at 2 lines (measured live: 100px -> 53px height);
+   text) grow from 57px to 67px, tall enough to crowd the row above and below. Widened
+   just this column so that label holds at 2 lines (measured live: 100px -> 53px height);
    !important is required because the constraining declaration is an inline style,
    always higher specificity than any external stylesheet rule regardless of selector
    weight - the same reasoning as the pre-existing input/select override below. */
@@ -317,22 +305,15 @@ ul.machinon_ul li {
     }
 
     /* Phone widths: core's Apply Settings row (the .sub-tabs strip's
-       li.pull-right) becomes one fixed bottom bar. (The second fixed bar this
-       used to coordinate with, the injected Theme tab's Reset/Save div, is
-       gone: Task 8 deleted the injected tabs; theme settings live in the
-       hub.)
-
-       Viewport-fit (menus-family task 4, retargeted CTA overlap defect):
-       the fixed bar paints over whatever in-flow content happens to occupy
-       its band, including at the page's first, unscrolled paint - mobile-
-       polish task 3 measured this live (System tab's AutoBackup checkbox,
-       390x844 Galaxy S24) and parked it as an accepted exception pending a
-       CTA-positioning decision "tied to the menus-redesign track" - this is
-       that track. A broader probe (390x844, 360x780, 320x568, every Setup
-       tab, top and scrolled-to-bottom, both schemes) found the same defect
-       class on several other tabs too (Log's debug checkboxes, Notifications'
-       Test button, Energy Dashboard's icon picker), so the fix has to be
-       structural, not a one-off nudge of a single control.
+       li.pull-right) becomes one fixed bottom bar. The bar paints over
+       whatever in-flow content occupies its band, including at the page's
+       first, unscrolled paint (measured live: System tab's AutoBackup
+       checkbox, 390x844 viewport). A broader probe (390x844, 360x780,
+       320x568, every Setup tab, top and scrolled-to-bottom, both schemes)
+       found the same defect class on several other tabs too (Log's debug
+       checkboxes, Notifications' Test button, Energy Dashboard's icon
+       picker), so the fix has to be structural, not a one-off nudge of a
+       single control.
 
        Reserving trailing padding (the section:last-child rule above) cannot
        fix this: it only adds room past the document's true end, and the
@@ -343,33 +324,25 @@ ul.machinon_ul li {
        laid out in that band at all: cap #my-tab-content to the viewport
        height minus the chrome above it and the bar's own reserve, and let it
        scroll internally. The chrome above (#settingscontent's top offset) is
-       50px and was measured live as WIDTH-INDEPENDENT (identical at 390, 360
+       50px and is WIDTH-INDEPENDENT (identical at 390, 360
        and 320) because it is just the static navbar + banner; nothing here
        hardcodes the sub-tabs row's OWN height, since that wraps to a
        different number of lines per width (10 tab labels) - flex hands
        #my-tab-content whatever is left after #tabs' natural (possibly
        multi-line) height, so the wrap is never a magic number to keep in
        sync. The bar's own footprint (34px button height + 5px bottom offset,
-       measured live as a 38px gap from the viewport's bottom edge to the
+       measured as a 38px gap from the viewport's bottom edge to the
        bar's top edge at all three widths) rounds up to 40px, plus 10px of
        daylight (the theme's small spacing step) between the scroll clip edge
        and the bar itself so no row visually touches it - 50px total.
 
-       That clip edge only stops PAINT: an overflow-clipped row's own layout
-       box still exists at full, unclipped geometry, so a geometry-only
-       overlap check (dz-mobile-layout-census.js's control-overlap check
-       included - it did not consult clip context, unlike its own viewport-
-       edge check) would still see it as intersecting the fixed bar's rect
-       even though nothing is painted there. That harness gap is fixed
-       alongside this rule (scripts/dz-mobile-layout-census.js, a new
-       verticalClipRange() helper feeding the interactive inventory the
-       overlap check reads from - the edge check's own horizontal clipRange()
-       could not be reused as-is: it applies either axis's clip to both
-       ranges, which would have wrongly vertically-clipped every control
-       inside a horizontal-scroll-only container elsewhere in the app).
-       Verified empirically (Playwright probe across 390x844/360x780/320x568,
-       every Setup tab, top and scrolled-to-bottom, both schemes; then the
-       real census): zero geometric overlaps remain. */
+       An overflow-clipped row's own layout box still exists at full,
+       unclipped geometry even though nothing paints there, so any
+       geometry-only overlap check needs to account for the clip range, not
+       just raw bounding boxes, or it reports a false collision here.
+       Verified empirically (390x844/360x780/320x568, every Setup tab, top
+       and scrolled-to-bottom, both schemes): zero geometric overlaps
+       remain. */
     #settingscontent {
         display: flex;
         flex-direction: column;
@@ -405,13 +378,12 @@ ul.machinon_ul li {
         min-height: 0;
     }
 
-    /* Sub-tabs strip: single-row horizontal overflow (owner direction, menus-family
-       Task 5, 2026-08-10: "Overflow seems the better option") in place of the tall
+    /* Sub-tabs strip: single-row horizontal overflow in place of the tall
        stacked block core's floated <li>s wrap into at phone widths (measured live,
        pre-fix: 149px / 4 wrapped rows at 390px). Mirrors css/theme-hub.css
        .dz-hub-tabs verbatim in spirit: flex-nowrap row that scrolls inside its own
        box instead of widening the page, thin themed scrollbar. flex: 0 0 auto (this
-       rule's own pre-existing sizing role, Task 4) is unaffected: #tabs is
+       rule's own existing sizing role) is unaffected: #tabs is
        simultaneously a flex ITEM in #settingscontent's outer column layout and a
        flex CONTAINER for its own <li> children - the two roles don't conflict. */
     #settingscontent #tabs {

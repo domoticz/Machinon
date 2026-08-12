@@ -18,10 +18,10 @@
 /* ── Card box contract (context-free) ─────────────────────────────────────────
    Core mounts our card inside a Bootstrap 2 grid cell (.span3/.span4/...), whose
    padding is breakpoint-dependent (bootstrap-responsive.css: 0.5em >=1200px,
-   0.3em at 768-979px). Every context that hosts a card used to neutralise that
-   wrapper separately, so any new context (Dynamic Dashboard, compact, mobile) silently
-   clipped until someone noticed. These two rules key off "wraps a card" rather
-   than off where the card lives, so a new context inherits them for free.
+   0.3em at 768-979px). If a context that hosts a card neutralises that wrapper
+   separately instead, a new context (Dynamic Dashboard, compact, mobile) can
+   silently clip until someone notices. These two rules key off "wraps a card"
+   rather than off where the card lives, so a new context inherits them for free.
 
    box-sizing:border-box is what makes any future wrapper padding safe: it insets the card
    inside the wrapper instead of growing the wrapper. A content-box wrapper with padding
@@ -195,14 +195,13 @@ div.bannercontent .row > .item {
 }
 
 /* Dynamic dashboard only: the card is full-bleed in a clipped cell (see the note above), so
-   an outer ring is clipped top/bottom (measured 2026-08-07: L/R 4px clearance, T/B 0px).
-   Inset is the only ring that survives today; the outer-ring plan (breathing-room tweak,
-   verified across widget types) is scoped in the todo's Cards polish item. */
+   an outer ring is clipped top/bottom (L/R 4px clearance, T/B 0px). Inset is the
+   only ring that survives here. */
 .dd-widget-body .item table[id^="item"] > tbody > tr:hover {
     box-shadow: var(--dz-ring-hover-inset);
 }
 
-/* Drag constraint for dashboard/tab card reordering — scoped to avoid affecting dialogs */
+/* Drag constraint for dashboard/tab card reordering - scoped to avoid affecting dialogs */
 .ui-draggable-dragging:not(.ui-dialog) {
     height: auto !important;
     overflow: hidden;
@@ -218,7 +217,7 @@ div.bannercontent .row > .item {
     box-shadow: var(--dz-elev-drag);
 }
 
-/* Drop target feedback while dragging — target the visible card (tr), not the outer wrapper */
+/* Drop target feedback while dragging - target the visible card (tr), not the outer wrapper */
 .ui-droppable-active table[id^="item"] > tbody > tr {
     outline: var(--dz-card-drop-outline-width) dashed rgba(var(--dz-accent-values), 0.3);
     outline-offset: var(--dz-card-drop-outline-offset);
@@ -285,14 +284,14 @@ div.bannercontent .row > .item {
    (default gs-h=2 = 120px) instead of growing to its natural content height and
    being cropped by the cell's overflow:hidden.
 
-   WHY the card overflowed. Core lays the card out top-aligned in a flex column
-   that does NOT stretch it: core dashboard.css:1195-1205 sets
+   WHY the card overflows without this. Core lays the card out top-aligned in a
+   flex column that does NOT stretch it: core dashboard.css:1195-1205 sets
    `.dd-dz-inner { display:flex; align-items:flex-start; overflow:hidden }`, so
    the `.item` takes its own content height and anything past the cell bottom is
-   clipped away (the icon/toggle is still there in layout, just painted-clipped -
-   which is why census check (d) measured img.lcursor +22px and the selector's
-   stacked level buttons +31/64/97px past the widget at a narrow card width,
-   where the device NAME wraps to a second line and pushes the lower rows down).
+   clipped away (the icon/toggle is still there in layout, just painted-clipped).
+   At a narrow card width, where the device NAME wraps to a second line and
+   pushes the lower rows down, this clips the icon and the selector's stacked
+   level buttons below the widget.
 
    THE FIX, all layout (no font shrink):
    (1) stretch the card to the cell: align the `.dd-dz-inner` flex child to
@@ -314,9 +313,10 @@ div.bannercontent .row > .item {
    measured against the scene card too), the classic dashboard cards keep their
    58px floor and natural height, and the dz-favorites widget - which re-renders
    classic cards in a SCROLLING list (also .item.itemBlock inside a
-   .dd-widget-body) - keeps its natural card height (the unscoped first version
-   squashed each favorites card from 118px to 103px, verified live). grid-gap
-   stays 4px (was: the old rounded corners got clipped at the classic 10px gap). */
+   .dd-widget-body) - keeps its natural card height: scoping matters here, an
+   unscoped rule squashes each favorites card from 118px to 103px. grid-gap
+   stays 4px rather than the classic 10px gap, which clips the rounded
+   corners in this tighter cell. */
 .dd-widget--dz-device .dd-dz-inner {
     align-items: stretch;
 }
@@ -372,50 +372,45 @@ div.bannercontent .row > .item {
     }
 }
 
-/* Blinds slider on the Dynamic Dashboard (owner defect + wide-card refinement,
-   fix wave 2026-07-19): the multi-icon slider variants collided with the blind
-   icons. The theme's blinds rule further down this file (".span4 td#img2 ~ ...
-   .dimslider" { left: 14px }) anchors the track at the card's left edge and
-   relies on core's inline margin-left (94-132px per variant) to clear the
-   fixed-width icons - but core's Dynamic Dashboard ZEROES exactly those
-   margins (core css/dashboard.css:1156-1163, ".dd-widget--dz-device
-   .dimslidersmalldouble { margin-left: 0 !important }"), so in a Dash2 tile
-   the track started at x=14 and ran straight through the icons (measured:
-   icons x 15-101 double / 15-119 tripple, track y 65-73 inside the icons'
-   y 52-92 band, at BOTH a 150px and a 328px tile).
+/* Blinds slider on the Dynamic Dashboard: the multi-icon slider variants collide
+   with the blind icons. The theme's blinds rule further down this file (".span4
+   td#img2 ~ ... .dimslider" { left: 14px }) anchors the track at the card's left
+   edge and relies on core's inline margin-left (94-132px per variant) to clear the
+   fixed-width icons - but core's Dynamic Dashboard ZEROES exactly those margins
+   (core css/dashboard.css:1156-1163, ".dd-widget--dz-device .dimslidersmalldouble
+   { margin-left: 0 !important }"), so in a Dash2 tile the track starts at x=14 and
+   runs straight through the icons (icons x 15-101 double / 15-119 tripple, track y
+   65-73 inside the icons' y 52-92 band, at BOTH a 150px and a 328px tile).
 
-   Placement is WIDTH-AWARE (owner refinement), via the same container the
-   selector cap-release above already queries (container-type: size on the
-   dz-device widget body):
+   Placement is WIDTH-AWARE, via the same container the selector cap-release above
+   already queries (container-type: size on the dz-device widget body):
    - COMPACT tiles (default, no query, so an unsupported browser degrades to
      this safe placement): no horizontal room exists past two 40px icons on a
      150px tile, so pin the track to the card's free bottom strip (the 20px
      third grid row: lastupdate is display:none here per dynamic-dashboard.css
-     and no favorite star renders on Dash2 tiles, both verified live). The
-     slider is absolutely positioned against the widget body (core
-     dashboard.css:1153 position: relative), so bottom pins to the tile edge:
-     the 5px track sits in the strip at y 105-110 in a 120px tile, 13px clear
-     of the icons, handle (15px, top:-5) within the tile.
-   - WIDE tiles: the owner wants the track BESIDE the icons, matching how the
-     wide dimmer card reads (its track sits in the icon band, anchored by the
-     base dimmer rule's right:20px + width:calc(100% - 100px), which resolves
-     to a fixed 80px left edge clear of its single icon). Same recipe here:
-     bottom:auto returns the track to its natural in-band y (65-73, mid-icon,
-     matching the dimmer's 72), and left restates the icon clearance core's
-     zeroed margin no longer provides: measured icon end (101 double / 119
-     tripple) + the handle's 12px overhang at 0% (per the classic blinds
-     rule's derivation below) + an 8px gap (a future --dz-gap token site,
-     spacing project) = 121px / 139px. left needs !important because the
-     classic blinds rule this overrides carries td#img2 in its selector, an id
-     (1,3,1) no class-only compound can outrank; same load-bearing pattern
-     that rule itself documents against the JS-set inline width. The width
-     thresholds are where the remaining track (tile - left - right:20)
-     reaches ~60px, above the usable-track floor the dimmer itself ships at a
-     150px tile (50px track): 200px for double, 220px for tripple; below them
-     the bottom strip stays. On the tripple card the stop glyph's line box
-     (transform-grown per the 19b46ae note, visible circle ~y 55-90) extends
-     to y 108 and nominally meets the compact strip's track box by 3px; the
-     visible glyph stays 15px clear (verified on the tile screenshot). */
+     and no favorite star renders on Dash2 tiles). The slider is absolutely
+     positioned against the widget body (core dashboard.css:1153 position:
+     relative), so bottom pins to the tile edge: the 5px track sits in the
+     strip at y 105-110 in a 120px tile, 13px clear of the icons, handle
+     (15px, top:-5) within the tile.
+   - WIDE tiles: the track sits BESIDE the icons, matching how the wide dimmer
+     card reads (its track sits in the icon band, anchored by the base dimmer
+     rule's right:20px + width:calc(100% - 100px), which resolves to a fixed
+     80px left edge clear of its single icon). Same recipe here: bottom:auto
+     returns the track to its natural in-band y (65-73, mid-icon, matching the
+     dimmer's 72), and left restates the icon clearance core's zeroed margin no
+     longer provides: icon end (101 double / 119 tripple) + the handle's 12px
+     overhang at 0% (per the classic blinds rule's derivation below) + an 8px
+     gap = 121px / 139px. left needs !important because the classic blinds
+     rule this overrides carries td#img2 in its selector, an id (1,3,1) no
+     class-only compound can outrank; same load-bearing pattern that rule
+     itself documents against the JS-set inline width. The width thresholds
+     are where the remaining track (tile - left - right:20) reaches ~60px,
+     above the usable-track floor the dimmer itself ships at a 150px tile
+     (50px track): 200px for double, 220px for tripple; below them the bottom
+     strip stays. On the tripple card the stop glyph's line box (transform-
+     grown, visible circle ~y 55-90) extends to y 108 and nominally meets the
+     compact strip's track box by 3px; the visible glyph stays 15px clear. */
 .dd-widget--dz-device .item .dimslidersmalldouble,
 .dd-widget--dz-device .item .dimslidersmalltripple {
     top: auto;
@@ -458,7 +453,7 @@ table.mobileitem td.name {
    nowrap+ellipsis with white-space:normal above (nice on the flexible classic
    dashboard), but in a 120px GridStack cell a long name like "Living Room
    Temperature" wrapped to four lines (82px), which drove the whole card grid to
-   155px and pushed the icon 7px below the cell (census check (d)). Two lines
+   155px and pushed the icon 7px below the cell. Two lines
    caps the name row at ~46px, which - with the compressed status row set in the
    Dash2 tile-fit block above - keeps every card within its 120px cell. The full
    name is still reachable via the hover tooltip (.item #name[data-desc]) and
@@ -555,25 +550,24 @@ table.mobileitem td.name {
     align-self: center;
     padding-right: var(--dz-card-lastupdate-pad-right);
     font-size: var(--dz-text-xs);
-    /* Owner gate verdict N2 "quiet status" (cards-polish, 2026-08-07): one
-       step tighter than the browser's unset "normal" (~14.4-16px at this
+    /* One step tighter than the browser's unset "normal" (~14.4-16px at this
        font-size), paired with #status dropping to regular weight below. */
     line-height: var(--dz-card-meta-line-height);
 }
 /* type.
-   line-height is 0, not --dz-card-meta-line-height (owner report 2026-08-10, item 4 of
-   the five-visual batch, fixed 2026-08-11). This cell carries the device-type string AND,
-   for dimmers/blinds, the slider - but the string is deliberately invisible via a zero
-   glyph size (declared below). An ABSOLUTE 14px line-height still builds a full 14px line
-   box for that zero-sized text, so the cell reserved a phantom row nothing could draw
-   into, and align-self: center then centred "phantom line + control" instead of the
-   control. Measured on #/LightSwitches at 1440: control-centre disagreement within a card
-   row was up to 21.5px; zeroing this line box takes it to 7.5px. (A unitless line-height
-   would have computed to 0 against the zero glyph size by itself; the absolute value is
-   what made it load-bearing, so this is a latent-bug fix, not a taste change.)
+   line-height is 0, not --dz-card-meta-line-height. This cell carries the device-type
+   string AND, for dimmers/blinds, the slider - but the string is deliberately invisible
+   via a zero glyph size (declared below). An ABSOLUTE 14px line-height still builds a
+   full 14px line box for that zero-sized text, so the cell reserved a phantom row
+   nothing could draw into, and align-self: center then centred "phantom line + control"
+   instead of the control. Measured on #/LightSwitches at 1440: control-centre
+   disagreement within a card row was up to 21.5px; zeroing this line box takes it to
+   7.5px. (A unitless line-height would have computed to 0 against the zero glyph size by
+   itself; the absolute value is what made it load-bearing, so this is a latent-bug fix,
+   not a taste change.)
    The residual 7.5px is switch-vs-slider and is NOT fixable here: core positions
    .dimslider absolute (www/css/style.css:843), so it contributes no height to this cell
-   and sits below a control that does. See the card-control contract harness. */
+   and sits below a control that does. */
 .item #type {
     color: var(--secondary-text-color);
     grid-area: status;
@@ -600,14 +594,12 @@ table.mobileitem td.name {
     scrollbar-color: var(--dz-accent-color) var(--dz-body-bg);
 }
 
-/* .btn-group dropped from this pair (selector-segmented spec, 2026-08-08):
-   the shell rule below sets overflow:hidden, which never shows a scrollbar.
-   #status/.status keep their own vertical scroll (the Dash2 zero-slack cap,
-   unrelated) and rely on scrollbar-width/scrollbar-color. */
+/* .btn-group dropped from this pair: the shell rule below sets overflow:hidden,
+   which never shows a scrollbar. #status/.status keep their own vertical scroll
+   (the Dash2 zero-slack cap, unrelated) and rely on scrollbar-width/scrollbar-color. */
 
-/* Button groups in device cards: pills with gap. BASE layout, byte-identical
-   to pre-selector-segmented-task values, shared by every context INCLUDING
-   compact (DashboardType 1, .span3 tiles): flex row, wraps, centered, thin
+/* Button groups in device cards: pills with gap. BASE layout, shared by every
+   context INCLUDING compact (DashboardType 1, .span3 tiles): flex row, wraps, centered, thin
    themed scrollbar cosmetic. Left unscoped deliberately - compact.css below
    builds on top of this (it restates flex-flow:column and width:100% but
    never restates display or its own gap), so compact still needs display:
@@ -625,100 +617,71 @@ table.mobileitem td.name {
     width: 100%;
 }
 
-/* Selector-level buttons (SelectorStyle 0): ONE joined segmented control.
-   OWNER-PICKED DIRECTION (2026-08-08, gate round 3): the theme's OWN,
-   already-shipped connected-toolbar family (css/buttons.css:500-529,
+/* Selector-level buttons (SelectorStyle 0): ONE joined segmented control, reusing
+   the theme's OWN, already-shipped connected-toolbar family (css/buttons.css:500-529,
    "Button groups in toolbars/dialogs: connected" - visible today on e.g.
    #/Events' Disabled/Enabled toggle), re-declared here at a higher,
-   :not(.span3 *)-scoped specificity instead of a bespoke mechanism.
+   :not(.span3 *)-scoped specificity instead of a bespoke mechanism. Wrapped
+   segments keep their NATURAL content width rather than flex-growing to fill
+   the row, so a lone wrapped button reads as a segment of this family, not a
+   large base button on its own.
 
-   History (full evidence trail in .superpowers/sdd/2026-08-08-selector-
-   segmented/task-1-report.md and task-3-report.md): a container-clip shell
-   (accent-fill, then neutral-fill, then flex-grow-tiled) went through three
-   owner gate rounds and was rejected each time as visually disconnected
-   from the theme's other buttons ("an option like the joined buttons we
-   have now"). Task 3's strip gate rendered five candidates against a live
-   ANCHOR screenshot of the Events toggle and settled on this one ("S3").
-   Gate round 3 (this implementation) added one tweak: wrapped segments
-   keep their NATURAL content width - S3 as strip-tested still had the
-   earlier flex-grow rule active underneath, and a full-width lone wrapped
-   button read as "a large base button", not a segment of this family.
-
-   `.item .btn-group` is the ONLY use of .btn-group inside a card (verified
-   against core views/widgets/light_widget.html and light_widget_tab.html:
-   SelectorStyle-0 is the sole emitter, shared by the classic tab-list page
-   (LightSwitches, td#type) and the classic/Dash2 Dashboard (td#status) -
-   one rule set covers all three desktop surfaces). :not(.span3 *) EXCLUDES
-   the compact dashboard (DashboardType 1; core marks every compact tile's
-   wrapper with .span3 via ng-class in dashboard_desktop.html, verified:
-   dashboardType==1 ? 'span3' : 'span4', never mixed with any other card
-   context - .span2/.span4/.span6/.span12 above are unrelated Bootstrap grid
-   widths). Compact is a PERMANENT, by-design exception (task-1-report.md's
-   controller-review addendum): its fixed-height vertical scroll-snap list
-   is unaffected by this rewrite, unchanged since that fix. The .item
-   .btn-group > .btn membership this selector defines is also exactly what
-   the mobile-layout census's structural squash exemption keys on
-   (task-2-report.md, segGroup) - unchanged by this rewrite. */
+   `.item .btn-group` is the ONLY use of .btn-group inside a card (core
+   views/widgets/light_widget.html and light_widget_tab.html: SelectorStyle-0
+   is the sole emitter, shared by the classic tab-list page (LightSwitches,
+   td#type) and the classic/Dash2 Dashboard (td#status) - one rule set covers
+   all three desktop surfaces). :not(.span3 *) EXCLUDES the compact dashboard
+   (DashboardType 1; core marks every compact tile's wrapper with .span3 via
+   ng-class in dashboard_desktop.html: dashboardType==1 ? 'span3' : 'span4',
+   never mixed with any other card context - .span2/.span4/.span6/.span12
+   above are unrelated Bootstrap grid widths). Compact is a PERMANENT,
+   by-design exception: its fixed-height vertical scroll-snap list stays
+   outside this rewrite. */
 .item .btn-group:not(.span3 *) {
     background: transparent !important;
     gap: 0 !important;
-    /* WRAP-ROW GEOMETRY decision (gate round 3, evidence-based, both
-       variants actually rendered before picking - see the report for the
-       loser): a wrapped row anchors to the group's own right edge (the
+    /* WRAP-ROW GEOMETRY: a wrapped row anchors to the group's own right edge (the
        same edge margin-left:auto below pins the whole shell to) and sits
        FLUSH against the row above (0 row-gap), so it reads as one
        continuous connected shape - "Fan Only" sitting directly under
-       "Auto", both edges aligned. The rejected alternative (a small
-       2-3px gap between rows, the "separate mini connected run" look) read
-       as two distinct toolbars stacked, undermining the ONE-control goal
-       this whole project exists for. Honest caveat, disclosed not hidden:
-       this is a visual TOUCH, not a true sub-pixel border collapse - no
-       reliable CSS selector exists for "first item in a wrapped flex row"
-       the way :first-child identifies the group's true first child (the
-       horizontal seam-collapse below works per-row automatically, flex-
-       wrap naturally resets the negative-margin overlap at each line
-       break; the vertical case has no equivalent), so the row junction is
-       two adjacent 1px borders (~2px combined), marginally thicker than
-       the 1px horizontal seams. Verified live, not assumed. */
+       "Auto", both edges aligned. A small gap between rows instead reads as
+       two distinct toolbars stacked, undermining the one-control look.
+       Honest caveat, disclosed not hidden: this is a visual TOUCH, not a
+       true sub-pixel border collapse - no reliable CSS selector exists for
+       "first item in a wrapped flex row" the way :first-child identifies
+       the group's true first child (the horizontal seam-collapse below
+       works per-row automatically, flex-wrap naturally resets the
+       negative-margin overlap at each line break; the vertical case has no
+       equivalent), so the row junction is two adjacent 1px borders (~2px
+       combined), marginally thicker than the 1px horizontal seams. */
     justify-content: flex-end !important;
-    /* Family radius (--dz-btn-radius, not --dz-card-radius-chrome): the
-       owner's picked direction is the LIVING buttons.css connected block
-       verbatim, which itself uses --dz-btn-radius for its first/last-child
-       corners - this shell radius only needs to agree with that, not with
-       other in-card buttons (nothing else in a card looks like this
-       control anymore). */
+    /* Family radius (--dz-btn-radius, not --dz-card-radius-chrome): this
+       shell reuses the LIVING buttons.css connected block verbatim, which
+       itself uses --dz-btn-radius for its first/last-child corners - this
+       shell radius only needs to agree with that, not with other in-card
+       buttons (nothing else in a card looks like this control anymore). */
     border-radius: var(--dz-btn-radius);
     /* Still needed even with the JS-tagged per-button corner radii below:
        buttons.css's first/last-child logic only knows the group's absolute
        first/last child, not "first/last in this particular wrapped row" -
        a square-cornered INTERIOR button can land at the shell's own
-       rounded-corner position after wrap (measured: "Auto", the HVAC
-       5-level case's row-1-last-but-not-group-last button). This clip is
-       a SAFETY NET for that gap (and is still what the focus-ring comment
-       below relies on for the outward-ring amputation it describes), not
-       the fix itself: overflow:hidden only erases a stray square corner
-       pixel, it never paints a replacement arc (measured live, Task 12,
-       first fix round: a genuine blank NOTCH, not a rounded or even a
-       square corner - the two straight border segments either side simply
-       stopped short of meeting). A first attempt papered over that gap
-       with a decorative ::after tracing the shell's own BOUNDING-BOX
-       corners; a controller review caught that this drew a plain rounded
-       rectangle around the WHOLE bounding box, including the genuinely
-       empty space beside a narrower last row (e.g. "Fan Only" alone,
-       right-anchored) - contradicting the DESIGN.md-documented stair-step
-       silhouette and the shell-fill mechanism the owner had already
-       rejected three times in the original selector-segmented pass. Fixed
-       for real via `src/js/devices.js` (retagSelectorWrapCorners): JS is
-       the only thing that can know which button is actually first/last
-       WITHIN a wrapped row (no CSS selector expresses that - the wrap-row
-       comment above documents the same limit for the vertical seam), so
-       it tags the buttons that need a corner change with
-       data-wrap-corner-tr/-bl/-br, and the rules right below this one
-       apply the correct radius to the tagged corner ONLY - never to empty
-       bounding-box space, keeping the stair-step reading the design calls
-       for. !important still beats the #type .btn-group / .input
-       .btn-group overflow-x:auto rule below (an ID selector, predates
-       this shell, still serves other .btn-group contexts, untouched). */
+       rounded-corner position after wrap (e.g. "Auto" in the HVAC 5-level
+       case, a row-1-last-but-not-group-last button). This clip is a SAFETY
+       NET for that gap (and is still what the focus-ring comment below
+       relies on for the outward-ring amputation it describes), not the fix
+       itself: overflow:hidden only erases a stray square corner pixel, it
+       never paints a replacement arc. The real fix is `src/js/devices.js`
+       (retagSelectorWrapCorners): JS is the only thing that can know which
+       button is actually first/last WITHIN a wrapped row (no CSS selector
+       expresses that - the wrap-row comment above documents the same limit
+       for the vertical seam), so it tags the buttons that need a corner
+       change with data-wrap-corner-tr/-bl/-br, and the rules right below
+       this one apply the correct radius to the tagged corner ONLY - never
+       to empty bounding-box space, keeping the DESIGN.md-documented
+       stair-step silhouette the design calls for. !important still beats
+       the #type .btn-group / .input .btn-group overflow-x:auto rule below
+       (an ID selector, predates this shell, still serves other .btn-group
+       contexts, untouched). */
     overflow: hidden !important;
     width: fit-content;
     max-width: 100%;
@@ -735,61 +698,54 @@ table.mobileitem td.name {
     position: relative;
 }
 
-/* Wrap-corner completion, JS-tagged (Task 12 fix rounds 2-3; see the shell
-   rule's own comment above for why a pure-CSS/::after attempt was
-   reverted). src/js/devices.js's retagSelectorWrapCorners measures each
-   shell's actual button rows after every render/resize and tags every
-   button that sits at a true convex corner of the STAIR-STEP silhouette,
-   only when a real wrap has actually happened:
+/* Wrap-corner completion, JS-tagged (see the shell rule's own comment above
+   for why a pure-CSS/::after attempt does not work). src/js/devices.js's
+   retagSelectorWrapCorners measures each shell's actual button rows after
+   every render/resize and tags every button that sits at a true convex
+   corner of the STAIR-STEP silhouette, only when a real wrap has actually
+   happened:
 
    - data-wrap-corner-tr on the LAST button of the FIRST (topmost) row -
      this is the "Auto" case the original defect was measured on: always a
      true exterior corner when wrapped, since the first row is always
      exactly as wide as the shell itself.
    - data-wrap-corner-bl on the FIRST button of the LAST (bottommost) row -
-     UNCONDITIONALLY when wrapped (fix round 3: an earlier version only
-     tagged this when the row's left edge reached the shell's own left
-     edge, reasoning by analogy to the reverted bounding-box overlay - that
-     guard made sense for an overlay that could paint empty space, but this
-     rule rounds a REAL BUTTON's own corner, which can never paint empty
-     space no matter where the shell's bounding box extends to, so the
-     corner is always genuinely convex here, narrower last row or not -
-     "Fan Only" alone measured 0/10/10/0 pre-fix, its own bottom-left
-     square when it should read as the control's true bottom-left-most
-     button corner).
+     UNCONDITIONALLY when wrapped: this rule rounds a REAL BUTTON's own
+     corner, which can never paint empty space no matter where the shell's
+     bounding box extends to, so the corner is always genuinely convex
+     here, narrower last row or not. Without this, a narrower last row
+     (e.g. a lone "Fan Only" button) would round only its own bottom-left
+     corner square, not the control's true bottom-left-most corner.
    - data-wrap-corner-br on the LAST button of the LAST row (always the
-     group's true :last-child too) - fix round 3: buttons.css's plain
-     :last-child rule rounds BOTH right corners unconditionally, correct
-     for the unwrapped single-row case but wrong once wrapped, where this
-     button's TOP-right is an interior seam against the row above, not an
-     exterior corner - left rounded, it pinched the joined right edge
-     inward ~10px right at the seam instead of running straight down to
-     the true bottom-right corner. The rule below forces top-right back to
-     square and restates bottom-right explicitly (still the family radius,
-     a true exterior corner, unaffected by this fix) rather than leaving
-     that property to fall through to the lower-specificity :last-child
-     rule.
+     group's true :last-child too): buttons.css's plain :last-child rule
+     rounds BOTH right corners unconditionally, correct for the unwrapped
+     single-row case but wrong once wrapped, where this button's TOP-right
+     is an interior seam against the row above, not an exterior corner -
+     left rounded, it pinches the joined right edge inward ~10px right at
+     the seam instead of running straight down to the true bottom-right
+     corner. The rule below forces top-right back to square and restates
+     bottom-right explicitly (still the family radius, a true exterior
+     corner, unaffected) rather than leaving that property to fall through
+     to the lower-specificity :last-child rule.
 
    The one corner that never needs tagging: the group's true :first-child
-   (top-left) is handled by the existing first-child rule above, untouched
-   by this fix, correct in both the wrapped and unwrapped case.
+   (top-left) is handled by the existing first-child rule above, correct in
+   both the wrapped and unwrapped case.
 
-   Specificity note: every attribute selector below is deliberately
-   repeated THREE times, measured live, not assumed. The base selector up
-   to `.btn` (.item + .btn-group + :not(.span3 *) + .btn) is already
-   (0,4,0); the interior-reset rule two rules above this one adds two more
-   pseudo-classes (:not(:first-child):not(:last-child)) to reach (0,6,0),
-   and the plain :last-child rule above reaches (0,5,0). A single repeated
-   attribute only reaches (0,5,0) (loses to the interior-reset rule
-   outright, ties :last-child) and TWO repeats only reach (0,6,0) - an
-   exact TIE with the interior-reset rule, which then wins on source order
-   since it is declared LATER in this file (confirmed live: the radius
-   stayed unfixed at both one and two attribute repeats, only resolving at
-   three). Three repeats reach (0,7,0), unambiguously outranking every
-   corner-radius rule in this file (including the single-button-last-row
-   edge case, where one button carries both -bl and -br and also
-   coincides with :last-child at (0,5,0)), with no reliance on rule order
-   either way. */
+   Specificity note: every attribute selector below is deliberately repeated
+   THREE times. The base selector up to `.btn` (.item + .btn-group +
+   :not(.span3 *) + .btn) is already (0,4,0); the interior-reset rule two
+   rules above this one adds two more pseudo-classes
+   (:not(:first-child):not(:last-child)) to reach (0,6,0), and the plain
+   :last-child rule above reaches (0,5,0). A single repeated attribute only
+   reaches (0,5,0) (loses to the interior-reset rule outright, ties
+   :last-child) and TWO repeats only reach (0,6,0) - an exact TIE with the
+   interior-reset rule, which then wins on source order since it is
+   declared LATER in this file. Three repeats reach (0,7,0), unambiguously
+   outranking every corner-radius rule in this file (including the
+   single-button-last-row edge case, where one button carries both -bl and
+   -br and also coincides with :last-child at (0,5,0)), with no reliance on
+   rule order either way. */
 .item .btn-group:not(.span3 *) > .btn[data-wrap-corner-tr][data-wrap-corner-tr][data-wrap-corner-tr] {
     border-top-right-radius: var(--dz-btn-radius) !important;
 }
@@ -801,21 +757,17 @@ table.mobileitem td.name {
     border-bottom-right-radius: var(--dz-btn-radius) !important;
 }
 
-/* Margin reset, UNSCOPED (applies inside compact too) - byte-identical to
-   pre-task. buttons.css's own generic connected-toolbar rule
-   (`.btn-group .btn { margin: 0 0 0 -1px !important }`, buttons.css:500)
-   has ALWAYS applied to every .btn-group everywhere, compact included -
-   compact never wanted that seam-collapse margin (its buttons are a
-   vertical scroll-snap list, not a connected horizontal run), and
-   previously relied on cards.css's own (then differently-shaped) unscoped
-   button rule to cancel it back to 0. Self-caught while re-verifying
-   compact byte-identically for this round: removing that old unscoped
-   rule wholesale (replaced below by the :not(.span3 *)-scoped -1px rule)
-   silently re-exposed compact to the buttons.css default, measured live as
-   a real 1px width shift on 3 of 5 compact buttons (marginLeft -1px where
-   baseline has 0px) before this line was added back. Left here, unscoped,
-   specifically so compact keeps landing on it while every other context's
-   higher-specificity :not(.span3 *) rule below overrides it back to -1px. */
+/* Margin reset, UNSCOPED (applies inside compact too). buttons.css's own
+   generic connected-toolbar rule (`.btn-group .btn { margin: 0 0 0 -1px
+   !important }`, buttons.css:500) applies to every .btn-group everywhere,
+   compact included - compact never wants that seam-collapse margin (its
+   buttons are a vertical scroll-snap list, not a connected horizontal run),
+   so this rule cancels it back to 0. Removing this rule silently re-exposes
+   compact to the buttons.css default: a real 1px width shift on affected
+   compact buttons (marginLeft -1px where it should be 0px). Left here,
+   unscoped, specifically so compact keeps landing on it while every other
+   context's higher-specificity :not(.span3 *) rule below overrides it back
+   to -1px. */
 .item .btn-group > .btn {
     margin: 0 !important;
 }
@@ -871,65 +823,56 @@ table.mobileitem td.name {
     border-radius: var(--dz-btn-radius) !important;
 }
 
-/* Unselected segments: a true ghost, no fill - the container-clip shell's
-   opaque-face requirement (this project's first two owner-gate rounds) no
-   longer applies, since the shell itself carries no fill to seam against
-   (background: transparent above). border-color is restated here even
-   though buttons.css's own `.btn-group .btn` rule already sets the same
-   accent value, because this selector's specificity already has to claim
-   the territory (for the :not(.span3 *) exclusion and the radius rules
-   above) - leaving border-color unstated would depend on a cross-file
-   cascade tie this project has already been burned by once (an earlier
-   round's missing !important silently losing to a same-specificity rule
-   in a different file). .btn-selected's own border-color (already
-   --dz-btn-toggle-selected-bg, which resolves to the same accent value) is
-   deliberately left untouched - the existing buttons.css rule for it is
-   already correct. */
+/* Unselected segments: a true ghost, no fill - the container-clip shell no
+   longer needs an opaque face to seam against, since the shell itself
+   carries no fill (background: transparent above). border-color is
+   restated here even though buttons.css's own `.btn-group .btn` rule
+   already sets the same accent value, because this selector's specificity
+   already has to claim the territory (for the :not(.span3 *) exclusion and
+   the radius rules above) - leaving border-color unstated would depend on a
+   cross-file cascade tie, which is fragile: a missing !important can
+   silently lose to a same-specificity rule in a different file.
+   .btn-selected's own border-color (already --dz-btn-toggle-selected-bg,
+   which resolves to the same accent value) is deliberately left untouched -
+   the existing buttons.css rule for it is already correct. */
 .item .btn-group:not(.span3 *) > .btn.btn-default {
     background: transparent !important;
     border-color: var(--dz-accent-color) !important;
 }
 
-/* Selected-hover clarity (Task 12b, owner gate verdict G2 "darken"). Root
-   cause: core's markup gives every level button class="btn btn-small"
-   regardless of selection, so buttons.css's ghost-hover rule
-   (".btn-default:hover, .btnsmall:hover, .btnsmall-sel:hover,
+/* Selected-hover clarity. Root cause: core's markup gives every level button
+   class="btn btn-small" regardless of selection, so buttons.css's ghost-hover
+   rule (".btn-default:hover, .btnsmall:hover, .btnsmall-sel:hover,
    .btn-small:hover { background: var(--dz-btn-hover-bg) !important }",
    specificity 0,2,0) matches a SELECTED button too and outranks the bare
-   ".btn-selected" rule's own "background !important" (buttons.css, 0,1,0) -
-   measured live: hovering a selected segment swapped its solid
+   ".btn-selected" rule's own "background !important" (buttons.css, 0,1,0):
+   without this rule, hovering a selected segment swaps its solid
    --dz-btn-toggle-selected-bg fill for the ghost family's near-transparent
-   10%-accent wash, while nothing on hover touched
-   --dz-btn-toggle-selected-text (white), so the label went white-on-near-
-   white (screenshot evidence + WCAG numbers in task-12-report.md). Fixed
-   here by re-declaring background/color/border-color at THIS selector's
+   10%-accent wash, while nothing on hover touches
+   --dz-btn-toggle-selected-text (white), so the label goes white-on-near-white.
+   Fixed here by re-declaring background/color/border-color at THIS selector's
    specificity (0,6,0: .item + .btn-group + :not()'s own .span3 argument +
    .btn + .btn-selected + :hover - the same scope+shape already used above
-   for :focus-visible against this exact ghost-rule family, proven to win
-   the same cascade fight there) - comfortably beats the ghost rule's 0,2,0,
-   so this never needs a specificity hack beyond matching the pattern
-   already established on this control.
+   for :focus-visible against this exact ghost-rule family) - comfortably
+   beats the ghost rule's 0,2,0, so this never needs a specificity hack
+   beyond matching the pattern already established on this control.
    Fill DARKENS via the theme's own established filled-button hover
    derivation (DESIGN.md, Buttons > States: "color-mix(in srgb, <bg> 90%,
    black)"), label color and border stay pinned to the resting selected
    values (no separate hover token needed - only the fill moves). Unselected
    (.btn-default) hover is deliberately untouched by this rule - the ghost
    family's own wash is correct there, only the SELECTED segment's hover
-   was ever broken. WCAG (re-measured 2026-08-12 for the Blue UI rebase,
-   same color-mix(in srgb, ...) 90%-black hover math this rule applies):
-   light 5.45:1 resting -> 6.41:1 hover (improves), PASS; dark 10.72:1
-   resting -> 8.69:1 hover (still comfortably above AA, though the mix
-   narrows the gap since darkening a light bg moves it toward the dark
-   text color instead of away from it), PASS. The old "~3.0-3.7:1
-   pre-existing --dz-accent-color-on-dark limitation" no longer applies:
-   Blue UI Dark's accent is pale, so --dz-accent-text now resolves dark
-   (#0f1620, see dark.css) instead of white there, which is what fixed it,
-   not a retune of the accent token itself.
+   was ever broken. WCAG (same color-mix(in srgb, ...) 90%-black hover math
+   this rule applies): light 5.45:1 resting -> 6.41:1 hover (improves), PASS;
+   dark 10.72:1 resting -> 8.69:1 hover (still comfortably above AA, though
+   the mix narrows the gap since darkening a light bg moves it toward the
+   dark text color instead of away from it), PASS. Dark passes because Blue
+   UI Dark's accent is pale, so --dz-accent-text resolves dark (#0f1620, see
+   dark.css) instead of white there.
 
-   box-shadow: none per owner gate H1 (2026-08-11, "flat-selected" round):
-   matches the rest-state .btn-selected rule in buttons.css, which stopped
-   consuming --dz-btn-shadow-pressed the same round - a selected segment no
-   longer reads as concave/pressed on hover either, only the fill darkens. */
+   box-shadow: none matches the rest-state .btn-selected rule in buttons.css,
+   which does not consume --dz-btn-shadow-pressed - a selected segment does
+   not read as concave/pressed on hover either, only the fill darkens. */
 .item .btn-group:not(.span3 *) > .btn.btn-selected:hover {
     background: color-mix(in srgb, var(--dz-btn-toggle-selected-bg) 90%, black) !important;
     color: var(--dz-btn-toggle-selected-text) !important;
@@ -937,30 +880,27 @@ table.mobileitem td.name {
     box-shadow: none !important;
 }
 
-/* Focus ring, inset - RE-VERIFIED for this gate round, not carried over on
-   assumption. With real per-button borders (no longer transparent) and the
-   shell clip still in place (still needed, see above), the outward ring
-   (--dz-btn-focus-ring) was tested live against the family's own standard
-   treatment before deciding: it renders correctly for the group's TRUE
-   first/last child (their own rounded corners already match the shell
-   clip's curve), but for a SQUARE-cornered interior button that lands at
-   the wrap boundary (measured: "Auto" in the HVAC 5-level case, the same
-   button the corner-radius artifact affects) the outward ring is clipped
-   down to almost nothing. Kept inset, uniformly: with a clipping shell in
-   play, which segment lands at that artifact position depends on level
-   count and label length, so the safe default stays inset rather than
-   "usually fine, occasionally amputated depending on the device's own
-   level names." */
+/* Focus ring, inset. With real per-button borders (no longer transparent) and
+   the shell clip still in place (still needed, see above), the outward ring
+   (--dz-btn-focus-ring) renders correctly for the group's TRUE first/last
+   child (their own rounded corners already match the shell clip's curve),
+   but for a SQUARE-cornered interior button that lands at the wrap boundary
+   (e.g. "Auto" in the HVAC 5-level case, the same button the corner-radius
+   artifact affects) the outward ring is clipped down to almost nothing.
+   Kept inset, uniformly: with a clipping shell in play, which segment lands
+   at that artifact position depends on level count and label length, so the
+   safe default stays inset rather than "usually fine, occasionally
+   amputated depending on the device's own level names." */
 .item .btn-group:not(.span3 *) > .btn:focus-visible {
     box-shadow: var(--dz-btn-shadow), var(--dz-btn-focus-ring-inset) !important;
 }
 
-/* Owner gate H1 (2026-08-11): the selected segment's rest/hover box-shadow
-   above dropped --dz-btn-shadow-pressed, so its own focus ring no longer
-   composes a pressed layer either - inset ring alone, same shape as the
-   unselected sibling above but without --dz-btn-shadow (a selected segment
-   never had a SEPARATE resting elevation to stack under the ring; its
-   "elevation" was always the pressed inset this gate removed). */
+/* The selected segment's rest/hover box-shadow above dropped
+   --dz-btn-shadow-pressed, so its own focus ring no longer composes a
+   pressed layer either - inset ring alone, same shape as the unselected
+   sibling above but without --dz-btn-shadow (a selected segment never had a
+   SEPARATE resting elevation to stack under the ring; its "elevation" was
+   always the pressed inset that box-shadow removed). */
 .item .btn-group:not(.span3 *) > .btn.btn-selected:focus-visible {
     box-shadow: var(--dz-btn-focus-ring-inset) !important;
 }
@@ -984,22 +924,21 @@ body table#itemtable tr > .options {
     padding: var(--dz-card-space-md) 0;
 }
 
-/* Flyout container geometry (owner feedback 2026-07-17, second pass): the
-   old fixed width: 97px + padding: 8px made the widest label
+/* Flyout container geometry: a fixed width would make the widest label
    ("Notifications" at sm) fill the content box wall to wall, so the row
-   hover band hugged the text with no breathing room, and the container's
-   8px side padding stopped that band short of the popup edges. Sized to
-   content instead (max-content + a floor so short menus don't collapse to
-   a sliver), and the padding is vertical-only: horizontal spacing now lives
-   on the rows themselves (below), so the hover highlight spans the full
-   popup width, edge to edge, like a real menu. */
+   hover band would hug the text with no breathing room, and side padding on
+   the container would stop that band short of the popup edges. Sized to
+   content instead (max-content + a floor so short menus don't collapse to a
+   sliver), and the padding is vertical-only: horizontal spacing lives on
+   the rows themselves (below), so the hover highlight spans the full popup
+   width, edge to edge, like a real menu. */
 .options {
     display: none;
     font-weight: var(--dz-weight-semibold);
     position: absolute;
-    /* Menu surface, not card surface (owner-approved 2026-07-17): the
-       --dz-menu-bg token separates the flyout from the card it floats over;
-       the navbar dropdown (css/nav.css) consumes the same token. */
+    /* Menu surface, not card surface: the --dz-menu-bg token separates the
+       flyout from the card it floats over; the navbar dropdown (css/nav.css)
+       consumes the same token. */
     background: var(--dz-menu-bg);
     border-radius: var(--dz-card-radius-chrome);
     right: var(--dz-card-options-offset);
@@ -1033,9 +972,9 @@ body table#itemtable tr > .options {
     display: block;
 }
 
-/* Flyout menu rows (Edit/Notifications/Idx...), NOT physical buttons (owner
-   feedback 2026-07-17, item a): the ghost family in buttons.css gives
-   .btnsmall/.btnsmall-sel a bordered outline and a radius, which reads as a
+/* Flyout menu rows (Edit/Notifications/Idx...), NOT physical buttons: the
+   ghost family in buttons.css gives .btnsmall/.btnsmall-sel a bordered
+   outline and a radius, which reads as a
    tiny button per row instead of a flat menu; killed here (more specific,
    and cards.css loads after buttons.css) so a row is just text. Box-shadow
    already resolves to none from that same ghost rule, so no override is
@@ -1050,17 +989,17 @@ body table#itemtable tr > .options {
     background: transparent;
     border: none !important;
     border-radius: 0 !important;
-    /* Row spacing (owner feedback, second pass): md tier gives each row its
-       own breathing room, and because the container above carries no side
-       padding, this is also what indents the label from the popup edge while
-       the hover band still paints the full row width. */
+    /* Row spacing: md tier gives each row its own breathing room, and
+       because the container above carries no side padding, this is also
+       what indents the label from the popup edge while the hover band still
+       paints the full row width. */
     padding: var(--dz-btn-pad-md);
     text-align: left;
     /* Release core style.css's fixed .btnsmall height (1.60em = 22.4px at
        sm, border-box): it crushed the padded 20px line box (needs 32px), so
        the text overflowed the row bottom and the hover band read as
-       bottom-hugging the label instead of centered (owner report). Auto lets
-       the symmetric padding + line-height actually center the text. */
+       bottom-hugging the label instead of centered. Auto lets the
+       symmetric padding + line-height actually center the text. */
     height: auto;
 }
 
@@ -1102,18 +1041,16 @@ body table#itemtable tr > .options {
    specific, and cards.css loads after buttons.css). Hover stays exactly
    that ghost rule's tonal tint (--dz-btn-hover-bg) - no extra background is
    added here so the icons don't grow a pill/circle.
-   Color (owner gate verdict, accent icons pass, cards-polish 2026-08-07):
-   ACCENT with a dark-compliant fix, not the quiet ghost-text default this
-   card used to render (buttons.css's ghost rule sets
-   "color: var(--dz-btn-ghost-text) !important" on plain .btnsmall/
-   .btnsmall-sel, which always won here before this rule carried its own
-   !important - the color declaration below was dead code). --dz-card-icon-
-   accent (dz-tokens.css, set again in dark.css) is the plain
-   --dz-accent-color on BOTH light and dark as of the 2026-08-12 Blue UI
-   rebase: light measures 5.45:1 resting / 4.77:1 hover against the card
-   background, dark measures 9.68:1, all comfortably over WCAG SC 1.4.11's
-   3:1 non-text threshold, so dark no longer needs a lightened derived
-   value; see dz-tokens.css/dark.css for the live-measured method.
+   Color: ACCENT with a dark-compliant fix, not the quiet ghost-text default
+   (buttons.css's ghost rule sets "color: var(--dz-btn-ghost-text)
+   !important" on plain .btnsmall/.btnsmall-sel, which always wins here
+   without this rule's own !important - the color declaration below is dead
+   code otherwise). --dz-card-icon-accent (dz-tokens.css, set again in
+   dark.css) is the plain --dz-accent-color on BOTH light and dark: light
+   measures 5.45:1 resting / 4.77:1 hover against the card background, dark
+   measures 9.68:1, all comfortably over WCAG SC 1.4.11's 3:1 non-text
+   threshold, so dark no longer needs a lightened derived value; see
+   dz-tokens.css/dark.css for the live-measured method.
    !important plus this selector's two-class specificity (0,2,0) beats the
    ghost rule's one-class .btnsmall (0,1,0) on the cascade tie, same
    mechanism as .aw-footer .btn-default in buttons.css. */
@@ -1218,11 +1155,11 @@ body table#itemtable tr > .options {
    `#img img:hover { transform: scale(1.1) }` (transform: none below) and
    extends the cue to the secondary/tertiary action icons (stop, close, media
    remote). Kept strictly IN-BOX: the five nested overflow:hidden ancestors
-   documented above shave any outer ring or spilled glow. The owner picked the
-   tonal-only variant deliberately (2026-07-14): it started as the
-   prefers-reduced-motion fallback and turned out to be the better design, so
-   it IS the design and no motion media query is needed. :focus-visible is
-   included for when these icons become keyboard-focusable. */
+   documented above shave any outer ring or spilled glow. This tonal-only
+   treatment started as the prefers-reduced-motion fallback and turned out
+   to be the better design, so it IS the design and no motion media query is
+   needed. :focus-visible is included for when these icons become
+   keyboard-focusable. */
 .item #img img,
 .item #img1 img,
 .item #img2 img,
@@ -1289,11 +1226,10 @@ body table#itemtable tr > .options {
 }
 
 /* Dashboard items hide last-seen by default; dashboard_show_last_update.css reveals it.
-   The old mechanism relied on the collapsed third grid row clipping the text, but the row
-   line sits inside the tr's padding slack, so the top half of the timestamp stayed visible
-   (measured on the standard dashboard with the feature off). visibility hides the text node
-   and icon outright; display stays so the cell keeps rendering the bar-ranges strip, which
-   un-hides itself below. */
+   Relying on the collapsed third grid row to clip the text is not enough: the row line
+   sits inside the tr's padding slack, so the top half of the timestamp stays visible.
+   visibility hides the text node and icon outright; display stays so the cell keeps
+   rendering the bar-ranges strip, which un-hides itself below. */
 #dashcontent .lastupdate,
 #dashcontent #lastupdate {
     display: inline-table;
@@ -1318,15 +1254,14 @@ body table#itemtable tr > .options {
     /* Vertical only - margin-top on an absolutely-positioned box with top:auto shifts its
        STATIC position, so this moves the track onto the same line as the toggles and
        selectors it shares card rows with, and cannot touch left/width/right (those resolve
-       against the card, not this cell). Verified: dz-slider-geometry.js reports every
-       variant's horizontal box byte-identical across both pages and three widths.
+       against the card, not this cell).
 
        !important is load-bearing: core's JS writes an INLINE margin-top per slider
-       variant (measured live - 7px on the dashboard dimslidernorm, 7px on dimsmall, 12px
-       on dimsmall3, none on the tab-page dimslidernorm), and those differing values are
-       the reason the variants never shared a baseline. One authored value replaces the
-       whole set so every slider lands on the same line. Only an author !important
-       outranks an inline declaration, so this cannot be done without it. */
+       variant (7px on the dashboard dimslidernorm, 7px on dimsmall, 12px on dimsmall3,
+       none on the tab-page dimslidernorm), and those differing values are the reason the
+       variants never shared a baseline. One authored value replaces the whole set so
+       every slider lands on the same line. Only an author !important outranks an inline
+       declaration, so this cannot be done without it. */
     margin-top: var(--dz-card-slider-align-nudge) !important;
 }
 
@@ -1344,11 +1279,9 @@ body table#itemtable tr > .options {
 .span4 td#img2 ~ .statusProtected .dimslider {
     left: var(--dz-card-blinds-slider-left);
     width: auto !important;
-    /* Was margin-top: 0 !important, which cancelled core's inline 7px/12px but parked the
-       blinds tracks on a different line from every other control (item 4). They now share
-       the one alignment constant with the rest of the family; the zeroing this replaces
-       was only ever about neutralising core's per-variant inline value, which the token
-       does too. */
+    /* Shares the one alignment constant (--dz-card-slider-align-nudge) with the rest of
+       the slider family, rather than a separate override: neutralising core's per-variant
+       inline margin-top is all this value needs to do, and the shared token does that too. */
     margin-top: var(--dz-card-slider-align-nudge) !important;
 }
 

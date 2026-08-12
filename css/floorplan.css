@@ -40,8 +40,8 @@ rect.header {
    so the header stays stroke-free by design rather than by omission, in case a future
    core change starts stroking it. A prior stroke-width: 0 !important rule on rect.header
    above tried to neutralize a stroke the same way and was redundant with this one:
-   verified live (computed stroke stays none, dz-floorplan-popup-contract.js stays clean)
-   whether that declaration is present or not, so it has been removed. */
+   the computed stroke stays none whether that declaration is present or not,
+   so it has been removed. */
 .DeviceDetails rect.header {
     stroke: none;
 }
@@ -73,9 +73,8 @@ rect.header {
     display: none;
 }
 
-/* Metadata rows, brought onto the card language (owner report 2026-08-11). The popup and the
-   device cards render the same two fields with different rules, which is what made the popup
-   read as "not themed" even after the chrome was fixed.
+/* Metadata rows, brought onto the card language. The popup and the device cards render the
+   same two fields with different rules, which reads as "not themed" if they disagree.
 
    type: hidden, exactly as the cards hide it (css/cards.css .item #type zeroes its glyph and
    line box, so it never renders there). Showing it here while hiding it there meant the two
@@ -87,7 +86,7 @@ rect.header {
    the size does not, since core sets that as a presentation attribute and any authored
    declaration outranks it.
 
-   Size is deliberately ONE STEP BELOW the cards (owner gate 2026-08-11): cards put this field
+   Size is deliberately ONE STEP BELOW the cards: cards put this field
    on --dz-text-xs, but the popup has core's expander chevron competing for the same line and
    the cards do not. Measured clearance from the end of the timestamp to the chevron: 17px at
    --dz-text-micro, 2px at --dz-text-xs. 2px survives the English string and nothing else -
@@ -180,8 +179,8 @@ image#twisty {
     background: var(--dz-accent-color) !important;
 }
 
-/* Mobile stage containment (mobile-polish task 2, owner defect 1: swiping to
-   another plan slides the menu off-screen).
+/* Mobile stage containment: without it, swiping to another plan slides the
+   menu off-screen.
 
    Core lays the floorplans side by side in the DOCUMENT, one
    full-viewport-wide .imageparent per plan (FloorplanController.js:514-515,

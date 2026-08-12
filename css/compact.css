@@ -61,7 +61,8 @@ section.compact .row:not(.divider) {
     width: 100%;
     /* the group itself is the scroll container: without this the
        non-selected buttons stack past the 50px design height and hang
-       out of the card (dz-pages-matrix.js caught 18-117px) */
+       out of the card by 18-117px, depending on how many buttons the
+       group holds */
     overflow-y: auto;
     scroll-snap-type: y mandatory;
     background: var(--dz-widget-bg) !important;

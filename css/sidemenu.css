@@ -8,29 +8,25 @@ img.header__icon {
     padding: 0px 2% 0 2% !important;
 }
 
-/* menus-family Task 8 (owner gate, 2026-08-10, verdict "opaque panel"):
-   solid --dz-menu-bg fill, backdrop-filter retired on this surface. The
-   previous accent-tinted glass (background-color: var(--dz-accent-color)
+/* Solid --dz-menu-bg fill; backdrop-filter is retired on this surface. An
+   accent-tinted glass fill (background-color: var(--dz-accent-color)
    fallback + transparent/blur(3px) opacity(.8) backdrop-filter under
-   @supports) measured badly against loud backdrops (owner screenshots: "the
-   blurred glass look is really nice but can cause certain items to be hard
-   to read"). Three readability treatments were gated against the Scenes
-   page's worst-case backdrop (glowing scene/group toggles) with real WCAG
-   contrast math sampled from live screenshots, not eyeballed: raising the
-   panel's own accent-tinted alpha (F-scrim) measured WORSE for the current
-   item specifically (1.48:1 light / 1.18:1 dark) because the panel tint and
-   the current item's own accent-colored left-edge text (below) collide on
-   the same hue; a much stronger blur radius (F-blur, 20px) improved but
-   still failed AA in both schemes (4.20:1 / 2.28:1); this opaque panel
-   measured best in both (4.51:1 light / 5.17:1 dark) by removing the
-   backdrop dependency entirely instead of mitigating it. Full measurements:
-   .superpowers/sdd/2026-08-10-menus-family/task-8-report.md.
+   @supports) reads badly against loud backdrops: the blur looks good in
+   isolation but can make items hard to read. Measured against the Scenes
+   page's worst-case backdrop (glowing scene/group toggles) with WCAG
+   contrast math sampled from live screenshots: raising the panel's own
+   accent-tinted alpha fails for the current item specifically (1.48:1
+   light / 1.18:1 dark) because the panel tint and the current item's own
+   accent-colored left-edge text (below) collide on the same hue; a much
+   stronger blur radius (20px) improves but still fails AA in both schemes
+   (4.20:1 / 2.28:1); this opaque panel measures best in both (4.51:1
+   light / 5.17:1 dark) by removing the backdrop dependency entirely
+   instead of mitigating it.
 
-   box-sizing: border-box also fixes the S3 containment defect
-   (reports/menu-facts.json, two records): this rule's own 5px padding was
-   adding 10px to each axis beyond the intended 100%/100% under content-box;
-   border-box moves it inside instead - settled geometry now measures
-   exactly 390x844 at (0,0), zero overflow on any edge. */
+   box-sizing: border-box also keeps this panel contained: this rule's own
+   5px padding adds 10px to each axis beyond the intended 100%/100% under
+   content-box; border-box moves it inside instead - settled geometry
+   measures exactly 390x844 at (0,0), zero overflow on any edge. */
 .navbar-inverse .navbar-inner {
     background-color: var(--dz-menu-bg) !important;
     box-sizing: border-box;
@@ -44,8 +40,7 @@ img.header__icon {
     border: none;
     box-shadow: var(--dz-elev-popup);
     position: fixed;
-    /* 1001, not 1000 (found 2026-08-11 while capturing the flyout for a type strip).
-       Core's Dynamic Dashboard pill, .dd-topbar (www/css/dashboard.css:49), is also
+    /* 1001, not 1000: core's Dynamic Dashboard pill, .dd-topbar (www/css/dashboard.css:49), is also
        position: fixed at z-index 1000 and overlaps this panel's first menu row. Equal
        z-index means DOM order decides, and core's markup comes later, so the pill won:
        elementFromPoint over the first entry ("Dashboard") returned .dd-topbar-btn, not the
@@ -75,8 +70,7 @@ img.header__icon {
 
 .navbar-inverse .navbar-inner.slide::-webkit-scrollbar-thumb {
     /* dz-menu-exception: scrollbar-thumb chrome, not a menu surface - out of
-       the --dz-menu-* family, not measured by reports/menu-facts.json.
-       0.4 alpha black doesn't match --dz-menu-item-hover-bg (accent 0.15) or
+       the --dz-menu-* family. 0.4 alpha black doesn't match --dz-menu-item-hover-bg (accent 0.15) or
        any other family token. */
     background: rgba(0,0,0, 0.4);
     border-radius: 5px;
@@ -96,9 +90,8 @@ img.header__icon {
 }
 
 .navbar .nav > li {
-    /* menus-family Task 8 (2026-08-10, F1 "same language"): tokenized -
-       --dz-menu-separator already equals this exact literal (dz-tokens.css),
-       byte-neutral swap for token-family consistency, no visual delta. */
+    /* --dz-menu-separator already equals this exact literal (dz-tokens.css);
+       tokenized for family consistency, byte-neutral, no visual delta. */
     border-bottom: 1px solid var(--dz-menu-separator);
     float: none;
 }
@@ -119,22 +112,19 @@ img.header__icon {
 .navbar .nav li a {
     font-size: var(--dz-text-nav-touch) !important;
     text-align: left;
-    /* menus-family Task 8 (2026-08-10, F1 "same language"): item padding
-       onto the page-level 8/10 spacing cluster (previously Bootstrap's
-       unmodified 8px 12px default - neither this file nor nav.css overrode
-       it before). border-left-width reserves the SAME 2px the current-item
-       rule below actually uses, on every item, current or not, so becoming
-       current only ever changes that edge's COLOR, never its WIDTH -
-       pre-applying Task 7 fix round 1's lesson (border-bottom case) to this
-       border-left case before it could bite here too. */
+    /* Item padding sits on the page-level 8/10 spacing cluster rather than
+       Bootstrap's unmodified 8px 12px default. border-left-width reserves
+       the SAME 2px the current-item rule below actually uses, on every
+       item, current or not, so becoming current only ever changes that
+       edge's COLOR, never its WIDTH (the nav.css .sub-tabs base rule uses
+       the identical border-bottom-reservation pattern for the same reason). */
     padding: 8px 10px;
     border-left-width: 2px;
 }
 
 .navbar .nav li a:hover {
-    /* menus-family Task 8 (2026-08-10, F1): token instead of transparent -
-       matches the hover tint every other family surface (desktop dropdowns,
-       Task 7 E1) already uses. */
+    /* Token instead of transparent: matches the hover tint every other
+       family surface (desktop dropdowns) already uses. */
     background: var(--dz-menu-item-hover-bg) !important;
     color: var(--secondary-text-color) !important;
 }
@@ -143,19 +133,17 @@ img.header__icon {
     padding-right: 10px;
 }
 
-/* menus-family Task 8 (owner gate, 2026-08-10): vertical "you are here"
-   language - 2px accent LEFT edge + accent text, matching Task 7/E2N's own
-   "underline = horizontal surfaces, left edge = vertical surfaces"
-   principle. FOUND LIVE: the rule this replaces was already a no-op
-   (--dz-menu-item-active-bg is transparent) - the flyout's current item was
-   actually inheriting nav.css's TOP-LEVEL E2N underline (border-bottom) by
-   DOM/selector accident, since the flyout list shares the identical
-   ".navbar .nav .current_page_item > a" selector with the desktop
-   horizontal bar. This rule neutralizes that inherited underline and
-   switches to the left edge instead; border-top/right/bottom-color reset to
-   transparent (border-bottom-width itself stays reserved by nav.css's own
-   base rule, only the color changes) so nothing regains a box on any other
-   side. */
+/* Vertical "you are here" language: 2px accent LEFT edge + accent text,
+   following the "underline = horizontal surfaces, left edge = vertical
+   surfaces" principle. --dz-menu-item-active-bg is transparent, so without
+   this rule the flyout's current item inherits nav.css's TOP-LEVEL
+   underline (border-bottom) by DOM/selector accident, since the flyout
+   list shares the identical ".navbar .nav .current_page_item > a" selector
+   with the desktop horizontal bar. This rule neutralizes that inherited
+   underline and switches to the left edge instead; border-top/right/bottom-
+   color reset to transparent (border-bottom-width itself stays reserved by
+   nav.css's own base rule, only the color changes) so nothing regains a box
+   on any other side. */
 .navbar .nav .current_page_item > a,
 .navbar .nav .current_page_item > a:hover {
     text-align: left;
@@ -242,8 +230,7 @@ img.header__icon {
     bottom: 10px;
     transform: rotate(90deg);
     /* dz-menu-exception: CSS-triangle caret (border trick), not a menu
-       surface - out of the --dz-menu-* family, not measured by
-       reports/menu-facts.json. */
+       surface - out of the --dz-menu-* family. */
     border-left-color: #fff;
     border-width: 4px;
 }
@@ -259,8 +246,8 @@ img.header__icon {
 }
 
 /*
-  Mobile app-shell overflow (tables-holistic task 4, complaint k; shared root cause behind
-  the census's recurring +60px scrollHeight on Users/Mobile/Cam/Log at 360x780).
+  Mobile app-shell overflow: the shared root cause behind a recurring +60px
+  scrollHeight on Users/Mobile/Cam/Log at 360x780.
 
   Above, this file forces the navbar out of position:fixed into normal flow so its
   navbar-inner can slide out as the mobile side menu. That puts Bootstrap's own navbar

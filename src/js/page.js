@@ -40,8 +40,8 @@ function locationHashChanged() {
     if (location.hash == "#/CustomIcons") {
         setCustomIconsPage();
     }
-    /* #/Setup needs no theme hook anymore: the injected Theme tab is gone
-       (Task 8); theme settings live in the hub (src/js/theme-hub.js), a click
+    /* #/Setup needs no theme hook anymore: there is no injected Theme tab;
+       theme settings live in the hub (src/js/theme-hub.js), a click
        pseudo-route with no hash of its own. */
 }
 
@@ -90,8 +90,8 @@ function setLogo() {
 
 /* Apply the user's dashboard background image (settings -> theme.background_img).
    Extracted from custom.js's ready block so the in-place settings reconcile
-   (settings-store.js applyThemeDeltaInPlace, perf-report F3) can re-run it when
-   the Domoticz-stored value differs from what the defaults painted. An empty
+   (settings-store.js applyThemeDeltaInPlace) can re-run it when the
+   Domoticz-stored value differs from what the defaults painted. An empty
    value sets no background, matching the original inline behavior (the defaults
    ship none). */
 function applyBackground() {
@@ -146,11 +146,10 @@ function clampCorePopups() {
 // the (fixed-height) nested list to fit underneath, but Setup > "More options" sits low
 // in a tall Setup list, and its own 19-item nested list (index.html ~1305-1343, the
 // theme cannot edit this markup) runs off the bottom of the viewport regardless of
-// window height: census S2 defect, reports/menu-facts.json (menus-family Task 1) --
-// rect.bottom = 923 at BOTH 1440x900 and 1024x768, the SAME on-screen anchor with a
-// different amount of room below it at each height. A max-height clamp was tried and
-// reverted (see css/nav.css, the comment above this dropdown-menu region): scoped to
-// every ".dropdown-submenu > .dropdown-menu" it also clipped Plans/Data push's own
+// window height: the trigger's own on-screen position determines the overflow, not the
+// viewport height, so a taller window does not fix it. A CSS max-height clamp cannot
+// work here (see css/nav.css, the comment above this dropdown-menu region): scoped to
+// every ".dropdown-submenu > .dropdown-menu" it would also clip Plans/Data push's own
 // third-level flyouts, which are themselves nested ".dropdown-submenu > .dropdown-menu".
 // The trigger's on-screen position is config-dependent (HaveUpdate, EnableTabCustom
 // change how many items sit above it), so no fixed CSS breakpoint can predict it; this
@@ -164,11 +163,9 @@ function clampCorePopups() {
 // the Math.max(0, ...) floor holds the shift at 0 (never negative -- never pushes the
 // list further down), so past that point the list simply keeps whatever residual
 // bottom overflow the viewport is too short to avoid; this is a deliberate "never make
-// it worse" floor, not a bug (verified 1440x500: shift stays at r.top - 10, some
-// bottom overflow remains, no top overflow is introduced). Class-toggle only where CSS
-// truly cannot know the runtime position (three dropdown-submenu triggers total: More
-// options, Plans, Data push -- selector below covers all, future submenus adopt this
-// for free.)
+// it worse" floor, not a bug. Class-toggle only where CSS truly cannot know the runtime
+// position (three dropdown-submenu triggers total: More options, Plans, Data push --
+// selector below covers all, future submenus adopt this for free.)
 //
 // Re-contained on window resize too (debounced ~100ms, same local-timer idiom
 // devices.js's initDeviceObserver uses), not just on open: a flyout left open across a

@@ -11,8 +11,8 @@
    instead of a fresh theme.json fetch) unless a native-API write later
    needs the factory baseline and lazily resolves it itself: see
    dzEnsureDefaultsSnap in settings-transport.js, the only other writer of
-   this var, used by dzBuildInstanceWrite's fallback base (Task 3) and the
-   seeding path (Task 4). */
+   this var, used by dzBuildInstanceWrite's fallback base and the seeding
+   path. */
 var dzDefaultsSnap = null;
 
 /* The theme object's localStorage cache. Plain functions instead of the old
@@ -46,19 +46,16 @@ function loadSettings() {
                     themeName = theme.name;
                     /* Pristine factory values, captured before any cache or
                        server overlay touches theme: the base for native-API
-                       instance writes and promote (Tasks 3 and 5). */
+                       instance writes and promote. */
                     dzDefaultsSnap = dzSettingsSnapshot(theme);
                     if (isEmptyObject(theme) === false) {
                         cacheThemeSettings();
                     }
-                    /* Perf-report F3 (task-9-perf-report.md 2.2): this branch used to
-                       schedule setTimeout(location.reload, 3000) after caching the
-                       defaults, so the Domoticz-stored settings could paint on a second
-                       full boot. That doubled a ~11s mobile load to ~19-20s and opened a
-                       visible race: defaults paint, then the async DB merge + delayed
-                       reload swap the settled state in mid-window (task-2-report.md
-                       "pre-existing settings race"). The defaults paint now stands and
-                       reconcileDomoticzSettingsInPlace() applies the DB delta live. */
+                    /* Do not reload here to let Domoticz-stored settings paint on a
+                       second boot: that doubles load time and opens a visible race
+                       between the defaults paint and the async DB merge. The defaults
+                       paint stands and reconcileDomoticzSettingsInPlace() applies the
+                       DB delta live instead. */
                     console.log(themeName + " - local theme settingsfile loaded and saved to localStorage");
                 })
                 .catch(function(error) {
@@ -104,7 +101,7 @@ function checkUserVariableThemeSettings() {
     return dzProbeThemeSettingsAPI().then(function(capable) {
         if (!capable) return checkUserVariableThemeSettingsLegacy();
         return dzApiLoad().then(function(outcome) {
-            if (outcome === DZ_LOAD_EMPTY) return dzSeedFromLegacyIfPossible(); /* Task 4 */
+            if (outcome === DZ_LOAD_EMPTY) return dzSeedFromLegacyIfPossible();
             return undefined; /* LOADED: dzApiLoad already merged onto theme and cached. FAILED: fail closed, no writes. */
         });
     });
@@ -174,14 +171,13 @@ function themeSettingsFingerprint(t) {
     });
 }
 
-/* Perf-report F3 (task-9-perf-report.md 2.2): the replacement for the
-   first-visit setTimeout(location.reload). init_theme's ready block has already
-   painted the defaults (cold) or the cache (warm); this merges the
-   Domoticz-stored settings and applies ONLY the delta to the live document, so
-   a first visit is a single boot instead of two (~11s saved on Fast-3G mobile)
-   and the defaults->DB swap no longer needs a reload to become visible.
-   Fail closed: checkUserVariableThemeSettings resolves without error on a failed
-   fetch, so the defaults simply stand (no retry, no half-applied state). */
+/* init_theme's ready block has already painted the defaults (cold) or the
+   cache (warm); this merges the Domoticz-stored settings and applies ONLY
+   the delta to the live document, so a first visit is a single boot instead
+   of two and the defaults->DB swap no longer needs a reload to become
+   visible. Fail closed: checkUserVariableThemeSettings resolves without
+   error on a failed fetch, so the defaults simply stand (no retry, no
+   half-applied state). */
 function reconcileDomoticzSettingsInPlace() {
     /* Snapshot the state the ready block just applied, before the DB merge
        mutates the theme object in place. */
@@ -228,13 +224,13 @@ function applyThemeDeltaInPlace(before) {
                 /* Newly enabled by the stored profile: load its files in place. */
                 if (files.length) { loadThemeFeatureFiles(key); }
             } else if (hasJs) {
-                /* The ONE residual reload (task-9-perf-report.md F3): a JS-backed
-                   feature the defaults enable but the stored profile disables.
-                   An executed script cannot be unloaded, so only a document boot
-                   truly turns it off. Reached solely on a first visit from a
-                   browser with an empty cache while the account already stored a
-                   profile with such a feature turned off; a warm visit paints
-                   from that same profile, so it does not hit this path. */
+                /* The one case that still needs a reload: a JS-backed feature the
+                   defaults enable but the stored profile disables. An executed
+                   script cannot be unloaded, so only a document boot truly turns
+                   it off. Reached solely on a first visit from a browser with an
+                   empty cache while the account already stored a profile with
+                   such a feature turned off; a warm visit paints from that same
+                   profile, so it does not hit this path. */
                 reloadNeeded = true;
             } else if (files.length) {
                 /* CSS-only feature newly disabled: unload its stylesheet in place. */

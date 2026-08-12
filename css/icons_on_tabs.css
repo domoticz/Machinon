@@ -7,9 +7,7 @@
    the font (Ionicons, 16px, accent colour) and a centred 20px-wide / 16px-tall
    box; each per-header rule supplies its own `content: "\fXXX"` glyph. The
    grouped selector is scoped to exactly the iconed headers (by data-i18n key and
-   column span) so no other <h2> gains a stray ::before. Replaced the previous
-   images/tabs/*.png background-image system on 2026-07-15 (the PNG dir and its
-   settings-tab-icons model site were deleted). */
+   column span) so no other <h2> gains a stray ::before. */
 
 
 .span6 H2 [data-i18n="User Interface"]::before,

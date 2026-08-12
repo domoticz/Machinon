@@ -1,9 +1,8 @@
 /*
   nav.css - top navbar, brand/logo, dropdown menus, and .sub-tabs / .nav-tabs (Machinon's flat
   underline tab style that overrides core's glass tabs), plus the banner header + the red
-  sub-tabs Apply button. Extracted after the "Add fonts" grab-bag fix; selectors are
-  nav-specific (.navbar/.sub-tabs/.nav-tabs/.brand). The one responsive `.navbar .brand` override
-  stays in custom.css's Media Queries (breakpoint-grouped). Verified permutation + snapshot.
+  sub-tabs Apply button. Selectors are nav-specific (.navbar/.sub-tabs/.nav-tabs/.brand). The one
+  responsive `.navbar .brand` override stays in custom.css's Media Queries (breakpoint-grouped).
 */
 .brand img,
 .brand h1,
@@ -38,22 +37,18 @@ div.menu-toggle {
 .menu-toggle:after,
 .menu-toggle:before,
 .menu-toggle div {
-    /* dz-menu-exception: hamburger icon bars, not a menu surface - out of the
+    /* dz-menu-exception: hamburger icon bars, not a menu surface, so out of the
        --dz-menu-* family (bg/text/hover/active/separator/radius/shadow of the
-       menu itself), not measured by reports/menu-facts.json. This base rule
-       covers the CLOSED hamburger only (the OPEN/X state is overridden
-       below, see that rule's comment) - closed, the bars sit over the
-       header banner (a blue-gradient band, not a --dz-menu-* surface) in
-       both schemes, where #fff already reads cleanly; verified live,
-       unchanged by menus-family Task 8. Semantically an icon glyph
-       (arguably --dz-accent-text, "text placed ON an accent surface", since
-       .menu-toggle.scrolled gives it an accent background) rather than a
-       menu-family token; wiring it to --dz-menu-bg would be a
-       coincidental-value swap, not a real match - proven wrong the hard way
-       for the OPEN state once --dz-menu-bg became the flyout's own opaque
-       fill (menus-family Task 8, 2026-08-10): white bars over white panel
-       were invisible in light scheme, exactly the coincidence this comment
-       already flagged as fragile before it broke. */
+       menu itself). This base rule covers the CLOSED hamburger only (the
+       OPEN/X state is overridden below, see that rule's comment): closed, the
+       bars sit over the header banner (a blue-gradient band, not a
+       --dz-menu-* surface) in both schemes, where #fff reads cleanly.
+       Semantically an icon glyph (arguably --dz-accent-text, "text placed ON
+       an accent surface", since .menu-toggle.scrolled gives it an accent
+       background) rather than a menu-family token; wiring it to --dz-menu-bg
+       would be a coincidental-value swap, not a real match, and breaks once
+       --dz-menu-bg differs from #fff (see the OPEN-state rule below, which
+       needs exactly that fix). */
     background-color: #fff;
     border-radius: 3px;
     content: '';
@@ -71,18 +66,17 @@ div.menu-toggle.scrolled {
     border-bottom-right-radius: 6px;
 }
 
-/* menus-family Task 8 addendum (owner-observed live, 2026-08-10): once the
-   flyout is open (.slide), these two bars rotate into the close ("X")
-   glyph and sit directly on top of .navbar-inner's own background - now the
-   opaque --dz-menu-bg panel (see css/sidemenu.css), not the old translucent
-   glass. #fff-on-white was invisible in light scheme (measured: white bars,
-   white panel); --dz-body-text is token-based and reads correctly in both
-   schemes without a scheme-specific override - light resolves near-black
-   against the now-white panel, dark resolves white against the dark panel
-   (byte-identical to the #fff this replaces there, so no visible change in
-   dark). Deliberately scoped to the .slide sibling selector only - the
-   CLOSED hamburger (base rule above) sits on the header banner, not this
-   panel, and stays #fff unchanged. */
+/* Once the flyout is open (.slide), these two bars rotate into the close ("X")
+   glyph and sit directly on top of .navbar-inner's own background: the
+   opaque --dz-menu-bg panel (see css/sidemenu.css), not translucent glass.
+   #fff-on-white is invisible in light scheme (white bars on a white panel);
+   --dz-body-text is token-based and reads correctly in both schemes without
+   a scheme-specific override - light resolves near-black against the
+   now-white panel, dark resolves white against the dark panel (byte-identical
+   to the #fff this replaces there, so no visible change in dark).
+   Deliberately scoped to the .slide sibling selector only - the CLOSED
+   hamburger (base rule above) sits on the header banner, not this panel, and
+   stays #fff unchanged. */
 .navbar-inverse .navbar-inner.slide + .menu-toggle:before,
 .navbar-inverse .navbar-inner.slide + .menu-toggle:after {
     background-color: var(--dz-body-text);
@@ -157,18 +151,13 @@ div.menu-toggle.scrolled {
     background-color: transparent;
     color: var(--dz-body-text);
     border: 1px solid transparent;
-    /* Fix round 1, menus-family Task 7 (2026-08-10): reserves the SAME 2px
-       the current-item rule below actually uses on the bottom edge, always,
-       on every item, current or not - the .sub-tabs base rule's own pattern
-       (border-bottom: 2px solid transparent), reused here for the same
-       reason. Without this, only the current item's border-top shrank from
-       1px to 0px when the old rule zeroed all four sides before re-adding
-       a 2px bottom, which visibly shifted the icon+text stack up by 1px
-       the instant an item became current - caught live (owner report:
-       "see the text jump up because of the underline"). Reserving the
-       width here means the current-item rule below only ever changes the
-       bottom border's COLOR, never its width, so content position never
-       moves. */
+    /* Reserves the SAME 2px the current-item rule below uses on the bottom
+       edge, on every item, current or not (the .sub-tabs base rule's own
+       pattern: border-bottom: 2px solid transparent, reused here for the
+       same reason). This means the current-item rule below only ever
+       changes the bottom border's COLOR, never its width; otherwise the
+       icon+text stack shifts up by 1px the instant an item becomes
+       current. */
     border-bottom-width: 2px;
     border-radius: 5px;
     position: relative;
@@ -178,11 +167,9 @@ div.menu-toggle.scrolled {
     transition: none;
 }
 
-/* Known no-op (menus-family Task 7 gate 2, 2026-08-10, measured live, not
-   redesigned - out of this gate's scope): background here computes
-   byte-identical to .navbar-inner's own background in both schemes, so
-   hovering a plain top-level item shows no visible tint today; flagged for
-   whoever next touches nav hover. */
+/* Known no-op: background here computes byte-identical to .navbar-inner's
+   own background in both schemes, so hovering a plain top-level item shows
+   no visible tint today; flagged for whoever next touches nav hover. */
 .navbar .nav li a:hover {
     color: var(--dz-body-text);
     background: var(--dz-nav-bg);
@@ -213,16 +200,14 @@ div.menu-toggle.scrolled {
 
 .navbar .nav .dropdown-menu {
     border: none;
-    /* Shared menu-surface token (2026-07-17): --dz-menu-bg aliases
-       --dz-nav-bg, the scheme's navbar/"Menu" colour (see dz-tokens.css);
-       the card 3-dot flyout (css/cards.css .options) consumes the same
-       token. */
+    /* Shared menu-surface token: --dz-menu-bg aliases --dz-nav-bg, the
+       scheme's navbar/"Menu" colour (see dz-tokens.css); the card 3-dot
+       flyout (css/cards.css .options) consumes the same token. */
     background: var(--dz-menu-bg);
     box-shadow: var(--dz-elev-popup);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    /* dz-menu-radius derived from this literal (menus-family Task 2,
-       facts S1 "Setup/Other dropdown", 8 records, dz-tokens.css). */
+    /* dz-menu-radius is derived from this literal value (see dz-tokens.css). */
     border-radius: var(--dz-menu-radius);
 }
 
@@ -234,23 +219,19 @@ div.menu-toggle.scrolled {
     box-shadow: none;
     transform: none;
     color: var(--dz-body-text);
-    /* menus-family Task 7 (2026-08-10, E1 "quiet refresh"): the 8/10
-       spacing cluster, replacing core's raw 8px 14px (style.css) - the
-       vertical component was already on-cluster, only the horizontal
-       moves. */
+    /* Uses the theme's 8/10 spacing cluster, replacing core's raw 8px 14px
+       (style.css); only the horizontal component moves, the vertical was
+       already on-cluster. */
     padding: 8px 10px;
 }
 
 .navbar .nav .dropdown-menu li a:hover {
-    /* Task 7 (2026-08-10): token instead of the rgba(var(--dz-accent-values),
-       0.15) literal - same computed value (--dz-menu-item-hover-bg was
-       defined as an alias of this exact value back in Task 2, but the
-       consuming site here was never switched over until now). */
+    /* Token instead of the literal rgba(var(--dz-accent-values), 0.15);
+       --dz-menu-item-hover-bg computes to the same value. */
     background: var(--dz-menu-item-hover-bg);
 }
 
-/* Task 7 (2026-08-10, E1): core ships no override for this divider at all
-   (confirmed by grep before Task 7) - it silently inherited core's
+/* Core ships no override for this divider; it inherits core's raw
    rgba(255, 255, 255, 0.1), nearly invisible against --dz-menu-bg in both
    schemes. Tokenized so the separator between grouped dropdown entries
    (e.g. Setup's Hardware/Devices/Energy Dashboard vs Users/Settings) is
@@ -264,80 +245,44 @@ div.menu-toggle.scrolled {
     background: var(--dz-menu-bg) !important;
 }
 
-/* REVERTED (2026-07-18): the Task 8 fix-wave clamp on Setup > "More options"
-   (index.html #cMoreOptions) applied max-height + overflow-y: auto to every
-   ".navbar .dropdown-submenu > .dropdown-menu", not just the More options
-   list itself. More options' OWN entries (Plans, Data push) are themselves
-   ".dropdown-submenu > .dropdown-menu", so the same rule clipped their
-   third-level flyouts: the new overflow context prevented those nested
-   submenus from opening/rendered them detached from their trigger. Reverted
-   in full.
+/* The More options list overflowing the viewport is handled in
+   src/js/page.js's armFlyoutContainment(), not here. The trigger's
+   on-screen position is config-dependent (HaveUpdate, EnableTabCustom change
+   how many items sit above it), so no fixed CSS breakpoint can predict it;
+   the JS measures the actual opened position on hover and nudges the "top"
+   offset this file's cascade already leaves at Bootstrap's default (0),
+   clamped so the list can never trade a bottom overflow for a top one. This
+   selector (".navbar .dropdown-submenu > .dropdown-menu") is intentionally
+   left plain: no max-height, no overflow, since a clamp here would also clip
+   More options' own nested Plans/Data push flyouts (both are themselves
+   ".dropdown-submenu > .dropdown-menu"). */
 
-   FIXED (menus-family Task 3, 2026-08-10): the More options list overflowing
-   the viewport at 1440x900 and 1024x768 (census S2 defect,
-   reports/menu-facts.json) is resolved in src/js/page.js,
-   armFlyoutContainment(), not here. The trigger's on-screen position is
-   config-dependent (HaveUpdate, EnableTabCustom change how many items sit
-   above it), so no fixed CSS breakpoint can predict it; the fix measures the
-   actual opened position on hover and nudges the SAME "top" offset this
-   file's cascade already leaves at Bootstrap's default (0), clamped so the
-   list can never trade a bottom overflow for a top one. This selector
-   (".navbar .dropdown-submenu > .dropdown-menu") is intentionally left
-   plain: no max-height, no overflow, so nothing here can re-clip Plans/Data
-   push's own third-level flyouts the way the reverted rule above did. */
-
-/* Top-level navbar current-page item (menus-family Task 7 gate 2,
-   2026-08-10, owner verdict "E2N unified accent edge"): drops the filled
-   box for the .sub-tabs active recipe below, reused verbatim - 2px accent
+/* Top-level navbar current-page item: drops the filled box for the
+   .sub-tabs active recipe below, reused verbatim - 2px accent
    border-bottom, accent text, no fill, no border box. Design logic:
    underline for horizontal surfaces (this bar, matches .sub-tabs exactly),
    left edge for vertical surfaces (the dropdown current-item rule further
    down). border-bottom is redeclared here at the SAME 2px width the base
    rule above (".navbar .nav li a") already reserves for every item,
    current or not, so becoming current never shifts the icon+text stack
-   (content position, not just outer box height, was the actual bug - fix
-   round 1, 2026-08-10, owner report "see the text jump up because of the
-   underline": the first version of this rule zeroed all four sides with
-   "border: none" then re-added a 2px bottom, which shrank border-top from
-   1px to 0px the instant an item became current).
+   (content position, not just outer box height, is what a mismatched width
+   would break).
 
-   Every declaration below carries !important, discovered necessary the
-   hard way across three separate live regressions in the same fix round,
-   all with the same root cause: core's OWN canary style.css - not one
-   rule but SEVERAL, scattered across style.css:1026-1044, some sharing
-   this exact selector text, none marked !important - competing at the
-   SAME (0,3,1)/(0,4,1) specificity as this rule. The ORIGINAL 2026-07-17
-   comment (see the dropdown rule further down) already documented core's
-   BARE, no-!important current-item color rule and assumed "this file's
-   later, equal-specificity rule already wins it" - true for the OLD box
-   version (which redeclared every property core also set), false for a
-   leaner rule that only touches SOME properties: for any property this
-   rule doesn't explicitly set, or ties core loses only by assumed source
-   order, the outcome turned out to depend on exactly which of core's
-   several scattered current-item rules is involved, not a single
-   predictable "later file wins" story. Confirmed live and fixed one at a
-   time before generalizing to !important throughout: border-bottom-width
-   (computed 1px, core's shorthand leaking, until redeclared explicitly),
-   border-top/right/left-color (a visible 1px box on three sides, owner
-   report, until border-color was added), and finally color itself (text
-   rendering white - core's OWN #fff, not this rule's accent - owner
-   report "the text turns white again" on navigation, confirmed via
-   CSS.getMatchedStylesForNode that core carries a SEPARATE small rule at
-   style.css:1030 with the identical ">a, >a:hover" selector text setting
-   only color, which this rule's assumed cross-file order did not reliably
-   beat). !important closes out the whole class of leak unconditionally,
-   matching the dropdown current-item rule's own established precedent
-   below for the identical reason (a core rule this file cannot out-order
-   by assumption alone). Split out from the old 3-selector rule; the
-   fix-round-1 pass below also replaced the split-off :focus rule's box
-   with a :focus-visible ring instead, so no nav item ever repaints the
-   pre-E2N box again, on any state. "transform: none" carried over from the
-   old combined rule deliberately: without it, core's own canary
-   ".navbar .nav li a:hover" (transform: translateY(-1px), same selector
-   text/specificity as the Machinon override at line ~150 above) wins the
-   transform property on this element's :hover state, since this rule
-   doesn't otherwise compete for it - a real 1px hover jump on the current
-   item only, caught live before commit (owner report). */
+   Every declaration below carries !important: core's OWN style.css sets
+   several current-item rules (style.css:1026-1044) that share this exact
+   selector text, none marked !important, at the SAME (0,3,1)/(0,4,1)
+   specificity as this rule. Which properties actually need !important
+   depends on which of core's several scattered rules is competing, not on
+   a predictable "later file wins" outcome, so !important closes out the
+   whole class of leak unconditionally rather than being applied
+   selectively, matching the dropdown current-item rule's own established
+   precedent below for the identical reason (a core rule this file cannot
+   out-order by assumption alone). "transform: none" is part of that:
+   without it, core's own ".navbar .nav li a:hover" (transform:
+   translateY(-1px), same selector text/specificity as the Machinon
+   override at line ~150 above) wins the transform property on this
+   element's :hover state, since this rule doesn't otherwise compete for
+   it, producing a 1px hover jump on the current item only. */
 .navbar .nav .current_page_item > a,
 .navbar .nav .current_page_item > a:hover {
     background: var(--dz-menu-item-active-bg) !important;
@@ -351,40 +296,28 @@ div.menu-toggle.scrolled {
     font-weight: var(--dz-weight-semibold);
 }
 
-/* Fix round 1, menus-family Task 7 (2026-08-10): this used to be part of
-   the pre-E2N combined 3-selector rule and carried the SAME filled box as
-   the current-item treatment (--dz-nav-active-bg fill, accent border, 5px
-   radius). The E2N split above left it standing untouched, which meant a
-   clicked (focused-not-hovered) current item still repainted the old box -
-   at (0,3,2) it beat the new bare current-item underline rule at (0,3,1),
-   since only hover (0,4,1) happened to outrank it. Confirmed live by the
-   owner and reproduced: Playwright real click + mouse moved away showed
-   the box, not the underline. Machinon owns this selector outright (core
-   ships no nav :focus rule at all), so nothing external dictates its
-   shape. Fixed two ways at once: plain mouse :focus gets an explicit
-   "outline: none" and nothing else here (an item that is also current
-   keeps only the underline above; an item that is not current gets no
-   box, no ring at all) - the outline reset is NOT redundant even though
+/* Machinon owns this selector outright (core ships no nav :focus rule at
+   all), so nothing external dictates its shape. Plain mouse :focus gets an
+   explicit "outline: none" and nothing else here: an item that is also
+   current keeps only the underline above; an item that is not current gets
+   no box, no ring at all. The outline reset is not redundant even though
    :focus-visible's own heuristic usually suppresses the browser's default
-   ring after a mouse click: confirmed live, twice, that assumption does
-   NOT hold for plain <a> nav items the way it does for <button>-based
-   controls elsewhere in the theme - a real mouse click still left the
-   browser's own native outline visible on three sides (owner report,
-   reproduced in Playwright too), so it has to be silenced explicitly
-   rather than left to UA behaviour. :focus-visible below gives keyboard
-   users the theme's established ring idiom instead (--dz-btn-focus-ring,
-   the same button-family token/recipe used at css/buttons.css:56-61 and
-   this file's own .sub-tabs-apply:focus-visible) - a real ring, not a box,
-   and nothing left in the nav family repaints the pre-E2N box on any
-   state. box-shadow carries !important: the current-item rule above also
-   went !important (its own comment explains why, against core's canary),
-   and Tab-focusing the CURRENT item itself needs the ring to still show -
-   confirmed live this was a real gap, not theoretical: without !important
-   here, the current-item rule's "box-shadow: none !important" always wins
-   over this rule's box-shadow regardless of specificity (author
-   !important beats author non-important outright), silently dropping the
-   keyboard focus indicator on exactly the one item a keyboard user is
-   most likely to already be sitting on. */
+   ring after a mouse click: that assumption does not hold for plain <a>
+   nav items the way it does for <button>-based controls elsewhere in the
+   theme, so the outline has to be silenced explicitly rather than left to
+   UA behaviour. :focus-visible below gives keyboard users the theme's
+   established ring idiom instead (--dz-btn-focus-ring, the same
+   button-family token/recipe used at css/buttons.css:56-61 and this file's
+   own .sub-tabs-apply:focus-visible) - a real ring, not a box, and nothing
+   left in the nav family repaints the old filled box on any state.
+   box-shadow carries !important: the current-item rule above also carries
+   !important on box-shadow: none, and Tab-focusing the CURRENT item itself
+   needs the ring to still show; without !important here, the current-item
+   rule's "box-shadow: none !important" always wins over this rule's
+   box-shadow regardless of specificity (author !important beats author
+   non-important outright), silently dropping the keyboard focus indicator
+   on exactly the one item a keyboard user is most likely to already be
+   sitting on. */
 .navbar-inverse .nav > li > a:focus {
     outline: none;
 }
@@ -393,13 +326,10 @@ div.menu-toggle.scrolled {
     box-shadow: var(--dz-btn-focus-ring) !important;
 }
 
-/* Setup dropdown current-item accent edge (menus-family Task 7 gate 2,
-   2026-08-10, owner verdict "E2N unified accent edge" - supersedes the
-   2026-07-17 "glass leak" fix's box treatment, itself relocated here from
-   css/buttons.css that same day, Task 8 owner refinement xi). With the
-   Machinon Settings menu feature (theme.json "custom_settings_menu")
-   disabled, core's raw Admin/Setup dropdown renders directly instead of
-   the tile grid js/settings_page.js normally builds, and its active entry
+/* Setup dropdown current-item accent edge. With the Machinon Settings menu
+   feature (theme.json "custom_settings_menu") disabled, core's raw
+   Admin/Setup dropdown renders directly instead of the tile grid
+   js/settings_page.js normally builds, and its active entry
    (ng-class="current_page_item") hits core's own glass selection style:
    domoticz/www/css/style.css:1047-1060, ".navbar .nav .dropdown-menu
    .current_page_item > a" (and its :hover), background/border/radius/
@@ -408,14 +338,11 @@ div.menu-toggle.scrolled {
    this file's later, equal-specificity rule already wins it) never reaches
    the DROPDOWN-nested selector, which adds a 4th class AND !important;
    repeating core's exact selector here matches its specificity/!important
-   tier so source order decides in our favour - inherited from the
-   2026-07-17 fix, not a new requirement, and still applies to whatever
-   replaces the fill. Restyled (2026-08-10, gate 2) to the SAME 2px-accent
-   edge language the top-level underline above uses, rotated 90 degrees for
-   a vertical surface (border-left instead of border-bottom) instead of the
-   old box (--dz-nav-active-bg/-text fill, 1px accent border, 5px radius) -
-   "you are here" now reads as a lean left edge, quieter than the box,
-   still unambiguous; generalizes to every dropdown, not just Setup's (the
+   tier so source order decides in our favour, and this still applies to
+   whatever replaces the fill. Uses the SAME 2px-accent edge language the
+   top-level underline above uses, rotated 90 degrees for a vertical
+   surface (border-left instead of border-bottom): "you are here" reads as
+   a lean left edge. Generalizes to every dropdown, not just Setup's (the
    selector keys off the shared ".navbar .nav .dropdown-menu" class, not a
    Setup-only ancestor, so submenus inherit it automatically). */
 .navbar .nav .dropdown-menu .current_page_item > a,
@@ -528,8 +455,8 @@ div.menu-toggle.scrolled {
 }
 
 /* ===========================================================================================
- * SelectorStyle-1 popup (owner-reported 2026-08-11, "Contract Selector Menu" card):
- * jQuery UI selectmenu, joined onto this file's own --dz-menu-* family
+ * SelectorStyle-1 popup ("Contract Selector Menu" card): jQuery UI selectmenu, joined onto
+ * this file's own --dz-menu-* family
  * ===========================================================================================
  * The multi-level Selector-switch control past SelectorStyle-0's segmented-button threshold
  * (app/widgets/dzLightWidget.js's initWidgets, `$select.selectmenu(...)`) opens a jQuery UI
@@ -544,17 +471,16 @@ div.menu-toggle.scrolled {
  * ui-darkness's own precedent for de-skinning a bundled jQuery UI surface: css/users.css's
  * dual-list retheme (.uix-multiselect, .ui-widget-content/.ui-state-default) and custom.css's
  * dialog-titlebar retheme (.ui-widget-header). Neither of those needs --dz-ui-icon-filter
- * here: confirmed live, this popup's items carry no ui-icon sprite (the closed trigger
- * button's own dropdown caret does, but that button already reads fine in the owner's
- * screenshot and is out of this defect's scope -- untouched).
+ * here: this popup's items carry no ui-icon sprite (the closed trigger button's own dropdown
+ * caret does, but that is a separate element, untouched by this block).
  *
  * The VISIBLE painted box is `ul.ui-menu.ui-widget.ui-widget-content`, not the
- * `.ui-selectmenu-menu` wrapper div: confirmed live, the wrapper itself computes a
- * transparent, borderless, unradiused box; ui-darkness paints the ul via its generic
- * `.ui-widget-content` rule (black background, #666 border) -- black background under our
- * own dark --dz-body-text-colored item labels is the owner's "near-black, unreadable"
- * report. Both selectors below stay scoped under `.ui-selectmenu-menu` so nothing here can
- * leak onto an unrelated `.ui-menu` (e.g. a future jQuery UI autocomplete).
+ * `.ui-selectmenu-menu` wrapper div: the wrapper itself computes a transparent, borderless,
+ * unradiused box; ui-darkness paints the ul via its generic `.ui-widget-content` rule (black
+ * background, #666 border), which renders this theme's own dark --dz-body-text-colored item
+ * labels as near-black, effectively unreadable. Both selectors below stay scoped under
+ * `.ui-selectmenu-menu` so nothing here can leak onto an unrelated `.ui-menu` (e.g. a future
+ * jQuery UI autocomplete).
  *
  * Containment (the popup's second defect, viewport overflow) is fixed at the cause, in JS,
  * not here: src/js/devices.js's patchSelectMenuCollision() re-points the widget's own
@@ -613,21 +539,17 @@ div.menu-toggle.scrolled {
    1px inside it -- vestigial now that this row's border is reduced to the left accent edge
    below, same as the margin was.
 
-   border-top/-right/-bottom: none is the second half of that same border story, and was
-   MISSED in the first pass -- only border-left-color was overridden then, on the
-   (correct) assumption that was the row's only border. It was not: ui-darkness's own
-   ".ui-state-active,...{border:1px solid #ffaf0f}" is a FULL shorthand (all four sides),
-   and with nothing here contesting the other three, it kept painting a 1px solid YELLOW
-   border on top/right/bottom of the active row underneath the correct left edge --
-   confirmed live (owner-reported "option text jumps on hover", 2026-08-11 follow-up):
-   that extra 1px top + 1px bottom border adds 2px to the active row's own height only
-   while it IS active, so every row below it shifts vertically by that same 2px as the
-   active state moves between options on hover -- a real, measured 2px jump (top:
-   757.17px -> 755.17px on "High" in the live repro), not the horizontal text-x shift a
-   missing reserved BORDER-LEFT width would cause (that width was already reserved
-   correctly by the base rule above; this was a completely different, unreserved edge).
-   Explicit `none` on all three beats ui-darkness's shorthand the same way border-left-
-   color already does, by specificity (3 classes here vs its 2), no !important needed. */
+   border-top/-right/-bottom: none is the second half of that same border story: ui-darkness's
+   own ".ui-state-active,...{border:1px solid #ffaf0f}" is a FULL shorthand (all four sides),
+   and with nothing here contesting the other three, it paints a 1px solid YELLOW border on
+   top/right/bottom of the active row underneath the correct left edge. That extra 1px top +
+   1px bottom border adds 2px to the active row's own height only while it IS active, so every
+   row below it shifts vertically by that same 2px as the active state moves between options on
+   hover -- not the horizontal text-x shift a missing reserved BORDER-LEFT width would cause
+   (that width is already reserved correctly by the base rule above; this is a completely
+   different, unreserved edge). Explicit `none` on all three beats ui-darkness's shorthand the
+   same way border-left-color already does, by specificity (3 classes here vs its 2), no
+   !important needed. */
 .ui-selectmenu-menu .ui-menu-item-wrapper.ui-state-active {
     background: var(--dz-menu-item-active-bg);
     border-top: none;

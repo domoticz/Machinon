@@ -1,4 +1,4 @@
-/* Theme hub setting previews (theme-hub project, task 4).
+/* Theme hub setting previews.
 
    Each setting row in the hub (src/js/theme-hub.js dzRenderHubRow) carries an
    empty .dz-hub-preview[data-preview] box. This module owns what goes inside it:
@@ -24,8 +24,7 @@
       scheme it has nothing to say about). Purely illustrative.
 
    Settings with neither a meaningful live mini nor a sensible sketch keep
-   previewId null in the manifest and render no preview (the row is still valid);
-   see theme-hub-task-4-report.md for which entries and why.
+   previewId null in the manifest and render no preview (the row is still valid).
 
    SPACING: the 8px rhythm (and its 2/4px sub-steps at this mini scale) is
    annotated inline for the future --dz-gap token. FONTS: text inside a mini uses
@@ -64,8 +63,7 @@ function dzSvg(tag, attrs) {
 }
 
 /* Scheme-neutral stroke for the SVG sketches: a mid grey that stays legible on
-   both the light (#f4f8fc, 3.01:1) and dark (#0f1620, 5.69:1) body backgrounds
-   (re-measured against the 2026-08-12 Blue UI rebase's body-bg values).
+   both the light (#f4f8fc, 3.01:1) and dark (#0f1620, 5.69:1) body backgrounds.
    Deliberately NOT a --dz-* token: these settings have no scheme colour to
    mirror. */
 var DZ_SKETCH_INK = "#8a9099";

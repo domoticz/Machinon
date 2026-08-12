@@ -1,8 +1,7 @@
 /**** ./typography.css ***/
 /* The theme's typography backbone: font faces, body base, heading ownership,
-   and explicit overrides for text that core/vendor CSS used to size (the theme
-   pins EVERY visible text size; census: dz-font-size-census.js). Tokens come
-   from dz-tokens.css only. */
+   and explicit overrides for text that core/vendor CSS used to size. The theme
+   pins EVERY visible text size. Tokens come from dz-tokens.css only. */
 
 @font-face {
     font-family: 'Inter'; /* dz-face */
@@ -127,14 +126,13 @@ table[id^="item"] > tbody > tr {
     font-family: var(--dz-font-family) !important;
 }
 
-/* Page titles are theme-owned (were core's 24px on desktop). Login heading
+/* Page titles are theme-owned; core sizes them at 24px on desktop. Login heading
    shares the same step (css/login.css). Mobile step-down stays in custom.css.
    Selector verified against the live core markup (Setup tabs, Log pages,
    Users, Timerplan, My Profile): every page title h1 sits inside
    `.page-header-small` (sometimes with the sibling modifier
    `page-header-with-button`), never inside a bare `.page-header`, `.row`, or
-   `#maincontent` (none of those exist in core's HTML; the brief's original
-   selector set matched nothing). */
+   `#maincontent` (none of those exist in core's HTML). */
 .page-header-small h1 {
     font-size: var(--dz-text-display);
     font-weight: var(--dz-weight-semibold);
@@ -156,8 +154,8 @@ table[id^="item"] > tbody > tr {
 .dd-library-item-desc, .dd-library-category-label { font-size: var(--dz-text-micro); }
 /* core's css/dashboard.css loads after this sheet (index.html: styles/default/
    custom.css, then css/dashboard.css) and sets this same class to a hardcoded
-   20px; at equal specificity source order wins, so this rule was dead without
-   !important (same cascade-loss pattern as .ace_editor below, T10 census). */
+   20px; at equal specificity source order wins, so this rule is dead without
+   !important (same cascade-loss pattern as .ace_editor below). */
 .dd-panel-close { font-size: var(--dz-icon-size-md) !important; }
 
 /* Topbar clock + sun times, toasts. */

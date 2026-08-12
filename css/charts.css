@@ -46,29 +46,26 @@
     font-family: var(--dz-font-family) !important;
 }
 
-/* Chart text sizes (owner audit 2026-08-10, measured on #/Devices/27/Report).
-   Core ships Highcharts 12.5.0, whose defaults are em-based (the bundle carries
-   fontSize:"0.8em" x10, "0.7em" x2, "0.6em" x1) resolved against the chart root's
+/* Chart text sizes: core ships Highcharts 12.5.0, whose defaults are em-based (the bundle
+   carries fontSize:"0.8em" x10, "0.7em" x2, "0.6em" x1) resolved against the chart root's
    16px, and core's own Highcharts.setOptions (www/app/app.js) adds px overrides for
-   some roles. The theme set font-family here but never a single font-size, so chart
-   text was entirely outside the typography contract. Three roles measured off the
-   11/12/14/16/22/26 scale and are pulled onto it below; x/y axis labels (12px) and
-   legend items (12px) already landed on --dz-text-xs by coincidence and are left alone
-   rather than restated.
+   some roles. The theme sets font-family here but never a single font-size, so without
+   this block chart text sits outside the typography contract. Three roles map onto the
+   11/12/14/16/22/26 scale below; x/y axis labels (12px) and legend items (12px) already
+   land on --dz-text-xs by coincidence and are left alone rather than restated.
 
    Highcharts writes these as INLINE style attributes on the SVG nodes, so !important is
    load-bearing: an author !important declaration outranks a non-important inline one.
-   That is the same mechanism the font-family rule above already relies on.
+   That is the same mechanism the font-family rule above relies on.
 
      axis titles  inline 0.8em -> 12.8px  =>  --dz-text-xs    (12px)
      data labels  inline 13px            =>  --dz-text-xs    (12px)
      credits      inline 0.6em ->  9.6px  =>  --dz-text-micro (11px)
 
-   .highcharts-credits also never matched the font-family list above (it is a bare
+   .highcharts-credits also never matches the font-family list above (it is a bare
    <text> carrying the class directly, the same shape as .highcharts-axis-title), so it
-   was still rendering Highcharts' own Lucida Grande stack; it gets the family here.
-   Colour is deliberately NOT set on it: the faint credits fill is Highcharts' own and
-   restyling it was outside this audit. */
+   needs the family set here too, or it renders Highcharts' own Lucida Grande stack.
+   Colour is deliberately NOT set on it: the faint credits fill is Highcharts' own. */
 .highcharts-axis-title,
 .highcharts-axis-title text,
 .highcharts-data-label text {
@@ -161,7 +158,7 @@
     background: var(--dz-btn-hover-bg);
 }
 
-/* Adjoined segmented range-button group (owner refinement x, 2026-07-17):
+/* Adjoined segmented range-button group:
    1h/3h/day (app/log/chart-day.html and friends) render as ONE connected
    control instead of separate pills, using the same longhand-corner /
    collapsed-shared-border technique as css/buttons.css's .btn-group (outer
@@ -183,10 +180,10 @@
    '1H'}"), themed with the SAME toggle-selected tokens css/buttons.css uses
    for .btn.active - one active-state language everywhere, not a chart-local
    invention.
-   Vertical centering (owner: "text not centered" - measured live: the glyph
-   sat 5px from the button's top edge but only 2px from the bottom, inside
-   core's fixed 21px-tall box, ".chartarea button { height: 21px }") is a
-   flex-centering fix, not a padding nudge: the cause is font-metric leading
+   Vertical centering fixes the glyph sitting 5px from the button's top edge
+   but only 2px from the bottom, inside core's fixed 21px-tall box,
+   ".chartarea button { height: 21px }": this is a flex-centering fix, not a
+   padding nudge, because the cause is font-metric leading
    distribution inside a block box, which padding numbers can't reliably
    correct; inline-flex + centered items is the same technique
    css/buttons.css's .btnstyle3 already uses elsewhere in this theme. */
@@ -221,9 +218,9 @@
     border-bottom-right-radius: var(--dz-btn-radius) !important;
 }
 
-/* box-shadow: none per owner gate H1 (2026-08-11): matches css/buttons.css's
-   .btn.active, which stopped consuming --dz-btn-shadow-pressed the same
-   round - fill + text color alone carry "this is the selected range" now. */
+/* box-shadow: none matches css/buttons.css's .btn.active, which does not
+   consume --dz-btn-shadow-pressed either: fill + text color alone carry
+   "this is the selected range". */
 .zoom-button-active {
     background: var(--dz-btn-toggle-selected-bg) !important;
     color: var(--dz-btn-toggle-selected-text) !important;

@@ -1,26 +1,24 @@
-/* SelectorStyle-1 popup containment (owner-reported 2026-08-11, "Contract Selector Menu"
-   card): app/widgets/dzLightWidget.js (core) opens the level dropdown as a jQuery UI
-   selectmenu with no `position` option of its own ($select.selectmenu({width: false,
-   change: ...})), so the widget falls back to ITS OWN default -- confirmed live in
-   jquery-ui.min.js's uncompressed source (ui/widgets/selectmenu.js): `position: {my:
-   "left top", at: "left bottom", collision: "none"}`. "none" is jQuery UI's own explicit
-   choice, not core disabling anything -- but it means $.position's built-in viewport
-   collision handling (flip/fit) never engages, so a popup opened low on a short/scrolled
-   viewport runs off the bottom uncorrected (confirmed live, 2026-08-11: at 1440x700 with
-   the card scrolled to the bottom, the closed popup's rect.bottom=787 past the
-   vh=700 viewport).
+/* SelectorStyle-1 popup containment: app/widgets/dzLightWidget.js (core) opens
+   the level dropdown as a jQuery UI selectmenu with no `position` option of
+   its own ($select.selectmenu({width: false, change: ...})), so the widget
+   falls back to ITS OWN default in jquery-ui.min.js (ui/widgets/selectmenu.js):
+   `position: {my: "left top", at: "left bottom", collision: "none"}`. "none"
+   is jQuery UI's own explicit choice, not core disabling anything -- but it
+   means $.position's built-in viewport collision handling (flip/fit) never
+   engages, so a popup opened low on a short/scrolled viewport runs off the
+   bottom uncorrected.
 
    Fixed at the cause, not with a position-nudge fallback (armFlyoutContainment/
    clampCorePopups's pattern, src/js/page.js): this default is a WIDGET-LEVEL setting on
    $.ui.selectmenu.prototype.options, reachable from theme JS before any card ever opens
    one, so re-pointing it here engages jQuery UI's OWN collision math instead of
-   reimplementing viewport arithmetic ourselves. "flip" (confirmed live, same 1440x700
-   repro: the popup re-opens ABOVE its button instead, fully contained) is the well-known
-   fix for this exact upstream default (jquery/jquery-ui#1272); jQuery UI's own
-   $.position() then recomputes fresh on every open() call, so this needs no resize-while-
-   open listener the way the flyout nudge does -- there is nothing to re-arm, every open
-   is a new position() call. One assignment, safe to call more than once (idempotent), so
-   unlike armFlyoutContainment there is no re-entrancy guard to write.
+   reimplementing viewport arithmetic ourselves. "flip" (the popup re-opens ABOVE its
+   button instead, fully contained) is the well-known fix for this exact upstream default
+   (jquery/jquery-ui#1272); jQuery UI's own $.position() then recomputes fresh on every
+   open() call, so this needs no resize-while-open listener the way the flyout nudge does
+   -- there is nothing to re-arm, every open is a new position() call. One assignment,
+   safe to call more than once (idempotent), so unlike armFlyoutContainment there is no
+   re-entrancy guard to write.
 
    MUST run before the first card's initWidgets() calls .selectmenu() -- true for every
    caller today: jquery-ui.min.js loads synchronously ahead of custom.js
@@ -114,9 +112,9 @@ function getCardDevice(item) {
    branches and are rejected by the #img heuristic anyway) and cards probed
    mid-render: after a drag drop core re-renders the whole list
    (ShowLights) and the fresh cards' scopes attach a beat after the DOM
-   lands, so the old DOM-only fallback re-grew toggles on smoke detectors
-   (owner report 2026-07-16). A real switch rejected in that window is
-   picked up by the next observer pass once its scope is bound. */
+   lands, so a DOM-only fallback would re-grow toggles on smoke detectors in
+   that window. A real switch rejected in that window is picked up by the
+   next observer pass once its scope is bound. */
 function isPlainOnOffSwitch(item) {
     var device = getCardDevice(item);
     if (!device) return false;
@@ -148,8 +146,8 @@ function isLightSwitchContext(item, status) {
    inferred from the icon filename (an earlier enhancement pass may have
    emptied the bigtext, and push buttons on the Dynamic Dashboard render
    with no text at all). The icon speaks only when its filename actually
-   carries a state: inventing "Off" for stateless icons put toggles on
-   text sensors (caught by dz-dd-matrix.js). */
+   carries a state: inventing "Off" for stateless icons would put toggles
+   on text sensors. */
 function readSwitchStatus(item) {
     var bigText = item.find("#bigtext");
     var status = bigText.text().trim();
@@ -171,38 +169,32 @@ function readSwitchStatus(item) {
    seam), so deciding which button needs which corner radius at a wrap is
    fundamentally a JS-only question. Tags every button that sits at a true
    convex corner of the STAIR-STEP silhouette (never the shell's bounding
-   box -- a first attempt traced the bounding box with a single ::after
-   overlay and got this exact distinction wrong, see the shell rule's own
-   comment for the full history) with the corner(s) it actually needs:
+   box) with the corner(s) it actually needs:
 
    - the LAST button of the FIRST (topmost) row -- data-wrap-corner-tr,
-     always tagged when a wrap happened (this is "Auto" in the HVAC
-     5-level case the defect was first measured on: the shell's top-right
-     corner, always exterior regardless of row width, since the first row
-     is always exactly as wide as the shell itself).
+     always tagged when a wrap happened: the shell's top-right corner,
+     always exterior regardless of row width, since the first row is
+     always exactly as wide as the shell itself.
    - the FIRST button of the LAST (bottommost) row -- data-wrap-corner-bl,
-     always tagged when a wrap happened, UNCONDITIONALLY (round 2 fix:
-     an earlier version only tagged this when the row's own left edge
-     reached the shell's left edge, reasoning by analogy to the reverted
-     bounding-box overlay -- that guard was right for an overlay tracing
-     empty space, but wrong here: this rule rounds a REAL BUTTON's own
-     corner, which can never paint empty space regardless of where the
-     shell's bounding box happens to extend to, so the corner is always a
-     genuine convex exterior point of the silhouette whenever this button
-     is first in a wrapped row, narrower last row or not).
+     always tagged when a wrap happened, UNCONDITIONALLY: this rule rounds
+     a REAL BUTTON's own corner, which can never paint empty space
+     regardless of where the shell's bounding box happens to extend to, so
+     the corner is always a genuine convex exterior point of the
+     silhouette whenever this button is first in a wrapped row, narrower
+     last row or not.
    - the LAST button of the LAST (bottommost) row (always the group's true
      :last-child too) -- data-wrap-corner-br, tagged when a wrap happened,
-     to SQUARE its top-right corner. Round 2 finding: buttons.css's plain
-     ":last-child" rule rounds BOTH right corners unconditionally (correct
-     for the unwrapped single-row case, where both really are exterior),
-     but when wrapped, this button's top-right is an INTERIOR SEAM against
-     the row above, not an exterior corner -- left rounded, it pinched the
-     joined right edge inward ~10px right at the row seam instead of
-     staying a continuous straight line down to the true bottom-right
-     corner. The css/cards.css rule this tag drives forces top-right back
-     to 0 and restates bottom-right explicitly (still the family radius,
-     still a true exterior corner, unaffected) rather than leaving that
-     property to fall through to the lower-specificity :last-child rule.
+     to SQUARE its top-right corner. buttons.css's plain ":last-child"
+     rule rounds BOTH right corners unconditionally (correct for the
+     unwrapped single-row case, where both really are exterior), but when
+     wrapped, this button's top-right is an INTERIOR SEAM against the row
+     above, not an exterior corner -- left rounded, it pinches the joined
+     right edge inward ~10px right at the row seam instead of staying a
+     continuous straight line down to the true bottom-right corner. The
+     css/cards.css rule this tag drives forces top-right back to 0 and
+     restates bottom-right explicitly (still the family radius, still a
+     true exterior corner, unaffected) rather than leaving that property
+     to fall through to the lower-specificity :last-child rule.
 
    The one corner that never needs tagging: the group's true :first-child
    (top-left) is already handled by the existing first-child CSS rule,
@@ -211,11 +203,10 @@ function readSwitchStatus(item) {
    FAIL CLOSED: an untagged button simply stays at whatever buttons.css's
    plain first/last-child/interior rules already give it -- if this
    function never runs for some reason (a code path that skips it, or a
-   future regression), the worst case is the ORIGINAL, lesser defects (a
-   plain square top-right/bottom-left corner, or the seam pinch), never
-   the reverted overlay's worse one (a rounded outline around empty
-   space): nothing this function does can ever paint space no button
-   occupies, since every rule it drives targets an actual rendered button.
+   future regression), the worst case is a plain square top-right/bottom-left
+   corner, or the seam pinch: nothing this function does can ever paint a
+   rounded outline around empty space, since every rule it drives targets
+   an actual rendered button.
 
    Idempotent and safe to call repeatedly: clears its own tags before
    recomputing every time, so a re-run after a resize or a content change
@@ -294,7 +285,7 @@ function setAllDevicesFeatures() {
         }
         $(this).find("tr").attr('data-idx', idx);
 
-        /* Remove native title tooltip — our CSS ::after tooltip handles it */
+        /* Remove native title tooltip - our CSS ::after tooltip handles it */
         $(this).find("#name").removeAttr("title");
 
         let bigText = $(this).find("#bigtext");
@@ -314,7 +305,7 @@ function setAllDevicesFeatures() {
         var lastupdateEl = $(this).find("#lastupdate");
         var alreadyProcessed = lastupdateEl.find("i.ion-ios-pulse").length > 0;
         if (alreadyProcessed) {
-            /* Already processed by setDeviceLastUpdate — skip to avoid overwriting
+            /* Already processed by setDeviceLastUpdate - skip to avoid overwriting
                livestamp text like "18 hours ago" which moment can't parse */
         } else if (theme.features.time_ago.enabled === true) {
             lastupd = lastupdateEl.text();
@@ -494,7 +485,7 @@ function setDeviceWindDirectionIcon(idx, direction) {
 function setDeviceLastUpdate(idx, lastupdate) {
     let tr = "tr[data-idx='" + idx + "']";
 
-    /* Strip "Last Seen:" or similar prefix — extract date portion */
+    /* Strip "Last Seen:" or similar prefix - extract date portion */
     if (typeof lastupdate === "string") {
         var dateMatch = lastupdate.match(/\d{4}[-/]\d{2}[-/]\d{2}[\sT]\d{2}:\d{2}:\d{2}/);
         if (dateMatch) lastupdate = dateMatch[0];
@@ -558,10 +549,11 @@ function initDeviceLiveUpdates($scope) {
             }
         }
         /* Sync EXISTING toggles only, on any device type. Creation stays with
-           the enhancement passes, which check page context and switch type; the
-           old Light/Switch + SwitchType === "On/Off" gate here both created
-           toggles without those checks and left every other toggleable type
-           (X10 Siren, Lighting 2 on/off) stale on remote state changes. */
+           the enhancement passes, which check page context and switch type:
+           gating creation here on Type === "Light/Switch" + SwitchType ===
+           "On/Off" would create toggles without those checks and leave every
+           other toggleable type (X10 Siren, Lighting 2 on/off) stale on
+           remote state changes. */
         if (theme.features.switch_instead_of_bigtext.enabled === true &&
             $("tr[data-idx='" + data.idx + "'] .switch").length > 0) {
             setDeviceSwitch(data.idx, data.Status);
@@ -686,7 +678,7 @@ function initDeviceObserver() {
                         setDeviceOptions(idx);
                     }
 
-                    /* Re-apply switch toggle if enabled and wiped — heuristics shared
+                    /* Re-apply switch toggle if enabled and wiped - heuristics shared
                        with setAllDevicesFeatures() via the helpers above */
                     if (switchEnabled && tr.find(".switch").length === 0) {
                         let item = $(this);
@@ -709,7 +701,7 @@ function initDeviceObserver() {
                                so the icon name is their only signal. Sensors stay safe:
                                a non-binary value fails the check, and an empty-value
                                sensor icon is not clickable, so isPlainOnOffSwitch
-                               already rejected it (dz-dd-matrix.js guards this). */
+                               already rejected it. */
                             if (isLightSwitchContext(item, readSwitchStatus(item)) && theme.features.switch_instead_of_bigtext.enabled === true) {
                                 setDeviceSwitch(idx, readSwitchStatus(item));
                             }

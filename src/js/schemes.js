@@ -33,17 +33,16 @@ function loadBuiltinSchemes() {
         });
 }
 
-/* Slugs retired across every pruning pass to date (2026-08-12 and earlier),
-   mapped to their survivor. A stored pick that no longer exists would
-   otherwise leave the user on a dead slug: applyScheme finds no scheme and
-   returns, so whatever painted stays and the picker shows nothing selected.
-   Deleted schemes migrate BY THEIR OLD BASE (a Dracula user lands on
-   Machinon Dark, not on the light default): the palette cannot survive, the
-   light/dark intent can. blue-ui-light/-dark map to the base slugs because
-   their values ARE the base tokens now, and e-ink is a pure rename. "custom"
-   and "user:<name>" are user-owned and never migrated. Add every future
-   retirement here too, not just this pass's - a surviving slug must never
-   appear in this map (see the Colors note in DESIGN.md). */
+/* Retired slugs mapped to their survivor. A stored pick that no longer
+   exists would otherwise leave the user on a dead slug: applyScheme finds no
+   scheme and returns, so whatever painted stays and the picker shows
+   nothing selected. Deleted schemes migrate BY THEIR OLD BASE (a Dracula
+   user lands on Machinon Dark, not on the light default): the palette
+   cannot survive, the light/dark intent can. blue-ui-light/-dark map to the
+   base slugs because their values ARE the base tokens now, and e-ink is a
+   pure rename. "custom" and "user:<name>" are user-owned and never
+   migrated. Add every future retirement here too: a surviving slug must
+   never appear in this map (see the Colors note in DESIGN.md). */
 var DZ_SCHEME_MIGRATIONS = {
     "blue-ui-light":    "light",
     "blue-ui-dark":     "dark",
@@ -75,20 +74,19 @@ function migrateRetiredScheme() {
 
 /* A scheme pick is a decision: persist it to the Domoticz user variables
    immediately (like users expect from a theme switcher), instead of waiting
-   for the Save button. Without this, an unsaved pick lived only in
-   localStorage and the async DB round-trip on the next full reload silently
-   reverted it (owner-reported). */
+   for the Save button. Without this, an unsaved pick would live only in
+   localStorage, and the async DB round-trip on the next full reload would
+   silently revert it. */
 function persistSchemeChoice() {
     if (typeof storeUserVariableThemeSettings === "function") {
         storeUserVariableThemeSettings("update");
     }
 }
 
-/* WCAG contrast rails. Built-in schemes are gated before shipping
-   (dz-scheme-picker.js); user presets and hand-picked custom colours get
-   checked HERE at save time, with a warning that names the failing pair and
-   ratio. Warn, not block: the user may knowingly trade contrast, but never
-   silently. */
+/* WCAG contrast rails. Built-in schemes are checked for contrast before
+   shipping; user presets and hand-picked custom colours get checked HERE at
+   save time, with a warning that names the failing pair and ratio. Warn,
+   not block: the user may knowingly trade contrast, but never silently. */
 function contrastRatio(hexA, hexB) {
     function lum(hex) {
         var c = hexToRGB(hex, true).split(",").map(function(v) {
@@ -235,8 +233,8 @@ var DZ_COLOR_SCHEME_FIELDS = [
 
 /* Scheme-picker card mount points, registered by their hosts via
    registerSchemePickerContainer (the hub registers #dzHubSchemePicker,
-   theme-hub.js dzHubSchemeMount). Starts EMPTY: the injected Theme tab's
-   #schemePicker div is gone (Task 8), so no container id is hardcoded here.
+   theme-hub.js dzHubSchemeMount). Starts EMPTY: no legacy Theme tab exists
+   any more, so no container id is hardcoded here.
    Rendering targets every registered id actually present in the document; an
    id not currently in the DOM (hub not open) is skipped. */
 var DZ_SCHEME_PICKER_CONTAINER_IDS = [];
@@ -260,9 +258,8 @@ function renderSchemePicker() {
         /* Every card previews the SAME seven colours in the SAME order as the
            custom colour editor's inputs (Background, Menu, Item, Main, Text,
            Secondary, Disabled), so preset cards and the Custom card are
-           comparable at a glance (owner report 2026-07-17: presets showed 4
-           swatches while Custom showed 7). Keys are color_scheme key-space;
-           preset swatches derive from each scheme's full colors object (all
+           comparable at a glance. Keys are color_scheme key-space; preset
+           swatches derive from each scheme's full colors object (all
            schemes are fully fetched by loadBuiltinSchemes, the 4-key
            preview{} block in scheme JSONs is no longer read here). */
         var SWATCH_KEYS = ["background", "navbar", "item", "main_color", "main_text", "alt_text", "disabled"];
@@ -331,9 +328,9 @@ function renderSchemePicker() {
                     applyScheme(card.slug).then(function() {
                         container.querySelectorAll(".scheme-card").forEach(function(c) { c.classList.remove("selected"); });
                         el.classList.add("selected");
-                        // theme-hub.js hub-task-5: keep the hub's own custom-colour
-                        // swatches (value + enabled state) in step with the pick.
-                        // Guarded: schemes.js must not hard-depend on the hub module.
+                        // Keep the hub's own custom-colour swatches (value + enabled
+                        // state) in step with the pick. Guarded: schemes.js must not
+                        // hard-depend on the hub module.
                         if (typeof dzHubSyncSchemeSwatches === "function") { dzHubSyncSchemeSwatches(); }
                     });
                 });

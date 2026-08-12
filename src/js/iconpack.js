@@ -150,8 +150,8 @@ function buildIconPackCard(ic) {
     img.className = "iconpack-preview";
     img.src = packPreviewUrl(ic.base, "On");
     img.alt = ic.name;
-    /* preview state: On by default (owner preference), hover shows Off
-       (desktop), click/tap toggles it (touch) */
+    /* preview state: On by default, hover shows Off (desktop), click/tap
+       toggles it (touch) */
     var sticky = false, hover = false;
     function paint() { img.src = packPreviewUrl(ic.base, (sticky !== hover) ? "Off" : "On"); }
     img.addEventListener("mouseenter", function() { hover = true; paint(); });

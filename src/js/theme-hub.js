@@ -30,7 +30,7 @@
    bypassed for this entry -- see the onclick-precedence note in
    settings_page.js buildTile).
 
-   ENTRY LINK POLICY (Task 6/9 review, binding): both entries carry
+   ENTRY LINK POLICY (binding): both entries carry
    href="#/Theme" UNCONDITIONALLY, set at insertion time, plus the onclick
    attribute calling dzOpenThemeHub() (unchanged: the one open path, kept for
    settings_page.js to harvest onto the tile verbatim). A guard listener,
@@ -224,10 +224,10 @@ function dzBuildThemeHub(routeHost) {
         h.className = "dz-hub-section-title";
         h.textContent = group.label;
         section.appendChild(h);
-        // General tab carries a SHORT about intro (owner, hub-completion
-        // 2026-07-20); the full About is its own tab (the "about" group below).
+        // General tab carries a SHORT about intro; the full About is its own
+        // tab (the "about" group below).
         if (group.id === "general") { section.appendChild(dzBuildShortAbout()); }
-        dzRenderGroupRows(section, group); // task 3: fill the section with setting rows
+        dzRenderGroupRows(section, group); // fill the section with setting rows
         panel.appendChild(section);
     });
 
@@ -254,23 +254,23 @@ function dzBuildThemeHub(routeHost) {
     // picker above, so it also runs here, once, right after attach.
     if (typeof mountIconPackInHub === "function") { mountIconPackInHub(); }
 
-    /* Restore the durable tab anchor across a full rebuild (task 10 fix: a
-       close+reopen or a route re-entry used to stomp dzHubActiveGroup to the
-       first manifest group unconditionally, inside the forEach above, before
-       it was ever read here). A routed :tab deep link still wins: it is
-       applied by dzMountThemeHubIn's own dzHubShowGroup(tab) call right
-       after dzBuildThemeHub returns, overriding whatever this line shows.
-       Absent a :tab param, dzHubActiveGroup (the last tab picked this
-       session; Task 6 tab clicks do not rewrite the hash, so this variable
-       is the ONLY thing carrying that selection) restores it; only a
-       genuinely fresh session (still null) or a stale id no current manifest
-       group matches falls back to the first group. */
+    /* Restore the durable tab anchor across a full rebuild: dzHubActiveGroup
+       must be read here, AFTER the forEach above has finished building every
+       section, never stomped to the first manifest group inside the loop
+       itself. A routed :tab deep link still wins: it is applied by
+       dzMountThemeHubIn's own dzHubShowGroup(tab) call right after
+       dzBuildThemeHub returns, overriding whatever this line shows. Absent a
+       :tab param, dzHubActiveGroup (the last tab picked this session; tab
+       clicks do not rewrite the hash, so this variable is the ONLY thing
+       carrying that selection) restores it; only a genuinely fresh session
+       (still null) or a stale id no current manifest group matches falls
+       back to the first group. */
     var dzHubRestoreGroup = (dzHubActiveGroup && dzHubHasGroup(dzHubActiveGroup)) ? dzHubActiveGroup : THEME_MANIFEST[0].id;
     dzHubShowGroup(dzHubRestoreGroup);
     return container;
 }
 
-/* Fixed dom id for the About footer (the harness dz-hub-about.js keys on it). */
+/* Fixed dom id for the About footer. */
 var DZ_HUB_ABOUT_ID = "dz-hub-about";
 
 /* The theme's live version string (the beta build appends the branch name),
@@ -284,13 +284,11 @@ function dzHubVersionLabel() {
 }
 
 /* Build the About content: name + live version, an accurate one-paragraph
-   description LEADING WITH what makes Machinon unique (owner, 2026-07-20
-   rework) rather than generic "responsive theme" phrasing, the maintainer
-   credits, the existing repo/wiki links (from theme.homepage/theme.wiki), and
-   the Icons8 free-tier attribution the theme is obliged to show ("Icons by
-   Icons8" linking icons8.com; confirmed against Icons8's current freebie
-   terms 2026-07-20, intercom.help/icons8 "How to use the Icons8 freebie": a
-   visible, clickable "Icons by Icons8" -> https://icons8.com/).
+   description LEADING WITH what makes Machinon unique rather than generic
+   "responsive theme" phrasing, the maintainer credits, the existing
+   repo/wiki links (from theme.homepage/theme.wiki), and the Icons8
+   free-tier attribution the theme is obliged to show: a visible, clickable
+   "Icons by Icons8" -> https://icons8.com/.
 
    The description order is deliberate: the icon-pack INSTALLER first (it
    writes packs straight into the Domoticz device database, so a pack is
@@ -370,9 +368,9 @@ function dzBuildHubAbout() {
     });
     about.appendChild(credits);
 
-    // Links row: repo + wiki, from theme.json (unchanged this task). Built only
-    // for links that actually exist, so a missing theme.homepage/theme.wiki
-    // never renders a dead "undefined" anchor.
+    // Links row: repo + wiki, from theme.json. Built only for links that
+    // actually exist, so a missing theme.homepage/theme.wiki never renders a
+    // dead "undefined" anchor.
     var links = document.createElement("p");
     links.className = "dz-hub-about-links";
     if (theme.homepage) links.appendChild(dzHubExternalLink(theme.homepage, "GitHub repository"));
@@ -404,9 +402,9 @@ function dzHubExternalLink(href, text) {
     return a;
 }
 
-/* SHORT about for the General tab (owner, hub-completion 2026-07-20): name +
-   live version and a one-line description, so the first tab introduces the
-   theme without the full credits/links (those live on the About tab). Type on
+/* SHORT about for the General tab: name + live version and a one-line
+   description, so the first tab introduces the theme without the full
+   credits/links (those live on the About tab). Type on
    --dz-text-* tokens (css/theme-hub.css .dz-hub-short-about). */
 function dzBuildShortAbout() {
     var box = document.createElement("div");
@@ -427,11 +425,11 @@ function dzBuildShortAbout() {
     return box;
 }
 
-/* The About tab's hosted mount (owner, hub-completion 2026-07-20): the expansive
-   About (dzBuildHubAbout: name+version, modern description, repo/wiki links, the
-   Icons8 credit) followed by the theme MAINTENANCE actions. Replaces the old
-   persistent About footer; dzHubCustomMount dispatches the manifest "about"
-   entry here. FAIL OPEN on the About content (dzBuildHubAbout returns null while
+/* The About tab's hosted mount: the expansive About (dzBuildHubAbout:
+   name+version, modern description, repo/wiki links, the Icons8 credit)
+   followed by the theme MAINTENANCE actions. Replaces the old persistent
+   About footer; dzHubCustomMount dispatches the manifest "about" entry here.
+   FAIL OPEN on the About content (dzBuildHubAbout returns null while
    theme.json is not loaded) so the maintenance actions still render. */
 function dzHubAboutMount(entry) {
     var mount = document.createElement("div");
@@ -443,7 +441,7 @@ function dzHubAboutMount(entry) {
     return mount;
 }
 
-/* Theme maintenance actions (owner placement: bottom of the About tab). These
+/* Theme maintenance actions (placed at the bottom of the About tab). These
    are the coverage-gate affordances the old Theme tab exposed and the hub
    lacked: reset to defaults, clear the browser cache, reset custom colours to
    the selected scheme. Each runs behind a confirm (dzHubConfirm). Wired to the
@@ -866,7 +864,7 @@ function dzCloseThemeHubOnLeave() {
 }
 
 /* ===================================================================== *
- *  Task 3: setting rows + instant apply                                  *
+ *  Setting rows + instant apply                                          *
  * ===================================================================== *
 
    Each non-custom manifest entry (theme-manifest.js) renders as a row:
@@ -876,22 +874,22 @@ function dzCloseThemeHubOnLeave() {
    persists through the storage seam (storeUserVariableThemeSettings("update")).
    The applier mapping below MIRRORS applyThemeDeltaInPlace (and the deleted
    legacy Theme tab's handlers) verbatim; it never invents a different mapping. control:"custom" entries
-   (scheme, custom colors, icon packs) are NOT rows here: Tasks 5/6 host those,
-   so a placeholder mount stands in their place. */
+   (scheme, custom colors, icon packs) are NOT rows here: a placeholder mount
+   stands in their place instead, hosted by their own dedicated UI. */
 
 /* Per-storageKey live visual applier. MIRRORS settings-store.js
-   applyThemeDeltaInPlace() (lines cited). Feature FILE
+   applyThemeDeltaInPlace()'s idempotent visual appliers block. Feature FILE
    load/unload is handled generically in dzApplyHubSetting
    (loadThemeFeatureFiles/unloadThemeFeatureFiles); this map only names the
    ADDITIONAL idempotent visual applier a setting drives on top of that. */
 var DZ_HUB_APPLIERS = {
-    card_min_width: applyCardWidths,     // scheme.js applyCardWidths -> --dz-card-min/max-width (settings-store.js:194 setColorScheme/applyCardWidths block)
+    card_min_width: applyCardWidths,     // scheme.js applyCardWidths -> --dz-card-min/max-width
     card_max_width: applyCardWidths,     // "
-    logo: setLogo,                       // page.js setLogo -> header.logo img (settings-store.js:195 setLogo())
+    logo: setLogo,                       // page.js setLogo -> header.logo img
     hide_logo: setLogo,                  // setLogo() re-applies on the hide_logo toggle (feature with files:[])
-    background_img: applyBackground,     // page.js applyBackground -> html background (settings-store.js:197 applyBackground())
+    background_img: applyBackground,     // page.js applyBackground -> html background
     background_type: applyBackground,    // "
-    navbar_icons_text: applyNavbarIconsText // page.js applyNavbarIconsText -> .navbar.notext (settings-store.js:197 applyNavbarIconsText())
+    navbar_icons_text: applyNavbarIconsText // page.js applyNavbarIconsText -> .navbar.notext
 };
 
 /* Number min/max and select options, carried over verbatim from the deleted
@@ -916,7 +914,7 @@ function dzHubCurrentValue(entry) {
 /* Render one group's rows into its section: top-level rows first, then nest each
    dependent (entry.parent) row inside its parent's .dz-hub-children with the
    correct initial disabled state. control:"custom" entries render a placeholder
-   mount (Tasks 5/6 replace it), never a row. */
+   mount hosting their own dedicated UI, never a row. */
 function dzRenderGroupRows(section, group) {
     var byKey = {};
     group.entries.forEach(function (entry) {
@@ -940,7 +938,7 @@ function dzRenderGroupRows(section, group) {
 
 /* The label + description header every control:"custom" mount starts with
    (hosted content, if any, follows). Shared by the generic placeholder below
-   and the task-5 scheme/custom-colour mounts so the three .dz-hub-custom-mount
+   and the scheme/custom-colour mounts so the three .dz-hub-custom-mount
    entries (scheme, custom_color_scheme, iconpacks) read consistently. */
 function dzHubCustomHeader(entry) {
     var frag = document.createDocumentFragment();
@@ -969,11 +967,11 @@ function dzHubCustomPlaceholder(entry) {
 }
 
 /* Dispatch a control:"custom" entry to its hosted mount. "scheme" and
-   "custom_color_scheme" (hub-task-5) host the real scheme picker and
-   custom-colour swatches (schemes.js/scheme.js, logic unchanged, only the
-   mount point moves); "iconpacks" (hub-task-6) hosts the icon-pack
-   installer (src/js/iconpack.js, same deal); any other control:"custom"
-   entry still gets the generic placeholder above. */
+   "custom_color_scheme" host the real scheme picker and custom-colour
+   swatches (schemes.js/scheme.js, logic unchanged, only the mount point
+   moves); "iconpacks" hosts the icon-pack installer (src/js/iconpack.js,
+   same deal); any other control:"custom" entry still gets the generic
+   placeholder above. */
 function dzHubCustomMount(entry) {
     if (entry.key === "scheme") return dzHubSchemeMount(entry);
     if (entry.key === "custom_color_scheme") return dzHubCustomColorsMount(entry);
@@ -1005,11 +1003,10 @@ function dzHubIconPacksMount(entry) {
 
 /* Fixed DOM ids the hub exposes to schemes.js. The scheme-picker container is
    registered with schemes.js's renderSchemePicker (registerSchemePickerContainer)
-   rather than schemes.js hardcoding it: this is the "parameterize the mount"
-   approach the brief called for, kept a one-line registration instead of
-   threading a container argument through every renderSchemePicker call site
-   (saveCurrentColorsAsScheme/deleteUserScheme all call it with no arguments
-   and must keep refreshing every registered mount). */
+   rather than schemes.js hardcoding it, kept a one-line registration instead
+   of threading a container argument through every renderSchemePicker call
+   site (saveCurrentColorsAsScheme/deleteUserScheme all call it with no
+   arguments and must keep refreshing every registered mount). */
 var DZ_HUB_SCHEME_PICKER_ID = "dzHubSchemePicker";
 var DZ_HUB_COLOR_INPUT_PREFIX = "dz-hub-color-";
 
@@ -1144,7 +1141,7 @@ function dzRenderHubRow(entry) {
     row.setAttribute("data-setting", entry.key);
     if (entry.parent) row.classList.add("dz-hub-row-child");
     // Value inputs (number/text/select) stack label-above-control; toggles stay
-    // inline (hub-task-5 FIX 2, see .dz-hub-row-input in css/theme-hub.css).
+    // inline (see .dz-hub-row-input in css/theme-hub.css).
     if (entry.control !== "toggle") row.classList.add("dz-hub-row-input");
 
     var controlCell = document.createElement("div");
@@ -1217,11 +1214,10 @@ function dzRenderHubRow(entry) {
         row.appendChild(kids);
     }
     // icon_image ("Device photos instead of icons") carries the per-device
-    // idx/img editor in its expanded area (spec rationalization table: "the
-    // per-device idx/img list editor moves into the row's expanded area").
-    // Rebuilt in the hub (owner, hub-completion 2026-07-20): same theme.icons
-    // storage + persistence path, only the UI is new. Shown only while the
-    // toggle is on (dzHubBuildImageEditor sets the initial hidden state).
+    // idx/img editor in its expanded area: the same theme.icons storage +
+    // persistence path as the deleted legacy Theme tab's raw-JSON textarea,
+    // only the UI is new. Shown only while the toggle is on
+    // (dzHubBuildImageEditor sets the initial hidden state).
     if (entry.key === "icon_image") { row.appendChild(dzHubBuildImageEditor()); }
     return row;
 }
@@ -1272,8 +1268,8 @@ function dzHubBuildControl(entry) {
 
 /* The reload-disclosure element for a reloadOnDisable row: hidden until the
    feature is toggled OFF (an executed .js cannot be un-run, so the change
-   cannot apply live: settings-store.js:180). "Reload now" boots the document so
-   the disable takes effect. */
+   cannot apply live: settings-store.js applyThemeDeltaInPlace's hasJs
+   branch). "Reload now" boots the document so the disable takes effect. */
 function dzHubBuildReloadNote(entry) {
     var note = document.createElement("div");
     note.className = "dz-hub-reload-note";
@@ -1318,7 +1314,7 @@ function dzHubSyncChildren(parentEntry, enabled) {
 }
 
 /* FAIL CLOSED: a setting whose applier cannot be resolved disables its row with
-   a message rather than silently no-op'ing (brief step 4). */
+   a message rather than silently no-op'ing. */
 function dzHubFailClosed(entry, message) {
     var hub = document.getElementById(DZ_HUB_ID);
     var row = hub && hub.querySelector('.dz-hub-row[data-setting="' + entry.key + '"]');
@@ -1334,8 +1330,8 @@ function dzHubFailClosed(entry, message) {
     note.textContent = message;
 }
 
-/* First-failure no_identity handling (ThemeSettings migration, controller
-   notes): dzSettingsMode().noIdentity flips true lazily, set by
+/* First-failure no_identity handling (ThemeSettings migration):
+   dzSettingsMode().noIdentity flips true lazily, set by
    settings-transport.js's dzApiFail on the first write the server refuses for
    lacking a resolvable identity (an application-token session has no Users
    row to attach a personal layer to; Cmd_ThemeSettingsSet returns
@@ -1400,7 +1396,7 @@ function dzApplyHubSetting(entry, value) {
         var files = feature.files || [];
         var hasJs = files.some(function (f) { return f.split(".").pop() === "js"; });
         if (now && !was) {
-            // Newly enabled: load its files in place (settings-store.js:171).
+            // Newly enabled: load its files in place (settings-store.js applyThemeDeltaInPlace).
             if (files.length) loadThemeFeatureFiles(key);
             // A JS feature re-enabled after a live disable: its reload note no longer applies.
             if (entry.reloadOnDisable) dzHubToggleReloadNote(entry, false);
@@ -1408,16 +1404,17 @@ function dzApplyHubSetting(entry, value) {
             if (key === "log_plot_bands" && typeof dzApplyLogPlotBands === "function") dzApplyLogPlotBands();
         } else if (!now && was) {
             if (hasJs) {
-                // reloadOnDisable: an executed script cannot be un-run
-                // (settings-store.js:180). Do NOT pretend it applied; disclose reload.
+                // reloadOnDisable: an executed script cannot be un-run.
+                // Do NOT pretend it applied; disclose reload.
                 dzHubToggleReloadNote(entry, true);
             } else if (files.length) {
-                unloadThemeFeatureFiles(key); // CSS-only feature (settings-store.js:183)
+                unloadThemeFeatureFiles(key); // CSS-only feature
             }
         }
         // Additional live visual applier, or a device-pass re-render for a
-        // file-less card flag (settings-store.js:191: "re-render on the next
-        // device poll"); we run it now so currently rendered cards reflect it.
+        // file-less card flag (settings-store.js applyThemeDeltaInPlace's
+        // idempotent-appliers comment); we run it now so currently rendered
+        // cards reflect it.
         if (DZ_HUB_APPLIERS[key]) {
             DZ_HUB_APPLIERS[key]();
         } else if (!files.length && typeof setAllDevicesFeatures === "function") {
@@ -1462,7 +1459,7 @@ function dzHubReloadIntoHub() {
    close-on-leave handler, and Angular fires an initial routing hashchange
    (-> #/Dashboard) shortly after boot. Opening the hub before that fires would
    immediately trip the close handler and dump the user on the route anyway
-   (observed: hub built then re-hidden). So debounce on hashchange: open the hub
+   (the hub would build, then immediately re-hide). So debounce on hashchange: open the hub
    only once the boot navigation has been quiet for a short window, by which
    point the next hashchange is a genuine user navigation the close handler
    should honour. Opens even if no hashchange comes (the initial schedule). */

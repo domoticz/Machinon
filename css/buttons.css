@@ -1,17 +1,16 @@
 /*
   buttons.css - all button + button-styled-control styling for Machinon.
 
-  Extracted only after the cross-cutting "Add fonts" grab-bag was dissolved (that rule's
-  colour on .btnstyle3 was the reorder trap that previously forced buttons to stay in custom.css).
-  Now that no cross-cutting rule colours buttons, this block is position-independent and lives here.
-  Contains: btnstyle arrows, reset/save theme buttons, the settings/z-wave label-buttons, the
-  Bootstrap-2 gradient reset + all .btn-* variants, ghost/modern/size/disabled buttons, btnstyle3
-  (+ grid-view overrides), and connected .btn-group toolbars. The load-bearing !important that beats
-  Bootstrap 2 state rules is preserved (see the reset block comment). Card-specific .item .btn-group
-  layout stays in custom.css with the device cards.
+  No cross-cutting rule colours buttons elsewhere, so this file is position-independent within
+  the stylesheet load order. Contains: btnstyle arrows, reset/save theme buttons, the
+  settings/z-wave label-buttons, the Bootstrap-2 gradient reset + all .btn-* variants,
+  ghost/modern/size/disabled buttons, btnstyle3 (+ grid-view overrides), and connected
+  .btn-group toolbars. The load-bearing !important that beats Bootstrap 2 state rules is
+  preserved (see the reset block comment). Card-specific .item .btn-group layout stays in
+  custom.css with the device cards.
 */
 
-/* ---- Soft-elevated base (spec 2026-07-17) ----
+/* ---- Soft-elevated base ----
    One radius, one elevation language, one focus ring for every button-like
    control the theme owns. !important mirrors the Bootstrap-2 constraint
    documented on the reset block below (state rules outrank base rules). */
@@ -23,16 +22,16 @@
     background-image: none !important;
     line-height: var(--dz-btn-line-height) !important;
     box-sizing: border-box !important;
-    /* Flex centering (owner report 2026-07-17, item xii: ghost/outline
-       buttons render their label off-center). Block-family buttons only
-       centered by ARITHMETIC (padding + the forced line-height happening to
-       fill the box); whenever the rendered box differs from that sum, the
-       label anchors to the top and reads off-center inside the outline.
-       Two live cases measured: core fixed heights the theme doesn't own
-       (style.css .btnsmall { height: 1.6em } vs our 20px line-height), and
-       flex/stretch parents growing the box past the arithmetic (Events
-       A-/A+ compute 31px in their toolbar, one more than the 30px the
-       padding+line-height+border sum produces). Centering with flex, the
+    /* Flex centering: without it, ghost/outline buttons render their label
+       off-center. Block-family buttons are only centered by ARITHMETIC
+       (padding + the forced line-height happening to fill the box); whenever
+       the rendered box differs from that sum, the label anchors to the top
+       and reads off-center inside the outline. Two cases where the box
+       differs: core fixed heights the theme doesn't own (style.css
+       .btnsmall { height: 1.6em } vs our 20px line-height), and flex/stretch
+       parents growing the box past the arithmetic (Events A-/A+ compute 31px
+       in their toolbar, one more than the 30px the padding+line-height+border
+       sum produces). Centering with flex, the
        .btnstyle3 recipe this theme already uses, makes the label track the
        ACTUAL box in every such case instead of the assumed one.
        vertical-align keeps inline-level flow alignment identical to the
@@ -49,19 +48,18 @@
     border: 1px solid transparent;
     transition: background-color .12s ease, box-shadow .12s ease;
 }
-/* :not(.btn-icon) on the .btn entries below (owner report 2026-08-10, "weird ghost
-   buttons" on the Devices row actions). The icon-only family declares a hard
+/* :not(.btn-icon) on the .btn entries below: without it, hovering an action icon on
+   the Devices row changes box-shadow ONLY (none -> --dz-btn-shadow-hover), and a
+   transparent borderless glyph grows a floating elevated box, defeating the
+   resting-chrome-free intent below. The icon-only family declares a hard
    none-shadow (!important) further down this file, and core emits every one of
-   its instances as <button class="btn btn-icon">, so these three state rules matched
+   its instances as <button class="btn btn-icon">, so these three state rules match
    them too. Both sides carry !important, which hands the decision to specificity, and
-   ".btn:hover" (0,2,0) beats ".btn-icon" (0,1,0) - the same losing shape as the F1 root
-   cause documented on that block. Measured live on #/Devices: hovering an action icon
-   changed box-shadow ONLY, none -> --dz-btn-shadow-hover, so a transparent borderless
-   glyph grew a floating elevated box, which is exactly the resting-chrome-free intent
-   that block states it is protecting. The tonal filter pop on .btn-icon img is the
-   affordance for this family and is unaffected. Focus is handled separately below: the
-   ring is an accessibility requirement, the elevation is not, so icon buttons keep the
-   ring without the shadow rather than being excluded outright. */
+   ".btn:hover" (0,2,0) beats ".btn-icon" (0,1,0) - the same losing shape as the root
+   cause documented on the .btn-icon block below. The tonal filter pop on .btn-icon img
+   is the affordance for this family and is unaffected. Focus is handled separately
+   below: the ring is an accessibility requirement, the elevation is not, so icon
+   buttons keep the ring without the shadow rather than being excluded outright. */
 .btn:not(.btn-icon):hover, .btnstyle3:hover, .btnstyle3-sel:hover,
 .btnsmall:hover, .btn-modern:hover, .btn-modern-warning:hover {
     box-shadow: var(--dz-btn-shadow-hover) !important;
@@ -137,13 +135,13 @@ a.btnstyle {
     color: var(--dz-body-text);
 }
 
-/* Label-as-button family (owner report 2026-07-17): core uses clickable
-   .label/.badge spans and links as buttons too (e.g. Hardware's "Create
-   Virtual Sensors" <span class="label label-info lcursor" onclick=...>,
-   Users' "Set Devices", the settings/z-wave label-buttons this rule
-   originally covered). Distinction preserved: CLICKABLE labels ([href] or
-   .lcursor) join the button system below; STATIC .label/.badge chips
-   (custom.css) stay flat informational chips, no elevation/radius change. */
+/* Label-as-button family: core uses clickable .label/.badge spans and links as
+   buttons too (e.g. Hardware's "Create Virtual Sensors" <span class="label
+   label-info lcursor" onclick=...>, Users' "Set Devices", and the
+   settings/z-wave label-buttons). Distinction preserved: CLICKABLE labels
+   ([href] or .lcursor) join the button system below; STATIC .label/.badge
+   chips (custom.css) stay flat informational chips, no elevation/radius
+   change. */
 .label-info[href], .badge-info[href],
 .label.lcursor, .badge.lcursor {
     background-color: var(--dz-accent-color);
@@ -165,7 +163,7 @@ a.btnstyle {
     padding: var(--dz-btn-pad-xs) !important;
     font-size: var(--dz-text-micro) !important;
 }
-/* Universal button reset — kills Bootstrap 2.x gradients.
+/* Universal button reset - kills Bootstrap 2.x gradients.
 
    Load-bearing !important: Bootstrap 2 (css/bootstrap.css, loaded globally before this theme and
    NOT removable per theme) styles .btn-* with gradients, and its STATE rules carry higher
@@ -202,9 +200,8 @@ a.btnstyle {
 }
 
 .btn-mini:hover {
-    /* Ghost tint (2026-07-17): matches the .btn-default/.btnsmall hover
-       pattern below (background wash, no text-colour flip) instead of the
-       retired solid-fill hover this rule used before. */
+    /* Ghost tint: matches the .btn-default/.btnsmall hover pattern below
+       (background wash, no text-colour flip). */
     background: var(--dz-btn-hover-bg);
 }
 
@@ -297,33 +294,26 @@ a.btnstyle {
     font-style: normal;
 }
 
-/* Ghost: icon-only buttons share one hit-box (Phase B, 2026-07-17). Visual
-   chrome at rest is intentionally none per owner feedback (device/card icon
-   glyphs must not look like buttons): background/border stay transparent/
-   none, so only the tonal hover pop (filter, on .btn-icon img below) and the
-   min hit-box are visible; border-radius only shapes that hover highlight,
-   not a resting box. min-width/min-height give every icon button (Devices
-   row actions, RoomPlans) the same square-ish hit target regardless of its
-   glyph's intrinsic size. (The legacy Theme tab's a.resetschemebtn /
-   a.saveschemebtn icon anchors used to sit in this family; deleted with the
-   injected tab, Task 8.)
+/* Ghost: icon-only buttons share one hit-box. Visual chrome at rest is
+   intentionally none (device/card icon glyphs must not look like buttons):
+   background/border stay transparent/none, so only the tonal hover pop
+   (filter, on .btn-icon img below) and the min hit-box are visible;
+   border-radius only shapes that hover highlight, not a resting box.
+   min-width/min-height give every icon button (Devices row actions,
+   RoomPlans) the same square-ish hit target regardless of its glyph's
+   intrinsic size.
 
-   F1 root cause (diagnosed live via CDP CSS.getMatchedStylesForNode on
-   #/Devices): core's own www/css/style.css ships a ".btn.btn-icon" rule that
-   zeroes the same four properties (padding, border, box-shadow, background)
-   - two classes, specificity (0,2,0) - and every .btn-icon element core emits
-   (Devices table row actions, RoomPlans) carries the "btn" class alongside
-   it, so that rule always matches too. Our previous one-class ".btn-icon"
-   selector (0,1,0) could never outrank it: neither side carried !important,
-   so the browser fell back to specificity, and core's two-class selector
-   always wins that regardless of file load order. Border/box-shadow/
-   background already matched core's values by coincidence, so only padding
-   visibly computed to 0 instead of the declared xs box. Since the hit-box is
-   now guaranteed by min-width/min-height (not by padding pushing the box
-   out), this fix mostly restores intent for icons whose padding-driven width
-   already exceeds the 28px floor (e.g. wider glyphs); !important is the same
-   load-bearing pattern documented on the "Universal button reset" block
-   below, applied here so the declared box actually wins. */
+   !important is required here: core's own www/css/style.css ships a
+   ".btn.btn-icon" rule that zeroes the same four properties (padding,
+   border, box-shadow, background) at two-class specificity (0,2,0), and
+   every .btn-icon element core emits (Devices table row actions,
+   RoomPlans) carries the "btn" class alongside it, so that rule always
+   matches too. A one-class ".btn-icon" selector (0,1,0) can never outrank
+   it by specificity alone regardless of load order. Border/box-shadow/
+   background already match core's values by coincidence, so only padding
+   is at risk of computing to 0 instead of the declared xs box; !important
+   is the same load-bearing pattern documented on the "Universal button
+   reset" block below, applied here so the declared box actually wins. */
 .btn-icon {
     background: transparent;
     border: none;
@@ -355,9 +345,10 @@ a.btnstyle {
 }
 
 /* Hover/focus affordance: the same in-place tonal pop as the device-card icons
-   (css/cards.css, 2026-07-14) - saturate/brightness on the glyph, no movement and
-   no background wash - so the Devices-table action buttons and device state toggles
-   read consistently with the cards. :focus-visible covers keyboard focus. */
+   (css/cards.css) - saturate/brightness on the glyph, no movement and no
+   background wash - so the Devices-table action buttons and device state
+   toggles read consistently with the cards. :focus-visible covers keyboard
+   focus. */
 .btn-icon img {
     transition: filter 0.18s ease;
 }
@@ -573,7 +564,7 @@ a.btnstyle {
     border-radius: var(--dz-btn-radius) !important;
 }
 
-/* ---- Ghost family (Phase B, 2026-07-17) ----
+/* ---- Ghost family ----
    Ghosts are quiet: no resting elevation, an outline in the ghost tokens,
    a tint on hover, the same radius every other button carries. Placed AFTER
    the soft-elevated base block (top of file) so its no-elevation override
@@ -607,23 +598,22 @@ a.btnstyle {
 
 /* One fill language for BOTH selected-state code paths (theme .btn-selected,
    e.g. the HVAC/dimmer level selector, and Bootstrap's own .active
-   toggle-button groups), killing Bootstrap 2's divergent inset highlights
-   (F2). Placed after the ghost rule above so a selected ghost
-   (.btn-default.active, which always also carries .btn per core's markup,
-   so it matches ".btn.active" here) gets the filled look instead of the
-   ghost's transparent background.
+   toggle-button groups), replacing Bootstrap 2's divergent inset highlights.
+   Placed after the ghost rule above so a selected ghost (.btn-default.active,
+   which always also carries .btn per core's markup, so it matches
+   ".btn.active" here) gets the filled look instead of the ghost's
+   transparent background.
 
-   FLAT per owner gate (2026-08-11, "flat-selected" round, verdict H1): a
-   persistent SELECTED state is a resting state, not a moment of contact, so
-   it no longer borrows --dz-btn-shadow-pressed (the concave/"pushed-in"
-   read that inset gives reads as physically depressed RIGHT NOW, which is
-   only true for a genuine :active press). Fill + text color alone carry
-   "this is selected" now; box-shadow: none explicitly rather than left
-   unset, so this rule still wins the cascade tie against the ghost family's
-   own box-shadow:none at equal specificity regardless of source order.
-   --dz-btn-shadow-pressed itself is unchanged and still drives the
+   Flat, not inset: a persistent SELECTED state is a resting state, not a
+   moment of contact, so it does not borrow --dz-btn-shadow-pressed (the
+   concave/"pushed-in" read that inset gives reads as physically depressed
+   RIGHT NOW, which is only true for a genuine :active press). Fill + text
+   color alone carry "this is selected"; box-shadow: none is explicit rather
+   than left unset, so this rule still wins the cascade tie against the ghost
+   family's own box-shadow: none at equal specificity regardless of source
+   order. --dz-btn-shadow-pressed itself is unchanged and still drives the
    MOMENTARY .btn:active rule above - only this persistent-selected path
-   stopped consuming it. See DESIGN.md Buttons > States for the split. */
+   does not consume it. See DESIGN.md Buttons > States for the split. */
 .btn-selected,
 .btn-group .btn.active,
 .btn.active {
@@ -643,13 +633,14 @@ a.btnstyle {
     filter: brightness(0.85);
 }
 
-/* No border-radius override here (Task 5, 2026-07-17): this rule used to
-   force full round corners on every .btn-group .btn-danger, which silently
-   defeated the first/last-child corner squaring above for the connected
-   Save/Delete pair (EventViewer.html) - Delete bulged out fully round
-   instead of matching Save's connected edge. Removing it lets the squaring
-   rules above govern, so Delete's outer (right) corner rounds and its inner
-   (left) corner squares against Save, same as any other last-child. */
+/* No border-radius override here: a full-round override on every
+   .btn-group .btn-danger would silently defeat the first/last-child corner
+   squaring above for a connected pair (e.g. Save/Delete in
+   EventViewer.html) - Delete would bulge out fully round instead of
+   matching Save's connected edge. Leaving this rule without a
+   border-radius lets the squaring rules above govern, so Delete's outer
+   (right) corner rounds and its inner (left) corner squares against Save,
+   same as any other last-child. */
 .btn-group .btn-danger {
     background: var(--dz-accent-red) !important;
     border-color: var(--dz-accent-red) !important;
@@ -675,24 +666,22 @@ a.btnstyle {
     padding-bottom: 1px;
 }
 
-/* ---- Focus ring, state-proof (task B9 keyboard pass, 2026-07-17) ----
+/* ---- Focus ring, state-proof ----
    The base block's .btn:focus-visible ring (top of file, 0,2,0) is beaten
    by two later state rules that also declare box-shadow !important at equal
    specificity, where source order then decides: the ghost family's
    ".btn-group .btn-default { box-shadow: none }" (a keyboard-focused ghost
-   in any toolbar group showed NO ring, measured on #/Devices Used/Not Used)
-   and the selected-state .btn.active rule (a keyboard-focused selected
-   toggle showed only its own box-shadow while focused, no ring visible at
-   all). Re-assert the ring with :focus-visible appended to the winning
-   rules' own selectors, placed after both, so specificity beats each
-   culprit instead of tying: ghosts get the bare ring (they have no resting
-   elevation to stack under it).
+   in any toolbar group shows NO ring) and the selected-state .btn.active
+   rule (a keyboard-focused selected toggle shows only its own box-shadow
+   while focused, no ring visible at all). Re-assert the ring with
+   :focus-visible appended to the winning rules' own selectors, placed after
+   both, so specificity beats each culprit instead of tying: ghosts get the
+   bare ring (they have no resting elevation to stack under it).
 
-   Selected went flat per owner gate H1 (2026-08-11, see the .btn-selected
-   rule above): the ring is now the ONLY shadow this state ever shows, at
-   rest or pressed - no --dz-btn-shadow-pressed composed underneath it
-   anymore (it used to stack "pressed inset, ring" comma-joined; the pressed
-   layer is simply gone, not replaced). */
+   Selected is flat (see the .btn-selected rule above): the ring is the ONLY
+   shadow this state ever shows, at rest or pressed - --dz-btn-shadow-pressed
+   is deliberately not composed underneath it, unlike the momentary
+   .btn:active rule above which still stacks it. */
 .btn-default:focus-visible,
 .btn-group .btn-default:focus-visible,
 .btnsmall:focus-visible,
@@ -719,25 +708,24 @@ a.btnstyle {
    needs correcting. !important is required: the soft-elevated base block
    sets line-height with !important on .btn (which this element also
    matches), so a plain declaration here would be silently outranked.
-   Owner report 2026-07-17 (item c): even after the height fix, Clear's TEXT
-   still read visibly smaller than its siblings - .btn-danger's own rule
-   assigns it the xs text token while .btnstyle3 sets none and falls back to
-   the body base sm token, so the two sizes sat side by side in the same
-   28px-tall box. Aligning Clear to sm makes the whole row read as one
-   weight; !important is needed for the same base-block reason as above.
-   Verified live: 28px tall, sm text, on all six buttons after this rule. */
+   Even after the height fix, Clear's TEXT still reads visibly smaller than
+   its siblings: .btn-danger's own rule assigns it the xs text token while
+   .btnstyle3 sets none and falls back to the body base sm token, so the two
+   sizes would sit side by side in the same 28px-tall box. Aligning Clear to
+   sm makes the whole row read as one weight; !important is needed for the
+   same base-block reason as above. */
 .log-toolbar .btn-danger {
     line-height: 14px !important;
     font-size: var(--dz-text-sm) !important;
 }
 
-/* Icon-only members of text-button rows (item xii follow-through): with the
-   base's flex centering, a button whose only child is an icon glyph hugs
-   that glyph's height instead of the text line, dropping below its
-   text-labelled siblings (measured: Events ACE toolbar's word-wrap toggle
-   25px next to A-/A+ at 30px; Tips modal's chevron prev/next pair 24px
-   where core's btn-sm sat at 30px). Pin the tier's text-line box height
-   explicitly: 30px = --dz-btn-line-height (20) + the xs/sm tiers' shared
+/* Icon-only members of text-button rows: with the base's flex centering, a
+   button whose only child is an icon glyph hugs that glyph's height instead
+   of the text line, dropping below its text-labelled siblings (e.g. Events
+   ACE toolbar's word-wrap toggle at 25px next to A-/A+ at 30px; Tips modal's
+   chevron prev/next pair at 24px where core's btn-sm sits at 30px). Pin the
+   tier's text-line box height explicitly: 30px = --dz-btn-line-height (20) +
+   the xs/sm tiers' shared
    4px vertical padding on both sides + 2 x 1px transparent border. The
    text-labelled siblings in both rows already compute exactly this, so the
    rule is a no-op for them and only lifts the icon-only members. */
@@ -766,7 +754,7 @@ a.btnstyle {
     color: var(--dz-accent-color);
 }
 
-/* ---- Core-region takeover (Phase C1, 2026-07-17) ----
+/* ---- Core-region takeover ----
    Regions core styles itself, where its own stylesheet loads AFTER the
    theme and re-asserts raw values, or ships bare/unclassed buttons the .btn
    system never reaches. Role guide unchanged: primary actions filled,
@@ -790,8 +778,8 @@ a.btnstyle {
    icon-quiet resting elevation.
    Hover applies only to inactive toggles (:not(.dd-topbar-nav-on):not(.dd-topbar-kiosk-active))
    to preserve the solid fill indicator of active-toggle state.
-   Tokenizing padding also resolves the B5-deferred sibling mismatch
-   (task-5-report.md): dd-topbar-fullpage/-kiosk computed "2px 5px" while
+   Tokenizing padding also resolves a sibling mismatch:
+   dd-topbar-fullpage/-kiosk computed "2px 5px" while
    dd-topbar-edit computed "2px 5px 2px 8px" (core's own .dd-topbar-edit
    rule, dashboard.css:117-121, adds a divider + padding-left: 8px
    !important). Both sides already agree on 8px for the shared left/right
@@ -836,63 +824,56 @@ a.btnstyle {
 
 /* Events editor open-file tab close-x (Events.html:185, Events.css:91-102):
    bare <button>&times;</button>, no color declared, so it renders the
-   browser's UA default button color (measured live: rgb(0,0,0)) rather
-   than anything this theme controls. Investigated the brief's "F3"
-   assumption live in both schemes (setColorScheme() toggle, dz-dash-capture
-   pattern): the parent tab (.events-editor__file) hardcodes a fixed light
-   chip (background #CCC / #e8e8e8, color #333 !important) that does NOT
-   adapt to the active scheme - confirmed identical in light and dark - so
-   the close-x never actually goes invisible on dark here; a literal
-   var(--dz-body-text) swap would have been the regression instead (dark
-   scheme's body-text resolves to white, which would sit white-on-#e8e8e8).
-   Hardened the declaration to an explicit value anyway, matching its
-   siblings' existing fixed-light convention (.events-editor__toolbar-btn's
-   old color, .ace-settings__theme, both #333) rather than leaving it to an
-   implicit, browser-dependent UA default. */
+   browser's UA default button color (rgb(0,0,0)) rather than anything this
+   theme controls. The parent tab (.events-editor__file) hardcodes a fixed
+   light chip (background #CCC / #e8e8e8, color #333 !important) that does
+   NOT adapt to the active scheme, so the close-x never actually goes
+   invisible on dark here; a literal var(--dz-body-text) swap would be the
+   regression instead (dark scheme's body-text resolves to white, which
+   would sit white-on-#e8e8e8). Hardened to an explicit value instead,
+   matching the parent chip's fixed-light convention rather than leaving it
+   to an implicit, browser-dependent UA default. */
 .events-editor__file-close {
     color: #333;
 }
 
-/* ---- Phase C2 continued (Task 8, 2026-07-17): Devices splitter, Events
-   Wizard footer, Events toolbar icon parity, room-picker options.
+/* ---- Devices splitter, Events Wizard footer, Events toolbar icon parity,
+   room-picker options. ----
    DataTables pager now lives in css/tables.css (see there for why: a
    specificity conflict with that file's own table-header reset means the
    fix has to live in, and load-order-after, that exact rule). Setup-
-   dropdown active-item lives in css/nav.css (owner refinement xi: it needs
-   a raw 5px radius to match the navbar tab, which this file's border-radius
-   contract check would reject). ---- */
+   dropdown active-item lives in css/nav.css: it needs a raw 5px radius to
+   match the navbar tab, which this file's border-radius contract check
+   would reject. ---- */
 
-/* Devices panel splitter/collapse toggle. Confirmed real selector live via
-   app/devices/Devices.html:22-27: a bare <button class="splitter"> inside
-   <section class="page-devices"> (the brief's speculative ".devices-
-   splitter" class does not exist anywhere in core). Styled by core's own
-   app/devices/Devices.css:28-38 (".page-devices > .splitter") with a fixed
-   white-on-near-transparent-white look baked for core's own dark default
-   theme (color:white, background-color: rgba(255,255,255,0.1) at 16px wide),
-   never adapted to Machinon's light body text, so the icon-only collapse
-   toggle sat at low contrast on the light page. Devices.css carries no
-   !important and loads before custom.css (index.html:98-99), and this
-   selector matches its specificity exactly (0,2,0), so a plain override wins
-   by source order.
+/* Devices panel splitter/collapse toggle: a bare <button class="splitter">
+   inside <section class="page-devices"> (app/devices/Devices.html:22-27).
+   Styled by core's own app/devices/Devices.css:28-38
+   (".page-devices > .splitter") with a fixed white-on-near-transparent-white
+   look baked for core's own dark default theme (color: white,
+   background-color: rgba(255,255,255,0.1) at 16px wide), never adapted to
+   Machinon's light body text, so the icon-only collapse toggle sits at low
+   contrast on the light page. Devices.css carries no !important and loads
+   before custom.css (index.html:98-99), and this selector matches its
+   specificity exactly (0,2,0), so a plain override wins by source order.
 
-   Owner follow-up (2026-07-18): the icon-quiet treatment above (resting-
-   transparent, ghost-text colored) fixed the contrast but still read as
-   near-invisible next to the actual table it controls - nothing signals a
-   collapse/expand control sits there until a pointer happens to land on it.
-   No longer icon-quiet tier (DESIGN.md's Family Roles table and Core-Region
-   Takeover section updated to match: icon-quiet's own contract is "hover is
-   a tonal glyph filter, never a background wash," which this rule now
-   deliberately breaks). Recast as an accent-tinted pill: a light accent wash
+   Deliberately NOT the icon-quiet tier (DESIGN.md's Family Roles table and
+   Core-Region Takeover section note the exception: icon-quiet's own
+   contract is "hover is a tonal glyph filter, never a background wash,"
+   which this rule breaks): a resting-transparent, ghost-text-colored
+   treatment reads as near-invisible next to the table it controls, since
+   nothing signals a collapse/expand control sits there until a pointer
+   lands on it. Recast as an accent-tinted pill instead: a light accent wash
    at rest (rgba(var(--dz-accent-values), 0.08), so it reads as a control -
    not dead space - independent of hover) that strengthens to the theme's
-   shared --dz-btn-hover-bg wash (0.1 alpha, the same across every scheme) on hover, the same
-   token every other ghost/icon-quiet control uses so the escalation matches
-   the rest of the app. The chevron itself is colored --dz-accent-color
-   instead of the generic ghost-text so it draws the eye the way an
-   affordance should. Widened from core's 16px to the button system's own
-   icon hit-box token (--dz-btn-icon-box, 28px) - comfortably over the
-   accessible >=24px hit-target floor - and centered via flex, since the
-   glyph itself stays small while the box grows. */
+   shared --dz-btn-hover-bg wash (0.1 alpha, the same across every scheme)
+   on hover, the same token every other ghost/icon-quiet control uses so the
+   escalation matches the rest of the app. The chevron itself is colored
+   --dz-accent-color instead of the generic ghost-text so it draws the eye
+   the way an affordance should. Widened from core's 16px to the button
+   system's own icon hit-box token (--dz-btn-icon-box, 28px) - comfortably
+   over the accessible >=24px hit-target floor - and centered via flex,
+   since the glyph itself stays small while the box grows. */
 .page-devices > .splitter {
     width: var(--dz-btn-icon-box);
     display: flex;
@@ -912,28 +893,27 @@ a.btnstyle {
     box-shadow: var(--dz-btn-focus-ring);
 }
 
-/* Automation Wizard footer (owner refinement viii, 2026-07-17): FULL/filled
-   treatment for every footer action, including Back and Cancel - overrides
-   the earlier ghost assignment those two inherited from plain .btn-default.
-   Scoped to .aw-footer so the theme-wide .btn-default GHOST convention (used
-   everywhere else in the app) is untouched; two classes (0,2,0) beats the
-   ghost rule's one-class .btn-default (0,1,0) even though both carry
-   !important, per the shared cascade-tie rule documented throughout this
-   file. Back's icon (<i class="icon-arrow-left">, a Bootstrap glyphicon
-   sprite) is forced pure white unconditionally by core's own
-   app/events/Events.css:577-580 (".aw-modal i[class^='icon-']" /
-   "i[class*=\" icon-\"]" -> "filter: brightness(0) invert(1)") in EVERY
-   scheme - measured live (Playwright, both schemes): on the old ghost/
-   transparent background that white icon was invisible against the light
-   page ("light-on-light"), while on the dark scheme's darker chrome behind
-   the modal it happened to read fine. Filling the button with the accent
-   background turns that same forced-white icon into the exact contrast
-   the rule was already trying to produce (white-on-accent), and the text
-   color below is set explicitly to --dz-btn-primary-text (not left to
-   inherit the old ghost --dz-btn-ghost-text) for the same reason.
-   All three buttons (Back, Cancel, Next) share md-tier padding and align-items:
-   center on both footer flex containers so heights compute from the buttons,
-   not from flex-stretch (task B9 height-uniformity check). */
+/* Automation Wizard footer: FULL/filled treatment for every footer action,
+   including Back and Cancel, overriding the ghost treatment those two would
+   otherwise inherit from plain .btn-default. Scoped to .aw-footer so the
+   theme-wide .btn-default GHOST convention (used everywhere else in the
+   app) is untouched; two classes (0,2,0) beats the ghost rule's one-class
+   .btn-default (0,1,0) even though both carry !important, per the shared
+   cascade-tie rule documented throughout this file. Back's icon
+   (<i class="icon-arrow-left">, a Bootstrap glyphicon sprite) is forced
+   pure white unconditionally by core's own app/events/Events.css:577-580
+   (".aw-modal i[class^='icon-']" / "i[class*=\" icon-\"]" ->
+   "filter: brightness(0) invert(1)") in EVERY scheme: on a ghost/
+   transparent background that white icon would be invisible against the
+   light page ("light-on-light"), while on the dark scheme's darker chrome
+   behind the modal it happens to read fine. Filling the button with the
+   accent background turns that same forced-white icon into the contrast
+   the core rule was already trying to produce (white-on-accent), and the
+   text color below is set explicitly to --dz-btn-primary-text (not left to
+   inherit the ghost --dz-btn-ghost-text) for the same reason. All three
+   buttons (Back, Cancel, Next) share md-tier padding and align-items:
+   center on both footer flex containers so heights compute from the
+   buttons, not from flex-stretch. */
 .aw-footer-left {
     display: flex;
     align-items: center;
@@ -959,12 +939,10 @@ a.btnstyle {
    Wrap button's icon is core's Bootstrap 2 glyphicon sprite
    (.icon-align-justify, bootstrap.css's generic [class^="icon-"] rule fixes
    EVERY such icon at a flat 14x14px raster tile) which reads visibly
-   smaller/fainter beside the bold "A" glyphs - owner report 2026-07-17
-   (item ix). All three buttons already share one tier (.btn.btn-default.
-   btn-xs - confirmed identical outer box via the button-contract census,
-   single cluster/signature for all three), so this is a glyph-only fix.
-   icon-align-justify is used nowhere else in core (grepped), so enlarging
-   it here is safe. Scaling the raster tile up toward the --dz-icon-size-sm
+   smaller/fainter beside the bold "A" glyphs. All three buttons already
+   share one tier (.btn.btn-default.btn-xs), so this is a glyph-only fix.
+   icon-align-justify is used nowhere else in core, so enlarging it here is
+   safe. Scaling the raster tile up toward the --dz-icon-size-sm
    token (16px, "inline/tab ionicons") via transform keeps the fix a single
    declarative rule instead of fragile sprite-sheet background-position/
    background-size math (resizing via width/height alone would just reveal

@@ -130,7 +130,7 @@ body.dashMobile table.mobileitem td.name a {
    that link was never meant to carry this arrow: its anchor is
    display:block;height:18px with only the icon as in-flow content, so this
    block-level ::after started a second line and spilled the glyph below the
-   18px box into the first data row (cards-polish task-5d). th is dropped
+   18px box into the first data row. th is dropped
    here, not from the base badge rule above, since the badge's background/
    size there is invisible on the banner anyway (it matches the th's own
    accent background) and removing it isn't needed to fix the defect. */
@@ -144,16 +144,15 @@ body.dashMobile table.mobileitem td.name a:after {
     width: var(--dz-mobile-card-name-badge-size);
 }
 
-/* MITIGATION (core ae507c7aae, 2026-03-30): core sets an inline
-   white-space:nowrap on the Temperature status cell only (dashboard_mobile.
-   html:469; Weather/Utility have no equivalent). table.mobileitem stays
+/* Core sets an inline white-space:nowrap on the Temperature status cell only
+   (dashboard_mobile.html:469; Weather/Utility have no equivalent). table.mobileitem stays
    display:table while its rows/cells are overridden to flex (above), so the
    browser still runs the table auto-layout min-content algorithm on it; an
    unbreakable status string (e.g. "58 % (Comfortable)") forces the whole
    table wider than its 100%-of-container target, and core's own
    SECTION.dashCategory{overflow:hidden} (style.css:2268) then silently
    clips the oversized table inside the screen edge instead of showing a
-   visible overflow (cards-polish task-5d investigation). !important beats
+   visible overflow. !important beats
    the inline style, which an external rule can't outrank otherwise.
    overflow-wrap covers the same failure mode for any future long,
    naturally-unbreakable status content (no core nowrap involved) so the
@@ -191,7 +190,7 @@ body.dashMobile table.mobileitem .btn-group .btn {
 
 /* Mobile-row button chip (.btn-mini: On/Off, Contact, Siren, selector levels;
    core views/dashboard_mobile.html renders every row control with this class).
-   Aligned to the DESIGN.md xs button tier (owner fix wave 2026-07-19): padding
+   Aligned to the DESIGN.md xs button tier: padding
    and font come from the tier's tokens (--dz-btn-pad-xs, --dz-text-micro, the
    tier DESIGN.md declares explicit on .btn-mini) instead of the raw 4px 10px /
    xs-size pair this rule carried; height is unchanged (the forced
@@ -213,17 +212,10 @@ body.dashMobile table.mobileitem .btn-mini {
     box-sizing: border-box;
 }
 
-/* Padding restatement dropped (cleanup): the base rule above already pins the
-   same tier padding with !important on every .btn-mini state. Also covers
-   the active selector level: core marks it with .btn-info (views/
-   dashboard_mobile.html, verified live), so this rule alone already renders
-   it correctly (--dz-accent-color/--dz-accent-text are the exact values
-   --dz-btn-toggle-selected-bg/-text alias). A dedicated ".btn-mini.btn-
-   selected" rule this file carried for the active level (targeting a class
-   core emitted at the time the rule was written) was removed as dead code
-   (selector-segmented spec, 2026-08-08 cleanup): core PR #6871 replaced
-   .btn-selected with .btn-info in this exact template that same day, after
-   the rule landed, so it never matched live markup. */
+/* Core marks the active selector level with .btn-info (views/
+   dashboard_mobile.html), and --dz-accent-color/--dz-accent-text are the
+   exact values --dz-btn-toggle-selected-bg/-text alias, so this rule alone
+   renders the active state correctly. */
 body.dashMobile table.mobileitem .btn-mini.btn-info,
 body.dashMobile table.mobileitem .btn-mini.active,
 body.dashMobile table.mobileitem .btn-mini:active {
@@ -275,30 +267,27 @@ body.dashMobile table.mobileitem .selectorlevels > select {
    buttons as direct children of the ng-if span (span > button), never
    nested span > span > button.
 
-   ONE joined segmented control. OWNER-PICKED DIRECTION (2026-08-08, gate
-   round 3): the theme's OWN connected-toolbar family (css/buttons.css:
-   500-529), the same mechanism as the desktop shell in css/cards.css - see
-   that file's comment for the full gate history (three rejected container-
-   clip rounds, Task 3's five-candidate strip gate, the round-3 natural-
-   width tweak). border-radius from --dz-btn-radius (the radius .btn-mini
-   already carries unrestated from buttons.css, so the shell agrees with its
-   own segments), overflow:hidden (still needed: rounds the group's actual
-   exterior regardless of which chip lands at a wrap corner, same reasoning
-   as the desktop shell), no shell fill (background: transparent - the
-   ghost-style ONLY needs a border seam now, not an opaque shell to divide
-   against). This is also the fix for the squash class the Timers #updelclr
-   rule below covers for forms (census key squash::Dashboard-classic::
-   #status): the census's structural, group-scoped exemption (task-2-
-   report.md) is unaffected by this rewrite - it keys on DOM shape
-   (span > span > .btn-mini under this exact host), not on fill/border.
+   ONE joined segmented control, reusing the theme's OWN connected-toolbar
+   family (css/buttons.css:500-529), the same mechanism as the desktop shell
+   in css/cards.css - see that file's comment for the selection rationale.
+   border-radius from --dz-btn-radius (the radius .btn-mini already carries
+   unrestated from buttons.css, so the shell agrees with its own segments),
+   overflow:hidden (still needed: rounds the group's actual exterior
+   regardless of which chip lands at a wrap corner, same reasoning as the
+   desktop shell), no shell fill (background: transparent - the ghost-style
+   ONLY needs a border seam now, not an opaque shell to divide against).
+   This also fixes the wrapped-buttons collision the Timers #updelclr rule
+   below covers for forms: that exemption keys on DOM shape (span > span >
+   .btn-mini under this exact host), not on fill/border, so it is unaffected
+   by this rewrite.
 
    WRAP-ROW GEOMETRY (same decision as the desktop shell, rendered and
    compared on this exact mobile surface, not assumed to transfer):
    justify-content:flex-end anchors a wrapped row to the group's own right
    edge (margin-left:auto below pins the same edge), gap:0 sits it flush
    against the row above so the borders touch and read as one connected
-   shape. The rejected alternative (a small gap between rows) read as two
-   separate mini-groups here too. */
+   shape. A small gap between rows instead reads as two separate
+   mini-groups here too. */
 body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) {
     display: flex;
     flex-wrap: wrap;
@@ -323,8 +312,8 @@ body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) > span
    span wraps exactly one chip, so a chip is always both the first AND last
    child of ITS OWN parent) - the position tests below target the INNER
    SPAN's position among the host's direct children instead, then reach
-   into it for the .btn-mini, matching the selector shape this project's
-   S1/S2 gate-round payloads already established for this exact markup. */
+   into it for the .btn-mini, matching the selector shape already
+   established for this exact markup. */
 body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) .btn-mini {
     /* Pulls every non-row-first chip 1px left so its own left border
        overlaps the previous chip's right border into one shared 1px
@@ -369,8 +358,8 @@ body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) .btn-m
     border-color: var(--dz-accent-color) !important;
 }
 
-/* Focus ring, inset - RE-VERIFIED for gate round 3 (see the desktop shell's
-   matching comment in css/cards.css for the live test): with real per-chip
+/* Focus ring, inset (see the desktop shell's matching comment in
+   css/cards.css for the live test): with real per-chip
    borders now in play, the outward ring was tested against the family's
    own standard treatment and still clips down to almost nothing on a
    square-cornered chip that lands at the shell's rounded wrap-corner
@@ -384,8 +373,7 @@ body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) .btn-m
 
 /* Timers form actions: core's #updelclr is a rigid 3-cell table (views/
    timers.html:35-47) that wraps its buttons with zero gap on phones. Flex
-   with a gap makes wrapping intentional instead of collision-shaped.
-   (mobile-polish task 3; census key squash::Timers::#updelclr) */
+   with a gap makes wrapping intentional instead of collision-shaped. */
 @media (max-width: 979px) {
     #updelclr, #updelclr tbody, #updelclr tr { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; } /* future --dz-gap token site (spacing project) */
     #updelclr td { display: contents; }
@@ -399,8 +387,7 @@ body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) .btn-m
    ace-editor row, and the ace-editor row squashes against Save/Delete, both
    with near-zero gap. Flex with a gap at both levels makes the wrap
    intentional. Scope is the wrap gap only, not the Events page's horizontal
-   overflow (owned elsewhere).
-   (mobile-polish task 3; census key squash::Events::form.form-inline[1]) */
+   overflow (owned elsewhere). */
 @media (max-width: 979px) {
     .events-editor-file__header form.form-inline { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; } /* future --dz-gap token site (spacing project), matches #updelclr gap above */
     .events-editor-file__header form.form-inline .pull-right { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; } /* future --dz-gap token site (spacing project), matches #updelclr gap above */
@@ -409,8 +396,7 @@ body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) .btn-m
        (EventViewer.html:9); with the flex gap above the two spacings stack
        additively (16px effective) once the button wraps onto its own line.
        Zero the inline margin so the flex gap is the only spacing, a
-       consistent 8px like every other gap in this file.
-       (task 5 leftover from task 3) */
+       consistent 8px like every other gap in this file. */
     .events-editor-file__header form.form-inline .btn-group {
         margin-left: 0;
     }
@@ -420,9 +406,9 @@ body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) .btn-m
    the file tree (fixed width: 300px) beside the editor pane (flex: 1) in a
    row. At 360px that alone is wider than the viewport before either pane's
    own content (ACE gutter, toolbar, Save/Delete) is even considered, so the
-   whole page scrolls sideways and the editor is mostly off-screen (census
-   keys edge::Events::*, task-5 report). Stack tree above editor instead:
-   the tree gets the full width and a bounded, independently-scrolling
+   whole page scrolls sideways and the editor is mostly off-screen. Stack
+   tree above editor instead: the tree gets the full width and a bounded,
+   independently-scrolling
    height (its child nav.events-editor-tree is already flex:1 + overflow-y:
    scroll, Events.css:119-124, so it just needs a definite parent height to
    size against); the editor takes the rest of .events-editor's fixed
@@ -464,7 +450,7 @@ body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) .btn-m
        px horizontal document scroll even though every individual element
        is already correctly clipped by .ace_scroller's own overflow:hidden
        (measured: 402-424px range on a 412px viewport, no single offending
-       element, only visible via document.scrollWidth - see task-5 report). */
+       element, only visible via document.scrollWidth). */
     .events-editor__editor {
         min-height: 0;
         overflow-x: hidden;
@@ -475,7 +461,7 @@ body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) .btn-m
    single-line height:30px and positions .events-editor-file__content
    (the ACE host) at a matching absolute top:46px (app/events/Events.css:
    256-286), assuming the header form never wraps.
-   The task-3 flex-wrap fix (above) makes the header wrap onto multiple
+   The flex-wrap fix above makes the header wrap onto multiple
    rows on phones, but the fixed height/top pair does not grow with it, so
    the wrapped Enabled/Disabled and Save/Delete rows visually sit on top of
    the editor's first lines instead of pushing it down. Let the header
@@ -507,7 +493,7 @@ body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) .btn-m
     /* position: relative, not static: ACE mounts its internal scroller/
        gutter layers (.ace_scroller etc) as position:absolute children of
        THIS element and expects it to be their containing block. Switching
-       to static (tried first) un-anchors them from their real parent; they
+       to static un-anchors them from their real parent; they
        fall back to the next positioned ancestor up the tree
        (.events-editor-file, Events.css:252-254) and render starting at
        ITS top instead - i.e. under the header instead of after it, visibly

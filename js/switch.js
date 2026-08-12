@@ -1,7 +1,7 @@
 function setDeviceSwitch(idx, status) {
     var switchState = switchLabels();
 
-    /* Trim whitespace — Angular templates include newlines in text nodes */
+    /* Trim whitespace - Angular templates include newlines in text nodes */
     if (typeof status === "string") status = status.trim();
 
     /* The same device can render as SEVERAL cards at once (classic page,
@@ -35,7 +35,7 @@ function setDeviceSwitch(idx, status) {
                         tr.find("#img1 img").click();
                     }
                 } else {
-                    /* Switches — use descendant selector, upstream wraps img in div */
+                    /* Switches - use descendant selector, upstream wraps img in div */
                     tr.find("#img img").click();
                 }
             });

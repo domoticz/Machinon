@@ -2,9 +2,9 @@
    talks to Domoticz about theme settings lives here; settings-store.js owns
    the in-memory theme object and the appliers. Store is three uservariables
    (theme-<folder>-features/-custom/-colors): safe and isolated, cannot clobber
-   core preferences. Native ThemeSettings storage was rejected (storesettings
-   rewrites the whole settings form and blanks absent fields; see
-   dz-themesettings-probe.js and the upstream issue). Per-user readiness:
+   core preferences. The native storesettings command is not used for this:
+   it rewrites the whole settings form and blanks absent fields, which this
+   theme never wants for a partial theme-settings write. Per-user readiness:
    consumers resolve settings through dzMergeSettingsLayers(defaults, stored,
    perUser); perUser is null until core ships per-user storage, at which point
    it becomes a third layer here without touching callers. */
@@ -13,7 +13,7 @@ var DZ_SETTINGS_SCHEMA_VERSION = 1;
 
 /* Deep-clone reference-typed values (icons array, user_schemes array,
    color_scheme object) so every snapshot owns its own copy. The overlay
-   (Task 3) keeps several snapshots alive at once (defaults, stored, per-user);
+   keeps several snapshots alive at once (defaults, stored, per-user);
    sharing a nested reference between them would let an in-place mutation of one
    silently leak into another. Scalars pass through untouched. The three
    reference-typed values are JSON-serializable, so a JSON round-trip is a safe
@@ -198,10 +198,9 @@ function dzApiLoad() {
    dzIsAdmin() check fires long after boot (a user-triggered save), so it
    never meets an unset my_config; this seeding path runs automatically at
    cold-boot time instead, and an instant read of dzIsAdmin() here reliably
-   loses that race (confirmed via TDD: task-4 harness, brief Step 1),
-   silently skipping the whole migration with no log and no retry (theme
-   stays on factory defaults for the session instead of the legacy-loaded
-   values). Poll briefly instead of trusting the instant read, same
+   loses that race, silently skipping the whole migration with no log and no
+   retry (theme stays on factory defaults for the session instead of the
+   legacy-loaded values). Poll briefly instead of trusting the instant read, same
    setInterval mechanism as checkAngular -- but bounded, unlike
    checkAngular's unconditional poll-forever: checkAngular has nothing to
    fall back to if Angular never boots, while this path already has a safe
@@ -229,9 +228,9 @@ function dzWaitForAdminKnown() {
    applies onto theme, so a full snapshot afterwards IS the migrated
    single-layer state. Legacy variables are left in place, frozen (the
    downgrade story, spec): a core rolled back to a version without the
-   native API still finds its uservariables untouched. Fail closed
-   (task-3 review carry-forward): dzThemeSettingsLoad and
-   dzApiWriteInstanceFull never reject on their own (traced: the ajax/fetch
+   native API still finds its uservariables untouched. Fail closed:
+   dzThemeSettingsLoad and dzApiWriteInstanceFull never reject on their own
+   (traced: the ajax/fetch
    layers underneath both resolve tri-state/ok-flag outcomes rather than
    rejecting), but the synchronous cacheThemeSettings()/JSON.stringify call
    in between can still throw (e.g. localStorage quota in private
@@ -471,7 +470,7 @@ var unableCreateUserVariable = false;
 
 /* Getter so settings-store.js does not reach across files for the raw flag;
    both are global-script scope at runtime, but the getter keeps the read
-   explicit at the call site (task-3-brief.md Step 2). */
+   explicit at the call site. */
 function dzUnableToCreateUserVariable() { return unableCreateUserVariable; }
 
 /* Tri-state load outcome, shared by dzApiLoad above (native transport) and
@@ -532,10 +531,11 @@ function dzThemeSettingsSaveNow(action) {
     $.each(theme.features, function(key, feature) { if (feature.enabled === true) settings.push(feature.id); });
 
     /* Positional contract: readers index into this array, APPEND ONLY. 0-6
-       original; 7/8 scheme + base; 9 saved colour presets; 10/11 card widths
-       (previously cache-only); 12 camera refresh seconds, closing the
-       cache-only gap like 10/11 did for card widths. getCustomThemeSettings
-       tolerates short arrays via length guards. */
+       original; 7/8 scheme + base; 9 saved colour presets; 10/11 card widths;
+       12 camera refresh seconds. Positions 10-12 close the cache-only gap
+       for settings that used to live only in localStorage and never
+       followed the user across browsers. getCustomThemeSettings tolerates
+       short arrays via length guards. */
     var custom = [
         theme.standby_after, theme.button_name, theme.custom_url,
         theme.logo, theme.icons, theme.background_img, theme.background_type,

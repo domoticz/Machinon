@@ -15,11 +15,10 @@
 */
 /* Data Tables */
 /* overflow-x: auto + max-width: 100% keep any table wider than its wrapper scrolling
-   INSIDE the wrapper, never dragging the whole page sideways. Originally only applied
-   narrow viewports (max-width: 767px), because that is where the Users table was found
-   overflowing (dz-mobile-sweep.js). Widened to all widths: it is a containment
-   backstop against ANY future wide table/column, at any viewport, at zero visual cost
-   when the table already fits (auto only shows a scrollbar when content overflows). */
+   INSIDE the wrapper, never dragging the whole page sideways. Applied at all widths: it
+   is a containment backstop against ANY future wide table/column, at any viewport, at
+   zero visual cost when the table already fits (auto only shows a scrollbar when
+   content overflows). */
 .dataTables_wrapper {
 		border: 1.5px solid;
     border-color: transparent;
@@ -28,7 +27,7 @@
     box-shadow: var(--dz-elev-card);
     overflow-x: auto;
     max-width: 100%;
-    /* Thin scrollbar affordance (Task 8 fix-wave, 2026-07-18), mirroring the
+    /* Thin scrollbar affordance, mirroring the
        existing pattern at css/cards.css:414-450: without it, the overflow-x:
        auto containment above is functionally invisible (no visual cue that a
        table scrolls) until a pointer happens to hover the horizontal
@@ -63,9 +62,8 @@
 }
 
 /*
-  #/Devices viewport fit (owner request, tables-holistic follow-up). Log already gets
-  this treatment (css/logpage.css's calc(100vh - 145px) fix); Devices was left as an
-  accepted vertical-overflow exception in the table census until now. Same idea here:
+  #/Devices viewport fit. Log already gets
+  this treatment (css/logpage.css's calc(100vh - 145px) fix). Same idea here:
   constrain the page's outermost container to the viewport, let flex hand the leftover
   space to the one area that actually needs to scroll, so the PAGE never overflows even
   though the DataTable underneath still has 230+ rows.
@@ -130,7 +128,7 @@
     min-height: 0;
 }
 
-/* #/Devices stacking breakpoint (<=979px, Task 6 mobile-polish, owner defect 5).
+/* #/Devices stacking breakpoint (<=979px).
    Core's own app/devices/Devices.css:10-12 sets `.page-devices { display: flex; }`
    with NO flex-direction and no media query of its own (grepped Devices.css and
    Devices.html: nothing responsive), so it stays a ROW - filters | splitter |
@@ -139,9 +137,8 @@
    (buttons.css:863, --dz-btn-icon-box) leaves so little width for the table on a
    360-412px phone that the DataTable's own overflow-x:auto (this file, line ~29)
    quietly absorbs the squeeze INSIDE the table's cell instead of the page
-   overflowing - confirmed live (task6-before-360x780-expanded.png): scrollWidth
-   stays exactly at the viewport width (no page-level scrollbar, so the census's
-   overflow check passes), but the table itself renders unusable at ~130px wide -
+   overflowing - confirmed live: scrollWidth
+   stays exactly at the viewport width (no page-level scrollbar), but the table itself renders unusable at ~130px wide -
    the pager wraps ("revious" instead of "Previous"), most columns are clipped.
    Stack the three children in a column instead, filters above table, matching
    core's own DOM order (Devices.html:15-29: filters, then splitter, then
@@ -278,7 +275,7 @@ table.dataTable {
     color: var(--dz-table-header-text) !important;
 }
 
-/* DataTables PAGER (Task 8, Phase C2, 2026-07-17). F6 source, confirmed
+/* DataTables PAGER. Confirmed
    live: ".fg-button" is not defined by ANY vendor stylesheet in this
    checkout (grepped css/demo_table_jui.css, css/ui-darkness/jquery-ui.min.css,
    every *.css under www/) - it is a JS-injected class STRING literal inside
@@ -286,8 +283,8 @@ table.dataTable {
    hit: `sPaging:"dataTables_paginate fg-buttonset ui-buttonset
    fg-buttonset-multi ui-buttonset-multi paging_"`), paired at runtime with
    jquery-ui's OWN .ui-button/.ui-state-default classes (css/ui-darkness/
-   jquery-ui.min.css). There never was an .fg-button rule to find; the
-   pager's visual styling used to come entirely from ui-button/ui-state-*
+   jquery-ui.min.css). There is no .fg-button rule to find; without this
+   block, the pager's visual styling comes entirely from ui-button/ui-state-*
    plus this theme's font override (css/typography.css:149).
    This lives HERE, not in css/buttons.css, because the pager's markup nests
    its <a class="fg-button ui-state-default"> anchors inside DataTables'
@@ -317,7 +314,7 @@ table.dataTable {
     cursor: default;
 }
 
-/* Pager width fix (Task 8 fix-wave, 2026-07-18). Vendor
+/* Pager width fix. Vendor
    www/css/demo_table_jui.css:52 pins ".paging_full_numbers" to a hard
    "width: 350px !important", sized for the original First/Previous/1..10/
    Next/Last row before this theme's ghost padding (--dz-btn-pad-xs above)
@@ -348,15 +345,13 @@ table.dataTable {
 
 /* Base header alignment: LEFT is correct for the majority of DataTables
    columns (text: Name/Type/Address/... across Devices/Hardware/Users/
-   Mobile/Cam/Timers). Task TB5 of the tables-holistic project replaces the
-   legacy "-webkit-left" keyword with the standard value (both render
-   identically; the vendor prefix was never load-bearing, see task TB1's
-   census notes on how Chromium reports it verbatim instead of folding it to
-   "left") and layers the per-column numeric/datetime/icon overrides below
-   on top of this default, rather than leaving every column stuck at left
-   regardless of type (the census's TB1 finding: numeric data was never
-   right-aligned anywhere in this theme). Padding uses the TB2 cell-padding
-   tokens so header height/rhythm matches the body rows below. */
+   Mobile/Cam/Timers). This replaces the legacy "-webkit-left" keyword with
+   the standard value (both render identically; the vendor prefix is never
+   load-bearing - Chromium reports it verbatim in DevTools instead of
+   folding it to "left") and layers the per-column numeric/datetime/icon
+   overrides below on top of this default, rather than leaving every column
+   stuck at left regardless of type. Padding uses the --dz-table-header-pad
+   token (dz-tokens.css); body cells use their own --dz-table-cell-pad. */
 table.dataTable thead th,
 table.dataTable thead th.ui-state-default {
     background: var(--dz-table-header-bg) !important;
@@ -368,7 +363,7 @@ table.dataTable thead th.ui-state-default {
     border: none !important;
 }
 
-/* Body-cell padding rhythm (TB2 tokens), same rationale as the header
+/* Body-cell padding rhythm, same rationale as the header
    above: DataTables/core ship a 3px 10px default (demo_table_jui.css);
    this brings body cells onto the theme's own token instead. */
 table.dataTable tbody td {
@@ -408,11 +403,10 @@ tr.odd td.sorting_1, tr.even td.sorting_1 {
 
 /* Inter is wider than Open Sans, which wrapped the Devices table's Last Seen date/time
    cells onto two lines (25 wrapped cells measured on #/Devices at 1440px with no nowrap
-   rule at all). A first attempt made ALL table.display td cells nowrap, with a positional
-   exception for the Name column; that was too broad; it also blocked SubType/Data from
-   wrapping, which pushed the whole page into horizontal scroll (body scrollWidth 1723 vs
-   1425 at 1440x900, 1714 vs 1244 at 1024x768, measured on #/Devices). The lesson: scope
-   nowrap to the ONE column that actually needs it, never to the whole row. Last Seen
+   rule at all). Scope nowrap to the ONE column that actually needs it, never to the whole
+   row: making ALL table.display td cells nowrap also blocks SubType/Data from
+   wrapping, which pushes the whole page into horizontal scroll (body scrollWidth 1723 vs
+   1425 at 1440x900, 1714 vs 1244 at 1024x768, measured on #/Devices). Last Seen
    carries no id/class of its own (app/devices/Devices.js columns array: title
    'Last Seen', data 'LastUpdate', no className, unlike its neighbours Data/actions which
    do set one), so it is targeted positionally (14th column, verified against that same
@@ -424,13 +418,11 @@ tr.odd td.sorting_1, tr.even td.sorting_1 {
 }
 
 /* ====================================================================
-   DataTables per-column alignment (task TB5 of tables-holistic; the
-   census's remaining FAIL inventory after TB3/TB4 - 28 columns, mirrored
-   1:1 on mobile - was every numeric/datetime/icon column below, still
-   stuck at the header default (left) set above while their data cells
-   render at the browser default (also left), because nothing in the
+   DataTables per-column alignment: every numeric/datetime/icon column
+   below was stuck at the header default (left) set above while their data
+   cells render at the browser default (also left), because nothing in the
    theme ever right-aligned a number or centered an icon outside the
-   report tables (TB3's section, a separate bug in the opposite
+   report tables (a separate rule set, in the opposite
    direction). Policy: text->left (the default above, untouched),
    numeric/datetime->right, icon->center - both header AND data, per
    column, so the two always agree. Most of these columns carry no
@@ -442,7 +434,7 @@ tr.odd td.sorting_1, tr.even td.sorting_1 {
    rule would not. */
 
 /* Devices (#devices), 14 columns - www/app/devices/Devices.js columns
-   array, confirmed live (DOM dump, task TB5): 0 row-selector(text)
+   array, confirmed live (DOM dump): 0 row-selector(text)
    1 state-icon(icon) 2 Idx(numeric) 3 Hardware(text) 4 ID(numeric)
    5 Unit(numeric) 6 Name(text) 7 Type(text) 8 SubType(text)
    9 Data(text, .devices-data-col) 10 SignalLevel(numeric)
@@ -507,14 +499,12 @@ tr.odd td.sorting_1, tr.even td.sorting_1 {
 /* Cam active-devices (#activetable), 3 columns - www/views/cam.html
    RefreshActiveDevicesTable(): 0 Name(text) 1 When(text, "On"/"Off")
    2 Delay(numeric, seconds). Written structurally alongside the rest of
-   this table's columns even though the test instance's census could not
-   sample it: core only populates this table's rows after a camera row
-   is clicked in the UI (RefreshActiveDevicesTable(idx), fired from the
-   #cameratable row click handler), which the census harness's plain
-   page-navigation never does, so the table stays empty (0 rows) in every
-   census run despite a real active-device row existing in the database
+   this table's columns: core only populates this table's rows after a
+   camera row is clicked in the UI (RefreshActiveDevicesTable(idx), fired
+   from the #cameratable row click handler), so a plain page load renders
+   it empty (0 rows) even when an active-device row exists in the database
    (seeded via json.htm addcamactivedevice and confirmed via
-   getcamactivedevices) - see task TB5's report for the exception entry. */
+   getcamactivedevices). */
 #activetable thead th:nth-child(3),
 #activetable tbody td:nth-child(3) {
     text-align: right;
@@ -630,23 +620,19 @@ img[src$="/next.png"] {
 
 /* ====================================================================
    Report tables (core app/report/*.js render these; theme owns look).
-   Task TB3 of the tables-holistic project (dz-table-census.js's "failing
-   test": report-surface alignment 32 desktop + 32 mobile FAILs, totals
-   contrast 2.65:1 on 3 rows, before this section landed).
 
    Markup (confirmed live, #/Devices/<idx>/Report and its month drilldown):
    <table id="reporttable" class="display myrighttable dataTable ...">,
    built by DataTables from a `columns` array core defines per report type
    (CounterReport.js, TemperatureReport.js, RainReport.js - WindReport.js
    and EnergyMultiCounterReport.js follow the identical shape, so these
-   rules cover them too even though they are outside this task's censused
-   surfaces). Column order:
+   rules cover them too). Column order:
      year view:  Month/Period (text)  | ...numeric metrics... | trend (icon)
      month view: Day (numeric)  | "" weekday (text) | ...numeric metrics... | trend (icon)
    The totals row is a hand-built <tfoot> core appends after the DataTable
    draws (CounterReport.js:488, RainReport.js:275; TemperatureReport has none).
 
-   ROOT CAUSE of the alignment bug (verified TB1): core's own
+   ROOT CAUSE of the alignment bug (verified live): core's own
    `.myrighttable td` (www/css/style.css:1403) blanket right-aligns EVERY
    data cell regardless of column type, while this theme's own DataTables
    header rule (`table.dataTable thead th` above, css/tables.css) makes
@@ -689,13 +675,11 @@ img[src$="/next.png"] {
    2589, wired in app.constants.js:50) never sets an `aria` key, so
    DataTables always falls back to its English-only bundled default
    regardless of the active UI language. The other realistic way this
-   fingerprint breaks (Task 8 fix-wave, 2026-07-18): a future DataTables
+   fingerprint breaks: a future DataTables
    library version bump changing the bundled aria template's own wording
    (e.g. dropping the leading ": " or the "activate to sort..." phrasing
-   entirely) - independent of anything Domoticz core does. Same detection
-   path either way: the live census (see DESIGN.md's Table Contract) would
-   catch the regression the next time it runs, but nothing flags it before
-   that. */
+   entirely) - independent of anything Domoticz core does. Either way this
+   rule would silently stop matching, with no automated check to flag it. */
 #reporttable.myrighttable thead th[aria-label^=":"] {
     text-align: left;
 }
@@ -711,19 +695,18 @@ img[src$="/next.png"] {
     text-align: center;
 }
 
-/* Cell padding rhythm (task TB2 tokens) for the report tables' totals
+/* Cell padding rhythm for the report tables' totals
    row. #reporttable also carries the base `table.dataTable` class, so its
-   thead th and tbody td already inherit the same TB2 padding tokens from
+   thead th and tbody td already inherit the same padding tokens from
    the base `table.dataTable thead th` / `table.dataTable tbody td` rules
-   above (removed here 2026-07-18, fix-wave M8: they were an exact,
-   value-for-value duplicate, not an override); only `tfoot td` has no base
+   above (an exact, value-for-value duplicate would be redundant here); only `tfoot td` has no base
    rule to fall back on (DataTables never styles a <tfoot> itself), so it
    is the one leg that still needs stating here. */
 #reporttable.myrighttable tfoot td {
     padding: var(--dz-table-cell-pad);
 }
 
-/* Totals band (owner report h/m): core appends the <tfoot> with an INLINE
+/* Totals band: core appends the <tfoot> with an INLINE
    style pairing the theme's accent background with the theme's BODY-TEXT
    token (CounterReport.js:488, RainReport.js:275 -
    style="background:var(--dz-accent-color,#337ab7); color:var(--dz-body-
@@ -731,8 +714,8 @@ img[src$="/next.png"] {
    2.65:1 against the live Blue UI scheme's accent (needs 4.5:1). Inline
    styles beat any external selector regardless of specificity, so these
    need !important; that is the ONLY reason it appears here. Overriding at
-   the <tr> is enough: background-color does not inherit, but the census
-   script's contrast check (and real rendering) both fall back to the
+   the <tr> is enough: background-color does not inherit, but real
+   rendering falls back to the
    row's background for any cell that has no background of its own, and
    `color` DOES inherit, so every <td> in the row picks up the readable
    pairing without needing its own rule. */

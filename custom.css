@@ -3,9 +3,9 @@
 
 /* ONE-LEVEL IMPORT RULE: every @import below must point at a leaf CSS file
    (a file with no @import of its own), never at an aggregator file that itself
-   imports further files. Reason (measured, task-9 perf audit, section 4): the
-   browser cannot start fetching an @imported file until the file that imports
-   it has itself fully downloaded and been parsed, so each extra level of
+   imports further files. The browser cannot start fetching an @imported file
+   until the file that imports it has itself fully downloaded and been parsed,
+   so each extra level of
    nesting serializes one full round trip before its children even start. On a
    Fast 3G mobile profile the theme's imported children did not begin
    downloading until ~1019 ms, well after custom.css itself was requested at
@@ -42,18 +42,14 @@
 @import url("css/animate.css");
 @import url("css/dynamic-dashboard.css");
 
-/* custom.css grew as one large source-ordered file, so it is being split
-   it into focused feature files, but ONLY for features whose selectors are UNIQUE (appear nowhere
-   else). That matters because @import must precede all inline rules, so a feature file loads BEFORE
-   the rest of custom.css - safe only when the extracted rules can't collide with anything they now
-   jump over. Verified per file.
+/* custom.css is split into focused feature files, but ONLY for features whose selectors are
+   UNIQUE (appear nowhere else). That matters because @import must precede all inline rules, so a
+   feature file loads BEFORE the rest of custom.css - safe only when the extracted rules can't
+   collide with anything they now jump over.
 
-   Buttons WERE stuck here because a cross-cutting "Add fonts" grab-bag rule coloured .btnstyle3,
-   forcing the button block to sit late to override it. That grab-bag was dissolved (font + colour
-   now come from body inheritance; see the .ui-widget-content note below), so buttons became
-   position-independent and are now in css/buttons.css. Remaining in custom.css by structural
-   necessity: device-card/tile layout + grid + drag-drop (tightly interdependent, order-sensitive),
-   the small nav/sub-tabs region, forms, and the bold-heading rule - keep these as the base.
+   Remaining in custom.css by structural necessity: device-card/tile layout + grid + drag-drop
+   (tightly interdependent, order-sensitive), the small nav/sub-tabs region, forms, and the
+   bold-heading rule - keep these as the base.
 
    Direction for contributors: when you touch a rule that belongs to an existing feature file,
    migrate it there. Do NOT bulk-reorder rules into feature files (cascade-regression risk); the
@@ -86,22 +82,18 @@
 }
 
 /* jQuery UI's bundled ui-darkness theme forces white .ui-widget-content text (invisible in light
-   mode). Restore the theme text colour. Body already provides font-family (--dz-font-family) + colour
-   by inheritance for everything else, so the old cross-cutting "Add fonts" grab-bag rule was removed -
-   it conflated font + colour across unrelated components (buttons, nav, cards) and was the reason
-   buttons could not be extracted to their own file. */
+   mode). Restore the theme text colour; body already provides font-family (--dz-font-family) and
+   colour by inheritance everywhere else. */
 .ui-widget-content {
     color: var(--dz-body-text);
 }
 
-/* #lightcontent td / #utilitycontent td used to sit in this list too: they match
+/* Do not add #lightcontent td / #utilitycontent td to this list: they match
    EVERY <td> in a device card on the LightSwitches/Utility tab pages (bigtext,
-   lastupdate, type - not just name/status), so those two pages alone rendered
-   every card cell semibold while the identical markup on Dashboard/Scenes/
-   Temperature/Weather stayed regular. #lightcontent/#utilitycontent wrap nothing
-   but device cards and the empty-state <h2> (already covered by the h1-h4 rule
-   below; see views/lights.html, views/utility.html), so the two selectors were
-   pure blast radius with no remaining purpose - removed rather than narrowed. */
+   lastupdate, type - not just name/status), so the whole card would render
+   semibold instead of just name/status. #lightcontent/#utilitycontent wrap
+   nothing but device cards and the empty-state <h2> (already covered by the
+   h1-h4 rule below; see views/lights.html, views/utility.html). */
 h1,
 h2,
 h3,
@@ -118,14 +110,12 @@ h4,
     font-weight: var(--dz-weight-semibold) !important;
 }
 
-/* Owner gate verdict N2 "quiet status" (cards-polish, 2026-08-07): #status
-   used to share the semibold rule above with #name, so a card carried two
-   equal-weight full-contrast anchors (#name + #status) right next to
-   #bigtext's 22px accent-colored anchor - three simultaneous emphasis
-   points read as heavy. Dropping #status alone to regular weight leaves
-   #name as the card's one anchor by repetition/contrast; #bigtext is
-   untouched (that was N3, not picked). Paired with the metadata
-   line-height tighten on .item #type/#lastupdate (css/cards.css). */
+/* #status stays regular weight rather than sharing the semibold rule above with
+   #name: a card with two equal-weight full-contrast anchors (#name + #status)
+   right next to #bigtext's accent-colored anchor reads as three simultaneous
+   emphasis points, which is heavy. Dropping #status to regular weight leaves
+   #name as the card's one anchor by repetition/contrast. Paired with the
+   metadata line-height tighten on .item #type/#lastupdate (css/cards.css). */
 .item #status {
     font-weight: var(--dz-weight-regular) !important;
 }
@@ -140,9 +130,9 @@ h4,
 .version-badge {
     color: var(--dz-body-text) !important;
     /* Retint the glass gradient/glow to the active scheme's accent instead of a
-       fixed blue (owner report 2026-07-17, "core glass theme leakage"): the pill
-       stayed cold-blue under every scheme since views/about.html's inline <style>
-       hardcodes rgba(100,200,255,...). Text color above already adapted. */
+       fixed blue: the pill would otherwise stay cold-blue under every scheme,
+       since views/about.html's inline <style> hardcodes rgba(100,200,255,...).
+       Text color above already adapted. */
     background: rgba(var(--dz-accent-values), 0.18) !important;
     border-color: rgba(var(--dz-accent-values), 0.4) !important;
     /* dz-shadow-exception: blur-only halo, no spread. Matches none of the elevation
@@ -232,7 +222,7 @@ h4,
     display: none;
 }
 
-/* Hide upstream "Switching On/Off" notification — inconsistent timing */
+/* Hide upstream "Switching On/Off" notification - inconsistent timing */
 #notification {
     display: none !important;
 }
@@ -293,7 +283,7 @@ div#floorplancontent {
     height: 87%;
 }
 
-/* CSS fallback icons — survive Angular re-renders that overwrite JS-injected icons */
+/* CSS fallback icons - survive Angular re-renders that overwrite JS-injected icons */
 .timers_log .btnsmall[data-i18n="Log"]::before {
     font-family: var(--dz-font-icons);
     content: '\f21c';
@@ -311,7 +301,7 @@ div#floorplancontent {
     speak: none;
 }
 
-/* Hide ALL JS-injected icons — CSS ::before handles icons */
+/* Hide ALL JS-injected icons - CSS ::before handles icons */
 .timers_log .btnsmall i,
 .timers_log .btnsmall-sel i {
     display: none !important;
@@ -329,18 +319,17 @@ header.logo {
     position: relative;
 }
 /* overflow-x: auto + max-width: 100% mirror css/tables.css's
-   .dataTables_wrapper containment (task TB5 of tables-holistic, Hardware
-   [mobile] +167px sideways scroll): this wrapper holds each page's
+   .dataTables_wrapper containment: this wrapper holds each page's
    "Add/Edit" params form (Hardware/Cam/Mobile/Devices/Timers/...), and at
    least one of those forms carries a core-authored FIXED pixel width wider
    than a mobile viewport - www/app/hardware/Hardware.html:463's
-   `<select id="combotype" style="width:410px">` (410px > 360px), confirmed
-   live as the exact element whose bounding box drove #/Hardware's mobile
-   page past the viewport (its wrapper, .dataTables_wrapper, was already
-   properly contained; #hardwareparamstable is a plain
-   `table:not(.dataTable)`, styled two rules below, but never scrollable
-   until now). Scroll happens INSIDE this panel, never the page, at zero
-   cost when a form already fits (auto only shows a scrollbar on overflow). */
+   `<select id="combotype" style="width:410px">` (410px > 360px) drives
+   #/Hardware's mobile page past the viewport (its wrapper,
+   .dataTables_wrapper, was already properly contained; #hardwareparamstable
+   is a plain `table:not(.dataTable)`, styled two rules below, but never
+   scrollable without this). Scroll happens INSIDE this panel, never the
+   page, at zero cost when a form already fits (auto only shows a scrollbar
+   on overflow). */
 .page-content-container {
     background: var(--dz-widget-bg) !important;
     border: 1px solid var(--dz-accent-color) !important;
@@ -351,17 +340,16 @@ header.logo {
     color: var(--dz-body-text);
     /* Spec side effect: setting one overflow axis non-visible resolves the
        other axis to auto too, so overflow-y here computes auto sitewide
-       (~15 core templates use this class). No vertical effect intended and
-       none today (all usages are auto-height, verified 2026-07-18); if a
-       future usage gains a constrained height, embedded flyouts (e.g. the
-       device-icon-select dropdown) would clip HERE, this rule is why. */
+       (~15 core templates use this class). No vertical effect intended, since
+       all usages are auto-height; if a future usage gains a constrained
+       height, embedded flyouts (e.g. the device-icon-select dropdown) would
+       clip HERE, this rule is why. */
     overflow-x: auto;
     max-width: 100%;
-    /* Thin scrollbar affordance (Task 8 fix-wave, 2026-07-18), mirroring
-       css/cards.css:414-450 and css/tables.css's .dataTables_wrapper: the
-       overflow-x: auto containment above needs a visible cue that a panel
-       scrolls, on narrow viewports especially. height, not width: this
-       scrollbar is horizontal. */
+    /* Thin scrollbar affordance, mirroring css/cards.css and css/tables.css's
+       .dataTables_wrapper: the overflow-x: auto containment above needs a
+       visible cue that a panel scrolls, on narrow viewports especially.
+       height, not width: this scrollbar is horizontal. */
     scrollbar-width: thin;
     scrollbar-color: var(--dz-accent-color) var(--dz-body-bg);
 }
@@ -709,7 +697,7 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
     color: var(--dz-btn-primary-text);
 }
 
-/* Device log stat cards — upstream uses rgba(255,255,255,0.05) inline which is invisible in light mode */
+/* Device log stat cards - upstream uses rgba(255,255,255,0.05) inline which is invisible in light mode */
 .current-conditions .ng-scope[style*="background"] {
     background: var(--dz-widget-bg) !important;
     border-radius: 6px;
@@ -748,23 +736,20 @@ textarea {
 }
 
 /* Room picker (#comboroom, views/inc_topbar.html: "select#comboroom.combobox
-   .ui-corner-all") and every other themed <select> (owner refinement vii,
-   2026-07-17): the option-list surface joins the MENU family
-   (--dz-menu-bg), migrated off the old direct --dz-nav-bg reference this
-   rule used to read (nav.css's dropdown-menu already made that same move -
-   see --dz-menu-bg's own comment in dz-tokens.css). Selected/hover option
-   gets the same accent tint the dropdown-menu's own rows use for :hover
-   (css/nav.css ".navbar .nav .dropdown-menu li a:hover"), so a room
-   picker's popup reads as the same chrome as every other menu surface.
+   .ui-corner-all") and every other themed <select>: the option-list surface
+   joins the MENU family (--dz-menu-bg; see --dz-menu-bg's own comment in
+   dz-tokens.css). Selected/hover option gets the same accent tint the
+   dropdown-menu's own rows use for :hover (css/nav.css ".navbar .nav
+   .dropdown-menu li a:hover"), so a room picker's popup reads as the same
+   chrome as every other menu surface.
    Native <option>/<optgroup> styling is a browser-controlled native widget,
    not an ordinary DOM box: background-color and color are the only
-   properties most engines honor on it at all. Verified live (Chromium):
-   background/color apply as declared, but :hover on a plain (non-multiple)
-   <select>'s native popup is NOT honored - Chromium draws its own OS-style
-   highlight for whichever row the pointer is over, ignoring this rule
-   entirely; :checked IS honored, so the currently-selected room does pick
-   up the accent tint. Documented here rather than silently claimed as
-   fully working. */
+   properties most engines honor on it at all. In Chromium, background/color
+   apply as declared, but :hover on a plain (non-multiple) <select>'s native
+   popup is NOT honored - Chromium draws its own OS-style highlight for
+   whichever row the pointer is over, ignoring this rule entirely; :checked
+   IS honored, so the currently-selected room does pick up the accent tint.
+   Documented here rather than silently claimed as fully working. */
 select.ui-corner-all option,
 select.ui-corner-all optgroup {
     background: var(--dz-menu-bg);
@@ -886,14 +871,7 @@ select.ui-corner-all option:hover {
    ui-selectmenu-button, jQuery UI's <span> replacement for the <select>). The OPEN popup
    this button owns (.ui-selectmenu-menu, appended to <body>, never a descendant of this
    button) is body-level menu chrome on the --dz-menu-* family instead -- css/nav.css's
-   "SelectorStyle-1 popup" block, scanned by scripts/check-menus.sh. Two dead rules removed
-   from here 2026-08-11 (owner-reported unstyled-popup fix): an unscoped
-   `.ui-menu-item-wrapper.ui-state-active` that fought css/nav.css's properly-scoped
-   replacement over cascade order rather than losing to it cleanly, and `.selectorlevels-menu`
-   (core's dzLightWidget.js's current $select.selectmenu({...}) call passes no `classes`
-   option, so core never actually adds that class to the popup -- confirmed dead by grep,
-   both here and in core's own www/css/style.css, likely a leftover from an older core
-   version that did). */
+   "SelectorStyle-1 popup" block, scanned by scripts/check-menus.sh. */
 .ui-selectmenu-button.ui-button {
     width: auto !important;
     border-radius: 0;
@@ -908,28 +886,24 @@ select.ui-corner-all option:hover {
     outline: none;
 }
 
-/* Trigger button's remaining interactive states, owner-reported 2026-08-11: click-and-hold
-   turned the underline YELLOW. jQuery UI's own .ui-button ships one border-bottom-color
-   literal PER STATE (baseline #666 -- already replaced by the accent underline below via
-   .ui-corner-all; hover/focus #59b4d4 light-blue; :active #ffaf0f bright yellow, the
-   reported defect) -- confirmed live, this task: hover/focus/active all leaked their own
-   ui-darkness literal unchanged, only the REST state was actually themed. The open state has
-   a second, independent leak: the widget's own `classes: {"ui-selectmenu-button-open":
-   "ui-corner-top", ...}` option (below) swaps this button OFF ui-corner-all while open,
-   dropping the accent-underline rule out of the match set entirely (confirmed live: open
-   measured the same #59b4d4 as hover/focus, since a freshly-clicked button also keeps
-   :focus while open -- covered here explicitly rather than relying on that incidental
-   overlap). Every selector below is 2 classes + 1 pseudo-class/class, (0,3,0), beating
-   jQuery UI's own (0,2,0) per-state compounds on specificity alone -- no !important needed,
-   unlike css/sidemenu.css's .current_page_item fight with Bootstrap (that one loses on
-   specificity too; this one does not). background/outline already neutralize correctly via
-   the generic .ui-button:hover, .ui-button:focus rule above (confirmed live: background
-   stayed transparent in every state already; only border-bottom-color leaked, so that is
-   the only property repeated here). ui-darkness's matching selector list also names
-   `.ui-state-active`, but this widget never actually adds that CLASS to the trigger button
-   (confirmed live via a full matched-rule dump across rest/hover/active/open) -- only
-   jQuery UI's own selector text carries it, unreachable here, so it is not repeated as dead
-   weight. */
+/* Trigger button's remaining interactive states: click-and-hold turns the underline
+   yellow. jQuery UI's own .ui-button ships one border-bottom-color literal PER STATE
+   (baseline #666 -- already replaced by the accent underline below via .ui-corner-all;
+   hover/focus #59b4d4 light-blue; :active #ffaf0f bright yellow). Only the rest state is
+   themed by that rule; hover/focus/active each leak their own ui-darkness literal
+   unchanged. The open state has a second, independent leak: the widget's own `classes:
+   {"ui-selectmenu-button-open": "ui-corner-top", ...}` option (below) swaps this button
+   OFF ui-corner-all while open, dropping the accent-underline rule out of the match set
+   entirely; open measures the same #59b4d4 as hover/focus, since a freshly-clicked button
+   also keeps :focus while open, so it is covered here explicitly rather than relying on
+   that incidental overlap. Every selector below is 2 classes + 1 pseudo-class/class,
+   (0,3,0), beating jQuery UI's own (0,2,0) per-state compounds on specificity alone -- no
+   !important needed. background/outline already neutralize correctly via the generic
+   .ui-button:hover, .ui-button:focus rule above, so border-bottom-color is the only
+   property repeated here. ui-darkness's matching selector list also names
+   `.ui-state-active`, but this widget never actually adds that CLASS to the trigger
+   button -- only jQuery UI's own selector text carries it, unreachable here, so it is not
+   repeated as dead weight. */
 .ui-selectmenu-button.ui-button:hover,
 .ui-selectmenu-button.ui-button:focus,
 .ui-selectmenu-button.ui-button:active,

@@ -19,16 +19,13 @@
 }
 
 /*
-  #/Log viewport fit (tables-holistic task 4, complaint k).
+  #/Log viewport fit.
 
   Core's style.css sizes the console as:
     .log-console-container { height: calc(100vh - 110px); }
     .log-console            { flex: 1; overflow-y: auto; }  (#logdata carries this class)
   #logdata already fills the remaining flex space via that flex:1, so it needs no height
-  rule of its own here; the redundant max-height this file used to carry was stale (a
-  leftover from before core's flex-based console, alongside the now-nonexistent
-  #logdata_status/_error/_debug ids removed above) and masked the real bug rather than
-  fixing it.
+  rule of its own here.
 
   Core's "110px" assumes the navbar is the only chrome between the viewport and the
   console container. At desktop widths (sidemenu.css is not loaded above 979px, see its
@@ -37,10 +34,9 @@
   -10px margin-top + 90px padding-top (80px, the theme's own nav.css override of core
   style.css's 20px/20px padding), and this container's own 1.5px top/bottom border
   (2px rendered, above in this file) adds another 2px - 145px total, 35px more than
-  core assumes. That 35px is exactly the constant #/Log scrollHeight overflow
-  measured at both 1440x900 and 1024x768 in the table census. Override the constant so
-  the container (and never the page) absorbs it; the console keeps scrolling internally
-  via its own flex:1/overflow-y.
+  core assumes. That 35px matches the constant #/Log scrollHeight overflow measured at
+  both 1440x900 and 1024x768. Override the constant so the container (and never the
+  page) absorbs it; the console keeps scrolling internally via its own flex:1/overflow-y.
   Scoped to desktop: at <=979px sidemenu.css zeroes both paddings above, so the console
   needs core's original math there instead (see the mobile #holder fix in sidemenu.css
   for the separate mobile chrome bug).
@@ -90,18 +86,17 @@
     background: rgba(255, 255, 255, 0.25);
 }
 
-/* Log[mobile] +11px sideways scroll (task TB5 of tables-holistic). Core's
-   own .log-toolbar (www/css/style.css) already wraps onto separate rows at
-   narrow widths (flex-wrap: wrap) - filter chips / search / actions each
-   get their own row, as intended - but the chip row itself
-   (.log-level-toggles, core style.css, 3 "btnstyle3 log-filter-btn"
-   chips: Normal/Status/Error) is its own nested flex row with NO
-   flex-wrap of its own, so at 360px the three chips simply overflow
-   sideways instead of wrapping to a second line. Confirmed live (task
-   TB5 DOM walk): .log-level-toggles was the sole element whose bounding
-   box exceeded the 360px viewport, by exactly the census's measured
-   11px. wrap has no effect at any width where the chips already fit
-   (desktop, and most mobile widths), so this is safe unconditionally. */
+/* Log[mobile] +11px sideways scroll. Core's own .log-toolbar
+   (www/css/style.css) already wraps onto separate rows at narrow widths
+   (flex-wrap: wrap) - filter chips / search / actions each get their own
+   row, as intended - but the chip row itself (.log-level-toggles, core
+   style.css, 3 "btnstyle3 log-filter-btn" chips: Normal/Status/Error) is
+   its own nested flex row with NO flex-wrap of its own, so at 360px the
+   three chips simply overflow sideways instead of wrapping to a second
+   line. Confirmed live: .log-level-toggles was the sole element whose
+   bounding box exceeded the 360px viewport, by exactly 11px. wrap has no
+   effect at any width where the chips already fit (desktop, and most
+   mobile widths), so this is safe unconditionally. */
 .log-level-toggles {
     flex-wrap: wrap;
 }
