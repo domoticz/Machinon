@@ -382,7 +382,19 @@
     display: flex;
     flex-wrap: wrap;
     gap: 8px; /* future --dz-gap token site (spacing project); css/settings.css #schemePicker uses 10px, kept at 8px here for the hub's rhythm */
-    margin: 8px 0; /* future --dz-gap token site (spacing project) */
+    /* 2px of the 8px block margin is spent as padding so the selected card's
+       2px outer ring (--dz-ring-accent) has somewhere to draw: .dz-hub-panel's
+       overflow-y:auto computes overflow-x to auto as well (same quirk as the
+       swatch-label clip guarded by dz-hub-colors.js check 1c), so a ring at the
+       panel's content edge is clipped. Owner-reported 2026-08-12, desktop and
+       mobile. Guarded by check 1e. No horizontal margin offsets the padding:
+       a negative left margin here would cancel the very room padding-left
+       just reserved (border-box shifts left by the margin, then padding
+       shifts the card back by the same amount, netting zero), leaving the
+       first card's ring clipped exactly as before, which is what an earlier
+       version of this rule did until the gate caught it. */
+    padding: 2px;
+    margin: 6px 0; /* future --dz-gap token site (spacing project) */
     max-width: 100%;
 }
 
