@@ -302,12 +302,12 @@ core; never working documents that do not ship.
 > Deliberately NOT tokenized: the login page and the offline splash (fixed brand surfaces),
 > Blockly's canvas, and the legacy dark_theme.css gradient. Everything else colour-bearing flows
 > through tokens, including text on the semantic colours: red/success/warning buttons consume
-> `--dz-btn-primary-text` (`var(--dz-accent-text)`), which is white in light but `dark.css` sets
-> it to `#0F1620` for dark, since Blue UI Dark's accent is pale enough that white text would fail
-> contrast there;
+> `--dz-btn-primary-text` (`var(--dz-accent-text)`), which is white in light but `dark.css`
+> overrides `--dz-accent-text` for dark, since Blue UI Dark's accent is pale enough that white text
+> would fail contrast there;
 > the device status glows use the `--dz-status-*-values` r,g,b triplets, and the
-> sunrise/sunset sun is `--dz-sun-color` (#8C730E light, #FAD232 dark; scheme colors key
-> `sun` overrides it like the other semantic colours).
+> sunrise/sunset sun is `--dz-sun-color`, which differs by scheme like the other semantic colours
+> (scheme colors key `sun` overrides it the same way).
 >
 > **Token definitions must DERIVE, never copy.** A token whose definition is a literal copy of
 > another token's value stops tracking schemes and rots silently. Write `var(--dz-widget-bg)` /
@@ -371,10 +371,10 @@ Not part of the main token mapping table above. Some of these are genuinely fixe
 scheme (Label important, Header gradient); others vary by scheme through their own token rather
 than the shared mapping table, so "theme-independent" no longer describes the whole group.
 
-- **On primary** (`{colors.on-primary}`): `#FFFFFF`, white text on filled buttons and accent backgrounds - the light value only. Varies by scheme: the real token is `--dz-accent-text`, which `dark.css` sets to `#0F1620` because Blue UI Dark's accent is pale (schemes set it via the `accent_text` key; see Colors above)
-- **Sun icon** (`--dz-sun-color`): `#8C730E` light / `#FAD232` dark for the sunrise/sunset icon; unlike the rest of this list, it now differs by scheme (see Colors > CSS Custom Property Mapping context above)
-- **Label important** (`{colors.label-important}`): `#b94a48` for critical badges
-- **Header gradient**: `{colors.gradient-start}` to `{colors.light-primary}` (light), `{colors.gradient-dark-start}` to `#0073a7` (dark)
+- **On primary** (`{colors.on-primary}`): white text on filled buttons and accent backgrounds - the light value only. Varies by scheme: the real token is `--dz-accent-text`, which `dark.css` overrides because Blue UI Dark's accent is pale (schemes set it via the `accent_text` key; see Colors above)
+- **Sun icon** (`--dz-sun-color`): unlike the rest of this list, it now differs by scheme (light and dark values live in `dz-tokens.css`/`dark.css`; see Colors > CSS Custom Property Mapping context above)
+- **Label important** (`{colors.label-important}`): `#b94a48` for critical badges - a deliberate literal, no `--dz-*` token (matched by `scripts/check-tokens.sh` against its `custom.css` declaration instead)
+- **Header gradient**: `{colors.gradient-start}` to `{colors.light-primary}` (light), `{colors.gradient-dark-start}` to `#0073a7` (dark) - the dark end-stop is a deliberate literal, no token (part of the legacy `dark_theme.css` gradient called out as not tokenized above)
 
 ### Status Glow Colors (hardcoded, not yet mapped to custom properties)
 
@@ -640,8 +640,8 @@ fixed here.
   outward to a 3px peak over 0.8s. The 50% keyframe carries a `dz-shadow-exception` marker: it is
   an animated intermediate value, intentionally wider than the static `--dz-ring-accent` (2px),
   and collapsing it to the token would flatten the pulse's peak.
-- **Drag target (active)**: `2px dashed rgba(blue, 0.3)` outline, `3px` offset
-- **Drag target (hover)**: `2px solid blue` outline, `3px` offset, `rgba(blue, 0.08)` background tint, `0.15s ease` transition
+- **Drag target (active)**: `var(--dz-card-drop-outline-width) dashed rgba(var(--dz-accent-values), 0.3)` outline, `var(--dz-card-drop-outline-offset)` offset
+- **Drag target (hover)**: `var(--dz-card-drop-outline-width) solid var(--dz-accent-color)` outline, `var(--dz-card-drop-outline-offset)` offset, `rgba(var(--dz-accent-values), var(--dz-card-drop-hover-bg-alpha))` background tint, `0.15s ease` transition
 
 ### Dark Underlay
 
@@ -939,20 +939,20 @@ Core appends the report tables' totals `<tfoot>` after the DataTable draws
 (`CounterReport.js`/`RainReport.js`; `TemperatureReport` has none, no natural sum), with an **inline**
 style pairing the theme's accent background with the theme's body-text token
 (`style="background:var(--dz-accent-color,#337ab7); color:var(--dz-body-text,#fff)"`) - a bold
-accent-colored band that measured **2.65:1** against the live Blue UI scheme's accent, well under the
-4.5:1 WCAG AA floor for normal text. `--dz-table-total-bg`/`-text` replace it with a quiet
+accent-colored band that falls below the 4.5:1 WCAG AA floor for normal text against the live Blue
+UI scheme's accent. `--dz-table-total-bg`/`-text` replace it with a quiet
 accent-tinted band (15% accent mixed into the widget surface) instead of the accent color at full
 strength, paired with the ordinary body-text token; `css/tables.css` overrides the row (not each cell)
 with `!important`, since inline styles otherwise beat any external selector regardless of
 specificity, and `background-color` doesn't inherit but `color` does, so every cell in the row picks
 up the readable pairing without its own rule.
 
-Measured contrast of the totals band (`--dz-table-total-bg` against `--dz-table-total-text`):
+Contrast of the totals band (`--dz-table-total-bg` against `--dz-table-total-text`):
 
-| Theme | Contrast |
-|-------|----------|
-| Light | 11.80:1 |
-| Dark | 9.21:1 |
+| Theme | Result |
+|-------|--------|
+| Light | Clears WCAG AA (>= 4.5:1) |
+| Dark | Clears WCAG AA (>= 4.5:1) |
 
 Method: the computed pair `background: var(--dz-table-total-bg); color:
 var(--dz-table-total-text)` under each scheme's `data-dz-scheme` attribute, read back via
@@ -1204,12 +1204,13 @@ here" marker at all for a non-admin user, independent of any CSS.
 `backdrop-filter`): a glass panel (blur + transparency) fails WCAG AA text contrast on busy page
 backdrops in both schemes, and an accent-tinted scrim measures even worse, a same-hue collision
 with the current item's own accent-coloured left edge and text; the opaque panel's own text
-contrast measures 4.51:1 light / 5.17:1 dark. Item density matches the desktop dropdowns (`8px
+contrast clears WCAG AA 4.5:1 in both schemes. Item density matches the desktop dropdowns (`8px
 10px`); the current item carries the 2px accent left edge, never the horizontal underline
 (vertical surface). The flyout close ("X") bars in the open (`.slide`-sibling) state read
 `var(--dz-body-text)`, not a hardcoded `#fff`, because the open panel behind them is the scheme
-surface (white in light), measuring 3.85:1 in the worst case; the closed hamburger's own `#fff`
-bars stay, since they sit on the blue header banner, a different surface.
+surface (white in light), clearing the WCAG SC 1.4.11 3:1 non-text floor even in the worst case;
+the closed hamburger's own `#fff` bars stay, since they sit on the blue header banner, a different
+surface.
 
 **Tile grid (S4).** Tokens-only surface: the tile box itself is card-tier (see Card-Flyout
 below), and its labels (`.machinoText`, `.dropdown-content a`) consume the `--dz-menu-text`
@@ -1766,10 +1767,9 @@ comments so a future reader finds the explanation from either side.
 Contrast is judged against **WCAG SC 1.4.11 (Non-text Contrast, 3:1)**, not SC 1.4.3's 4.5:1 text
 threshold - these are graphical Ionicon glyphs with no text label, not text. The plain accent
 clears 3:1 comfortably in both schemes, so `dark.css` needs no derived
-override: light measures **5.45:1** resting / **4.77:1** hover against the light
-card background (hover composites `--dz-btn-hover-bg`'s tonal tint over the card background), and
-dark measures **9.68:1** against the dark card background using the same plain
-`var(--dz-accent-color)`.
+override: light clears 3:1 both resting and on hover against the light card background (hover
+composites `--dz-btn-hover-bg`'s tonal tint over the card background), and dark clears 3:1 by an
+even wider margin against the dark card background using the same plain `var(--dz-accent-color)`.
 
 #### Selector Levels
 
@@ -1834,10 +1834,9 @@ a ragged disconnected wrap).
   (specificity (0,6,0), the same scope+shape already proven against this ghost rule by the
   control's own `:focus-visible` override). The hover reaction darkens the fill via the theme's
   own filled-button hover derivation (`color-mix(in srgb, var(--dz-btn-toggle-selected-bg) 90%,
-  black)`). Hover contrast measures 5.38:1 (light) / 3.70:1 (dark); the dark number stays below
-  the 4.5:1 text floor, but that is a pre-existing `--dz-accent-color`-on-dark limitation the
-  RESTING selected state already carries (3.04:1 dark at rest) - the hover derivation does not
-  introduce or worsen it.
+  black)`). Hover contrast clears the WCAG AA 4.5:1 text floor in light; dark stays below it, but
+  that is a pre-existing `--dz-accent-color`-on-dark limitation the RESTING selected state already
+  carries (also below 4.5:1 at rest) - the hover derivation does not introduce or worsen it.
 - **Inset focus ring** (`--dz-btn-focus-ring-inset`, `dz-tokens.css`): with the shell clip in place,
   the family's standard outward ring (`--dz-btn-focus-ring`) renders fine on the group's TRUE first/last
   child (their own rounded corners roughly match the clip curve) but is amputated down to almost
@@ -1934,8 +1933,8 @@ Material-style slider. Track: 40x15px, `{rounded.container}` radius. Handle: 20x
 
 | State | Track | Handle | Handle shadow |
 |-------|-------|--------|--------------|
-| Off | `rgba(blue, 0.2)` | `var(--secondary-text-color)` | `var(--dz-elev-card)` |
-| On | `rgba(blue, 0.5)` | `var(--dz-accent-color)` | same |
+| Off | `rgba(var(--dz-accent-values), 0.2)` | `var(--secondary-text-color)` | `var(--dz-elev-card)` |
+| On | `rgba(var(--dz-accent-values), 0.5)` | `var(--dz-accent-color)` | same |
 
 Handle translates `34px` right on toggle, `0.4s` transition.
 
@@ -1980,8 +1979,8 @@ contract.
 
 ### Dimmer Slider
 
-- Track: `rgba(0,0,0,0.26)`, 5px height, `{rounded.sm}` radius
-- Range fill: `rgba(blue, 0.5)`
+- Track: `--dz-card-slider-track-bg`, 5px height, `{rounded.sm}` radius
+- Range fill: `rgba(var(--dz-accent-values), 0.5)`
 - Handle: 15px circle, solid `var(--dz-accent-color)`, positioned -5px top
 - Width: `calc(100% - 100px)` (start point fixed relative to the card, so it never crosses the device icon), 55% on wide screens (1200px+)
 - Blinds cards (any card with a second icon cell): track anchored on BOTH edges (`left: 14px` for the handle's -12px overhang, `right: 20px`, `width: auto`); the icon clearance itself comes from core's inline `margin-left` per variant, so the track can never overlap the blind icons at any card width
@@ -2417,9 +2416,9 @@ would have to change, not a reason to copy the current behaviour.
   `css/nav.css`). The dropdown-menu items themselves (`.navbar .nav .dropdown-menu li a`,
   Setup/Other/Custom) still have no visible keyboard-focus ring.
 - Disabled button contrast below WCAG AA: light theme `{colors.light-text-secondary}` on
-  `{colors.light-disabled}` is 2.88:1, dark theme `{colors.dark-text-secondary}` on
-  `{colors.dark-disabled}` is 2.31:1. WCAG exempts disabled controls, but readability would benefit
-  from dedicated disabled text/background tokens.
+  `{colors.light-disabled}`, and dark theme `{colors.dark-text-secondary}` on
+  `{colors.dark-disabled}`, both fall below AA 4.5:1. WCAG exempts disabled controls, but
+  readability would benefit from dedicated disabled text/background tokens.
 - Navbar shadow uses `10px 2px` spread instead of the card tier's `10px 1px`
 - `css/login.css` still carries nine hardcoded literals (`#fff`, `#f1f1f1`, `#ccc`, `#1a1a1a`)
   alongside its 22 `--dz-*` usages, so parts of the login page do not follow the dark scheme

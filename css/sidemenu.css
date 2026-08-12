@@ -15,13 +15,12 @@ img.header__icon {
    isolation but can make items hard to read. Measured against the Scenes
    page's worst-case backdrop (glowing scene/group toggles) with WCAG
    contrast math sampled from live screenshots: raising the panel's own
-   accent-tinted alpha fails for the current item specifically (1.48:1
-   light / 1.18:1 dark) because the panel tint and the current item's own
+   accent-tinted alpha fails AA in both schemes for the current item
+   specifically, because the panel tint and the current item's own
    accent-colored left-edge text (below) collide on the same hue; a much
-   stronger blur radius (20px) improves but still fails AA in both schemes
-   (4.20:1 / 2.28:1); this opaque panel measures best in both (4.51:1
-   light / 5.17:1 dark) by removing the backdrop dependency entirely
-   instead of mitigating it.
+   stronger blur radius (20px) improves but still fails AA in both schemes;
+   this opaque panel clears WCAG AA 4.5:1 in both schemes by removing the
+   backdrop dependency entirely instead of mitigating it.
 
    box-sizing: border-box also keeps this panel contained: this rule's own
    5px padding adds 10px to each axis beyond the intended 100%/100% under
