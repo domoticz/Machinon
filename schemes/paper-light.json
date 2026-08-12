@@ -1,5 +1,5 @@
 {
-    "name": "E-Ink",
+    "name": "Paper Light",
     "description": "Monochrome paper: zero-chrome interface, colour reserved for states",
     "base": "light",
     "preview": { "bg": "#fafafa", "surface": "#ffffff", "accent": "#222222", "text": "#111111" },
