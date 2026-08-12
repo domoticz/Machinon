@@ -4,25 +4,32 @@
   Attribute-scoped: dark applies only under html[data-dz-scheme="dark"], so Machinon is
   light-by-default and future schemes slot in as sibling blocks. Imported directly by
   custom.css (Machinon imports nothing from core). Overrides the --dz-* / aux tokens that
-  differ from the light contract in dz-tokens.css. Values match custom.js dark_theme / DESIGN.md.
+  differ from the light contract in dz-tokens.css. Values are the Blue UI dark palette,
+  adopted as the base on 2026-08-12; custom.js dark_theme no longer exists as a source of
+  truth.
 */
 html[data-dz-scheme="dark"] {
-  --dz-body-bg:         #333639;
-  --dz-body-text:       #ffffff;
-  --dz-nav-bg:          #232324;
-  --dz-widget-bg:       #515558;
-  --dz-widget-text:     #ffffff;
-  --dz-accent-color:    #0b9eda;
-  --dz-input-border:    #6d6e6d;
-  --dz-status-disabled: #808080;
-  --dz-accent-red:      #e05555;
-  --dz-btn-success-bg:  #4aa84a;
-  --dz-btn-warning-bg:  #df7b00;
+  --dz-body-bg:         #0f1620;
+  --dz-body-text:       #dce6f0;
+  --dz-nav-bg:          #0a0f16;
+  --dz-widget-bg:       #18202b;
+  --dz-widget-text:     #dce6f0;
+  --dz-accent-color:    #98ccfd;
+  --dz-input-border:    #2a3644;
+  --dz-status-disabled: #5e7183;
+  --dz-accent-red:      #fa5d57;
+  --dz-btn-success-bg:  #73d173;
+  --dz-btn-warning-bg:  #f2b03d;
 
   /* Machinon aux tokens (no core --dz-* equivalent) */
-  --secondary-text-color:   #cccccc;
-  --dz-accent-values: 11,158,218;
-  --dz-accent-red-values:   224,85,85;
+  --secondary-text-color:   #9db2c6;
+  --dz-accent-values: 152,204,253;
+  --dz-accent-red-values:   250,93,87;
+  /* Blue UI Dark's accent is pale, so text ON an accent surface must be dark
+     here; the light base keeps white. Gated by dz-scheme-picker.js at 3:1. */
+  --dz-accent-text:         #0f1620;
+  /* Sunrise/sunset sun, warm against the navy base (light base: #8c730e). */
+  --dz-sun-color:           #fad232;
 
   /* Dynamic Dashboard chrome tokens (dark). panel-bg and skeleton derive in
      dz-tokens.css and track this scheme's widget-bg/body tokens; only the
@@ -64,15 +71,10 @@ html[data-dz-scheme="dark"] {
      selection border). */
   --dz-ring-accent: 0px 0px 0px 2px var(--dz-accent-color);
 
-  /* Card Log/Timer icon pair, dark-compliant tint (owner gate verdict, accent
-     icons pass, cards-polish 2026-08-07). The raw --dz-accent-color (#0b9eda)
-     only measures 2.48:1 resting / 2.29:1 hover against the dark card
-     background, below WCAG SC 1.4.11's 3:1 non-text threshold. Derived by
-     blending the accent RGB (11,158,218) 27% toward white, the first step
-     that cleared 3:1 against BOTH measured underlays (resting: card bg
-     rgb(81,85,88); hover: --dz-btn-hover-bg tint composited over card bg,
-     rgb(74,92,101)); confirmed live via getComputedStyle, not just computed:
-     3.33:1 resting / 3.08:1 hover. Real but narrow margin above the floor -
-     revisit if a future pass wants more headroom. */
-  --dz-card-icon-accent: rgb(77, 184, 228);
+  /* Card Log/Timer icon pair. Blue UI Dark's accent (#98ccfd) measures 9.68:1
+     against the dark card background (#18202b), far above WCAG SC 1.4.11's 3:1
+     non-text threshold, so dark reuses the plain accent like light does. The
+     old rgb(77, 184, 228) literal was a 27%-toward-white blend needed by the
+     pre-2026-08-12 accent (#0b9eda, only 2.48:1); it went with the rebase. */
+  --dz-card-icon-accent: var(--dz-accent-color);
 }

@@ -229,8 +229,8 @@ function renderSchemePicker() {
         /* Base (schemeless) themes have no JSON; their colours mirror the
            dz-tokens.css / dark.css token defaults. */
         var cards = [
-            { slug: "light", name: "Machinon Light", colors: { background: "#f1f1f1", navbar: "#ffffff", item: "#ffffff", main_color: "#097fae", main_text: "#1a1a1a", alt_text: "#6d6e6d", disabled: "#d3d3d3" } },
-            { slug: "dark", name: "Machinon Dark", colors: { background: "#333639", navbar: "#232324", item: "#515558", main_color: "#0b9eda", main_text: "#ffffff", alt_text: "#cccccc", disabled: "#808080" } }
+            { slug: "light", name: "Machinon Light", colors: { background: "#f4f8fc", navbar: "#e9f2fb", item: "#ffffff", main_color: "#396d9e", main_text: "#1b2b3a", alt_text: "#3e5568", disabled: "#8ca0b3" } },
+            { slug: "dark", name: "Machinon Dark", colors: { background: "#0f1620", navbar: "#0a0f16", item: "#18202b", main_color: "#98ccfd", main_text: "#dce6f0", alt_text: "#9db2c6", disabled: "#5e7183" } }
         ];
         Object.keys(schemes).forEach(function(slug) {
             var s = schemes[slug];

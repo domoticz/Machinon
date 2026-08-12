@@ -7,7 +7,8 @@
   style.css read these tokens; Machinon's component CSS stays authoritative over its look.
 
   Dark and future schemes override these under html[data-dz-scheme="..."] (see dark.css).
-  Values match custom.js light_theme / DESIGN.md.
+  Values are the Blue UI light palette, adopted as the base on 2026-08-12; custom.js
+  light_theme no longer exists as a source of truth.
 
   Machinon's own component CSS (custom.css + css/*.css) consumes these --dz-* tokens directly.
   The old --main-* back-compat aliases have been retired; the only non-core-named tokens
@@ -16,34 +17,36 @@
 */
 :root {
     /* Core --dz-* tokens mapped from Machinon's palette (light) */
-    --dz-body-bg:         #f1f1f1;
-    --dz-body-text:       #1a1a1a;
-    --dz-nav-bg:          #ffffff;
+    --dz-body-bg:         #f4f8fc;
+    --dz-body-text:       #1b2b3a;
+    --dz-nav-bg:          #e9f2fb;
     --dz-widget-bg:       #ffffff;
-    --dz-widget-text:     #1a1a1a;
-    --dz-accent-color:    #097fae;
-    --dz-input-border:    #d3d3d3;
-    --dz-status-disabled: #d3d3d3;
-    --dz-accent-red:      #c43b3b;
-    --dz-btn-success-bg:  #3b863b;
-    --dz-btn-warning-bg:  #b36200;
+    --dz-widget-text:     #1b2b3a;
+    --dz-accent-color:    #396d9e;
+    --dz-input-border:    #cbd9e6;
+    --dz-status-disabled: #8ca0b3;
+    --dz-accent-red:      #992f2b;
+    --dz-btn-success-bg:  #306b30;
+    --dz-btn-warning-bg:  #7a5412;
 
     /* Machinon aux tokens (no core --dz-* equivalent) */
-    --secondary-text-color:   #6d6e6d;
-    --dz-accent-values: 9,127,174;
-    --dz-accent-red-values:   196,59,59;
+    --secondary-text-color:   #3e5568;
+    --dz-accent-values: 57,109,158;
+    --dz-accent-red-values:   153,47,43;
     /* Text placed ON an accent-coloured surface (buttons, active chips,
        hovered menu rows). Schemes with a light accent override this to a
        dark value; keep contrast vs --dz-accent-color at 3:1 or better
        (gated by dz-scheme-picker.js). */
     --dz-accent-text:         #ffffff;
     /* Card Log/Timer icon pair (owner gate verdict, accent icons pass,
-       cards-polish 2026-08-07): plain --dz-accent-color on the light card
-       background (--dz-widget-bg #ffffff) already clears WCAG SC 1.4.11's
-       3:1 non-text threshold (measured 4.51:1 resting / 3.96:1 hover), so
-       light reuses it as-is. Dark overrides this to a lightened value; see
-       dark.css for the derivation (the raw dark accent only measures
-       2.48:1 / 2.29:1 against the dark card background, below 3:1). */
+       cards-polish 2026-08-07; re-measured for the 2026-08-12 Blue UI
+       rebase). Plain --dz-accent-color (#396d9e) on the light card
+       background (--dz-widget-bg #ffffff) measures 5.45:1 resting / 4.77:1
+       hover (hover composites --dz-btn-hover-bg's 10%-accent tint over the
+       card background), both comfortably above WCAG SC 1.4.11's 3:1
+       non-text threshold, measured live via getComputedStyle against real
+       .timers_log icons. Dark reuses the plain accent too as of this
+       rebase (9.68:1 there); see dark.css. */
     --dz-card-icon-accent:    var(--dz-accent-color);
     /* Device status glows (card shadows), as r,g,b triplets so consumers
        can alpha them with rgba(). */
@@ -62,7 +65,7 @@
        Semantic like error/success/warning, and like them overridable per
        scheme (scheme colors key: sun); every built-in scheme keeps the
        default. */
-    --dz-sun-color:                #ff8c00;
+    --dz-sun-color:                #8c730e;
 
     /* ---- Typography tokens (scheme-independent; schemes never override) ----
        The ONLY place font sizes/weights/families are defined. Enforced by
@@ -402,11 +405,10 @@
        colour, the scheme's "navbar" colour, which the settings UI labels
        "Menu". Schemes author it as a distinct tint from cards/page (e.g.
        Blue UI light #E9F2FB vs #FFFFFF cards), so menus read as their own
-       chrome surface; the two schemes where it collided with the card colour
-       (nord, solarized-light) were retired rather than special-cased. In the
-       base (schemeless) light theme nav is white like cards, so base-light
-       menus separate by shadow only, accepted pending the base -> Blue UI
-       replacement. Floating menus consume THIS alias, never --dz-nav-bg
+       chrome surface. The base light theme carries this separation itself
+       since the 2026-08-12 Blue UI rebase (nav #e9f2fb vs card #ffffff), so
+       the old "base-light menus separate by shadow only" concession is gone.
+       Floating menus consume THIS alias, never --dz-nav-bg
        directly, so the mapping stays a single-line decision. */
     --dz-menu-bg:             var(--dz-nav-bg);
 
