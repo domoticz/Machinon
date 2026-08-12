@@ -175,7 +175,10 @@
     --dz-card-slider-radius:  3px;  /* fine; also table.mobileitem's dimslider (verified duplicate) */
 
     /* Grid / container (classic #holder .row + Dynamic Dashboard .dd-widget-body share these) */
-    --dz-card-fill-width:               99%;    /* .row .item wrapper fill (paired with grid-pad-y's row) */
+    --dz-card-fill-width:               99%;    /* .row .item wrapper fill; reads like an old sub-pixel
+                                                   anti-clip hack (paired with the 2px margin-left in
+                                                   cards.css), purpose unconfirmed - kept verbatim, a
+                                                   possible drift flag, not a deliberate design value */
     --dz-card-border-width:             1.5px;
     --dz-card-drop-outline-width:       2px;    /* drag-drop feedback outline */
     --dz-card-drop-outline-offset:      3px;
@@ -276,8 +279,11 @@
     --dz-mobile-card-btn-radius:            5px;
     --dz-mobile-card-btnmini-border-width:  1px;
     --dz-mobile-card-btnmini-min-width:     40px;
-    --dz-mobile-card-slider-handle-offset:  -6px;  /* desktop is -5px (--dz-card-slider-handle-offset); kept as measured, see cards-polish task-2 report */
-    --dz-mobile-card-selectorlevels-margin: -30px;
+    --dz-mobile-card-slider-handle-offset:  -6px;  /* desktop is -5px (--dz-card-slider-handle-offset); the 1px
+                                                      delta is kept as measured, purpose unconfirmed - a
+                                                      possible drift flag, not a deliberate design value */
+    --dz-mobile-card-selectorlevels-margin: -30px; /* negative-margin hack of unconfirmed necessity; kept as
+                                                      measured - a possible drift flag, verify before removing */
 
     /* jQuery UI ships white icon sprites (ui-darkness theme): invert to dark on light
        surfaces; dark.css resets to none. Consumed by css/users.css. */

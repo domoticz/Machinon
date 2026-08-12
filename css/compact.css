@@ -36,6 +36,9 @@ section.compact .row:not(.divider) {
     overflow: hidden;
 }
 
+/* Accent-colored while classic #status keeps --dz-body-text: an OPEN QUESTION
+   (deliberate density-driven emphasis at the 180px compact tile, or drift from
+   an earlier pass); kept as-is until decided. */
 .span3 #status {
     color: var(--dz-accent-color);
 }

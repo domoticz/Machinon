@@ -32,6 +32,14 @@ function cameraPreview(section) {
                     });
                     if (activeCam) {
                         html += "</div></section>";
+                        /* Injected with raw jQuery, never $compile'd: #dashCameras carries no
+                           ng-scope and never joins the Angular digest the other dashboard
+                           sections settle on, and its thumbnails arrive later as blob: URLs
+                           (refreshCamera). CONSTRAINT for any geometry measurement or
+                           screenshot of a dashboard with cameras: poll for #dashCameras
+                           present in the DOM AND its height stable across two consecutive
+                           polls before capturing - a plain "page loaded"/networkidle signal
+                           does not guarantee the sections below it have stopped shifting. */
                         $("#dashcontent section:first").before(html);
                         $("tr.with-cam-preview").on("click", function(e) {
                             ShowCameraLiveStream($(this).children("td#name").text(), $(this).attr("data-cam"));

@@ -321,18 +321,12 @@ core; never working documents that do not ship.
 >
 > **Settings persistence** runs through a transport seam (`src/js/settings-transport.js`),
 > layered on Domoticz core's native `ThemeSettings` API where the core reports
-> `ThemeSettingsAPI: 1`: a shared instance (house) layer and a per-user layer, merged onto the
-> theme object on load and split by a `"user"`/`"house"` scope carried on every settings-manifest
-> entry (`src/js/theme-manifest.js`). A core without the native API falls back to the original
-> three theme user variables (`theme-<folder>-features`, `theme-<folder>-custom`,
-> `theme-<folder>-colors`, isolated from core preferences, read/written through
-> `dzThemeSettingsLoad`/`dzThemeSettingsSave`), and a one-time migration seeds the native
-> instance layer from them the first time a capable core boots. Card min/max widths persist
-> appended to the legacy custom array at positions 10 and 11 (token default 320px). The legacy
-> transport's own load still resolves through `dzMergeSettingsLayers(defaults, stored, null)`
-> (`schemaVersion` 1, `perUser` always null there; real per-user differentiation lives in the
-> native transport's two layers instead). See [Settings storage](#theme-hub) under Theme Hub
-> for the full two-layer model, the scope rule, and the reachability/UI contract.
+> `ThemeSettingsAPI: 1`: a shared instance (house) layer and a per-user layer, split by a
+> `"user"`/`"house"` scope carried on every settings-manifest entry. A core without the native
+> API falls back to the original theme user variables, and a one-time migration seeds the
+> native instance layer from them; the variable names, merge shape, and legacy field positions
+> live in `src/js/settings-transport.js`. See [Settings storage](#theme-hub) under Theme Hub
+> for the two-layer model, the scope rule, and the reachability/UI contract.
 >
 > Machinon publishes the `--dz-*` token names that Domoticz core's globally-linked stylesheets
 > (`css/dashboard.css`, `css/style.css`) consume. It deliberately does not import core's
@@ -622,20 +616,14 @@ fixed here.
 
 ### Interactive States
 
-- **Card hover**: `--dz-ring-hover`, which is *composed* from `var(--dz-elev-card),
-  var(--dz-ring-accent)` rather than restated as a fresh literal. `box-shadow` is a single
-  property, so historically a hover rule that listed only the ring deleted the resting card
-  shadow; composing the token from the card token itself makes that trap structurally
-  impossible; a rule that applies `--dz-ring-hover` can never drop the card layer, because the
-  card layer is part of the token's own definition, not something the call site has to remember
-  to restate.
-- **Card hover (Dynamic Dashboard)**: `--dz-ring-hover-inset`. The card is full-bleed inside a
-  cell that core wraps in five nested `overflow: hidden` ancestors (`dd-dz-inner`,
-  `dd-dz-device`, `dd-widget-body`, `dd-widget`, `dd-widget-cell`). Clearance
-  between the ring target and the nearest clip boundary is 4px left/right but 0px top/bottom,
-  so an outer ring is invisible top and bottom on any card whose content
-  reaches minimum grid height: the outer form is not just undesirable there, it is clipped.
-  The inset token is the only option that renders correctly.
+- **Card hover**: `--dz-ring-hover`. **Constraint.** `box-shadow` is a single property, so a
+  hover rule listing only the ring would delete the resting card shadow; the token composes
+  `var(--dz-elev-card)` into its own definition so no call site can drop the card layer
+  (`dz-tokens.css`, the accent-rings comment).
+- **Card hover (Dynamic Dashboard)**: `--dz-ring-hover-inset`. **Constraint.** Core clips the
+  card cell with 0px of top/bottom clearance, so an outer ring is shaved invisible there; the
+  inset form is the only one that renders correctly. Full clip geometry lives with the rules
+  in `css/cards.css`.
 - **Update pulse**: keyframe animation (`css/device-status.css`) that flashes the accent ring
   outward to a 3px peak over 0.8s. The 50% keyframe carries a `dz-shadow-exception` marker: it is
   an animated intermediate value, intentionally wider than the static `--dz-ring-accent` (2px),
@@ -665,10 +653,8 @@ dark.css override of its own.
 Three declarations in the theme carry a `dz-shadow-exception` marker comment at their
 declaration site, documenting why each is intentionally not a named elevation/glow/ring token.
 The marker is documentation, not a functional skip: the two CSS exceptions below already pass
-`scripts/check-shadows.sh` on their own merit, since each layer pairs literal geometry with a
-token-driven color, which the checker accepts per the per-layer rule described below. The JS
-exception sits outside the checker's `*.css` scope entirely, so it is never scanned regardless
-of the marker.
+`scripts/check-shadows.sh` per the per-layer rule described below, and the JS exception sits
+outside the checker's `*.css` scope entirely.
 
 - **`css/device-status.css`**, the `updatePulse` keyframe's 50% peak (see Update pulse above):
   an animated intermediate value, not a resting or hover state.
@@ -777,34 +763,27 @@ so they sit outside the table above:
   the bullet above: a selected state sharing the pressed inset would read as "permanently being
   clicked"; fill + text color alone carry the state
 - **Focus-visible**: `--dz-btn-focus-ring`, stacked with a comma onto whatever shadow the element
-  already carries at rest. One later rule (the ghost family's `box-shadow: none`) ties the base
-  rule's ring at equal specificity and wins by source order, so the ring is re-asserted a second
-  time on that selector's own `:focus-visible` state (documented in `css/buttons.css`'s "Focus
-  ring, state-proof" block). Toggle-selected's own `:focus-visible` composes the ring alone too,
-  now that it has no pressed layer left to stack under it
+  already carries at rest, never replacing it. **Constraint.** Later flat-family rules would tie
+  the ring away by source order, so it is re-asserted per state; the accounting lives in
+  `css/buttons.css`'s "Focus ring, state-proof" block
 - **Disabled**: flat - `--dz-btn-disabled-bg`/`-text`, `box-shadow: none`, no hover/focus reaction
 - **Transition**: `background-color .12s ease, box-shadow .12s ease` on the shared base rule (plus a
   slower `0.15s ease` background/color/border-color/filter transition kept on the older Bootstrap-class
   selectors for the brightness-hover holdouts above)
 
 **Label centering.** Every button in the base rule is `display: inline-flex; align-items: center;
-justify-content: center` rather than centered by arithmetic (padding + forced line-height happening to
-sum to the box). Two live cases needed this: core fixes some heights the theme doesn't own (e.g.
-`.btnsmall { height: 1.6em }` in `style.css`, versus this theme's own 20px line-height), and
-flex/stretch parents can grow a box past the padding+line-height sum (Events A-/A+ compute 31px in
-their own toolbar). Flex centering makes the label track the box that actually renders, in every such
-case, instead of the box the padding math assumed.
+justify-content: center` rather than centered by arithmetic. **Constraint.** Core fixes some button
+heights the theme doesn't own, and flex/stretch parents can grow a box past the padding+line-height
+sum; the live cases are documented with the base rule in `css/buttons.css`.
 
 ### Radius Rationale
 
 Buttons are `10px` (`--dz-btn-radius`), device cards are `6px` (`{rounded.container}`) - a deliberate
 split, not a rounding inconsistency: buttons are a small, dense control that reads better with a
 softer, roomier corner than a large card surface would want. There is no filled "you are here" box
-on the top navbar's active tab or the Setup dropdown's active item: every menu surface uses
-the unified accent-edge language (an underline on horizontal surfaces, a left edge on vertical
-ones, no radius involved at all); see [Menus > Unified Accent-Edge](#unified-accent-edge-you-are-here-language)
-for the full mechanism. `--dz-nav-active-bg`/`-text` (`dz-tokens.css`) remain
-declared but are not consumed anywhere, a dead pair; see Gaps.
+anywhere: every menu surface uses the unified accent-edge language, no radius involved; see
+[Menus > Unified Accent-Edge](#unified-accent-edge-you-are-here-language). `--dz-nav-active-bg`/`-text`
+remain declared but unconsumed, a dead pair; see Gaps.
 
 ### Menu Surface
 
@@ -826,19 +805,17 @@ with a raw radius/shadow/padding value in that file.
 
 ### Bootstrap 2 Constraint
 
-Bootstrap 2 (`css/bootstrap.css`, loaded globally, not removable per-theme) styles `.btn-*` with
-gradients, and its own **state** rules (`:hover`/`:active`/`[disabled]`) carry higher specificity
-(`0,2,0`) than this theme's base rules (`0,1,0`). Without `!important`, a hover would flip a button to
-Bootstrap's own blue and disabled/active would show Bootstrap's gradients. Every `!important` in
-`css/buttons.css` on `background`/`border`/`box-shadow`/`color` exists to beat this one constraint,
-not as a style preference; see the "Universal button reset" comment block in that file for the full
-specificity accounting, and the Don'ts entry on `!important` below.
+**Constraint.** Bootstrap 2 (`css/bootstrap.css`, loaded globally, not removable per-theme) styles
+`.btn-*` with gradients at higher state-rule specificity than the theme's base rules. Every
+`!important` in `css/buttons.css` on `background`/`border`/`box-shadow`/`color` exists to beat this
+one constraint, not as a style preference; the full specificity accounting lives in that file's
+"Universal button reset" comment block. See also the Don'ts entry on `!important` below.
 
 ### Core-Region Takeover
 
 Regions core styles itself (its own stylesheet loads after the theme and re-asserts raw values, or
 ships bare/unclassed buttons the `.btn` system never reaches) needed their own rules, one per region,
-each citing the exact core selector/specificity that forced it:
+each citing in its owning file the exact core selector/specificity that forced it:
 
 - **`dd-topbar`** (Dynamic Dashboard compact view-mode bar) - icon-quiet tier (`css/buttons.css`)
 - **Events editor chrome + Automation Wizard** - toolbar buttons, the open-file tab close-`x`, and the
@@ -847,17 +824,12 @@ each citing the exact core selector/specificity that forced it:
 - **Charts zoom/range segmented group** - `.zoom-button`/`.zoom-reset` ghost tier, plus the connected
   1H/3H/day range group using the same corner-squaring technique as `.btn-group` (`css/charts.css`)
 - **DataTables pager** - `.fg-button` ghost tier; lives in `css/tables.css`, not `css/buttons.css`,
-  because its markup nests inside that file's own table-header reset and needs to load after it
-- **Devices panel splitter** - accent-pill tier (`css/buttons.css`); a
-  fully-transparent-until-hover icon-quiet look would read as near-invisible next to the table it
-  controls, so it carries a resting accent wash (`rgba(var(--dz-accent-values), 0.08)`) and an
-  accent-colored chevron, strengthening to the shared `--dz-btn-hover-bg` wash on hover like every
-  other ghost/icon-quiet control - see Family Roles
+  for cascade-order reasons documented with the rule there
+- **Devices panel splitter** - accent-pill tier (`css/buttons.css`); see Family Roles for why it is
+  deliberately not icon-quiet
 - **Dropdown active item** - every dropdown's "you are here" marker; lives in `css/nav.css` as part
   of the `--dz-menu-*` family, not the button system (see [Menus](#menus))
-- **About page** - `.btn-modern` is used directly for Website/Forum/Wiki/Source Code and the Tips
-  trigger; no override needed here, listed for completeness since it is the one region above that
-  needed nothing extra
+- **About page** - `.btn-modern` used directly; no override needed, listed for completeness
 
 ### Button Groups
 
@@ -900,19 +872,10 @@ covering the DataTables pages (Devices, Hardware, Cam, Mobile, Device Timers) an
 (Counter/Temperature/Rain/Wind/Energy) alike; see Core-Region Takeover below for the full surface
 list.
 
-**The month-view weekday column's fingerprint.** Every report type titles its month-view weekday
-column `''` (an empty string) in core's own `columns` array (`CounterReport.js`,
-`TemperatureReport.js`, `RainReport.js`), so it carries no id, class, or visible header text to select
-on. DataTables' bundled aria template renders a header's `aria-label` as `"<title>: activate to sort
-column ..."`, so an empty title collapses to an aria-label that starts with a bare `:` -
-`css/tables.css` selects on `thead th[aria-label^=":"]`. This is locale-safe today: Domoticz's
-`$.DataTableLanguage` (`js/domoticz.js`) never sets an `aria` key, so DataTables always falls back to
-its English-only bundled default regardless of the active UI language. **Risk:** if core ever starts
-localizing DataTables' own aria strings, this column would silently lose its fingerprint and fall
-back to the report table's right-aligned default (wrong for a text column). The same breakage can
-arrive from the other direction, independent of core: a future
-DataTables library version bump changing the bundled aria template's own wording (e.g. dropping the
-leading `": "` or the `"activate to sort..."` phrasing) would lose the fingerprint identically.
+**The month-view weekday column's fingerprint.** **Constraint.** Core gives every report type's
+month-view weekday column no id, class, or header text to select on, so `css/tables.css`
+selects on an aria-label fingerprint instead; the fragility account lives with the rule in
+`css/tables.css`.
 
 ### Token Table (Tables)
 
@@ -935,29 +898,14 @@ All twelve `--dz-table-*` tokens live in `dz-tokens.css`; only `css/tables.css` 
 
 ### Totals Rows
 
-Core appends the report tables' totals `<tfoot>` after the DataTable draws
-(`CounterReport.js`/`RainReport.js`; `TemperatureReport` has none, no natural sum), with an **inline**
-style pairing the theme's accent background with the theme's body-text token
-(`style="background:var(--dz-accent-color,#337ab7); color:var(--dz-body-text,#fff)"`) - a bold
-accent-colored band that falls below the 4.5:1 WCAG AA floor for normal text against the live Blue
-UI scheme's accent. `--dz-table-total-bg`/`-text` replace it with a quiet
-accent-tinted band (15% accent mixed into the widget surface) instead of the accent color at full
-strength, paired with the ordinary body-text token; `css/tables.css` overrides the row (not each cell)
-with `!important`, since inline styles otherwise beat any external selector regardless of
-specificity, and `background-color` doesn't inherit but `color` does, so every cell in the row picks
-up the readable pairing without its own rule.
-
-Contrast of the totals band (`--dz-table-total-bg` against `--dz-table-total-text`):
-
-| Theme | Result |
-|-------|--------|
-| Light | Clears WCAG AA (>= 4.5:1) |
-| Dark | Clears WCAG AA (>= 4.5:1) |
-
-Method: the computed pair `background: var(--dz-table-total-bg); color:
-var(--dz-table-total-text)` under each scheme's `data-dz-scheme` attribute, read back via
-`getComputedStyle()` and run through the WCAG relative-luminance/contrast formula.
-Both clear AA (4.5:1) by a wide margin.
+The totals idiom: a **quiet accent-tinted band**, `--dz-table-total-bg` (15% accent mixed into the
+widget surface) paired with the ordinary body-text token, never the accent color at full strength.
+It replaces the inline style core appends with its totals `<tfoot>`
+(`CounterReport.js`/`RainReport.js`; `TemperatureReport` has none, no natural sum), whose bold
+accent band falls below the 4.5:1 WCAG AA floor under the live Blue UI scheme. Both schemes clear
+AA (>= 4.5:1) with the token pair. **Constraint.** The override must be row-level `!important`,
+since an inline style beats any external selector; the inheritance account lives with the rule in
+`css/tables.css`.
 
 ### Padding Rhythm
 
@@ -969,103 +917,57 @@ in the theme. These are a deliberate **design choice** near the de facto 4/8/10 
 vertical/horizontal control a single spacing scalar can't express, so they get their own token pair
 rather than reusing `{spacing.xs}`/`{spacing.sm}` in place.
 
-**Accepted mobile cost.** The padding rhythm leaves two mobile (360x780) surfaces with a small
-vertical overflow: Users[mobile] (+5px) and Cam[mobile] (+29px). Accepted as-is
-rather than reverting the rhythm or carving out per-surface padding - a small, page-length-only cost
-judged worth the alignment/contrast/rhythm consistency gained everywhere else.
+**Accepted mobile cost.** The rhythm leaves Users[mobile] and Cam[mobile] with a small page-length
+overflow at 360x780; accepted rather than carving out per-surface padding.
 
 ### Viewport Fit
 
 Two chrome-sizing overrides, unrelated to alignment/padding, keep table-bearing pages from
 overflowing the viewport:
 
-- **`#/Log` desktop (145px chrome constant).** Core's `.log-console-container` sizes itself as
-  `calc(100vh - 110px)`, core's guess at the chrome above/below it. Machinon's actual chrome measures
-  145px (63px `#holder > .container-fluid` padding (43px top + 20px bottom) + 80px `.bannercontent`
-  padding/margin, a `css/nav.css` override of core's own smaller padding + 2px of this container's
-  own border), so the console overflowed the viewport by a flat 35px regardless of viewport height. Fixed in
-  `css/logpage.css` by overriding the constant to `calc(100vh - 145px)`, scoped to
-  `@media (min-width: 980px)` (the desktop widths where that 145px total actually holds - `sidemenu.css`
-  zeroes the same padding below that breakpoint). The derivation and its arithmetic live in
-  `css/logpage.css`'s own comment above the override.
-- **Mobile app-shell (60px).** At <=979px `css/sidemenu.css` forces the navbar out of
-  `position: fixed` into normal document flow (so it can slide out as the mobile side menu), which
-  puts 60px of navbar (40px min-height + 20px margin-bottom) into the document that isn't there on
-  desktop. Core's `#holder { min-height: 100% }` resolves against the full viewport height with no
-  awareness that a sibling above it just claimed 60px of it, so any page shorter than a full viewport
-  overflowed by exactly that 60px. Fixed in `css/sidemenu.css` (the same file that flips the navbar to
-  static) with `#holder { min-height: calc(100% - 60px) }`. Because this is an app-shell bug, not a
-  Log-page bug, the one fix also cleared the identical overflow on Users, Mobile, and Cam at
-  360x780 for free.
-- **`#/Devices`.** Unlike the pages above, Devices' vertical overflow was never a chrome-sizing
-  bug - the page has 230+ rows, genuinely more content than any viewport. It gets the `#/Log`
-  treatment: the page fits the viewport and the table panel scrolls internally.
-  `.page-devices-wrapper` (the Devices analogue of `.log-console-container`) gets the same
-  `calc(100vh - Npx)` treatment, measured live the same way as the 145px above: 143px at desktop
-  (`>=980px`; 63px `container-fluid` + 80px `.bannercontent`, matching Log's own two components
-  exactly - Devices carries no extra border of its own, so no "+2px" term), 70px at mobile
-  (`<=979px`; sidemenu.css's zeroed `.bannercontent` plus the in-flow navbar leave only 50px above
-  `#main-view` + 20px `container-fluid` bottom padding); it holds cleanly at mobile too.
-  `.page-devices` itself stacks into a column at the same `<=979px` boundary (see
-  [Mobile Layout](#mobile-layout)), filters above table with the splitter turned into a horizontal
-  expander bar, so the 70px mobile budget above is shared by a capped filters panel (`max-height:
-  50vh`) and the table panel rather than a fixed three-column row.
-
-  What scrolls: core's `dataTableDefaultSettings` (`app/app.constants.js`) never sets `scrollY`, so
-  the Devices DataTable renders no `.dataTables_scrollBody` - its `dom` option
-  (`<"H"lfrC>t<"F"ip>`, `bJQueryUI: true`) gives a plain `.dataTables_wrapper` with two `.fg-toolbar`
-  divs (length/search above, info/pagination below) flanking the bare `<table>`, no extra wrapping
-  div DataTables' own scroller feature would normally use. That shape still supports real
-  row-area-only scrolling with CSS alone: the two `.fg-toolbar` rows stay `flex: none` (always
-  visible), and the `<table>` itself becomes the scrolling box (`flex: 1`, `overflow` both axes) with
-  its `<thead>` pinned via `position: sticky; top: 0`. The header stays pinned
-  through a vertical scroll and shifts exactly in sync with a horizontal one, with no `display: block`
-  hack and therefore no risk of the header/body column-width desync that naive sticky-table-header
-  implementations hit. Scoped to `.page-devices .dataTables_wrapper` specifically (`css/tables.css`),
-  not `.dataTables_wrapper` generally - every other DataTable (Hardware/Users/Cam/Mobile/reports)
-  shares the same `.fg-toolbar` markup via the same shared `dataTableDefaultSettings` and none of them
-  get the height constraint that would make this scrolling behavior meaningful. Full derivation and
-  the live measurements live in `css/tables.css`'s own comment above the rules.
+- **`#/Log` desktop (145px chrome constant).** **Constraint.** Core's `.log-console-container`
+  guesses its surrounding chrome at 110px; Machinon's actual chrome measures 145px, a flat 35px
+  overflow. `css/logpage.css` overrides the constant to `calc(100vh - 145px)`, desktop-only; the
+  derivation arithmetic lives in that file's comment above the override.
+- **Mobile app-shell (60px).** **Constraint.** Below 979px the navbar moves into normal flow
+  (see [Mobile Layout](#mobile-layout)), claiming 60px core's `#holder { min-height: 100% }` knows
+  nothing about; `css/sidemenu.css` compensates with `min-height: calc(100% - 60px)`, clearing the
+  identical overflow on Users, Mobile, and Cam at once. The failure chain lives with the rule in
+  `css/sidemenu.css`.
+- **`#/Devices`.** Not a chrome-sizing bug (genuinely more content than any viewport); it gets
+  the `#/Log` treatment: page fits the viewport, the row area alone scrolls with a sticky
+  `<thead>`, scoped to `.page-devices` only. **Constraint.** The per-breakpoint budgets are in
+  the [Viewport-Fit Pages](#viewport-fit-pages) table; the derivation, live measurements, and
+  the DataTables markup-shape account live in `css/tables.css`'s comments above the rules.
 
 ### The Table Contract
 
-Unlike the [Button Contract](#the-button-contract-enforcement), tables have **no static grep-style
-checker** (no `scripts/check-tables.sh` alongside `check-typography.sh`/`check-buttons.sh`) - by
-design, not an oversight. `check-buttons.sh` works because it asks a lexical question a regex can
-answer: does this CSS declaration's value resolve through a `var(--dz-btn-*)` token? Table correctness
-isn't a lexical property of any one CSS rule: whether a column is text, numeric, datetime, or icon
-depends on what data actually renders in it (a live-DOM fact core itself sometimes contradicts, e.g.
-`.myrighttable td` blankly right-aligning every cell regardless of type), and totals-row contrast
-depends on resolving real computed colors through inheritance and cascade, including values core
-injects as inline styles at runtime. None of that is answerable by grepping source text: verifying
-tables means checking the rendered page against the Alignment Policy above, the totals-row contrast
-floor (>= 4.5:1, WCAG AA normal text), and page overflow (`scrollWidth` and `scrollHeight` must not
-exceed the viewport, minus the pages that scroll by design).
+Tables have **no static grep-style checker** (no `scripts/check-tables.sh`) - by design, not an
+oversight: table correctness is a rendered-page property (live data classification, computed colors
+through cascade and inline styles), not a lexical property a regex can answer. Verifying tables
+means checking the rendered page against three invariants:
+
+1. **Alignment**: every column's header and data agree, per the Alignment Policy above.
+2. **Totals-row contrast**: >= 4.5:1 (WCAG AA normal text) in both schemes.
+3. **Viewport**: `scrollWidth` and `scrollHeight` stay within the viewport, minus the pages that
+   scroll by design.
 
 ### Core-Region Takeover (Tables)
 
 Regions core renders and styles itself, each needing the theme's own alignment/padding/totals rules
-layered on top:
+layered on top. The per-column type census behind each rule set (which columns are numeric,
+datetime, or icon, and why) lives as comments beside the rules in `css/tables.css`:
 
-- **Devices** (`#devices`, 14 columns) - state-icon and actions columns centered, Idx/ID/Unit/
-  SignalLevel/BatteryLevel/Last Seen right-aligned, the rest left (text); Last Seen also gets a
-  positional `nowrap` rule so Inter (wider than the original theme's Open Sans) doesn't wrap it onto
-  two lines.
-- **Hardware** (`#hardwaretable`, 7 columns) - only the Idx column needs a rule; core's own
-  `align="center"` HTML attribute on Port/Data Timeout never mattered (an HTML alignment hint is always
-  beaten by the base header rule, and both columns' live data classifies as text, not numeric).
-- **Cam** (`#cameratable`, 10 columns, plus `#activetable`, 3 columns for the active-devices sub-table)
-  - Idx/Port right, Preview/capture-snapshot/stream-video icons centered.
-- **Mobile** (`#mobiletable`, 6 columns) - Idx right, Last Seen right (datetime + an inline "Test"
-  icon; classified datetime because the date text dominates the cell).
-- **Device Timers** (`.js-device-timers` container; DataTables assigns this table no static id) - only
-  the Time column needs a rule.
-- **Report tables** (`#reporttable.myrighttable`, every report type: Counter, Temperature, Rain, Wind,
-  Energy) - base right-align (most columns are numeric quantities), the year-view leading label column
-  and month-view weekday column left (see the aria-fingerprint note above), the trailing trend column
-  centered (a single trend icon), and the totals band override (see Totals Rows above). Core's own
-  `.myrighttable td` blanket right-aligns every cell regardless of type; these rules also fix the
-  header side of that mismatch.
+- **Devices** (`#devices`, 14 columns), including a Last Seen `nowrap` rule (Inter is wider than
+  the original theme's Open Sans).
+- **Hardware** (`#hardwaretable`, 7 columns).
+- **Cam** (`#cameratable`, 10 columns, plus `#activetable`, 3 columns).
+- **Mobile** (`#mobiletable`, 6 columns).
+- **Device Timers** (`.js-device-timers` container; the table has no static id).
+- **Report tables** (`#reporttable.myrighttable`, every report type) - base right-align, the two
+  text columns left (see the aria-fingerprint note above), the trend column centered, and the
+  totals band override (see Totals Rows above). Core's own `.myrighttable td` blanket right-aligns
+  every cell regardless of type; these rules also fix the header side of that mismatch.
 - **DataTables pager** (`.fg-button`) - ghost-tier styling; documented under
   [Buttons > Core-Region Takeover](#core-region-takeover), since it's a button family, not a table
   concern, even though the rule lives in `css/tables.css` for cascade-ordering reasons.
@@ -1127,90 +1029,54 @@ Every menu surface marks its current item the same way, oriented to the surface'
   filled current-item box anywhere (`--dz-nav-active-bg`/`-text` are a dead declared pair; see
   Gaps).
 
-The current-item rules are `!important` out of necessity, not preference: core's own
-`.current_page_item > a` rule sets a same-specificity 4-sided border (countered with an explicit
-`border-color: transparent`) and core's `style.css` ties the same selector's `color`, so the
-accent edge and its text colour must both carry `!important` to win. The `:focus-visible` ring's
-own `box-shadow` is `!important` too; otherwise the current-item rule's `box-shadow: none
-!important` would silently kill the Tab-focus ring on the current item itself.
+**Constraint.** The current-item rules and the `:focus-visible` ring's `box-shadow` are
+`!important` out of necessity, not preference: core ties the same selectors on border and color,
+and the ring would otherwise be killed on the current item itself. The full cascade accounting
+lives with the rules in `css/nav.css` and `css/sidemenu.css`.
 
 ### Defect Fixes
 
-**Third-level flyout containment (S2).** Bootstrap's `.dropdown-submenu > .dropdown-menu { top: 0;
-left: 100%; }` anchors a submenu's top edge to the trigger's top edge with no viewport
-awareness, and the Setup > More options second-level submenu (`#cMoreOptions + ul`, a 19-item,
-576px-tall list) is taller than the room below at common desktop heights, so it exits the
-viewport bottom. A `max-height` clamp is not an option: it also clips the Plans /
-Data push third-level flyouts sharing the same selector. The fix (`armFlyoutContainment()`,
-`src/js/page.js`, alongside the pre-existing `clampCorePopups()`): on `mouseenter` of any
-`.navbar .dropdown-submenu > a` trigger, measure the submenu's `getBoundingClientRect()`, and if
-`rect.bottom > window.innerHeight - 10`, shift it up via an inline `top` offset clamped so it
-never pushes the top edge above the 10px floor. A debounced
-`resize` listener re-arms the same containment logic via a shared `containFlyout(menu)` helper,
-so a still-open flyout repositions when the window shrinks instead of staying at a stale offset.
+**Third-level flyout containment (S2).** **Constraint.** Bootstrap anchors a submenu's top edge
+to its trigger with no viewport awareness, and a CSS clamp would clip the third-level flyouts
+sharing the same selector, so containment is JS (`armFlyoutContainment()`, `src/js/page.js`);
+the mechanism and its fail-closed behavior live in that function's comment block.
 
-**Setup CTA overlap (S8).** `css/settings.css` pins core's Apply Settings row (`li.pull-right`) to
-`position: fixed; bottom: 5px` on phone widths, a fixed element that sits at a constant viewport
-position and paints over whatever in-flow content the document happens to place there, at any
-scroll offset including zero. The fix is a bounded, internally-scrolling content region rather
-than a padding nudge. `#settingscontent #settings #my-tab-content` becomes a flex `column` chain
-(`#settingscontent` auto height, `#settings`/`#my-tab-content` flexed), with `#my-tab-content`
-capped to `calc(100vh - 100px)` (falling back to `calc(100dvh - 100px)` via the invalid-value
-cascade, guarding iOS Safari's address-bar resize) and `overflow-y: auto`, mobile-only. The 100px
-reserve is measured, not guessed: 50px of chrome above `#settingscontent` (static navbar + banner,
-width-independent) plus the CTA bar's own 34px height + 5px offset rounding up to 40px, plus 10px
-of daylight. `li.pull-right` itself is untouched, still `position: fixed`; the fix stops content
-from ever being laid out in the band the bar occupies.
+**Setup CTA overlap (S8).** **Constraint.** Core's fixed mobile Apply bar paints over whatever
+in-flow content occupies its band, so a padding nudge cannot fix it; `css/settings.css` instead
+caps the tab content to a measured viewport budget and lets it scroll internally, mobile-only,
+leaving the bar itself untouched. The derivation and scoping account live with the rules there.
 
 ### Surface Treatments
 
 **Settings page (S5).** Sub-tabs render as a single horizontal row with horizontal overflow
-scrolling, mirroring the Theme hub's own `.dz-hub-tabs` pattern, instead of a tall wrapped block
-(which costs 186px of 468px, 45% of visible content, at 320x568). Section headings (`h2`) sit on
-the type scale (`--dz-text-md`, 16px semibold) and carry a `border-bottom` + `margin-bottom`,
-turning each heading into a visible section boundary; table-cell padding is `8px 10px`. The
-roomier 15/20 spacing cluster is deliberately not used here: `#settings .row-fluid` is
-`justify-content: center`, so a wrapped child wider than the viewport overflows symmetrically off
-BOTH edges, invisible to `document.documentElement.scrollWidth`; measure candidate spacing with
-`getBoundingClientRect()` before widening anything. One targeted `!important` widening exists on
-the Security tab (`#weblocaltable td[style*="width:60px"]`, 60px to 100px, preventing a 3-line
-label wrap), `!important` because the constraint it overrides is an inline `style` attribute,
-always higher specificity than any external rule regardless of selector weight.
-
-Depth is **flat modern**, structurally coherent with the Theme hub (itself flat: no cards
-anywhere, thin border-bottom row dividers): `#settingscontent #settings .row-fluid > div` gets
-`border: 1px solid var(--dz-input-border); box-shadow: none;` (the extra `#settingscontent` id
-outranks `css/cards.css`'s pre-existing same-specificity card rule without `!important`), and
-Setup's text inputs/selects carry a `:focus-visible` ring (`border-color: var(--dz-accent-color)`
-+ `box-shadow: var(--dz-btn-focus-ring)`) copied from `css/theme-hub.css`'s `.dz-hub-input`
-verbatim.
+scrolling, mirroring the Theme hub's own `.dz-hub-tabs` pattern, instead of a tall wrapped block.
+Section headings (`h2`) sit on the type scale (`--dz-text-md`, 16px semibold) with a
+`border-bottom` + `margin-bottom` section boundary; table-cell padding is `8px 10px`, and the
+roomier 15/20 cluster is deliberately not used (the centered-row overflow trap; see the comment in
+`css/settings.css`). Depth is **flat modern**, coherent with the Theme hub: bordered, shadowless
+panels, and Setup's inputs carry the `:focus-visible` ring recipe from `css/theme-hub.css`'s
+`.dz-hub-input`. **Constraint.** The one inline-width `!important` widening (Security tab) and the
+id-based specificity that beats the card rule are accounted for beside the rules in
+`css/settings.css`.
 
 **Desktop dropdowns and submenus (S1/S2).** Items use the 8/10 padding cluster; the item hover
-tint rides `--dz-menu-item-hover-bg`; the `.divider` rule is tokenized
-(`--dz-menu-separator`), since an untokenized divider silently inherits core's near-invisible
-`rgba(255,255,255,0.1)`. The current item carries the accent left edge (see Unified Accent-Edge
-above). Top-level nav hover is a visual no-op in both schemes (`background: var(--dz-nav-bg)`,
-byte-identical to the navbar's own background). Two known core-side defects, logged, not fixable
-in theme CSS: a real click on the admin Setup toggle redirects to `#/SetupMenu` when routes are
-active (`js/settings_page.js`'s own click handler on the whole `<li>`); and core's `index.html`
-gives the Setup and Other dropdowns' shared entries (Energy Dashboard, My Profile, About)
-duplicate `id`s, so Angular's `ngClass` only ever marks the first (Setup's, hidden for
-non-admins) of the two same-id elements current, leaving the Other dropdown with no "you are
-here" marker at all for a non-admin user, independent of any CSS.
+tint rides `--dz-menu-item-hover-bg`; the `.divider` rule is tokenized (`--dz-menu-separator`),
+since an untokenized divider silently inherits core's near-invisible `rgba(255,255,255,0.1)`. The
+current item carries the accent left edge (see Unified Accent-Edge above). Top-level nav hover is
+a visual no-op in both schemes (`background: var(--dz-nav-bg)`, byte-identical to the navbar's own
+background). Two known core-side defects, logged, not fixable in theme CSS: the admin Setup toggle
+redirects to `#/SetupMenu` on a real click, and duplicate `id`s in core's `index.html` leave the
+Other dropdown with no "you are here" marker for a non-admin user.
 
-**Mobile side menu (S3).** The panel (`.navbar-inverse.navbar-inner.slide`, `<979px`) is
-`box-sizing: border-box`; with `content-box`, its `5px` padding on a `100%`/`100%` box adds a
-10px overhang past the viewport on each axis. It renders **opaque** (`var(--dz-menu-bg)`, no
-`backdrop-filter`): a glass panel (blur + transparency) fails WCAG AA text contrast on busy page
-backdrops in both schemes, and an accent-tinted scrim measures even worse, a same-hue collision
-with the current item's own accent-coloured left edge and text; the opaque panel's own text
-contrast clears WCAG AA 4.5:1 in both schemes. Item density matches the desktop dropdowns (`8px
-10px`); the current item carries the 2px accent left edge, never the horizontal underline
-(vertical surface). The flyout close ("X") bars in the open (`.slide`-sibling) state read
-`var(--dz-body-text)`, not a hardcoded `#fff`, because the open panel behind them is the scheme
-surface (white in light), clearing the WCAG SC 1.4.11 3:1 non-text floor even in the worst case;
-the closed hamburger's own `#fff` bars stay, since they sit on the blue header banner, a different
-surface.
+**Mobile side menu (S3).** The panel (`.navbar-inverse.navbar-inner.slide`, `<979px`) renders
+**opaque** (`var(--dz-menu-bg)`, no `backdrop-filter`): glass and accent-tinted scrims both fail
+WCAG AA text contrast on busy backdrops, measured in both schemes; the opaque panel clears 4.5:1.
+Item density matches the desktop dropdowns (`8px 10px`); the current item carries the 2px accent
+left edge, never the horizontal underline (vertical surface). The open-state close ("X") bars read
+`var(--dz-body-text)`, not `#fff`, clearing the WCAG SC 1.4.11 3:1 non-text floor against the
+scheme surface; the closed hamburger's `#fff` bars stay, sitting on the blue banner instead.
+**Constraint.** The panel must be `box-sizing: border-box`; the overhang arithmetic and the glass
+measurement account live with the rule in `css/sidemenu.css`.
 
 **Tile grid (S4).** Tokens-only surface: the tile box itself is card-tier (see Card-Flyout
 below), and its labels (`.machinoText`, `.dropdown-content a`) consume the `--dz-menu-text`
@@ -1238,20 +1104,17 @@ oversight.
 
 A second, easily-confused surface is explicitly NOT part of the menu family at all: the settings
 tile grid's own nested sub-menu (`.dropdown-content`, built by `js/settings_page.js` inside a
-grouped tile), despite living one file away in `css/settings.css` and looking like a dropdown. Its
-element carries the class `"dropdown-content rectangle-8"`, so `css/cards.css`'s shared
-`.rectangle-8` rule (identical selector list, equal specificity, loaded after `settings.css`)
-always wins its background, border, and shadow outright; any same-property declaration in
-`css/settings.css` would be dead on arrival. Its real surface tokens are the card tier
-(`--dz-widget-bg` / `--dz-card-radius` / `--dz-elev-card`), not `--dz-menu-*`. Only its two
-text-colour rules (`.machinoText`, `.dropdown-content a`) alias onto `--dz-menu-text`, since label
-text is genuinely shared family vocabulary even where the box around it is not.
+grouped tile). Its real surface tokens are the card tier (`--dz-widget-bg` / `--dz-card-radius` /
+`--dz-elev-card`), not `--dz-menu-*`; only its two text-colour rules (`.machinoText`,
+`.dropdown-content a`) alias onto `--dz-menu-text`, since label text is genuinely shared family
+vocabulary even where the box around it is not. **Constraint.** `css/cards.css`'s shared
+`.rectangle-8` rule always wins this element's surface properties outright, so any same-property
+declaration in `css/settings.css` would be dead on arrival; the cascade account lives beside the
+rules in `css/settings.css`.
 
 One item logged, not resolved: `.mDropdown-Text:hover` (the same nested sub-menu's row-hover text
-colour, `rgba(0,0,0,0.5)`) matches no family token, hover or otherwise, the family only defines a
-hover BACKGROUND (`--dz-menu-item-hover-bg`), never a hover text colour, so this is structurally
-unmatchable today, not merely unmatched. Marked `dz-menu-exception`, left as a future refine
-candidate.
+colour) is structurally unmatchable today, since the family defines a hover BACKGROUND but no
+hover text colour. Marked `dz-menu-exception`, left as a future refine candidate.
 
 ### The Menu Contract (enforcement)
 
@@ -1287,13 +1150,12 @@ access; below it, a page that overflows pushes the whole app-shell (and the menu
 hamburger with it) along with it, so pages need to genuinely fit rather than pin their own
 chrome over a scrolling document.
 
-Core's own `#holder { min-height: 100% }` (`style.css`) has no awareness that the navbar just
-claimed 60px of that 100%, so `css/sidemenu.css` compensates with `#holder { min-height:
-calc(100% - 60px) }` - the fix that clears the identical 60px overflow on every short mobile
-page at once (Users, Mobile, Cam; see [Viewport Fit](#viewport-fit) above). Every mobile-polish
-media query in this project keys off the same pair of numbers, `@media (max-width: 979px)`
-paired with `@media (min-width: 980px)` for the matching desktop-only rule, so a page's mobile
-and desktop treatment never straddle a gap or an overlap at the boundary.
+Core's own `#holder { min-height: 100% }` has no awareness that the navbar just claimed 60px of
+that 100%; `css/sidemenu.css` compensates with `min-height: calc(100% - 60px)` (see
+[Viewport Fit](#viewport-fit) above). Every mobile-polish media query in this project keys off
+the same pair of numbers, `@media (max-width: 979px)` paired with `@media (min-width: 980px)`
+for the matching desktop-only rule, so a page's mobile and desktop treatment never straddle a
+gap or an overlap at the boundary.
 
 ### Viewport-Fit Pages
 
@@ -1308,29 +1170,11 @@ horizontal containment problem with no vertical calc at all:
 | `#/Floorplans` | Core's own layout; navbar stays fixed, nothing to contain | Stage containment, gated on `body.machinon-fp-stage`, `<=979px` | `css/floorplan.css` (the `@media (max-width: 979px)` block) + `src/js/floorplan-stage.js` (the module header comment) |
 
 **Floorplans: stage containment.** Unlike Log and Devices, Floorplans' mobile problem is
-horizontal, not vertical: core lays every floor plan side by side in the DOCUMENT (one
-full-viewport-wide `.imageparent` per plan, `FloorplanController.js`) and switches between
-plans by scrolling the document horizontally (`ScrollFloorplans`, `window.scrollTo`). Below
-979px, with the navbar in flow (see the boundary above), that document-level scroll drags the
-whole navbar off-screen the moment a user swipes to another plan, the menu becomes unreachable
-mid-navigation. `css/floorplan.css` turns `#floorplancontent` itself into the
-horizontal scroll box (`overflow-x: hidden`) under the `body.machinon-fp-stage` gate, and
-`src/js/floorplan-stage.js` redirects every one of core's plan-switch entry points (swipe, nav
-arrows, keyboard, bullet clicks, resize realign) to the stage's own `scrollLeft` instead of the
-document's; `window.scrollTo` cannot be retargeted from CSS alone, and clipping the overflow
-without the JS redirect would leave every plan switch a silent no-op.
-
-The gate is fail-closed in both directions: the CSS containment only activates once the JS
-module has added the `machinon-fp-stage` class, which it does only after verifying it could
-wrap core's `ScrollFloorplans` hook and confirming the stage DOM (`#floorplancontent` with
-`.imageparent` children) exists; if core's markup or wiring ever drifts, the class never
-appears, the containment CSS stays inert, and the page falls back to core's stock (broken on
-mobile) behavior rather than a half-applied state. The wrapper itself also fails closed: it only
-redirects when the containment is actually live (checked by computed `overflow-x` at call time,
-never by duplicating the 979px number), so on desktop it no-ops and core scrolls the document
-exactly as before. A stray 1x1 `<svg>` core leaves at the top of the stage
-(`views/floorplans.html`) is hidden in the same media block, since it opened a spurious first line box
-that pushed the contained plan out of the viewport.
+horizontal: core switches plans by scrolling the DOCUMENT sideways, which drags the in-flow
+mobile navbar off-screen mid-navigation. **Constraint.** `window.scrollTo` cannot be retargeted
+from CSS alone, so the fix pairs `css/floorplan.css` (the stage becomes the scroll box, gated
+on `body.machinon-fp-stage`) with `src/js/floorplan-stage.js`, fail-closed in both directions;
+the mechanism, gate conditions, and wrapper shape live in that module's header comment.
 
 ### The Wrap-With-Gap Form Pattern
 
@@ -1353,58 +1197,40 @@ The exemplar is `#updelclr` (the Timers Update/Delete/Clear row, `css/dashboard_
 }
 ```
 
-The same flex-wrap-plus-gap-plus-`display: contents` recipe is reused, unchanged in shape, at
-three more collision sites: the Events file-header form and its `.pull-right` button group
-(`css/dashboard_mobile.css`), and the HVAC/Scene selector row (`td#status`, using
-`:has(> span > .btn-mini)` to target only the nested selector-button host so no other row type
-is touched, with the ng-repeat's `<span>` wrapper flattened via `display: contents` the same way
-`#updelclr`'s `<td>` is). Five further sites in the same project reuse the plain `gap: 8px` or
-`margin-bottom: 8px` half of the pattern, without a rigid wrapper to flatten, because their
-layout is a simple stack rather than a collision: the Events file-tree's bottom margin, the
-Devices filters/splitter stacking margins (`css/tables.css`), the Quick Stats compact list's
-item gap (`css/dynamic-dashboard.css`), and the blinds slider's icon-clearance offset
-(`css/cards.css`). Every one of the nine sites lands on the existing `{spacing.xs}` cluster value
-(8px), not a new number, and every one is commented `future --dz-gap token site (spacing
-project)`: they are the first candidates to move onto a `--dz-gap` custom property once the
-spacing-token migration in [Spacing](#spacing) lands.
+The same recipe is reused, unchanged in shape, at the other collision sites (Events file-header
+form, HVAC/Scene selector row), and further sites reuse the plain `gap: 8px` /
+`margin-bottom: 8px` half of the pattern where the layout is a simple stack rather than a
+collision. Every pattern site lands on the existing `{spacing.xs}` cluster value (8px), not a
+new number; these sites are the first candidates to move onto a `--dz-gap` custom property once
+the spacing-token migration in [Spacing](#spacing) lands.
 
 ### Dash2 Card Density
 
 Four density rules fit the Machinon device card, and its widgets, into the Dynamic Dashboard's
 fixed-height GridStack cell:
 
-1. **Stretch to the cell.** `.dd-widget--dz-device .dd-dz-inner { align-items: stretch }`, plus
-   `height: 100%` / `min-height: 0` down the card's own table/row/cell chain, lets the card's
-   grid rows compress into the cell's definite height instead of rendering at natural height and
-   being clipped by the cell's `overflow: hidden`. Scoped to `.dd-widget--dz-device` only: scene
-   widgets and the `dz-favorites` widget's scrolling re-render of the same card markup both keep
-   their natural, uncompressed height.
-2. **The h:2 floor.** Core's GridStack config (`ddDzDevice.widget.js`) sets `minH: 2` (120px at
-   `rowHeight: 60`), the size the compressed card must fit into at minimum. A two-line name clamp
-   (`-webkit-line-clamp: 2` on `.dd-widget--dz-device .item.itemBlock td#name`) keeps a long
-   device name from growing the card past that floor; the full name stays reachable via the
-   existing hover tooltip and `title` attribute.
+1. **Stretch to the cell.** The card's grid rows compress into the cell's definite height
+   instead of rendering at natural height and being clipped. Scoped to `.dd-widget--dz-device`
+   only: scene widgets and the `dz-favorites` widget's scrolling re-render of the same card
+   markup both keep their natural, uncompressed height (`css/cards.css`).
+2. **The h:2 floor.** Core fixes the minimum cell at 120px with no theme hook; a two-line name
+   clamp keeps a long device name from growing the card past that floor, with the full name
+   still reachable via the hover tooltip and `title` attribute.
 3. **The h:3+ scroll-cap release.** A multi-level selector (HVAC mode, Scene) scrolls inside its
-   own `#status` cell at h:2 (`overflow-y: auto`, a ~60px window); a `container-type: size` query
-   on the widget body releases that cap (`max-height: none`) from `@container (min-height:
-   150px)` up, i.e. h:3 and taller, so resizing the widget is what reveals the rest of the
-   selector. The h:2 cutoff itself is an accepted exception to the no-cutoff rule (see
-   the Contract below): every alternative layout was measured and rejected at h:2 (a 1-column
-   button stack needs 150px against 120px available; a 2-column grid's min-content forces a
-   40x17px collision with the device icon; the real 30px buttons need 96px of vertical room
-   against a ~66px status row).
+   own `#status` cell at h:2; a height-gated container query releases the cap from h:3 up, so
+   resizing the widget is what reveals the rest of the selector. The h:2 cutoff itself is an
+   accepted exception to the no-cutoff rule (see the Contract below). **Constraint.** Every
+   alternative layout was measured and rejected at h:2; the measurements live with the rules in
+   `css/cards.css`.
 4. **Width-aware slider placement.** The blinds slider's multi-icon track defaults to a bottom
-   strip (the safe fallback compact tiles use, and what an unsupported browser degrades to), and
-   a `@container (min-width: 200px)` / `(min-width: 220px)` pair on the same size-contained
-   widget body moves it beside the icons once the tile is wide enough to give the track a usable
-   width there (200px for the double-icon variant, 220px for triple).
+   strip (the safe fallback, and what an unsupported browser degrades to), and a
+   `@container (min-width: 200px)` / `(min-width: 220px)` pair moves it beside the icons once
+   the tile is wide enough (double-icon / triple-icon variants; `css/cards.css`).
 
-The Quick Stats widget also gets a compact single-column row list
-(`@container (max-width: 340px)` on its own `inline-size`-contained body, replacing core's
-multi-column icon/label/value grid once a tile is too narrow to keep all entries inside the
-cell), and `css/dynamic-dashboard.css` (`.dd-topbar .caret, .dd-toolbar .caret`) counters a
-stray Bootstrap 2 caret-margin rule that would drop the Dash2 edit-toolbar and
-view-mode-topbar dropdown carets ~4.5px below their labels.
+The Quick Stats widget also gets a compact single-column row list under
+`@container (max-width: 340px)`, and `css/dynamic-dashboard.css` counters a stray Bootstrap 2
+caret-margin rule on the Dash2 toolbar dropdowns; both accounts live as comments in
+`css/dynamic-dashboard.css`.
 
 ### The Mobile Layout Contract
 
@@ -1463,14 +1289,11 @@ grid-anatomy declaration, e.g.
 .dd-widget-body .item table[id^="item"] > tbody > tr { ... }
 ```
 
-This is settled architecture, not incidental duplication: both contexts render the exact same
-widget-template markup (`.item table[id^="item"]`), differing only in their wrapping chrome
-(Bootstrap `.span4` cell vs. GridStack tile) and clip ancestors. One rule serving both means a
-future anatomy change (a new grid track, a new region) lands in both contexts automatically by
-construction, instead of needing to be remembered twice. Where the two contexts must genuinely
-diverge - the hover ring, the Dynamic Dashboard's height-compression grid - a second, narrowly
-scoped rule follows immediately after the shared one, always with a comment naming which core
-constraint forces the split (see Traps below).
+This is settled architecture: both contexts render the exact same widget-template markup, so
+an anatomy change written into the shared rule lands in both by construction. Where the two
+must genuinely diverge (the hover ring, the Dynamic Dashboard's height-compression grid), a
+second, narrowly scoped rule follows the shared one; `css/cards.css` names the core constraint
+forcing each split.
 
 **Standard card (classic `.span4` / Dynamic Dashboard):**
 ```
@@ -1519,20 +1342,12 @@ row. Track color comes from `--dz-bar-track-bg` (0.2 neutral grey, both schemes)
 classic pages and the standard dashboard; on the Dynamic Dashboard the gauge stays hidden with its
 host cell.
 
-**Dynamic Dashboard card** (Constraint): the same card, mounted in a GridStack cell. Core sets
-`defaultH: 2` and `minH: 2` (`ddDzDevice.widget.js`) against a `rowHeight` of 60
-(`ddGrid.directive.js`), so the cell is always at least 120px and there is no theme hook for
-either. Measured natural card heights are 116px (switch), 118px (dimmer, blinds) and 120px
-(selector), so the tallest card needs the whole cell. Consequences:
-
-- The row gap is tightened to `4px` (`.dd-widget--dz-device` scope, literal not tokenized - see
-  Traps) from the classic `10px`; at the classic gap the card clips.
-- The card keeps its natural height. Forcing `height: 100%` compresses its grid rows (measured
-  30/60/20 -> 28/58/20px) and squeezes the switch pill and icons.
-- No padding may be reserved around the card, which is why the hover ring is inset - see States.
-- Core clips every cell of the card (`dashboard.css`: `.dd-dz-inner table[id^="itemtable"] td
-  { overflow: hidden }`), so an icon that overhangs its `td` is shaved here though it is visible on
-  the classic dashboard. Not fixable from the theme.
+**Dynamic Dashboard card**: the same card, mounted in a GridStack cell core fixes at a 120px
+minimum with no theme hook, which the tallest card needs entirely. **Constraint.** The card
+keeps its natural height (never `height: 100%`), the row gap tightens to a literal `4px` (see
+Traps), no padding may be reserved around the card (which is why the hover ring is inset, see
+States), and core clips every card cell, shaving any icon that overhangs its `td`. The measured
+heights and the full derivation live with the tile-fit rules in `css/cards.css`.
 
 **Mobile card (`table.mobileitem`, the third context).** This
 is a genuinely different widget template, not a scaled-down `.item` card. It carries no `.item`
@@ -1543,26 +1358,14 @@ lives in one `<td id="status">`. Its rows are `display: flex` inside an outer el
 differ site-by-site (e.g. `14px` name line-height here vs. `18px` on desktop), and the two contexts
 don't even share a layout algorithm. Two mobile-specific behaviors:
 
-- **Arrow-badge scoping.** The round name badge (`--dz-mobile-card-name-badge-size`, 18px) and its
-  `::after` arrow glyph (`\2794`) target exactly one thing: the row-level "view log"
-  badge on Temperature/Weather/Utility rows (`td#name a`/`td.name a`). The `::after` arm is
-  scoped to `td#name a:after, td.name a:after` only, never `th a:after`: the section banner's own
-  plain icon link matches the broader selector list, and an arrow there spills a second
-  line below the 18px-tall banner icon into the first data row. The base badge-circle
-  rule is deliberately left unscoped, since it's invisible on the banner anyway (the badge's accent
-  background matches the `<th>`'s own accent background). Scenes/Switches rows have no `<a>` inside
-  `td#name` at all (core's template renders plain text there), so they are out of scope either way.
-- **Nowrap mitigation.** Core sets an inline `style="white-space: nowrap"` on the Temperature
-  section's status cell only (`dashboard_mobile.html`;
-  Weather/Utility carry no equivalent). Because the outer `<table>` still runs the CSS2.1
-  auto-table-layout min-content algorithm despite its flexed rows/cells, that one unbreakable cell
-  forces the whole table wider than its container, and core's own
-  `SECTION.dashCategory{overflow:hidden}` (`style.css`) then silently amputates the overflow
-  17px inside the true viewport edge - a hard clip, not a visible scrollbar. The theme mitigates
-  with `white-space: normal !important` (required to beat the inline style) plus
-  `overflow-wrap: anywhere` as a defensive belt against any future long, naturally-unbreakable
-  status string, not just today's nowrap instance. Drop the override once core fixes or removes
-  the inline nowrap, not before.
+- **Arrow-badge scoping.** The round name badge (`--dz-mobile-card-name-badge-size`, 18px) and
+  its `::after` arrow glyph mark exactly one thing: the row-level "view log" link on
+  Temperature/Weather/Utility rows. **Constraint.** The arrow arm must exclude the section
+  banner's `th a`; see `css/dashboard_mobile.css`.
+- **Nowrap mitigation.** **Constraint.** Core's inline `white-space: nowrap` on the Temperature
+  status cell is overridden to keep the table inside its container; the failure chain lives
+  with the rule in `css/dashboard_mobile.css`. Drop the override once core removes the inline
+  nowrap, not before.
 
 #### Tokens
 
@@ -1593,11 +1396,10 @@ values and adds the finer 2/3/5px card-internal steps; see [Spacing](#spacing) >
 | `--dz-card-tooltip-radius` | 4px | Fine | Name-description tooltip |
 | `--dz-card-slider-radius` | 3px | Fine | Dimmer/blinds slider track (also `table.mobileitem`'s dimslider, a verified duplicate) |
 
-Tooltip (4px) and slider (3px) don't share a value, so the "fine" tier stays two named properties
-under one grouping comment rather than being forced onto one shared property - collapsing them
-would silently change one of the two, breaking the pass's zero-visual-change contract. `--dz-card-radius`
-closes a gap `--dz-btn-radius`'s own comment ("cards stay 6px: dense card corners, deliberate
-split") had anticipated since before this token existed.
+Tooltip (4px) and slider (3px) do not share a value, so the "fine" tier stays two named
+properties rather than being forced onto one shared property, which would silently change one
+of the two. The card/button radius split (cards 6px, buttons 10px) is deliberate; see the tier
+comments in `dz-tokens.css`.
 
 **Grid / container** (14 tokens, classic + Dynamic Dashboard shared):
 
@@ -1708,12 +1510,9 @@ future pass could make that explicit and token-driven).
 `#status` keeps its color (`var(--dz-body-text)`); only its weight is quiet. `#type`/`#lastupdate`
 are quiet by construction: secondary color, regular weight.
 
-**Mobile is structurally unaffected**: the desktop selectors (`.item #status`, `.item #name`)
-cannot match `table.mobileitem`'s markup at all - it has no `.item` class and no `#bigtext`.
-Mobile bolds its status text via a completely separate, single-purpose rule (`table.mobileitem
-td:last-child { font-weight: semibold }`, `css/dashboard_mobile.css`), and `#name` there is
-*already* regular by default - there is no dual-anchor rule to split on mobile in the first place.
-Mobile's bold status text is a deliberate scope decision, not an oversight, and stands as a
+**Mobile is structurally unaffected**: `table.mobileitem` shares none of the desktop card's
+markup, so the split above cannot leak there. Mobile's bold status text (its own rule in
+`css/dashboard_mobile.css`) is a deliberate scope decision, not an oversight, and stands as a
 one-line follow-up if mobile should later be brought in line.
 
 #### States
@@ -1721,20 +1520,12 @@ one-line follow-up if mobile should later be brought in line.
 - **Card hover (classic)**: `--dz-ring-hover`, composing the resting `--dz-elev-card` shadow with
   the accent ring so a hover rule can never delete the drop shadow (`box-shadow` is a single
   property - see Traps). Full token definitions: [Elevation](#elevation) > Accent Rings.
-- **Card hover (Dynamic Dashboard)**: `--dz-ring-hover-inset`, a settled decision. The card sits
-  inside five nested `overflow: hidden` ancestors core wraps around every GridStack cell
-  (`dd-dz-inner`, `dd-dz-device`, `dd-widget-body`, `dd-widget`, `dd-widget-cell`); clearance
-  between the ring target and the nearest clip boundary is `4px` left/right but `0px` top/bottom,
-  so an outer ring is invisible top and bottom on any card whose content reaches the grid's
-  minimum height, and a straddled half-in/half-out ring collapses asymmetrically (a full double
-  ring on the `4px` sides, zero outer ring on the `0px` sides), reading as a rendering defect
-  rather than a deliberate thin-ring look. Breathing room cannot be freed either: the
-  `SELECTOR`-type card's `<table>`/`<tbody>` ancestors grow to fit the HVAC-mode button group's
-  64px content height regardless of what the row's own height is told to be, a CSS2.1
-  table-height-as-minimum behavior that absorbs any padding tweak before it can shrink anything.
-  Classic cards stay on the composed outer `--dz-ring-hover`. Revisit an outer look only by
-  making the Dynamic Dashboard card shorter on every widget type (a density change, per
-  `css/cards.css`'s own comment), not by changing which ring token is used.
+- **Card hover (Dynamic Dashboard)**: `--dz-ring-hover-inset`, a settled decision.
+  **Constraint.** On the Dynamic Dashboard, core clips the card cell, so the hover ring is
+  drawn inset there instead of outside the card edge; the full clip geometry and the
+  asymmetric-collapse rationale live with the rules in `css/cards.css`. Revisit an outer look
+  only by making the card shorter on every widget type (a density change), not by changing
+  which ring token is used.
 - **Status glows** (timeout/protected/low-battery): semantic ring color instead of a resting drop
   shadow, `!important` (beats the resting card shadow's own `#holder` specificity). Full token
   values and dark-underlay deltas: [Elevation](#elevation) > Status Glows.
@@ -1750,26 +1541,16 @@ one-line follow-up if mobile should later be brought in line.
 
 #### Log/Timer Icon Accent
 
-The Log/Timer icon pair (`.timers_log .btnsmall`/`.btnsmall-sel`) is accent-colored via a
-`css/cards.css` declaration that must carry its own `!important` (**matching-force**, not a
-narrowing of the shared rule): `css/buttons.css`'s shared "ghost" family rule (`.btn-default,
-.btn-group .btn-default, .btnsmall, .btnsmall-sel, .btn-small { color: var(--dz-btn-ghost-text)
-!important; ... }`) otherwise always wins, because a plain declaration can never outrank
-`!important` regardless of selector specificity, and the icons would render quiet gray on every
-card. Once both rules carry `!important`, `.timers_log .btnsmall`/`.timers_log .btnsmall-sel`'s
-two-class specificity (`0,2,0`) beats the ghost rule's one-class `.btnsmall` (`0,1,0`). The same
-mechanism has in-repo precedent: `.aw-footer .btn-default` (`css/buttons.css`) overrides the same
-ghost rule for one context the identical way, and `css/cards.css`'s own comment for this rule uses
-the same mechanism to win the `border` property. Documented in both files with cross-reference
-comments so a future reader finds the explanation from either side.
+The Log/Timer icon pair (`.timers_log .btnsmall`/`.btnsmall-sel`) is accent-colored.
+**Constraint.** The color declaration in `css/cards.css` must carry its own `!important` to beat
+the ghost-family color rule in `css/buttons.css`; the cascade account lives with the rule in
+`css/cards.css`.
 
-**Token**: `--dz-card-icon-accent` (`dz-tokens.css`, light `:root`) = `var(--dz-accent-color)`.
-Contrast is judged against **WCAG SC 1.4.11 (Non-text Contrast, 3:1)**, not SC 1.4.3's 4.5:1 text
-threshold - these are graphical Ionicon glyphs with no text label, not text. The plain accent
-clears 3:1 comfortably in both schemes, so `dark.css` needs no derived
-override: light clears 3:1 both resting and on hover against the light card background (hover
-composites `--dz-btn-hover-bg`'s tonal tint over the card background), and dark clears 3:1 by an
-even wider margin against the dark card background using the same plain `var(--dz-accent-color)`.
+**Token**: `--dz-card-icon-accent` (`dz-tokens.css`) = `var(--dz-accent-color)` in both schemes.
+Contrast is judged against **WCAG SC 1.4.11 (Non-text Contrast, 3:1)**, not SC 1.4.3's 4.5:1
+text threshold: these are graphical Ionicon glyphs with no text label. Both schemes clear 3:1
+resting and hovered, so `dark.css` needs no derived override; the measurements live with the
+rule in `css/cards.css`.
 
 #### Selector Levels
 
@@ -1799,60 +1580,24 @@ mini-toolbars. A small-gap "separate toolbar run" look is rejected by design: at
 it reads as two distinct controls, undermining the reason this control exists (one control, never
 a ragged disconnected wrap).
 
-**Mechanism notes:**
+**Constraints** (each full account lives with its rules in the named file):
 
-- **Wrap-corner clip, a safety net only.** `:first-child`/`:last-child` only know the group's
-  absolute first/last button, not "first/last of whichever row the wrap happens to produce," so a
-  square-cornered INTERIOR button can land at a wrap corner (e.g. "Auto" in the HVAC 5-level
-  case). The shell's own `overflow: hidden` + `border-radius: var(--dz-btn-radius)`
-  (`.item .btn-group:not(.span3 *)`, `css/cards.css`) only ERASES that button's stray
-  square-corner pixel - it never paints a replacement arc, so on its own it produces a genuine
-  blank notch, not a rounded corner. The real mechanism is
-  `src/js/devices.js`'s `retagSelectorWrapCorners()`: it reads
-  each shell's actual button rows via `offsetTop`/`offsetLeft`
-  (shell-relative) and tags the TRUE convex corners of the STAIR-STEP silhouette - never the
-  shell's bounding box - with `data-wrap-corner-tr`/`-bl`/`-br`, each driving its own `!important`
-  corner-radius rule in `css/cards.css` (every attribute repeated three times to reach
-  specificity (0,7,0), the only way to outrank the interior-button radius reset in the same file;
-  see the specificity note in `css/cards.css`). Re-run on every enhancement pass and the
-  MutationObserver's debounced re-enhance settle (`setAllDevicesFeatures`, `initDeviceObserver`),
-  plus a dedicated debounced `window resize` listener (`armSelectorWrapCornerRetag`, wired into
-  `custom.js`'s bootstrap next to `armFlyoutContainment`) since a pure viewport
-  resize changes wrap state with no DOM mutation for the observer to catch. FAIL-CLOSED: an
-  untagged button simply falls back to whatever the existing first/last-child/interior CSS already
-  gives it - if the retagger never runs, the worst case is a lesser defect (a plain
-  square corner or the right-edge seam pinch), never a rounded outline around empty space. A
-  decorative `::after` overlay tracing the shell's own bounding
-  box is not a substitute: it paints exactly the empty-space outline this fail-closed design
-  avoids.
-- **Selected-hover state.** Core marks every level button `class="btn btn-small"` regardless of
-  selection, so `buttons.css`'s ghost-hover wash (`.btn-small:hover` and siblings, specificity
-  (0,2,0)) outranks the bare `.btn-selected` background rule's own (0,1,0) and would swap a
-  SELECTED button's solid `--dz-btn-toggle-selected-bg` fill for the wash on hover - white label
-  text on a near-white background. `css/cards.css` therefore re-declares
-  background/color/border-color at `.item .btn-group:not(.span3 *) > .btn.btn-selected:hover`
-  (specificity (0,6,0), the same scope+shape already proven against this ghost rule by the
-  control's own `:focus-visible` override). The hover reaction darkens the fill via the theme's
-  own filled-button hover derivation (`color-mix(in srgb, var(--dz-btn-toggle-selected-bg) 90%,
-  black)`). Hover contrast clears the WCAG AA 4.5:1 text floor in light; dark stays below it, but
-  that is a pre-existing `--dz-accent-color`-on-dark limitation the RESTING selected state already
-  carries (also below 4.5:1 at rest) - the hover derivation does not introduce or worsen it.
-- **Inset focus ring** (`--dz-btn-focus-ring-inset`, `dz-tokens.css`): with the shell clip in place,
-  the family's standard outward ring (`--dz-btn-focus-ring`) renders fine on the group's TRUE first/last
-  child (their own rounded corners roughly match the clip curve) but is amputated down to almost
-  nothing on the same square-cornered interior button the clip note above describes. Which segment
-  lands at that position depends on a device's own level count and label lengths, so "usually fine,
-  occasionally amputated" was rejected as a default; every segment in both contexts uses the inset ring
-  uniformly instead.
-- **The ~2px wrapped-row junction.** The horizontal (within-row) seam collapses to a true 1px hairline
-  automatically, because `flex-wrap` resets which button counts as "previous" at every line break, so
-  the `margin: 0 0 0 -1px` trick applies per row with no extra rule. There is no equivalent CSS
-  selector for "first item in a wrapped row" the way `:first-child` identifies the group's true first
-  child, so nothing collapses the VERTICAL row-to-row junction the same way: it stays two adjacent 1px
-  borders (~2px combined), measured directly (`border-bottom-width`/`border-top-width` both compute
-  `1px`, both accent-colored) rather than assumed. This is a structural limit of flex-wrap, not an
-  oversight - visually marginal at normal viewing size (not visible without
-  zooming past ~3x), disclosed rather than chased.
+- **Wrap corners.** No CSS selector knows the corners of whichever rows a wrap produces, so
+  `src/js/devices.js` (`retagSelectorWrapCorners`) tags the stair-step silhouette's true convex
+  corners and `css/cards.css` rounds exactly those, fail-closed: an untagged button falls back
+  to the existing corner CSS, never to a rounded outline around empty space. The shell clip is
+  only a safety net, not the fix. A decorative `::after` overlay tracing the shell's own
+  bounding box is not a substitute: it paints exactly the empty-space outline this fail-closed
+  design avoids.
+- **Selected hover.** Core's ghost-hover wash would replace a selected segment's solid fill;
+  `css/cards.css` re-declares the selected-hover state at winning specificity, darkening the
+  fill via the family's filled-button hover derivation.
+- **Inset focus ring.** Every segment uses `--dz-btn-focus-ring-inset` uniformly, since the
+  shell clip amputates the outward ring on a wrapped interior segment and which segment lands
+  there depends on the device's own level count and labels; see `css/cards.css`.
+- **Wrapped-row junction.** The vertical row-to-row seam stays ~2px; a structural flex-wrap
+  limit, visually marginal, listed under [Gaps](#gaps) and disclosed with the rule in
+  `css/cards.css`.
 
 **Compact exception.** The Compact Dashboard (`DashboardType=1`, `.span3` tiles) is permanently
 excluded (`:not(.span3 *)` scoping throughout both files): its fixed ~50px-tall card has no room for a
@@ -1870,54 +1615,39 @@ two independent controls.
 
 #### Traps
 
-Load-bearing quirks a future edit could break without realizing it:
+Load-bearing quirks a future edit could break without realizing it; each full account lives
+beside its rule in the named file:
 
-- **The Dynamic Dashboard card is deliberately not stretched to its cell.** `height: 100%` looks
-  like the obvious fix for "card doesn't fill its GridStack cell," but it compresses the card's own
-  grid rows (measured 30/60/20px -> 28/58/20px) and squeezes the switch pill and icons. The cell is
-  already guaranteed >= the tallest natural card height (120px, via core's `minH: 2`); the card
-  needs no forced height, only `align-items: stretch` on its flex parent.
-- **`:has(.item)` scopes every card-grid rule to rows that actually hold device cards.** Without it,
-  the plain Bootstrap `.row` class - reused by unrelated Angular views (e.g. the Events page's
-  `<timesun>` topbar) - gets treated as a card grid and stretched to a full track. `.item` is a
-  device-card-only class; `:has(.item)` is what makes the broader `.row` selector safe. Browsers
-  without `:has()` support fall back to plain Bootstrap float layout (functional, no card grid),
-  not breakage.
-- **Matched reset+override pairs travel together.** The Bootstrap-span wrapper reset
-  (`:is(.span2, .span3, ...):has(> .item) { padding: 0; margin: 0; box-sizing: border-box }`) and
-  the card's own `box-sizing: border-box` (`.item, .item table[id^="item"], .item table[id^="item"]
-  > tbody > tr`) are two halves of one contract: the wrapper reset is what makes any *future*
-  wrapper padding safe (insets instead of grows the cell), and the card's own border-box is what
-  keeps its `1.5px` border from adding to its rendered height. Editing one half without the other
-  silently breaks the pairing.
+- **The Dynamic Dashboard card is deliberately not stretched to its cell.** `height: 100%`
+  compresses the card's own grid rows and squeezes the switch pill and icons; the cell is
+  already guaranteed at least the tallest natural card height. See the tile-fit note in
+  `css/cards.css`.
+- **`:has(.item)` scopes every card-grid rule to rows that actually hold device cards.** The
+  plain Bootstrap `.row` class is reused by unrelated Angular views; browsers without `:has()`
+  fall back to plain float layout (functional, no card grid), not breakage. See `css/cards.css`.
+- **Matched reset+override pairs travel together.** The Bootstrap-span wrapper reset and the
+  card's own `box-sizing: border-box` are two halves of one contract; editing one half silently
+  breaks the pairing. See the card box contract at the top of `css/cards.css`.
 - **`box-shadow` is a single property.** A hover or status rule that lists only a ring or glow
-  deletes the resting `--dz-elev-card` shadow outright - CSS does not merge multiple `box-shadow`
-  declarations on the same element, a later one replaces the whole property. Every card-hover/status
-  rule in the theme either composes the resting shadow into its token (`--dz-ring-hover`) or
-  restates it explicitly alongside the new layer (`device-status.css`'s status hovers). See
-  [Elevation](#elevation) > The Shadow Contract for the enforcement gate (`scripts/check-shadows.sh`).
-- **A handful of geometric values are kept verbatim, not "cleaned up," because their purpose is
-  unconfirmed.** `--dz-card-fill-width` (99%, paired with a `2px` `margin-left`) reads like an old
-  sub-pixel anti-clip hack; `--dz-mobile-card-slider-handle-offset` (-6px) differs by 1px from
-  desktop's -5px; `--dz-mobile-card-selectorlevels-margin` (-30px) is a negative-margin hack of
-  unconfirmed necessity. All three are kept at their current value; each carries a source comment
-  flagging it as a possible drift, not a deliberate design value, so a future pass can grep for them
-  before removing anything.
-- **`.span3 #status` is accent-colored while classic `#status` is body-text colored** - an open,
-  unresolved question (could be deliberate density-driven emphasis at the 180px compact tile, or
-  drift from an earlier pass).
-- **The mobile dashboard's camera section loads late.** `#dashCameras` is injected asynchronously
-  (thumbnail `blob:` URLs) by non-Angular JS - it carries no `ng-scope` class, so it never joins the
-  Angular digest the other sections settle on, and a plain `networkidle` wait does not guarantee it
-  has finished pushing content down. Any geometry measurement or screenshot of the mobile dashboard
-  should poll for `#dashCameras` present in the DOM **and** its height stable across two consecutive
-  polls before capturing; card positions below the cameras section can still shift after a naive
-  "page loaded" signal.
-- **Two grid-gap values stay untokenized:** the classic 10px card-grid gap and the Dynamic Dashboard's
-  4px tightened gap remain as literals in `css/cards.css` instead of joining the `--dz-card-space-*`
-  scale. The 4px value is not a step on the 7-step card-space
-  scale, so tokenizing the pair symmetrically is impossible without either adding an off-scale token or
-  changing a value; they remain refine candidates for a future density decision.
+  deletes the resting `--dz-elev-card` shadow outright; every card-hover/status rule composes
+  the resting shadow into its token (`--dz-ring-hover`) or restates it alongside the new layer.
+  See [Elevation](#elevation) > The Shadow Contract for the enforcement gate
+  (`scripts/check-shadows.sh`).
+- **A handful of geometric values are kept verbatim because their purpose is unconfirmed.**
+  `--dz-card-fill-width` (99%), `--dz-mobile-card-slider-handle-offset` (-6px vs desktop's
+  -5px), and `--dz-mobile-card-selectorlevels-margin` (-30px) each carry a drift flag beside
+  their value in `dz-tokens.css`; grep for consumers before removing anything.
+- **`.span3 #status` is accent-colored while classic `#status` is body-text colored**: an open,
+  unresolved question (deliberate compact-tile emphasis, or drift), flagged beside the rule in
+  `css/compact.css`.
+- **The camera section loads late.** `#dashCameras` is injected outside the Angular digest, so
+  any geometry measurement or screenshot of a dashboard with cameras must poll for it present
+  in the DOM AND height-stable across two consecutive polls before capturing. **Constraint.**
+  The injection and its digest-bypass account live in `js/dashboard_camera.js`.
+- **Two grid-gap values stay untokenized.** The classic 10px card-grid gap and the Dynamic
+  Dashboard's 4px tightened gap stay literal in `css/cards.css`: 4px is not a step on the
+  card-space scale, so the pair cannot be tokenized symmetrically without an off-scale token or
+  a value change. Refine candidates for a future density decision.
 
 ### Form Inputs
 
@@ -1983,52 +1713,38 @@ contract.
 - Range fill: `rgba(var(--dz-accent-values), 0.5)`
 - Handle: 15px circle, solid `var(--dz-accent-color)`, positioned -5px top
 - Width: `calc(100% - 100px)` (start point fixed relative to the card, so it never crosses the device icon), 55% on wide screens (1200px+)
-- Blinds cards (any card with a second icon cell): track anchored on BOTH edges (`left: 14px` for the handle's -12px overhang, `right: 20px`, `width: auto`); the icon clearance itself comes from core's inline `margin-left` per variant, so the track can never overlap the blind icons at any card width
+- Blinds cards (any card with a second icon cell): track anchored on BOTH edges instead of a fixed width, so it can never overlap the blind icons at any card width. **Constraint.** The anchoring derivation and the Dynamic Dashboard's zeroed-margin variant live with the blinds rules in `css/cards.css`.
 
 ### Floorplan Device Popup
 
 Clicking a device on a floorplan opens core's own SVG popup (`g.DeviceDetails`, drawn by
-`www/js/domoticzdevices.js`), not an HTML card; core also ships an HTML variant
-(`div.span4.DeviceDetails`) in the same file, but it is dead code (commented "this is not
-used"). The theme cannot restyle the popup by changing its markup, so `css/floorplan.css`
-overrides SVG presentation attributes with ordinary `fill`/`stroke` declarations, which win the
-cascade over the same-property values core paints inline (an SVG presentation attribute only
-loses to a stylesheet rule that actually declares that property on that element).
+`www/js/domoticzdevices.js`), not an HTML card. The theme cannot restyle the popup by changing
+its markup, so `css/floorplan.css` overrides SVG presentation attributes with ordinary
+`fill`/`stroke` declarations. **Constraint.** A stylesheet declaration always beats a
+same-property SVG presentation attribute, so most overrides need no `!important`; the per-rule
+exceptions and their verifications live with the rules in `css/floorplan.css`.
 
 **Collapsed chrome.** `rect.popup`/`rect.header` fill from `--dz-widget-bg`, text from
-`--dz-body-text` (name semibold, status semibold and accent-colored). The slider
-(`rect#sliderback` -> `--dz-card-slider-track-bg`, `rect#slider` -> `--dz-accent-color`, both
-`stroke: none`) keeps core's GEOMETRY on purpose: the popup lives inside the floorplan's scaled
-SVG user-unit space, not px, so matching the card slider's literal 5px track would fight the
-floorplan zoom instead of following it. Only the LANGUAGE (flat, accent-filled, unstroked) is
-matched, not the numbers. `rect.header` gets an explicit `stroke: none`: core never actually
-paints a stroke on this rect (only a `fill` presentation attribute; SVG's initial stroke value is
-already none), so no hairline ever rendered, but the rule is kept as a stated guarantee against a
-future core change adding one. `rect#shadow`, core's own black drop-shadow rect, is softened to
-`opacity: 0.12` rather than removed outright: the popup floats over a busy floorplan and still
-needs visual separation, and 0.3 (core's default) is heavier than every `--dz-elev-*` tier
-except `--dz-elev-drag`'s 0.35.
+`--dz-body-text` (name semibold, status semibold and accent-colored). The slider matches the
+card slider's LANGUAGE (flat, accent-filled, unstroked: `--dz-card-slider-track-bg` track,
+`--dz-accent-color` fill) but keeps core's GEOMETRY, because the popup lives in the floorplan's
+scaled SVG user-unit space, not px. Core's black drop-shadow rect is softened to `opacity:
+0.12` to sit within the elevation language. **Constraint.** The header's explicit
+`stroke: none` guarantee and the shadow-softening rationale live with the rules in
+`css/floorplan.css`.
 
-**Expanded state (opt-in).** Core's own expander (`image#twisty`, wired to
-`Device.popupExpand()`) has shipped hidden (`image#twisty { display: none }`) since 2019 with no
-recorded reason, and works correctly once revealed. Feature `floorplan_popup_details`
-(`theme.json` id 44, **default off**) re-enables it via `css/floorplan_popup_details.css`,
-appended after `css/floorplan.css` by the feature loader so source order, not `!important`,
-settles the equal-specificity override; with the feature off, the popup keeps its collapsed-only
-behavior. Once expanded, the Log/Notifications action pills (`rect#Log`,
-`rect#Notifications`) are not individually wrapped in the DOM (`g#Log`/`g#Notifications` do not
-exist; core's `drawButtons` appends a bare `rect` then an unnamed sibling `text` per button,
-flat inside `g#detailsgroup`), so they are themed via `--dz-btn-primary-bg`/
-`--dz-btn-primary-text`, reached through the adjacent-sibling combinator
-(`.DeviceDetails rect#Log + text`). The label override needs `!important`: the general
-`.DeviceDetails text { fill: ... !important }` rule already claims every text node under the
-popup at a precedence a plain higher-specificity rule cannot beat.
+**Expanded state (opt-in).** Feature `floorplan_popup_details` (`theme.json` id 44, **default
+off**) reveals core's own popup expander (`image#twisty`), which has shipped hidden and works
+correctly once revealed; with the feature off, the popup keeps its collapsed-only behavior. The
+expanded Log/Notifications action pills are themed on the primary button tokens
+(`--dz-btn-primary-bg`/`--dz-btn-primary-text`). **Constraint.** The feature file loads after
+`css/floorplan.css`, so source order, not `!important`, settles the override (see
+`css/floorplan_popup_details.css`); the pills' flat DOM structure and the one required
+`!important` on their labels are documented with the rules in `css/floorplan.css`.
 
-**Remaining core rasters.** The slider knob (`images/handle.png`, id `sliderhandle`) and the
-expander chevron (`images/expand16.png`, id `twisty`) are still core's raster PNGs; CSS cannot
-recolor a raster the way it recolors an SVG shape via `fill`. Replacement art was deferred (none
-available yet) and is tracked upstream as issue #6959, which asks core to draw both as SVG
-shapes and to finish tokenizing `drawDetails()`.
+**Remaining core rasters.** The slider knob (`images/handle.png`) and the expander chevron
+(`images/expand16.png`) are core raster PNGs, which CSS cannot recolor the way it recolors an
+SVG shape; replacement art is tracked upstream as issue #6959.
 
 The surface's invariant, across light/dark x collapsed/expanded x feature off/on: no `url(#...)`
 computed fill and no pure-black stroke may survive anywhere in the popup.
@@ -2040,35 +1756,22 @@ Every theme setting lives in one page, the **theme hub**
 `css/theme-hub.css`). It is the sole settings surface: there is no injected Setup tab and no
 standalone settings page.
 
-**Pseudo-route.** The theme cannot register an Angular route (core owns `app.routes.js`, and
-any unknown hash falls through to `.otherwise` -> redirects to `#/Dashboard`), so the hub is a
-click pseudo-route with no URL of its own, following the `js/custom_page.js` technique: one
-Setup-menu `<li>` (`dzInsertHubMenuEntry`) is inserted immediately after core's own Settings
-item. Clicking it (`dzOpenThemeHub()`) hides core's routed content (`#main-view`, the `ng-view`
-mount) and shows the hub, a SIBLING of `#main-view`, never a child - Angular re-renders
-`ng-view` on every digest and would wipe anything placed inside it. A one-time `hashchange` listener
-(`dzCloseThemeHubOnLeave`) restores core's content the moment the user navigates away, so the
-hub is a page, not a hijack. The single menu insertion feeds BOTH surfaces at once: the Setup
-dropdown, and the tile grid, since `settings_page.js` builds its grid from that same `<ul>` at
-click time - no second registration. FAIL CLOSED throughout: if the Setup menu `<ul>` or its
-Settings item cannot be matched, no entry is added (never a broken one), logged as a structured
-warning.
+**Routing.** With routes active (`window.dzRoutesActive`), `#/Theme` and `#/Theme/:tab` are
+registered Angular routes rendering the hub inside core's own `ng-view`, the `:tab` segment
+deep-linking straight to a manifest group (e.g. `#/Theme/colors`). **Constraint.** When the
+route table cannot be reached, the hub falls back to the original click pseudo-route (hide
+`#main-view`, show a sibling, restore on `hashchange`); the fallback anatomy, the
+menu-insertion fail-closed rules, and the tile-grid feed live in `src/js/theme-hub.js` (header
+comment) and `custom.js` (route table).
 
 **Manifest-driven rendering.** `THEME_MANIFEST` (`src/js/theme-manifest.js`) is the single
 declarative source of truth: nine ordered groups (General, Menus and navbar, Dashboard, Device
 cards, Charts and log, Background and branding, Colors and schemes, Icon packs, About), 35
-entries. Each entry names its `storageKey` (the exact `theme.json` feature key or top-level
-value, unchanged, so the storage seam's positional format stays migration-compatible), a
-`control` (`toggle`/`number`/`text`/`select`/`custom`), a `label`/`description`/`appliesTo`
-tag, an optional `previewId`, an optional `parent` for the five checkbox-gated pairs the legacy
-tab expressed as nested checkboxes, and `reloadOnDisable` (true only where a live disable
-cannot apply without an already-executed script being un-executed). `dzBuildThemeHub()` walks
-the manifest once to build one underlined tab plus one `.dz-hub-section[data-group]` per group;
-`dzRenderGroupRows()` renders one `.dz-hub-row[data-setting]` per non-`custom` entry (control +
-label + `appliesTo` tag + description, dependent rows nested under their parent's
-`.dz-hub-children` and disabled together with it) and a `.dz-hub-custom-mount` for each
-`control:"custom"` entry (scheme picker, custom-colour swatches, icon-pack installer, About).
-Adding a setting is a manifest entry, not new markup.
+entries. Adding a setting is a manifest entry, not new markup: each entry declares its
+`storageKey`, `control` (`toggle`/`number`/`text`/`select`/`custom`),
+label/description/`appliesTo` tag, optional `previewId` and `parent`, and `reloadOnDisable`.
+The full entry schema lives in the manifest's own header comment; the group/row build walk
+lives in `src/js/theme-hub.js` (`dzBuildThemeHub`, `dzRenderGroupRows`).
 
 **Underlined-tab group nav.** Group navigation mirrors the theme's existing flat-underline tab
 language (`css/nav.css` `.nav-tabs`, reused a third time after the icon-pack tabs below): one
@@ -2080,36 +1783,28 @@ horizontal scroll at any width, and every one of the nine tabs stays reachable b
 bar itself.
 
 **Instant apply.** Every setting change applies live and persists immediately; there is no Save
-button. `dzApplyHubSetting()` mirrors the in-place reconcile's existing appliers
-(`settings-store.js applyThemeDeltaInPlace`) verbatim for the extra visual effect a setting
-drives (`DZ_HUB_APPLIERS`: `card_min_width`/`card_max_width` -> `applyCardWidths`,
-`logo`/`hide_logo` -> `setLogo`, `background_img`/`background_type` -> `applyBackground`,
-`navbar_icons_text` -> `applyNavbarIconsText`), loads or unloads the setting's feature file
-generically, then persists through the `settings-transport.js` seam
-(`storeUserVariableThemeSettings("update")`). A `reloadOnDisable` row surfaces a disclosure
-note only once its live disable actually needs a reload (an executed `.js` file cannot be
-un-executed); a CSS-only feature never shows one, since disabling it just unloads a stylesheet
-live.
+button. A `reloadOnDisable` row surfaces a disclosure note only once its live disable actually
+needs a reload (an executed `.js` file cannot be un-executed); a CSS-only feature never shows
+one, since disabling it just unloads a stylesheet live. **Constraint.** The per-setting applier
+map (`DZ_HUB_APPLIERS`) and the persistence path live in `src/js/theme-hub.js` and the
+`src/js/settings-transport.js` seam.
 
 **Previews.** Each row's `.dz-hub-preview` box renders a mini illustrating the setting
-(`src/js/theme-hub-previews.js`, the `DZ_HUB_PREVIEWS` registry + `dzRenderPreview()`), one of
-two kinds: a LIVE TOKEN MINI built only from `var(--dz-*)` references, so it recolors
-automatically when the scheme changes with no JS re-render (device-card toggle, navbar strip,
-chart bands, card width, and others); or, for the three settings with no on-screen colour to
-mirror (`standby`, `check_update`, `notification`), a scheme-neutral inline `<svg>` sketch in a
-fixed muted grey that reads on both backgrounds, deliberately not a token it has nothing to say
-about. A setting with neither a faithful mini nor a sensible sketch keeps `previewId: null` and
-renders no preview; the row is still valid.
+(`src/js/theme-hub-previews.js`), one of two kinds: a LIVE TOKEN MINI built only from
+`var(--dz-*)` references, so it recolors automatically when the scheme changes with no JS
+re-render; or, for the three settings with no on-screen colour to mirror (`standby`,
+`check_update`, `notification`), a scheme-neutral inline `<svg>` sketch in a fixed muted grey
+that reads on both backgrounds, deliberately not a token
+it has nothing to say about. A setting with neither a faithful mini nor a sensible sketch keeps
+`previewId: null` and renders no preview; the row is still valid.
 
 **Colors and icon packs, hosted.** The `scheme`/`custom_color_scheme`/`iconpacks` manifest
-entries are `control:"custom"`: their mount dispatches to the existing UI modules rather than
-duplicating them. `renderSchemePicker()` (`src/js/schemes.js`) and the 7-swatch
-custom-colour editor mount into the hub's Colors group (see [Colors](#colors) above for the
-scheme picker/persistence contract). `src/js/iconpack.js` loads `iconsettings.html` into the
-hub's Icon packs group the same way (grid detailed below). Both mounts render only once the
-hub's section is actually attached to the live document (`dzBuildThemeHub`, right after the DOM
-insert), since both resolve their containers by `getElementById`/jQuery `#id`, which only match
-attached nodes.
+entries are `control:"custom"`: their mounts dispatch to the existing UI modules rather than
+duplicating them: the scheme picker and 7-swatch custom-colour editor (`src/js/schemes.js`, see
+[Colors](#colors) for the picker/persistence contract) into the Colors group, the installer
+(`src/js/iconpack.js`) into the Icon packs group. **Constraint.** Both mounts render only once
+the hub is attached to the live document; the reason lives in `src/js/theme-hub.js`
+(`dzBuildThemeHub`).
 
 **About and attribution.** The General tab carries a short intro (name, live version, one
 line); the About tab (the last tab) carries the expansive version, a modernized
@@ -2134,24 +1829,21 @@ section); a key without a manifest home is a defect. The hub is subject to the
 #### Settings storage
 
 **Two-layer model.** Theme settings resolve through Domoticz core's native `ThemeSettings` API
-(`ThemeSettingsAPI: 1`, core `WebServerCmds.cpp` `Cmd_ThemeSettingsGet/Set/SetDefault`), read
-and written entirely through `src/js/settings-transport.js`. Two server-side rows exist per
-theme: an **instance layer** (`themesettings_setdefault`, one shared row for the whole
-Domoticz instance, the house defaults) and a **per-user layer** (`themesettings_set`, one row
-per logged-in identity). `dzApiLoad()` reads both and applies them onto the in-memory `theme`
-object, instance then user, so a personal override always wins over the shared default for the
-keys it is allowed to touch.
+(`ThemeSettingsAPI: 1`), read and written entirely through `src/js/settings-transport.js`. Two
+server-side rows exist per theme: an **instance layer** (one shared row, the house defaults)
+and a **per-user layer** (one row per logged-in identity), applied instance then user, so a
+personal override always wins over the shared default for the keys it is allowed to touch.
 
-**Scope rule.** Not every setting may live in the per-user layer. Every manifest entry
-(`src/js/theme-manifest.js`) and every snapshot-only extra (`DZ_SCOPE_EXTRAS`) carries a scope
-of `"user"` or `"house"`, resolved through `dzSettingScope()`, never read off `entry.scope`
-directly. The rule, verbatim from the manifest's own header comment:
+**Scope rule.** Not every setting may live in the per-user layer. Every manifest entry and
+every snapshot-only extra carries a scope of `"user"` or `"house"`. The rule, verbatim from the
+manifest's own header comment:
 
 > per-user = anything that only changes how your own browser renders; house = shared content,
 > branding, infrastructure, and per-device data.
 
-`dzSnapshotSubset(snap, "user")` enforces this structurally: a per-user write can only ever
-carry `"user"`-scoped keys, so a house key cannot be overridden per user even by a bug.
+**Constraint.** A per-user write can structurally only carry `"user"`-scoped keys, so a house
+key cannot be overridden per user even by a bug; the enforcement (`dzSnapshotSubset`) lives in
+`src/js/settings-transport.js`.
 
 **The 29/9 split.** Every persisted key falls into exactly one scope:
 
@@ -2171,74 +1863,46 @@ page, dashboard camera wiring, the logo, and the per-device icon list): things t
 the house, not the person looking at it. Everything else, including which color scheme you
 picked and how wide you like your cards, is yours alone.
 
-**Promote and reset.** Three actions on the About tab's Maintenance block manage the two
-layers directly, each behind a confirm (`dzHubConfirm`) and each gated on `dzSettingsMode()`
-(`{api, perUser, admin, noIdentity}`), rendered only in native-API mode:
-
-- **"Save my current preferences as house defaults"** (`dzHubPromote` -> `dzApiPromote()`,
-  visible only when `admin && perUser`) copies the admin's own personal settings over the
-  house defaults. Needs both: with no personal layer at all, the session's settings already
-  *are* the house defaults (see PerUser-false collapse below), so promoting would be a no-op.
-- **"Reset my personal settings"** (`dzHubResetMine` -> `dzApiResetUser()`, visible when
-  `perUser`) deletes the caller's personal row; the session falls back to the house defaults.
-- **"Reset the house defaults"** (`dzHubResetHouse` -> `dzApiResetHouse()`, visible when
-  `admin`) deletes the shared instance row, resetting it to theme.json factory values.
-  Personal settings of other users are untouched.
-
-"Reset theme to defaults" (`dzHubDoResetTheme`), unlike the three above, is mode-aware rather
-than mode-gated: it resets every native layer this identity can reach (house when admin,
-personal when `perUser`) and only then clears the localStorage cache and reloads, so a partial
-failure (already warned by `dzApiFail`) never masquerades as a clean reset.
+**Promote and reset.** Three confirm-gated actions on the About tab's Maintenance block manage
+the two layers directly, rendered only in native-API mode: **"Save my current preferences as
+house defaults"** (admin with a personal layer) copies the admin's personal settings over the
+house defaults; **"Reset my personal settings"** deletes the caller's personal row, falling
+back to the house defaults; **"Reset the house defaults"** (admin) resets the shared row to
+factory values, leaving other users' personal settings untouched. "Reset theme to defaults" is
+mode-aware rather than mode-gated: it resets every native layer this identity can reach, then
+clears the localStorage cache and reloads. **Constraint.** The visibility gating and the
+promote no-op rationale live in `src/js/theme-hub.js`; the write paths in
+`src/js/settings-transport.js`.
 
 **PerUser-false collapse.** A shared, non-differentiated session (a core running `-nowwwpwd`,
-or any core that resolves every request to the same identity)
-reports `dzSettingsMode().perUser === false`. `dzApiSaveSettings()` takes its single-layer
-branch there, writing only the instance row; the house-scope indicator's own render condition
-(`entry.scope === "house" && dzSettingsMode().perUser`, `theme-hub.js`) never fires, so no
-house chip and no locked row ever appear. The hub collapses to behave exactly like the legacy
-single-shared-settings page: every row editable by whoever can reach it, since there is no
-second layer to distinguish a personal setting from a shared one.
+or any core that resolves every request to the same identity) collapses the hub to the legacy
+single-shared-settings behavior: one layer, no house chips, no locked rows, every row editable
+by whoever can reach it. The detection and the single-layer write branch live in
+`src/js/settings-transport.js` and `src/js/theme-hub.js`.
 
-**Legacy fallback and seed-once migration.** `dzProbeThemeSettingsAPI()` checks `getversion`
-for `ThemeSettingsAPI: 1`. When the core lacks it (or the probe fails), `dzSettingsMode().api`
-is false and every read/write routes through the original uservariable transport
-(`dzThemeSettingsLoad`/`dzThemeSettingsSave`, the three `theme-<folder>-features/-custom/-colors`
-variables). On a capable core, `dzSeedFromLegacyIfPossible()`
-runs once per cold boot for a session that may write the instance layer: if the native instance
-row is empty (`DZ_LOAD_EMPTY`) but the three legacy variables exist, it loads them through the
-legacy transport, snapshots the resulting `theme` object, and writes that snapshot into the
-instance layer (`dzApiWriteInstanceFull`). The three legacy variables are left in place,
-unchanged, frozen: a core rolled back to a version without the native API still finds them
-intact and boots from them exactly as before. The migration is idempotent: once
-the instance row exists, `dzApiLoad()` reports `DZ_LOAD_LOADED` on every later boot and the
-seed step never runs again.
+**Legacy fallback and seed-once migration.** **Constraint.** On a core without
+`ThemeSettingsAPI: 1` (or a failed probe), every read/write routes through the original
+uservariable transport; on a capable core, a one-time idempotent seed copies the three legacy
+variables into the instance layer and leaves them in place, unchanged and frozen, so a core
+rolled back to a version without the native API still boots from them exactly as before. The
+probe, seed conditions, and idempotence account live in `src/js/settings-transport.js`.
 
-**Reachability.** Two menu entries feed one hub, so every session that can reach it gets
-exactly one visible way in. `dzInsertHubMenuEntry()` inserts `<li id="dzThemeHubMenu">`
-immediately after the Settings item inside `#appnavbar li[has-permission='Admin'] > ul` (the
-Setup dropdown, admin-only; core hides it from everyone else with zero theme code). `dzInsertHubMenuEntryOther()`
-inserts `<li id="dzThemeHubMenuOther">` into `#appnavbar li[has-login-no-admin] > ul` (the
-Other dropdown, shown only to a logged-in non-admin). Both anchors carry the identical
-`href="#/Theme"` plus `onclick="dzOpenThemeHub()"` markup. With real Angular routes active
-(`window.dzRoutesActive`, `dzRegisterThemeRoutes` in `custom.js`), `#/Theme` and `#/Theme/:tab`
-are registered routes rendering the hub inside core's own `ng-view`; the `:tab` segment
-deep-links straight to a manifest group (e.g. `#/Theme/colors`) via `dzMountThemeHubIn`.
-`#/SetupMenu`, the routed settings tile grid, is gated `permission: "Admin"` at the route
-table itself, so the admin-only surface stays admin-only even reached by a direct URL, not
-only through the hidden menu entry.
+**Reachability.** Two menu entries feed one hub (the Setup dropdown for admins, the Other
+dropdown for logged-in non-admins, each hidden by core's own permission directives), so every
+session that can reach the hub gets exactly one visible way in. `#/SetupMenu`, the routed
+settings tile grid, is gated `permission: "Admin"` at the route table itself, so the admin-only
+surface stays admin-only even reached by a direct URL. Insertion anchors and gating live in
+`src/js/theme-hub.js` and `custom.js`.
 
-**House chip and locked rows.** A per-user row for a house-scope setting renders a
-`.dz-hub-chip-house` pill next to its label (`theme-hub.js` `dzRenderHubRow`, only while
-`dzSettingsMode().perUser` is true): 11px semibold text (`--dz-text-micro` /
-`--dz-weight-semibold`), an accent-colored 1px outline (`border: 1px solid var(--dz-accent-color)`)
-rather than the accent-filled `.dz-hub-tag` pill it sits beside, same pill radius
-(`var(--dz-btn-radius)`), body-text color (`css/theme-hub.css`). A non-admin session additionally
-gets `.dz-hub-row-locked` on the row (`opacity: 0.5`, `.dz-hub-row-locked .dz-hub-control { pointer-events: none; }`)
-and its control's native `disabled` attribute set, so a house row is visibly distinct and
-provably inert for anyone who cannot write the house layer. The same `.dz-hub-row-locked`
-class (hub-wide, every row) is reused by `dzHubApplyNoIdentityLock()` the first time a write
-fails `no_identity` (an application-token session with no Users row to attach a personal layer
-to), paired with a one-time `.dz-hub-no-identity-note` banner at the top of the About tab.
+**House chip and locked rows.** While per-user mode is active, a house-scope setting's row
+carries a `.dz-hub-chip-house` pill next to its label: `--dz-text-micro` semibold, an
+accent-colored 1px outline (rather than the accent-filled `.dz-hub-tag` it sits beside), the
+same pill radius (`var(--dz-btn-radius)`), body-text color. A non-admin session additionally
+gets `.dz-hub-row-locked` on the row (`opacity: 0.5`, pointer-events off, native `disabled`
+set), so a house row is visibly distinct and provably inert for anyone who cannot write the
+house layer. The same class locks every row after the first `no_identity` write failure,
+paired with a one-time banner on the About tab; render conditions live in
+`src/js/theme-hub.js`, the styles in `css/theme-hub.css`.
 
 #### Icon Packs
 
@@ -2255,9 +1919,9 @@ Card grid (`.iconpack-grid`, `auto-fill, minmax(150px, 1fr)`, 140px under 480px)
 | Counter | `{typography.xs}` (12px), 75% opacity | |
 | "Installed" chip | `{typography.micro}` (11px) | `var(--dz-status-ok)` background, white text, top-right |
 
-Actions row: `images/add.png` installs; it swaps to `images/machinon/refresh.png` only when the served art or metadata has actually drifted from the pack (a title/description check against `getcustomiconset` first, then FNV-1a content signatures: the manifest carries the shipped On/Off sigs, so only the two served images are fetched per installed icon), never on a hunch. `images/remove.png` warns with the names of any devices currently assigned the icon (looked up via `getdevices`), notes they will revert to their default icon, and is disabled when nothing is installed. State is never bookkept client-side: every action re-derives install status from `getcustomiconset` before the grid repaints, so operations are idempotent and safe to retry.
+Actions row: `images/add.png` installs; it swaps to `images/machinon/refresh.png` only when the served art or metadata has actually drifted from the pack, never on a hunch. `images/remove.png` warns with the names of any devices currently assigned the icon, notes they will revert to their default icon, and is disabled when nothing is installed. State is never bookkept client-side: every action re-derives install status from the server before the grid repaints, so operations are idempotent and safe to retry. **Constraint.** The drift check (metadata first, then FNV-1a content signatures) and the re-derive path live in `src/js/iconpack.js`.
 
-"Install / update all" acts on the visible set only: with a search filter active it relabels to "Install / update shown (N)" and installs/updates just the shown icons, one upload at a time (chained, not parallel, to avoid SQLite lock contention on the CustomImages table). A busy flag serializes every DB-writing operation, install, update, or remove alike, so a second click mid-upload gets a warning toast instead of a second concurrent write.
+"Install / update all" acts on the visible set only: with a search filter active it relabels to "Install / update shown (N)" and installs/updates just the shown icons. **Constraint.** Every DB-writing operation is serialized (uploads chained, never parallel; a busy flag turns a second click mid-operation into a warning toast); the SQLite-contention rationale lives in `src/js/iconpack.js`.
 
 ## Feature Modules
 
@@ -2392,18 +2056,12 @@ Because `@import` must precede all inline rules, an extracted file loads *before
 rules would lose to the rules they now jump over.
 
 **Import depth is one level, by design.** Every `@import` in `custom.css` must point at a leaf
-file with no `@import` of its own; a file may never import an aggregator that itself imports
-further files. The browser cannot start fetching an `@import`ed file until the file that imports
-it has fully downloaded and parsed, so each extra nesting level serializes one more full network
-round trip before its children even begin downloading (measured on Fast 3G: the theme's imported
-children did not start until ~1019ms, well after `custom.css` itself was requested at ~200ms -
-that gap is the round trip; a three-level chain would add a second one on top). This is a
-source-only invariant, documented in a comment at the top of `custom.css`: it does not by itself
-remove the round trip (the browser still fetches `custom.css`, then its 26 children), it only
-stops the cost from compounding. `scripts/build-dist.sh` is what actually removes the request
-fan-out for real users: it recursively inlines the whole `@import` chain, depth-first, into
-`dist/custom.css` for release artifacts (`dist/` is gitignored, not committed) so a release ships
-one flat file while the source stays modular, one `@import` per leaf, easy to find and edit.
+file with no `@import` of its own; each extra nesting level serializes one more full network
+round trip before its children even begin downloading. **Constraint.** The measured round-trip
+account lives in the comment at the top of `custom.css`. The invariant caps the cost, it does
+not remove it; `scripts/build-dist.sh` removes the request fan-out for real users by inlining
+the whole `@import` chain into `dist/custom.css` (gitignored) so a release ships one flat file
+while the source stays modular.
 
 ## Gaps
 

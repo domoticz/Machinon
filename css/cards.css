@@ -240,6 +240,11 @@ div.bannercontent .row > .item {
 .dd-widget-body .item.itemBlock table[id^="item"] > tbody > tr {
     grid-template-rows: auto minmax(var(--dz-card-row-status-min),1fr) minmax(0,var(--dz-card-row-lastupdate-h));
     grid-template-columns: var(--dz-card-col-icon) var(--dz-card-col-icon2) minmax(0,1fr) minmax(0, auto) minmax(0, auto) var(--dz-card-col-trailing);
+    /* 10px stays a literal, not a --dz-card-space-* token: its Dynamic Dashboard
+       counterpart is 4px (the tile-fit note below), which is not a step on the
+       7-step card-space scale, so the pair cannot be tokenized symmetrically
+       without an off-scale token or a value change. Both stay literal pending a
+       density decision. */
     grid-gap: 10px;
     gap: 10px;
     grid-template-areas: 'name name name bigtext bigtext options'

@@ -234,7 +234,11 @@ ul.machinon_ul li {
 /* Row rhythm: every Setup tab's label|value table cells move onto the 8/10 card
    cluster, up from an inconsistent 3px 10px (measured live, core's own table.display
    default); horizontal padding is deliberately left unchanged from that default -
-   widening it (e.g. to a 15/20 pair) causes mobile-width overflow. */
+   widening it (e.g. to a 15/20 pair) causes mobile-width overflow. That overflow is
+   invisible to documentElement.scrollWidth: #settings .row-fluid is
+   justify-content: center, so a wrapped child wider than the viewport overflows
+   symmetrically off BOTH edges without moving scrollWidth - measure candidate
+   spacing with getBoundingClientRect() on the child, never with scrollWidth. */
 #settingscontent .tab-pane td {
     padding: 8px 10px;
 }
