@@ -1,0 +1,21 @@
+{
+    "name": "Paper Dark",
+    "description": "Ink on slate: the monochrome pair of Paper Light",
+    "base": "dark",
+    "preview": { "bg": "#121212", "surface": "#1E1E1E", "accent": "#D0D0D0", "text": "#EDEDED" },
+    "colors": {
+        "background": "#121212",
+        "item": "#1E1E1E",
+        "navbar": "#0B0B0B",
+        "main_color": "#D0D0D0",
+        "main_text": "#EDEDED",
+        "alt_text": "#B0B0B0",
+        "border": "#3A3A3A",
+        "disabled": "#6B6B6B",
+        "error": "#FF6B63",
+        "success": "#7FC97F",
+        "warning": "#E0B341",
+        "accent_text": "#121212",
+        "sun": "#CFCFCF"
+    }
+}
