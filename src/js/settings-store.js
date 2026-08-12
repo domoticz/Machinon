@@ -187,6 +187,22 @@ function reconcileDomoticzSettingsInPlace() {
        mutates the theme object in place. */
     var before = JSON.parse(JSON.stringify(theme));
     return checkUserVariableThemeSettings().then(function() {
+        /* Retired-scheme repair (schemes.js DZ_SCHEME_MIGRATIONS): runs after
+           the stored profile has merged, so it sees the real stored pick
+           whichever transport carried it. Guarded because settings-store.js
+           loads before schemes.js in custom.js's module list. */
+        if (typeof migrateRetiredScheme === "function") { return migrateRetiredScheme(); }
+        return false;
+    }).then(function(migrated) {
+        /* migrateRetiredScheme() -> applyScheme() already loaded/unloaded
+           dark_theme.css itself (setDarkFeature), a real side effect that
+           already ran. Sync the snapshot's dark_theme entry to the live one
+           so the delta differ below does not see the same false->true (or
+           true->false) transition again and repeat the file load/unload
+           (feature-loader.js has no duplicate guard). */
+        if (migrated && before.features && theme.features && theme.features.dark_theme) {
+            before.features.dark_theme.enabled = theme.features.dark_theme.enabled;
+        }
         applyThemeDeltaInPlace(before);
     });
 }

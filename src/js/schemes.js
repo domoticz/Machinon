@@ -33,6 +33,43 @@ function loadBuiltinSchemes() {
         });
 }
 
+/* Slugs retired by the 2026-08-12 pruning pass, mapped to their survivor. A
+   stored pick that no longer exists would otherwise leave the user on a dead
+   slug: applyScheme finds no scheme and returns, so whatever painted stays and
+   the picker shows nothing selected. Deleted schemes migrate BY THEIR OLD BASE
+   (a Dracula user lands on Machinon Dark, not on the light default): the
+   palette cannot survive, the light/dark intent can. blue-ui-light/-dark map
+   to the base slugs because their values ARE the base tokens now, and e-ink is
+   a pure rename. "custom" and "user:<name>" are user-owned and never migrated. */
+var DZ_SCHEME_MIGRATIONS = {
+    "blue-ui-light":    "light",
+    "blue-ui-dark":     "dark",
+    "e-ink":            "paper-light",
+    "catppuccin-latte": "light",
+    "magenta-light":    "light",
+    "catppuccin-mocha": "dark",
+    "tokyo-night":      "dark",
+    "dracula":          "dark",
+    "terra":            "dark",
+    "golden-hour":      "dark",
+    "nightfall":        "dark",
+    "ultraviolet":      "dark",
+    "ember":            "dark",
+    "high-contrast":    "dark",
+    "magenta-dark":     "dark"
+};
+
+/* Repair a stored pick of a retired scheme, once, at load. applyScheme already
+   sets scheme/scheme_base/color_scheme, toggles custom_color_scheme, caches and
+   persists, so the repair is written back and the next boot reads the survivor
+   directly instead of migrating again. */
+function migrateRetiredScheme() {
+    var target = DZ_SCHEME_MIGRATIONS[theme.scheme];
+    if (!target) return Promise.resolve(false);
+    console.log(themeName + " - scheme '" + theme.scheme + "' was retired, migrating to '" + target + "'");
+    return applyScheme(target).then(function() { return true; });
+}
+
 /* A scheme pick is a decision: persist it to the Domoticz user variables
    immediately (like users expect from a theme switcher), instead of waiting
    for the Save button. Without this, an unsaved pick lived only in
