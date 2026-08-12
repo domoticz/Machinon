@@ -915,12 +915,16 @@ table.mobileitem td.name {
    values (no separate hover token needed - only the fill moves). Unselected
    (.btn-default) hover is deliberately untouched by this rule - the ghost
    family's own wash is correct there, only the SELECTED segment's hover
-   was ever broken. WCAG (screenshot-measured, both schemes): light
-   4.51->5.38:1 hover vs the resting 4.51:1 (improves), PASS; dark stays
-   ~3.0-3.7:1 (a pre-existing --dz-accent-color-on-dark limitation shared by
-   the RESTING selected state too, disclosed in f9f345d, not introduced or
-   worsened by this rule - fully closing it means retuning the dark accent
-   token theme-wide, out of scope here).
+   was ever broken. WCAG (re-measured 2026-08-12 for the Blue UI rebase,
+   same color-mix(in srgb, ...) 90%-black hover math this rule applies):
+   light 5.45:1 resting -> 6.41:1 hover (improves), PASS; dark 10.72:1
+   resting -> 8.69:1 hover (still comfortably above AA, though the mix
+   narrows the gap since darkening a light bg moves it toward the dark
+   text color instead of away from it), PASS. The old "~3.0-3.7:1
+   pre-existing --dz-accent-color-on-dark limitation" no longer applies:
+   Blue UI Dark's accent is pale, so --dz-accent-text now resolves dark
+   (#0f1620, see dark.css) instead of white there, which is what fixed it,
+   not a retune of the accent token itself.
 
    box-shadow: none per owner gate H1 (2026-08-11, "flat-selected" round):
    matches the rest-state .btn-selected rule in buttons.css, which stopped
@@ -1104,13 +1108,15 @@ body table#itemtable tr > .options {
    "color: var(--dz-btn-ghost-text) !important" on plain .btnsmall/
    .btnsmall-sel, which always won here before this rule carried its own
    !important - the color declaration below was dead code). --dz-card-icon-
-   accent (dz-tokens.css, overridden per-scheme in dark.css) is
-   --dz-accent-color on light (already >=3:1 per WCAG SC 1.4.11) and a
-   lightened derived value on dark (raw accent measured under 3:1 there);
-   see dz-tokens.css/dark.css for the measurements. !important plus this
-   selector's two-class specificity (0,2,0) beats the ghost rule's one-class
-   .btnsmall (0,1,0) on the cascade tie, same mechanism as .aw-footer
-   .btn-default in buttons.css. */
+   accent (dz-tokens.css, set again in dark.css) is the plain
+   --dz-accent-color on BOTH light and dark as of the 2026-08-12 Blue UI
+   rebase: light measures 5.45:1 resting / 4.77:1 hover against the card
+   background, dark measures 9.68:1, all comfortably over WCAG SC 1.4.11's
+   3:1 non-text threshold, so dark no longer needs a lightened derived
+   value; see dz-tokens.css/dark.css for the live-measured method.
+   !important plus this selector's two-class specificity (0,2,0) beats the
+   ghost rule's one-class .btnsmall (0,1,0) on the cascade tie, same
+   mechanism as .aw-footer .btn-default in buttons.css. */
 .timers_log .btnsmall,
 .timers_log .btnsmall-sel {
     display: inline;

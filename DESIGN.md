@@ -1,41 +1,43 @@
 ---
 version: alpha
 name: Machinon
-description: Clean, card-based Domoticz home automation theme. Dual light/dark color scheme driven by CSS custom properties, responsive grid layout, Inter typography, single teal-blue accent color against neutral surfaces. Optional feature modules for compact dashboard, toggle switches, navbar icons, sidemenu, and more.
+description: Clean, card-based Domoticz home automation theme. Dual light/dark color scheme driven by CSS custom properties, responsive grid layout, Inter typography, single slate-blue accent color against cool neutral surfaces. Optional feature modules for compact dashboard, toggle switches, navbar icons, sidemenu, and more.
 
 colors:
-  # Light theme
-  light-bg: "#f1f1f1"
-  light-primary: "#097fae"
-  light-navbar: "#ffffff"
-  light-surface: "#ffffff"
-  light-text: "#1a1a1a"
-  light-text-secondary: "#6d6e6d"
-  light-border: "#d3d3d3"
-  light-disabled: "#d3d3d3"
-  light-error: "#c43b3b"
-  light-success: "#3b863b"
-  light-warning: "#b36200"
+  # Light theme (Blue UI, adopted as the base 2026-08-12)
+  light-bg: "#F4F8FC"
+  light-primary: "#396D9E"
+  light-navbar: "#E9F2FB"
+  light-surface: "#FFFFFF"
+  light-text: "#1B2B3A"
+  light-text-secondary: "#3E5568"
+  light-border: "#CBD9E6"
+  light-disabled: "#8CA0B3"
+  light-error: "#992F2B"
+  light-success: "#306B30"
+  light-warning: "#7A5412"
 
-  # Dark theme
-  dark-bg: "#333639"
-  dark-primary: "#0b9eda"
-  dark-navbar: "#232324"
-  dark-surface: "#515558"
-  dark-text: "#ffffff"
-  dark-text-secondary: "#cccccc"
-  dark-border: "#6d6e6d"
-  dark-disabled: "#808080"
-  dark-error: "#e05555"
-  dark-success: "#4aa84a"
-  dark-warning: "#df7b00"
+  # Dark theme (Blue UI Dark)
+  dark-bg: "#0F1620"
+  dark-primary: "#98CCFD"
+  dark-navbar: "#0A0F16"
+  dark-surface: "#18202B"
+  dark-text: "#DCE6F0"
+  dark-text-secondary: "#9DB2C6"
+  dark-border: "#2A3644"
+  dark-disabled: "#5E7183"
+  dark-error: "#FA5D57"
+  dark-success: "#73D173"
+  dark-warning: "#F2B03D"
 
   # Fixed (both themes)
-  on-primary: "#ffffff"
-  sun-icon: "#ff8c00"
-  label-important: "#b94a48"
-  gradient-start: "#0bcdc7"
-  gradient-dark-start: "#103c68"
+  on-primary: "#FFFFFF"
+  label-important: "#B94A48"
+  gradient-start: "#0BCDC7"
+  gradient-dark-start: "#103C68"
+  # sun-icon removed 2026-08-12: no longer one fixed value for both themes.
+  # The sunrise/sunset sun is now scheme-aware (--dz-sun-color): #8C730E
+  # light, #FAD232 dark. See Colors > Fixed Colors below.
 
 typography:
   body:
@@ -226,7 +228,7 @@ components:
 
 ## Overview
 
-Machinon is a clean, card-based theme for the Domoticz home automation dashboard. It replaces Domoticz's default Bootstrap 2.x UI with a modern CSS grid layout, CSS custom properties for theming, and a dual light/dark color scheme. The design centers on a single teal-blue accent color against neutral surfaces, with device cards displayed in a responsive grid. The theme supports optional feature modules (compact dashboard, toggle switches, navbar icons, sidemenu, and more), all toggled via a settings UI stored in `theme.json`.
+Machinon is a clean, card-based theme for the Domoticz home automation dashboard. It replaces Domoticz's default Bootstrap 2.x UI with a modern CSS grid layout, CSS custom properties for theming, and a dual light/dark color scheme. The design centers on a single slate-blue accent color, matched to the theme's Blue UI icon set, against cool neutral surfaces, with device cards displayed in a responsive grid. The theme supports optional feature modules (compact dashboard, toggle switches, navbar icons, sidemenu, and more), all toggled via a settings UI stored in `theme.json`.
 
 **Key characteristics:**
 - Single accent color (`{colors.light-primary}` / `{colors.dark-primary}`) used for all interactive elements
@@ -266,17 +268,35 @@ the same edit, or record the difference as a gap.
 > Built-in schemes (`schemes/*.json`, picker in the theme hub's Colors group rendered by `src/js/schemes.js`)
 > are presets for that same applier: a scheme carries a `colors` object with the applier's
 > keys plus a `base` ("light"/"dark") that picks the token underlay beneath the overrides via
-> `theme.scheme_base` (dark schemes keep `dark.css` active for every token they do not set).
+> `theme.scheme_base`. A dark scheme is less exposed to that underlay than it might appear:
+> `applyCustomColorScheme` (`src/js/scheme.js:68-92`) sets `--dz-widget-bg` and `--dz-body-text`
+> inline from the scheme's own `item` and `main_text` keys, and the table-stripe tokens derive
+> from those two, so all four gated rails are scheme-owned. What actually falls through to
+> `dark.css` is only what no scheme key sets at all: shadows, elevation, glows and the dd grid
+> line. (Established while restoring the magenta pair on 2026-08-12.)
 > Every shipped scheme must hold body text vs body background at WCAG AA 4.5:1 or better,
 > and text-on-accent (`--dz-accent-text`, the token every "text on an accent surface" rule
 > consumes; scheme key `accent_text`) at 3:1 or better (both gated by `dz-scheme-picker.js`).
-> Adding a scheme = one JSON file + an `index.json` entry.
+> The two base cards' hardcoded preview swatches are gated against the computed tokens by the
+> same harness.
+> Adding a scheme = one JSON file + an `index.json` entry. The shipped set is deliberately
+> small (owner decision 2026-08-12): four families, each a light and dark pair. Machinon Light
+> and Machinon Dark are the token defaults themselves and carry no JSON; Magenta, Paper and
+> Gruvbox are the three JSON families, and Magenta is the base's hue opposite. Retired slugs
+> are migrated by `DZ_SCHEME_MIGRATIONS` in `src/js/schemes.js`: most map to their old base so a
+> user's light/dark intent survives a deletion, and the one exception (`e-ink` -> `paper-light`)
+> is a rename onto its direct successor rather than a base fallback, which still preserves the
+> same intent. A surviving slug must never appear in that map.
+> The swatch order is `Background, Menu, Item, Main, Text, Secondary Text, Disabled`, grouped
+> as surfaces from page to card, then the accent, then text, then state (owner decision
+> 2026-08-12). One list in `src/js/schemes.js` drives both the card previews and the
+> custom-colour editor, and two harness checks pin it.
 >
 > Deliberately NOT tokenized: text on the semantic colours (red/success/warning buttons stay
 > white), the login page and the offline splash (fixed brand surfaces), Blockly's canvas, and
 > the legacy dark_theme.css gradient. Everything else colour-bearing flows through tokens;
 > the device status glows use the `--dz-status-*-values` r,g,b triplets, and the
-> sunrise/sunset sun is `--dz-sun-color` (#ff8c00 in every base scheme; scheme colors key
+> sunrise/sunset sun is `--dz-sun-color` (#8C730E light, #FAD232 dark; scheme colors key
 > `sun` overrides it like the other semantic colours).
 >
 > **Token definitions must DERIVE, never copy.** A token whose definition is a literal copy of
@@ -340,8 +360,8 @@ core's later-loaded `:root`.
 
 ### Fixed Colors (theme-independent)
 
-- **On primary** (`{colors.on-primary}`): white text on filled buttons and accent backgrounds
-- **Sun icon** (`{colors.sun-icon}`): `#ff8c00` orange for sunrise/sunset icon
+- **On primary** (`{colors.on-primary}`): `#FFFFFF`, white text on filled buttons and accent backgrounds - the light value only. Like Sun icon below, this is no longer theme-independent: the real token is `--dz-accent-text`, which `dark.css` sets to `#0F1620` because Blue UI Dark's accent is pale (schemes set it via the `accent_text` key; see Colors above)
+- **Sun icon** (`--dz-sun-color`): `#8C730E` light / `#FAD232` dark for the sunrise/sunset icon; unlike the rest of this list, it now differs by scheme (see Colors > CSS Custom Property Mapping context above)
 - **Label important** (`{colors.label-important}`): `#b94a48` for critical badges
 - **Header gradient**: `{colors.gradient-start}` to `{colors.light-primary}` (light), `{colors.gradient-dark-start}` to `#0073a7` (dark)
 
@@ -968,18 +988,26 @@ with `!important`, since inline styles otherwise beat any external selector rega
 specificity, and `background-color` doesn't inherit but `color` does, so every cell in the row picks
 up the readable pairing without its own rule.
 
-Measured contrast, both base and Blue UI (the schemes named in this project's brief), light and dark:
+Base and Blue UI collapsed into a single scheme on 2026-08-12, when Blue UI became the theme's base;
+there is no longer a second column to compare against. Re-measured live against the rig rather than
+carrying the old numbers forward:
 
-| Scheme | Light | Dark |
-|--------|-------|------|
-| Base | 14.30:1 | 6.67:1 |
-| Blue UI | 11.79:1 | 9.21:1 |
+| Theme | Contrast |
+|-------|----------|
+| Light | 11.80:1 |
+| Dark | 9.21:1 |
 
-All four clear AA (4.5:1) by a wide margin. The live table-census contract (base scheme active during
-that harness run) independently re-measured the rendered report totals rows at 14.45:1 - consistent
-with the manual probe above; the small numeric difference is measurement method (the manual check
-resolved `color-mix()` via a temporary DOM probe element, the census reads `getComputedStyle()`
-straight off the live totals row), not a regression.
+Method: a temporary DOM probe element styled with `background: var(--dz-table-total-bg); color:
+var(--dz-table-total-text)` under each scheme's `data-dz-scheme` attribute, read back via
+`getComputedStyle()` and run through the WCAG relative-luminance/contrast formula - the same
+color-mix-resolving method the pre-rebase manual probe used. Both clear AA (4.5:1) by a wide margin.
+The live table-census contract (light scheme active during that harness run; it does not switch
+schemes, so it has no dark-mode equivalent) independently re-measured the rendered report totals rows
+at 14.45:1 - not a regression: the census's `getComputedStyle()` read falls back to the ancestor's
+white widget background rather than resolving the row's own `color-mix()` fill (confirmed live:
+14.45:1 is exactly body-text `#1B2B3A` against plain white, not against the tinted totals band), a
+pre-existing gap between the two measurement techniques that predates this pass and is unrelated to
+the accent rebase.
 
 ### Padding Rhythm
 
