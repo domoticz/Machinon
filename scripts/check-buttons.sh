@@ -10,13 +10,44 @@ f=css/buttons.css
 
 # Lines annotated with "dz-btn-exempt" are skipped (the annotation is
 # expected to carry its own justification comment alongside it, e.g.
-# "/* dz-btn-exempt: caret notch, not a boxed button */"). Comment-only
-# lines are also excluded so contract prose mentioning these properties
-# isn't flagged. Emits "lineno:content" pairs with original line numbers
-# preserved (grep -n numbers before filtering, so removed lines never
-# shift later numbers).
+# "/* dz-btn-exempt: caret notch, not a boxed button */"). Comment TEXT is
+# blanked so contract prose mentioning these properties isn't flagged.
+# Emits "lineno:content" pairs with original line numbers preserved (NR
+# counts every line, so blanking never shifts later numbers).
+#
+# The blanking tracks /* */ state ACROSS lines. The previous version dropped
+# only lines whose first non-space characters were "/*", which caught the
+# opening line of a block comment but not its continuation lines: prose in
+# the middle of a block reading "box-shadow: none explicitly rather than
+# left unset" was reported as a raw box-shadow violation (css/buttons.css
+# 621 and 623, red since that comment was written).
+#
+# The exempt annotation is read from the ORIGINAL line, before blanking,
+# because it lives inside a comment: blanking first would erase the
+# annotation and re-flag the very declaration it exempts.
 strip() {
-  grep -vn "dz-btn-exempt" "$1" | grep -v "^[0-9]*:[[:space:]]*/\*"
+  awk '
+    {
+      orig = $0
+      out = ""; i = 1; len = length(orig)
+      while (i <= len) {
+        if (!incomment) {
+          q = index(substr(orig, i), "/*")
+          if (q == 0) { out = out substr(orig, i); break }
+          out = out substr(orig, i, q - 1)
+          i = i + q + 1
+          incomment = 1
+        } else {
+          q = index(substr(orig, i), "*/")
+          if (q == 0) { break }
+          i = i + q + 1
+          incomment = 0
+        }
+      }
+      if (orig ~ /dz-btn-exempt/) next
+      print NR ":" out
+    }
+  ' "$1"
 }
 
 # Reports every "$1:" declaration in $f whose value does not match the
