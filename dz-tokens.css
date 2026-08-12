@@ -25,11 +25,19 @@
     --dz-accent-color:    #396d9e;
     --dz-input-border:    #cbd9e6;
     --dz-status-disabled: #8ca0b3;
-    --dz-accent-red:      #992f2b;
+    --dz-accent-red:      var(--dz-accent-red-base);
     --dz-btn-success-bg:  #306b30;
     --dz-btn-warning-bg:  #7a5412;
 
     /* Machinon aux tokens (no core --dz-* equivalent) */
+    /* Private base for the light danger red. Not itself a --dz-* contract
+       token: it exists only so --dz-accent-red above and the html:root
+       override below (see the specificity note near that block) both
+       derive from one place instead of two literals drifting apart, which
+       is how the html:root copy went stale during the 2026-08-12 Blue UI
+       rebase (found live: --dz-accent-red computed the retired #c43b3b
+       while --dz-accent-red-values already carried the new triplet). */
+    --dz-accent-red-base:     #992f2b;
     --secondary-text-color:   #3e5568;
     --dz-accent-values: 57,109,158;
     --dz-accent-red-values:   153,47,43;
@@ -504,12 +512,15 @@
   beats :root (0,1,0) in both schemes; dark.css's html[data-dz-scheme="dark"] (also 0,1,1) still
   wins over this via source order when the dark attribute is set. Only the brand accent + brand
   red are Machinon-ised - the energy/weather/moon colours are semantic and stay at core defaults.
-  --dz-accent-red: without this line core's #DF2D3A overrides Machinon's #c43b3b in light mode
-  (dark was already correct via the higher-specificity attribute selector).
+  --dz-accent-red: without this line core's #DF2D3A overrides Machinon's red in light mode (dark
+  was already correct via the higher-specificity attribute selector). References the same
+  --dz-accent-red-base private token as the plain :root --dz-accent-red above (derive-not-copy:
+  a literal #992f2b here previously drifted from the :root value silently after the 2026-08-12
+  Blue UI rebase touched only the latter).
 */
 html:root {
     --dz-widget-accent: var(--dz-accent-color);
-    --dz-accent-red:    #c43b3b;
+    --dz-accent-red:    var(--dz-accent-red-base);
 }
 
 /* Standby clock steps down on small screens. Breakpoint (979px) matches the

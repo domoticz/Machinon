@@ -401,7 +401,7 @@
 .dz-hub-scheme-picker .scheme-card {
     position: relative;
     cursor: pointer;
-    width: 160px; /* was 108px, tuned for the pre-2026-08-12 20-card wall; at 7 cards the row fits on one line on desktop. At 360px the hub's own chrome leaves the panel only ~277px wide, so cards wrap one-up rather than two-up; still fully contained (check 6), just a taller single column */
+    width: 160px; /* was 108px, tuned for the pre-2026-08-12 20-card wall; at the current 9 cards (four families, light+dark, plus custom) the row wraps across multiple lines on desktop rather than fitting on one. At 360px the hub's own chrome leaves the panel only ~277px wide, so cards wrap one-up rather than two-up; still fully contained (check 6), just a taller single column */
     padding: 6px; /* future --dz-gap token site (spacing project) */
     border: 1px solid var(--dz-input-border);
     border-radius: var(--dz-btn-radius);

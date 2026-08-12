@@ -37,7 +37,7 @@ colors:
   gradient-dark-start: "#103C68"
   # sun-icon removed 2026-08-12: no longer one fixed value for both themes.
   # The sunrise/sunset sun is now scheme-aware (--dz-sun-color): #8C730E
-  # light, #FAD232 dark. See Colors > Fixed Colors below.
+  # light, #FAD232 dark. See Colors > Special-Cased Colors below.
 
 typography:
   body:
@@ -292,9 +292,12 @@ the same edit, or record the difference as a gap.
 > 2026-08-12). One list in `src/js/schemes.js` drives both the card previews and the
 > custom-colour editor, and two harness checks pin it.
 >
-> Deliberately NOT tokenized: text on the semantic colours (red/success/warning buttons stay
-> white), the login page and the offline splash (fixed brand surfaces), Blockly's canvas, and
-> the legacy dark_theme.css gradient. Everything else colour-bearing flows through tokens;
+> Deliberately NOT tokenized: the login page and the offline splash (fixed brand surfaces),
+> Blockly's canvas, and the legacy dark_theme.css gradient. Everything else colour-bearing flows
+> through tokens, including text on the semantic colours: red/success/warning buttons consume
+> `--dz-btn-primary-text` (`var(--dz-accent-text)`), which is white in light but `dark.css` sets
+> it to `#0F1620` for dark, since Blue UI Dark's accent is pale enough that white text would fail
+> contrast there;
 > the device status glows use the `--dz-status-*-values` r,g,b triplets, and the
 > sunrise/sunset sun is `--dz-sun-color` (#8C730E light, #FAD232 dark; scheme colors key
 > `sun` overrides it like the other semantic colours).
@@ -347,8 +350,8 @@ the same edit, or record the difference as a gap.
 | `--dz-accent-red` | `{colors.light-error}` | `{colors.dark-error}` | Destructive actions, timeout status |
 | `--dz-btn-success-bg` | `{colors.light-success}` | `{colors.dark-success}` | Success state buttons |
 | `--dz-btn-warning-bg` | `{colors.light-warning}` | `{colors.dark-warning}` | Warning state buttons |
-| `--dz-accent-values` | `9,127,174` | `11,158,218` | Raw RGB for `rgba()` usage |
-| `--dz-accent-red-values` | `196,59,59` | `224,85,85` | Raw RGB for `rgba()` usage |
+| `--dz-accent-values` | `57,109,158` | `152,204,253` | Raw RGB for `rgba()` usage |
+| `--dz-accent-red-values` | `153,47,43` | `250,93,87` | Raw RGB for `rgba()` usage |
 | `--dz-status-danger` | alias of `--dz-accent-red` | (follows) | Status fills: danger tier (battery empty bar) |
 | `--dz-status-warn` | alias of `--dz-btn-warning-bg` | (follows) | Status fills: warning tier (battery half bar) |
 | `--dz-status-ok` | alias of `--dz-btn-success-bg` | (follows) | Status fills: healthy tier (battery base/full bar) |
@@ -358,9 +361,13 @@ Derived tokens (`--dz-panel-bg`, `--dz-border-color`, `--dz-table-*`, `--dz-btn-
 `--dz-accent-red` are additionally set in an `html:root` block, whose `(0,1,1)` specificity beats
 core's later-loaded `:root`.
 
-### Fixed Colors (theme-independent)
+### Special-Cased Colors
 
-- **On primary** (`{colors.on-primary}`): `#FFFFFF`, white text on filled buttons and accent backgrounds - the light value only. Like Sun icon below, this is no longer theme-independent: the real token is `--dz-accent-text`, which `dark.css` sets to `#0F1620` because Blue UI Dark's accent is pale (schemes set it via the `accent_text` key; see Colors above)
+Not part of the main token mapping table above. Some of these are genuinely fixed across every
+scheme (Label important, Header gradient); others vary by scheme through their own token rather
+than the shared mapping table, so "theme-independent" no longer describes the whole group.
+
+- **On primary** (`{colors.on-primary}`): `#FFFFFF`, white text on filled buttons and accent backgrounds - the light value only. Varies by scheme: the real token is `--dz-accent-text`, which `dark.css` sets to `#0F1620` because Blue UI Dark's accent is pale (schemes set it via the `accent_text` key; see Colors above)
 - **Sun icon** (`--dz-sun-color`): `#8C730E` light / `#FAD232` dark for the sunrise/sunset icon; unlike the rest of this list, it now differs by scheme (see Colors > CSS Custom Property Mapping context above)
 - **Label important** (`{colors.label-important}`): `#b94a48` for critical badges
 - **Header gradient**: `{colors.gradient-start}` to `{colors.light-primary}` (light), `{colors.gradient-dark-start}` to `#0073a7` (dark)
@@ -712,7 +719,7 @@ the ones that need to differ.
 | `--dz-btn-info-bg` | `var(--dz-accent-color)` | Alias: Bootstrap's `.btn-info` reuses the primary look |
 | `--dz-btn-danger-bg` | `var(--dz-accent-red)` | Filled danger background |
 | `--dz-btn-danger-bg-alpha` | `rgba(var(--dz-accent-red-values), 0.85)` | Declared; no current CSS consumer (flagged for cleanup, not fixed here) |
-| `--dz-btn-success-bg` / `--dz-btn-warning-bg` | `#3b863b` / `#b36200` | Defined in the mapped-token block, not the `--dz-btn-*` block; consumed by `.btn-success`/`.btn-warning` (both declared-only, no live instance in the current contract crawl) |
+| `--dz-btn-success-bg` / `--dz-btn-warning-bg` | `#306b30` / `#7a5412` | Defined in the mapped-token block, not the `--dz-btn-*` block; consumed by `.btn-success`/`.btn-warning` (both declared-only, no live instance in the current contract crawl) |
 | `--dz-btn-bg` / `--dz-btn-text` / `--dz-btn-border` | `var(--dz-widget-bg)` / `var(--dz-body-text)` / `var(--dz-input-border)` | Bootbox `.modal-footer .btn` only; radius/shadow come from the shared base rule (`--dz-btn-radius`/`--dz-btn-shadow`), not from this token group |
 | `--dz-btn-hover-bg` | `rgba(var(--dz-accent-values), 0.1)` | Ghost/icon-quiet hover tint |
 | `--dz-btn-shadow` | `0 1px 3px rgba(0,0,0,.18), 0 1px 2px rgba(0,0,0,.10)` | Resting elevation for every filled button |
@@ -1946,7 +1953,7 @@ split") had anticipated since before this token existed.
 | `--dz-card-options-top` | 8px | 3-dot flyout top offset |
 | `--dz-card-options-min-width` | 120px | 3-dot flyout min width |
 | `--dz-card-favorite-line-height` | 16px | Favorite star and Log/Timer icon line-height (shared value) |
-| `--dz-card-icon-accent` | `var(--dz-accent-color)` light / `rgb(77, 184, 228)` dark | Log/Timer icon color; see Log/Timer Icon Accent |
+| `--dz-card-icon-accent` | `var(--dz-accent-color)` light and dark | Log/Timer icon color; see Log/Timer Icon Accent |
 
 **Images / sliders** (9 tokens):
 
@@ -2114,16 +2121,16 @@ future reader finds the explanation from either side.
 
 **Token**: `--dz-card-icon-accent` (`dz-tokens.css`, light `:root`) = `var(--dz-accent-color)`.
 Contrast is judged against **WCAG SC 1.4.11 (Non-text Contrast, 3:1)**, not SC 1.4.3's 4.5:1 text
-threshold - these are graphical Ionicon glyphs with no text label, not text. Light already clears
-3:1 as-is (measured **4.51:1** resting / **3.96:1** hover against the light card background). The
-raw dark accent (`#0b9eda`, `rgb(11,158,218)`) does not: measured **2.48:1** resting / **2.29:1**
-hover against the dark card background, both below the 3:1 floor. `dark.css` overrides the token to
-a derived value, **`rgb(77, 184, 228)`**: the accent RGB blended **27% toward white**, the first
-1%-step blend that cleared 3:1 against *both* measured dark-underlay backgrounds (resting
-`rgb(81,85,88)`, hover `rgb(74,92,101)`, the tonal `--dz-btn-hover-bg` tint composited over the card
-background). Re-measured live after shipping, not just computed: **3.33:1** resting / **3.08:1**
-hover, both passing with a real but narrow margin above the 3:1 floor - flagged in the `dark.css`
-token comment as a spot to revisit for more headroom in a future pass.
+threshold - these are graphical Ionicon glyphs with no text label, not text. Post-rebase (2026-08-12
+Blue UI palette), the plain accent clears 3:1 comfortably in both schemes, so `dark.css` no longer
+needs a derived override: light measures **5.45:1** resting / **4.77:1** hover against the light
+card background (hover composites `--dz-btn-hover-bg`'s tonal tint over the card background), and
+dark measures **9.68:1** against the dark card background using the same plain
+`var(--dz-accent-color)`. Both numbers were measured live via `getComputedStyle` against real
+`.timers_log` icons, matching the derivation comment at `dz-tokens.css:41-49`. Dark's pre-rebase
+27%-toward-white blend (`rgb(77, 184, 228)`, needed because the old raw dark accent only cleared
+2.48:1/2.29:1) is gone: it does not exist in `dark.css` any more, and the headroom concern it
+carried is moot now that the plain accent alone comfortably passes.
 
 #### Selector Levels
 

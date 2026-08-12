@@ -83,7 +83,7 @@ function applyCustomColorScheme(cs) {
     /* Text on accent surfaces; schemes with a light accent set a dark value
        (default token: white). */
     set('--dz-accent-text', cs.accent_text);
-    /* Sunrise/sunset sun icon; semantic default #ff8c00 unless a scheme says otherwise */
+    /* Sunrise/sunset sun icon; semantic default #8c730e light / #fad232 dark unless a scheme says otherwise */
     set('--dz-sun-color', cs.sun);
     if (cs.main_color) { s.setProperty('--dz-accent-values', hexToRGB(cs.main_color, true)); }
     /* danger-button tints derive from this triplet; without it schemes kept

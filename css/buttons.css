@@ -885,7 +885,7 @@ a.btnstyle {
    deliberately breaks). Recast as an accent-tinted pill: a light accent wash
    at rest (rgba(var(--dz-accent-values), 0.08), so it reads as a control -
    not dead space - independent of hover) that strengthens to the theme's
-   shared --dz-btn-hover-bg wash (0.1 alpha under blue-ui) on hover, the same
+   shared --dz-btn-hover-bg wash (0.1 alpha, the same across every scheme) on hover, the same
    token every other ghost/icon-quiet control uses so the escalation matches
    the rest of the app. The chevron itself is colored --dz-accent-color
    instead of the generic ghost-text so it draws the eye the way an

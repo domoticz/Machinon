@@ -33,14 +33,17 @@ function loadBuiltinSchemes() {
         });
 }
 
-/* Slugs retired by the 2026-08-12 pruning pass, mapped to their survivor. A
-   stored pick that no longer exists would otherwise leave the user on a dead
-   slug: applyScheme finds no scheme and returns, so whatever painted stays and
-   the picker shows nothing selected. Deleted schemes migrate BY THEIR OLD BASE
-   (a Dracula user lands on Machinon Dark, not on the light default): the
-   palette cannot survive, the light/dark intent can. blue-ui-light/-dark map
-   to the base slugs because their values ARE the base tokens now, and e-ink is
-   a pure rename. "custom" and "user:<name>" are user-owned and never migrated. */
+/* Slugs retired across every pruning pass to date (2026-08-12 and earlier),
+   mapped to their survivor. A stored pick that no longer exists would
+   otherwise leave the user on a dead slug: applyScheme finds no scheme and
+   returns, so whatever painted stays and the picker shows nothing selected.
+   Deleted schemes migrate BY THEIR OLD BASE (a Dracula user lands on
+   Machinon Dark, not on the light default): the palette cannot survive, the
+   light/dark intent can. blue-ui-light/-dark map to the base slugs because
+   their values ARE the base tokens now, and e-ink is a pure rename. "custom"
+   and "user:<name>" are user-owned and never migrated. Add every future
+   retirement here too, not just this pass's - a surviving slug must never
+   appear in this map (see the Colors note in DESIGN.md). */
 var DZ_SCHEME_MIGRATIONS = {
     "blue-ui-light":    "light",
     "blue-ui-dark":     "dark",
@@ -54,7 +57,9 @@ var DZ_SCHEME_MIGRATIONS = {
     "nightfall":        "dark",
     "ultraviolet":      "dark",
     "ember":            "dark",
-    "high-contrast":    "dark"
+    "high-contrast":    "dark",
+    "nord":             "dark",
+    "solarized-light":  "light"
 };
 
 /* Repair a stored pick of a retired scheme, once, at load. applyScheme already
