@@ -76,6 +76,61 @@ check_literal label-important     custom.css          'background-color: #'
 check_literal gradient-start      css/login.css       'linear-gradient\(to right, #'
 check_literal gradient-dark-start css/dark_theme.css  'background-image: linear-gradient\(275deg, #'
 
+# --- Type scale: frontmatter px vs CSS rem (16px root) ---
+doc_px() { # key -> bare number, from "  key:\n    fontSize: 11px"
+    awk -v k="  $1:" '$0==k{f=1;next} f&&/fontSize:/{gsub(/[^0-9]/,"");print;exit}' DESIGN.md
+}
+css_rem_px() { # token -> px number (rem*16), from "--token: 0.6875rem;"
+    grep -m1 -E "^\s*$1:" dz-tokens.css | grep -oE '[0-9.]+rem' | tr -d 'rem' \
+        | awk '{printf "%g", $1*16}'
+}
+check_px() { # doc-key token
+    local doc css
+    doc=$(doc_px "$1")
+    css=$(css_rem_px "$2")
+    if [ -z "$doc" ] || [ -z "$css" ]; then
+        echo "MISSING: type $1 (doc='$doc' css='$css' from $2)"
+        fail=1
+    elif [ "$doc" != "$css" ]; then
+        echo "DRIFT: type $1 doc=${doc}px css=${css}px ($2)"
+        fail=1
+    fi
+}
+check_px micro   --dz-text-micro
+check_px xs      --dz-text-xs
+check_px sm      --dz-text-sm
+check_px md      --dz-text-md
+check_px lg      --dz-text-lg
+check_px display --dz-text-display
+
+# --- Radius: frontmatter px vs CSS token px ---
+# Only button and container have an unambiguous single CSS token home. The
+# other rounded.* keys (xs, sm, interactive, circle) are doc-only conventions
+# with no single matching custom property (interactive in particular is
+# split across --dz-card-radius-chrome and --dz-mobile-card-btn-radius,
+# neither of which is the nav-link/input-border concept the doc describes),
+# so they stay unguarded rather than get a guessed mapping.
+doc_radius() { # key -> "10px"
+    awk -v k="  $1:" '$0 ~ "^"k{sub(/.*: /,"");print;exit}' DESIGN.md
+}
+css_px() { # file token -> "10px"
+    grep -m1 -E "^\s*$2:" "$1" | grep -oE '[0-9]+px' | head -1
+}
+check_radius() { # doc-key token
+    local doc css
+    doc=$(doc_radius "$1")
+    css=$(css_px dz-tokens.css "$2")
+    if [ -z "$doc" ] || [ -z "$css" ]; then
+        echo "MISSING: radius $1 (doc='$doc' css='$css' from $2)"
+        fail=1
+    elif [ "$doc" != "$css" ]; then
+        echo "DRIFT: radius $1 doc=$doc css=$css ($2)"
+        fail=1
+    fi
+}
+check_radius button    --dz-btn-radius
+check_radius container --dz-card-radius
+
 if [ "$fail" -eq 0 ]; then
     echo "OK: DESIGN.md palette matches the CSS tokens"
 fi
