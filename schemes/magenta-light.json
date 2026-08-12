@@ -1,0 +1,21 @@
+{
+    "name": "Magenta Light",
+    "description": "Warm magenta on white",
+    "base": "light",
+    "preview": { "bg": "#FAF0F7", "surface": "#FFFFFF", "accent": "#99407E", "text": "#292528" },
+    "colors": {
+        "background": "#FAF0F7",
+        "item": "#FFFFFF",
+        "navbar": "#F5E6F0",
+        "main_color": "#99407E",
+        "main_text": "#292528",
+        "alt_text": "#575055",
+        "border": "#DBC5D5",
+        "disabled": "#9E959B",
+        "error": "#992F2B",
+        "success": "#306B30",
+        "warning": "#7A5412",
+        "accent_text": "#FFFFFF",
+        "sun": "#8C730E"
+    }
+}

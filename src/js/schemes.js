@@ -46,7 +46,6 @@ var DZ_SCHEME_MIGRATIONS = {
     "blue-ui-dark":     "dark",
     "e-ink":            "paper-light",
     "catppuccin-latte": "light",
-    "magenta-light":    "light",
     "catppuccin-mocha": "dark",
     "tokyo-night":      "dark",
     "dracula":          "dark",
@@ -55,8 +54,7 @@ var DZ_SCHEME_MIGRATIONS = {
     "nightfall":        "dark",
     "ultraviolet":      "dark",
     "ember":            "dark",
-    "high-contrast":    "dark",
-    "magenta-dark":     "dark"
+    "high-contrast":    "dark"
 };
 
 /* Repair a stored pick of a retired scheme, once, at load. applyScheme already
