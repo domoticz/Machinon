@@ -693,8 +693,8 @@
    "name": "Fridge",
    "description": "Fridge door open (red) / closed (grey)",
    "tab": "blue",
-   "on_sig": "1988-c1393d87",
-   "off_sig": "1208-6311dc39"
+   "on_sig": "1980-e1bcbff0",
+   "off_sig": "1243-d7bfcbc9"
   },
   {
    "base": "machinon_GameController",
@@ -1069,16 +1069,16 @@
    "name": "Mailbox",
    "description": "Mail waiting (red) / empty (grey)",
    "tab": "blue",
-   "on_sig": "2773-0fc545c2",
-   "off_sig": "2435-b57183db"
+   "on_sig": "2761-2d3eebf4",
+   "off_sig": "2451-d77db061"
   },
   {
    "base": "machinon_Mailbox-color",
    "name": "Mailbox Color",
    "description": "Mail waiting (native) / empty (grey)",
    "tab": "color",
-   "on_sig": "2687-ed15378c",
-   "off_sig": "2235-082ffe66"
+   "on_sig": "2737-7d94e35e",
+   "off_sig": "2240-68b055fb"
   },
   {
    "base": "machinon_Man",
