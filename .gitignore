@@ -2,9 +2,8 @@
 # Release files
 machinon-*.zip
 machinon-*.tar.gz
-# Shell files except the one for making releases
+# Shell files except the repo's own scripts/
 *.sh
-!makerelease.sh
 !scripts/check-typography.sh
 !scripts/check-buttons.sh
 !scripts/check-shadows.sh
