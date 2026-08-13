@@ -24,7 +24,9 @@ It works with current Domoticz beta and stable releases.
 
   ![Theme Hub settings page](docs/screenshots/theme-hub.png)
 
-- **Refreshed icon set**: redrawn device icons with optional icon packs, so you can pick the style that suits your dashboard.
+- **Refreshed icon set**: redrawn device icons with optional icon packs, so you can pick the style that suits your dashboard, installed straight from the Theme Hub's built-in pack installer.
+
+  ![Icon pack installer in the Theme Hub](docs/screenshots/icon-packs.png)
 
 - **Mobile-polished layouts**: dashboards, menus, and dialogs adapt to small screens instead of just shrinking the desktop layout.
 
