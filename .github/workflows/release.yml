@@ -1,0 +1,90 @@
+name: Release
+
+# Fires when a GitHub Release is published. Builds the runtime-only staging
+# tree, attaches it as machinon-<version>.zip, and rebuilds the `dist`
+# branch so `git clone -b dist --single-branch` installs stay updatable.
+#
+# Guards: the release tag must be v<version> where <version> is exactly
+# theme.json's "version" (kills tag/version drift), and the tag is passed
+# via env, never interpolated into shell text (injection guard).
+#
+# COPY-PASTE NOTES for other theme authors, the only things to change:
+#   - the zip name prefix (machinon) in the package job
+#   - nothing else if you took scripts/build-release.sh
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Verify tag matches theme.json version
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          [[ "$TAG" =~ ^v[0-9][0-9.]*$ ]] || { echo "unexpected tag format: $TAG" >&2; exit 1; }
+          VERSION=$(python3 -c "import json; print(json.load(open('theme.json'))['version'])")
+          [[ "$TAG" == "v$VERSION" ]] || { echo "tag $TAG does not match theme.json version $VERSION" >&2; exit 1; }
+
+      - name: Build staging tree
+        run: scripts/build-release.sh
+
+      - name: Zip and attach to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          VERSION="${TAG#v}"
+          (cd dist && zip -rq "machinon-${VERSION}.zip" machinon)
+          unzip -l "dist/machinon-${VERSION}.zip"
+          gh release upload "$TAG" "dist/machinon-${VERSION}.zip" --clobber
+
+  sync-dist:
+    needs: package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout release tag (full history)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Rebuild dist branch from the staging tree
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          [[ "$TAG" =~ ^v[0-9][0-9.]*$ ]] || { echo "unexpected tag format: $TAG" >&2; exit 1; }
+          scripts/build-release.sh
+          snapshot="$(mktemp -d)"
+          cp -r dist/machinon/. "$snapshot"/
+          rm -rf dist
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin dist >/dev/null 2>&1; then
+            git fetch origin dist
+            git checkout dist
+          else
+            git checkout --orphan dist
+          fi
+          git rm -rfq . >/dev/null 2>&1 || true
+          git clean -fdq
+          cp -r "$snapshot"/. .
+          git add -A
+          if git diff --cached --quiet; then
+            echo "dist already up to date for $TAG"
+            exit 0
+          fi
+          git commit -m "dist: $TAG"
+          git push origin dist
