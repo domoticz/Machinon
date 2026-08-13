@@ -90,6 +90,24 @@ fail() {
   exit 1
 }
 
+# The flat dist/custom.css is served from the theme root (styles/machinon/),
+# but a one-level-deep source file (dir != ".", i.e. anything under css/,
+# per the ONE-LEVEL IMPORT RULE) writes its url(../x) references relative to
+# its own directory (css/). Once that content is inlined into the root-level
+# flat file, an un-rebased url(../x) resolves one level too high (styles/x
+# instead of styles/machinon/x) and every referenced font 404s. Strip exactly
+# one leading ../ from such urls at inline time to rebase them. Two levels of
+# ../../ cannot happen under the one-level rule today, so treat that as a
+# corruption signal and fail loudly rather than mis-rewrite silently; leave
+# data:, http(s):, absolute, and non-../ urls untouched.
+rebase_relative_url() {
+  local line="$1" relpath="$2"
+  if printf '%s' "$line" | grep -Eq "url\\([\"']?\\.\\./\\.\\./"; then
+    fail "two-level ../../ in url() at '$relpath' violates the ONE-LEVEL IMPORT RULE: $line"
+  fi
+  sed -E "s#url\\((['\"]?)\\.\\./#url(\\1#g" <<< "$line"
+}
+
 # Strips a leading UTF-8 byte-order mark from $1, if present, to stdout.
 # A BOM is only meaningful as the first three bytes of a standalone HTTP
 # resource (that is how a browser fetching one leaf CSS file today knows its
@@ -174,6 +192,8 @@ inline_file() {
       # through verbatim would silently ship a still-nested @import in the
       # "flat" release file, defeating the whole point of this script.
       fail "unrecognized @import syntax at $relpath:$lineno: '$rawline' (only @import url(\"...\") [media]; is supported)"
+    elif [ "$dir" != "." ]; then
+      rebase_relative_url "$rawline" "$relpath"
     else
       echo "$rawline"
     fi
