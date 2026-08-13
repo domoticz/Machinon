@@ -8,9 +8,7 @@ A modern, responsive theme for [Domoticz](https://www.domoticz.com/).
 
 ## What is Machinon
 
-Machinon is a modern theme for Domoticz, built on design tokens (`--dz-*` CSS custom properties) so its look stays consistent everywhere and is easy to retheme.
-
-It ships light and dark variants, a choice of color schemes, a refreshed icon set, and a Theme Hub settings page where you control all of it from inside Domoticz.
+Machinon gives your Domoticz dashboard a clean, modern look, with matching light and dark modes, a choice of color schemes, a refreshed icon set, and one Theme Hub settings page inside Domoticz where you control all of it.
 
 It works with current Domoticz beta and stable releases.
 
@@ -41,7 +39,7 @@ It works with current Domoticz beta and stable releases.
 
   ![Machinon dashboard, dark scheme](docs/screenshots/dashboard-dark.png)
 
-- **Fast loading**: releases ship a single, flattened CSS file instead of dozens of separate requests.
+- **Fast loading**: releases are packaged so the theme loads quickly, especially on slower connections.
 
 ## Requirements
 
@@ -94,7 +92,7 @@ Nothing needs migrating: all of your theme settings live in Domoticz itself and 
 
 ## Theme settings
 
-Once Machinon is active, open the Theme Hub from the Domoticz Setup menu to configure it. From there you can choose a color scheme, set custom colors in the "Colors and schemes" tab, and turn individual features on or off (the available toggles are defined in `theme.json`).
+Once Machinon is active, open the Theme Hub from the Domoticz Setup menu to configure it. From there you can choose a color scheme, set custom colors in the "Colors and schemes" tab, and turn individual features on or off.
 
 This README only covers the basics. Deeper settings documentation is planned for a later update.
 
@@ -106,7 +104,7 @@ Most issues after updating Domoticz or the theme go away after a hard refresh (C
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for issue and contribution guidelines.
 
-The theme's source CSS is modular, split into feature files under `css/` and assembled through a one-level `@import` rule (see the top of `custom.css`). Guard scripts under `scripts/` check things like token usage and typography, and CI runs them on every push.
+The theme's source CSS is modular, split into feature files under `css/` and assembled through a one-level `@import` rule (see the top of `custom.css`). Guard scripts under `scripts/` check things like token usage and typography, and CI runs them on every push. The styling itself is driven by a design-token system (the `--dz-*` custom properties) documented in [DESIGN.md](DESIGN.md).
 
 ## Credits and license
 
