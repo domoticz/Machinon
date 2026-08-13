@@ -16,8 +16,11 @@ Before opening a new issue, please review the following:
 Clone the full source (Option 4 in the README):
 
 ```
+cd domoticz/www/styles
 git clone https://github.com/domoticz/Machinon.git machinon
 ```
+
+The clone must live at `domoticz/www/styles/machinon`; Domoticz only finds themes in that folder. Select Machinon as the active theme in Domoticz (see the README's Installation section for the exact steps) before you start editing, otherwise your changes have no page to show up on.
 
 The source CSS is modular: `custom.css` at the repo root pulls in the individual files
 under `css/` through a single level of `@import` statements (see the ONE-LEVEL IMPORT
@@ -25,10 +28,11 @@ RULE comment at the top of `custom.css` for why the chain stays flat). Edits are
 files, so there is no build step to run while developing; save a file and hard-refresh
 the browser to see the change.
 
+`DESIGN.md` is the source of truth for design tokens (colors, type scale, spacing, radius); `scripts/check-tokens.sh` and `scripts/check-typography.sh` fail when the CSS drifts from what it documents, so update `DESIGN.md` in the same edit as any token change.
+
 ### Checks
 
-Before opening a PR, run the guard suite and the build check locally. CI runs the same
-commands on every push, so a clean local run means CI will be clean too:
+Before opening a PR, run the guard suite and the build check locally. Install the pinned dev tools first with `pip install -r requirements-dev.txt`. CI runs the same commands on every push, so a clean local run means CI will be clean too:
 
 ```
 scripts/check-typography.sh && scripts/check-buttons.sh && scripts/check-shadows.sh && scripts/check-menus.sh && scripts/check-tokens.sh
