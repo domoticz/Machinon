@@ -4,7 +4,7 @@
 
   One of the feature files split out of custom.css - see the @import block in
   custom.css for the full direction. Only LOGIN-specific selectors live here (#login*,
-  .remember-row, and the .glass-card .glass-input/.auth-tab/.passkey-*/.back-link/.domoticz-link
+  .remember-row, and the .glass-card .glass-input/.auth-tab/.back-link/.domoticz-link/.passkey-*
   form rules). The shared .glass-card BASE rule and the About-page .section-title/.version-badge/
   .info-value/.donation-text stay in custom.css because they are shared with the About page, not
   login - they belong to a future about/glass-primitives file, not here. Safe to relocate earlier
