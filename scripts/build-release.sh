@@ -55,11 +55,34 @@ strip_css() {
 }
 
 strip_css dist/custom.css "$STAGE/custom.css"
-strip_css dark.css "$STAGE/dark.css"
-strip_css dz-tokens.css "$STAGE/dz-tokens.css"
+# dark.css and dz-tokens.css are NOT staged on their own: both are @imported
+# by custom.css and already inlined into it by scripts/build-dist.sh above,
+# so a standalone copy at the dist root would be dead weight nobody fetches.
+
+# theme.json's "features" list the loose per-feature js/css files that
+# src/js/feature-loader.js fetches on demand at runtime, over and above the
+# always-loaded custom.css: a .js entry is requested from styles/<theme>/js/,
+# a .css entry from styles/<theme>/css/ (see loadThemeFeatureFiles). The .js
+# ones already ship via the whole js/ directory in the ALLOWLIST below. The
+# .css ones live under css/ too, but css/ is deliberately NOT copied wholesale
+# (its non-feature leaf files are already inlined into the flattened
+# custom.css above, so shipping the whole directory would duplicate them) so
+# each feature .css file is staged here individually, comment-stripped like
+# every other shipped CSS file, at the exact path feature-loader.js fetches.
+mkdir -p "$STAGE/css"
+FEATURE_CSS_FILES=$(python3 -c "
+import json
+theme = json.load(open('theme.json'))
+files = {f for feature in theme['features'].values() for f in feature['files'] if f.endswith('.css')}
+print('\n'.join(sorted(files)))
+")
+while IFS= read -r f; do
+  [ -n "$f" ] || continue
+  strip_css "css/$f" "$STAGE/css/$f"
+done <<< "$FEATURE_CSS_FILES"
 
 # ALLOWLIST: runtime files shipped verbatim. Nothing outside this list and
-# the three stripped CSS files above ever reaches users.
+# the stripped CSS files above ever reaches users.
 cp -r --parents \
   custom.js \
   js \
@@ -95,6 +118,36 @@ head -c 8 "$STAGE/custom.css" | grep -q '@charset' \
 if grep -q '@import' "$STAGE/custom.css"; then
   fail "unflattened @import in shipped custom.css"
 fi
+# A url(../...) surviving into the flat custom.css means scripts/build-dist.sh
+# failed to rebase a one-level-deep import (see its rebase_relative_url
+# comment) and every font it points at will 404 for users.
+if grep -Eq "url\\([\"']?\\.\\./" "$STAGE/custom.css"; then
+  fail "staged custom.css still contains an un-rebased url(../...) reference"
+fi
+
+# Every js/css file theme.json's features list must be reachable at the exact
+# runtime path src/js/feature-loader.js fetches it from, or a toggled-on
+# feature silently fails to load for users.
+MISSING_FEATURE_FILES=$(python3 -c "
+import json
+from pathlib import Path
+stage = Path('$STAGE')
+theme = json.load(open('theme.json'))
+missing = []
+for name, feature in theme['features'].items():
+    for f in feature['files']:
+        if f.endswith('.js'):
+            path = stage / 'js' / f
+        elif f.endswith('.css'):
+            path = stage / 'css' / f
+        else:
+            continue
+        if not path.is_file():
+            missing.append(f'{name}: {path}')
+print('\n'.join(missing))
+")
+[ -z "$MISSING_FEATURE_FILES" ] \
+  || fail "theme.json feature files missing from staged tree:"$'\n'"$MISSING_FEATURE_FILES"
 
 echo "== manifest ($STAGE)"
 find "$STAGE" -type f | LC_ALL=C sort
