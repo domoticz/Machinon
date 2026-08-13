@@ -1,0 +1,47 @@
+name: Validate
+
+# CI gate: keeps master releasable at all times by running the same checks
+# the release build runs, plus the comment-stripper unit tests.
+#
+# COPY-PASTE NOTES for other theme authors: nothing to change if you took
+# scripts/build-release.sh (it embeds the guard scripts you kept). Drop the
+# pytest step if you did not take scripts/strip_comments.py.
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned dev tools
+        run: pip install -r requirements-dev.txt
+
+      - name: Comment-stripper unit tests
+        run: python3 -m pytest scripts/test_strip_comments.py -q
+
+      - name: Import chain resolves
+        run: scripts/build-dist.sh --check
+
+      - name: Release build dry run (guards + stage + leak check)
+        run: |
+          scripts/build-release.sh
+          test -f dist/machinon/custom.css
+          test -f dist/machinon/theme.json
+          test -f dist/machinon/NOTICE
+          if find dist/machinon \( -name "*.sh" -o -name "*.py" -o -name "DESIGN.md" -o -name "CONTRIBUTING.md" -o -path "*.github*" \) | grep -q .; then
+            echo "dev files leaked into the staging tree" >&2
+            exit 1
+          fi
