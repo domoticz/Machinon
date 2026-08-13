@@ -7,7 +7,7 @@ function update() {
         .then(function(data) {
             var gitVersion = data.version;
             if (theme.version !== gitVersion) {
-                var newVersionText = "Machinon version " + data.version + " " + language.is_available + '! <a href="https://github.com/domoticz/machinon/tree/' + branch + '" target="_blank">' + language.click_here + "</a>";
+                var newVersionText = "Machinon version " + data.version + " " + language.is_available + '! <a href="https://github.com/domoticz/machinon/releases" target="_blank">' + language.click_here + "</a>";
                 generate_noty('success', newVersionText, false);
             }
         })
