@@ -418,9 +418,9 @@ function dzBuildShortAbout() {
 
     var desc = document.createElement("p");
     desc.className = "dz-hub-short-about-desc";
-    desc.textContent = "A responsive Machinon theme for Domoticz with light and dark "
-        + "colour schemes, tabbed icon packs, and a mobile layout. See the About "
-        + "tab for details and maintenance.";
+    desc.textContent = "A modern Domoticz theme with color schemes, Theme Hub settings, "
+        + "refreshed icons, and light and dark variants. See the About tab for "
+        + "details and maintenance.";
     box.appendChild(desc);
     return box;
 }
