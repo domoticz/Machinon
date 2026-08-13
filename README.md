@@ -16,7 +16,7 @@ It works with current Domoticz beta and stable releases.
 
 ## Highlights
 
-- **Color schemes**: Gruvbox, Magenta, and Paper, each with a light and dark variant, plus a custom color picker on Domoticz's own theme settings page if you want to design your own palette.
+- **Color schemes**: Gruvbox, Magenta, and Paper, each with a light and dark variant, plus a custom color picker in the Theme Hub's "Colors and schemes" tab if you want to design your own palette and save it as a preset.
 
   ![Dark magenta color scheme](docs/screenshots/scheme-magenta.png)
 
@@ -35,13 +35,15 @@ It works with current Domoticz beta and stable releases.
 
   </details>
 
-- **Fast loading**: releases ship a single, flattened CSS file instead of dozens of separate requests.
+- **Light and dark variants**: every color scheme ships both, so the whole interface follows your preference.
 
   ![Machinon dashboard, dark scheme](docs/screenshots/dashboard-dark.png)
 
+- **Fast loading**: releases ship a single, flattened CSS file instead of dozens of separate requests.
+
 ## Requirements
 
-- A running Domoticz installation. Domoticz 2024.x or a newer beta is recommended.
+- A running Domoticz installation: Domoticz 2025.2 or newer, latest beta recommended. The theme is developed against the beta; on stable releases the Theme Hub menu entry is available to admin users.
 - A browser you can hard-refresh (Ctrl+Shift+R) after installing or updating the theme.
 
 ## Installation
@@ -57,7 +59,7 @@ cd domoticz/www/styles
 git clone -b dist --single-branch https://github.com/domoticz/Machinon.git machinon
 ```
 
-In Domoticz, go to Setup > Settings > Themes, pick `machinon`, and hard-refresh your browser (Ctrl+Shift+R) so it picks up the new files.
+In Domoticz, go to Setup > Settings, open the System tab, and find the Theme dropdown under User Interface. Pick `machinon`, then click Apply Settings at the bottom of the page (the choice only persists once you do), and hard-refresh your browser (Ctrl+Shift+R) so it picks up the new files. No Domoticz restart is needed.
 
 To update later, run `git pull` inside the `machinon` folder.
 
@@ -74,6 +76,7 @@ The [Theme Manager plugin](https://github.com/galadril/domoticz-theme-manager) c
 ### Option 4: full source (developers)
 
 ```
+cd domoticz/www/styles
 git clone https://github.com/domoticz/Machinon.git machinon
 ```
 
@@ -83,13 +86,13 @@ The source loads around 27 separate CSS files rather than one flattened file. Th
 
 Machinon's repository history was rewritten for the v2.0.0 release. If you have a pre-2.0 clone, `git pull` inside it will fail because the histories no longer share a common base.
 
-To update, delete the old `machinon` folder and reinstall using Option 1 or Option 2 above.
+To update, delete the old `machinon` folder and reinstall using Option 1 or Option 2 above. Theme Manager (Option 3) installs are also git clones under the hood, so they break the same way; remove and reinstall through Theme Manager too.
 
 Nothing needs migrating: all of your theme settings live in Domoticz itself and your browser, not in the theme folder, so a clean reinstall picks them up automatically. The in-app update notification links to the [Releases page](https://github.com/domoticz/Machinon/releases) whenever a newer version is available.
 
 ## Theme settings
 
-Once Machinon is active, open the Theme Hub from the Domoticz Setup menu to configure it. From there you can choose a color scheme, set custom colors through Domoticz's own theme settings, and turn individual features on or off (the available toggles are defined in `theme.json`).
+Once Machinon is active, open the Theme Hub from the Domoticz Setup menu to configure it. From there you can choose a color scheme, set custom colors in the "Colors and schemes" tab, and turn individual features on or off (the available toggles are defined in `theme.json`).
 
 This README only covers the basics. Deeper settings documentation is planned for a later update.
 
