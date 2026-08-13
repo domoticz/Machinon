@@ -1,7 +1,11 @@
+# Keeps git-archive and GitHub's auto-generated "Source code" downloads
+# runtime-lean. The authoritative ship list is scripts/build-release.sh
+# (allowlist); this file is a second, independent layer.
 .gitignore export-ignore
 .gitattributes export-ignore
-makerelease.sh export-ignore
-images/unorganised export-ignore
-images/readme export-ignore
-RE.MACHINON export-ignore
-views export-ignore
+.github export-ignore
+scripts export-ignore
+docs export-ignore
+DESIGN.md export-ignore
+CONTRIBUTING.md export-ignore
+requirements-dev.txt export-ignore

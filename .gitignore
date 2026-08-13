@@ -20,3 +20,8 @@ docs/superpowers/
 dist/
 # Python cache
 __pycache__/
+# Local-only working files: never commit these (kept untracked today; these
+# entries make that permanent)
+CLAUDE.md
+todo.md
+.claude/
