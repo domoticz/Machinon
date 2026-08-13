@@ -454,7 +454,8 @@ Every `font-family`, `font-size`, and `font-weight` declared anywhere in the the
 `font-size: 0` (used to visually hide a text node without removing it). `scripts/check-typography.sh`
 enforces this line by line, including the shorthand `font:` property (no token-legal form exists for
 it, so any use is a violation) and a repo-wide scan for the retired `main-font` family name, and it
-gates `makerelease.sh`: a release cannot ship with a raw font declaration in theme CSS.
+gates `scripts/build-release.sh` (run in CI by `validate.yml`): a release cannot ship with a raw
+font declaration in theme CSS.
 
 Body text is theme-owned at `--dz-text-sm` (14px), replacing core's `10pt` (13.33px) default. Page
 titles (`.page-header-small h1`) are theme-owned at `--dz-text-display` (26px) on desktop, stepping
@@ -674,7 +675,8 @@ when it contains a `var(--dz-*)` reference anywhere in it, so literal geometry p
 token-driven color (`0px 0px 0px 2px rgb(var(--dz-status-timeout-values))`, the live shape of
 device-status.css's status rings) passes by design. A layer with no token reference fails unless
 the whole declaration is a `none` reset or its line carries a `dz-shadow-exception` marker. It
-gates `makerelease.sh` alongside `check-typography.sh` and `check-buttons.sh`.
+gates `scripts/build-release.sh` (run in CI by `validate.yml`) alongside `check-typography.sh` and
+`check-buttons.sh`.
 
 ## Buttons
 
@@ -800,8 +802,8 @@ file-format break for no behavioral gain. This is one token of a larger shared f
 `scripts/check-buttons.sh` (static, scoped to `css/buttons.css` only) checks that every
 `border-radius`, `box-shadow`, and `padding` declaration in that one file resolves through a
 `var(--dz-btn-*)` token (or is `0`/`none`); a line tagged `dz-btn-exempt` with its own justification
-comment is skipped. It gates `makerelease.sh` alongside `check-typography.sh`: a release cannot ship
-with a raw radius/shadow/padding value in that file.
+comment is skipped. It gates `scripts/build-release.sh` (run in CI by `validate.yml`) alongside
+`check-typography.sh`: a release cannot ship with a raw radius/shadow/padding value in that file.
 
 ### Bootstrap 2 Constraint
 
@@ -1124,8 +1126,8 @@ per-declaration assembly technique so a value wrapped across physical lines can'
 check. (a) No raw hex or `rgb()`/`rgba()` colour literal on any background/color/border-color
 property, unless marked `dz-menu-exception` with its own justification comment. (b) Every
 `box-shadow` layer references a `var(--dz-` token. (c) `font-size`/`font-weight` only from the
-type-scale tokens. It is the fourth static checker (after typography, buttons, shadows),
-makerelease-wired alongside the other three.
+type-scale tokens. It is the fourth static checker (after typography, buttons, shadows), wired into
+`scripts/build-release.sh` alongside the other three.
 
 ## Mobile Layout
 
