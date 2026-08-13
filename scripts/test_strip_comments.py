@@ -27,5 +27,9 @@ def run():
     eq("html", "<div>\n<!-- gone -->\n<span>x</span></div>", "<div> <span>x</span></div>")
     print("OK: all strip_comments self-tests passed")
 
+def test_strip_comments():
+    # pytest entry point; the __main__ path below stays for direct runs.
+    run()
+
 if __name__ == "__main__":
     run()
