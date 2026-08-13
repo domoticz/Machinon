@@ -11,6 +11,7 @@ machinon-*.tar.gz
 !scripts/build-dist.sh
 !scripts/check-comments-only.sh
 !scripts/check-tokens.sh
+!scripts/build-release.sh
 # JPEG images
 images/*.[jJ][pP][gG]
 # Claude-generated working documents (local-only: specs, plans, brainstorms)
