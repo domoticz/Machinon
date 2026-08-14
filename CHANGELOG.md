@@ -4,6 +4,11 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+### Fixed
+
+- The theme now reports the version you actually have installed. After updating, the Theme Hub kept showing the previous version and you were repeatedly told a newer version was available, even though you already had it. Clearing your browser data was the only way around it.
+- The update notice now only appears when the newer version has actually been released, and no longer appears if you are running a build newer than the latest release.
+
 ## [2.0.1] - 2026-08-14
 
 ### Fixed

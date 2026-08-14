@@ -36,6 +36,45 @@ function isEmptyObject(obj) {
     return true;
 }
 
+/* theme.json keys that describe the INSTALL rather than the user's choices.
+   The cache above stores the whole theme object, so on a warm boot these come
+   back exactly as they were when the cache was first written. Left alone they
+   freeze at the installed-then version: an upgraded theme keeps reporting the
+   old one in the hub's About tab AND to check_update.js, which compares it
+   against the repo and offers an update the user already has. Nothing the
+   server does can clear that, because the stale copy lives in the browser.
+   Settings and features are deliberately absent from this list; they belong
+   to the user and must survive untouched. */
+var DZ_THEME_METADATA_KEYS = [
+    "type", "name", "description", "license", "version", "author", "homepage", "wiki"
+];
+
+/* Overlay the shipped metadata onto a theme object restored from cache, and
+   re-cache when it actually moved. FAILS CLOSED: a failed or malformed fetch
+   leaves the cached values in place rather than blanking the version the
+   About tab reads, so an offline boot still renders. */
+function refreshThemeMetadata() {
+    return fetch("styles/" + themeFolder + "/theme.json", { cache: "no-cache", credentials: "include" })
+        .then(function(response) { return response.json(); })
+        .then(function(localJson) {
+            if (!localJson || typeof localJson !== "object") { return; }
+            var was = theme.version;
+            var changed = false;
+            DZ_THEME_METADATA_KEYS.forEach(function(key) {
+                if (typeof localJson[key] === "undefined" || theme[key] === localJson[key]) { return; }
+                theme[key] = localJson[key];
+                changed = true;
+            });
+            if (!changed) { return; }
+            themeName = theme.name;
+            cacheThemeSettings();
+            console.log(themeName + " - theme metadata refreshed from theme.json (" + was + " -> " + theme.version + ")");
+        })
+        .catch(function(error) {
+            console.log("Machinon - theme.json metadata refresh failed, keeping cached values:", error);
+        });
+}
+
 function loadSettings() {
     if (typeof Storage !== "undefined") {
         if (localStorage.getItem(themeFolder + ".themeSettings") === null) {
@@ -83,6 +122,13 @@ function loadSettings() {
                     : (theme.features.dark_theme && theme.features.dark_theme.enabled ? "dark" : "light");
                 theme.scheme_base = theme.features.dark_theme && theme.features.dark_theme.enabled ? "dark" : "light";
             }
+            /* The cache carries metadata as well as settings, so the version
+               (and the About tab's repo/wiki links) would otherwise stay at
+               whatever was installed when it was written. Awaited rather than
+               fired and forgotten: check_update.js and the About tab both read
+               theme.version, and neither should race a background patch. The
+               cold branch above already pays this same fetch. */
+            return refreshThemeMetadata();
         }
     }
     return Promise.resolve();
