@@ -29,9 +29,25 @@ It works with current Domoticz beta and stable releases.
 - **Mobile-polished layouts**: dashboards, menus, and dialogs adapt to small screens instead of just shrinking the desktop layout.
 
   <details>
-  <summary>Mobile dashboard</summary>
+  <summary>Machinon on a phone</summary>
 
   ![Machinon dashboard on a mobile screen](docs/screenshots/mobile-dashboard.png)
+  The dashboard on a phone, with the cards stacked into a single column.
+
+  ![Machinon compact mobile dashboard](docs/screenshots/mobile-dashboard-compact.png)
+  Domoticz's compact mobile dashboard, which lists your favourite devices as rows with their controls beside them. Domoticz picks this layout automatically on a phone.
+
+  ![Switches page on a mobile screen](docs/screenshots/mobile-switches.png)
+  The Switches page.
+
+  ![Temperature page on a mobile screen](docs/screenshots/mobile-temperature.png)
+  The Temperature page.
+
+  ![Utility page on a mobile screen](docs/screenshots/mobile-utility.png)
+  The Utility page.
+
+  ![Device graph on a mobile screen](docs/screenshots/mobile-device-graph.png)
+  A device's Log page, with the chart scaled to fit the screen.
 
   </details>
 
