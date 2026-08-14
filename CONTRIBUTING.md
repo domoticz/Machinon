@@ -3,13 +3,16 @@ Machinon issue and contributing Guidelines
 
 ### Issue Guidelines
 
-Before opening a new issue, please review the following:
-* The Github Issues is for Domoticz CODE Bugs only. Please do not use this for general questions, howto, or this is not working conversations. If you have a question, please post to our forum at https://forum.domoticz.com/viewtopic.php?t=45132
-* Please use the search feature to see if your issues have been raised or addressed first.
-* First try to update to the latest beta version.
-* Always state your version when reporting code related issues
-* Often we will require Log Files and Screenshots to help diagnose the issue. 
-* Pull requests target the `master` branch.
+Bugs and feature requests belong in this repository's GitHub Issues. The [forum thread](https://forum.domoticz.com/viewtopic.php?t=45132) is for discussion: questions, how-to, and showing what you built with the theme.
+
+Before opening an issue:
+
+* Search the existing issues, open and closed. Yours may already be reported or answered.
+* Update to the latest Machinon release and check whether the problem still happens.
+* State both versions: the theme's (Theme Hub, About tab) and your Domoticz version.
+* Include a screenshot of what you see. If something is broken rather than merely ugly, add the browser console output, which is usually where a theme problem shows up.
+
+Pull requests target the `master` branch.
 
 ### Development setup
 
