@@ -1,0 +1,81 @@
+name: Icon request
+description: Request a new or improved device icon for the Machinon icon pack
+labels: ["icons"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The Machinon icon pack is built from [Icons8](https://icons8.com) artwork in two specific styles: [Blue UI](https://icons8.com/icons/ultraviolet) (used for the Blue UI pack) and [Office M](https://icons8.com/icons/all--style-office) (used for the Color pack). Browse one of those two style pages (or use the style filter in search) and paste the link of the icon that fits: an icon available in those styles can go straight into the pack. If the right shape only exists in another style, link it anyway and say so; we will check whether a Blue UI or Office M version exists.
+
+  - type: input
+    id: device
+    attributes:
+      label: What device or purpose is the icon for?
+      placeholder: e.g. a pellet stove, a pool pump, a CO2 sensor
+    validations:
+      required: true
+
+  - type: input
+    id: icons8-link
+    attributes:
+      label: Icons8 link for the main icon
+      description: Preferably from the Blue UI or Office M style (see above)
+      placeholder: https://icons8.com/icon/...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: states
+    attributes:
+      label: Which states does the device have?
+      options:
+        - On and Off (two icons, e.g. a light)
+        - Single state (one icon, e.g. a sensor)
+        - Not sure
+    validations:
+      required: true
+
+  - type: input
+    id: inset
+    attributes:
+      label: Small inset symbol (optional)
+      description: Some icons carry a small badge in the corner, like a lightning bolt on an energy meter. Describe it or paste a second Icons8 link.
+      placeholder: e.g. a small flame in the corner, https://icons8.com/icon/...
+    validations:
+      required: false
+
+  - type: dropdown
+    id: tint
+    attributes:
+      label: Color tint
+      description: The pack colors icons with a fixed set of tints
+      options:
+        - Let the maintainer pick
+        - Blue
+        - Green
+        - Red
+        - Orange
+        - Yellow
+        - Grey
+    validations:
+      required: true
+
+  - type: dropdown
+    id: pack-style
+    attributes:
+      label: Which pack style should get it?
+      options:
+        - Blue UI and Color (the usual pair)
+        - Blue UI only
+        - Color only
+        - Fun
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else
+      description: A screenshot of the device card it will be used on, or other context. Drag and drop images here.
+    validations:
+      required: false

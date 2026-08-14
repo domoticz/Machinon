@@ -1,0 +1,78 @@
+name: Bug report
+description: Report a bug or unexpected behavior in the Machinon theme
+labels: ["bug"]
+body:
+  - type: checkboxes
+    id: cache-check
+    attributes:
+      label: Before you start
+      description: Most display problems after an update are cache leftovers.
+      options:
+        - label: I hard-refreshed my browser (Ctrl+Shift+R) and the problem is still there
+          required: true
+
+  - type: input
+    id: theme-version
+    attributes:
+      label: Machinon version
+      description: Shown at the top of the Theme Hub (Setup menu, Theme)
+      placeholder: e.g. 2.0.0
+    validations:
+      required: true
+
+  - type: input
+    id: domoticz-version
+    attributes:
+      label: Domoticz version
+      description: Setup, then About
+      placeholder: e.g. 2026.3 build 18239
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install-method
+    attributes:
+      label: How is the theme installed?
+      options:
+        - dist branch (git clone -b dist)
+        - Release zip
+        - Theme Manager plugin
+        - Full source clone
+        - Not sure
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and device
+      placeholder: e.g. Chrome 143 on Windows 11, Safari on iPhone 15
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: What did you see, and what did you expect instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to ...
+        2. Click ...
+        3. See ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: A screenshot of the problem helps a lot. Drag and drop images here.
+    validations:
+      required: false

@@ -1,0 +1,34 @@
+name: Feature request
+description: Suggest an improvement or new capability for the Machinon theme
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: Describe the situation or annoyance this would solve, not just the solution.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: What would you like to happen?
+      description: Describe the behavior or look you have in mind.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Workarounds or alternatives you considered
+    validations:
+      required: false
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: Screenshots or mockups
+      description: Sketches, screenshots from other apps, anything visual helps. Drag and drop images here.
+    validations:
+      required: false
