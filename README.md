@@ -32,21 +32,27 @@ It works with current Domoticz beta and stable releases.
   <summary>Machinon on a phone</summary>
 
   ![Machinon dashboard on a mobile screen](docs/screenshots/mobile-dashboard.png)
+
   The dashboard on a phone, with the cards stacked into a single column.
 
   ![Machinon compact mobile dashboard](docs/screenshots/mobile-dashboard-compact.png)
+
   Domoticz's compact mobile dashboard, which lists your favourite devices as rows with their controls beside them. Domoticz picks this layout automatically on a phone.
 
   ![Switches page on a mobile screen](docs/screenshots/mobile-switches.png)
+
   The Switches page.
 
   ![Temperature page on a mobile screen](docs/screenshots/mobile-temperature.png)
+
   The Temperature page.
 
   ![Utility page on a mobile screen](docs/screenshots/mobile-utility.png)
+
   The Utility page.
 
   ![Device graph on a mobile screen](docs/screenshots/mobile-device-graph.png)
+
   A device's Log page, with the chart scaled to fit the screen.
 
   </details>
@@ -61,12 +67,15 @@ It works with current Domoticz beta and stable releases.
 <summary>More screenshots</summary>
 
 ![Switches page](docs/screenshots/switches.png)
+
 The Switches page, showing lights, sensors, and other on/off devices as cards.
 
 ![Utility page](docs/screenshots/utility.png)
+
 The Utility page, listing counters and usage devices like electricity, gas, and water.
 
 ![Device graph](docs/screenshots/device-graph.png)
+
 A device's Log page, charting electricity usage over the last 24 hours and the last month.
 
 </details>
