@@ -44,14 +44,19 @@ scripts/build-release.sh
 `scripts/build-release.sh` mirrors the packaging step the release workflow runs, so a
 clean local run there means the eventual release build will also succeed.
 
+### Changelog
+
+Every user-visible change adds a one-line entry under `## [Unreleased]` in `CHANGELOG.md`, in the same commit or pull request as the change itself. Those lines become the next release's notes, so write them for theme users, not developers.
+
 ### Releasing
 
 This section is for maintainers cutting a release. The steps must happen in this order:
 
-1. Bump `version` in `theme.json`.
-2. Commit the version bump.
+1. Bump `version` in `theme.json`, and in `CHANGELOG.md` move the `Unreleased` lines into a new `## [<version>] - <date>` section.
+2. Commit the version bump and changelog roll together.
 3. Tag the commit `v<version>`, matching the `theme.json` version exactly; the release
-   workflow checks this and fails the release if the tag and the version disagree.
+   workflow checks this, and that `CHANGELOG.md` has a section for the version, and
+   fails the release if either disagrees.
 4. Push `master` and the tag.
 5. Publish a GitHub Release for the tag. The release workflow then builds the lean
    `machinon-<version>.zip`, attaches it to the release, and updates the `dist` branch
