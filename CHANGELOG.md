@@ -4,6 +4,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-08-14
+
 ### Fixed
 
 - Dashboard device cards no longer run together into one continuous block in Chrome and Edge; they are spaced the same way in every browser.
