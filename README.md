@@ -41,6 +41,20 @@ It works with current Domoticz beta and stable releases.
 
 - **Fast loading**: releases are packaged so the theme loads quickly, especially on slower connections.
 
+<details>
+<summary>More screenshots</summary>
+
+![Switches page](docs/screenshots/switches.png)
+The Switches page, showing lights, sensors, and other on/off devices as cards.
+
+![Utility page](docs/screenshots/utility.png)
+The Utility page, listing counters and usage devices like electricity, gas, and water.
+
+![Device graph](docs/screenshots/device-graph.png)
+A device's Log page, charting electricity usage over the last 24 hours and the last month.
+
+</details>
+
 ## Requirements
 
 - A running Domoticz installation: Domoticz 2025.2 or newer, latest beta recommended. The theme is developed against the beta; on stable releases the Theme Hub menu entry is available to admin users.
