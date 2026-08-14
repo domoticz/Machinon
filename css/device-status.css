@@ -65,6 +65,33 @@ tr.update-pulse {
     box-shadow: inset 0px 0px 0px 2px rgb(var(--dz-status-lowbat-values)) !important;
 }
 
+/* Dynamic dashboard device cards paint their surface on `.item.itemBlock` rather than on
+   the card tr (see the dz-device block in cards.css), so their glows follow it there. A
+   glow left on the tr traces a box a couple of pixels inside the visible card edge, which
+   reads as a misaligned halo. The wrapper-is-wider objection above does not apply in this
+   one context: here `.item` and the tr are the same box.
+   Every other card on this surface (dz-scene, dz-favorites, dz-room) keeps the tr glow. */
+.dd-widget--dz-device .item.itemBlock table[id^="item"] > tbody > tr {
+    box-shadow: none !important;
+}
+.dd-widget--dz-device .item.statusTimeout.itemBlock {
+    box-shadow: var(--dz-glow-timeout) !important;
+}
+.dd-widget--dz-device .item.statusProtected.itemBlock,
+.dd-widget--dz-device .item.statusProtected.itemBlock:hover {
+    box-shadow: var(--dz-glow-protected) !important;
+}
+.dd-widget--dz-device .item.statusLowBattery.itemBlock {
+    box-shadow: var(--dz-glow-battery) !important;
+}
+/* Hover keeps the inset ring the rest of this surface uses, in the status colour. */
+.dd-widget--dz-device .item.statusTimeout.itemBlock:hover {
+    box-shadow: inset 0px 0px 0px 2px rgb(var(--dz-status-timeout-values)) !important;
+}
+.dd-widget--dz-device .item.statusLowBattery.itemBlock:hover {
+    box-shadow: inset 0px 0px 0px 2px rgb(var(--dz-status-lowbat-values)) !important;
+}
+
 .blink {
     animation: blinker 2s linear infinite;
 }

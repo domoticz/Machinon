@@ -57,19 +57,22 @@
    taller and are not bounded by a 120px cell at all: dz-favorites 134..136, dz-room 146,
    dz-scene 134. Three consequences, each learned the hard way:
 
-   1. Do NOT reserve padding on the wrapper here. It eats headroom the selector card has
-      already used up, clipping it further. (A <table> cannot shrink below its min-content
+   1. Do NOT reserve padding on the wrapper here. It eats headroom the tallest cards have
+      already used up, clipping them. (A <table> cannot shrink below its min-content
       height, so `height: 100%` acts as a minimum there, not a maximum.)
-   2. Do NOT force height:100% on the card outside the scoped dz-device block below. The
-      card is a CSS grid whose rows size to content (30px name / 60px status / 20px
-      last-update). Forcing the cell height compresses them (measured: 28px 58px 20px),
-      squeezing the switch pill and clipping the icons.
+   2. Do NOT force height:100% on the card. The card is a CSS grid whose rows size to
+      content (30px name / 60px status / 20px last-update). Forcing the cell height
+      compresses them (measured: 28px 58px 20px), squeezing the switch pill and clipping
+      the icons. On the dynamic dashboard the card takes its natural height instead; see
+      the dz-device block further down.
    3. The hover ring must therefore be INSET. Core clips the cell with five nested
       `overflow: hidden` ancestors (dd-dz-inner, dd-dz-device, dd-widget-body, dd-widget,
       dd-widget-cell), so an outer ring or drop shadow cannot spill into the grid gutter.
 
-   To get an outer ring back, the card must first become ~4px shorter in this context (the
-   #name row carries padding-top:10px). That is a density change, not a bug fix.
+   To get an outer ring back, the tallest cards must first give up ~7px of content height:
+   the multi-value ones (temp+humidity, weather station) measure 119px in a 120px cell,
+   leaving ~1px, where a 2px ring needs 4px of clearance to read. That is a density
+   change, not a bug fix.
 
    Related: core also clips each cell of the card (dashboard.css: `.dd-dz-inner
    table[id^="itemtable"] td { overflow: hidden }`), which shaves any icon that overhangs
@@ -201,10 +204,18 @@ div.bannercontent .row > .item {
     box-shadow: var(--dz-ring-hover);
 }
 
-/* Dynamic dashboard only: the card is full-bleed in a clipped cell (see the note above), so
-   an outer ring is clipped top/bottom (L/R 4px clearance, T/B 0px). Inset is the
-   only ring that survives here. */
-.dd-widget-body .item table[id^="item"] > tbody > tr:hover {
+/* Dynamic dashboard only: the ring is INSET because the card nearly fills its clipped
+   cell. L/R clearance is 4px, and the tallest card leaves ~1px top and bottom, which an
+   outer 2px ring cannot survive. Freeing it needs the multi-value cards to give up
+   content height, which is a density change rather than a ring change.
+
+   The dz-device card paints its surface on `.item.itemBlock`, so its ring goes there too
+   or it would trace a transparent row of the wrong size. Every other card on this surface
+   (dz-scene, dz-favorites, dz-room) still paints on the tr and keeps the tr ring. */
+.dd-widget--dz-device .item.itemBlock:hover {
+    box-shadow: var(--dz-ring-hover-inset);
+}
+.dd-widget-body .item:not(.dd-widget--dz-device .item) table[id^="item"] > tbody > tr:hover {
     box-shadow: var(--dz-ring-hover-inset);
 }
 
@@ -292,61 +303,56 @@ div.bannercontent .row > .item {
     overflow: hidden;
 }
 
-/* Dynamic Dashboard: make the Machinon card FIT the fixed-height GridStack cell
-   (default gs-h=2 = 120px) instead of growing to its natural content height and
-   being cropped by the cell's overflow:hidden.
+/* Dynamic Dashboard: the card surface lives on `.item.itemBlock`, NOT on the `tr`.
 
-   WHY the card overflows without this. Core lays the card out top-aligned in a
-   flex column that does NOT stretch it: core dashboard.css:1195-1205 sets
-   `.dd-dz-inner { display:flex; align-items:flex-start; overflow:hidden }`, so
-   the `.item` takes its own content height and anything past the cell bottom is
-   clipped away (the icon/toggle is still there in layout, just painted-clipped).
-   At a narrow card width, where the device NAME wraps to a second line and
-   pushes the lower rows down, this clips the icon and the selector's stacked
-   level buttons below the widget.
+   WHY IT CANNOT LIVE ON THE tr HERE. Everywhere else the theme paints the card on the
+   `tr` (see the note near the top of this file). That relies on `height: 100%` to make
+   the row fill its box, and a percentage height on a `<tr>` resolves in Chromium and is
+   IGNORED in Firefox, which sizes the row to content. Measured on the selector card in a
+   120px cell: Chromium table 124 / tr 124, Firefox table 120 / tr 107. Chromium then
+   paints each card over its whole cell, so a column of cards reads as one fused surface,
+   while Firefox paints at content height and the leftover cell shows as a gap. Painting
+   on `.item.itemBlock` instead removes the disagreement at the source, because that is a
+   real block box and both engines size it identically.
 
-   THE FIX, all layout (no font shrink):
-   (1) stretch the card to the cell: align the `.dd-dz-inner` flex child to
-       `stretch` so `.item` fills the cell's definite height (the cell height is
-       core's, ddDzDevice.widget.js minH:2 -> 120px; .dd-dz-inner is flex:1 with
-       min-height:0 so it already has that definite height). The two-class
-       compound outranks core's one-class rule without !important.
-   (2) let the card's own row grid compress into that definite height: the
-       status row floor drops from 58px to 0 (minmax(0,1fr)) and every grid cell
-       gets min-height:0/min-width:0, so the rows give up their hard minimums and
-       the 48px icon simply centres inside the compressed status row, its box
-       staying within the 120px cell instead of being pushed below it. At a wide
-       (desktop) card the name is one line, the status row keeps ~64px and the
-       toggle/slider/icon are unaffected - this only bites when space is short.
-   EVERY rule here is scoped to the dz-device widget (.dd-widget--dz-device):
-   core's .dd-dz-inner and .item.itemBlock are SHARED markup, not device-only.
-   dz-scene.html:8 renders the same .dd-dz-inner for scene widgets (those keep
-   core's align-items:flex-start, dashboard.css:1203, until this system is
-   measured against the scene card too), the classic dashboard cards keep their
-   58px floor and natural height, and the dz-favorites widget - which re-renders
-   classic cards in a SCROLLING list (also .item.itemBlock inside a
-   .dd-widget-body) - keeps its natural card height: scoping matters here, an
-   unscoped rule squashes each favorites card from 118px to 103px. grid-gap
-   stays 4px rather than the classic 10px gap, which clips the rounded
-   corners in this tighter cell. */
+   This is safe HERE and nowhere else: on the dynamic dashboard `.item` and the card `tr`
+   are the SAME box (measured 0x0 delta), whereas on the classic pages `.item` is 16px
+   wider (Bootstrap span padding), which is exactly why the surface sits on the `tr`
+   there and why the status glows in device-status.css do too.
+
+   The card keeps its NATURAL height, so no cell-filling chain is needed and nothing is
+   compressed. `align-items: center` splits the leftover cell evenly above and below
+   rather than pooling it under the card. Measured naturals 109..119 in a 120px cell, so
+   the tallest card leaves ~1px: that is why the hover ring below is still INSET. An
+   outer ring needs the multi-value cards to give up ~7px of content height first.
+
+   EVERY rule here is scoped to the dz-device widget (.dd-widget--dz-device): core's
+   .dd-dz-inner and .item.itemBlock are SHARED markup, not device-only. dz-scene.html:8
+   renders the same .dd-dz-inner for scene widgets, and the dz-favorites widget re-renders
+   classic cards in a SCROLLING list (also .item.itemBlock inside a .dd-widget-body). Both
+   keep the tr surface and their own natural height. grid-gap stays 4px rather than the
+   classic 10px, which clips the rounded corners in this tighter cell. */
 .dd-widget--dz-device .dd-dz-inner {
-    align-items: stretch;
+    align-items: center;
 }
-.dd-widget--dz-device .item.itemBlock,
-.dd-widget--dz-device .item.itemBlock table[id^="item"],
-.dd-widget--dz-device .item.itemBlock table[id^="item"] > tbody {
-    height: 100%;
+.dd-widget--dz-device .item.itemBlock {
+    background: var(--dz-widget-bg);
+    border: var(--dz-card-border-width) solid transparent;
+    border-radius: var(--dz-card-radius);
+    box-shadow: var(--dz-elev-card);
+    box-sizing: border-box;
+    overflow: visible;
+    /* Natural height, but never past the cell: the cell clips, so a card that
+       outgrew it would lose the overflow to the clip rather than scroll it.
+       The status row's own overflow-y keeps that content reachable. */
+    max-height: 100%;
 }
-/* ENGINE SPLIT, and the tr is the painted card surface (background, border, radius).
-   `height: 100%` on a <tr> resolves in Chromium and is ignored in Firefox, which sizes
-   the row to content instead. Measured on the selector card in a 120px cell: Chromium
-   table 124 / tr 124, Firefox table 120 / tr 107. So Chromium paints each card over its
-   whole cell and a column of cards reads as one fused surface, while Firefox paints at
-   content height and the leftover cell shows as a gap. Nothing here creates or removes
-   that gap; moving the surface off the tr onto an element with a real block box is what
-   would make the two agree. */
+/* Strip the surface off the row it normally carries, leaving it a plain layout box. */
 .dd-widget--dz-device .item.itemBlock table[id^="item"] > tbody > tr {
-    height: 100%;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
     min-height: 0;
     grid-gap: 4px;
     gap: 4px;
@@ -383,6 +389,21 @@ div.bannercontent .row > .item {
    resizes the widget to reveal it" story real. The query needs container-type:
    size (height queries) on the widget body; its height is definite (flex:1 of
    the fixed cell), so size containment cannot collapse it. */
+/* Trim the level buttons' side padding in this one context so a 5-level selector fits
+   on ONE row. Chromium rounds each button's used width UP to a whole pixel where Firefox
+   keeps sub-pixel values (measured on a 5-level selector: 234.00px of buttons against
+   224.41px of group, versus Firefox's 224.48px which fits exactly), so Chromium alone
+   wraps to a second row. That second row is what pushed the card past its cell, and with
+   the card now taking natural height it is also what made the two engines disagree.
+   Padding is the smallest lever that closes a ~10px gap without touching label text or
+   the codified --dz-btn-pad-xs token every other small button uses. !important is needed
+   to beat buttons.css's own `.btn-small { padding: var(--dz-btn-pad-xs) !important }`,
+   which specificity alone cannot outrank. */
+.dd-widget--dz-device .selectorlevelbuttons .btn-small {
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+}
+
 .dd-widget--dz-device > .dd-widget-body {
     container-type: size;
 }

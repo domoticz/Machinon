@@ -4,6 +4,11 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+### Fixed
+
+- Dashboard device cards no longer run together into one continuous block in Chrome and Edge; they are spaced the same way in every browser.
+- Selector switches with several options now fit on one row in Chrome and Edge instead of spilling onto a second line.
+
 ## [2.0.0] - 2026-08-14
 
 Machinon returns with a full modernization. This release is a relaunch: new look, new settings experience, and a new, leaner way to install.
