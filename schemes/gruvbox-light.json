@@ -1,0 +1,20 @@
+{
+    "name": "Gruvbox Light",
+    "description": "Warm retro paper",
+    "base": "light",
+    "preview": { "bg": "#fbf1c7", "surface": "#f2e5bc", "accent": "#076678", "text": "#3c3836" },
+    "colors": {
+        "background": "#fbf1c7",
+        "item": "#f2e5bc",
+        "navbar": "#ebdbb2",
+        "main_color": "#076678",
+        "main_text": "#3c3836",
+        "alt_text": "#504945",
+        "border": "#d5c4a1",
+        "disabled": "#928374",
+        "error": "#9d0006",
+        "success": "#79740e",
+        "warning": "#b57614",
+        "accent_text": "#fbf1c7"
+    }
+}

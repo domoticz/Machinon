@@ -1,0 +1,1 @@
+.navbar .nav li a img { display: inline; width: 24px; height: 24px; } .navbar .nav li a span { display: block; } .navbar.notext .nav li a span { display: none !important; } @media screen and (min-width: 979px) { .events-editor { margin-top: 90px; } #timesun { margin-top: 10px; } } .navbar .nav li.clWeather a img { content: url(../images/machinon/weather.png); }

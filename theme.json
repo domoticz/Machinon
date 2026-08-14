@@ -1,0 +1,160 @@
+{
+    "type": "theme",    
+    "name": "Machinon",
+    "description": "Modern Domoticz theme: color schemes, Theme Hub settings, refreshed icons, light and dark",
+    "license": "GNU General Public License v3.0",
+    "version":"2.0.0",
+    "author": "EdddieN",
+    "homepage": "https://www.github.com/domoticz/Machinon",
+    "wiki": "https://www.domoticz.com/wiki/Machinon_Theme",
+    "standby_after": 10,
+    "dashboard_camera_refresh": 10,
+    "logo": "",
+    "custom_url": "https://www.domoticz.com",
+    "button_name": "Domoticz",
+    "icons": [
+        {"idx":"36","img":"IMG_0138.jpg"},
+        {"idx":"38","img":"IMG_0137.jpg"},
+        {"idx":"94","img":"IMG_0263.JPG"}
+        ],
+    "background_img":"",
+    "background_type":"",
+    "card_min_width": 320,
+    "card_max_width": 500,
+    "color_scheme": {
+        "background":"",
+        "main_color": "",
+        "navbar":"",
+        "item":"",
+        "main_text":"",
+        "alt_text":"",
+        "disabled":""
+    },
+    "features": {
+        "dark_theme": {
+            "id":10,
+            "enabled":false,
+            "files": ["dark_theme.css"]
+        },
+        "footer_text_disabled": {
+            "id":11,
+            "enabled":true,
+            "files": ["footer.css"]
+        },
+        "custom_settings_menu": {
+            "id":12,
+            "enabled":true,
+            "files": ["settings_page.js"]
+        },
+        "hide_logo": {
+            "id": 42,
+            "enabled": false,
+            "files": []
+        },
+        "log_plot_bands": {
+            "id": 43,
+            "enabled": true,
+            "files": ["log_ranges.js"]
+        },
+        "floorplan_popup_details": {
+            "id": 44,
+            "enabled": false,
+            "files": ["floorplan_popup_details.css"]
+        },
+        "standby": {
+            "id":13,
+            "enabled":false,
+            "files": ["standby.js", "standby.css"]
+        },
+        "check_update": {
+            "id":15,
+            "enabled":true,
+            "files": ["check_update.js"]
+        },
+        "time_ago": {
+            "id":16,
+            "enabled":true,
+            "files": []
+        },
+        "custom_page_menu": {
+            "id":17,
+            "enabled":true,
+            "files": ["custom_page.js"]
+        },
+        "fade_off_items": {
+            "id":18,
+            "enabled":false,
+            "files": []
+        },
+        "switch_instead_of_bigtext": {
+            "id":20,
+            "enabled":true,
+            "files": ["switch.js", "switch.css"]
+        },
+        "dashboard_show_last_update": {
+            "id":21,
+            "enabled":false,
+            "files": ["dashboard_show_last_update.css"]
+        },
+        "switch_instead_of_bigtext_scenes": {
+            "id":22,
+            "enabled":true,
+            "files": []
+        },
+        "navbar_icons": {
+            "id":25,
+            "enabled":false,
+            "files": ["navbar_icons.css"]
+        },
+        "navbar_icons_text": {
+            "id":27,
+            "enabled":false,
+            "files": []
+        },
+        "sidemenu": {
+            "id":28,
+            "enabled":false,
+            "files": ["sidemenu.css"]
+        },
+        "notification": {
+            "id":29,
+            "enabled":true,
+            "files": []
+        },
+        "dashboard_columns": {
+            "id":30,
+            "enabled":false,
+            "files": ["dashboard_columns.css"]
+        },
+        "dashboard_camera": {
+            "id":31,
+            "enabled":true,
+            "files": ["dashboard_camera.js", "dashboard_camera.css"]
+        },
+        "icon_image": {
+            "id":32,
+            "enabled":false,
+            "files": []
+        },
+        "center_popups": {
+            "id":33,
+            "enabled":false,
+            "files": ["center_popups.css"]
+        },
+        "dashboard_camera_section": {
+            "id":36,
+            "enabled":true,
+            "files": []
+        },
+        "wind_direction": {
+            "id":38,
+            "enabled":true,
+            "files": []
+        },
+        "custom_color_scheme": {
+            "id":39,
+            "enabled":false,
+            "files": []
+        }
+    }
+}

@@ -1,0 +1,17 @@
+var branch = "master";
+
+setTimeout(update, 5000);
+function update() {
+    fetch("https://raw.githubusercontent.com/domoticz/Machinon/" + branch + "/theme.json")
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            var gitVersion = data.version;
+            if (theme.version !== gitVersion) {
+                var newVersionText = "Machinon version " + data.version + " " + language.is_available + '! <a href="https://github.com/domoticz/Machinon/releases" target="_blank">' + language.click_here + "</a>";
+                generate_noty('success', newVersionText, false);
+            }
+        })
+        .catch(function(error) {
+            console.log("Machinon - update check failed:", error);
+        });
+}
