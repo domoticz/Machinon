@@ -44,19 +44,26 @@
 
    Core's device cell is 120px and can never be smaller: ddDzDevice.widget.js sets
    minH: 2, ddGrid.directive.js sets cellHeight to rowHeight (default 60). There is no
-   theme hook for either. Measured natural Machinon card heights against that 120px cell:
-       itemtablesmall             116 (switch) .. 118 (dimmer) .. 120 (selector)
-       itemtablesmalldoubleicon   118
-       itemtablesmalltrippleicon  118
-   So the tallest card needs the entire cell. Three consequences, each learned the hard way:
+   theme hook for either. Measured natural card heights in a dz-device widget at 1440
+   wide, against that 120px cell:
+       itemtablesmall             101 (text sensor) .. 107 (switch, dimmer, colour,
+                                  setpoint, temperature, counter) .. 119 (temp+humidity,
+                                  weather station) .. 124 (selector, Chromium only:
+                                  Firefox measures the same selector card at 107)
+       itemtablesmalldoubleicon   107 (blinds, media player)
+       itemtablesmalltrippleicon  107 (blinds with stop)
+   The selector is the only card that EXCEEDS the cell, and only in Chromium, so minH
+   does not guarantee cell >= card. Cards re-rendered inside a container widget are
+   taller and are not bounded by a 120px cell at all: dz-favorites 134..136, dz-room 146,
+   dz-scene 134. Three consequences, each learned the hard way:
 
-   1. Do NOT reserve padding on the wrapper here. Even 2px leaves 116px and clips every
-      dimmer, blind and selector card. (A <table> cannot shrink below its min-content
+   1. Do NOT reserve padding on the wrapper here. It eats headroom the selector card has
+      already used up, clipping it further. (A <table> cannot shrink below its min-content
       height, so `height: 100%` acts as a minimum there, not a maximum.)
-   2. Do NOT force height:100% on the card. The card is a CSS grid whose rows size to
-      content (30px name / 60px status / 20px last-update). Forcing the cell height
-      compresses them (measured: 28px 58px 20px), squeezing the switch pill and clipping
-      the icons. It is also unnecessary: minH guarantees cell >= card.
+   2. Do NOT force height:100% on the card outside the scoped dz-device block below. The
+      card is a CSS grid whose rows size to content (30px name / 60px status / 20px
+      last-update). Forcing the cell height compresses them (measured: 28px 58px 20px),
+      squeezing the switch pill and clipping the icons.
    3. The hover ring must therefore be INSET. Core clips the cell with five nested
       `overflow: hidden` ancestors (dd-dz-inner, dd-dz-device, dd-widget-body, dd-widget,
       dd-widget-cell), so an outer ring or drop shadow cannot spill into the grid gutter.
@@ -330,6 +337,14 @@ div.bannercontent .row > .item {
 .dd-widget--dz-device .item.itemBlock table[id^="item"] > tbody {
     height: 100%;
 }
+/* ENGINE SPLIT, and the tr is the painted card surface (background, border, radius).
+   `height: 100%` on a <tr> resolves in Chromium and is ignored in Firefox, which sizes
+   the row to content instead. Measured on the selector card in a 120px cell: Chromium
+   table 124 / tr 124, Firefox table 120 / tr 107. So Chromium paints each card over its
+   whole cell and a column of cards reads as one fused surface, while Firefox paints at
+   content height and the leftover cell shows as a gap. Nothing here creates or removes
+   that gap; moving the surface off the tr onto an element with a real block box is what
+   would make the two agree. */
 .dd-widget--dz-device .item.itemBlock table[id^="item"] > tbody > tr {
     height: 100%;
     min-height: 0;
