@@ -131,7 +131,12 @@
         <span class="dc-name">Hallway dimmer</span>
         <span class="dc-bigtext">62%</span>
         <span class="dc-options"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg></span>
-        <span class="dc-img"><img src="assets/icons/Dimmer48_On.png" alt="Dimmer icon" width="40" height="40" loading="lazy"></span>
+        <!-- Deliberately NOT Dimmer48_On.png: the theme ships that file byte-identical
+             to Light48_On.png (md5 adb53c81), so this card and Kitchen lights above would
+             show the same bulb and read as a copy-paste bug. ReflectorBulb is a distinct
+             spotlight shape from the same Blue UI pack. The duplication is being reported
+             upstream; do not "correct" this back. -->
+        <span class="dc-img"><img src="assets/icons/machinon_ReflectorBulb48_On.png" alt="Spotlight bulb icon" width="40" height="40" loading="lazy"></span>
         <span class="dc-status"><span class="dc-level">Level</span><span class="slider" role="img" aria-label="Level 62 percent"><span class="slider-fill"></span><span class="slider-knob"></span></span></span>
         <span class="dc-favorite"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.6l1.9 4 4.4.6-3.2 3.1.8 4.4L8 11.6l-3.9 2.1.8-4.4L1.7 6.2l4.4-.6z"/></svg></span>
         <span class="dc-lastupdate">just now</span>
