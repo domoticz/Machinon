@@ -1,0 +1,77 @@
+# Structurally parallel with script.easytv/mkdocs.yml and
+# script.easymovie/mkdocs.yml. Keep the theme block, features list and
+# markdown_extensions in step across all three; site_name, site_url,
+# repo_url, repo_name, edit_uri and nav are per-project.
+site_name: Machinon
+site_url: https://domoticz.github.io/Machinon/docs/
+site_description: "Machinon, a modern theme for Domoticz"
+repo_url: https://github.com/domoticz/Machinon
+repo_name: domoticz/Machinon
+edit_uri: edit/master/docs/
+
+# Build output goes under build/ (gitignored). The default ./site holds the
+# hand-authored landing page committed to this repo; a bare `mkdocs build`
+# must never overwrite site/index.html, site/style.css or site/tokens.css.
+site_dir: build/docs
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - toc.integrate
+    - search.highlight
+    - search.suggest
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.action.edit
+  icon:
+    repo: fontawesome/brands/github
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - attr_list
+  - md_in_html
+
+# docs/superpowers/ holds local-only specs and plans and is gitignored.
+# Excluding it keeps `mkdocs build --strict` from failing on files not in nav.
+exclude_docs: |
+  superpowers/
+
+# Pages join this nav in the task that writes them (Tasks 5, 6 and 7), so no
+# placeholder page ever exists and `mkdocs build --strict` stays clean at
+# every commit. The finished nav is:
+#   Home, Installation, Using the theme (Theme Hub, Color schemes, Icon packs,
+#   Mobile layouts), Settings reference, Troubleshooting and FAQ.
+nav:
+  - Home: index.md
