@@ -27,7 +27,8 @@ You picked `machinon` from the dropdown, but the dashboard still looks like the 
    sits at the **top right**, next to the row of tabs, not at the bottom of the page. Picking a
    theme from the dropdown only previews it; the change isn't saved until you click that button.
    (On a narrow phone screen, the same button moves to a bar fixed at the bottom of the screen,
-   see [Mobile layouts](mobile.md#what-else-changes-below-979px).)
+   see [Mobile
+   layouts](mobile.md#at-767px-forms-tables-search-and-the-settings-page-adapt-further).)
 2. Hard-refresh your browser (Ctrl+Shift+R). A normal refresh often keeps serving the old theme's
    cached files even after the setting is saved correctly.
 
@@ -53,10 +54,13 @@ You expected to find **Theme** in the Setup menu, but it isn't there.
    **Setup** menu, next to **Settings**.
 3. If you're logged in as a **non-admin** user on an installation with separate logins, the
    Setup menu isn't shown to you at all, that's normal Domoticz behaviour, not something Machinon
-   changes. You still have access to the Theme Hub, though: look in the **Other** menu in the
-   navigation bar (the one with the person icon, next to **Log**), just above **Logout**. Machinon
-   adds a Theme Hub entry there too, specifically so non-admin users on a multi-login installation
-   aren't locked out of their own theme settings.
+   changes. You still have access to the Theme Hub, though: look for the **Other** menu in the
+   navigation bar instead, the dropdown a non-admin login sees in place of Setup, holding items
+   like Energy Dashboard, My Profile, About and Logout. Machinon adds a Theme Hub entry there
+   too, directly above Logout, specifically so non-admin users on a multi-login installation
+   aren't locked out of their own theme settings. (This is established from Domoticz's own menu
+   code, not confirmed on screen: the test instance behind this manual has no login enabled, so
+   there's no non-admin session available to verify it against directly.)
 4. If your installation has no separate logins at all (or login is disabled), you're treated as
    admin and the entry is in the Setup menu as in step 2.
 

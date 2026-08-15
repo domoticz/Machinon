@@ -14,11 +14,20 @@ On stable Domoticz releases, this menu entry is available to admin users.
 
 If you're logged in as a non-admin user on an installation with separate logins, you won't see
 the Setup menu at all, that's normal Domoticz behaviour. Machinon still gives you a way in: look
-in the **Other** menu in the navbar instead (the one with the person icon, next to **Log**), just
-above **Logout**. The Theme Hub entry sits there too, so a non-admin login is never locked out of
-its own theme settings, just directed to a different menu than an admin sees. See
-[Troubleshooting: the Theme Hub entry is missing](troubleshooting-and-faq.md#the-theme-hub-entry-is-missing)
-if neither menu shows it.
+for the **Other** menu in the navbar instead. It's the dropdown a non-admin login sees in place
+of Setup, holding items like Energy Dashboard, My Profile, About and Logout; the Theme Hub entry
+sits there too, directly above Logout. It puts non-admin users on equal footing with admins: a
+non-admin login is never locked out of its own theme settings, just directed to a different menu
+than an admin sees.
+
+!!! note "Not confirmed against an actual non-admin session"
+    This is read from Domoticz's own menu markup and the theme's source, not something we've
+    seen rendered on screen: the test instance this manual is checked against runs with no login
+    at all, so there is no non-admin session to open and screenshot. If your Domoticz installation
+    has separate logins, this is what a non-admin account should see in the **Other** menu.
+
+See [Troubleshooting: the Theme Hub entry is
+missing](troubleshooting-and-faq.md#the-theme-hub-entry-is-missing) if neither menu shows it.
 
 ![Theme Hub settings page](screenshots/theme-hub.png)
 
