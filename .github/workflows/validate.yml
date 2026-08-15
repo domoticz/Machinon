@@ -32,6 +32,69 @@ jobs:
       - name: Comment-stripper unit tests
         run: python3 -m pytest scripts/test_strip_comments.py -q
 
+      - name: Site and docs unit tests
+        run: python3 -m pytest scripts/test_gen_site_tokens.py scripts/test_check_site.py scripts/test_check_contrast.py scripts/test_check_settings_docs.py -q
+
+      - name: Site tokens are in step with the theme's schemes
+        run: python3 scripts/gen-site-tokens.py --check
+
+      - name: Landing page guards
+        run: python3 scripts/check-site.py
+
+      - name: Landing page contrast holds WCAG AA in every scheme
+        run: python3 scripts/check-contrast.py
+
+      - name: Settings reference covers the manifest
+        run: python3 scripts/check-settings-docs.py
+
+      - name: Manual builds clean
+        run: mkdocs build --strict -d build/docs
+
+      - name: Published site makes no external requests
+        run: |
+          cp -r site/* build/
+          # Material's vendored JS bundle (assets/javascripts/bundle*.min.js
+          # and its source map) contains the literal string
+          # "https://api.github.com/repos/..." as dead code for the
+          # repo-stats widget (star, fork and release counts): that code
+          # ships in every Material build and is not conditionally compiled
+          # out per project. overrides/partials/source.html already drops
+          # the data-md-component="source" attribute that is the only thing
+          # that makes Material's bundle call it, so the string here is
+          # unreachable, not a live request. Excluding the vendor bundle
+          # keeps this check meaningful instead of permanently red on a
+          # string neither this repo nor its authors wrote.
+          #
+          # That exclusion is only safe because the two assertions below
+          # hold. They are a pair with the exclusion above, not a redundant
+          # extra: the exclusion trusts that data-md-component="source" is
+          # gone from the built HTML, and nothing else in this step checks
+          # that trust is still warranted. Do not remove either assertion
+          # while the exclusion stays.
+          if grep -rIlE 'https?://(fonts\.(googleapis|gstatic)\.com|api\.github\.com|cdn\.|unpkg\.com|cdnjs\.)' build/ --exclude='bundle*.min.js*' ; then
+            echo "external asset host referenced in the built site" >&2
+            exit 1
+          fi
+          echo "no external asset hosts in the built site"
+
+          material_version=$(grep -oP 'mkdocs-material==\K.*' requirements-dev.txt)
+
+          if grep -rq 'data-md-component="source"' build/docs/; then
+            echo "overrides/partials/source.html is no longer suppressing data-md-component=\"source\"." >&2
+            echo "That attribute is what makes Material's bundle call api.github.com on every page view (see the comment above and in overrides/partials/source.html)." >&2
+            echo "Likely cause: mkdocs-material was bumped past ${material_version} and restructured partials/source.html, renamed it, or moved the attribute to a different element, and the override no longer matches or no longer applies." >&2
+            echo "Compare overrides/partials/source.html against the upstream partials/source.html shipped in the new mkdocs-material version and update the override to match, still without the data-md-component attribute." >&2
+            exit 1
+          fi
+          echo "data-md-component=\"source\" is absent: the repo-stats fetch stays unreachable"
+
+          if ! grep -q 'class="md-source"' build/docs/index.html; then
+            echo "overrides/partials/source.html no longer renders the repository link at all (no class=\"md-source\" found in build/docs/index.html)." >&2
+            echo "Check overrides/partials/source.html: it should still render the <a class=\"md-source\"> link, just without data-md-component=\"source\"." >&2
+            exit 1
+          fi
+          echo "repository link still renders"
+
       - name: Import chain resolves
         run: scripts/build-dist.sh --check
 

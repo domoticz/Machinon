@@ -1,0 +1,30 @@
+{#-
+  Overrides Material's partials/source.html to drop data-md-component="source".
+
+  That attribute is the only thing that makes Material's bundle call
+  https://api.github.com/repos/<owner>/<repo> and .../releases/latest on every
+  page view, to render star, fork and version counts. Those two requests break
+  this project's no-external-requests rule and send every reader's IP to
+  GitHub for decoration nobody asked for. Removing the attribute keeps the
+  repository link and its icon and drops the requests; the styling rides on
+  the md-source class, not the attribute.
+
+  Re-check this file when bumping mkdocs-material: it is a copy of an upstream
+  template minus one attribute, so upstream markup changes do not reach it.
+
+  validate.yml's "Published site makes no external requests" step asserts
+  that data-md-component="source" stays absent from the built manual and
+  that the repository link still renders, specifically so a version bump
+  that silently breaks this override (renamed partial, restructured markup,
+  attribute moved elsewhere) fails CI instead of quietly reintroducing the
+  api.github.com calls. Keep that step in sync with this file.
+-#}
+<a href="{{ config.repo_url }}" title="{{ lang.t('source') }}" class="md-source">
+  <div class="md-source__icon md-icon">
+    {% set icon = config.theme.icon.repo or "fontawesome/brands/git-alt" %}
+    {% include ".icons/" ~ icon ~ ".svg" %}
+  </div>
+  <div class="md-source__repository">
+    {{ config.repo_name }}
+  </div>
+</a>

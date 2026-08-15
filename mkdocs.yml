@@ -16,6 +16,9 @@ site_dir: build/docs
 
 theme:
   name: material
+  # Drops data-md-component="source" from the repo link so Material does not
+  # call the GitHub API on every page view. See overrides/partials/source.html.
+  custom_dir: overrides
   # Material links Google Fonts (Roboto and Roboto Mono) from its own CDN
   # unless font is false. The published site must make no external request at
   # all, so this is off and the faces are self-hosted from the repo's fonts/
@@ -73,6 +76,14 @@ markdown_extensions:
 # Excluding it keeps `mkdocs build --strict` from failing on files not in nav.
 exclude_docs: |
   superpowers/
+
+# MkDocs defaults broken-anchor links (#some-heading that does not exist on
+# the target page) to "info", which --strict does not fail on. Raising this
+# to "warn" makes --strict treat a dangling anchor as a build failure like
+# any other broken internal link, instead of a silent no-op.
+validation:
+  links:
+    anchors: warn
 
 # Pages join this nav in the task that writes them (Tasks 5, 6 and 7), so no
 # placeholder page ever exists and `mkdocs build --strict` stays clean at

@@ -1,0 +1,69 @@
+# Builds the landing page (site/) and the MkDocs manual into one tree and
+# publishes it to GitHub Pages.
+#
+# Layout: the manual builds into build/docs, then site/* is copied over the
+# top, so the landing page serves at / and the manual at /docs/. Same shape as
+# script.easytv and script.easymovie.
+#
+# The deploy job runs on the upstream repo ONLY. Rouzax/Machinon is a
+# force-synced mirror with no Pages site, so an unguarded deploy step would
+# fail on every sync. The build job still runs there, so a broken docs build
+# is caught on the mirror too.
+name: Deploy Docs
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned dev tools
+        run: pip install -r requirements-dev.txt
+
+      - name: Configure Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      - name: Build the manual and assemble the site
+        run: |
+          mkdocs build --strict -d build/docs
+          cp -r site/* build/
+          cp -r fonts build/fonts
+          touch build/.nojekyll
+
+      - name: Upload the Pages artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: build/
+
+  deploy:
+    needs: build
+    if: github.repository == 'domoticz/Machinon'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
