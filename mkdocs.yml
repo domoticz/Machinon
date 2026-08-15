@@ -84,3 +84,7 @@ nav:
   - Installation: installation.md
   - Using the theme:
       - Theme Hub: theme-hub.md
+      - Color schemes: color-schemes.md
+      - Icon packs: icon-packs.md
+      - Mobile layouts: mobile.md
+  - Troubleshooting and FAQ: troubleshooting-and-faq.md

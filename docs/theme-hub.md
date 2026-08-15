@@ -12,6 +12,14 @@ The Theme Hub only appears once Machinon is the active theme (see
 
 On stable Domoticz releases, this menu entry is available to admin users.
 
+If you're logged in as a non-admin user on an installation with separate logins, you won't see
+the Setup menu at all, that's normal Domoticz behaviour. Machinon still gives you a way in: look
+in the **Other** menu in the navbar instead (the one with the person icon, next to **Log**), just
+above **Logout**. The Theme Hub entry sits there too, so a non-admin login is never locked out of
+its own theme settings, just directed to a different menu than an admin sees. See
+[Troubleshooting: the Theme Hub entry is missing](troubleshooting-and-faq.md#the-theme-hub-entry-is-missing)
+if neither menu shows it.
+
 ![Theme Hub settings page](screenshots/theme-hub.png)
 
 ## The nine groups
