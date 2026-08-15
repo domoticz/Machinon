@@ -1,0 +1,168 @@
+/*
+  tokens.css - GENERATED, do not edit by hand.
+
+  Written by scripts/gen-site-tokens.py from dz-tokens.css, dark.css and
+  schemes/*.json, so the landing page's colours are the theme's real
+  colours. scripts/gen-site-tokens.py --check runs in CI and fails on drift.
+*/
+
+/* Machinon Light */
+:root,
+[data-scheme="machinon-light"] {
+    --dz-body-bg: #f4f8fc;
+    --dz-body-text: #1b2b3a;
+    --dz-nav-bg: #e9f2fb;
+    --dz-widget-bg: #ffffff;
+    --dz-widget-text: #1b2b3a;
+    --dz-accent-color: #396d9e;
+    --dz-accent-text: #ffffff;
+    --dz-accent-values: 57,109,158;
+    --dz-input-border: #cbd9e6;
+    --dz-status-disabled: #8ca0b3;
+    --dz-accent-red: #992f2b;
+    --dz-accent-red-values: 153,47,43;
+    --dz-btn-success-bg: #306b30;
+    --dz-btn-warning-bg: #7a5412;
+    --secondary-text-color: #3e5568;
+    --dz-sun-color: #8c730e;
+}
+
+/* Machinon Dark */
+[data-scheme="machinon-dark"] {
+    --dz-body-bg: #0f1620;
+    --dz-body-text: #dce6f0;
+    --dz-nav-bg: #0a0f16;
+    --dz-widget-bg: #18202b;
+    --dz-widget-text: #dce6f0;
+    --dz-accent-color: #98ccfd;
+    --dz-accent-text: #0f1620;
+    --dz-accent-values: 152,204,253;
+    --dz-input-border: #2a3644;
+    --dz-status-disabled: #5e7183;
+    --dz-accent-red: #fa5d57;
+    --dz-accent-red-values: 250,93,87;
+    --dz-btn-success-bg: #73d173;
+    --dz-btn-warning-bg: #f2b03d;
+    --secondary-text-color: #9db2c6;
+    --dz-sun-color: #fad232;
+}
+
+/* Magenta Light */
+[data-scheme="magenta-light"] {
+    --dz-body-bg: #FAF0F7;
+    --dz-body-text: #292528;
+    --dz-nav-bg: #F5E6F0;
+    --dz-widget-bg: #FFFFFF;
+    --dz-widget-text: #292528;
+    --dz-accent-color: #99407E;
+    --dz-accent-text: #FFFFFF;
+    --dz-accent-values: 153,64,126;
+    --dz-input-border: #DBC5D5;
+    --dz-status-disabled: #9E959B;
+    --dz-accent-red: #992F2B;
+    --dz-accent-red-values: 153,47,43;
+    --dz-btn-success-bg: #306B30;
+    --dz-btn-warning-bg: #7A5412;
+    --secondary-text-color: #575055;
+    --dz-sun-color: #8C730E;
+}
+
+/* Magenta Dark */
+[data-scheme="magenta-dark"] {
+    --dz-body-bg: #171015;
+    --dz-body-text: #EBD3E4;
+    --dz-nav-bg: #0F0A0E;
+    --dz-widget-bg: #21191F;
+    --dz-widget-text: #EBD3E4;
+    --dz-accent-color: #FC72D3;
+    --dz-accent-text: #1A0F16;
+    --dz-accent-values: 252,114,211;
+    --dz-input-border: #3D3039;
+    --dz-status-disabled: #7A6975;
+    --dz-accent-red: #FA5D57;
+    --dz-accent-red-values: 250,93,87;
+    --dz-btn-success-bg: #73D173;
+    --dz-btn-warning-bg: #F2B03D;
+    --secondary-text-color: #B89EB0;
+    --dz-sun-color: #FAD232;
+}
+
+/* Paper Light */
+[data-scheme="paper-light"] {
+    --dz-body-bg: #fafafa;
+    --dz-body-text: #111111;
+    --dz-nav-bg: #efefef;
+    --dz-widget-bg: #ffffff;
+    --dz-widget-text: #111111;
+    --dz-accent-color: #222222;
+    --dz-accent-text: #ffffff;
+    --dz-accent-values: 34,34,34;
+    --dz-input-border: #cccccc;
+    --dz-status-disabled: #999999;
+    --dz-accent-red: #8b0000;
+    --dz-accent-red-values: 139,0,0;
+    --dz-btn-success-bg: #1b5e20;
+    --dz-btn-warning-bg: #8a6d00;
+    --secondary-text-color: #444444;
+    --dz-sun-color: #555555;
+}
+
+/* Paper Dark */
+[data-scheme="paper-dark"] {
+    --dz-body-bg: #121212;
+    --dz-body-text: #EDEDED;
+    --dz-nav-bg: #0B0B0B;
+    --dz-widget-bg: #1E1E1E;
+    --dz-widget-text: #EDEDED;
+    --dz-accent-color: #D0D0D0;
+    --dz-accent-text: #121212;
+    --dz-accent-values: 208,208,208;
+    --dz-input-border: #3A3A3A;
+    --dz-status-disabled: #6B6B6B;
+    --dz-accent-red: #FF6B63;
+    --dz-accent-red-values: 255,107,99;
+    --dz-btn-success-bg: #7FC97F;
+    --dz-btn-warning-bg: #E0B341;
+    --secondary-text-color: #B0B0B0;
+    --dz-sun-color: #8E8E8E;
+}
+
+/* Gruvbox Light */
+[data-scheme="gruvbox-light"] {
+    --dz-body-bg: #fbf1c7;
+    --dz-body-text: #3c3836;
+    --dz-nav-bg: #ebdbb2;
+    --dz-widget-bg: #f2e5bc;
+    --dz-widget-text: #3c3836;
+    --dz-accent-color: #076678;
+    --dz-accent-text: #fbf1c7;
+    --dz-accent-values: 7,102,120;
+    --dz-input-border: #d5c4a1;
+    --dz-status-disabled: #928374;
+    --dz-accent-red: #9d0006;
+    --dz-accent-red-values: 157,0,6;
+    --dz-btn-success-bg: #79740e;
+    --dz-btn-warning-bg: #b57614;
+    --secondary-text-color: #504945;
+    --dz-sun-color: #8c730e;
+}
+
+/* Gruvbox Dark */
+[data-scheme="gruvbox-dark"] {
+    --dz-body-bg: #282828;
+    --dz-body-text: #ebdbb2;
+    --dz-nav-bg: #32302f;
+    --dz-widget-bg: #3c3836;
+    --dz-widget-text: #ebdbb2;
+    --dz-accent-color: #83a598;
+    --dz-accent-text: #1d2021;
+    --dz-accent-values: 131,165,152;
+    --dz-input-border: #504945;
+    --dz-status-disabled: #665c54;
+    --dz-accent-red: #fb4934;
+    --dz-accent-red-values: 251,73,52;
+    --dz-btn-success-bg: #b8bb26;
+    --dz-btn-warning-bg: #fabd2f;
+    --secondary-text-color: #bdae93;
+    --dz-sun-color: #fad232;
+}
