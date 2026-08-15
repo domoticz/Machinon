@@ -1,9 +1,15 @@
 /*
   style.css - layout and components for the Machinon landing page.
 
-  Colours come from tokens.css (generated from the theme's own schemes), so
-  nothing here declares a colour literal except the elevation shadows, which
-  are fixed by design across schemes (see DESIGN.md > Elevation).
+  Colours AND shadows come from tokens.css, generated from the theme's own
+  schemes, so nothing in this file declares a colour or shadow literal at all.
+  Elevation is consumed as var(--dz-elev-card|popup|overlay) rather than copied:
+  dark.css deepens every alpha (card 0.25 -> 0.50) so shadows read against a
+  dark underlay, and hardcoding the light values here would paint all four dark
+  schemes too weakly (DESIGN.md > Elevation > Dark Underlay).
+
+  The only remaining --site-* variables are geometry and type, which carry no
+  per-scheme value: radius, the type scale, and the max width.
 
   Type: body and UI text use the theme's scale (11/12/14/16/20/26). The three
   --site-text-display-* sizes are the documented site-only display tier; they
@@ -52,11 +58,6 @@
     --site-radius-container: 6px;
     --site-radius-button: 10px;
 
-    /* DESIGN.md > Elevation. Fixed by design, not scheme-dependent. */
-    --site-elev-card: 0 1px 4px rgba(0, 0, 0, 0.25);
-    --site-elev-popup: 0 2px 6px rgba(0, 0, 0, 0.28);
-    --site-elev-overlay: 0 3px 10px rgba(0, 0, 0, 0.30);
-
     --site-max-width: 1120px;
 }
 
@@ -88,12 +89,16 @@ code, pre { font-family: var(--site-font-mono); }
 
 /* Not a colour, a keyword: it tells the browser which way to paint the
    native controls it owns (the picker's dropdown list, scrollbars) so they
-   do not stay light inside a dark scheme. */
+   do not stay light inside a dark scheme.
+
+   Root-scoped on purpose. Every .scheme-swatch carries its own data-scheme, so
+   an unscoped [data-scheme="*-dark"] would also match the four dark swatch
+   buttons and flip their native rendering while the page itself is light. */
 :root { color-scheme: light; }
-[data-scheme="machinon-dark"],
-[data-scheme="magenta-dark"],
-[data-scheme="paper-dark"],
-[data-scheme="gruvbox-dark"] { color-scheme: dark; }
+:root[data-scheme="machinon-dark"],
+:root[data-scheme="magenta-dark"],
+:root[data-scheme="paper-dark"],
+:root[data-scheme="gruvbox-dark"] { color-scheme: dark; }
 
 figure { margin: 0; }
 
@@ -187,6 +192,7 @@ main > section[id] { scroll-margin-top: 4.5rem; }
     font-size: var(--site-text-sm);
     font-weight: 600;
     text-decoration: none;
+    white-space: nowrap;
     padding: 0.35rem 0.65rem;
     border-radius: var(--site-radius-interactive);
 }
@@ -208,8 +214,6 @@ main > section[id] { scroll-margin-top: 4.5rem; }
 
 .scheme-control { display: flex; align-items: center; flex: 0 0 auto; }
 
-.nav-links a { white-space: nowrap; }
-
 /* ---- Buttons --------------------------------------------------------- */
 
 .btn {
@@ -219,14 +223,19 @@ main > section[id] { scroll-margin-top: 4.5rem; }
     font-size: var(--site-text-xs);
     font-weight: 600;
     text-decoration: none;
-    box-shadow: var(--site-elev-card);
+    box-shadow: var(--dz-elev-card);
 }
 
 .btn-primary { background: var(--dz-accent-color); color: var(--dz-accent-text); }
 
+/* The accent carries the affordance (border), the text does not. Accent-as-text
+   on --dz-widget-bg is only 4.31:1 in Gruvbox Dark, under the 4.5 floor for
+   small text, and these buttons sit on a card inside .install-card. Body text
+   on the border keeps the Paper monochrome behaviour intact and clears AA in
+   all eight schemes. */
 .btn-outline {
     background: transparent;
-    color: var(--dz-accent-color);
+    color: var(--dz-body-text);
     border: 2px solid var(--dz-accent-color);
     box-shadow: none;
 }
@@ -283,7 +292,7 @@ main > section[id] { scroll-margin-top: 4.5rem; }
 .hero-shot img {
     border: 1px solid var(--dz-input-border);
     border-radius: var(--site-radius-container);
-    box-shadow: var(--site-elev-overlay);
+    box-shadow: var(--dz-elev-overlay);
 }
 
 /* ---- Section heads --------------------------------------------------- */
@@ -330,7 +339,7 @@ main > section[id] { scroll-margin-top: 4.5rem; }
     background: var(--dz-widget-bg);
     color: var(--dz-widget-text);
     border-radius: var(--site-radius-container);
-    box-shadow: var(--site-elev-card);
+    box-shadow: var(--dz-elev-card);
     padding: 0.9rem 1rem;
 }
 
@@ -407,7 +416,7 @@ main > section[id] { scroll-margin-top: 4.5rem; }
     margin: -8px 0 0 -8px;
     border-radius: 50%;
     background: var(--dz-accent-color);
-    box-shadow: var(--site-elev-card);
+    box-shadow: var(--dz-elev-card);
 }
 
 /* ---- Features -------------------------------------------------------- */
@@ -423,7 +432,7 @@ main > section[id] { scroll-margin-top: 4.5rem; }
     color: var(--dz-widget-text);
     border: 1px solid var(--dz-input-border);
     border-radius: var(--site-radius-container);
-    box-shadow: var(--site-elev-card);
+    box-shadow: var(--dz-elev-card);
     padding: 1.25rem;
 }
 
@@ -436,6 +445,28 @@ main > section[id] { scroll-margin-top: 4.5rem; }
 }
 
 /* ---- Scheme swatches ------------------------------------------------- */
+
+/* Shown only when the swatch grid cannot be built. Same callout shape as
+   .install-note, so a no-JS visitor gets an explanation rather than an empty
+   box under a heading that says "click one to apply it". */
+.noscript-note {
+    width: min(100% - 2.5rem, calc(var(--site-max-width) - 2.5rem));
+    margin: 0 auto;
+    padding: 0.85rem 1rem;
+    background: rgba(var(--dz-accent-values), 0.07);
+    border-left: 3px solid var(--dz-accent-color);
+    border-radius: var(--site-radius-container);
+    font-size: var(--site-text-sm);
+    color: var(--secondary-text-color);
+}
+
+/* Underlined body text, not accent-coloured text. Accent on this tinted band is
+   4.36:1 in Gruvbox Dark, under the AA floor, and a link sitting inside a
+   sentence should not be marked by colour alone anyway (WCAG 1.4.1). */
+.noscript-note a {
+    color: var(--dz-body-text);
+    text-decoration: underline;
+}
 
 .scheme-grid {
     display: grid;
@@ -456,7 +487,7 @@ main > section[id] { scroll-margin-top: 4.5rem; }
     color: var(--dz-body-text);
     border: 2px solid var(--dz-input-border);
     border-radius: var(--site-radius-container);
-    box-shadow: var(--site-elev-card);
+    box-shadow: var(--dz-elev-card);
 }
 
 .scheme-swatch[aria-pressed="true"] { border-color: var(--dz-accent-color); }
@@ -481,7 +512,7 @@ main > section[id] { scroll-margin-top: 4.5rem; }
 .showcase-shot img {
     border: 1px solid var(--dz-input-border);
     border-radius: var(--site-radius-container);
-    box-shadow: var(--site-elev-overlay);
+    box-shadow: var(--dz-elev-overlay);
     margin: 0 auto;
 }
 
@@ -496,7 +527,7 @@ main > section[id] { scroll-margin-top: 4.5rem; }
 .phone img {
     border: 1px solid var(--dz-input-border);
     border-radius: var(--site-radius-container);
-    box-shadow: var(--site-elev-card);
+    box-shadow: var(--dz-elev-card);
 }
 
 .phone figcaption {
@@ -608,7 +639,7 @@ main > section[id] { scroll-margin-top: 4.5rem; }
     color: var(--dz-widget-text);
     border: 1px solid var(--dz-input-border);
     border-radius: var(--site-radius-container);
-    box-shadow: var(--site-elev-card);
+    box-shadow: var(--dz-elev-card);
     padding: 1.25rem;
 }
 
@@ -627,7 +658,7 @@ main > section[id] { scroll-margin-top: 4.5rem; }
     background: var(--dz-widget-bg);
     border: 1px solid var(--dz-input-border);
     border-radius: var(--site-radius-container);
-    box-shadow: var(--site-elev-card);
+    box-shadow: var(--dz-elev-card);
     overflow: hidden;
 }
 
@@ -671,6 +702,9 @@ main > section[id] { scroll-margin-top: 4.5rem; }
 .copy-btn {
     flex: 0 0 auto;
     cursor: pointer;
+    /* The label swaps to "Copied" / "Press Ctrl+C" on click, so it must not
+       wrap inside the code head. */
+    white-space: nowrap;
     font-family: inherit;
     font-size: var(--site-text-micro);
     font-weight: 600;
@@ -680,7 +714,10 @@ main > section[id] { scroll-margin-top: 4.5rem; }
     border: 1px solid var(--dz-accent-color);
     border-radius: var(--site-radius-interactive);
     background: transparent;
-    color: var(--dz-accent-color);
+    /* Same reason as .btn-outline, and worse here: 11px accent text over the
+       rgba(accent, 0.08) head is 3.81:1 in Gruvbox Dark. The accent stays as
+       the border. */
+    color: var(--dz-body-text);
 }
 
 .copy-btn:hover {
@@ -742,30 +779,21 @@ main > section[id] { scroll-margin-top: 4.5rem; }
     color: var(--secondary-text-color);
 }
 
-.footer-credits a { color: var(--dz-accent-color); }
+/* Same reasoning as .noscript-note a: this one sits inside a sentence too. */
+.footer-credits a {
+    color: var(--dz-body-text);
+    text-decoration: underline;
+}
 
 /* ---- Motion: opt-in only -------------------------------------------- */
 
 @media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+
     .nav-links a,
     .btn,
     .device-card,
-    .feature-card {
-        transition: background-color 0.2s ease, color 0.2s ease,
-                    transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .btn:hover { transform: translateY(-1px); }
-    .feature-card:hover { transform: translateY(-3px); box-shadow: var(--site-elev-overlay); }
-
-    .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.5s ease, transform 0.5s ease; }
-    .reveal.is-visible { opacity: 1; transform: none; }
-}
-
-/* Same gate, for the components authored below the skeleton. */
-@media (prefers-reduced-motion: no-preference) {
-    html { scroll-behavior: smooth; }
-
+    .feature-card,
     .scheme-swatch,
     .install-card,
     .copy-btn,
@@ -776,9 +804,14 @@ main > section[id] { scroll-margin-top: 4.5rem; }
                     box-shadow 0.2s ease;
     }
 
-    .scheme-swatch:hover { transform: translateY(-2px); box-shadow: var(--site-elev-popup); }
-    .install-card:hover { box-shadow: var(--site-elev-popup); }
-    .phone:hover img { transform: translateY(-3px); box-shadow: var(--site-elev-popup); }
+    .btn:hover { transform: translateY(-1px); }
+    .feature-card:hover { transform: translateY(-3px); box-shadow: var(--dz-elev-overlay); }
+    .scheme-swatch:hover { transform: translateY(-2px); box-shadow: var(--dz-elev-popup); }
+    .install-card:hover { box-shadow: var(--dz-elev-popup); }
+    .phone:hover img { transform: translateY(-3px); box-shadow: var(--dz-elev-popup); }
+
+    .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.5s ease, transform 0.5s ease; }
+    .reveal.is-visible { opacity: 1; transform: none; }
 }
 
 /* ---- Responsive ------------------------------------------------------ */

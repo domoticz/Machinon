@@ -13,8 +13,9 @@ and resolves each JSON scheme the way src/js/scheme.js does: start from the
 base named by the scheme's "base" key, then overlay the colors mapping in
 SCHEME_KEY_TO_TOKENS (kept identical to applyCustomColorScheme).
 
-Only the tokens the landing page consumes are emitted. Elevation, radius and
-typography are scheme-independent and live in site/style.css.
+Only the tokens the landing page consumes are emitted: colour, plus the three
+elevation levels the page uses. Radius and typography carry no per-scheme
+value at all, so they stay as --site-* declarations in site/style.css.
 
 Run:
     python3 scripts/gen-site-tokens.py           # write site/tokens.css
@@ -46,6 +47,19 @@ SCHEME_KEY_TO_TOKENS = {
 }
 
 # Emitted in this order, so the generated file diffs cleanly.
+#
+# Colour first, then the three elevation levels the landing page consumes.
+# Elevation is not in SCHEME_KEY_TO_TOKENS and never will be: no scheme JSON
+# has a key for it, because a shadow is scheme-INDEPENDENT within a base. What
+# it is not is base-independent. dark.css deepens every level's alpha (card
+# 0.25 -> 0.50, popup 0.28 -> 0.56, overlay 0.30 -> 0.60) so shadows still read
+# against a dark underlay. So these three ride the plain base fallthrough in
+# resolve_scheme(): every light-based scheme inherits the light alphas and
+# every dark-based one the deepened alphas, with no mapping entry needed.
+#
+# Emitting them here is what stops site/style.css from hand-copying the light
+# values, which would silently paint all four dark schemes too weakly and would
+# breach DESIGN.md's derive-never-copy rule for token definitions.
 SITE_TOKENS = [
     "--dz-body-bg",
     "--dz-body-text",
@@ -63,6 +77,9 @@ SITE_TOKENS = [
     "--dz-btn-warning-bg",
     "--secondary-text-color",
     "--dz-sun-color",
+    "--dz-elev-card",
+    "--dz-elev-popup",
+    "--dz-elev-overlay",
 ]
 
 _DECL = re.compile(r"(--[\w-]+)\s*:\s*([^;]+);")
@@ -149,8 +166,10 @@ def build():
         "  tokens.css - GENERATED, do not edit by hand.",
         "",
         "  Written by scripts/gen-site-tokens.py from dz-tokens.css, dark.css and",
-        "  schemes/*.json, so the landing page's colours are the theme's real",
-        "  colours. scripts/gen-site-tokens.py --check runs in CI and fails on drift.",
+        "  schemes/*.json, so the landing page's colours and shadows are the",
+        "  theme's real ones. The elevation trio is per-BASE, not per-scheme:",
+        "  dark.css deepens each alpha so shadows read against a dark underlay.",
+        "  scripts/gen-site-tokens.py --check runs in CI and fails on drift.",
         "*/",
     ]
     for scheme_id in scheme_ids():

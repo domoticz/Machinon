@@ -2,8 +2,10 @@
   tokens.css - GENERATED, do not edit by hand.
 
   Written by scripts/gen-site-tokens.py from dz-tokens.css, dark.css and
-  schemes/*.json, so the landing page's colours are the theme's real
-  colours. scripts/gen-site-tokens.py --check runs in CI and fails on drift.
+  schemes/*.json, so the landing page's colours and shadows are the
+  theme's real ones. The elevation trio is per-BASE, not per-scheme:
+  dark.css deepens each alpha so shadows read against a dark underlay.
+  scripts/gen-site-tokens.py --check runs in CI and fails on drift.
 */
 
 /* Machinon Light */
@@ -25,6 +27,9 @@
     --dz-btn-warning-bg: #7a5412;
     --secondary-text-color: #3e5568;
     --dz-sun-color: #8c730e;
+    --dz-elev-card: 0 1px 4px rgba(0,0,0,0.25);
+    --dz-elev-popup: 0 2px 6px rgba(0,0,0,0.28);
+    --dz-elev-overlay: 0 3px 10px rgba(0,0,0,0.30);
 }
 
 /* Machinon Dark */
@@ -45,6 +50,9 @@
     --dz-btn-warning-bg: #f2b03d;
     --secondary-text-color: #9db2c6;
     --dz-sun-color: #fad232;
+    --dz-elev-card: 0 1px 4px rgba(0,0,0,0.50);
+    --dz-elev-popup: 0 2px 6px rgba(0,0,0,0.56);
+    --dz-elev-overlay: 0 3px 10px rgba(0,0,0,0.60);
 }
 
 /* Magenta Light */
@@ -65,6 +73,9 @@
     --dz-btn-warning-bg: #7A5412;
     --secondary-text-color: #575055;
     --dz-sun-color: #8C730E;
+    --dz-elev-card: 0 1px 4px rgba(0,0,0,0.25);
+    --dz-elev-popup: 0 2px 6px rgba(0,0,0,0.28);
+    --dz-elev-overlay: 0 3px 10px rgba(0,0,0,0.30);
 }
 
 /* Magenta Dark */
@@ -85,6 +96,9 @@
     --dz-btn-warning-bg: #F2B03D;
     --secondary-text-color: #B89EB0;
     --dz-sun-color: #FAD232;
+    --dz-elev-card: 0 1px 4px rgba(0,0,0,0.50);
+    --dz-elev-popup: 0 2px 6px rgba(0,0,0,0.56);
+    --dz-elev-overlay: 0 3px 10px rgba(0,0,0,0.60);
 }
 
 /* Paper Light */
@@ -105,6 +119,9 @@
     --dz-btn-warning-bg: #8a6d00;
     --secondary-text-color: #444444;
     --dz-sun-color: #555555;
+    --dz-elev-card: 0 1px 4px rgba(0,0,0,0.25);
+    --dz-elev-popup: 0 2px 6px rgba(0,0,0,0.28);
+    --dz-elev-overlay: 0 3px 10px rgba(0,0,0,0.30);
 }
 
 /* Paper Dark */
@@ -125,6 +142,9 @@
     --dz-btn-warning-bg: #E0B341;
     --secondary-text-color: #B0B0B0;
     --dz-sun-color: #8E8E8E;
+    --dz-elev-card: 0 1px 4px rgba(0,0,0,0.50);
+    --dz-elev-popup: 0 2px 6px rgba(0,0,0,0.56);
+    --dz-elev-overlay: 0 3px 10px rgba(0,0,0,0.60);
 }
 
 /* Gruvbox Light */
@@ -145,6 +165,9 @@
     --dz-btn-warning-bg: #b57614;
     --secondary-text-color: #504945;
     --dz-sun-color: #8c730e;
+    --dz-elev-card: 0 1px 4px rgba(0,0,0,0.25);
+    --dz-elev-popup: 0 2px 6px rgba(0,0,0,0.28);
+    --dz-elev-overlay: 0 3px 10px rgba(0,0,0,0.30);
 }
 
 /* Gruvbox Dark */
@@ -165,4 +188,7 @@
     --dz-btn-warning-bg: #fabd2f;
     --secondary-text-color: #bdae93;
     --dz-sun-color: #fad232;
+    --dz-elev-card: 0 1px 4px rgba(0,0,0,0.50);
+    --dz-elev-popup: 0 2px 6px rgba(0,0,0,0.56);
+    --dz-elev-overlay: 0 3px 10px rgba(0,0,0,0.60);
 }

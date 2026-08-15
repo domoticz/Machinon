@@ -12,6 +12,32 @@
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="stylesheet" href="tokens.css">
+<script>
+/* Stamps data-scheme before first paint. This has to be an inline, blocking
+   script in <head>: app.js is deferred, so it cannot run until after the
+   document is parsed, and an external script here would still cost a round
+   trip. Without this, tokens.css's :root paints Machinon Light for one frame
+   and a visitor whose stored scheme (or OS preference) is dark sees a white
+   flash, on the one feature the page is selling.
+
+   app.js re-applies the same value on load, which is a no-op.
+
+   The id list below is duplicated in three places on purpose (here, the
+   <select> options further down, and SCHEMES in app.js) because this script
+   must not depend on either of them being parsed yet. Change one, change all
+   three. scripts/check-site.py compares them against tokens.css. */
+(function () {
+    var IDS = ['machinon-light', 'machinon-dark', 'magenta-light', 'magenta-dark',
+               'paper-light', 'paper-dark', 'gruvbox-light', 'gruvbox-dark'];
+    var stored = null;
+    try { stored = localStorage.getItem('machinon_site_scheme'); } catch (e) { stored = null; }
+    if (IDS.indexOf(stored) === -1) {
+        stored = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+            ? 'machinon-dark' : 'machinon-light';
+    }
+    document.documentElement.setAttribute('data-scheme', stored);
+}());
+</script>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -30,6 +56,9 @@
     </nav>
     <label class="scheme-control">
       <span class="visually-hidden">Color scheme</span>
+      <!-- These eight values must match the [data-scheme] blocks in tokens.css,
+           the IDS array in the pre-paint script above, and SCHEMES in app.js.
+           scripts/check-site.py enforces the first of those. -->
       <select id="scheme-picker">
         <option value="machinon-light">Machinon Light</option>
         <option value="machinon-dark">Machinon Dark</option>
@@ -57,12 +86,12 @@
         <a class="btn btn-outline" href="docs/">Documentation</a>
         <a class="btn btn-outline" href="https://github.com/domoticz/Machinon" target="_blank" rel="noopener noreferrer">GitHub</a>
       </div>
-      <p class="hero-hint">Every colour on this page is the theme's own. Change the scheme in the
+      <p class="hero-hint">Every color on this page is the theme's own. Change the scheme in the
         top right and watch.</p>
     </div>
     <figure class="hero-shot">
       <img id="hero-screenshot" src="docs/screenshots/dashboard-light.png"
-           alt="The Machinon dashboard showing device cards in the light scheme" width="1600" height="900">
+           alt="The Machinon dashboard showing device cards in the light scheme" width="1440" height="900">
     </figure>
   </section>
 
@@ -138,6 +167,11 @@
       <p class="section-desc">Every shipped scheme holds body text at WCAG AA or better. Click one
         to apply it to this page.</p>
     </div>
+    <noscript>
+      <p class="noscript-note">The swatches and the scheme picker need JavaScript,
+        so they are empty here. All eight schemes are pictured and described in the
+        <a href="docs/">manual</a>, and the theme itself does not depend on this page.</p>
+    </noscript>
     <div class="scheme-grid" id="scheme-grid"></div>
   </section>
 
@@ -150,7 +184,7 @@
         maintenance actions. Most rows carry a live preview of what they change.</p>
     </div>
     <figure class="showcase-shot">
-      <img src="docs/screenshots/theme-hub.png" alt="The Machinon Theme Hub settings page" loading="lazy">
+      <img src="docs/screenshots/theme-hub.png" width="1440" height="900" alt="The Machinon Theme Hub settings page" loading="lazy">
     </figure>
   </section>
 
@@ -162,7 +196,7 @@
         Theme Hub. Pick a pack, or set individual devices by hand.</p>
     </div>
     <figure class="showcase-shot">
-      <img src="docs/screenshots/icon-packs.png" alt="The icon pack installer in the Theme Hub" loading="lazy">
+      <img src="docs/screenshots/icon-packs.png" width="1440" height="900" alt="The icon pack installer in the Theme Hub" loading="lazy">
     </figure>
   </section>
 
@@ -172,12 +206,12 @@
       <h2>Made for the phone on the counter</h2>
     </div>
     <div class="phone-grid">
-      <figure class="phone"><img src="docs/screenshots/mobile-dashboard.png" alt="The dashboard on a phone, cards stacked in one column" loading="lazy"><figcaption>Dashboard</figcaption></figure>
-      <figure class="phone"><img src="docs/screenshots/mobile-dashboard-compact.png" alt="The compact mobile dashboard listing favourite devices as rows" loading="lazy"><figcaption>Compact dashboard</figcaption></figure>
-      <figure class="phone"><img src="docs/screenshots/mobile-switches.png" alt="The Switches page on a phone" loading="lazy"><figcaption>Switches</figcaption></figure>
-      <figure class="phone"><img src="docs/screenshots/mobile-temperature.png" alt="The Temperature page on a phone" loading="lazy"><figcaption>Temperature</figcaption></figure>
-      <figure class="phone"><img src="docs/screenshots/mobile-utility.png" alt="The Utility page on a phone" loading="lazy"><figcaption>Utility</figcaption></figure>
-      <figure class="phone"><img src="docs/screenshots/mobile-device-graph.png" alt="A device log chart scaled to a phone screen" loading="lazy"><figcaption>Device log</figcaption></figure>
+      <figure class="phone"><img src="docs/screenshots/mobile-dashboard.png" width="390" height="844" alt="The dashboard on a phone, cards stacked in one column" loading="lazy"><figcaption>Dashboard</figcaption></figure>
+      <figure class="phone"><img src="docs/screenshots/mobile-dashboard-compact.png" width="390" height="844" alt="The compact mobile dashboard listing favorite devices as rows" loading="lazy"><figcaption>Compact dashboard</figcaption></figure>
+      <figure class="phone"><img src="docs/screenshots/mobile-switches.png" width="390" height="844" alt="The Switches page on a phone" loading="lazy"><figcaption>Switches</figcaption></figure>
+      <figure class="phone"><img src="docs/screenshots/mobile-temperature.png" width="390" height="844" alt="The Temperature page on a phone" loading="lazy"><figcaption>Temperature</figcaption></figure>
+      <figure class="phone"><img src="docs/screenshots/mobile-utility.png" width="390" height="844" alt="The Utility page on a phone" loading="lazy"><figcaption>Utility</figcaption></figure>
+      <figure class="phone"><img src="docs/screenshots/mobile-device-graph.png" width="390" height="844" alt="A device log chart scaled to a phone screen" loading="lazy"><figcaption>Device log</figcaption></figure>
     </div>
   </section>
 

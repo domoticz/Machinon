@@ -2,6 +2,7 @@
 """Self-tests for gen-site-tokens.py. Run: python3 -m pytest scripts/test_gen_site_tokens.py -q"""
 import importlib.util
 import pathlib
+import re
 
 _SPEC = importlib.util.spec_from_file_location(
     "gen_site_tokens", pathlib.Path(__file__).parent / "gen-site-tokens.py"
@@ -86,3 +87,37 @@ def test_scheme_ids_order_starts_with_the_two_base_schemes():
     assert ids[1] == "machinon-dark"
     assert len(ids) == 8
     assert "magenta-dark" in ids
+
+
+def test_elevation_rides_the_base_fallthrough():
+    """dark.css deepens every elevation alpha, and the site must inherit that.
+
+    No scheme JSON carries an elevation key, so these three reach a scheme only
+    by falling through from its base. If SCHEME_KEY_TO_TOKENS ever grew an
+    elevation entry, or the trio dropped out of SITE_TOKENS, the landing page
+    would go back to painting light-scheme shadows on a dark underlay, which is
+    the bug this guards.
+    """
+    light, dark = gen._bases()
+    assert light["--dz-elev-card"] == "0 1px 4px rgba(0,0,0,0.25)"
+    assert dark["--dz-elev-card"] == "0 1px 4px rgba(0,0,0,0.50)"
+
+    for token in ("--dz-elev-card", "--dz-elev-popup", "--dz-elev-overlay"):
+        assert token in gen.SITE_TOKENS
+        assert token not in [t for ts in gen.SCHEME_KEY_TO_TOKENS.values() for t in ts]
+        # A dark-based scheme overlaying its colours must not disturb elevation.
+        assert gen.resolve_scheme(dark, {"main_color": "#83a598"})[token] == dark[token]
+
+
+def test_generated_css_gives_every_dark_scheme_the_deepened_alpha():
+    css = gen.build()
+    blocks = dict(
+        (name, body)
+        for name, body in re.findall(
+            r'\[data-scheme="([a-z-]+)"\][^{]*\{(.*?)\}', css, re.S
+        )
+    )
+    assert len(blocks) == 8
+    for name, body in blocks.items():
+        expected = "0.50" if name.endswith("-dark") else "0.25"
+        assert "--dz-elev-card: 0 1px 4px rgba(0,0,0,{});".format(expected) in body, name

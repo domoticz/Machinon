@@ -11,7 +11,10 @@
     var STORAGE_KEY = 'machinon_site_scheme';
 
     /* Scheme ids and labels must match the [data-scheme] blocks in tokens.css.
-       scripts/check-site.py enforces that they do. */
+       scripts/check-site.py enforces that they do. The same ids also appear in
+       the <select> options and in the pre-paint IDS array inline in index.html's
+       <head>, which stamps data-scheme before this deferred file can run.
+       Change one, change all three. */
     var SCHEMES = [
         { id: 'machinon-light', label: 'Machinon Light', base: 'light' },
         { id: 'machinon-dark', label: 'Machinon Dark', base: 'dark' },
@@ -135,17 +138,39 @@
         }
     }
 
+    /* Flashes a word on the button and puts the original back. The label is
+       captured from data-label, never from textContent: reading textContent
+       inside the async callback meant a second click during the 1500ms window
+       captured "Copied" and restored that permanently. Re-arming the timer on
+       every click keeps rapid clicks from stacking restores. */
+    function flashLabel(button, word) {
+        button.textContent = word;
+        if (button._resetTimer) { clearTimeout(button._resetTimer); }
+        button._resetTimer = setTimeout(function () {
+            button.textContent = button.getAttribute('data-label');
+            button._resetTimer = null;
+        }, 1500);
+    }
+
     function wireCopyButtons() {
         var buttons = document.querySelectorAll('.copy-btn');
         for (var i = 0; i < buttons.length; i++) {
+            buttons[i].setAttribute('data-label', buttons[i].textContent);
             buttons[i].addEventListener('click', function (event) {
                 var button = event.currentTarget;
                 var text = button.getAttribute('data-copy') || '';
-                if (!navigator.clipboard) { return; }
+                /* No clipboard API (or an insecure origin, where it is absent):
+                   say so instead of failing silently. The command is on screen
+                   directly above the button, so it can still be selected. */
+                if (!navigator.clipboard) {
+                    flashLabel(button, 'Select it');
+                    return;
+                }
                 navigator.clipboard.writeText(text).then(function () {
-                    var original = button.textContent;
-                    button.textContent = 'Copied';
-                    setTimeout(function () { button.textContent = original; }, 1500);
+                    flashLabel(button, 'Copied');
+                }, function () {
+                    /* Permission denied or document not focused. */
+                    flashLabel(button, 'Press Ctrl+C');
                 });
             });
         }
