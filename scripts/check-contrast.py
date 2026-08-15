@@ -23,18 +23,24 @@ glyph ARE in scope, at the WCAG 1.4.11 non-text 3:1 floor, because
 dz-tokens.css itself documents that the theme's real card icons are held to
 that floor and this page's cards claim to be the theme's real cards.
 
-The demo's .switch is explicitly NOT audited here even though it is also a
-UI component: it is a simplified <span>/<button> mockup of the real
-checkbox-and-slider control in css/switch.css, which paints its track as
-rgba(var(--dz-accent-values), 0.2 or 0.5), not a flat token. The site
-reimplements it with a flat --dz-status-disabled fill that carries no
-matching "clears 1.4.11" claim anywhere in this repo the way the card icons
-do, and it measures under 3:1 against --dz-widget-bg in five of eight
-schemes. That is a real, separate finding, not a site-vs-theme colour
-mismatch this generator-mirroring page is built to catch; it belongs in a
-follow-up rather than being swept into this pair list or silently
-allowlisted alongside the one finding this file's owner has already ruled
-on.
+The .switch toggle IS audited here, as of the site's fix in commit f58e565
+that made it a faithful copy of css/switch.css instead of an invented
+approximation (it used to have a flat --dz-status-disabled track and a
+--dz-widget-bg knob; neither token appears in the real control at all). The
+real control deliberately carries its perceivability on the KNOB, a
+text-grade colour (--secondary-text-color off, --dz-accent-color on) with an
+--dz-elev-card drop shadow, and leaves the TRACK a faint accent tint (0.2
+off, 0.5 on) that is not meant to read as a hard edge on its own. Checked
+against WCAG 1.4.11 literally, the track-vs-card and on-knob-vs-on-track
+pairs both measure under 3:1 in most schemes (the two colours are the same
+hue at different alphas, so at low alpha they cannot really separate) - but
+these are the theme's OWN values, faithfully reproduced, not a site defect,
+so they are named ALLOWLIST entries rather than silently dropped or
+gated. What actually carries the component's perceivability, and IS gated
+un-allowlisted, is knob-vs-card: the 20x20 knob overhangs a 40x15 track at
+both ends, so most of its visible boundary sits against the card, not the
+track, and its colour is what identifies open/closed by both hue and
+position. That pair clears 3:1 in all eight schemes, worst case 4.31:1.
 
 Thresholds (WCAG 2.1): 4.5:1 for body text, 3.0:1 for large text (>= 24px,
 or >= 18.66px i.e. 14pt at bold weight) and for non-text UI boundaries
@@ -71,6 +77,53 @@ ALLOWLIST = {
         "as a theme colour issue, not fixed by changing the site."
     ),
 }
+
+# The switch track is a faint accent tint at rest (css/switch.css lines
+# 30-60, copied faithfully in site/style.css as of commit f58e565), not a
+# flat colour, and its two states are the same hue at different alphas: they
+# cannot fully separate from their own background at any alpha. Both are the
+# theme's real values, not a site invention, and the control's actual
+# perceivability rides the un-allowlisted knob-vs-card pairs below (module
+# docstring has the full argument). Named per scheme, like the #bigtext
+# entry above, rather than generated from one blanket "all schemes" list,
+# precisely because it is NOT all schemes for the second pair: paper-light
+# clears 3:1 on its own (4.98:1), so it is left off and shows as a plain
+# PASS. A scheme that regresses either pair reads as a genuine new failure,
+# never masked by a listing wider than what is actually known-and-accepted.
+_SWITCH_TRACK_FAILS_IN = (
+    # Fails in all eight schemes (worst 1.31:1, machinon-light).
+    "machinon-light", "machinon-dark",
+    "magenta-light", "magenta-dark",
+    "paper-light", "paper-dark",
+    "gruvbox-light", "gruvbox-dark",
+)
+for _scheme_id in _SWITCH_TRACK_FAILS_IN:
+    ALLOWLIST[(_scheme_id, "switch off track on card")] = (
+        "known theme value, not a site defect: css/switch.css's own "
+        "rgba(accent, 0.2) track tint, measured under 3:1 against the card "
+        "in every scheme. The control's perceivability rides the knob, "
+        "gated separately and un-allowlisted below."
+    )
+del _scheme_id
+
+_SWITCH_ON_KNOB_FAILS_IN = (
+    # Fails in seven of eight (worst 1.99:1, gruvbox-dark); paper-light is
+    # NOT here, since it clears 3:1 on its own (4.98:1).
+    "machinon-light", "machinon-dark",
+    "magenta-light", "magenta-dark",
+    "paper-dark",
+    "gruvbox-light", "gruvbox-dark",
+)
+for _scheme_id in _SWITCH_ON_KNOB_FAILS_IN:
+    ALLOWLIST[(_scheme_id, "switch on-state knob on on-track")] = (
+        "known theme value, not a site defect: the on-state knob "
+        "(--dz-accent-color) against its own on-track tint (rgba(accent, "
+        "0.5)), the same hue at two alphas, which cannot fully separate. "
+        "css/switch.css's own combination. The control's perceivability "
+        "rides the knob-vs-card pair, gated separately and un-allowlisted "
+        "below."
+    )
+del _scheme_id
 
 
 def parse_token_blocks(css_text):
@@ -177,6 +230,14 @@ WIDGET_TEXT = ("token", "--dz-widget-text")
 SECONDARY_TEXT = ("token", "--secondary-text-color")
 ACCENT_TEXT = ("token", "--dz-accent-text")
 ACCENT = ("token", "--dz-accent-color")
+
+# .switch (site/style.css, a faithful copy of css/switch.css lines 10-60,
+# commit f58e565). The track is a low-alpha accent tint at rest, not a flat
+# colour, so it needs the same compositing as the code/note tints above.
+SWITCH_TRACK_OFF = ("composite", 0.2, ("triplet", "--dz-accent-values"), WIDGET)
+SWITCH_TRACK_ON = ("composite", 0.5, ("triplet", "--dz-accent-values"), WIDGET)
+SWITCH_KNOB_OFF = SECONDARY_TEXT
+SWITCH_KNOB_ON = ACCENT
 
 # Each pair: (label, foreground spec, background spec, category, source note)
 # "normal" -> 4.5:1, "large" -> 3.0:1, "non-text" -> 3.0:1 (WCAG 1.4.11).
@@ -406,6 +467,46 @@ PAIRS = [
         NAV,
         "normal",
         ".footer-credits a",
+    ),
+    # .switch, all non-text (WCAG 1.4.11). The two ALLOWLISTED entries below
+    # are the theme's own low-alpha track values, not a site defect: see the
+    # module docstring. The three un-allowlisted entries are what the switch
+    # actually leans on to be perceivable, and are real gates: if any of
+    # these drops under 3:1, that IS a build failure.
+    (
+        "switch off track on card",
+        SWITCH_TRACK_OFF,
+        WIDGET,
+        "non-text",
+        ".switch (rest)",
+    ),
+    (
+        "switch on-state knob on on-track",
+        SWITCH_KNOB_ON,
+        SWITCH_TRACK_ON,
+        "non-text",
+        ".switch.is-on .switch-knob on .switch.is-on",
+    ),
+    (
+        "switch off-state knob on off-track",
+        SWITCH_KNOB_OFF,
+        SWITCH_TRACK_OFF,
+        "non-text",
+        ".switch-knob on .switch (rest)",
+    ),
+    (
+        "switch off-state knob on card",
+        SWITCH_KNOB_OFF,
+        WIDGET,
+        "non-text",
+        ".switch-knob overhang on .device-card (rest)",
+    ),
+    (
+        "switch on-state knob on card",
+        SWITCH_KNOB_ON,
+        WIDGET,
+        "non-text",
+        ".switch.is-on .switch-knob overhang on .device-card",
     ),
 ]
 

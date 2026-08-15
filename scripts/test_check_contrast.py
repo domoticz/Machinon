@@ -143,15 +143,35 @@ def test_evaluate_respects_the_allowlist():
     assert rows[0][5] is True  # allowlisted flag
 
 
-def test_the_real_site_tokens_pass_with_only_the_known_allowlisted_finding():
+def test_the_real_site_tokens_pass_with_only_the_known_allowlisted_findings():
     """Integration check: run the real pair list against the real
     site/tokens.css. This is what scripts/check-contrast.py itself asserts;
     repeating it here means a change that breaks the gate breaks a fast
-    pytest run too, not just a separate script invocation."""
+    pytest run too, not just a separate script invocation.
+
+    16 allowlisted rows: the one #bigtext finding, the switch off-track-on-
+    card finding in all 8 schemes, and the switch on-knob-on-on-track
+    finding in 7 of 8 (paper-light passes that one on its own, 4.98:1, and
+    is deliberately not allowlisted)."""
     schemes = check.parse_token_blocks(check.TOKENS.read_text())
     rows, failures = check.evaluate(schemes)
     assert failures == []
     allowlisted = [row for row in rows if row[5]]
-    assert len(allowlisted) == 1
-    assert allowlisted[0][0] == "gruvbox-dark"
-    assert allowlisted[0][1] == "device value (#bigtext) on device card"
+    assert len(allowlisted) == 16
+
+    bigtext = [row for row in allowlisted if row[1] == "device value (#bigtext) on device card"]
+    assert [row[0] for row in bigtext] == ["gruvbox-dark"]
+
+    track = [row for row in allowlisted if row[1] == "switch off track on card"]
+    assert len(track) == 8
+
+    on_knob = [row for row in allowlisted if row[1] == "switch on-state knob on on-track"]
+    assert len(on_knob) == 7
+    assert "paper-light" not in [row[0] for row in on_knob]
+
+    # The pairs that actually carry the switch's WCAG 1.4.11 perceivability
+    # are un-allowlisted and must be genuinely passing, not just excluded.
+    carrying_pairs = ("switch off-state knob on card", "switch on-state knob on card")
+    for row in rows:
+        if row[1] in carrying_pairs:
+            assert row[4] is True, "{} must pass on its own merit".format(row)
