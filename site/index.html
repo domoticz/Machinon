@@ -99,11 +99,9 @@
     <div class="section-head">
       <span class="section-label">Live, not a screenshot</span>
       <h2>Real Machinon cards</h2>
-      <p class="section-desc">These four use the theme's own card grid and design tokens: the
-        48px icon column, the value in the accent color at the top right, the status row under
-        it, and the timestamp and tools along the bottom. A sensor, a switch, a dimmer and a
-        counter, which are four of the shapes the theme draws. Pick any scheme above and they
-        repaint with the rest of the page.</p>
+      <p class="section-desc">Built on the theme's own card grid, from the same design tokens it
+        ships. Pick any scheme above and they repaint with the rest of the page. Open the garage
+        door to see an icon swap to its other state.</p>
     </div>
     <div class="device-grid">
 
@@ -150,6 +148,34 @@
         <span class="dc-lastupdate">1 minute ago</span>
         <span class="dc-tools"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 13h2V7H2zm4 0h2V3H6zm4 0h2V9h-2zm4 0h1.5V5H14z"/></svg><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2a6 6 0 100 12A6 6 0 008 2zm0 1.5A4.5 4.5 0 118 12.5 4.5 4.5 0 018 3.5zm-.75 1.75v3.5l3 1.8.75-1.25-2.25-1.35V5.25z"/></svg></span>
       </article>
+
+      <article class="device-card" id="garage-card">
+        <span class="dc-name">Garage door</span>
+        <span class="dc-bigtext" data-garage-value>Closed</span>
+        <span class="dc-options"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg></span>
+        <span class="dc-img">
+          <img src="assets/icons/machinon_Garage48_On.png" alt="" width="40" height="40" data-garage-on hidden>
+          <img src="assets/icons/machinon_Garage48_Off.png" alt="" width="40" height="40" data-garage-off>
+        </span>
+        <span class="dc-status">
+          <span class="dc-level" data-garage-status aria-live="polite">Contact closed</span>
+          <button type="button" class="switch" id="garage-toggle" aria-pressed="false" aria-label="Garage door" disabled><span class="switch-knob"></span></button>
+        </span>
+        <span class="dc-favorite"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.6l1.9 4 4.4.6-3.2 3.1.8 4.4L8 11.6l-3.9 2.1.8-4.4L1.7 6.2l4.4-.6z"/></svg></span>
+        <span class="dc-lastupdate" data-garage-stamp>6 minutes ago</span>
+        <span class="dc-tools"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 13h2V7H2zm4 0h2V3H6zm4 0h2V9h-2zm4 0h1.5V5H14z"/></svg><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2a6 6 0 100 12A6 6 0 008 2zm0 1.5A4.5 4.5 0 118 12.5 4.5 4.5 0 018 3.5zm-.75 1.75v3.5l3 1.8.75-1.25-2.25-1.35V5.25z"/></svg></span>
+      </article>
+
+      <article class="device-card">
+        <span class="dc-name">Batcave</span>
+        <span class="dc-bigtext">On</span>
+        <span class="dc-options"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg></span>
+        <span class="dc-img"><img src="assets/icons/machinon_Batman48_On.png" alt="Batcave scene icon" width="40" height="40" loading="lazy"></span>
+        <span class="dc-status"><span class="switch is-on" role="img" aria-label="On"><span class="switch-knob"></span></span></span>
+        <span class="dc-favorite"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.6l1.9 4 4.4.6-3.2 3.1.8 4.4L8 11.6l-3.9 2.1.8-4.4L1.7 6.2l4.4-.6z"/></svg></span>
+        <span class="dc-lastupdate">22 minutes ago</span>
+        <span class="dc-tools"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 13h2V7H2zm4 0h2V3H6zm4 0h2V9h-2zm4 0h1.5V5H14z"/></svg><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2a6 6 0 100 12A6 6 0 008 2zm0 1.5A4.5 4.5 0 118 12.5 4.5 4.5 0 018 3.5zm-.75 1.75v3.5l3 1.8.75-1.25-2.25-1.35V5.25z"/></svg></span>
+      </article>
     </div>
   </section>
 
@@ -162,7 +188,7 @@
       <article class="feature-card"><h3>8 color schemes</h3><p>Machinon, Gruvbox, Magenta and Paper, each with a light and a dark variant, so the whole interface follows your preference.</p></article>
       <article class="feature-card"><h3>36 settings, one page</h3><p>Every theme setting on one page inside Domoticz, reachable from the Setup menu once the theme is active.</p></article>
       <article class="feature-card"><h3>Custom colors</h3><p>Design your own palette in the Colors and schemes tab and save it as a preset, with contrast checked as you go.</p></article>
-      <article class="feature-card"><h3>Refreshed icons</h3><p>Redrawn device icons with optional icon packs, installed straight from the Theme Hub.</p></article>
+      <article class="feature-card"><h3>267 device icons</h3><p>Three styles, on and off states, installed individually per device from the Theme Hub. Request more on GitHub.</p></article>
       <article class="feature-card"><h3>Mobile layouts</h3><p>Dashboards, menus and dialogs adapt to small screens instead of just shrinking the desktop layout.</p></article>
       <article class="feature-card"><h3>Card based</h3><p>Devices sit in a responsive grid you can reorder by dragging, with card width under your control.</p></article>
       <article class="feature-card"><h3>Settings that stick</h3><p>Choices persist per user or across the whole instance, so a shared tablet and your phone can differ.</p></article>
@@ -201,9 +227,11 @@
   <section class="showcase" id="icons">
     <div class="section-head">
       <span class="section-label">Icon packs</span>
-      <h2>Icons that match your scheme</h2>
-      <p class="section-desc">Redrawn device icons in three styles, installed from inside the
-        Theme Hub. Pick a pack, or set individual devices by hand.</p>
+      <h2>267 icons, installed one at a time</h2>
+      <p class="section-desc">A browsable library in three styles, Blue UI, Color and Fun, each
+        icon drawn for both its on and off state. Install just the ones you want onto individual
+        devices, straight from the Theme Hub. Missing one?
+        <a href="https://github.com/domoticz/Machinon/issues/new?template=icon_request.yml" target="_blank" rel="noopener noreferrer">Request it on GitHub</a>.</p>
     </div>
     <figure class="showcase-shot">
       <img src="docs/screenshots/icon-packs.png" width="1440" height="900" alt="The icon pack installer in the Theme Hub" loading="lazy">

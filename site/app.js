@@ -114,6 +114,55 @@
         });
     }
 
+    /* The garage card is the only interactive demo. One click proves three
+       things at once: the card is the theme's real layout, the icon library
+       carries per-state artwork, and icons are chosen per device.
+
+       Both PNGs are already in the DOM with one hidden, so the swap is a
+       display toggle and never waits on a fetch. site/style.css carries the
+       img[hidden] rule that makes hiding an <img> work at all here. */
+    function wireGarageCard() {
+        var card = byId('garage-card');
+        var button = byId('garage-toggle');
+        if (!card || !button) { return; }
+
+        var onImg = card.querySelector('[data-garage-on]');
+        var offImg = card.querySelector('[data-garage-off]');
+        var value = card.querySelector('[data-garage-value]');
+        var status = card.querySelector('[data-garage-status]');
+        var stamp = card.querySelector('[data-garage-stamp]');
+        if (!onImg || !offImg || !value || !status || !stamp) { return; }
+
+        /* Ships disabled in the markup so a JS-less visitor gets an inert,
+           unfocusable control rather than a live one that does nothing. */
+        button.disabled = false;
+
+        var STATES = {
+            open: { value: 'Open', status: 'Contact open' },
+            closed: { value: 'Closed', status: 'Contact closed' }
+        };
+
+        function render(isOpen) {
+            var state = isOpen ? STATES.open : STATES.closed;
+            button.setAttribute('aria-pressed', isOpen ? 'true' : 'false');
+            /* .is-on is what paints the track on the accent, same class the
+               static switches use. */
+            if (isOpen) { button.classList.add('is-on'); }
+            else { button.classList.remove('is-on'); }
+            onImg.hidden = !isOpen;
+            offImg.hidden = isOpen;
+            value.textContent = state.value;
+            status.textContent = state.status;
+            stamp.textContent = 'just now';
+        }
+
+        /* A <button> fires click for Enter and Space already, so keyboard
+           support needs no extra key handling. */
+        button.addEventListener('click', function () {
+            render(button.getAttribute('aria-pressed') !== 'true');
+        });
+    }
+
     function wirePicker() {
         var picker = byId('scheme-picker');
         if (picker) {
@@ -180,5 +229,6 @@
     wirePicker();
     wireReveals();
     wireCopyButtons();
+    wireGarageCard();
     applyScheme(defaultScheme());
 }());

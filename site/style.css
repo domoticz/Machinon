@@ -74,6 +74,11 @@ body {
 }
 
 img { max-width: 100%; height: auto; display: block; }
+/* `img { display: block }` above out-specifies the UA sheet's
+   `[hidden] { display: none }`, so a hidden <img> would still paint. The
+   garage card keeps both state PNGs in the DOM and hides one, so this rule
+   is what makes that work at all. */
+img[hidden] { display: none; }
 code, pre { font-family: var(--site-font-mono); }
 
 .visually-hidden {
@@ -361,16 +366,25 @@ main > section[id] { scroll-margin-top: 4.5rem; }
     margin: 0 auto;
     padding: 0 1.25rem;
     display: grid;
-    /* Track max is 500px, not 1fr: with 1fr a single card at a ~600px viewport
-       stretched to 560px, past the theme's own card_max_width. min(320px, 100%)
-       is what keeps the 320px floor from forcing a horizontal scrollbar below a
-       320px viewport. */
-    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 500px));
-    justify-content: center;
+    /* The track max stays 1fr and the 500px cap lives on the CARD, which is not
+       interchangeable. css-grid-1 7.2.3.1 sizes an auto-repeat by the track's
+       MAX function when that is definite, so minmax(320px, 500px) computes
+       floor((960 + 20) / (500 + 20)) = ONE column and the strip collapses to a
+       single card per row. With 1fr the max is indefinite, the count falls back
+       to the 320px min, and 960px gives the intended two. min(320px, 100%)
+       keeps that floor from forcing a horizontal scrollbar under a 320px
+       viewport. Measured, not derived: see the round-3 report. */
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+    justify-items: center;
     gap: 1.25rem;
 }
 
 .device-card {
+    /* theme.json's card_max_width. Capping the card rather than the track is
+       what lets a lone card at a ~600px viewport stay 500px instead of
+       stretching to 560px, without breaking the column count above. */
+    width: 100%;
+    max-width: 500px;
     display: grid;
     grid-template-rows: auto minmax(var(--site-card-row-status-min), 1fr)
                         minmax(0, var(--site-card-row-lastupdate-h));
@@ -502,6 +516,19 @@ main > section[id] { scroll-margin-top: 4.5rem; }
 .dc-favorite svg,
 .dc-tools svg { display: block; fill: currentColor; }
 
+/* The garage card stacks both state icons in the 48px cell and hides one, so
+   the first toggle never waits on a network fetch. Only one is ever visible, so
+   no positioning is needed; `img[hidden]` above does the work. */
+
+/* Status row content: the label and its control sit on one line, right aligned
+   like the theme's own status cell. */
+.dc-status {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--site-card-space-sm);
+}
+
 /* Toggle: the theme's switch idiom, tokenised. Sits in the status row. */
 .switch {
     position: relative;
@@ -511,6 +538,19 @@ main > section[id] { scroll-margin-top: 4.5rem; }
     border-radius: 12px;
     background: var(--dz-status-disabled);
     vertical-align: middle;
+}
+
+/* The garage toggle is a real <button>, so it needs the UA chrome removed
+   while keeping the same switch geometry as the static ones. Focus visibility
+   comes from the shared button:focus-visible ring near the top of this file. */
+button.switch:disabled { cursor: default; }
+
+button.switch {
+    padding: 0;
+    border: 0;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 .switch.is-on { background: var(--dz-accent-color); }
@@ -952,6 +992,9 @@ main > section[id] { scroll-margin-top: 4.5rem; }
                     border-color 0.2s ease, transform 0.2s ease,
                     box-shadow 0.2s ease;
     }
+
+    .switch { transition: background-color 0.2s ease; }
+    .switch-knob { transition: left 0.2s ease; }
 
     .btn:hover { transform: translateY(-1px); }
     .feature-card:hover { transform: translateY(-3px); box-shadow: var(--dz-elev-overlay); }
