@@ -432,6 +432,13 @@ grid's tracks are `fr`/`minmax` and absorb taller text.
 | icon md (`--dz-icon-size-md`) | 24px | Header buttons, card options |
 | icon lg (`--dz-icon-size-lg`) | 30px | Search icon, dialog close glyphs |
 
+**Site-only display tier (not theme tokens).** The GitHub Pages landing page under `site/`
+declares three additional sizes, `--site-text-display-sm/md/lg` at 32 / 40 / 56px, because a
+marketing hero cannot be carried by a 26px maximum. They are declared in `site/style.css`,
+they are not `--dz-*` tokens, and they must never be used by theme CSS. `check-typography.sh`
+governs `custom.css` and `css/*.css` only, so `site/` sits outside it by design rather than
+by omission.
+
 **Semantic aliases.** `--dz-text-lg` is never consumed directly; three aliases name what the
 text *is*, so a size decision cannot leak between unrelated surfaces:
 

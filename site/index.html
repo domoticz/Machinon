@@ -1,13 +1,265 @@
 <!DOCTYPE html>
-<html lang="en" data-scheme="machinon-light">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Machinon</title>
+<title>Machinon: a modern theme for Domoticz</title>
+<meta name="description" content="Machinon gives your Domoticz dashboard a clean, modern look, with matching light and dark modes, a choice of color schemes, a refreshed icon set, and one settings page for all of it.">
+<meta property="og:title" content="Machinon">
+<meta property="og:description" content="A modern theme for Domoticz">
+<meta property="og:image" content="assets/social-preview.png">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="style.css">
 </head>
-<body style="background: var(--dz-body-bg); color: var(--dz-body-text); font-family: sans-serif; padding: 2rem;">
-<h1>Machinon</h1>
-<p>Assembly works. <a href="docs/" style="color: var(--dz-accent-color);">Documentation</a></p>
+<body>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="wordmark" href="./">Machinon</a>
+    <nav class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#schemes">Schemes</a>
+      <a href="#hub">Theme Hub</a>
+      <a href="#icons">Icons</a>
+      <a href="#install">Install</a>
+      <a href="docs/">Docs</a>
+      <a href="https://github.com/domoticz/Machinon" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </nav>
+    <label class="scheme-control">
+      <span class="visually-hidden">Color scheme</span>
+      <select id="scheme-picker">
+        <option value="machinon-light">Machinon Light</option>
+        <option value="machinon-dark">Machinon Dark</option>
+        <option value="magenta-light">Magenta Light</option>
+        <option value="magenta-dark">Magenta Dark</option>
+        <option value="paper-light">Paper Light</option>
+        <option value="paper-dark">Paper Dark</option>
+        <option value="gruvbox-light">Gruvbox Light</option>
+        <option value="gruvbox-dark">Gruvbox Dark</option>
+      </select>
+    </label>
+  </div>
+</header>
+
+<main>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <h1>Your Domoticz dashboard, redrawn.</h1>
+      <p class="hero-sub">Machinon replaces Domoticz's default interface with a clean, card-based
+        layout: 8 color schemes in matching light and dark pairs, 3 icon packs, and 36 settings
+        on one page inside Domoticz.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#install">Install</a>
+        <a class="btn btn-outline" href="docs/">Documentation</a>
+        <a class="btn btn-outline" href="https://github.com/domoticz/Machinon" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+      <p class="hero-hint">Every colour on this page is the theme's own. Change the scheme in the
+        top right and watch.</p>
+    </div>
+    <figure class="hero-shot">
+      <img id="hero-screenshot" src="docs/screenshots/dashboard-light.png"
+           alt="The Machinon dashboard showing device cards in the light scheme" width="1600" height="900">
+    </figure>
+  </section>
+
+  <section class="cards-demo" id="cards-demo">
+    <div class="section-head">
+      <span class="section-label">Live, not a screenshot</span>
+      <h2>Real Machinon cards</h2>
+      <p class="section-desc">These four are built from the same design tokens the theme ships.
+        Pick any scheme above and they repaint with the rest of the page.</p>
+    </div>
+    <div class="device-grid">
+
+      <article class="device-card">
+        <header class="device-card-head"><span class="device-name">Living room</span></header>
+        <div class="device-body">
+          <span class="device-value">21.4 &deg;C</span>
+          <span class="device-status">Humidity 48%</span>
+        </div>
+        <footer class="device-foot">2 minutes ago</footer>
+      </article>
+
+      <article class="device-card">
+        <header class="device-card-head"><span class="device-name">Kitchen lights</span></header>
+        <div class="device-body">
+          <span class="switch is-on" role="img" aria-label="On"><span class="switch-knob"></span></span>
+          <span class="device-status">On</span>
+        </div>
+        <footer class="device-foot">14 minutes ago</footer>
+      </article>
+
+      <article class="device-card">
+        <header class="device-card-head"><span class="device-name">Hallway dimmer</span></header>
+        <div class="device-body">
+          <span class="device-value">62%</span>
+          <span class="slider"><span class="slider-fill"></span><span class="slider-knob"></span></span>
+        </div>
+        <footer class="device-foot">just now</footer>
+      </article>
+
+      <article class="device-card">
+        <header class="device-card-head"><span class="device-name">Electricity</span></header>
+        <div class="device-body">
+          <span class="device-value">412 W</span>
+          <span class="device-status">Today 6.83 kWh</span>
+        </div>
+        <footer class="device-foot">1 minute ago</footer>
+      </article>
+
+    </div>
+  </section>
+
+  <section class="features" id="features">
+    <div class="section-head">
+      <span class="section-label">What you get</span>
+      <h2>Built for a dashboard you actually look at</h2>
+    </div>
+    <div class="feature-grid">
+      <article class="feature-card"><h3>8 color schemes</h3><p>Machinon, Gruvbox, Magenta and Paper, each with a light and a dark variant, so the whole interface follows your preference.</p></article>
+      <article class="feature-card"><h3>36 settings, one page</h3><p>Every theme setting on one page inside Domoticz, reachable from the Setup menu once the theme is active.</p></article>
+      <article class="feature-card"><h3>Custom colors</h3><p>Design your own palette in the Colors and schemes tab and save it as a preset, with contrast checked as you go.</p></article>
+      <article class="feature-card"><h3>Refreshed icons</h3><p>Redrawn device icons with optional icon packs, installed straight from the Theme Hub.</p></article>
+      <article class="feature-card"><h3>Mobile layouts</h3><p>Dashboards, menus and dialogs adapt to small screens instead of just shrinking the desktop layout.</p></article>
+      <article class="feature-card"><h3>Card based</h3><p>Devices sit in a responsive grid you can reorder by dragging, with card width under your control.</p></article>
+      <article class="feature-card"><h3>Settings that stick</h3><p>Choices persist per user or across the whole instance, so a shared tablet and your phone can differ.</p></article>
+      <article class="feature-card"><h3>Fast to load</h3><p>Releases ship as one flattened stylesheet, which matters most on slower connections and wall panels.</p></article>
+    </div>
+  </section>
+
+  <section class="schemes" id="schemes">
+    <div class="section-head">
+      <span class="section-label">Eight schemes</span>
+      <h2>Pick a palette</h2>
+      <p class="section-desc">Every shipped scheme holds body text at WCAG AA or better. Click one
+        to apply it to this page.</p>
+    </div>
+    <div class="scheme-grid" id="scheme-grid"></div>
+  </section>
+
+  <section class="showcase" id="hub">
+    <div class="section-head">
+      <span class="section-label">One settings page</span>
+      <h2>The Theme Hub</h2>
+      <p class="section-desc">Nine groups covering standby, menus, the dashboard, device cards,
+        charts, background and branding, colors, icon packs, and an About tab with the theme's
+        maintenance actions. Most rows carry a live preview of what they change.</p>
+    </div>
+    <figure class="showcase-shot">
+      <img src="docs/screenshots/theme-hub.png" alt="The Machinon Theme Hub settings page" loading="lazy">
+    </figure>
+  </section>
+
+  <section class="showcase" id="icons">
+    <div class="section-head">
+      <span class="section-label">Icon packs</span>
+      <h2>Icons that match your scheme</h2>
+      <p class="section-desc">Redrawn device icons in three styles, installed from inside the
+        Theme Hub. Pick a pack, or set individual devices by hand.</p>
+    </div>
+    <figure class="showcase-shot">
+      <img src="docs/screenshots/icon-packs.png" alt="The icon pack installer in the Theme Hub" loading="lazy">
+    </figure>
+  </section>
+
+  <section class="mobile" id="mobile">
+    <div class="section-head">
+      <span class="section-label">Small screens</span>
+      <h2>Made for the phone on the counter</h2>
+    </div>
+    <div class="phone-grid">
+      <figure class="phone"><img src="docs/screenshots/mobile-dashboard.png" alt="The dashboard on a phone, cards stacked in one column" loading="lazy"><figcaption>Dashboard</figcaption></figure>
+      <figure class="phone"><img src="docs/screenshots/mobile-dashboard-compact.png" alt="The compact mobile dashboard listing favourite devices as rows" loading="lazy"><figcaption>Compact dashboard</figcaption></figure>
+      <figure class="phone"><img src="docs/screenshots/mobile-switches.png" alt="The Switches page on a phone" loading="lazy"><figcaption>Switches</figcaption></figure>
+      <figure class="phone"><img src="docs/screenshots/mobile-temperature.png" alt="The Temperature page on a phone" loading="lazy"><figcaption>Temperature</figcaption></figure>
+      <figure class="phone"><img src="docs/screenshots/mobile-utility.png" alt="The Utility page on a phone" loading="lazy"><figcaption>Utility</figcaption></figure>
+      <figure class="phone"><img src="docs/screenshots/mobile-device-graph.png" alt="A device log chart scaled to a phone screen" loading="lazy"><figcaption>Device log</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="install" id="install">
+    <div class="section-head">
+      <span class="section-label">Get started</span>
+      <h2>Install in a minute</h2>
+      <p class="section-desc">Needs Domoticz 2025.2 or newer, latest beta recommended.</p>
+    </div>
+    <ol class="install-steps">
+      <li>
+        <h3>Clone the dist branch</h3>
+        <p>The leanest install: just the built theme, no source files.</p>
+        <div class="code-block">
+          <div class="code-head"><span>Terminal</span><button class="copy-btn" type="button" data-copy="cd domoticz/www/styles&#10;git clone -b dist --single-branch https://github.com/domoticz/Machinon.git machinon">Copy</button></div>
+          <pre><code>cd domoticz/www/styles
+git clone -b dist --single-branch https://github.com/domoticz/Machinon.git machinon</code></pre>
+        </div>
+      </li>
+      <li>
+        <h3>Select the theme</h3>
+        <p>In Domoticz, open Setup &gt; Settings &gt; System and pick <code>machinon</code> under Theme.</p>
+      </li>
+      <li>
+        <h3>Click Apply Settings</h3>
+        <p>The choice only persists once you do. No Domoticz restart is needed.</p>
+      </li>
+      <li>
+        <h3>Hard-refresh your browser</h3>
+        <p>Ctrl+Shift+R, so the browser picks up the new files instead of the cached old ones.</p>
+      </li>
+    </ol>
+    <p class="install-note">Update later with <code>git pull</code> inside the <code>machinon</code> folder.</p>
+
+    <h3 class="install-alt-head">Other ways to install</h3>
+    <div class="install-blocks">
+      <article class="install-card">
+        <h3>Release zip</h3>
+        <p>Download <code>machinon-&lt;version&gt;.zip</code> and unzip it into <code>domoticz/www/styles/</code>. The zip already contains a <code>machinon/</code> folder.</p>
+        <p><a class="btn btn-outline btn-sm" href="https://github.com/domoticz/Machinon/releases" target="_blank" rel="noopener noreferrer">Releases</a></p>
+      </article>
+      <article class="install-card">
+        <h3>Theme Manager</h3>
+        <p>The Theme Manager plugin can install Machinon for you. It installs the full source rather than the lean dist build, so the dist branch loads faster if you do not need the plugin otherwise.</p>
+        <p><a class="btn btn-outline btn-sm" href="https://github.com/galadril/domoticz-theme-manager" target="_blank" rel="noopener noreferrer">Theme Manager</a></p>
+      </article>
+      <article class="install-card">
+        <h3>Full source</h3>
+        <p>For development. Loads around 27 separate CSS files instead of one flattened file, which is slower for everyday use.</p>
+        <div class="code-block">
+          <div class="code-head"><span>Terminal</span><button class="copy-btn" type="button" data-copy="cd domoticz/www/styles&#10;git clone https://github.com/domoticz/Machinon.git machinon">Copy</button></div>
+          <pre><code>cd domoticz/www/styles
+git clone https://github.com/domoticz/Machinon.git machinon</code></pre>
+        </div>
+      </article>
+    </div>
+    <p class="install-note">Upgrading from 1.x? The repository history was rewritten for 2.0.0, so
+      <code>git pull</code> in an old clone will fail. Delete the old <code>machinon</code> folder
+      and reinstall. Nothing needs migrating: your settings live in Domoticz, not the theme folder.</p>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span class="footer-logo">Machinon</span>
+      <p>A modern theme for Domoticz</p>
+    </div>
+    <nav class="footer-links">
+      <a href="docs/">Documentation</a>
+      <a href="https://github.com/domoticz/Machinon" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="https://github.com/domoticz/Machinon/releases" target="_blank" rel="noopener noreferrer">Releases</a>
+      <a href="https://www.domoticz.com/" target="_blank" rel="noopener noreferrer">Domoticz</a>
+      <a href="https://github.com/domoticz/Machinon/blob/master/LICENSE.txt" target="_blank" rel="noopener noreferrer">GPL-3.0</a>
+    </nav>
+  </div>
+  <p class="footer-credits">Originally created by EdddieN, now maintained by the Domoticz
+    community. Icons by <a href="https://icons8.com" target="_blank" rel="noopener noreferrer">Icons8</a>.
+    Fonts: Inter, JetBrains Mono and Ionicons.</p>
+</footer>
+
+<script src="app.js" defer></script>
 </body>
 </html>

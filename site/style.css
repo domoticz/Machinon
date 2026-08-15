@@ -1,0 +1,845 @@
+/*
+  style.css - layout and components for the Machinon landing page.
+
+  Colours come from tokens.css (generated from the theme's own schemes), so
+  nothing here declares a colour literal except the elevation shadows, which
+  are fixed by design across schemes (see DESIGN.md > Elevation).
+
+  Type: body and UI text use the theme's scale (11/12/14/16/20/26). The three
+  --site-text-display-* sizes are the documented site-only display tier; they
+  are not --dz-* tokens and must never be used by theme CSS (DESIGN.md >
+  Typography > Site-only display tier).
+*/
+
+@font-face {
+    font-family: 'Inter';
+    src: url('fonts/Inter-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Inter';
+    src: url('fonts/Inter-SemiBold.woff2') format('woff2');
+    font-weight: 600;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'JetBrains Mono';
+    src: url('fonts/JetBrainsMono-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-display: swap;
+}
+
+:root {
+    --site-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --site-font-mono: 'JetBrains Mono', ui-monospace, Consolas, Menlo, monospace;
+
+    /* Theme type scale (DESIGN.md) */
+    --site-text-micro: 0.6875rem;
+    --site-text-xs: 0.75rem;
+    --site-text-sm: 0.875rem;
+    --site-text-md: 1rem;
+    --site-text-lg: 1.25rem;
+    --site-text-xl: 1.625rem;
+
+    /* Site-only display tier: 32 / 40 / 56px. NOT theme tokens. */
+    --site-text-display-sm: 2rem;
+    --site-text-display-md: 2.5rem;
+    --site-text-display-lg: 3.5rem;
+
+    /* DESIGN.md > Border Radius */
+    --site-radius-interactive: 5px;
+    --site-radius-container: 6px;
+    --site-radius-button: 10px;
+
+    /* DESIGN.md > Elevation. Fixed by design, not scheme-dependent. */
+    --site-elev-card: 0 1px 4px rgba(0, 0, 0, 0.25);
+    --site-elev-popup: 0 2px 6px rgba(0, 0, 0, 0.28);
+    --site-elev-overlay: 0 3px 10px rgba(0, 0, 0, 0.30);
+
+    --site-max-width: 1120px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--dz-body-bg);
+    color: var(--dz-body-text);
+    font-family: var(--site-font);
+    font-size: var(--site-text-sm);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+img { max-width: 100%; height: auto; display: block; }
+code, pre { font-family: var(--site-font-mono); }
+
+.visually-hidden {
+    position: absolute;
+    width: 1px; height: 1px;
+    margin: -1px; padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+/* ---- Base ------------------------------------------------------------ */
+
+/* Not a colour, a keyword: it tells the browser which way to paint the
+   native controls it owns (the picker's dropdown list, scrollbars) so they
+   do not stay light inside a dark scheme. */
+:root { color-scheme: light; }
+[data-scheme="machinon-dark"],
+[data-scheme="magenta-dark"],
+[data-scheme="paper-dark"],
+[data-scheme="gruvbox-dark"] { color-scheme: dark; }
+
+figure { margin: 0; }
+
+h1, h2, h3 {
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+/* Inline code in prose. The tint is the accent at low alpha, so it stays a
+   tint of whatever the active scheme's accent is, including the monochrome
+   Paper schemes where it reads as a plain grey chip. */
+code {
+    font-size: var(--site-text-xs);
+    padding: 0.15em 0.4em;
+    border-radius: 3px;
+    background: rgba(var(--dz-accent-values), 0.10);
+}
+
+a:focus-visible,
+button:focus-visible,
+select:focus-visible {
+    outline: 2px solid var(--dz-accent-color);
+    outline-offset: 2px;
+}
+
+/* One container geometry, shared by every block that sits directly in a
+   section. .device-grid below declares the same numbers itself. */
+.hero,
+.section-head,
+.feature-grid,
+.scheme-grid,
+.showcase-shot,
+.phone-grid,
+.install-steps,
+.install-blocks,
+.footer-inner,
+.footer-credits {
+    max-width: var(--site-max-width);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+}
+
+main > section {
+    padding-top: 4.5rem;
+    padding-bottom: 4.5rem;
+}
+
+/* Sticky nav clearance for the in-page anchors. */
+main > section[id] { scroll-margin-top: 4.5rem; }
+
+/* Quiet banding: alternate sections sit on the nav surface instead of the
+   body surface, which is a real tonal step in all eight schemes without
+   introducing a colour that is not already in the palette. */
+.cards-demo,
+.schemes,
+.mobile { background: var(--dz-nav-bg); }
+
+/* ---- Nav ------------------------------------------------------------- */
+
+.nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--dz-nav-bg);
+    border-bottom: 1px solid var(--dz-input-border);
+}
+
+.nav-inner {
+    max-width: var(--site-max-width);
+    margin: 0 auto;
+    padding: 0.6rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.wordmark {
+    font-size: var(--site-text-lg);
+    font-weight: 600;
+    color: var(--dz-body-text);
+    text-decoration: none;
+    margin-right: auto;
+}
+
+.nav-links { display: flex; gap: 0.25rem; }
+
+.nav-links a {
+    color: var(--secondary-text-color);
+    font-size: var(--site-text-sm);
+    font-weight: 600;
+    text-decoration: none;
+    padding: 0.35rem 0.65rem;
+    border-radius: var(--site-radius-interactive);
+}
+
+.nav-links a:hover {
+    color: var(--dz-accent-text);
+    background: var(--dz-accent-color);
+}
+
+#scheme-picker {
+    font-family: inherit;
+    font-size: var(--site-text-sm);
+    color: var(--dz-body-text);
+    background: var(--dz-widget-bg);
+    border: 1px solid var(--dz-input-border);
+    border-radius: var(--site-radius-interactive);
+    padding: 0.35rem 0.5rem;
+}
+
+.scheme-control { display: flex; align-items: center; flex: 0 0 auto; }
+
+.nav-links a { white-space: nowrap; }
+
+/* ---- Buttons --------------------------------------------------------- */
+
+.btn {
+    display: inline-block;
+    padding: 0.7rem 1.5rem;
+    border-radius: var(--site-radius-button);
+    font-size: var(--site-text-xs);
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: var(--site-elev-card);
+}
+
+.btn-primary { background: var(--dz-accent-color); color: var(--dz-accent-text); }
+
+.btn-outline {
+    background: transparent;
+    color: var(--dz-accent-color);
+    border: 2px solid var(--dz-accent-color);
+    box-shadow: none;
+}
+
+.btn-sm { padding: 0.45rem 1rem; }
+
+/* Hover swaps to the filled pair rather than tinting, so it stays legible in
+   the monochrome Paper schemes where the accent has no hue to lighten. */
+.btn-outline:hover {
+    background: var(--dz-accent-color);
+    color: var(--dz-accent-text);
+}
+
+/* ---- Hero ------------------------------------------------------------ */
+
+.hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    align-items: center;
+    gap: 3rem;
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+}
+
+.hero h1 {
+    margin: 0;
+    font-size: var(--site-text-display-lg);
+    letter-spacing: -0.02em;
+}
+
+.hero-sub {
+    margin: 1.25rem 0 0;
+    max-width: 46ch;
+    font-size: var(--site-text-md);
+    color: var(--secondary-text-color);
+}
+
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2rem;
+}
+
+.hero-hint {
+    margin: 1.75rem 0 0;
+    padding-left: 0.85rem;
+    max-width: 44ch;
+    border-left: 3px solid var(--dz-accent-color);
+    font-size: var(--site-text-xs);
+    color: var(--secondary-text-color);
+}
+
+.hero-shot img {
+    border: 1px solid var(--dz-input-border);
+    border-radius: var(--site-radius-container);
+    box-shadow: var(--site-elev-overlay);
+}
+
+/* ---- Section heads --------------------------------------------------- */
+
+.section-head {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.section-label {
+    display: block;
+    font-size: var(--site-text-micro);
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--dz-accent-color);
+}
+
+.section-head h2 {
+    margin: 0.5rem 0 0;
+    font-size: var(--site-text-display-sm);
+    letter-spacing: -0.01em;
+}
+
+.section-desc {
+    margin: 0.9rem auto 0;
+    max-width: 62ch;
+    font-size: var(--site-text-md);
+    color: var(--secondary-text-color);
+}
+
+/* ---- Device cards: the live demo ------------------------------------- */
+
+.device-grid {
+    max-width: var(--site-max-width);
+    margin: 0 auto;
+    padding: 0 1.25rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+.device-card {
+    background: var(--dz-widget-bg);
+    color: var(--dz-widget-text);
+    border-radius: var(--site-radius-container);
+    box-shadow: var(--site-elev-card);
+    padding: 0.9rem 1rem;
+}
+
+.device-name { font-size: var(--site-text-sm); font-weight: 600; }
+
+.device-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin: 0.75rem 0;
+}
+
+.device-value {
+    font-size: var(--site-text-lg);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.device-status { font-size: var(--site-text-sm); color: var(--secondary-text-color); }
+
+.device-foot {
+    font-size: var(--site-text-xs);
+    color: var(--secondary-text-color);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Toggle: the theme's switch idiom, tokenised */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    border-radius: 12px;
+    background: var(--dz-status-disabled);
+}
+
+.switch.is-on { background: var(--dz-accent-color); }
+
+.switch-knob {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--dz-widget-bg);
+}
+
+.switch.is-on .switch-knob { left: 23px; }
+
+/* Slider: track, accent fill, round handle */
+.slider {
+    position: relative;
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--dz-input-border);
+}
+
+.slider-fill {
+    position: absolute;
+    inset: 0 38% 0 0;
+    border-radius: 3px;
+    background: var(--dz-accent-color);
+}
+
+.slider-knob {
+    position: absolute;
+    top: 50%;
+    left: 62%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border-radius: 50%;
+    background: var(--dz-accent-color);
+    box-shadow: var(--site-elev-card);
+}
+
+/* ---- Features -------------------------------------------------------- */
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+.feature-card {
+    background: var(--dz-widget-bg);
+    color: var(--dz-widget-text);
+    border: 1px solid var(--dz-input-border);
+    border-radius: var(--site-radius-container);
+    box-shadow: var(--site-elev-card);
+    padding: 1.25rem;
+}
+
+.feature-card h3 { margin: 0; font-size: var(--site-text-md); }
+
+.feature-card p {
+    margin: 0.5rem 0 0;
+    font-size: var(--site-text-sm);
+    color: var(--secondary-text-color);
+}
+
+/* ---- Scheme swatches ------------------------------------------------- */
+
+.scheme-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+.scheme-swatch {
+    display: block;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--site-text-sm);
+    font-weight: 600;
+    padding: 0.9rem 1rem;
+    background: var(--dz-widget-bg);
+    color: var(--dz-body-text);
+    border: 2px solid var(--dz-input-border);
+    border-radius: var(--site-radius-container);
+    box-shadow: var(--site-elev-card);
+}
+
+.scheme-swatch[aria-pressed="true"] { border-color: var(--dz-accent-color); }
+
+.scheme-swatch-chips { display: flex; gap: 0.35rem; margin-top: 0.6rem; }
+
+.chip {
+    width: 28px;
+    height: 20px;
+    border-radius: 3px;
+    border: 1px solid var(--dz-input-border);
+}
+
+.chip-bg { background: var(--dz-body-bg); }
+.chip-nav { background: var(--dz-nav-bg); }
+.chip-card { background: var(--dz-widget-bg); }
+.chip-accent { background: var(--dz-accent-color); }
+.chip-text { background: var(--dz-body-text); }
+
+/* ---- Showcase -------------------------------------------------------- */
+
+.showcase-shot img {
+    border: 1px solid var(--dz-input-border);
+    border-radius: var(--site-radius-container);
+    box-shadow: var(--site-elev-overlay);
+    margin: 0 auto;
+}
+
+/* ---- Mobile screenshots ---------------------------------------------- */
+
+.phone-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.phone img {
+    border: 1px solid var(--dz-input-border);
+    border-radius: var(--site-radius-container);
+    box-shadow: var(--site-elev-card);
+}
+
+.phone figcaption {
+    margin-top: 0.6rem;
+    text-align: center;
+    font-size: var(--site-text-xs);
+    color: var(--secondary-text-color);
+}
+
+/* ---- Install --------------------------------------------------------- */
+
+/* The recommended route is a numbered flow: visible accent step numbers on
+   ::before, joined by a hairline, so it reads as one sequence rather than
+   four equal options. */
+/* Longhands only: the shared container rule above sets margin-left/right to
+   auto, and a `margin: 0` shorthand here would silently un-centre the list. */
+.install-steps {
+    list-style: none;
+    margin-top: 0;
+    margin-bottom: 0;
+    counter-reset: step;
+}
+
+.install-steps > li {
+    position: relative;
+    counter-increment: step;
+    padding-left: 3.5rem;
+    padding-bottom: 1.75rem;
+}
+
+.install-steps > li:last-child { padding-bottom: 0; }
+
+.install-steps > li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: var(--dz-accent-color);
+    color: var(--dz-accent-text);
+    font-size: var(--site-text-sm);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.install-steps > li:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    left: 1.125rem;
+    top: 2.75rem;
+    bottom: 0.5rem;
+    width: 1px;
+    background: var(--dz-input-border);
+}
+
+.install-steps h3 {
+    margin: 0.25rem 0 0;
+    font-size: var(--site-text-lg);
+}
+
+.install-steps p {
+    margin: 0.35rem 0 0;
+    font-size: var(--site-text-sm);
+    color: var(--secondary-text-color);
+}
+
+/* Notes and the alternatives heading align with the cards' inner edge, not
+   the container edge, so the rule and the callout bar line up with the grid
+   above them. */
+.install-note,
+.install-alt-head {
+    width: min(100% - 2.5rem, calc(var(--site-max-width) - 2.5rem));
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.install-note {
+    margin-top: 1.5rem;
+    margin-bottom: 0;
+    padding: 0.85rem 1rem;
+    background: rgba(var(--dz-accent-values), 0.07);
+    border-left: 3px solid var(--dz-accent-color);
+    border-radius: var(--site-radius-container);
+    font-size: var(--site-text-sm);
+    color: var(--secondary-text-color);
+}
+
+.install-alt-head {
+    margin-top: 3.5rem;
+    margin-bottom: 1.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--dz-input-border);
+    font-size: var(--site-text-lg);
+}
+
+.install-blocks {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.install-card {
+    background: var(--dz-widget-bg);
+    color: var(--dz-widget-text);
+    border: 1px solid var(--dz-input-border);
+    border-radius: var(--site-radius-container);
+    box-shadow: var(--site-elev-card);
+    padding: 1.25rem;
+}
+
+.install-card h3 { margin: 0; font-size: var(--site-text-md); }
+
+.install-card p {
+    margin: 0.6rem 0 0;
+    font-size: var(--site-text-sm);
+    color: var(--secondary-text-color);
+}
+
+/* ---- Code blocks ----------------------------------------------------- */
+
+.code-block {
+    margin-top: 1rem;
+    background: var(--dz-widget-bg);
+    border: 1px solid var(--dz-input-border);
+    border-radius: var(--site-radius-container);
+    box-shadow: var(--site-elev-card);
+    overflow: hidden;
+}
+
+/* Inside a card the block would otherwise sit on its own background, so it
+   drops to the body surface to stay readable as a distinct block. */
+.install-card .code-block {
+    background: var(--dz-body-bg);
+    box-shadow: none;
+}
+
+.code-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.4rem 0.5rem 0.4rem 0.85rem;
+    background: rgba(var(--dz-accent-values), 0.08);
+    border-bottom: 1px solid var(--dz-input-border);
+    font-size: var(--site-text-micro);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--secondary-text-color);
+}
+
+.code-block pre {
+    margin: 0;
+    padding: 0.85rem;
+    overflow-x: auto;
+    font-size: var(--site-text-xs);
+    line-height: 1.7;
+    color: var(--dz-widget-text);
+}
+
+.code-block code {
+    padding: 0;
+    background: transparent;
+    font-size: inherit;
+}
+
+.copy-btn {
+    flex: 0 0 auto;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--site-text-micro);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    border: 1px solid var(--dz-accent-color);
+    border-radius: var(--site-radius-interactive);
+    background: transparent;
+    color: var(--dz-accent-color);
+}
+
+.copy-btn:hover {
+    background: var(--dz-accent-color);
+    color: var(--dz-accent-text);
+}
+
+/* ---- Footer ---------------------------------------------------------- */
+
+.footer {
+    background: var(--dz-nav-bg);
+    border-top: 1px solid var(--dz-input-border);
+    padding-top: 3rem;
+    padding-bottom: 2.5rem;
+}
+
+.footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.footer-logo {
+    display: block;
+    font-size: var(--site-text-lg);
+    font-weight: 600;
+}
+
+.footer-brand p {
+    margin: 0.25rem 0 0;
+    font-size: var(--site-text-sm);
+    color: var(--secondary-text-color);
+}
+
+.footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.25rem;
+}
+
+.footer-links a {
+    font-size: var(--site-text-sm);
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--secondary-text-color);
+}
+
+.footer-links a:hover { color: var(--dz-accent-color); }
+
+.footer-credits {
+    width: min(100% - 2.5rem, calc(var(--site-max-width) - 2.5rem));
+    margin: 2.5rem auto 0;
+    padding: 1.5rem 0 0;
+    border-top: 1px solid var(--dz-input-border);
+    text-align: center;
+    font-size: var(--site-text-xs);
+    color: var(--secondary-text-color);
+}
+
+.footer-credits a { color: var(--dz-accent-color); }
+
+/* ---- Motion: opt-in only -------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+    .nav-links a,
+    .btn,
+    .device-card,
+    .feature-card {
+        transition: background-color 0.2s ease, color 0.2s ease,
+                    transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+    .feature-card:hover { transform: translateY(-3px); box-shadow: var(--site-elev-overlay); }
+
+    .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.5s ease, transform 0.5s ease; }
+    .reveal.is-visible { opacity: 1; transform: none; }
+}
+
+/* Same gate, for the components authored below the skeleton. */
+@media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+
+    .scheme-swatch,
+    .install-card,
+    .copy-btn,
+    .footer-links a,
+    .phone img {
+        transition: background-color 0.2s ease, color 0.2s ease,
+                    border-color 0.2s ease, transform 0.2s ease,
+                    box-shadow 0.2s ease;
+    }
+
+    .scheme-swatch:hover { transform: translateY(-2px); box-shadow: var(--site-elev-popup); }
+    .install-card:hover { box-shadow: var(--site-elev-popup); }
+    .phone:hover img { transform: translateY(-3px); box-shadow: var(--site-elev-popup); }
+}
+
+/* ---- Responsive ------------------------------------------------------ */
+
+@media (max-width: 980px) {
+    .hero {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 2.5rem;
+        padding-top: 3.5rem;
+        padding-bottom: 3.5rem;
+    }
+
+    .hero h1 { font-size: var(--site-text-display-md); }
+
+    /* The picker is the page's whole point, so it keeps its width and the
+       links give theirs up first. */
+    .nav-inner { gap: 0.75rem; }
+    .wordmark { font-size: var(--site-text-md); }
+    .nav-links a { font-size: var(--site-text-xs); padding: 0.3rem 0.45rem; }
+
+    .phone-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 768px) {
+    main > section {
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+    }
+
+    /* Seven links will not fit beside the picker at this width, and stacking
+       them makes the sticky bar eat the viewport. Docs and GitHub stay one
+       tap away in the hero and the footer. */
+    .nav-links { display: none; }
+
+    .section-head { margin-bottom: 2rem; }
+
+    .install-blocks { grid-template-columns: minmax(0, 1fr); }
+
+    .footer-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero h1 { font-size: var(--site-text-display-sm); }
+    .hero-sub { font-size: var(--site-text-sm); }
+    .section-head h2 { font-size: var(--site-text-xl); }
+    .section-desc { font-size: var(--site-text-sm); }
+
+    .hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .hero-actions .btn { text-align: center; }
+
+    .phone-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    .install-steps > li { padding-left: 2.9rem; }
+    .install-steps > li::before { width: 2rem; height: 2rem; }
+    .install-steps > li:not(:last-child)::after { left: 1rem; top: 2.5rem; }
+}

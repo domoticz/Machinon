@@ -28,9 +28,21 @@ fail=0
 # new and not yet committed but not gitignored either, is in scope. Deriving
 # the set from git rather than a glob means a new css file - anywhere in the
 # repo, not just css/ or the root - can't silently dodge the gate.
+#
+# site/ is the GitHub Pages landing page, not theme CSS, and it never ships in
+# the release zip or on the dist branch. It has its own elevation contract
+# (--site-elev-card/popup/overlay, which carry DESIGN.md's three shadow values
+# as literals because the page cannot import the theme's token files), and its
+# own gate in scripts/check-site.py. The two files are listed by name rather
+# than the whole directory on purpose: a third site stylesheet still lands in
+# scope here and forces a deliberate decision, exactly as the paragraph above
+# intends. This mirrors check-typography.sh, which looks at custom.css and
+# css/*.css only, and DESIGN.md > Typography > Site-only display tier.
 exclude="dz-tokens.css
 dark.css
-css/ionicons.min.css"
+css/ionicons.min.css
+site/style.css
+site/tokens.css"
 files=$( { git ls-files -- '*.css'; git ls-files -o --exclude-standard -- '*.css'; } \
          | sort -u | grep -vFxf <(printf '%s\n' "$exclude") )
 
