@@ -10,10 +10,20 @@
 #   http://127.0.0.1:8081/Machinon/docs/   manual
 #
 # Port 8081 because 8080 is the Domoticz test container.
+#
+# Binds to loopback by default, so a preview of unreleased work is not exposed
+# to the network by simply running this script. To review from another machine
+# on the LAN, opt in explicitly:
+#
+#   HOST=0.0.0.0 scripts/serve-site.sh
+#
+# python3's http.server is a development server with no access control, so keep
+# the opt-in deliberate and do not make 0.0.0.0 the default.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 PORT="${PORT:-8081}"
+HOST="${HOST:-127.0.0.1}"
 
 rm -rf build build-preview
 mkdocs build -d build/docs
@@ -25,6 +35,12 @@ touch build/.nojekyll
 mkdir -p build-preview
 ln -sfn ../build build-preview/Machinon
 
-echo "Serving http://127.0.0.1:${PORT}/Machinon/  (Ctrl-C to stop)"
+if [ "$HOST" = "0.0.0.0" ]; then
+    echo "Serving on ALL interfaces, port ${PORT}, path /Machinon/  (Ctrl-C to stop)"
+    echo "  local:   http://127.0.0.1:${PORT}/Machinon/"
+    echo "  network: http://$(hostname):${PORT}/Machinon/"
+else
+    echo "Serving http://${HOST}:${PORT}/Machinon/  (Ctrl-C to stop)"
+fi
 cd build-preview
-exec python3 -m http.server "$PORT" --bind 127.0.0.1
+exec python3 -m http.server "$PORT" --bind "$HOST"
