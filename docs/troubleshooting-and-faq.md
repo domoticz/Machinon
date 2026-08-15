@@ -58,9 +58,13 @@ You expected to find **Theme** in the Setup menu, but it isn't there.
    navigation bar instead, the dropdown a non-admin login sees in place of Setup, holding items
    like Energy Dashboard, My Profile, About and Logout. Machinon adds a Theme Hub entry there
    too, directly above Logout, specifically so non-admin users on a multi-login installation
-   aren't locked out of their own theme settings. (This is established from Domoticz's own menu
-   code, not confirmed on screen: the test instance behind this manual has no login enabled, so
-   there's no non-admin session available to verify it against directly.)
+   aren't locked out of their own theme settings.
+
+    !!! note "Not confirmed against an actual non-admin session"
+        This is established from Domoticz's own menu code, not confirmed on screen: the test
+        instance behind this manual has no login enabled, so there's no non-admin session
+        available to verify it against directly.
+
 4. If your installation has no separate logins at all (or login is disabled), you're treated as
    admin and the entry is in the Setup menu as in step 2.
 

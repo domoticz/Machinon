@@ -66,15 +66,17 @@ Narrower than 767 pixels, roughly phone width, a further set of changes kicks in
 all.
 
 - The search box collapses to a small icon and expands when you tap it, rather than sitting open
-  in the navigation bar all the time. Checked live: the search box is still open (about 218
-  pixels wide) at 768 pixels, and fully collapsed at 767.
+  in the navigation bar all the time. Checked live: the search box is still open at 768 pixels
+  wide, and fully collapsed at 767.
 - Tables inside dialogs wrap their text instead of running wide and needing to scroll sideways.
 - Edit forms (for devices, and similar dialogs) stack each field's label above the field, instead
   of placing them side by side, so the field itself can use the full width.
 - The Settings page's tile grid (the one behind the Setup menu) packs its icons into narrower
-  tiles so more fit on screen; their labels stay put, just in a smaller tile. Checked live: the
-  grid uses wide, three-per-row tiles at 768 pixels and switches to the narrower, five-per-row
-  layout at 767.
+  tiles so more of them fit on screen at once; their labels stay put, just in a smaller tile.
+  Checked live: the tiles measure 250 pixels wide down to 768 pixels, and drop to 100 pixels wide
+  at 767. (How many actually fit per row at a given width also depends on how much horizontal
+  space the page has around the grid, not on the tile width alone, so that's deliberately left
+  out here.)
 - The Settings page's **Apply Settings** button also changes position here: instead of sitting at
   the top right next to the row of tabs (see [Troubleshooting and
   FAQ](troubleshooting-and-faq.md#the-theme-is-selected-but-nothing-changed) for where it
