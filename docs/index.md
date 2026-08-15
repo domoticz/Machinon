@@ -2,11 +2,26 @@
 
 Machinon is a modern theme for [Domoticz](https://www.domoticz.com/). It gives your dashboard
 a clean, card-based look, with matching light and dark modes, a choice of color schemes, a
-refreshed icon set, and one settings page inside Domoticz where you control all of it.
+refreshed icon set, and one settings page inside Domoticz, the Theme Hub, where you control all
+of it.
 
 ![Machinon dashboard, light scheme](screenshots/dashboard-light.png)
+![Machinon dashboard, dark scheme](screenshots/dashboard-dark.png)
+
+## Highlights
+
+- **Color schemes**: several built-in schemes, each with a light and dark variant, plus a
+  custom color picker if you want to design your own palette.
+- **One settings page**: every setting lives in the Theme Hub, reachable from Domoticz's Setup
+  menu once the theme is active.
+- **Refreshed icons**: redrawn device icons with optional icon packs, installed straight from
+  the Theme Hub.
+- **Mobile-ready**: dashboards, menus, and dialogs adapt to small screens instead of just
+  shrinking the desktop layout.
+- **Fast to load**: releases ship as a single flattened stylesheet.
 
 ## Where to start
 
-Installation, the Theme Hub, color schemes, icon packs, mobile layouts, every setting, and
-troubleshooting are all covered in this manual. Use the navigation to find your way around.
+New to Machinon? Start with [Installation](installation.md) to get the theme running, then open
+[Theme Hub](theme-hub.md) to see what you can configure and how those settings are shared (or
+not) between users.

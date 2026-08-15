@@ -81,3 +81,6 @@ exclude_docs: |
 #   Mobile layouts), Settings reference, Troubleshooting and FAQ.
 nav:
   - Home: index.md
+  - Installation: installation.md
+  - Using the theme:
+      - Theme Hub: theme-hub.md
