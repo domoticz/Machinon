@@ -529,14 +529,36 @@ main > section[id] { scroll-margin-top: 4.5rem; }
     gap: var(--site-card-space-sm);
 }
 
-/* Toggle: the theme's switch idiom, tokenised. Sits in the status row. */
+/* Toggle: a faithful copy of css/switch.css (theme lines 10-60), not an
+   approximation of it.
+
+   The earlier version inverted the theme's own logic. The theme carries the
+   control's perceivability on the KNOB, which is a text-grade colour
+   (--secondary-text-color when off, --dz-accent-color when on) with an
+   --dz-elev-card drop shadow, and leaves the TRACK a faint accent tint
+   (0.2 off, 0.5 on). The demo had a solid --dz-status-disabled track and a
+   --dz-widget-bg knob, which is why it read as not-quite-Machinon and why the
+   off track measured 1.78:1 against the card in Gruvbox Dark.
+
+   The geometry is the theme's too, and it is not the conventional contained
+   pill it replaced: a 40x15 track with a 20x20 knob that overhangs both ends
+   (left: -10px at rest, translateX(34px) when on). --dz-btn-focus-ring is not
+   one of the tokens site/tokens.css generates, so the focus ring stays this
+   page's shared outline; that is the single deviation, and an outline is the
+   more robust affordance anyway. */
 .switch {
     position: relative;
     display: inline-block;
-    width: 44px;
-    height: 24px;
-    border-radius: 12px;
-    background: var(--dz-status-disabled);
+    width: 40px;
+    height: 15px;
+    /* The theme's own margin-right, plus a matching left margin so the knob's
+       10px left overhang has somewhere to sit inside the flex status row
+       instead of colliding with the label. The theme gets that room from
+       .switch-cell's 30px left padding, which this page has no equivalent of. */
+    margin-left: 10px;
+    margin-right: 10px;
+    border-radius: 34px;
+    background-color: rgba(var(--dz-accent-values), 0.2);
     vertical-align: middle;
 }
 
@@ -553,19 +575,23 @@ button.switch {
     appearance: none;
 }
 
-.switch.is-on { background: var(--dz-accent-color); }
+.switch.is-on { background-color: rgba(var(--dz-accent-values), 0.5); }
 
 .switch-knob {
     position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 18px;
-    height: 18px;
+    left: -10px;
+    bottom: -2px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    background: var(--dz-widget-bg);
+    background-color: var(--secondary-text-color);
+    box-shadow: var(--dz-elev-card);
 }
 
-.switch.is-on .switch-knob { left: 23px; }
+.switch.is-on .switch-knob {
+    transform: translateX(34px);
+    background-color: var(--dz-accent-color);
+}
 
 /* Dimmer slider, in the status row beside the value. Geometry from
    --dz-card-slider-* (5px track, 3px radius, 15px handle). The theme's track
@@ -993,8 +1019,10 @@ button.switch {
                     box-shadow 0.2s ease;
     }
 
-    .switch { transition: background-color 0.2s ease; }
-    .switch-knob { transition: left 0.2s ease; }
+    /* css/switch.css animates both at 0.4s; the knob moves by transform now,
+       not by `left`, so the property list has to follow it. */
+    .switch { transition: background-color 0.4s ease; }
+    .switch-knob { transition: transform 0.4s ease, background-color 0.4s ease; }
 
     .btn:hover { transform: translateY(-1px); }
     .feature-card:hover { transform: translateY(-3px); box-shadow: var(--dz-elev-overlay); }
