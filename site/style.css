@@ -326,48 +326,183 @@ main > section[id] { scroll-margin-top: 4.5rem; }
 
 /* ---- Device cards: the live demo ------------------------------------- */
 
+/* This is the theme's REAL card, not an approximation. The grid below is a
+   copy of css/cards.css:255-272: same 3 rows, same 6 columns, same areas, same
+   10px gap, so the demo reads as Machinon rather than as a generic card.
+
+   The column and row constants mirror --dz-card-* in dz-tokens.css. They are
+   NOT in site/tokens.css and must not be added there: that file is generated
+   from the schemes and carries colour and elevation only, both of which vary
+   per scheme. Card geometry is scheme-independent, so it belongs here beside
+   --site-radius-*, the same way the type scale does. */
 .device-grid {
-    max-width: var(--site-max-width);
+    --site-card-col-icon: 48px;        /* --dz-card-col-icon */
+    --site-card-col-icon2: 18px;       /* --dz-card-col-icon2 */
+    --site-card-col-trailing: 15px;    /* --dz-card-col-trailing */
+    --site-card-row-status-min: 58px;  /* --dz-card-row-status-min */
+    --site-card-row-lastupdate-h: 20px;/* --dz-card-row-lastupdate-h */
+    --site-card-gap: 10px;             /* literal in cards.css too, see its note */
+    --site-card-space-lg: 10px;        /* --dz-card-space-lg */
+    --site-card-space-sm: 5px;         /* --dz-card-space-sm */
+    --site-card-space-2xl: 20px;       /* --dz-card-space-2xl */
+    --site-card-img-size: 40px;        /* --dz-card-img-size, inside the 48px column */
+    --site-card-border-width: 1.5px;   /* --dz-card-border-width */
+    --site-card-name-line: 18px;       /* --dz-card-name-line-height */
+    --site-card-value-line: 24px;      /* --dz-card-value-line-height */
+    --site-card-favorite-line: 16px;   /* --dz-card-favorite-line-height */
+
+    /* theme.json ships card_min_width 320 and card_max_width 500, so the demo
+       sizes itself into that band instead of stretching to the full container.
+       Narrower than --site-max-width on purpose: at 1120px four cards would be
+       249px each, below the theme's own minimum, and three columns would leave
+       one orphan. Two columns land at ~470px, a realistic Machinon card, and
+       the four shapes read as a 2x2 matrix. */
+    max-width: 1000px;
     margin: 0 auto;
     padding: 0 1.25rem;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 1rem;
+    /* Track max is 500px, not 1fr: with 1fr a single card at a ~600px viewport
+       stretched to 560px, past the theme's own card_max_width. min(320px, 100%)
+       is what keeps the 320px floor from forcing a horizontal scrollbar below a
+       320px viewport. */
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 500px));
+    justify-content: center;
+    gap: 1.25rem;
 }
 
 .device-card {
+    display: grid;
+    grid-template-rows: auto minmax(var(--site-card-row-status-min), 1fr)
+                        minmax(0, var(--site-card-row-lastupdate-h));
+    grid-template-columns: var(--site-card-col-icon) var(--site-card-col-icon2)
+                           minmax(0, 1fr) minmax(0, auto) minmax(0, auto)
+                           var(--site-card-col-trailing);
+    grid-template-areas:
+        'name name name bigtext bigtext options'
+        'img  img2 status status status status'
+        'favorite lastupdate lastupdate lastupdate tools tools';
+    gap: var(--site-card-gap);
     background: var(--dz-widget-bg);
     color: var(--dz-widget-text);
+    /* Transparent 1.5px border, as the theme does: it reserves the ring the
+       device-status glows paint into, so the box geometry matches. */
+    border: var(--site-card-border-width) solid transparent;
     border-radius: var(--site-radius-container);
     box-shadow: var(--dz-elev-card);
-    padding: 0.9rem 1rem;
+    font-size: var(--site-text-sm);
 }
 
-.device-name { font-size: var(--site-text-sm); font-weight: 600; }
-
-.device-body {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    margin: 0.75rem 0;
+/* Row 1, columns 1-3. */
+.dc-name {
+    grid-area: name;
+    padding: var(--site-card-space-lg) 0 0 var(--site-card-space-lg);
+    line-height: var(--site-card-name-line);
+    color: var(--dz-widget-text);
+    min-width: 0;
+    overflow-wrap: break-word;
 }
 
-.device-value {
+/* Row 1, columns 4-5. The device value, ACCENT-coloured and hard right, beside
+   the name rather than under it. This is the single most recognisable thing
+   about a Machinon card (css/cards.css .item #bigtext). */
+.dc-bigtext {
+    grid-area: bigtext;
+    justify-self: right;
+    text-align: right;
+    padding: var(--site-card-space-lg) 0 0 var(--site-card-space-lg);
     font-size: var(--site-text-lg);
-    font-weight: 600;
+    line-height: var(--site-card-value-line);
+    color: var(--dz-accent-color);
     font-variant-numeric: tabular-nums;
+    min-width: 0;
 }
 
-.device-status { font-size: var(--site-text-sm); color: var(--secondary-text-color); }
+/* Row 1, column 6: the options (3-dot) affordance. */
+.dc-options {
+    grid-area: options;
+    align-self: start;
+    padding-top: var(--site-card-space-lg);
+    color: var(--secondary-text-color);
+    line-height: 0;
+}
 
-.device-foot {
+/* Row 2, column 1: the 48px device icon column, 40px image, bottom aligned.
+
+   No horizontal padding here, deliberately. cards.css does pad this cell, but
+   there the padding is inert: core has no max-width clamp on card images, so a
+   40px icon simply overflows the 28px padding box and still paints 40x40,
+   centred in the 48px track. On this page the global `img { max-width: 100% }`
+   reset DOES clamp, against that same 28px box, and because the reset
+   constrains width only (height stays at the declared 40px) the icon painted
+   28x40: a squashed square, at every viewport width. Dropping the padding and
+   centring reproduces the theme's RENDERED geometry, which is what the section
+   claims, rather than copying a declaration whose effect differs here. */
+.dc-img {
+    grid-area: img;
+    align-self: end;
+    text-align: center;
+    line-height: 0;
+}
+
+.dc-img img {
+    width: var(--site-card-img-size);
+    height: var(--site-card-img-size);
+    /* Overrides the global `img { max-width: 100% }` reset. Belt and braces:
+       with the padding gone nothing clamps today, but this is the declaration
+       that guarantees a future container change cannot silently distort a
+       fixed-size icon again. */
+    max-width: none;
+}
+
+/* Row 2, columns 3-6: status text and any control (toggle, slider). */
+.dc-status {
+    grid-area: status;
+    align-self: center;
+    justify-self: right;
+    padding-right: var(--site-card-space-2xl);
+    max-width: 100%;
+    color: var(--dz-body-text);
+}
+
+/* Row 3. The theme pins the star and the tool pair to the ends of the whole
+   row and right-aligns the timestamp inside its own area. */
+.dc-favorite {
+    grid-row: 3;
+    grid-column: 1 / -1;
+    justify-self: start;
+    margin-left: var(--site-card-space-lg);
+    line-height: var(--site-card-favorite-line);
+    color: var(--dz-accent-color);
+}
+
+.dc-lastupdate {
+    grid-area: lastupdate;
+    justify-self: right;
+    align-self: center;
     font-size: var(--site-text-xs);
     color: var(--secondary-text-color);
     font-variant-numeric: tabular-nums;
 }
 
-/* Toggle: the theme's switch idiom, tokenised */
+/* Log and timer glyphs. dz-tokens.css defines --dz-card-icon-accent as the
+   plain accent and documents that it clears WCAG 1.4.11's 3:1 non-text
+   threshold on the card in both schemes, so the accent is used directly. */
+.dc-tools {
+    grid-row: 3;
+    grid-column: 1 / -1;
+    justify-self: end;
+    display: flex;
+    gap: var(--site-card-space-sm);
+    padding-right: var(--site-card-space-sm);
+    line-height: var(--site-card-favorite-line);
+    color: var(--dz-accent-color);
+}
+
+.dc-options svg,
+.dc-favorite svg,
+.dc-tools svg { display: block; fill: currentColor; }
+
+/* Toggle: the theme's switch idiom, tokenised. Sits in the status row. */
 .switch {
     position: relative;
     display: inline-block;
@@ -375,6 +510,7 @@ main > section[id] { scroll-margin-top: 4.5rem; }
     height: 24px;
     border-radius: 12px;
     background: var(--dz-status-disabled);
+    vertical-align: middle;
 }
 
 .switch.is-on { background: var(--dz-accent-color); }
@@ -391,11 +527,18 @@ main > section[id] { scroll-margin-top: 4.5rem; }
 
 .switch.is-on .switch-knob { left: 23px; }
 
-/* Slider: track, accent fill, round handle */
+/* Dimmer slider, in the status row beside the value. Geometry from
+   --dz-card-slider-* (5px track, 3px radius, 15px handle). The theme's track
+   colour is --dz-card-slider-track-bg, a raw rgba(0,0,0,0.26) that
+   dz-tokens.css itself flags as a leftover with no accent tie; the site has a
+   no-colour-literals rule, so the track takes --dz-input-border instead. That
+   is the one deliberate deviation from the real card. */
 .slider {
     position: relative;
-    flex: 1;
-    height: 6px;
+    display: inline-block;
+    vertical-align: middle;
+    width: 100px;
+    height: 5px;
     border-radius: 3px;
     background: var(--dz-input-border);
 }
@@ -411,12 +554,18 @@ main > section[id] { scroll-margin-top: 4.5rem; }
     position: absolute;
     top: 50%;
     left: 62%;
-    width: 16px;
-    height: 16px;
-    margin: -8px 0 0 -8px;
+    width: 15px;
+    height: 15px;
+    margin: -7.5px 0 0 -7.5px;
     border-radius: 50%;
     background: var(--dz-accent-color);
     box-shadow: var(--dz-elev-card);
+}
+
+/* The dimmer card pairs a percentage with the control. */
+.dc-status .dc-level {
+    margin-right: var(--site-card-space-sm);
+    font-variant-numeric: tabular-nums;
 }
 
 /* ---- Features -------------------------------------------------------- */
