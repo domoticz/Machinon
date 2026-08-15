@@ -16,6 +16,11 @@ site_dir: build/docs
 
 theme:
   name: material
+  # Material links Google Fonts (Roboto and Roboto Mono) from its own CDN
+  # unless font is false. The published site must make no external request at
+  # all, so this is off and the faces are self-hosted from the repo's fonts/
+  # directory via docs/stylesheets/extra.css. Do not remove this line.
+  font: false
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default

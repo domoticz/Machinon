@@ -6,8 +6,39 @@
   Values are Machinon's accent tokens: #396d9e (light, dz-tokens.css) and
   #98ccfd (dark, dark.css). They are duplicated here rather than imported
   because the manual is served standalone, without the theme's stylesheets.
+
+  The @font-face rules below exist because mkdocs.yml sets theme.font: false
+  to stop Material fetching Roboto from Google's CDN. The paths are relative
+  to this file's built location (build/docs/stylesheets/), reaching the fonts
+  the deploy workflow and scripts/serve-site.sh copy to build/fonts/. Under a
+  bare `mkdocs serve`, build/fonts/ does not exist and font-display: swap
+  leaves the system stack in place; that is dev-only and harmless.
 */
+
+@font-face {
+    font-family: 'Inter';
+    src: url('../../fonts/Inter-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Inter';
+    src: url('../../fonts/Inter-SemiBold.woff2') format('woff2');
+    font-weight: 600;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'JetBrains Mono';
+    src: url('../../fonts/JetBrainsMono-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-display: swap;
+}
+
 :root {
+    --md-text-font: 'Inter';
+    --md-code-font: 'JetBrains Mono';
     --md-primary-fg-color: #396d9e;
     --md-primary-fg-color--light: #4d80b1;
     --md-primary-fg-color--dark: #2c5680;
