@@ -3,9 +3,10 @@
 ## Requirements
 
 - A running Domoticz installation: Domoticz 2025.2 or newer. Machinon is developed against the
-  latest Domoticz beta, so that's the recommended version to run it on. On stable Domoticz
-  releases, the Theme Hub menu entry (see [Theme Hub](theme-hub.md)) is available to admin
-  users.
+  latest Domoticz beta, so that's the recommended version to run it on. The Setup menu, and the
+  Theme Hub entry inside it (see [Theme Hub](theme-hub.md)), is visible to admin users only, on
+  both stable and beta releases; non-admin logins have a separate path to it, covered on that
+  same page.
 - A browser you can hard-refresh (Ctrl+Shift+R), since you'll need to do that once after
   installing or updating the theme.
 
@@ -63,7 +64,9 @@ put the files in place. To switch to it:
 1. In Domoticz, open the **Setup** menu in the navbar and choose **Settings**.
 2. On the **System** tab (the tab that opens by default), find the **Theme** dropdown under
    **User Interface** and select `machinon`.
-3. Click **Apply Settings**, the red button next to the row of tabs at the top of the page.
+3. Click **Apply Settings**. On a desktop screen it's the red button next to the row of tabs at
+   the top of the page; narrower than 767 pixels (see [Mobile layouts](mobile.md)), Machinon pins
+   it to a bar fixed to the bottom of the screen instead.
 
 !!! warning "The theme choice only persists once you click Apply Settings"
     Picking `machinon` from the dropdown previews it, but the choice is not saved to Domoticz

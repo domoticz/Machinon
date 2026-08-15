@@ -2,6 +2,9 @@
 
 A modern, responsive theme for [Domoticz](https://www.domoticz.com/).
 
+**[domoticz.github.io/Machinon](https://domoticz.github.io/Machinon/)**: screenshots, a live
+color scheme preview, and the full manual.
+
 ![Version](https://img.shields.io/badge/dynamic/json.svg?label=Version&url=https%3A%2F%2Fraw.githubusercontent.com%2Fdomoticz%2FMachinon%2Fmaster%2Ftheme.json&query=version&colorB=blue)
 
 ![Machinon dashboard, light scheme](docs/screenshots/dashboard-light.png)
@@ -14,7 +17,7 @@ It works with current Domoticz beta and stable releases.
 
 ## Highlights
 
-- **Color schemes**: Gruvbox, Magenta, and Paper, each with a light and dark variant, plus a custom color picker in the Theme Hub's "Colors and schemes" tab if you want to design your own palette and save it as a preset.
+- **Color schemes**: eight built in, Machinon's own light and dark default plus Gruvbox, Magenta, and Paper each in a light and dark variant, plus a custom color picker in the Theme Hub's "Colors and schemes" tab if you want to design your own palette and save it as a preset.
 
   ![Dark magenta color scheme](docs/screenshots/scheme-magenta.png)
 
@@ -22,7 +25,7 @@ It works with current Domoticz beta and stable releases.
 
   ![Theme Hub settings page](docs/screenshots/theme-hub.png)
 
-- **Refreshed icon set**: redrawn device icons with optional icon packs, so you can pick the style that suits your dashboard, installed straight from the Theme Hub's built-in pack installer.
+- **Refreshed icon set**: a library of 267 device icons in three styles, install just the ones you want onto individual devices straight from the Theme Hub's built-in pack installer.
 
   ![Icon pack installer in the Theme Hub](docs/screenshots/icon-packs.png)
 
@@ -37,7 +40,7 @@ It works with current Domoticz beta and stable releases.
 
   ![Machinon compact mobile dashboard](docs/screenshots/mobile-dashboard-compact.png)
 
-  Domoticz's compact mobile dashboard, which lists your favourite devices as rows with their controls beside them. Domoticz picks this layout automatically on a phone.
+  Domoticz's compact mobile dashboard, which lists your favorite devices as rows with their controls beside them. Domoticz picks this layout automatically on a phone.
 
   ![Switches page on a mobile screen](docs/screenshots/mobile-switches.png)
 
@@ -82,7 +85,7 @@ A device's Log page, charting electricity usage over the last 24 hours and the l
 
 ## Requirements
 
-- A running Domoticz installation: Domoticz 2025.2 or newer, latest beta recommended. The theme is developed against the beta; on stable releases the Theme Hub menu entry is available to admin users.
+- A running Domoticz installation: Domoticz 2025.2 or newer, latest beta recommended. The theme is developed against the beta. The Setup menu, and the Theme Hub entry inside it, is visible to admin users only, on both stable and beta; non-admin logins have a separate path to it, see [Theme Hub](https://domoticz.github.io/Machinon/docs/theme-hub/) in the manual.
 - A browser you can hard-refresh (Ctrl+Shift+R) after installing or updating the theme.
 
 ## Installation
@@ -133,7 +136,7 @@ Nothing needs migrating: all of your theme settings live in Domoticz itself and 
 
 Once Machinon is active, open the Theme Hub from the Domoticz Setup menu to configure it. From there you can choose a color scheme, set custom colors in the "Colors and schemes" tab, and turn individual features on or off.
 
-This README only covers the basics. Deeper settings documentation is planned for a later update.
+This README only covers the basics. See the [settings reference](https://domoticz.github.io/Machinon/docs/settings-reference/) in the full manual for every setting explained in detail.
 
 ## Cache problems
 

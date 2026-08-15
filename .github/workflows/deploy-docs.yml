@@ -5,10 +5,17 @@
 # top, so the landing page serves at / and the manual at /docs/. Same shape as
 # script.easytv and script.easymovie.
 #
+# No "Configure Pages" step, on purpose: actions/configure-pages calls GET
+# /repos/{owner}/{repo}/pages, which throws on a repo with no Pages site
+# enabled, such as Rouzax/Machinon, a force-synced mirror, and this job's
+# read-only contents:read token would not have permission to call it anyway.
+# None of its outputs (base_url, origin, host, base_path) are used below: no
+# static_site_generator is set, and mkdocs.yml already hardcodes site_url.
+#
 # The deploy job runs on the upstream repo ONLY. Rouzax/Machinon is a
 # force-synced mirror with no Pages site, so an unguarded deploy step would
-# fail on every sync. The build job still runs there, so a broken docs build
-# is caught on the mirror too.
+# fail on every sync. The build job carries no such guard and runs on both
+# repos, so a broken docs build is caught on the mirror too.
 name: Deploy Docs
 
 on:
@@ -37,9 +44,6 @@ jobs:
 
       - name: Install pinned dev tools
         run: pip install -r requirements-dev.txt
-
-      - name: Configure Pages
-        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
 
       - name: Build the manual and assemble the site
         run: |

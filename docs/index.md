@@ -5,17 +5,21 @@ a clean, card-based look, with matching light and dark modes, a choice of color 
 refreshed icon set, and one settings page inside Domoticz, the Theme Hub, where you control all
 of it.
 
+See the [Machinon website](https://domoticz.github.io/Machinon/) for a live, interactive preview
+of the color schemes and card layout; this manual covers installation and every setting in
+detail.
+
 ![Machinon dashboard, light scheme](screenshots/dashboard-light.png)
 ![Machinon dashboard, dark scheme](screenshots/dashboard-dark.png)
 
 ## Highlights
 
-- **Color schemes**: several built-in schemes, each with a light and dark variant, plus a
+- **Color schemes**: eight built-in schemes, each with a light and dark variant, plus a
   custom color picker if you want to design your own palette.
 - **One settings page**: every setting lives in the Theme Hub, reachable from Domoticz's Setup
   menu once the theme is active.
-- **Refreshed icons**: redrawn device icons with optional icon packs, installed straight from
-  the Theme Hub.
+- **Refreshed icons**: a library of 267 device icons in three styles, installed one at a time
+  onto individual devices from the Theme Hub.
 - **Mobile-ready**: dashboards, menus, and dialogs adapt to small screens instead of just
   shrinking the desktop layout.
 - **Fast to load**: releases ship as a single flattened stylesheet.

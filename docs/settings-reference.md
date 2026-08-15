@@ -1,7 +1,10 @@
 # Settings reference
 
-This page documents every one of Machinon's 36 settings, one row per setting, grouped into the
-same nine tabs as the [Theme Hub](theme-hub.md). If you're new to the Theme Hub itself, its own
+This page documents all 36 rows in the Theme Hub, one row per entry, grouped into the same nine
+tabs as the [Theme Hub](theme-hub.md). Two of those rows, the icon pack browser and the About
+panel, aren't settings in the toggle-or-value sense (see [Theme Hub: personal settings versus
+shared settings](theme-hub.md#personal-settings-versus-shared-settings)); they're documented here
+for completeness alongside the 34 actual settings. If you're new to the Theme Hub itself, its own
 page explains where to find it, what the nine groups cover, and how personal settings differ
 from shared ones, this page is the per-setting detail it points at, not a repeat of it.
 
@@ -29,7 +32,7 @@ row below that depends on another one says so directly in its "What it does" col
 | `notification` | Device warnings | A timed-out or low-battery device already shows a small warning icon next to its name everywhere it appears; turning this on additionally pops up a toast notification for that timeout or low-battery condition as it happens. | Navbar / toasts |
 | `center_popups` | Center popup dialogs | Forces every popup dialog to a fixed position centered in the browser window, instead of wherever Domoticz would otherwise place it (often near where you clicked). | All dialogs |
 | `footer_text_disabled` | Hide the footer text | Hides the copyright line Domoticz prints at the bottom of every page. | Page footer |
-| `floorplan_popup_details` | Expandable floorplan popups | Machinon hides Domoticz's own expand arrow on the small popup that opens when you click a device on a floorplan; turning this on restores that arrow, letting the popup expand to reveal Log and Notifications shortcuts and the favourite star. | Floorplan |
+| `floorplan_popup_details` | Expandable floorplan popups | Machinon hides Domoticz's own expand arrow on the small popup that opens when you click a device on a floorplan; turning this on restores that arrow, letting the popup expand to reveal Log and Notifications shortcuts and the favorite star. | Floorplan |
 
 ## Menus and navbar
 

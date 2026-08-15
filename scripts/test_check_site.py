@@ -169,6 +169,18 @@ def test_asset_refs_reads_href_src_and_content():
     ]
 
 
+def test_asset_refs_normalizes_absolute_site_url_references():
+    html = (
+        '<meta property="og:image" content="{}assets/social-preview.png">'
+        '<link rel="canonical" href="{}">'
+        '<img src="assets/icons/temp48.png">'
+    ).format(check.SITE_URL, check.SITE_URL)
+    assert check.asset_refs(html) == [
+        "assets/icons/temp48.png",
+        "assets/social-preview.png",
+    ]
+
+
 def test_asset_files_lists_nested_files_as_assets_relative_paths(tmp_path):
     assets = tmp_path / "assets"
     (assets / "icons").mkdir(parents=True)

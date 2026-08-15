@@ -26,8 +26,8 @@ are three color families, each with a light and a dark variant.
 | Machinon Dark | Dark | The default look: blue glowing on navy |
 | Magenta Light | Light | Warm magenta on white |
 | Magenta Dark | Dark | Magenta glow on plum black |
-| Paper Light | Light | Monochrome paper: zero-chrome interface, color reserved for states |
-| Paper Dark | Dark | Ink on slate, the monochrome pair of Paper Light |
+| Paper Light | Light | Monochrome paper: zero-chrome interface, colour reserved for states |
+| Paper Dark | Dark | Ink on slate: the monochrome pair of Paper Light |
 | Gruvbox Light | Light | Warm retro paper |
 | Gruvbox Dark | Dark | Retro warm dark with earthy accents |
 

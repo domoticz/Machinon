@@ -46,6 +46,15 @@ Thresholds (WCAG 2.1): 4.5:1 for body text, 3.0:1 for large text (>= 24px,
 or >= 18.66px i.e. 14pt at bold weight) and for non-text UI boundaries
 (1.4.11).
 
+PAIRS below is a HAND-MAINTAINED model of what site/style.css actually
+paints: nothing in this script parses site/style.css and checks PAIRS
+against it, so the two can drift apart. The failure mode of that drift is
+silent staleness, a real color-contrast regression in site/style.css that
+this script keeps reporting green because PAIRS still describes the old
+rule, not a false red. Re-derive PAIRS by hand whenever site/style.css is
+substantially edited, the same way the pair list itself was built: by
+reading site/style.css and site/index.html together.
+
 Run: python3 scripts/check-contrast.py
 """
 import pathlib

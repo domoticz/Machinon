@@ -9,3 +9,6 @@ docs export-ignore
 DESIGN.md export-ignore
 CONTRIBUTING.md export-ignore
 requirements-dev.txt export-ignore
+site export-ignore
+mkdocs.yml export-ignore
+overrides export-ignore

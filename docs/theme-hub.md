@@ -8,17 +8,17 @@ file to edit and nothing to touch outside Domoticz itself.
 
 The Theme Hub only appears once Machinon is the active theme (see
 [Installation](installation.md) if you haven't switched to it yet). Once it is, open the
-**Setup** menu in the navbar and choose **Theme**.
-
-On stable Domoticz releases, this menu entry is available to admin users.
+**Setup** menu in the navbar and choose **Theme**. The Setup menu itself is visible to admin
+users only, on both stable and beta Domoticz releases.
 
 If you're logged in as a non-admin user on an installation with separate logins, you won't see
-the Setup menu at all, that's normal Domoticz behaviour. Machinon still gives you a way in: look
-for the **Other** menu in the navbar instead. It's the dropdown a non-admin login sees in place
-of Setup, holding items like Energy Dashboard, My Profile, About and Logout; the Theme Hub entry
-sits there too, directly above Logout. It puts non-admin users on equal footing with admins: a
-non-admin login is never locked out of its own theme settings, just directed to a different menu
-than an admin sees.
+the Setup menu at all, that's normal Domoticz behavior. Machinon still gives you a way in: look
+for the dropdown that replaces Setup for a non-admin login, labeled **Other** on the current
+Domoticz beta and **Profile** on the 2025.2 stable release. It's the menu a non-admin login sees
+in place of Setup, holding items like Energy Dashboard, My Profile, About and Logout; the Theme
+Hub entry sits there too, directly above Logout. It puts non-admin users on equal footing with
+admins: a non-admin login is never locked out of its own theme settings, just directed to a
+different menu than an admin sees.
 
 !!! note "Not confirmed against an actual non-admin session"
     This is read from Domoticz's own menu markup and the theme's source, not something we've
@@ -44,23 +44,28 @@ The Theme Hub is organized into nine tabs, in this order:
 | **Charts and log** | Device history charts: range bands on log graphs. |
 | **Background and branding** | The page background image and the navbar logo. |
 | **Colors and schemes** | Pick a built-in color scheme, or design your own and save it as a preset. |
-| **Icon packs** | Install and switch device icon packs. |
+| **Icon packs** | Browse the icon library and install icons one at a time onto individual devices. |
 | **About** | The theme's version, credits, links, and maintenance actions such as resetting settings back to their defaults. |
 
 Each row also carries a small tag showing which part of the interface it affects (for example
-*Whole UI* or *Navbar badge*), so you can tell how far a change reaches before you make it. Most
-rows also show a small live preview next to them, illustrating what the setting changes; a few
-settings (like the color scheme and icon packs) have no single preview because they open their
-own picker instead.
+*Whole UI* or *Navbar badge*), so you can tell how far a change reaches before you make it. Some
+rows also show a small live preview next to them, illustrating what the setting changes. Many
+others don't: settings like the color scheme and icon packs open their own picker instead, and
+plenty of plain toggles apply immediately without needing one.
 
 ## Personal settings versus shared settings
 
-Every row in the Theme Hub is either **personal** or **shared**:
+Most rows in the Theme Hub are either **personal** or **shared**:
 
 - A **personal** setting changes how the theme looks only for your own browser and Domoticz
   user account. Other people using the same Domoticz installation don't see it change.
 - A **shared** setting changes how the theme looks for the whole Domoticz installation. Everyone
   who opens it, on any device, sees the new value.
+
+Two rows don't fit either label. The icon pack browser installs into Domoticz's own custom-icon
+library rather than storing a personal or shared value of its own, so an install is effectively
+shared by everyone regardless (see [Icon packs](icon-packs.md)); and the About tab is an
+information and maintenance panel, not a stored setting.
 
 Most settings are personal (things like your color scheme, card width, or whether relative
 times are shown). A handful of settings that involve shared content or fixed infrastructure are

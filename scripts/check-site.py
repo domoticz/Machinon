@@ -59,6 +59,12 @@ APP_JS = SITE / "app.js"
 SCHEME_JS = ROOT / "src" / "js" / "scheme.js"
 ASSETS = SITE / "assets"
 
+# The published prefix every asset URL resolves under. og:image, og:url and
+# the canonical link are absolute (scrapers need a resolvable URL, not a
+# page-relative one), so asset_refs() below normalizes a reference under
+# this prefix back to its assets/-relative form before matching it.
+SITE_URL = "https://domoticz.github.io/Machinon/"
+
 _REF = re.compile(r'(?:href|src)\s*=\s*"([^"]+)"')
 _ASSET_REF = re.compile(r'(?:href|src|content)\s*=\s*"([^"]+)"')
 _OPTION = re.compile(r'<option\s+value="([^"]+)"')
@@ -216,11 +222,18 @@ def asset_refs(html_text):
     """Return every distinct assets/... path referenced in index.html.
 
     content= is included alongside href/src because the og:image meta tag
-    points at social-preview.png through content=, not href or src.
+    points at social-preview.png through content=, not href or src. A
+    reference given as an absolute URL under SITE_URL (as og:image must be,
+    for scrapers that will not resolve a relative one) is normalized back to
+    its assets/-relative form first, so it still matches.
     """
-    return sorted(
-        set(ref for ref in _ASSET_REF.findall(html_text) if ref.startswith("assets/"))
-    )
+    refs = set()
+    for ref in _ASSET_REF.findall(html_text):
+        if ref.startswith(SITE_URL):
+            ref = ref[len(SITE_URL):]
+        if ref.startswith("assets/"):
+            refs.add(ref)
+    return sorted(refs)
 
 
 def asset_files(assets_dir):

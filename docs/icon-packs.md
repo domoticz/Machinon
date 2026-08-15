@@ -11,10 +11,9 @@ Everything else in your dashboard keeps its existing icon.
 
 Browse the library from the Theme Hub's **Icon packs** tab, which sorts icons into three tabs:
 
-- **Blue UI**: a clean, flat, blue-tinted line style. The largest matched style, and Machinon's
-  own default look.
-- **Color**: the same shapes as Blue UI, redrawn in fuller color. Blue UI and Color are a matched
-  pair, most icons in the library ship in both.
+- **Blue UI**: a clean, flat, blue-tinted line style, and Machinon's own default look.
+- **Color**: the same shapes as Blue UI, redrawn in fuller color, and the larger of the two
+  matched styles. Blue UI and Color are a matched pair, most icons in the library ship in both.
 - **Fun**: a smaller, more playful, novelty set for dashboards that want a lighter tone.
 
 ## On and off states

@@ -10,13 +10,13 @@ how narrow the screen is.
 ## The compact mobile dashboard
 
 On a phone, Domoticz doesn't show you the same dashboard as on desktop, scaled down. It
-automatically switches to its own compact mobile dashboard: your favourite devices, listed as
+automatically switches to its own compact mobile dashboard: your favorite devices, listed as
 rows with their controls right beside them, so you can flip a switch or check a sensor without
 opening the device.
 
 ![Machinon compact mobile dashboard](screenshots/mobile-dashboard-compact.png)
 
-Domoticz's compact mobile dashboard, which lists your favourite devices as rows with their
+Domoticz's compact mobile dashboard, which lists your favorite devices as rows with their
 controls beside them. Domoticz picks this layout automatically on a phone.
 
 The regular card dashboard is still there if you reach it another way, for example by widening
