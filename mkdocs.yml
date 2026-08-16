@@ -89,7 +89,7 @@ validation:
 # placeholder page ever exists and `mkdocs build --strict` stays clean at
 # every commit. The finished nav is:
 #   Home, Installation, Using the theme (Theme Hub, Color schemes, Icon packs,
-#   Mobile layouts), Settings reference, Troubleshooting and FAQ.
+#   Bar ranges, Mobile layouts), Settings reference, Troubleshooting and FAQ.
 nav:
   - Home: index.md
   - Installation: installation.md
@@ -97,6 +97,7 @@ nav:
       - Theme Hub: theme-hub.md
       - Color schemes: color-schemes.md
       - Icon packs: icon-packs.md
+      - Bar ranges: bar-ranges.md
       - Mobile layouts: mobile.md
   - Settings reference: settings-reference.md
   - Troubleshooting and FAQ: troubleshooting-and-faq.md

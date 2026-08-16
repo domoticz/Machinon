@@ -75,11 +75,19 @@ The Switches page, showing lights, sensors, and other on/off devices as cards.
 
 ![Utility page](docs/screenshots/utility.png)
 
-The Utility page, listing counters and usage devices like electricity, gas, and water.
+The Utility page, listing counters and usage devices like electricity, gas, and water. The colored strips along the card tops are Bar Ranges, per-device thresholds you set yourself; see [Bar ranges](https://domoticz.github.io/Machinon/docs/bar-ranges/) in the manual.
+
+![Floorplan page](docs/screenshots/floorplan.png)
+
+The Floorplan page, with live device icons and readings placed on your home's plans.
+
+![Weather page](docs/screenshots/weather.png)
+
+The Weather page, with wind, rain, pressure, and sun readings.
 
 ![Device graph](docs/screenshots/device-graph.png)
 
-A device's Log page, charting electricity usage over the last 24 hours and the last month.
+A device's Log page. The colored background zones are the device's Bar Ranges, which Machinon draws on the charts as well, something the standard interface only shows on the cards.
 
 </details>
 

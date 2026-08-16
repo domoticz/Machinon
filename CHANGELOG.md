@@ -7,6 +7,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 ### Added
 
 - Machinon now has a website with a full manual at https://domoticz.github.io/Machinon/, covering installation, the Theme Hub, color schemes, icon packs, mobile layouts, every setting, and troubleshooting.
+- The manual gained a Bar ranges guide (setting colored value bands on utility devices, and the theme's range bands on Log charts), and the README, manual, and website now show the floorplan and weather pages.
 
 ## [2.0.2] - 2026-08-14
 

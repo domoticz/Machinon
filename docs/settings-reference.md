@@ -81,7 +81,7 @@ switching to the classic dashboard makes all five apply exactly as described bel
 
 | Key | Setting | What it does | Applies to |
 |---|---|---|---|
-| `log_plot_bands` | Range bands in log graphs | Draws the colored threshold bands you configured in a device's Bar Ranges dialog onto its Log page chart as well. Domoticz itself only draws those bands on the card strip and Dynamic Dashboard widgets, never on the chart. | Device log charts |
+| `log_plot_bands` | Range bands in log graphs | Draws the colored threshold bands you configured in a device's Bar Ranges dialog onto its Log page chart as well. Domoticz itself only draws those bands on the card strip and Dynamic Dashboard widgets, never on the chart. See [Bar ranges](bar-ranges.md). | Device log charts |
 
 ## Background and branding
 

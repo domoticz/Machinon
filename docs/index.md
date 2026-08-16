@@ -11,6 +11,7 @@ detail.
 
 ![Machinon dashboard, light scheme](screenshots/dashboard-light.png)
 ![Machinon dashboard, dark scheme](screenshots/dashboard-dark.png)
+![Floorplan page with live device icons](screenshots/floorplan.png)
 
 ## Highlights
 
