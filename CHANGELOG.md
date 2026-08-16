@@ -14,6 +14,10 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 - Device cards get their toggles, fade and icons right as they render instead of in one late redraw about a second after the page loads; options menus and "time ago" text follow within a beat.
 
+### Fixed
+
+- The Theme entry no longer intermittently disappears from the Setup and Other menus after a slow page load; the same fix restores the distinct Setup dropdown icons on those loads.
+
 ## [2.0.2] - 2026-08-14
 
 ### Fixed

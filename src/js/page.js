@@ -8,6 +8,24 @@
    timers spinning for the whole session when their element never appeared. */
 var domWaiters = {};
 function whenElementRenders(key, selector, fn) {
+    /* Boot race guard: custom.js injects THEME_MODULES as async=false
+       scripts, which can execute while the parser is still blocked on
+       js/require.min.js, i.e. before <body> exists. In that state the
+       observe() below got null and its TypeError aborted the CALLER's whole
+       module init (the intermittently missing Theme menu entry, prod
+       2.0.2). While the document is still parsing, defer the whole check
+       to DOMContentLoaded: every boot-time caller targets static
+       index.html markup, so the immediate path hits there, and a waiter
+       armed at DOM-ready can never observe a mid-parse, half-built menu
+       (the second, fail-closed-forever variant of the same race). The
+       observer path below stays for genuinely dynamic content
+       (#iconsmain). */
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", function() {
+            whenElementRenders(key, selector, fn);
+        });
+        return;
+    }
     if ($(selector).length) {
         fn();
         return;
