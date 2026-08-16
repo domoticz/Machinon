@@ -4,6 +4,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+## [2.0.3] - 2026-08-16
+
 ### Added
 
 - Machinon now has a website with a full manual at https://domoticz.github.io/Machinon/, covering installation, the Theme Hub, color schemes, icon packs, mobile layouts, every setting, and troubleshooting.
