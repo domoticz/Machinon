@@ -10,6 +10,10 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - The manual gained a Bar ranges guide (setting colored value bands on utility devices, and the theme's range bands on Log charts), and the README, manual, and website now show the floorplan and weather pages.
 - The website's demo cards are more alive: the kitchen lights toggle, the hallway dimmer drags (its bulb switches off at 0%), and the card icons sit on the same left gutter as the real theme.
 
+### Changed
+
+- Device cards get their toggles, fade and icons right as they render instead of in one late redraw about a second after the page loads; options menus and "time ago" text follow within a beat.
+
 ## [2.0.2] - 2026-08-14
 
 ### Fixed

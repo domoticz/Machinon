@@ -216,14 +216,13 @@ function readSwitchStatus(item) {
    Idempotent and safe to call repeatedly: clears its own tags before
    recomputing every time, so a re-run after a resize or a content change
    never leaves a stale tag on the wrong button. Called from
-   setAllDevicesFeatures (initial render + the observer's re-enhance pass),
-   from initDeviceObserver's own re-enhance pass directly (wrapped in that
-   function's own try/catch idiom, so a throw here can never skip the
-   options re-apply loop or the observer's takeRecords() drain after it),
-   and from armSelectorWrapCornerRetag's debounced window resize listener
-   below, since wrap state depends on viewport/tile width and can change
-   with no DOM mutation for the MutationObserver in initDeviceObserver to
-   catch. */
+   dzRunDevicePass("deferred") (the tail of both setAllDevicesFeatures'
+   back-compat synchronous run and the coalesced idle pass dzScheduleDeferredPass
+   arms after every flush, whose own try/catch means a throw here can never
+   skip the observer's takeRecords() drain after it), and from
+   armSelectorWrapCornerRetag's debounced window resize listener below, since
+   wrap state depends on viewport/tile width and can change with no DOM
+   mutation for the MutationObserver in initDeviceObserver to catch. */
 function retagSelectorWrapCorners() {
     $("#main-view .item .btn-group").each(function() {
         var $shell = $(this);
@@ -274,93 +273,130 @@ function armSelectorWrapCornerRetag() {
     });
 }
 
-function setAllDevicesFeatures() {
-    /* Browse all items to apply themes features and styles */
-    $("#main-view .item").each(function() {
-        /* Set idx on tr, for easy retrieval */
-        let idx = $(this).find("#name").attr('data-idx');
-        if (typeof idx === "undefined" || idx === "") {
-            /* Fallback: try parent id (dashboard items like light_37, temp_1) */
-            idx = $(this).parent().attr('id');
-            if (typeof idx === "undefined") {
-                idx = $(this).attr('id');
-            } else {
-                idx = idx.replace(/^\D+/g, '');
-            }
+/* Stage-split enhancement (perf work 2026-08-16). "visible" is everything
+   the user can see flip at paint time: data-idx tagging, the toggle swap,
+   fade-off, custom/wind icons, status warning icons. "deferred" is work
+   that is invisible until interacted with or low-urgency: the options
+   menu build, the time-ago rewrite, selector wrap-corner retag; it runs
+   in one coalesced idle callback per flush burst (dzScheduleDeferredPass).
+   Every mutation stays guarded by its own marker, so both stages are
+   idempotent per card and safe to re-run on every flush. */
+function dzEnhanceDeviceCard($item, stage) {
+    /* idx resolution: name attr, else parent id (dashboard groups), else own id */
+    let idx = $item.find("#name").attr("data-idx");
+    if (typeof idx === "undefined" || idx === "") {
+        idx = $item.parent().attr("id");
+        if (typeof idx === "undefined") {
+            idx = $item.attr("id");
+        } else {
+            idx = idx.replace(/^\D+/g, "");
         }
-        $(this).find("tr").attr('data-idx', idx);
+    }
+    var $trs = $item.find("tr");
 
-        /* The card's own rows, resolved once here and threaded into every
-           helper call below instead of each helper re-querying
-           tr[data-idx] globally: that global query is O(all cards) per
-           call, which made this pass O(n^2) at page size. */
-        var $trs = $(this).find("tr");
+    if (stage === "visible") {
+        $trs.attr("data-idx", idx);
+        $item.find("#name").removeAttr("title");
 
-        /* Remove native title tooltip - our CSS ::after tooltip handles it */
-        $(this).find("#name").removeAttr("title");
+        var status = readSwitchStatus($item);
 
-        let bigText = $(this).find("#bigtext");
-        let status = bigText.text().trim();
-        if (status.length == 0) {
-            status = bigText.attr("data-status")?.trim();
-        }
-
-        /* Apply style and redefine options */
-        setDeviceOptions(idx, $trs);
-
-        /* Feature - Fade off items */
         setDeviceOpacity(idx, status, $trs);
 
-        /* Feature - Show timeago for last update */
-        var lastupd;
-        var lastupdateEl = $(this).find("#lastupdate");
-        var alreadyProcessed = lastupdateEl.find("i.ion-ios-pulse").length > 0;
-        if (alreadyProcessed) {
-            /* Already processed by setDeviceLastUpdate - skip to avoid overwriting
-               livestamp text like "18 hours ago" which moment can't parse */
-        } else if (theme.features.time_ago.enabled === true) {
-            lastupd = lastupdateEl.text();
-            setDeviceLastUpdate(idx, lastupd, $trs);
-        } else {
-            lastupd = moment(lastupdateEl.text(), [ "YYYY-MM-DD HH:mm:ss", "L LT" ]).format();
-            setDeviceLastUpdate(idx, lastupd, $trs);
-        }
-
-        /* Feature - Switch instead of text */
-        if (isLightSwitchContext($(this), status) && isPlainOnOffSwitch($(this))) {
-            if (theme.features.switch_instead_of_bigtext.enabled && $(this).find("#img2").length == 0) {
+        /* Switch instead of bigtext: same eligibility chain the old initial
+           and re-enhance passes shared; readSwitchStatus is the superset
+           status source the re-enhance pass already used (bigtext, then
+           data-status, then a state-carrying icon filename). This branch
+           now feeds that superset into setDeviceOpacity, so empty-bigtext
+           cards with state-carrying _Off icons (Dynamic Dashboard) now fade
+           where they previously never did, matching classic-page behavior. */
+        if ($trs.find(".switch").length === 0) {
+            var isGroupCard = $item.find("#img2").length > 0 &&
+                ($item.parents("#scenecontent").length > 0 ||
+                 $item.parents("#dashScenes").length > 0);
+            if (isGroupCard && theme.features.switch_instead_of_bigtext_scenes.enabled === true) {
                 setDeviceSwitch(idx, status);
-            } else {
-                bigText.show();
+                $item.find("#bigtext").hide();
+            } else if ($item.find("#img2").length === 0 &&
+                       isLightSwitchContext($item, status) &&
+                       isPlainOnOffSwitch($item)) {
+                if (theme.features.switch_instead_of_bigtext.enabled === true) {
+                    setDeviceSwitch(idx, status);
+                } else {
+                    $item.find("#bigtext").show();
+                }
             }
         }
 
-        /* Feature - Switch instead of text for scenes. Only a GROUP carries both an
-           On and an Off button (#img1 + #img2) and can actually toggle; a SCENE is
-           activate-only, so a toggle on it lies (its off-click targets an #img2 that
-           does not exist). Gate on the second button, the discriminator the dashboard
-           branch always used, on every scene surface. */
-        if (theme.features.switch_instead_of_bigtext_scenes.enabled === true &&
-            $(this).find("#img2").length > 0 &&
-            ($(this).parents("#scenecontent").length > 0 || $(this).parents("#dashScenes").length > 0)) {
-            setDeviceSwitch(idx, status);
-            bigText.hide();
-        }
-
-        /* Feature - Set custom icons */
         if (theme.features.icon_image.enabled === true) {
             setDeviceCustomIcon(idx, status, $trs);
         }
-
-        /* Feature - Show wind direction */
         if (theme.features.wind_direction.enabled === true) {
             setDeviceWindDirectionIcon(idx, undefined, $trs);
         }
-	});
+        return;
+    }
 
-    /* Wrap-corner tagging for any joined Selector-level control (SelectorStyle 0)
-       just (re)rendered above -- see the function's own header comment. */
-    retagSelectorWrapCorners();
+    /* deferred stage */
+    if ($trs.find(".options-cell").length === 0) {
+        setDeviceOptions(idx, $trs);
+    }
+    var lastupdateEl = $item.find("#lastupdate");
+    /* setDeviceLastUpdate renders its non-time_ago marker as
+       <i id='lastSeen' class='ion-ios-pulse'>, so this single class check
+       already covers both branches' output. */
+    var alreadyProcessed = lastupdateEl.find("i.ion-ios-pulse").length > 0;
+    if (!alreadyProcessed) {
+        var lastupd;
+        if (theme.features.time_ago.enabled === true) {
+            lastupd = lastupdateEl.text();
+        } else {
+            lastupd = moment(lastupdateEl.text(), ["YYYY-MM-DD HH:mm:ss", "L LT"]).format();
+        }
+        setDeviceLastUpdate(idx, lastupd, $trs);
+    }
+}
+
+function dzRunDevicePass(stage) {
+    $("#main-view .item").each(function() {
+        dzEnhanceDeviceCard($(this), stage);
+    });
+    if (stage === "visible") {
+        setAllDevicesIconsStatus();
+    } else {
+        retagSelectorWrapCorners();
+    }
+}
+
+/* At most ONE pending deferred pass, keep-first: while one is pending,
+   scheduling is a no-op, so the pass runs no later than ~300ms after the
+   FIRST flush of a burst even if flushes keep coming (cancel-and-reschedule
+   here would starve stage B for the whole storm, the same trap the
+   two-timer debounce above exists to avoid). The pass scans the live DOM
+   when it fires, so it covers every later burst too; a flush arriving
+   while it RUNS re-arms, because the handle is cleared before the pass. */
+var dzDeferredHandle = null;
+function dzScheduleDeferredPass() {
+    if (dzDeferredHandle !== null) return;
+    var run = function() {
+        dzDeferredHandle = null;
+        try {
+            dzRunDevicePass("deferred");
+        } catch (e) {
+            console.warn("deferred device pass threw", e);
+        }
+    };
+    if (window.requestIdleCallback) {
+        dzDeferredHandle = requestIdleCallback(run, { timeout: 300 });
+    } else {
+        dzDeferredHandle = setTimeout(run, 300);
+    }
+}
+
+/* Back-compat single-shot: theme-hub.js re-enhances through this name after
+   icon or feature changes, and it is the harnesses' probe point. */
+function setAllDevicesFeatures() {
+    dzRunDevicePass("visible");
+    dzRunDevicePass("deferred");
 }
 
 function setAllDevicesIconsStatus() {
@@ -404,7 +440,7 @@ function setDeviceOptions(idx, $trs) {
         if (subnav.length && subnavButton.length == 0) {
             /* Display idx in the options */
             $(subnav).append('<a class="btnsmall" id="idno"><i>Idx: ' + idx + "</i></a>");
-            $(this).append('<td class="options-cell" title="' + $.t("More options") + '"><i class="ion-md-more"></i</td>');
+            $(this).append('<td class="options-cell" title="' + $.t("More options") + '"><i class="ion-md-more"></i></td>');
             $(this).on("click", "td.options-cell", function(e) {
                 e.preventDefault();
                 $(this).siblings("td.options").slideToggle(400);
@@ -474,10 +510,14 @@ function setDeviceCustomIcon(idx, status, $trs) {
     for (var i = 0; i < icons.length; i++) {
         if (icons[i].idx == idx) {
             rows.find("#img img").attr("src", "images/" + icons[i].img);
+            /* Mutually exclusive: the visible stage re-runs this on every
+               flush now, so a device that changes state must drop the other
+               class or it accumulates both, and custom.css's .user rule
+               (opacity: 0.4) permanently dims an On device's icon. */
             if (status == switchState.on || status == 'On') {
-                rows.find("#img img").addClass("userOn");
+                rows.find("#img img").removeClass("user").addClass("userOn");
             } else {
-                rows.find("#img img").addClass("user");
+                rows.find("#img img").removeClass("userOn").addClass("user");
             }
         }
     }
@@ -639,7 +679,11 @@ function initDeviceLiveUpdates($scope) {
    settles after a mutation burst (card-drag-handle.js, floorplan-stage.js)
    register here instead of running their own MutationObserver, so one burst
    schedules one 50ms flush instead of one per module. devices.js loads first
-   (custom.js THEME_MODULES), so this is defined before any caller runs. */
+   (custom.js THEME_MODULES), so this is defined before any caller runs.
+   Callbacks are invoked with no arguments: both registered subscribers
+   (card-drag-handle.js applyHandle, floorplan-stage.js applyClass) are
+   documented cheap no-ops when idle and never consumed the raw mutation
+   records, so the flush does not pass them. */
 var domSettledCallbacks = [];
 function dzOnDomSettled(callback) {
     domSettledCallbacks.push(callback);
@@ -665,7 +709,7 @@ function initDeviceObserver() {
     var MAX_WAIT_MS = 150;
     var settleTimer = null;
     var deadlineTimer = null;
-    var observer = new MutationObserver(function(mutations) {
+    var observer = new MutationObserver(function() {
         if (settleTimer) clearTimeout(settleTimer);
         settleTimer = setTimeout(flushEnhancements, SETTLE_MS);
         if (deadlineTimer === null) {
@@ -680,85 +724,23 @@ function initDeviceObserver() {
         setCorrectDashboardLinksforMobile();
         setDevicesNativeSelectorForMobile();
 
-        /* Re-apply progressive enhancements if device cards are present */
+        /* Re-apply progressive enhancements if device cards are present.
+           Stage-split (perf work 2026-08-16): the visible stage runs
+           synchronously here (toggle swap, fade, icons -- what the user
+           sees at paint time); the deferred stage (options menu, time-ago,
+           wrap-corner retag) is coalesced into one idle callback per burst
+           by dzScheduleDeferredPass so a mutation storm never re-triggers
+           it more than once. dzEnhanceDeviceCard's per-card guards
+           (.switch/.options-cell existence checks) make both stages
+           idempotent, so this replaces both the old unprocessed-items
+           branch and the per-item switch/options re-apply loop. */
         if ($("#main-view").find(".item").length > 0) {
-            /* Initialize unprocessed items (no data-idx = setAllDevicesFeatures hasn't run) */
-            var hasUnprocessed = $("#main-view .item tr:not([data-idx])").length > 0;
-            if (hasUnprocessed && typeof setAllDevicesFeatures === "function") {
-                setAllDevicesFeatures();
-                setAllDevicesIconsStatus();
-            } else {
-                /* setAllDevicesFeatures (which already re-tags at its own end) did not
-                   run this burst, but an ALREADY-processed selector's wrap state can
-                   still have changed here (e.g. a live level-name/label update that
-                   reflows without adding a new, unprocessed card) -- re-tag directly
-                   so a stale corner tag never survives a settle burst untouched. Same
-                   try/catch idiom as the domSettledCallbacks loop below: a throw in
-                   here must never skip the switch re-apply loop right after this
-                   block, or the observer.takeRecords() drain at the very end of this
-                   debounced handler. */
-                try {
-                    retagSelectorWrapCorners();
-                } catch (e) {
-                    console.warn("retagSelectorWrapCorners threw", e);
-                }
-            }
-
-            var switchEnabled = theme.features.switch_instead_of_bigtext.enabled === true ||
-                theme.features.switch_instead_of_bigtext_scenes.enabled === true;
-            $("#main-view .item").each(function() {
-                let tr = $(this).find("tr[data-idx]");
-                if (!tr.length) return;
-                let idx = tr.attr("data-idx");
-                if (!idx) return;
-
-                /* Re-strip the native title tooltip. The theme's own tooltip is the
-                   CSS ::after reading data-desc; stable core's legacy update path
-                   re-adds title="<description>" to #name after every device update,
-                   which stacked a browser tooltip on top of ours. The initial strip
-                   in setAllDevicesFeatures runs once, so it must repeat here.
-                   (Current beta sets no title: this is a no-op there.) */
-                tr.find("#name[title]").removeAttr("title");
-
-                /* Re-apply options menu if wiped */
-                if (tr.find(".options-cell").length === 0) {
-                    setDeviceOptions(idx);
-                }
-
-                /* Re-apply switch toggle if enabled and wiped - heuristics shared
-                   with setAllDevicesFeatures() via the helpers above */
-                if (switchEnabled && tr.find(".switch").length === 0) {
-                    let item = $(this);
-                    let bigText = item.find("#bigtext");
-                    /* Groups (both scene surfaces): toggleable only with BOTH buttons
-                       present; activate-only scenes never get a toggle. This branch
-                       cannot sit behind isPlainOnOffSwitch: scene widgets have no
-                       #img sibling, so that heuristic always rejected them and group
-                       toggles were silently never re-created after a re-render. */
-                    let isGroupCard = item.find("#img2").length > 0 &&
-                        (item.parents("#scenecontent").length > 0 ||
-                         item.parents("#dashScenes").length > 0);
-                    if (isGroupCard && theme.features.switch_instead_of_bigtext_scenes.enabled === true) {
-                        setDeviceSwitch(idx, readSwitchStatus(item));
-                        bigText.hide();
-                    } else if (isPlainOnOffSwitch(item) && item.find("#img2").length === 0) {
-                        /* The Dynamic Dashboard binary check uses the full status
-                           chain (bigtext, data-status, icon filename): push buttons
-                           on that board render an EMPTY bigtext and no data-status,
-                           so the icon name is their only signal. Sensors stay safe:
-                           a non-binary value fails the check, and an empty-value
-                           sensor icon is not clickable, so isPlainOnOffSwitch
-                           already rejected it. */
-                        if (isLightSwitchContext(item, readSwitchStatus(item)) && theme.features.switch_instead_of_bigtext.enabled === true) {
-                            setDeviceSwitch(idx, readSwitchStatus(item));
-                        }
-                    }
-                }
-            });
+            dzRunDevicePass("visible");
+            dzScheduleDeferredPass();
         }
         domSettledCallbacks.forEach(function(callback, index) {
             try {
-                callback(mutations);
+                callback();
             } catch (e) {
                 console.warn("dzOnDomSettled callback " + index + " (" + (callback.name || "anonymous") + ") threw", e);
             }

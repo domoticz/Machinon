@@ -236,8 +236,9 @@ function ajaxSuccessCallback(event, xhr, settings) {
 
     /* No per-request enhancement here for getdevices/getscenes: the cards
        those responses produce render in a later Angular digest, and the
-       MutationObserver in devices.js already re-enhances when they appear
-       (setAllDevicesFeatures on unprocessed items, plus the mobile passes). */
+       MutationObserver in devices.js already enhances when they appear
+       (the visible enhancement stage runs on every flush, the deferred stage
+       follows within ~300ms, plus the mobile passes). */
     if (settings.url.startsWith("json.htm?type=command&param=switchscene")) {
         let id = settings.url.split("&")[2];
         id = id.substr(4);
