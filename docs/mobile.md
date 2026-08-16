@@ -55,9 +55,8 @@ in the top-left corner, and pages that don't fit a narrow screen switch to a sta
 single-column layout instead of trying to squeeze the desktop one down. This is the change a
 tablet in portrait orientation typically sees.
 
-Checked by resizing a browser against the running test instance: the full horizontal menu is
-still showing at 980 pixels wide, and the hamburger icon has fully replaced it by 960 pixels
-(the exact switch happens somewhere in between, at 979 pixels).
+The full horizontal menu is still showing at 980 pixels wide, and the hamburger icon has fully
+replaced it by 960 pixels; the switch itself happens at 979.
 
 ## At 767px: forms, tables, search and the Settings page adapt further
 
