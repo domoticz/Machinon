@@ -623,110 +623,126 @@ function dzOnDomSettled(callback) {
    (jQuery UI marking elements ui-draggable) alongside childList/subtree. */
 function initDeviceObserver() {
     var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-    var mutationTimer = null;
+    /* Debounce with a max-wait, two timers. The settle timer resets on
+       every mutation (trailing edge, 50ms of quiet). The deadline timer is
+       armed on the FIRST mutation of a burst and never touched again, so a
+       continuous render storm cannot starve the flush: clearing and
+       re-arming a single near-0ms timer on every mutation lets each
+       mutation's microtask cancel the pending macrotask forever (measured:
+       a flush 1.9s after burst start that way). Whichever timer fires
+       first runs the flush and disarms both. */
+    var SETTLE_MS = 50;
+    var MAX_WAIT_MS = 150;
+    var settleTimer = null;
+    var deadlineTimer = null;
     var observer = new MutationObserver(function(mutations) {
-        /* Debounce: wait for Angular digest to settle */
-        if (mutationTimer) clearTimeout(mutationTimer);
-        mutationTimer = setTimeout(function() {
-            $("#main-view").children("div.container").removeClass("container").addClass("container-fluid");
-            removeRowDivider();
-            setCorrectDashboardLinksforMobile();
-            setDevicesNativeSelectorForMobile();
+        if (settleTimer) clearTimeout(settleTimer);
+        settleTimer = setTimeout(flushEnhancements, SETTLE_MS);
+        if (deadlineTimer === null) {
+            deadlineTimer = setTimeout(flushEnhancements, MAX_WAIT_MS);
+        }
+    });
+    function flushEnhancements() {
+        if (settleTimer) { clearTimeout(settleTimer); settleTimer = null; }
+        if (deadlineTimer) { clearTimeout(deadlineTimer); deadlineTimer = null; }
+        $("#main-view").children("div.container").removeClass("container").addClass("container-fluid");
+        removeRowDivider();
+        setCorrectDashboardLinksforMobile();
+        setDevicesNativeSelectorForMobile();
 
-            /* Re-apply progressive enhancements if device cards are present */
-            if ($("#main-view").find(".item").length > 0) {
-                /* Initialize unprocessed items (no data-idx = setAllDevicesFeatures hasn't run) */
-                var hasUnprocessed = $("#main-view .item tr:not([data-idx])").length > 0;
-                if (hasUnprocessed && typeof setAllDevicesFeatures === "function") {
-                    setAllDevicesFeatures();
-                    setAllDevicesIconsStatus();
-                } else {
-                    /* setAllDevicesFeatures (which already re-tags at its own end) did not
-                       run this burst, but an ALREADY-processed selector's wrap state can
-                       still have changed here (e.g. a live level-name/label update that
-                       reflows without adding a new, unprocessed card) -- re-tag directly
-                       so a stale corner tag never survives a settle burst untouched. Same
-                       try/catch idiom as the domSettledCallbacks loop below: a throw in
-                       here must never skip the switch re-apply loop right after this
-                       block, or the observer.takeRecords() drain at the very end of this
-                       debounced handler. */
-                    try {
-                        retagSelectorWrapCorners();
-                    } catch (e) {
-                        console.warn("retagSelectorWrapCorners threw", e);
-                    }
+        /* Re-apply progressive enhancements if device cards are present */
+        if ($("#main-view").find(".item").length > 0) {
+            /* Initialize unprocessed items (no data-idx = setAllDevicesFeatures hasn't run) */
+            var hasUnprocessed = $("#main-view .item tr:not([data-idx])").length > 0;
+            if (hasUnprocessed && typeof setAllDevicesFeatures === "function") {
+                setAllDevicesFeatures();
+                setAllDevicesIconsStatus();
+            } else {
+                /* setAllDevicesFeatures (which already re-tags at its own end) did not
+                   run this burst, but an ALREADY-processed selector's wrap state can
+                   still have changed here (e.g. a live level-name/label update that
+                   reflows without adding a new, unprocessed card) -- re-tag directly
+                   so a stale corner tag never survives a settle burst untouched. Same
+                   try/catch idiom as the domSettledCallbacks loop below: a throw in
+                   here must never skip the switch re-apply loop right after this
+                   block, or the observer.takeRecords() drain at the very end of this
+                   debounced handler. */
+                try {
+                    retagSelectorWrapCorners();
+                } catch (e) {
+                    console.warn("retagSelectorWrapCorners threw", e);
+                }
+            }
+
+            var switchEnabled = theme.features.switch_instead_of_bigtext.enabled === true ||
+                theme.features.switch_instead_of_bigtext_scenes.enabled === true;
+            $("#main-view .item").each(function() {
+                let tr = $(this).find("tr[data-idx]");
+                if (!tr.length) return;
+                let idx = tr.attr("data-idx");
+                if (!idx) return;
+
+                /* Re-strip the native title tooltip. The theme's own tooltip is the
+                   CSS ::after reading data-desc; stable core's legacy update path
+                   re-adds title="<description>" to #name after every device update,
+                   which stacked a browser tooltip on top of ours. The initial strip
+                   in setAllDevicesFeatures runs once, so it must repeat here.
+                   (Current beta sets no title: this is a no-op there.) */
+                tr.find("#name[title]").removeAttr("title");
+
+                /* Re-apply options menu if wiped */
+                if (tr.find(".options-cell").length === 0) {
+                    setDeviceOptions(idx);
                 }
 
-                var switchEnabled = theme.features.switch_instead_of_bigtext.enabled === true ||
-                    theme.features.switch_instead_of_bigtext_scenes.enabled === true;
-                $("#main-view .item").each(function() {
-                    let tr = $(this).find("tr[data-idx]");
-                    if (!tr.length) return;
-                    let idx = tr.attr("data-idx");
-                    if (!idx) return;
-
-                    /* Re-strip the native title tooltip. The theme's own tooltip is the
-                       CSS ::after reading data-desc; stable core's legacy update path
-                       re-adds title="<description>" to #name after every device update,
-                       which stacked a browser tooltip on top of ours. The initial strip
-                       in setAllDevicesFeatures runs once, so it must repeat here.
-                       (Current beta sets no title: this is a no-op there.) */
-                    tr.find("#name[title]").removeAttr("title");
-
-                    /* Re-apply options menu if wiped */
-                    if (tr.find(".options-cell").length === 0) {
-                        setDeviceOptions(idx);
-                    }
-
-                    /* Re-apply switch toggle if enabled and wiped - heuristics shared
-                       with setAllDevicesFeatures() via the helpers above */
-                    if (switchEnabled && tr.find(".switch").length === 0) {
-                        let item = $(this);
-                        let bigText = item.find("#bigtext");
-                        /* Groups (both scene surfaces): toggleable only with BOTH buttons
-                           present; activate-only scenes never get a toggle. This branch
-                           cannot sit behind isPlainOnOffSwitch: scene widgets have no
-                           #img sibling, so that heuristic always rejected them and group
-                           toggles were silently never re-created after a re-render. */
-                        let isGroupCard = item.find("#img2").length > 0 &&
-                            (item.parents("#scenecontent").length > 0 ||
-                             item.parents("#dashScenes").length > 0);
-                        if (isGroupCard && theme.features.switch_instead_of_bigtext_scenes.enabled === true) {
+                /* Re-apply switch toggle if enabled and wiped - heuristics shared
+                   with setAllDevicesFeatures() via the helpers above */
+                if (switchEnabled && tr.find(".switch").length === 0) {
+                    let item = $(this);
+                    let bigText = item.find("#bigtext");
+                    /* Groups (both scene surfaces): toggleable only with BOTH buttons
+                       present; activate-only scenes never get a toggle. This branch
+                       cannot sit behind isPlainOnOffSwitch: scene widgets have no
+                       #img sibling, so that heuristic always rejected them and group
+                       toggles were silently never re-created after a re-render. */
+                    let isGroupCard = item.find("#img2").length > 0 &&
+                        (item.parents("#scenecontent").length > 0 ||
+                         item.parents("#dashScenes").length > 0);
+                    if (isGroupCard && theme.features.switch_instead_of_bigtext_scenes.enabled === true) {
+                        setDeviceSwitch(idx, readSwitchStatus(item));
+                        bigText.hide();
+                    } else if (isPlainOnOffSwitch(item) && item.find("#img2").length === 0) {
+                        /* The Dynamic Dashboard binary check uses the full status
+                           chain (bigtext, data-status, icon filename): push buttons
+                           on that board render an EMPTY bigtext and no data-status,
+                           so the icon name is their only signal. Sensors stay safe:
+                           a non-binary value fails the check, and an empty-value
+                           sensor icon is not clickable, so isPlainOnOffSwitch
+                           already rejected it. */
+                        if (isLightSwitchContext(item, readSwitchStatus(item)) && theme.features.switch_instead_of_bigtext.enabled === true) {
                             setDeviceSwitch(idx, readSwitchStatus(item));
-                            bigText.hide();
-                        } else if (isPlainOnOffSwitch(item) && item.find("#img2").length === 0) {
-                            /* The Dynamic Dashboard binary check uses the full status
-                               chain (bigtext, data-status, icon filename): push buttons
-                               on that board render an EMPTY bigtext and no data-status,
-                               so the icon name is their only signal. Sensors stay safe:
-                               a non-binary value fails the check, and an empty-value
-                               sensor icon is not clickable, so isPlainOnOffSwitch
-                               already rejected it. */
-                            if (isLightSwitchContext(item, readSwitchStatus(item)) && theme.features.switch_instead_of_bigtext.enabled === true) {
-                                setDeviceSwitch(idx, readSwitchStatus(item));
-                            }
                         }
                     }
-                });
-            }
-            domSettledCallbacks.forEach(function(callback, index) {
-                try {
-                    callback(mutations);
-                } catch (e) {
-                    console.warn("dzOnDomSettled callback " + index + " (" + (callback.name || "anonymous") + ") threw", e);
                 }
             });
+        }
+        domSettledCallbacks.forEach(function(callback, index) {
+            try {
+                callback(mutations);
+            } catch (e) {
+                console.warn("dzOnDomSettled callback " + index + " (" + (callback.name || "anonymous") + ") threw", e);
+            }
+        });
 
-            /* The class swap above (and possibly a registered callback) mutates
-               attributes under the observed subtree, which the attributes:true
-               filter picks up as new records. Drain them now, synchronously,
-               before the pending delivery microtask runs: an emptied record
-               queue is skipped by that microtask (spec: notify only fires for
-               observers with a non-empty queue), so the observer re-arms clean
-               instead of re-triggering this same debounce for its own writes. */
-            observer.takeRecords();
-        }, 50);
-    });
+        /* The class swap above (and possibly a registered callback) mutates
+           attributes under the observed subtree, which the attributes:true
+           filter picks up as new records. Drain them now, synchronously,
+           before the pending delivery microtask runs: an emptied record
+           queue is skipped by that microtask (spec: notify only fires for
+           observers with a non-empty queue), so the observer re-arms clean
+           instead of re-triggering this same debounce for its own writes. */
+        observer.takeRecords();
+    }
     observer.observe(document.getElementById("holder") || document.body, {
         childList: true,
         subtree: true,
