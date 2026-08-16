@@ -36,6 +36,12 @@ function packOpEnds() {
 function mountIconPackInHub() {
     var container = $("#iconpack");
     if (!container.length) return;
+    /* Idempotent: hub re-entries re-run this call (the route path re-attaches
+       the cached hub and runs the mount hooks again), and each unguarded call
+       re-fetched iconsettings.html and re-wired the installer. #iconpackTabs
+       only exists after a successful load, so a failed or partial mount still
+       retries on the next entry (fail closed stays intact). */
+    if (container.find("#iconpackTabs").length) return;
     container.load("styles/" + themeFolder + "/iconsettings.html", initIconPack);
 }
 
