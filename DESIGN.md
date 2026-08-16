@@ -703,7 +703,6 @@ the ones that need to differ.
 | `--dz-btn-primary-text` | `var(--dz-accent-text)` | Text on any filled or toggle-selected surface |
 | `--dz-btn-info-bg` | `var(--dz-accent-color)` | Alias: Bootstrap's `.btn-info` reuses the primary look |
 | `--dz-btn-danger-bg` | `var(--dz-accent-red)` | Filled danger background |
-| `--dz-btn-danger-bg-alpha` | `rgba(var(--dz-accent-red-values), 0.85)` | Declared; no current CSS consumer (flagged for cleanup, not fixed here) |
 | `--dz-btn-success-bg` / `--dz-btn-warning-bg` | `#306b30` / `#7a5412` | Defined in the mapped-token block, not the `--dz-btn-*` block; consumed by `.btn-success`/`.btn-warning` (both declared-only, no live instance in the current markup) |
 | `--dz-btn-bg` / `--dz-btn-text` / `--dz-btn-border` | `var(--dz-widget-bg)` / `var(--dz-body-text)` / `var(--dz-input-border)` | Bootbox `.modal-footer .btn` only; radius/shadow come from the shared base rule (`--dz-btn-radius`/`--dz-btn-shadow`), not from this token group |
 | `--dz-btn-hover-bg` | `rgba(var(--dz-accent-values), 0.1)` | Ghost/icon-quiet hover tint |
@@ -717,10 +716,8 @@ the ones that need to differ.
 | `--dz-btn-toggle-selected-bg` / `-text` | `var(--dz-accent-color)` / `var(--dz-accent-text)` | One pressed/selected fill for every toggle mechanism (theme's own `.btn-selected` and Bootstrap's native `.active`) |
 | `--dz-btn-icon-box` | `28px` | Min-width/min-height square hit-box for icon-only buttons |
 | `--dz-btn-line-height` | `20px` | Forced line-height so same-tier block buttons measure an identical height everywhere |
-| `--dz-btn-text-shadow` | `none` | Declared; no current CSS consumer (`text-shadow: none` is applied as a literal in the base rule instead) |
 | `--dz-btn-disabled-bg` / `-text` | `var(--dz-status-disabled)` / `var(--secondary-text-color)` | Shared by every family; see the existing WCAG AA gap below |
 | `--dz-menu-bg` | `var(--dz-nav-bg)` | Shared "Menu" surface; see Menu Surface below |
-| `--dz-nav-active-bg` / `-text` | `rgba(var(--dz-accent-values), 0.4)` / `var(--dz-body-text)` | Declared; no current CSS consumer (the "you are here" marker uses the Menus family's accent-edge language instead; see Radius Rationale and Gaps) |
 
 ### Size Tiers
 
@@ -791,8 +788,7 @@ Buttons are `10px` (`--dz-btn-radius`), device cards are `6px` (`{rounded.contai
 split, not a rounding inconsistency: buttons are a small, dense control that reads better with a
 softer, roomier corner than a large card surface would want. There is no filled "you are here" box
 anywhere: every menu surface uses the unified accent-edge language, no radius involved; see
-[Menus > Unified Accent-Edge](#unified-accent-edge-you-are-here-language). `--dz-nav-active-bg`/`-text`
-remain declared but unconsumed, a dead pair; see Gaps.
+[Menus > Unified Accent-Edge](#unified-accent-edge-you-are-here-language).
 
 ### Menu Surface
 
@@ -1035,8 +1031,7 @@ Every menu surface marks its current item the same way, oriented to the surface'
 - **Focus-visible ring** is reserved for keyboard navigation only; a plain `:focus` must never
   paint a "you are here" box, because a real click focuses an element (mouse-away leaves it
   focused, not hovered), so any `:focus`-scoped marker would repaint on every click. There is no
-  filled current-item box anywhere (`--dz-nav-active-bg`/`-text` are a dead declared pair; see
-  Gaps).
+  filled current-item box anywhere.
 
 **Constraint.** The current-item rules and the `:focus-visible` ring's `box-shadow` are
 `!important` out of necessity, not preference: core ties the same selectors on border and color,
@@ -2098,13 +2093,9 @@ would have to change, not a reason to copy the current behaviour.
   true 1px hairline like the horizontal seams: no CSS selector exists for "first item in a wrapped
   flex row" to collapse it the way `:first-child` collapses the group's true first button. Visually
   marginal (not visible without zooming past ~3x); see [Selector Levels](#selector-levels).
-- Two declared `--dz-btn-*` tokens have no current CSS consumer: `--dz-btn-danger-bg-alpha` and
-  `--dz-btn-text-shadow` (the base rule applies a literal `text-shadow: none !important` instead of
-  the token). Candidates for removal in a future cleanup pass.
-- `--dz-nav-active-bg` and `--dz-nav-active-text` (`dz-tokens.css`) have no current CSS consumer
-  either: the whole menus family marks "you are here" with the unified accent-edge
-  underline/left-edge language, never a filled box (see
-  [Menus](#menus)). Same cleanup-candidate class as the `--dz-btn-*` pair above.
+- (Resolved 2026-08-16: the four declared-but-unconsumed tokens flagged here,
+  `--dz-btn-danger-bg-alpha`, `--dz-btn-text-shadow` and the `--dz-nav-active-bg`/`-text` pair,
+  were removed from `dz-tokens.css` in the dead-token cleanup pass.)
 - The legacy `#login #submit` button (old pre-glass-morphism login markup, `css/login.css`) still has
   a raw `border-radius: 5px`. The current login page (`views/login.html`) uses `.btn-modern` instead,
   which is fully on the 10px token; this raw rule only affects the superseded markup kept for older

@@ -325,7 +325,6 @@
     --dz-btn-primary-text:    var(--dz-accent-text);
     --dz-btn-info-bg:         var(--dz-accent-color);
     --dz-btn-danger-bg:       var(--dz-accent-red);
-    --dz-btn-danger-bg-alpha: rgba(var(--dz-accent-red-values), 0.85);
     --dz-btn-bg:              var(--dz-widget-bg);
     --dz-btn-text:            var(--dz-body-text);
     --dz-btn-border:          var(--dz-input-border);
@@ -374,7 +373,6 @@
     --dz-btn-line-height:     20px; /* one text-box height; with border-box + the
                                        transparent-border trick, same-tier buttons
                                        measure identical heights everywhere */
-    --dz-btn-text-shadow:     none;
     --dz-btn-disabled-bg:     var(--dz-status-disabled);
     --dz-btn-disabled-text:   var(--secondary-text-color);
 
@@ -413,10 +411,7 @@
          (".navbar .nav .current_page_item > a" and ".navbar .nav
          .dropdown-menu .current_page_item > a") all consume this one token
          for their background, keeping the "no fill" semantic explicit
-         instead of hardcoding the literal. --dz-nav-active-bg and
-         --dz-nav-active-text (below) are dead: nothing in the family
-         consumes either now that these bare-border rules replaced their
-         fill (see Gaps in DESIGN.md).
+         instead of hardcoding the literal.
        - --dz-menu-separator: divider between stacked items, consumed by
          css/sidemenu.css's ".navbar .nav > li" border-bottom.
        - --dz-menu-radius: floating-menu container corner radius (css/nav.css
@@ -436,18 +431,6 @@
     --dz-menu-separator:       var(--dz-status-disabled);
     --dz-menu-radius:          6px;
     --dz-menu-shadow:          var(--dz-elev-popup);
-
-    /* "You are here" navbar tint: the top-level navbar tab marks the active
-       route with a translucent accent tint over body text (css/nav.css), not
-       a solid fill. A Setup dropdown entry marked as the current route
-       (core's .current_page_item) is the SAME semantic state at a different
-       nesting depth, so both consume this one pair instead of nav.css
-       hardcoding the value while buttons.css invents an unrelated solid
-       --dz-btn-toggle-selected-* fill for what is really the identical
-       marker. Derived from the existing accent/body-text tokens
-       (derive-not-copy), not a new colour. */
-    --dz-nav-active-bg:       rgba(var(--dz-accent-values), 0.4);
-    --dz-nav-active-text:     var(--dz-body-text);
 }
 
 /*
