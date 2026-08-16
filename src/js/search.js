@@ -39,7 +39,13 @@ function searchFunction() {
 			element.toggle(visibility);
 		}
     });
-    $("div.row.divider, #dashcontent div.row").show();
+    /* Scoped like the section reveal below, and for the same reason: this
+       runs on every live device_update push via searchFunction, on EVERY
+       page. An unscoped div.row.divider would re-show hidden rows anywhere
+       in the document; the only rows search itself ever hides live in the
+       three search surfaces (weather/temp rows via element.toggle on the
+       parent, classic dashboard rows via removeEmptySectionDashboard). */
+    $("#weatherwidgets div.row.divider, #tempwidgets div.row.divider, #dashcontent div.row").show();
     // Scoped to #dashcontent: this undoes whatever removeEmptySectionDashboard
     // hid on the PREVIOUS keyup, before recomputing below, so it only ever
     // needs the same container that function already scopes to. An unscoped
