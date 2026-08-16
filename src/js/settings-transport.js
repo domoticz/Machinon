@@ -212,17 +212,20 @@ function dzApiLoad() {
    setInterval mechanism as checkAngular -- but bounded, unlike
    checkAngular's unconditional poll-forever: checkAngular has nothing to
    fall back to if Angular never boots, while this path already has a safe
-   default (treat as non-admin, skip, retry next load), so capping at ~30
-   attempts (~3s, generous against a real Angular bootstrap) lets a
-   genuinely anonymous/non-admin viewer resolve promptly instead of leaving
-   a dangling timer for the rest of the page's life. Never rejects. */
+   default (treat as non-admin, skip, retry next load), so capping at ~50
+   attempts (~5s) lets a genuinely anonymous/non-admin viewer resolve
+   promptly instead of leaving a dangling timer for the rest of the page's
+   life. The cap was 30 (~3s), but the measured Angular boot is ~3.5s on
+   the rig alone, so a slow production boot could misclassify an admin as
+   non-admin for the session and silently skip the seed/migration path.
+   Never rejects. */
 function dzWaitForAdminKnown() {
     if (window.my_config) return Promise.resolve(dzIsAdmin());
     return new Promise(function(resolve) {
         var attempts = 0;
         var poll = setInterval(function() {
             attempts++;
-            if (window.my_config || attempts >= 30) {
+            if (window.my_config || attempts >= 50) {
                 clearInterval(poll);
                 resolve(dzIsAdmin());
             }
