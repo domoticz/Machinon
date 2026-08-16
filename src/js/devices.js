@@ -55,16 +55,21 @@ function setCorrectDashboardLinksforMobile() {
 }
 
 /* Localized switch state labels, shared by every consumer (switch.js and the
-   helpers below). Recomputed per call on purpose: $.t only returns translated
-   strings once core's i18n is initialized, so caching the first result could
-   freeze untranslated labels. */
+   helpers below). Per-tick memo: $.t lookups are cheap but not free at 138
+   cards x several calls. Cleared on the next macrotask so late i18n init
+   can never freeze untranslated labels (the reason switchLabels recomputes
+   at all). */
+var dzLabelsMemo = null;
 function switchLabels() {
-    return {
+    if (dzLabelsMemo) return dzLabelsMemo;
+    dzLabelsMemo = {
         on: $.t("On"),
         off: $.t("Off"),
         open: $.t("Open"),
         closed: $.t("Closed")
     };
+    setTimeout(function() { dzLabelsMemo = null; }, 0);
+    return dzLabelsMemo;
 }
 
 /* Core's toggleability vocabulary, mirrored from dzLightWidget.js
@@ -285,6 +290,12 @@ function setAllDevicesFeatures() {
         }
         $(this).find("tr").attr('data-idx', idx);
 
+        /* The card's own rows, resolved once here and threaded into every
+           helper call below instead of each helper re-querying
+           tr[data-idx] globally: that global query is O(all cards) per
+           call, which made this pass O(n^2) at page size. */
+        var $trs = $(this).find("tr");
+
         /* Remove native title tooltip - our CSS ::after tooltip handles it */
         $(this).find("#name").removeAttr("title");
 
@@ -295,10 +306,10 @@ function setAllDevicesFeatures() {
         }
 
         /* Apply style and redefine options */
-        setDeviceOptions(idx);
+        setDeviceOptions(idx, $trs);
 
         /* Feature - Fade off items */
-        setDeviceOpacity(idx, status);
+        setDeviceOpacity(idx, status, $trs);
 
         /* Feature - Show timeago for last update */
         var lastupd;
@@ -309,10 +320,10 @@ function setAllDevicesFeatures() {
                livestamp text like "18 hours ago" which moment can't parse */
         } else if (theme.features.time_ago.enabled === true) {
             lastupd = lastupdateEl.text();
-            setDeviceLastUpdate(idx, lastupd);
+            setDeviceLastUpdate(idx, lastupd, $trs);
         } else {
             lastupd = moment(lastupdateEl.text(), [ "YYYY-MM-DD HH:mm:ss", "L LT" ]).format();
-            setDeviceLastUpdate(idx, lastupd);
+            setDeviceLastUpdate(idx, lastupd, $trs);
         }
 
         /* Feature - Switch instead of text */
@@ -338,12 +349,12 @@ function setAllDevicesFeatures() {
 
         /* Feature - Set custom icons */
         if (theme.features.icon_image.enabled === true) {
-            setDeviceCustomIcon(idx, status);
+            setDeviceCustomIcon(idx, status, $trs);
         }
 
         /* Feature - Show wind direction */
         if (theme.features.wind_direction.enabled === true) {
-            setDeviceWindDirectionIcon(idx);
+            setDeviceWindDirectionIcon(idx, undefined, $trs);
         }
 	});
 
@@ -380,9 +391,13 @@ function setAllDevicesIconsStatus() {
     });
 }
 
-function setDeviceOptions(idx) {
-    let tr = "tr[data-idx='" + idx + "']";
-    $(tr).each(function() {
+/* $trs: the card's own tr set when the caller already holds it (the
+   enhancement passes), else resolved by idx (live-update handlers). The
+   global query is O(all cards) per call, which made the initial pass
+   O(n^2) at page size. */
+function setDeviceOptions(idx, $trs) {
+    var rows = ($trs && $trs.length) ? $trs : $("tr[data-idx='" + idx + "']");
+    rows.each(function() {
         /* Create options menu */
         let subnav = $(this).find(".options");
         let subnavButton = $(this).find(".options-cell");
@@ -429,8 +444,8 @@ function setDeviceOptions(idx) {
                    Matched without the first letter: light widgets call
                    makeFavorite(n), weather/temperature call MakeFavorite(n). */
                 var clickTarget = currentlyFav
-                    ? $(tr).find('.options img[ng-click*="akeFavorite(0)"]')
-                    : $(tr).find('.options img[ng-click*="akeFavorite(1)"]');
+                    ? rows.find('.options img[ng-click*="akeFavorite(0)"]')
+                    : rows.find('.options img[ng-click*="akeFavorite(1)"]');
                 if (!clickTarget.length) { return; }
                 clickTarget.click();
                 /* Update star icon after toggle (only when the toggle really fired,
@@ -447,18 +462,22 @@ function setDeviceOptions(idx) {
     });
 }
 
-function setDeviceCustomIcon(idx, status) {
+/* $trs: the card's own tr set when the caller already holds it (the
+   enhancement passes), else resolved by idx (live-update handlers). The
+   global query is O(all cards) per call, which made the initial pass
+   O(n^2) at page size. */
+function setDeviceCustomIcon(idx, status, $trs) {
     var switchState = switchLabels();
+    var rows = ($trs && $trs.length) ? $trs : $("tr[data-idx='" + idx + "']");
 
     var icons = theme.icons;
     for (var i = 0; i < icons.length; i++) {
         if (icons[i].idx == idx) {
-            let tr = "tr[data-idx='" + idx + "']";
-            $(tr).find("#img img").attr("src", "images/" + icons[i].img);
+            rows.find("#img img").attr("src", "images/" + icons[i].img);
             if (status == switchState.on || status == 'On') {
-                $(tr).find("#img img").addClass("userOn");
+                rows.find("#img img").addClass("userOn");
             } else {
-                $(tr).find("#img img").addClass("user");
+                rows.find("#img img").addClass("user");
             }
         }
     }
@@ -468,9 +487,13 @@ function setDeviceCustomIcon(idx, status) {
    match that shape exactly. The old substring selector ([src*='Wind']) hijacked
    ANY icon containing "Wind": a device with the built-in Window picker icon got
    rewritten to images/wind-direction/Window48_On.png, a 404. */
-function setDeviceWindDirectionIcon(idx, direction) {
-    let tr = "tr[data-idx='" + idx + "']";
-    $(tr).find("#img img").each(function() {
+/* $trs: the card's own tr set when the caller already holds it (the
+   enhancement passes), else resolved by idx (live-update handlers). The
+   global query is O(all cards) per call, which made the initial pass
+   O(n^2) at page size. */
+function setDeviceWindDirectionIcon(idx, direction, $trs) {
+    var rows = ($trs && $trs.length) ? $trs : $("tr[data-idx='" + idx + "']");
+    rows.find("#img img").each(function() {
         var src = $(this).attr("src") || "";
         if (direction === undefined) {
             var m = src.match(/images\/Wind([A-Z]{1,3})\.png$/);
@@ -482,9 +505,11 @@ function setDeviceWindDirectionIcon(idx, direction) {
     });
 }
 
-function setDeviceLastUpdate(idx, lastupdate) {
-    let tr = "tr[data-idx='" + idx + "']";
-
+/* $trs: the card's own tr set when the caller already holds it (the
+   enhancement passes), else resolved by idx (live-update handlers). The
+   global query is O(all cards) per call, which made the initial pass
+   O(n^2) at page size. */
+function setDeviceLastUpdate(idx, lastupdate, $trs) {
     /* Strip "Last Seen:" or similar prefix - extract date portion */
     if (typeof lastupdate === "string") {
         var dateMatch = lastupdate.match(/\d{4}[-/]\d{2}[-/]\d{2}[\sT]\d{2}:\d{2}:\d{2}/);
@@ -495,7 +520,8 @@ function setDeviceLastUpdate(idx, lastupdate) {
     if (moment(lastupdate).isAfter(moment()))
         lastupdate = moment();
 
-    $(tr).each(function() {
+    var rows = ($trs && $trs.length) ? $trs : $("tr[data-idx='" + idx + "']");
+    rows.each(function() {
         let lastupdateEl = $(this).find("#lastupdate");
         /* Core renders its bar-ranges strip (<dz-bar>, views/widgets/utility_widget.html)
            inside this same cell. Rewriting the cell with .html()/.text() destroys that live
@@ -523,15 +549,19 @@ function setDeviceLastUpdate(idx, lastupdate) {
     });
 }
 
-function setDeviceOpacity(idx, status) {
+/* $trs: the card's own tr set when the caller already holds it (the
+   enhancement passes), else resolved by idx (live-update handlers). The
+   global query is O(all cards) per call, which made the initial pass
+   O(n^2) at page size. */
+function setDeviceOpacity(idx, status, $trs) {
     var switchState = switchLabels();
 
     if (theme.features.fade_off_items.enabled === true) {
-        let tr = "tr[data-idx='" + idx + "']";
+        var rows = ($trs && $trs.length) ? $trs : $("tr[data-idx='" + idx + "']");
         if (status === switchState.off  || status === 'Off' || status === switchState.closed || status === 'Closed') {
-            $(tr).parents(".item").addClass("fadeOff");
+            rows.parents(".item").addClass("fadeOff");
         } else {
-            $(tr).parents(".item").removeClass("fadeOff");
+            rows.parents(".item").removeClass("fadeOff");
         }
     }
 }
