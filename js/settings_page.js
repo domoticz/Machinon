@@ -210,7 +210,14 @@ if (mSettings.length > 0) {
 
     // Registered unconditionally: this file can execute before Angular has
     // booted, so dzRoutesActive is not settled yet; the handler re-checks it per
-    // call and is a no-op without routes.
+    // call and is a no-op without routes. Re-enabling the feature re-executes
+    // this whole file (feature-loader), so drop the previous registration
+    // first: the stale closure held a dead mSettings node and the duplicates
+    // accumulated once per toggle cycle.
+    if (window.dzSyncSettingsMenuActive) {
+        window.removeEventListener("hashchange", window.dzSyncSettingsMenuActive);
+    }
+    window.dzSyncSettingsMenuActive = syncSettingsMenuActive;
     window.addEventListener("hashchange", syncSettingsMenuActive);
     syncSettingsMenuActive();
 

@@ -3,7 +3,7 @@
     "name": "Machinon",
     "description": "Modern Domoticz theme: color schemes, Theme Hub settings, refreshed icons, light and dark",
     "license": "GNU General Public License v3.0",
-    "version":"2.0.2",
+    "version":"2.0.3",
     "author": "EdddieN",
     "homepage": "https://www.github.com/domoticz/Machinon",
     "wiki": "https://www.domoticz.com/wiki/Machinon_Theme",
@@ -12,11 +12,7 @@
     "logo": "",
     "custom_url": "https://www.domoticz.com",
     "button_name": "Domoticz",
-    "icons": [
-        {"idx":"36","img":"IMG_0138.jpg"},
-        {"idx":"38","img":"IMG_0137.jpg"},
-        {"idx":"94","img":"IMG_0263.JPG"}
-        ],
+    "icons": [],
     "background_img":"",
     "background_type":"",
     "card_min_width": 320,

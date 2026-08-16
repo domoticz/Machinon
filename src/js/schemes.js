@@ -78,6 +78,16 @@ function migrateRetiredScheme() {
    localStorage, and the async DB round-trip on the next full reload would
    silently revert it. */
 function persistSchemeChoice() {
+    /* Route through the hub's write funnel when it exists: dzHubPersist adds
+       the reactive no_identity lock every other hub write already gets, and
+       scheme picks used to bypass it (an application-token session's pick
+       failed silently without locking the hub). theme-hub.js loads after
+       this module in THEME_MODULES, but a pick only happens long after
+       boot; the direct legacy call stays as the fallback. */
+    if (typeof dzHubPersist === "function") {
+        dzHubPersist();
+        return;
+    }
     if (typeof storeUserVariableThemeSettings === "function") {
         storeUserVariableThemeSettings("update");
     }

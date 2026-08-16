@@ -8,6 +8,24 @@
    timers spinning for the whole session when their element never appeared. */
 var domWaiters = {};
 function whenElementRenders(key, selector, fn) {
+    /* Boot race guard: custom.js injects THEME_MODULES as async=false
+       scripts, which can execute while the parser is still blocked on
+       js/require.min.js, i.e. before <body> exists. In that state the
+       observe() below got null and its TypeError aborted the CALLER's whole
+       module init (the intermittently missing Theme menu entry, prod
+       2.0.2). While the document is still parsing, defer the whole check
+       to DOMContentLoaded: every boot-time caller targets static
+       index.html markup, so the immediate path hits there, and a waiter
+       armed at DOM-ready can never observe a mid-parse, half-built menu
+       (the second, fail-closed-forever variant of the same race). The
+       observer path below stays for genuinely dynamic content
+       (#iconsmain). */
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", function() {
+            whenElementRenders(key, selector, fn);
+        });
+        return;
+    }
     if ($(selector).length) {
         fn();
         return;
@@ -121,22 +139,45 @@ function applyNavbarIconsText() {
 // (js/domoticz.js, ShowRGBWPopupInt: top = mouseY, left = mouseX + 15), so a popup opened
 // near the bottom or right edge is partly unreachable. Nudge it back into view whenever core
 // shows or moves it. Mitigation for a core behavior; drop this when core clamps.
+var corePopupClampArmed = false;
 function clampCorePopups() {
-    ["rgbw_popup", "setpoint_popup", "thermostat3_popup", "rfy_popup"].forEach(function (id) {
+    var CORE_POPUP_IDS = ["rgbw_popup", "setpoint_popup", "thermostat3_popup", "rfy_popup"];
+    function nudgeIntoViewport(pop) {
+        if (pop.style.display === "none") return;
+        var r = pop.getBoundingClientRect();
+        if (!r.width) return;
+        // Already-clamped popups yield dx = dy = 0, so the style write below cannot loop.
+        var dx = Math.min(0, window.innerWidth - 10 - r.right);
+        var dy = Math.min(0, window.innerHeight - 10 - r.bottom);
+        if (dx || dy) {
+            pop.style.left = Math.max(10, r.left + dx + window.scrollX) + "px";
+            pop.style.top = Math.max(10, r.top + dy + window.scrollY) + "px";
+        }
+    }
+    CORE_POPUP_IDS.forEach(function (id) {
         var pop = document.getElementById(id);
         if (!pop) return;
         new MutationObserver(function () {
-            if (pop.style.display === "none") return;
-            var r = pop.getBoundingClientRect();
-            if (!r.width) return;
-            // Already-clamped popups yield dx = dy = 0, so the style write below cannot loop.
-            var dx = Math.min(0, window.innerWidth - 10 - r.right);
-            var dy = Math.min(0, window.innerHeight - 10 - r.bottom);
-            if (dx || dy) {
-                pop.style.left = Math.max(10, r.left + dx + window.scrollX) + "px";
-                pop.style.top = Math.max(10, r.top + dy + window.scrollY) + "px";
-            }
+            nudgeIntoViewport(pop);
         }).observe(pop, { attributes: true, attributeFilter: ["style"] });
+    });
+    // Re-clamp on window resize too (debounced ~100ms, armFlyoutContainment's
+    // idiom): a popup left open across a resize keeps coordinates computed for
+    // the previous viewport size. Armed once; only popups core is currently
+    // showing get touched. The resize nudge's own style write re-fires the
+    // observer above, but a second nudge on an already-clamped popup is a
+    // no-op (dx = dy = 0), so it settles immediately.
+    if (corePopupClampArmed) return;
+    corePopupClampArmed = true;
+    var resizeTimer = null;
+    window.addEventListener("resize", function () {
+        if (resizeTimer) clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () {
+            CORE_POPUP_IDS.forEach(function (id) {
+                var pop = document.getElementById(id);
+                if (pop) nudgeIntoViewport(pop);
+            });
+        }, 100);
     });
 }
 
@@ -173,9 +214,7 @@ function clampCorePopups() {
 // change) keeps whatever "top" offset was computed for the PREVIOUS viewport size,
 // which can under- or over-correct once the viewport actually changes. Only menus
 // Bootstrap is currently showing (display !== "none") are touched; nothing recomputes
-// for closed ones. clampCorePopups (above) has the same "no resize handling" gap for
-// core's device popups; that's pre-existing and out of this function's scope, not
-// fixed here.
+// for closed ones. clampCorePopups (above) re-arms across resizes the same way.
 var flyoutContainmentArmed = false;
 function armFlyoutContainment() {
     if (flyoutContainmentArmed) return; // re-entrancy guard: never double-bind
@@ -236,8 +275,9 @@ function ajaxSuccessCallback(event, xhr, settings) {
 
     /* No per-request enhancement here for getdevices/getscenes: the cards
        those responses produce render in a later Angular digest, and the
-       MutationObserver in devices.js already re-enhances when they appear
-       (setAllDevicesFeatures on unprocessed items, plus the mobile passes). */
+       MutationObserver in devices.js already enhances when they appear
+       (the visible enhancement stage runs on every flush, the deferred stage
+       follows within ~300ms, plus the mobile passes). */
     if (settings.url.startsWith("json.htm?type=command&param=switchscene")) {
         let id = settings.url.split("&")[2];
         id = id.substr(4);
