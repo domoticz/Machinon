@@ -12,11 +12,7 @@
     "logo": "",
     "custom_url": "https://www.domoticz.com",
     "button_name": "Domoticz",
-    "icons": [
-        {"idx":"36","img":"IMG_0138.jpg"},
-        {"idx":"38","img":"IMG_0137.jpg"},
-        {"idx":"94","img":"IMG_0263.JPG"}
-        ],
+    "icons": [],
     "background_img":"",
     "background_type":"",
     "card_min_width": 320,
