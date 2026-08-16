@@ -17,6 +17,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 ### Fixed
 
 - The Theme entry no longer intermittently disappears from the Setup and Other menus after a slow page load; the same fix restores the distinct Setup dropdown icons on those loads.
+- Fresh installs no longer request three non-existent example icon images on every load (the custom-icons default list is now empty; your own stored icon settings are untouched).
 
 ## [2.0.2] - 2026-08-14
 
