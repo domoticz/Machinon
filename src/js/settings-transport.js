@@ -184,7 +184,15 @@ function dzApiLoad() {
         if (outcome !== DZ_LOAD_LOADED) return outcome;
         if (dzApiState.instanceSnap) dzApplySnapshot(theme, dzApiState.instanceSnap);
         if (dzApiState.userSnap) dzApplySnapshot(theme, dzSnapshotSubset(dzApiState.userSnap, "user"));
-        cacheThemeSettings();
+        /* localStorage can throw here (private-browsing quota). The cache is
+           only the warm-boot fast path and the snapshots are already applied,
+           so a failed write must not reject this load: a rejection would
+           skip the boot's visual appliers for the session. */
+        try {
+            cacheThemeSettings();
+        } catch (e) {
+            console.warn("machinon_themesettings", "cache_write_failed", "continuing uncached: " + ((e && e.message) || e));
+        }
         return DZ_LOAD_LOADED;
     });
 }
