@@ -442,18 +442,18 @@ main > section[id] { scroll-margin-top: 4.5rem; }
 
 /* Row 2, column 1: the 48px device icon column, 40px image, bottom aligned.
 
-   No horizontal padding here, deliberately. cards.css does pad this cell, but
-   there the padding is inert: core has no max-width clamp on card images, so a
-   40px icon simply overflows the 28px padding box and still paints 40x40,
-   centred in the 48px track. On this page the global `img { max-width: 100% }`
-   reset DOES clamp, against that same 28px box, and because the reset
-   constrains width only (height stays at the declared 40px) the icon painted
-   28x40: a squashed square, at every viewport width. Dropping the padding and
-   centring reproduces the theme's RENDERED geometry, which is what the section
-   claims, rather than copying a declaration whose effect differs here. */
+   History: this cell once had NO padding at all, because the theme's own
+   cards.css padding interacted badly with this page's global
+   `img { max-width: 100% }` reset (the reset clamps width only, so a 40px
+   icon painted 28x40, a squashed square). That squash is now impossible: the
+   `.dc-img img` rule below pins both dimensions with `max-width: none`. What
+   the no-padding version got wrong instead was the card's left gutter; the
+   real theme's icon never touches the card edge (owner-reported 2026-08-16),
+   so the cell now carries the same left inset as .dc-name above it. */
 .dc-img {
     grid-area: img;
     align-self: end;
+    padding-left: var(--site-card-space-lg);
     text-align: center;
     line-height: 0;
 }
@@ -607,6 +607,17 @@ button.switch {
     height: 5px;
     border-radius: 3px;
     background: var(--dz-input-border);
+}
+
+/* The hallway dimmer's slider is live (site/app.js wireDimmerCard).
+   touch-action: none keeps a drag on the track from scrolling the page on
+   touch screens; pointer capture in the JS does the rest. */
+#dimmer-slider {
+    cursor: pointer;
+    touch-action: none;
+}
+#dimmer-slider[aria-disabled="true"] {
+    cursor: default;
 }
 
 .slider-fill {

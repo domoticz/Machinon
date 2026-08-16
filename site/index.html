@@ -102,8 +102,9 @@
       <span class="section-label">Live, not a screenshot</span>
       <h2>Real Machinon cards</h2>
       <p class="section-desc">Built on the theme's own card grid, from the same design tokens it
-        ships. Pick any scheme above and they repaint with the rest of the page. Open the garage
-        door to see an icon swap to its other state.</p>
+        ships. Pick any scheme above and they repaint with the rest of the page. Flip the kitchen
+        lights, drag the hallway dimmer, or open the garage door: every state change swaps in the
+        icon library's real per-state artwork.</p>
     </div>
     <div class="device-grid">
 
@@ -118,30 +119,36 @@
         <span class="dc-tools"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 13h2V7H2zm4 0h2V3H6zm4 0h2V9h-2zm4 0h1.5V5H14z"/></svg><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2a6 6 0 100 12A6 6 0 008 2zm0 1.5A4.5 4.5 0 118 12.5 4.5 4.5 0 018 3.5zm-.75 1.75v3.5l3 1.8.75-1.25-2.25-1.35V5.25z"/></svg></span>
       </article>
 
-      <article class="device-card">
+      <article class="device-card" id="lights-card">
         <span class="dc-name">Kitchen lights</span>
-        <span class="dc-bigtext">On</span>
+        <span class="dc-bigtext" data-lights-value>On</span>
         <span class="dc-options"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg></span>
-        <span class="dc-img"><img src="assets/icons/Light48_On.png" alt="Light switch icon" width="40" height="40" loading="lazy"></span>
-        <span class="dc-status"><span class="switch is-on" role="img" aria-hidden="true"><span class="switch-knob"></span></span></span>
+        <span class="dc-img">
+          <img src="assets/icons/Light48_On.png" alt="Light switch icon" width="40" height="40" loading="lazy" data-lights-on>
+          <img src="assets/icons/Light48_Off.png" alt="" width="40" height="40" loading="lazy" data-lights-off hidden>
+        </span>
+        <span class="dc-status"><button type="button" class="switch is-on" id="lights-toggle" aria-pressed="true" aria-label="Kitchen lights" disabled><span class="switch-knob"></span></button></span>
         <span class="dc-favorite"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.6l1.9 4 4.4.6-3.2 3.1.8 4.4L8 11.6l-3.9 2.1.8-4.4L1.7 6.2l4.4-.6z"/></svg></span>
-        <span class="dc-lastupdate">14 minutes ago</span>
+        <span class="dc-lastupdate" data-lights-stamp>14 minutes ago</span>
         <span class="dc-tools"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 13h2V7H2zm4 0h2V3H6zm4 0h2V9h-2zm4 0h1.5V5H14z"/></svg><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2a6 6 0 100 12A6 6 0 008 2zm0 1.5A4.5 4.5 0 118 12.5 4.5 4.5 0 018 3.5zm-.75 1.75v3.5l3 1.8.75-1.25-2.25-1.35V5.25z"/></svg></span>
       </article>
 
-      <article class="device-card">
+      <article class="device-card" id="dimmer-card">
         <span class="dc-name">Hallway dimmer</span>
-        <span class="dc-bigtext">62%</span>
+        <span class="dc-bigtext" data-dimmer-value>62%</span>
         <span class="dc-options"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg></span>
         <!-- Deliberately NOT Dimmer48_On.png: the theme ships that file byte-identical
              to Light48_On.png (md5 adb53c81), so this card and Kitchen lights above would
              show the same bulb and read as a copy-paste bug. ReflectorBulb is a distinct
              spotlight shape from the same Blue UI pack. The duplication is being reported
              upstream; do not "correct" this back. -->
-        <span class="dc-img"><img src="assets/icons/machinon_ReflectorBulb48_On.png" alt="Spotlight bulb icon" width="40" height="40" loading="lazy"></span>
-        <span class="dc-status"><span class="dc-level">Level</span><span class="slider" role="img" aria-label="Level 62 percent"><span class="slider-fill"></span><span class="slider-knob"></span></span></span>
+        <span class="dc-img">
+          <img src="assets/icons/machinon_ReflectorBulb48_On.png" alt="Spotlight bulb icon" width="40" height="40" loading="lazy" data-dimmer-on>
+          <img src="assets/icons/machinon_ReflectorBulb48_Off.png" alt="" width="40" height="40" loading="lazy" data-dimmer-off hidden>
+        </span>
+        <span class="dc-status"><span class="dc-level">Level</span><span class="slider" id="dimmer-slider" role="slider" aria-label="Level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="62" aria-disabled="true"><span class="slider-fill"></span><span class="slider-knob"></span></span></span>
         <span class="dc-favorite"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.6l1.9 4 4.4.6-3.2 3.1.8 4.4L8 11.6l-3.9 2.1.8-4.4L1.7 6.2l4.4-.6z"/></svg></span>
-        <span class="dc-lastupdate">just now</span>
+        <span class="dc-lastupdate" data-dimmer-stamp>just now</span>
         <span class="dc-tools"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 13h2V7H2zm4 0h2V3H6zm4 0h2V9h-2zm4 0h1.5V5H14z"/></svg><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2a6 6 0 100 12A6 6 0 008 2zm0 1.5A4.5 4.5 0 118 12.5 4.5 4.5 0 018 3.5zm-.75 1.75v3.5l3 1.8.75-1.25-2.25-1.35V5.25z"/></svg></span>
       </article>
 
@@ -243,6 +250,20 @@
     </div>
     <figure class="showcase-shot">
       <img src="docs/screenshots/icon-packs.png" width="1440" height="900" alt="The icon pack installer in the Theme Hub" loading="lazy">
+    </figure>
+  </section>
+
+  <section class="showcase" id="floorplan">
+    <div class="section-head">
+      <span class="section-label">Floorplans</span>
+      <h2>The whole house at a glance</h2>
+      <p class="section-desc">Domoticz floorplans, restyled to match: live device icons,
+        readings and states drawn over your own plans. Click a device for its control
+        popup; an optional theme setting makes that popup expandable, adding Log and
+        Notifications shortcuts right on the plan.</p>
+    </div>
+    <figure class="showcase-shot">
+      <img src="docs/screenshots/floorplan.png" width="1440" height="900" alt="A floorplan with live device icons and temperature readings" loading="lazy">
     </figure>
   </section>
 

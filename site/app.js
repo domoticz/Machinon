@@ -114,13 +114,14 @@
         });
     }
 
-    /* The garage card is the only interactive demo. One click proves three
-       things at once: the card is the theme's real layout, the icon library
-       carries per-state artwork, and icons are chosen per device.
+    /* Three cards are interactive demos (lights, dimmer, garage). Each click
+       proves the same three things: the card is the theme's real layout, the
+       icon library carries per-state artwork, and icons are chosen per
+       device.
 
-       Both PNGs are already in the DOM with one hidden, so the swap is a
-       display toggle and never waits on a fetch. site/style.css carries the
-       img[hidden] rule that makes hiding an <img> work at all here. */
+       Both PNGs of a pair are already in the DOM with one hidden, so a swap
+       is a display toggle and never waits on a fetch. site/style.css carries
+       the img[hidden] rule that makes hiding an <img> work at all here. */
     function wireGarageCard() {
         var card = byId('garage-card');
         var button = byId('garage-toggle');
@@ -160,6 +161,97 @@
            support needs no extra key handling. */
         button.addEventListener('click', function () {
             render(button.getAttribute('aria-pressed') !== 'true');
+        });
+    }
+
+    /* Kitchen lights: the garage's swap pattern on the pack's Light48 pair. */
+    function wireLightsCard() {
+        var card = byId('lights-card');
+        var button = byId('lights-toggle');
+        if (!card || !button) { return; }
+
+        var onImg = card.querySelector('[data-lights-on]');
+        var offImg = card.querySelector('[data-lights-off]');
+        var value = card.querySelector('[data-lights-value]');
+        var stamp = card.querySelector('[data-lights-stamp]');
+        if (!onImg || !offImg || !value || !stamp) { return; }
+
+        button.disabled = false;
+
+        function render(isOn) {
+            button.setAttribute('aria-pressed', isOn ? 'true' : 'false');
+            if (isOn) { button.classList.add('is-on'); }
+            else { button.classList.remove('is-on'); }
+            onImg.hidden = !isOn;
+            offImg.hidden = isOn;
+            value.textContent = isOn ? 'On' : 'Off';
+            stamp.textContent = 'just now';
+        }
+
+        button.addEventListener('click', function () {
+            render(button.getAttribute('aria-pressed') !== 'true');
+        });
+    }
+
+    /* Hallway dimmer: a draggable level. Pointer events cover mouse and
+       touch in one path; arrow keys serve keyboard users. At 0% the bulb
+       swaps to its off artwork, as the theme's own dimmer cards do. Ships
+       aria-disabled and unfocusable in the markup for JS-less visitors,
+       mirroring the toggles' disabled attribute. */
+    function wireDimmerCard() {
+        var card = byId('dimmer-card');
+        var slider = byId('dimmer-slider');
+        if (!card || !slider) { return; }
+
+        var fill = slider.querySelector('.slider-fill');
+        var knob = slider.querySelector('.slider-knob');
+        var onImg = card.querySelector('[data-dimmer-on]');
+        var offImg = card.querySelector('[data-dimmer-off]');
+        var value = card.querySelector('[data-dimmer-value]');
+        var stamp = card.querySelector('[data-dimmer-stamp]');
+        if (!fill || !knob || !onImg || !offImg || !value || !stamp) { return; }
+
+        slider.removeAttribute('aria-disabled');
+        slider.tabIndex = 0;
+
+        var level = 62;
+
+        function render(next) {
+            level = Math.max(0, Math.min(100, Math.round(next)));
+            fill.style.inset = '0 ' + (100 - level) + '% 0 0';
+            knob.style.left = level + '%';
+            slider.setAttribute('aria-valuenow', String(level));
+            value.textContent = level === 0 ? 'Off' : level + '%';
+            onImg.hidden = level === 0;
+            offImg.hidden = level !== 0;
+            stamp.textContent = 'just now';
+        }
+
+        function levelFromEvent(event) {
+            var rect = slider.getBoundingClientRect();
+            return ((event.clientX - rect.left) / rect.width) * 100;
+        }
+
+        var dragging = false;
+        slider.addEventListener('pointerdown', function (event) {
+            dragging = true;
+            slider.setPointerCapture(event.pointerId);
+            render(levelFromEvent(event));
+            event.preventDefault();
+        });
+        slider.addEventListener('pointermove', function (event) {
+            if (dragging) { render(levelFromEvent(event)); }
+        });
+        slider.addEventListener('pointerup', function () { dragging = false; });
+        slider.addEventListener('pointercancel', function () { dragging = false; });
+        slider.addEventListener('keydown', function (event) {
+            if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') {
+                render(level - 5);
+                event.preventDefault();
+            } else if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
+                render(level + 5);
+                event.preventDefault();
+            }
         });
     }
 
@@ -230,5 +322,7 @@
     wireReveals();
     wireCopyButtons();
     wireGarageCard();
+    wireLightsCard();
+    wireDimmerCard();
     applyScheme(defaultScheme());
 }());

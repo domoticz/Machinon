@@ -8,6 +8,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 - Machinon now has a website with a full manual at https://domoticz.github.io/Machinon/, covering installation, the Theme Hub, color schemes, icon packs, mobile layouts, every setting, and troubleshooting.
 - The manual gained a Bar ranges guide (setting colored value bands on utility devices, and the theme's range bands on Log charts), and the README, manual, and website now show the floorplan and weather pages.
+- The website's demo cards are more alive: the kitchen lights toggle, the hallway dimmer drags (its bulb switches off at 0%), and the card icons sit on the same left gutter as the real theme.
 
 ## [2.0.2] - 2026-08-14
 
