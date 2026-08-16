@@ -427,12 +427,16 @@ function setAllDevicesIconsStatus() {
     });
 }
 
-/* $trs: the card's own tr set when the caller already holds it (the
-   enhancement passes), else resolved by idx (live-update handlers). The
-   global query is O(all cards) per call, which made the initial pass
-   O(n^2) at page size. */
+/* Shared row resolution for the per-card helpers. $trs: the card's own tr
+   set when the caller already holds it (the enhancement passes), else
+   resolved by idx (live-update handlers). The global query is O(all cards)
+   per call, which made the initial pass O(n^2) at page size. */
+function resolveRows(idx, $trs) {
+    return ($trs && $trs.length) ? $trs : $("tr[data-idx='" + idx + "']");
+}
+
 function setDeviceOptions(idx, $trs) {
-    var rows = ($trs && $trs.length) ? $trs : $("tr[data-idx='" + idx + "']");
+    var rows = resolveRows(idx, $trs);
     rows.each(function() {
         /* Create options menu */
         let subnav = $(this).find(".options");
@@ -504,7 +508,7 @@ function setDeviceOptions(idx, $trs) {
    O(n^2) at page size. */
 function setDeviceCustomIcon(idx, status, $trs) {
     var switchState = switchLabels();
-    var rows = ($trs && $trs.length) ? $trs : $("tr[data-idx='" + idx + "']");
+    var rows = resolveRows(idx, $trs);
 
     var icons = theme.icons;
     for (var i = 0; i < icons.length; i++) {
@@ -532,7 +536,7 @@ function setDeviceCustomIcon(idx, status, $trs) {
    global query is O(all cards) per call, which made the initial pass
    O(n^2) at page size. */
 function setDeviceWindDirectionIcon(idx, direction, $trs) {
-    var rows = ($trs && $trs.length) ? $trs : $("tr[data-idx='" + idx + "']");
+    var rows = resolveRows(idx, $trs);
     rows.find("#img img").each(function() {
         var src = $(this).attr("src") || "";
         if (direction === undefined) {
@@ -560,7 +564,7 @@ function setDeviceLastUpdate(idx, lastupdate, $trs) {
     if (moment(lastupdate).isAfter(moment()))
         lastupdate = moment();
 
-    var rows = ($trs && $trs.length) ? $trs : $("tr[data-idx='" + idx + "']");
+    var rows = resolveRows(idx, $trs);
     rows.each(function() {
         let lastupdateEl = $(this).find("#lastupdate");
         /* Core renders its bar-ranges strip (<dz-bar>, views/widgets/utility_widget.html)
@@ -597,7 +601,7 @@ function setDeviceOpacity(idx, status, $trs) {
     var switchState = switchLabels();
 
     if (theme.features.fade_off_items.enabled === true) {
-        var rows = ($trs && $trs.length) ? $trs : $("tr[data-idx='" + idx + "']");
+        var rows = resolveRows(idx, $trs);
         if (status === switchState.off  || status === 'Off' || status === switchState.closed || status === 'Closed') {
             rows.parents(".item").addClass("fadeOff");
         } else {
@@ -735,8 +739,17 @@ function initDeviceObserver() {
            idempotent, so this replaces both the old unprocessed-items
            branch and the per-item switch/options re-apply loop. */
         if ($("#main-view").find(".item").length > 0) {
-            dzRunDevicePass("visible");
-            dzScheduleDeferredPass();
+            /* Contained like the subscriber loop below: a deterministically
+               throwing card must not abort the flush, because everything
+               after this block (subscriber flush, takeRecords drain) keeps
+               the observer healthy; skipping the drain would re-trigger
+               this handler on its own writes in a ~50ms loop. */
+            try {
+                dzRunDevicePass("visible");
+                dzScheduleDeferredPass();
+            } catch (e) {
+                console.warn("visible device pass threw", e);
+            }
         }
         domSettledCallbacks.forEach(function(callback, index) {
             try {
