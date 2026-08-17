@@ -1109,8 +1109,8 @@
    "name": "Mailbox Color",
    "description": "Mail waiting (native) / empty (grey)",
    "tab": "color",
-   "on_sig": "2737-7d94e35e",
-   "off_sig": "2240-68b055fb"
+   "on_sig": "2834-ffbd1255",
+   "off_sig": "2187-49b17928"
   },
   {
    "base": "machinon_Man",
