@@ -97,6 +97,22 @@
    "off_sig": "6307-bd6b2d6a"
   },
   {
+   "base": "machinon_Automatic",
+   "name": "Automatic",
+   "description": "Automatic mode on / off (grey)",
+   "tab": "blue",
+   "on_sig": "5363-a07c0455",
+   "off_sig": "4601-8edb5ee6"
+  },
+  {
+   "base": "machinon_Automatic-color",
+   "name": "Automatic Color",
+   "description": "Automatic mode on / off (grey)",
+   "tab": "color",
+   "on_sig": "5216-d0860df3",
+   "off_sig": "4683-3149a636"
+  },
+  {
    "base": "machinon_Avengers",
    "name": "Avengers",
    "description": "Avengers logo",
@@ -163,7 +179,7 @@
   {
    "base": "machinon_BatteryCharging-color",
    "name": "Battery Charging Color",
-   "description": "Charging / charged",
+   "description": "Charging (on) / charged (off)",
    "tab": "color",
    "on_sig": "1663-4156fb47",
    "off_sig": "767-23611a6e"
@@ -171,7 +187,7 @@
   {
    "base": "machinon_Battery-color",
    "name": "Battery Color",
-   "description": "Battery, full charge",
+   "description": "Battery charged (on) / empty (off)",
    "tab": "color",
    "on_sig": "767-23611a6e",
    "off_sig": "772-9671d439"
@@ -187,7 +203,7 @@
   {
    "base": "machinon_BatteryLow-color",
    "name": "Battery Low Color",
-   "description": "Low battery (red) / ok (grey)",
+   "description": "Low battery (native) / ok (grey)",
    "tab": "color",
    "on_sig": "884-0a21f074",
    "off_sig": "794-62063ade"
@@ -210,8 +226,8 @@
   },
   {
    "base": "machinon_Blinds-color",
-   "name": "blinds Color",
-   "description": "blinds",
+   "name": "Blinds Color",
+   "description": "Blinds",
    "tab": "color",
    "on_sig": "2577-ce78c0ac",
    "off_sig": "2318-77f0df03"
@@ -251,7 +267,7 @@
   {
    "base": "machinon_CarCharging-color",
    "name": "Car Charging Color",
-   "description": "EV charging (green) / idle (grey)",
+   "description": "EV charging (native) / idle (grey)",
    "tab": "color",
    "on_sig": "6308-c44e0ec7",
    "off_sig": "5086-ff90a927"
@@ -266,8 +282,8 @@
   },
   {
    "base": "machinon_ChristmasTree-color",
-   "name": "ChristmasTree Color",
-   "description": "ChristmasTree",
+   "name": "Christmas Tree Color",
+   "description": "Christmas tree",
    "tab": "color",
    "on_sig": "5240-f4841fe4",
    "off_sig": "4774-0fe703dd"
@@ -331,7 +347,7 @@
   {
    "base": "machinon_Connection-color",
    "name": "Connection Color",
-   "description": "Connection",
+   "description": "Connected (on) / disconnected (off)",
    "tab": "color",
    "on_sig": "4937-b8720307",
    "off_sig": "6469-cb064c43"
@@ -355,7 +371,7 @@
   {
    "base": "machinon_Cooktop-color",
    "name": "Cooktop Color",
-   "description": "Cooktop",
+   "description": "Cooktop on / off (grey)",
    "tab": "color",
    "on_sig": "9228-580a1034",
    "off_sig": "8276-a2fc74b6"
@@ -491,7 +507,7 @@
   {
    "base": "machinon_Lock",
    "name": "Door Lock",
-   "description": "Door lock: locked green / unlocked red",
+   "description": "Locked (green) / unlocked (red)",
    "tab": "blue",
    "on_sig": "2891-094f2ad0",
    "off_sig": "2790-bd4650d2"
@@ -499,7 +515,7 @@
   {
    "base": "machinon_Lock-color",
    "name": "Door Lock Color",
-   "description": "Door lock: locked green / unlocked red",
+   "description": "Locked (green) / unlocked (red)",
    "tab": "color",
    "on_sig": "2772-7271570f",
    "off_sig": "2664-5d0930f3"
@@ -579,7 +595,7 @@
   {
    "base": "machinon_FamilyHome-color",
    "name": "Family Home Color",
-   "description": "Family home (green) / away (grey)",
+   "description": "Family home (native) / away (grey)",
    "tab": "color",
    "on_sig": "8465-314a9bb8",
    "off_sig": "8155-a13cd37e"
@@ -691,7 +707,7 @@
   {
    "base": "machinon_Fridge",
    "name": "Fridge",
-   "description": "Fridge door open (red) / closed (grey)",
+   "description": "Fridge door open / closed (grey)",
    "tab": "blue",
    "on_sig": "1980-e1bcbff0",
    "off_sig": "1243-d7bfcbc9"
@@ -755,7 +771,7 @@
   {
    "base": "machinon_Gate",
    "name": "Gate",
-   "description": "Gate open (red) / closed (green)",
+   "description": "Gate open (on) / closed (off)",
    "tab": "blue",
    "on_sig": "4139-b600cc0e",
    "off_sig": "3980-ac010168"
@@ -763,10 +779,26 @@
   {
    "base": "machinon_Gate-color",
    "name": "Gate Color",
-   "description": "Gate",
+   "description": "Gate open (on) / closed (off)",
    "tab": "color",
    "on_sig": "4028-e7e394e6",
    "off_sig": "3926-e9900d6e"
+  },
+  {
+   "base": "machinon_Gears",
+   "name": "Gears",
+   "description": "Automations running / off (grey)",
+   "tab": "blue",
+   "on_sig": "11790-bd7b279a",
+   "off_sig": "10579-36e0df61"
+  },
+  {
+   "base": "machinon_Gears-color",
+   "name": "Gears Color",
+   "description": "Automations running / off (grey)",
+   "tab": "color",
+   "on_sig": "11548-b2d7aacd",
+   "off_sig": "10524-75ae59e0"
   },
   {
    "base": "machinon_Generic-color",
@@ -907,7 +939,7 @@
   {
    "base": "machinon_HouseLock",
    "name": "House Lock",
-   "description": "House secured green / open red",
+   "description": "House secured (green) / open (red)",
    "tab": "blue",
    "on_sig": "5867-68ff7f46",
    "off_sig": "5827-db487a6f"
@@ -915,7 +947,7 @@
   {
    "base": "machinon_HouseLock-color",
    "name": "House Lock Color",
-   "description": "House secured green / open red",
+   "description": "House secured (green) / open (red)",
    "tab": "color",
    "on_sig": "5830-d3dcc2b8",
    "off_sig": "5742-3dab927d"
@@ -963,7 +995,7 @@
   {
    "base": "machinon_InfraredSensor-color",
    "name": "Infrared Sensor Color",
-   "description": "IR sensor (color) / clear (grey)",
+   "description": "IR detected (native) / clear (grey)",
    "tab": "color",
    "on_sig": "7836-899e7299",
    "off_sig": "7201-54cfc17e"
@@ -1011,7 +1043,7 @@
   {
    "base": "machinon_Kettle",
    "name": "Kettle",
-   "description": "Kettle boiling (red) / off (grey)",
+   "description": "Kettle boiling / off (grey)",
    "tab": "blue",
    "on_sig": "8566-c98a8502",
    "off_sig": "7692-d64a1f81"
@@ -1019,7 +1051,7 @@
   {
    "base": "machinon_Kettle-color",
    "name": "Kettle Color",
-   "description": "Kettle, native color / off (grey)",
+   "description": "Kettle boiling (native) / off (grey)",
    "tab": "color",
    "on_sig": "8924-6c0b4259",
    "off_sig": "7928-f1369517"
@@ -1067,7 +1099,7 @@
   {
    "base": "machinon_Mailbox",
    "name": "Mailbox",
-   "description": "Mail waiting (red) / empty (grey)",
+   "description": "Mail waiting / empty (grey)",
    "tab": "blue",
    "on_sig": "2761-2d3eebf4",
    "off_sig": "2451-d77db061"
@@ -1099,7 +1131,7 @@
   {
    "base": "machinon_ManHome",
    "name": "Man Home",
-   "description": "Man home (native) / away (grey)",
+   "description": "Man home (green) / away (grey)",
    "tab": "blue",
    "on_sig": "6766-fd5fd2fd",
    "off_sig": "6662-b5a4336f"
@@ -1107,7 +1139,7 @@
   {
    "base": "machinon_ManHome-color",
    "name": "Man Home Color",
-   "description": "Man Home",
+   "description": "Man home (native) / away (grey)",
    "tab": "color",
    "on_sig": "6555-8798ca58",
    "off_sig": "6428-d1d95bdf"
@@ -1155,7 +1187,7 @@
   {
    "base": "machinon_Mobile",
    "name": "Mobile",
-   "description": "Phone present (green) / away (grey)",
+   "description": "Phone present / away (grey)",
    "tab": "blue",
    "on_sig": "2018-56ca2e11",
    "off_sig": "1824-d1201045"
@@ -1171,7 +1203,7 @@
   {
    "base": "machinon_Mood",
    "name": "Mood",
-   "description": "Mood: happy green / sad red",
+   "description": "Mood: happy (on) / sad (off)",
    "tab": "blue",
    "on_sig": "7910-036ceebb",
    "off_sig": "7988-e445cb32"
@@ -1283,7 +1315,7 @@
   {
    "base": "machinon_OneRing",
    "name": "One Ring",
-   "description": "the One Ring",
+   "description": "The One Ring",
    "tab": "fun",
    "on_sig": "11676-b5919b08",
    "off_sig": "10514-d697664c"
@@ -1291,7 +1323,7 @@
   {
    "base": "machinon_OneRing-color",
    "name": "One Ring Color",
-   "description": "the One Ring",
+   "description": "The One Ring",
    "tab": "fun",
    "on_sig": "10650-7342d426",
    "off_sig": "9316-506f1bb7"
@@ -1347,7 +1379,7 @@
   {
    "base": "machinon_Oven",
    "name": "Oven",
-   "description": "Oven hot (red) / off (grey)",
+   "description": "Oven hot / off (grey)",
    "tab": "blue",
    "on_sig": "4676-95c2ca19",
    "off_sig": "4045-06f6d17e"
@@ -1355,7 +1387,7 @@
   {
    "base": "machinon_Oven-color",
    "name": "Oven Color",
-   "description": "Oven",
+   "description": "Oven hot / off (grey)",
    "tab": "color",
    "on_sig": "5075-d467657f",
    "off_sig": "4372-fe6a2cf8"
@@ -1363,7 +1395,7 @@
   {
    "base": "machinon_Package",
    "name": "Package",
-   "description": "Package delivered (green) / none (grey)",
+   "description": "Package delivered / none (grey)",
    "tab": "blue",
    "on_sig": "1790-274995b9",
    "off_sig": "1574-13623289"
@@ -1395,7 +1427,7 @@
   {
    "base": "machinon_Pet",
    "name": "Pet",
-   "description": "Pet detected (green) / away (grey)",
+   "description": "Pet detected / away (grey)",
    "tab": "blue",
    "on_sig": "8907-3f4ca487",
    "off_sig": "8091-d2618be2"
@@ -1403,7 +1435,7 @@
   {
    "base": "machinon_PetBowl",
    "name": "Pet Bowl",
-   "description": "Pet bowl full (green) / empty (red)",
+   "description": "Pet bowl full / empty (grey)",
    "tab": "blue",
    "on_sig": "7669-e3d4a818",
    "off_sig": "6638-e2fb3f2c"
@@ -1491,7 +1523,7 @@
   {
    "base": "machinon_Presence-color",
    "name": "Presence Color",
-   "description": "At home (blue) / away (grey)",
+   "description": "At home (native) / away (grey)",
    "tab": "color",
    "on_sig": "6430-0239f34e",
    "off_sig": "6352-1a30243b"
@@ -1547,7 +1579,7 @@
   {
    "base": "machinon_Projector-color",
    "name": "Projector Color",
-   "description": "Projector",
+   "description": "Projector on (native) / off (grey)",
    "tab": "color",
    "on_sig": "5214-48203730",
    "off_sig": "4717-d0e98d5a"
@@ -1555,7 +1587,7 @@
   {
    "base": "machinon_Proximity",
    "name": "Proximity",
-   "description": "Proximity detected red / idle grey",
+   "description": "Proximity detected (red) / idle (grey)",
    "tab": "blue",
    "on_sig": "10468-d26d0146",
    "off_sig": "9771-7a8170be"
@@ -1619,7 +1651,7 @@
   {
    "base": "machinon_RFID",
    "name": "RFID",
-   "description": "RFID read (green) / idle (grey)",
+   "description": "RFID read / idle (grey)",
    "tab": "blue",
    "on_sig": "11911-7a4c241e",
    "off_sig": "10886-97e85bed"
@@ -1675,7 +1707,7 @@
   {
    "base": "machinon_Router",
    "name": "Router",
-   "description": "Router online (green) / offline (red)",
+   "description": "Router online / offline (grey)",
    "tab": "blue",
    "on_sig": "7951-b4371a49",
    "off_sig": "6425-7959f7a6"
@@ -1691,7 +1723,7 @@
   {
    "base": "machinon_Safe",
    "name": "Safe",
-   "description": "Safe locked (green) / open (red)",
+   "description": "Safe locked (on) / open (off)",
    "tab": "blue",
    "on_sig": "7502-3a04e2ac",
    "off_sig": "5542-9f1d7cea"
@@ -1699,10 +1731,26 @@
   {
    "base": "machinon_Safe-color",
    "name": "Safe Color",
-   "description": "Safe locked (native) / open (grey)",
+   "description": "Safe locked / open (native)",
    "tab": "color",
    "on_sig": "7573-75ccd960",
    "off_sig": "5886-07baa82f"
+  },
+  {
+   "base": "machinon_Settings",
+   "name": "Settings",
+   "description": "Setting active / off (grey)",
+   "tab": "blue",
+   "on_sig": "8533-9689cf31",
+   "off_sig": "7438-3e90c119"
+  },
+  {
+   "base": "machinon_Settings-color",
+   "name": "Settings Color",
+   "description": "Setting active / off (grey)",
+   "tab": "color",
+   "on_sig": "8615-343f0276",
+   "off_sig": "7495-ff31bbfe"
   },
   {
    "base": "machinon_Shower",
@@ -1931,7 +1979,7 @@
   {
    "base": "machinon_Vibration",
    "name": "Vibration",
-   "description": "Vibration detected (red) / still (grey)",
+   "description": "Vibration detected / still (grey)",
    "tab": "blue",
    "on_sig": "6318-8f6f35b5",
    "off_sig": "5221-5fbd7925"
@@ -1939,7 +1987,7 @@
   {
    "base": "machinon_Vibration-color",
    "name": "Vibration Color",
-   "description": "Vibration",
+   "description": "Vibration detected / still (grey)",
    "tab": "color",
    "on_sig": "7892-75e939ab",
    "off_sig": "6050-e722f581"
@@ -2043,7 +2091,7 @@
   {
    "base": "machinon_WindowLock",
    "name": "Window Lock",
-   "description": "Window closed green / open red",
+   "description": "Window closed (green) / open (red)",
    "tab": "blue",
    "on_sig": "3290-c7dad659",
    "off_sig": "3233-d2446fd8"
@@ -2051,7 +2099,7 @@
   {
    "base": "machinon_WindowLock-color",
    "name": "Window Lock Color",
-   "description": "Window closed green / open red",
+   "description": "Window closed (green) / open (red)",
    "tab": "color",
    "on_sig": "3298-a88018ab",
    "off_sig": "3244-21ba7654"
@@ -2091,7 +2139,7 @@
   {
    "base": "machinon_WomanHome",
    "name": "Woman Home",
-   "description": "Woman home (native) / away (grey)",
+   "description": "Woman home (green) / away (grey)",
    "tab": "blue",
    "on_sig": "7080-7e6a8061",
    "off_sig": "6941-ac106575"
@@ -2099,7 +2147,7 @@
   {
    "base": "machinon_WomanHome-color",
    "name": "Woman Home Color",
-   "description": "Woman Home",
+   "description": "Woman home (native) / away (grey)",
    "tab": "color",
    "on_sig": "6789-1a7f0c53",
    "off_sig": "6623-80b35dcf"

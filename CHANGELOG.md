@@ -4,9 +4,14 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+### Added
+
+- Three new icon families in both Blue UI and Color: Automatic (a framed gear, for auto-mode switches), Settings (a single gear) and Gears (a three-gear cluster).
+
 ### Fixed
 
 - The device edit window is usable on a phone again: the fields fit, the Sensor Icon picker opens, and you can scroll down to the buttons.
+- Icon pack descriptions match the icons again: twenty-one entries (Gate, Mood, Safe, Pet Bowl, Router and more) still promised green or red states that the redrawn icons no longer use, and another twenty-three read inconsistently or said nothing about their on and off states.
 
 ## [2.0.3] - 2026-08-16
 
