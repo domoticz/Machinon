@@ -1160,6 +1160,19 @@ body table#itemtable tr > .options {
     height: var(--dz-card-img-size);
 }
 
+/* Card links take the card's own text color. Sensor cards wrap their icon in a
+   link to the device's Log page, and core's `a:link { color: #fff }` (unscoped,
+   www/css/style.css) wins there, so those anchors compute white on a light card.
+   Nothing paints today because the anchor holds only an image, but anything that
+   does render from it - a missing icon's alt text, any future label - would be
+   white on white. inherit keeps it correct in every scheme instead of naming a
+   color here. */
+.item td#img a,
+.item td#img1 a,
+.item td#name a {
+    color: inherit;
+}
+
 .item #img1 {
     grid-area: img;
     align-self: end;
