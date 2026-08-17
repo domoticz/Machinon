@@ -244,6 +244,31 @@ body.dashMobile table.mobileitem .dimslider .ui-slider-handle {
     top: var(--dz-mobile-card-slider-handle-offset);
 }
 
+/* Wrapped joined selector, corner repair. The shell wraps a 5-level selector
+   onto a second row, and the first/last-child radii above only know the group's
+   absolute first and last segment, never "first or last within THIS wrapped
+   row": the row-1 last button ("Auto" in the 5-level case) keeps the middle
+   segment's square corners exactly where the shell's own rounded corner is, and
+   the shell's overflow clip amputates that corner instead of drawing an arc.
+   src/js/devices.js (retagSelectorWrapCorners) tags the three buttons that need
+   a corner change, the same machinery the desktop card shell uses; these rules
+   apply the radius to the tagged corner only.
+   The selector restates the full shell prefix AND repeats the attribute three
+   times on purpose: the middle-segment rule above is `border-radius: 0
+   !important` at (1,6,5) - measured, "Auto" is a middle segment - so anything
+   lighter loses. Three repetitions ties that and wins on order, the same
+   technique css/cards.css uses for the desktop shell's pair. */
+body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) > span > .btn-mini[data-wrap-corner-tr][data-wrap-corner-tr][data-wrap-corner-tr] {
+    border-top-right-radius: var(--dz-btn-radius) !important;
+}
+body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) > span > .btn-mini[data-wrap-corner-bl][data-wrap-corner-bl][data-wrap-corner-bl] {
+    border-bottom-left-radius: var(--dz-btn-radius) !important;
+}
+body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) > span > .btn-mini[data-wrap-corner-br][data-wrap-corner-br][data-wrap-corner-br] {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: var(--dz-btn-radius) !important;
+}
+
 body.dashMobile table.mobileitem .selectorlevels .ui-selectmenu-button {
     display: none;
 }
