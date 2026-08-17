@@ -7,6 +7,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 ### Added
 
 - Three new icon families in both Blue UI and Color: Automatic (a framed gear, for auto-mode switches), Settings (a single gear) and Gears (a three-gear cluster).
+- Three more icon families in both Blue UI and Color: Curtains (for curtain motors, alongside the existing Blinds), CO2 Gauge (for CO2 sensors) and Humidity Gauge (a dial reading, alongside the existing Hygrometer droplet).
 
 ### Changed
 

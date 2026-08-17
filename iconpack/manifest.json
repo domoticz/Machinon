@@ -297,6 +297,22 @@
    "off_sig": "7385-593a75bf"
   },
   {
+   "base": "machinon_CO2Gauge",
+   "name": "CO2 Gauge",
+   "description": "CO2 concentration gauge",
+   "tab": "blue",
+   "on_sig": "8148-2d0d7742",
+   "off_sig": "7169-3159f04b"
+  },
+  {
+   "base": "machinon_CO2Gauge-color",
+   "name": "CO2 Gauge Color",
+   "description": "CO2 concentration gauge",
+   "tab": "color",
+   "on_sig": "8158-56f54800",
+   "off_sig": "7122-b5c67941"
+  },
+  {
    "base": "machinon_Coffee-color",
    "name": "Coffee Machine Color",
    "description": "Coffee Machine",
@@ -383,6 +399,22 @@
    "tab": "color",
    "on_sig": "6158-6b428f38",
    "off_sig": "5676-21070776"
+  },
+  {
+   "base": "machinon_Curtains",
+   "name": "Curtains",
+   "description": "Curtains / curtain motor",
+   "tab": "blue",
+   "on_sig": "4686-5286987c",
+   "off_sig": "4298-54cb7bf7"
+  },
+  {
+   "base": "machinon_Curtains-color",
+   "name": "Curtains Color",
+   "description": "Curtains / curtain motor",
+   "tab": "color",
+   "on_sig": "4620-03edd398",
+   "off_sig": "4210-95d52176"
   },
   {
    "base": "machinon_Custom-color",
@@ -967,6 +999,22 @@
    "tab": "fun",
    "on_sig": "8001-3ef527f8",
    "off_sig": "7352-3fffde6a"
+  },
+  {
+   "base": "machinon_HumidityGauge",
+   "name": "Humidity Gauge",
+   "description": "Humidity dial gauge",
+   "tab": "blue",
+   "on_sig": "9979-b852727e",
+   "off_sig": "8679-07d05edd"
+  },
+  {
+   "base": "machinon_HumidityGauge-color",
+   "name": "Humidity Gauge Color",
+   "description": "Humidity dial gauge",
+   "tab": "color",
+   "on_sig": "10018-1e23881c",
+   "off_sig": "8926-7d82f84d"
   },
   {
    "base": "machinon_Hygrometer",
