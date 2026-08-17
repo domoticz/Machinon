@@ -620,6 +620,12 @@ table.mobileitem td.name {
     line-height: 0;
 }
 
+/* max-width caps this cell at its grid area, the same cap #type and td.input above
+   already carry. Without it a control wider than the shrunk status track (a
+   SelectorStyle-1 dropdown is ~91px against the ~84px a 140px tile can give) keeps its
+   min-content width, and justify-self: right then puts the whole surplus on the LEFT,
+   painting the control over the device icon. Capped, the cell's own overflow contains it
+   and the dropdown shrinks instead. */
 .item #status,
 .item .status {
     color: var(--dz-body-text);
@@ -628,6 +634,7 @@ table.mobileitem td.name {
     align-self: center;
     justify-self: right;
     text-align: left;
+    max-width: 100%;
     max-height: var(--dz-card-status-max-height);
 	white-space: normal;
     overflow-y: auto;
