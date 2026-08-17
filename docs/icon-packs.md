@@ -7,7 +7,7 @@ browsable library of over 250 device icons, and you install only the ones you ac
 one at a time, onto individual devices.
 Everything else in your dashboard keeps its existing icon.
 
-## The three styles
+## The three tabs
 
 Browse the library from the Theme Hub's **Icon packs** tab, which sorts icons into three tabs:
 
