@@ -153,6 +153,14 @@ main > section {
     padding-bottom: 4.5rem;
 }
 
+/* Belt and braces for the hero's bleed, which reads 100vw and therefore
+   includes the scrollbar. This lives on main, NOT on .hero: .hero's content box
+   stops at the container edge, so clipping there would eat the bleed rather
+   than protect against it (measured: 712px laid out, 572px painted).
+   `clip` rather than `hidden` so this never becomes a scroll container and the
+   sticky header keeps working. */
+main { overflow-x: clip; }
+
 /* Sticky nav clearance for the in-page anchors. */
 main > section[id] { scroll-margin-top: 4.5rem; }
 
@@ -267,12 +275,6 @@ main > section[id] { scroll-margin-top: 4.5rem; }
     gap: 3rem;
     padding-top: 5rem;
     padding-bottom: 5rem;
-    /* The bleed below reads 100vw, which INCLUDES the scrollbar, so it
-       overshoots the true layout width by about half a scrollbar (~7px). Page
-       containers keep at least a 20px gutter, which absorbs that, and this
-       clip is the belt-and-braces guard. `clip` rather than `hidden`: hidden
-       would make this a scroll container and break position: sticky above. */
-    overflow-x: clip;
 }
 
 .hero h1 {
@@ -305,7 +307,15 @@ main > section[id] { scroll-margin-top: 4.5rem; }
 }
 
 /* Runs from the container's edge to the viewport's, so the screenshot reads as
-   a window onto something larger than the page. */
+   a window onto something larger than the page.
+ *
+ * The 20px it stops short of the edge is deliberate slack, not an error: the
+ * container is --site-max-width minus 2.5rem, so the true gutter is
+ * (100vw - 1080px) / 2, and using 1120px here lands 20px inside. 100vw includes
+ * the scrollbar, so that slack is exactly what absorbs it: the right edge sits
+ * at 100vw - scrollbar/2 - 20px, which stays inside the layout width for any
+ * scrollbar narrower than 40px. Widen this to the true gutter and a normal
+ * 15px scrollbar starts a horizontal scroll. */
 .hero-shot {
     width: calc(100% + (100vw - var(--site-max-width)) / 2);
 }
