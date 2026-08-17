@@ -43,6 +43,28 @@
    card does not toggle, and then fixing a duplicate-icon defect silently
    orphaned Dimmer48_On.png the moment its card pointed at a different icon.
 
+6. Tour manifest drift. site/tour.js holds the hero's eight slides: one
+   Dashboard capture per scheme, and a light and a dark capture for each of
+   the other seven. This check proves every path exists, that the Dashboard
+   map covers exactly the canonical scheme list, that no slide lost a twin,
+   and that no two manifest entries resolve to the same file. It matters
+   because tour.js deliberately SKIPS a slide whose image fails to load, so
+   a deleted or renamed capture is invisible in a warm browser and simply
+   shortens the rotation. The canonical list is tokens.css's [data-scheme]
+   blocks, the same source check 2 uses, and deliberately not
+   schemes/index.json: that file holds only the six add-on schemes and would
+   accept a set with both Machinon defaults missing. Two entries sharing a
+   path is its own failure, separate from the existence check: every path
+   can exist and the tour still show one screenshot twice under two
+   different captions, which is exactly how Task 2's capture harness once
+   produced two byte-identical captures from a navigation that silently did
+   not take. An entry the parser cannot read (a stray double-quoted field,
+   for instance) is ALSO a failure, not a silent skip: the first version of
+   this check let tour_slide_paths() skip past what it could not parse,
+   which meant a manifest reformatted to double quotes parsed as zero
+   slides and check 6 passed while guarding none of the fourteen
+   non-dashboard captures.
+
 Run: python3 scripts/check-site.py
 """
 import importlib.util
@@ -58,6 +80,7 @@ TOKENS = SITE / "tokens.css"
 APP_JS = SITE / "app.js"
 SCHEME_JS = ROOT / "src" / "js" / "scheme.js"
 ASSETS = SITE / "assets"
+TOUR_JS = SITE / "tour.js"
 
 # The published prefix every asset URL resolves under. og:image, og:url and
 # the canonical link are absolute (scrapers need a resolvable URL, not a
@@ -78,6 +101,15 @@ _IMG_TAG = re.compile(r"<img\b[^>]*>")
 _ATTR = re.compile(r'(\w[\w-]*)\s*=\s*"([^"]*)"')
 # set('--dz-token', cs.key) inside applyCustomColorScheme.
 _SET_CALL = re.compile(r"set\('(--[\w-]+)',\s*cs\.(\w+)\)")
+# Indentation-independent on purpose: no slide entry contains "];", so a
+# non-greedy match to the first one always ends at the array's close, and the
+# regex does not break the day someone reindents tour.js.
+_SLIDES_ARRAY = re.compile(r"var SLIDES\s*=\s*\[(.*?)\];", re.S)
+_DASHBOARD_MAP = re.compile(r"var DASHBOARD_SHOTS\s*=\s*\{(.*?)\};", re.S)
+_MAP_PAIR = re.compile(r"'([^']+)'\s*:\s*'([^']+)'")
+_SLIDE_ENTRY = re.compile(r"\{(.*?)\}", re.S)
+_FIELD = re.compile(r"(\w+)\s*:\s*'([^']*)'")
+_PHONE_SHOT = re.compile(r"var PHONE_SHOT\s*=\s*'([^']+)'")
 
 _PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 
@@ -169,6 +201,119 @@ def app_scheme_ids(js_text):
     if not match:
         return []
     return _ID_FIELD.findall(match.group(1))
+
+
+def tour_dashboard_shots(js_text):
+    """Return the Dashboard slide's scheme id -> capture path map from tour.js.
+
+    That slide is the only one with a capture per scheme, because it is the
+    slide the hero loads first and the one visitors experiment on with the
+    picker. Every other slide gets a light and a dark file instead.
+    """
+    match = _DASHBOARD_MAP.search(js_text)
+    if not match:
+        return {}
+    return dict(_MAP_PAIR.findall(match.group(1)))
+
+
+def tour_slide_paths(js_text):
+    """Return (name, light, dark) for every slide that is NOT per-scheme.
+
+    A missing path comes back as "" rather than being skipped, so main() can
+    name the slide that lost its twin. The per-scheme Dashboard slide is
+    excluded: it legitimately carries no light/dark pair.
+
+    An entry this cannot read (no `name` field, most often because it is
+    quoted in a style _FIELD does not match) is silently absent from the
+    result: this function reports what it found, not what went wrong.
+    tour_slide_problems() below is what turns an unreadable entry into a
+    build failure instead of a quiet gap.
+    """
+    match = _SLIDES_ARRAY.search(js_text)
+    if not match:
+        return []
+    slides = []
+    for entry in _SLIDE_ENTRY.findall(match.group(1)):
+        if "perScheme" in entry:
+            continue
+        fields = dict(_FIELD.findall(entry))
+        if "name" not in fields:
+            continue
+        slides.append((fields["name"], fields.get("light", ""), fields.get("dark", "")))
+    return slides
+
+
+def tour_slide_problems(js_text):
+    """Return human-readable reasons the SLIDES manifest could not be fully
+    parsed. An empty list means every entry parsed.
+
+    This exists because tour_slide_paths() silently `continue`s past an
+    entry it cannot read. A manifest reformatted from single to double
+    quotes therefore parses as ZERO slides there, and check 6 would pass
+    while guarding none of the fourteen non-dashboard captures. Silence is
+    the dangerous outcome for a guard, so an entry it cannot read is now an
+    error rather than a skip.
+    """
+    match = _SLIDES_ARRAY.search(js_text)
+    if not match:
+        return ["no `var SLIDES = [...]` array found in site/tour.js"]
+    entries = _SLIDE_ENTRY.findall(match.group(1))
+    if not entries:
+        return ["the SLIDES array in site/tour.js contains no entries"]
+    problems = []
+    for entry in entries:
+        if "perScheme" in entry:
+            continue
+        if "name" not in dict(_FIELD.findall(entry)):
+            problems.append(
+                "a SLIDES entry has no readable `name` field, so its "
+                "captures cannot be checked: "
+                + " ".join(entry.split())[:90]
+            )
+    return problems
+
+
+def duplicate_tour_paths(dashboard_shots, slides):
+    """Return (label_a, label_b, path) for every capture path used by more
+    than one manifest entry, across DASHBOARD_SHOTS and SLIDES together.
+
+    A missing path ("" from tour_slide_paths, for a slide with no dark twin)
+    is never compared: that gap is check 6's separate missing-capture
+    failure, not a shared-path failure. Every path can individually exist and
+    the tour still be broken this way, because the visitor sees the same
+    screenshot twice under two different captions: this is exactly how
+    Task 2's capture harness once produced two byte-identical captures from a
+    navigation that silently did not take.
+    """
+    entries = []
+    for scheme_id, path in dashboard_shots.items():
+        if path:
+            entries.append(("Dashboard ({})".format(scheme_id), path))
+    for name, light, dark in slides:
+        if light:
+            entries.append(("{} (light)".format(name), light))
+        if dark:
+            entries.append(("{} (dark)".format(name), dark))
+
+    seen = {}
+    duplicates = []
+    for label, path in entries:
+        if path in seen:
+            duplicates.append((seen[path], label, path))
+        else:
+            seen[path] = label
+    return duplicates
+
+
+def tour_phone_shot(js_text):
+    """Return the PHONE_SHOT path from tour.js, or "" if the line is absent.
+
+    Below the 768px breakpoint the hero shows this one capture instead of
+    rotating the desktop slides. A missing PHONE_SHOT means the hero falls
+    back to a desktop capture painted at a quarter of native there.
+    """
+    match = _PHONE_SHOT.search(js_text)
+    return match.group(1) if match else ""
 
 
 def declared_dimensions(html_text):
@@ -331,15 +476,78 @@ def main():
             "referenced from site/index.html.".format(path)
         )
 
+    # --- Check 6: the tour manifest resolves, and covers every scheme ---
+    tour_js = TOUR_JS.read_text()
+    dashboard_shots = tour_dashboard_shots(tour_js)
+    slides = tour_slide_paths(tour_js)
+    slide_problems = tour_slide_problems(tour_js)
+    for problem in slide_problems:
+        failures.append(problem)
+    if not slide_problems and not slides:
+        failures.append(
+            "site/tour.js SLIDES parsed with no non-perScheme slides: the "
+            "manifest read cleanly but covers none of the light/dark "
+            "captures, which is as blind a guard as an unreadable entry."
+        )
+    if not dashboard_shots:
+        failures.append(
+            "no DASHBOARD_SHOTS map found in site/tour.js: the hero cannot "
+            "answer the scheme picker."
+        )
+    missing_schemes = sorted(set(schemes) - set(dashboard_shots))
+    extra_schemes = sorted(set(dashboard_shots) - set(schemes))
+    if missing_schemes:
+        failures.append(
+            "site/tour.js DASHBOARD_SHOTS has no capture for: {}. A visitor "
+            "picking one of those sees another scheme's dashboard.".format(
+                ", ".join(missing_schemes)
+            )
+        )
+    if extra_schemes:
+        failures.append(
+            "site/tour.js DASHBOARD_SHOTS names schemes tokens.css does not "
+            "define: {}.".format(", ".join(extra_schemes))
+        )
+    for name, light, dark in slides:
+        for label, ref in (("light", light), ("dark", dark)):
+            if not ref:
+                failures.append(
+                    'tour slide "{}" has no {} capture: the rotation would '
+                    "skip it in that base.".format(name, label)
+                )
+    for label_a, label_b, path in duplicate_tour_paths(dashboard_shots, slides):
+        failures.append(
+            'tour entries "{}" and "{}" both resolve to "{}": the visitor '
+            "sees the same screenshot twice under different captions."
+            .format(label_a, label_b, path)
+        )
+    phone_shot = tour_phone_shot(tour_js)
+    if not phone_shot:
+        failures.append(
+            "no PHONE_SHOT found in site/tour.js: below 768px the hero would "
+            "fall back to a desktop capture painted at a quarter of native."
+        )
+    tour_refs = sorted(set(dashboard_shots.values())
+                       | {p for _, light, dark in slides for p in (light, dark) if p}
+                       | ({phone_shot} if phone_shot else set()))
+    for ref in tour_refs:
+        if not resolve_asset(ref).exists():
+            failures.append(
+                'tour capture "{}" referenced by site/tour.js does not exist. '
+                "tour.js skips a slide whose image fails, so this ships as an "
+                "invisible hole in the rotation.".format(ref)
+            )
+
     for failure in failures:
         print("check-site: " + failure, file=sys.stderr)
     if failures:
         return 1
     print(
         "check-site: OK ({} schemes, {} mapped colour keys, {} image "
-        "dimensions checked, {} assets referenced, no absolute "
-        "references)".format(
-            len(schemes), len(generator), dimension_checks, len(existing)
+        "dimensions checked, {} assets referenced, {} tour captures, no "
+        "absolute references)".format(
+            len(schemes), len(generator), dimension_checks, len(existing),
+            len(tour_refs),
         )
     )
     return 0

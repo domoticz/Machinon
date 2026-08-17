@@ -187,3 +187,156 @@ def test_asset_files_lists_nested_files_as_assets_relative_paths(tmp_path):
     (assets / "favicon.png").write_bytes(b"x")
     (assets / "icons" / "temp48.png").write_bytes(b"x")
     assert check.asset_files(assets) == ["assets/favicon.png", "assets/icons/temp48.png"]
+
+
+_TOUR_JS = """
+    var SLIDES = [
+        { name: 'Dashboard', caption: 'Dashboard, your devices as cards', perScheme: true },
+        { name: 'Floorplan', caption: 'Floorplan',
+          light: 'docs/screenshots/floorplan.png', dark: 'docs/screenshots/floorplan-dark.png' },
+        { name: 'Switches', caption: 'Switches',
+          light: 'docs/screenshots/switches.png', dark: 'docs/screenshots/switches-dark.png' }
+    ];
+
+    var DASHBOARD_SHOTS = {
+        'machinon-light': 'docs/screenshots/dashboard-light.png',
+        'machinon-dark': 'docs/screenshots/dashboard-dark.png'
+    };
+"""
+
+
+def test_tour_dashboard_shots_reads_the_map():
+    assert check.tour_dashboard_shots(_TOUR_JS) == {
+        "machinon-light": "docs/screenshots/dashboard-light.png",
+        "machinon-dark": "docs/screenshots/dashboard-dark.png",
+    }
+
+
+def test_tour_slide_paths_skips_the_per_scheme_slide():
+    """The Dashboard slide carries no light/dark pair: its sources live in
+    DASHBOARD_SHOTS, one per scheme, so it must not be reported as a slide
+    missing its twins."""
+    assert check.tour_slide_paths(_TOUR_JS) == [
+        ("Floorplan", "docs/screenshots/floorplan.png", "docs/screenshots/floorplan-dark.png"),
+        ("Switches", "docs/screenshots/switches.png", "docs/screenshots/switches-dark.png"),
+    ]
+
+
+def test_tour_slide_paths_reports_a_missing_dark_twin():
+    js = """
+    var SLIDES = [
+        { name: 'Dashboard', perScheme: true },
+        { name: 'Weather', light: 'docs/screenshots/weather.png' }
+    ];
+    var DASHBOARD_SHOTS = { 'machinon-light': 'docs/screenshots/dashboard-light.png' };
+    """
+    assert check.tour_slide_paths(js) == [("Weather", "docs/screenshots/weather.png", "")]
+
+
+def test_tour_dashboard_shots_returns_empty_without_the_map():
+    assert check.tour_dashboard_shots("var SLIDES = [];") == {}
+
+
+def test_duplicate_tour_paths_finds_two_slides_sharing_a_path():
+    """Two slides resolving to the same file is a broken tour even though
+    every path exists: the visitor sees the same screenshot twice under two
+    different captions, and check 6's existence loop would call it healthy.
+    Task 2's capture harness hit exactly this once, when a navigation
+    silently did not take and two captures came out identical."""
+    dashboard_shots = {"machinon-light": "docs/screenshots/dashboard-light.png"}
+    slides = [
+        ("Floorplan", "docs/screenshots/floorplan.png", "docs/screenshots/floorplan-dark.png"),
+        ("Switches", "docs/screenshots/floorplan.png", "docs/screenshots/switches-dark.png"),
+    ]
+    assert check.duplicate_tour_paths(dashboard_shots, slides) == [
+        ("Floorplan (light)", "Switches (light)", "docs/screenshots/floorplan.png"),
+    ]
+
+
+def test_duplicate_tour_paths_returns_empty_when_all_distinct():
+    dashboard_shots = {
+        "machinon-light": "docs/screenshots/dashboard-light.png",
+        "machinon-dark": "docs/screenshots/dashboard-dark.png",
+    }
+    slides = [
+        ("Floorplan", "docs/screenshots/floorplan.png", "docs/screenshots/floorplan-dark.png"),
+    ]
+    assert check.duplicate_tour_paths(dashboard_shots, slides) == []
+
+
+def test_duplicate_tour_paths_ignores_missing_paths():
+    """A slide missing its dark twin (reported by "" from tour_slide_paths)
+    must not be treated as a duplicate of another missing twin: that is
+    check 6's separate missing-capture failure, not a shared-path failure."""
+    dashboard_shots = {}
+    slides = [
+        ("Floorplan", "docs/screenshots/floorplan.png", ""),
+        ("Switches", "docs/screenshots/switches.png", ""),
+    ]
+    assert check.duplicate_tour_paths(dashboard_shots, slides) == []
+
+
+def test_duplicate_tour_paths_finds_two_dashboard_schemes_sharing_a_path():
+    """duplicate_tour_paths() claims to compare DASHBOARD_SHOTS entries
+    against each other too, not only slide-versus-slide: two schemes wired
+    to the same dashboard capture is exactly as broken, since a visitor
+    switching schemes on the Dashboard slide would see no change at all."""
+    dashboard_shots = {
+        "machinon-light": "docs/screenshots/dashboard-light.png",
+        "magenta-light": "docs/screenshots/dashboard-light.png",
+    }
+    assert check.duplicate_tour_paths(dashboard_shots, []) == [
+        ("Dashboard (machinon-light)", "Dashboard (magenta-light)",
+         "docs/screenshots/dashboard-light.png"),
+    ]
+
+
+def test_duplicate_tour_paths_finds_a_dashboard_and_a_slide_sharing_a_path():
+    """The same check spans DASHBOARD_SHOTS and SLIDES together: a scheme's
+    dashboard capture reused as a different named slide's capture is still
+    one screenshot doing two jobs in the rotation."""
+    dashboard_shots = {"machinon-light": "docs/screenshots/dashboard-light.png"}
+    slides = [
+        ("Floorplan", "docs/screenshots/dashboard-light.png", "docs/screenshots/floorplan-dark.png"),
+    ]
+    assert check.duplicate_tour_paths(dashboard_shots, slides) == [
+        ("Dashboard (machinon-light)", "Floorplan (light)",
+         "docs/screenshots/dashboard-light.png"),
+    ]
+
+
+def test_tour_slide_problems_returns_empty_on_the_valid_fixture():
+    assert check.tour_slide_problems(_TOUR_JS) == []
+
+
+def test_tour_slide_problems_reports_a_missing_slides_array():
+    problems = check.tour_slide_problems("var DASHBOARD_SHOTS = {};")
+    assert len(problems) == 1
+    assert "no `var SLIDES" in problems[0]
+
+
+def test_tour_slide_problems_reports_a_double_quoted_entry():
+    """The concrete regression: reformatting SLIDES from single to double
+    quotes makes _FIELD match nothing, so every entry's field dict comes
+    back empty and tour_slide_paths() silently reports zero slides. This
+    must surface as a problem instead of a quiet gap."""
+    js = """
+    var SLIDES = [
+        { name: "Dashboard", perScheme: true },
+        { name: "Floorplan", light: "docs/screenshots/floorplan.png",
+          dark: "docs/screenshots/floorplan-dark.png" }
+    ];
+    var DASHBOARD_SHOTS = { 'machinon-light': 'docs/screenshots/dashboard-light.png' };
+    """
+    problems = check.tour_slide_problems(js)
+    assert len(problems) == 1
+    assert "no readable `name` field" in problems[0]
+
+
+def test_tour_phone_shot_reads_the_path():
+    js = "var PHONE_SHOT = 'docs/screenshots/mobile-dashboard.png';"
+    assert check.tour_phone_shot(js) == "docs/screenshots/mobile-dashboard.png"
+
+
+def test_tour_phone_shot_returns_empty_when_absent():
+    assert check.tour_phone_shot("var SLIDES = [];") == ""
