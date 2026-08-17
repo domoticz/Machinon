@@ -9,6 +9,25 @@
     display: block !important;
 }
 
+/* Narrow tiles put the value on its own line in the third row (cards.css), which
+   only works while that row is free. With this feature on the timestamp owns it,
+   so the value returns to the name's row: the same cramped sharing every wider
+   tile does, rather than two readings stacked in one row. */
+@container (max-width: 199px) {
+    .dd-widget--dz-device .item.itemBlock table[id^="item"] > tbody > tr {
+        grid-template-rows: minmax(0, auto) minmax(0, 1fr) minmax(0, var(--dz-card-row-lastupdate-h));
+    }
+    .dd-widget--dz-device .item #bigtext {
+        grid-area: bigtext;
+        padding-top: var(--dz-card-space-lg);
+        font-size: var(--dz-text-value);
+    }
+    .dd-widget--dz-device .item.itemBlock td#name {
+        grid-area: name;
+        padding-top: var(--dz-card-space-lg);
+    }
+}
+
 #holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr,
 #holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr {
     grid-template-rows: 20px 58px 20px !important;

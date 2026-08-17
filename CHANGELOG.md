@@ -16,6 +16,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 - The device edit window is usable on a phone again: the fields fit, the Sensor Icon picker opens, and you can scroll down to the buttons.
 - On a narrow dynamic dashboard tile, a selector device's dropdown no longer sits on top of the device icon: it now stays in its own half of the card.
+- On a narrow dynamic dashboard tile, the device's value no longer prints on top of its name: the name gets the full first line and the value sits on the line below it, so both are readable and long names are no longer cut short.
 - Icon pack descriptions match the icons again: twenty-one entries (Gate, Mood, Safe, Pet Bowl, Router and more) still promised green or red states that the redrawn icons no longer use, and another twenty-three read inconsistently or said nothing about their on and off states.
 - The Color Mailbox icon now matches the Blue UI one: its empty state showed an open mailbox and its mail-waiting state showed a closed one, the wrong way round.
 

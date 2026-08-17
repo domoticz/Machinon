@@ -487,8 +487,10 @@ used. Name and status are explicit `--dz-text-sm` (14px; `.item-name, .item #nam
 `css/typography.css`, not left to inheritance). The value (`#bigtext`) is `--dz-text-lg` (20px,
 regular weight); last update is `--dz-text-xs` (12px). Compact-dashboard cards (`.span3`) reuse the
 same tokens: bigtext is `--dz-text-lg` at `--dz-weight-semibold`, last update steps down to
-`--dz-text-micro` (11px). There is no separate relative-size table: every card variant, standard or
-compact, reads its size from the scale above.
+`--dz-text-micro` (11px). One width-gated exception: on a Dynamic Dashboard tile under 200px the
+value steps to `--dz-text-md` (16px) and moves to its own line (see Standard card below), because at
+that width name and value cannot share a row. There is no separate relative-size table: every card
+variant, standard or compact, reads its size from the scale above.
 
 ## Spacing
 
@@ -1312,6 +1314,15 @@ Columns: --dz-card-col-icon  --dz-card-col-icon2  minmax(0,1fr)  minmax(0,auto) 
                 (48px)              (18px)                                                              (15px)
 Gap: 10px (literal, not tokenized - see Traps)
 ```
+
+**Dynamic Dashboard tiles under 200px** reassign row 1 and row 3 (container query on the widget
+body): the name spans the whole first row and the value moves to the third, which is free because
+Dash2 hides last-seen by default. Sharing row 1 does not survive that width, since the value keeps
+its min-content width and its right justification puts the surplus over the name. The value steps to
+`--dz-text-md` and the name row gives up the top padding it only needed beside a larger value, so no
+card grows: the tallest measures 124px against 125px before, and short-named cards drop to 98px.
+When `dashboard_show_last_update` is on, that feature's own CSS returns the value to row 1, because
+the third row then carries the timestamp.
 
 **Dashboard card** (the standard/`#dashcontent` view): hides the third row
 (`grid-template-rows: var(--dz-card-row-name-h-dash) minmax(var(--dz-card-row-status-min),1fr) 0`,

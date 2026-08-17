@@ -413,6 +413,41 @@ div.bannercontent .row > .item {
     }
 }
 
+/* Narrow tiles: the value gets its own line instead of sharing the name's.
+   At a 140px card the two cannot share row 1. The value keeps its min-content
+   width, and justify-self: right then puts the whole surplus on the LEFT, so the
+   reading paints through the device name: measured 15-55px of overlapping glyph
+   ink on four of nine fixture tiles. Capping the value cell instead pushes it
+   out of the card (9-35px past the right edge, clipped), so the space has to come
+   from somewhere else rather than from the value's own box.
+   The third grid row is free here, because Dash2 hides the last-seen cell by
+   default, so the value moves into it, one step down the type scale, and the name
+   row gives up the top padding it only needed to sit beside a bigger value.
+   Net effect measured on the census fixture: no ink overlap anywhere, full device
+   names, and cards land at or below the height they had before, so nothing
+   outgrows its 120px cell.
+   dashboard_show_last_update.css puts the value back on the name row when the
+   user turns the timestamp on, because the third row is then genuinely occupied. */
+@container (max-width: 199px) {
+    .dd-widget--dz-device .item.itemBlock table[id^="item"] > tbody > tr {
+        grid-template-rows: minmax(0, auto) minmax(0, 1fr) minmax(0, auto);
+    }
+    .dd-widget--dz-device .item #bigtext {
+        grid-area: lastupdate;
+        justify-self: right;
+        align-self: end;
+        padding-top: 0;
+        font-size: var(--dz-text-md);
+    }
+    /* td#name, not `.item #name`: the base padding rule carries
+       `div.item.statusNormal td#name` for the status families, which outranks a
+       class-only compound and would keep the wider top padding. */
+    .dd-widget--dz-device .item.itemBlock td#name {
+        grid-area: name / name / name / bigtext;
+        padding-top: var(--dz-card-space-sm);
+    }
+}
+
 /* Blinds slider on the Dynamic Dashboard: the multi-icon slider variants collide
    with the blind icons. The theme's blinds rule further down this file (".span4
    td#img2 ~ ... .dimslider" { left: 14px }) anchors the track at the card's left
