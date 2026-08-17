@@ -31,7 +31,54 @@ are three color families, each with a light and a dark variant.
 | Gruvbox Light | Light | Warm retro paper |
 | Gruvbox Dark | Dark | Retro warm dark with earthy accents |
 
-![Dark magenta color scheme](screenshots/dashboard-magenta-dark.png)
+## What each scheme looks like
+
+Every screenshot is the same dashboard, so you can compare palettes rather than
+layouts. Click any one to see it full size.
+
+<div class="grid" markdown>
+
+<figure markdown="span">
+[![The dashboard in the Machinon Light scheme](screenshots/dashboard-light.png){ width="1440" height="900" loading=lazy }](screenshots/dashboard-light.png)
+<figcaption>Machinon Light</figcaption>
+</figure>
+
+<figure markdown="span">
+[![The dashboard in the Machinon Dark scheme](screenshots/dashboard-dark.png){ width="1440" height="900" loading=lazy }](screenshots/dashboard-dark.png)
+<figcaption>Machinon Dark</figcaption>
+</figure>
+
+<figure markdown="span">
+[![The dashboard in the Magenta Light scheme](screenshots/dashboard-magenta-light.png){ width="1440" height="900" loading=lazy }](screenshots/dashboard-magenta-light.png)
+<figcaption>Magenta Light</figcaption>
+</figure>
+
+<figure markdown="span">
+[![The dashboard in the Magenta Dark scheme](screenshots/dashboard-magenta-dark.png){ width="1440" height="900" loading=lazy }](screenshots/dashboard-magenta-dark.png)
+<figcaption>Magenta Dark</figcaption>
+</figure>
+
+<figure markdown="span">
+[![The dashboard in the Paper Light scheme](screenshots/dashboard-paper-light.png){ width="1440" height="900" loading=lazy }](screenshots/dashboard-paper-light.png)
+<figcaption>Paper Light</figcaption>
+</figure>
+
+<figure markdown="span">
+[![The dashboard in the Paper Dark scheme](screenshots/dashboard-paper-dark.png){ width="1440" height="900" loading=lazy }](screenshots/dashboard-paper-dark.png)
+<figcaption>Paper Dark</figcaption>
+</figure>
+
+<figure markdown="span">
+[![The dashboard in the Gruvbox Light scheme](screenshots/dashboard-gruvbox-light.png){ width="1440" height="900" loading=lazy }](screenshots/dashboard-gruvbox-light.png)
+<figcaption>Gruvbox Light</figcaption>
+</figure>
+
+<figure markdown="span">
+[![The dashboard in the Gruvbox Dark scheme](screenshots/dashboard-gruvbox-dark.png){ width="1440" height="900" loading=lazy }](screenshots/dashboard-gruvbox-dark.png)
+<figcaption>Gruvbox Dark</figcaption>
+</figure>
+
+</div>
 
 ## Building your own colors
 
