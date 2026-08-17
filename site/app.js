@@ -32,7 +32,7 @@
     var SHOTS = {
         'machinon-light': 'docs/screenshots/dashboard-light.png',
         'machinon-dark': 'docs/screenshots/dashboard-dark.png',
-        'magenta-dark': 'docs/screenshots/scheme-magenta.png'
+        'magenta-dark': 'docs/screenshots/dashboard-magenta-dark.png'
     };
 
     function byId(id) { return document.getElementById(id); }

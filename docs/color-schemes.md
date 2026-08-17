@@ -31,7 +31,7 @@ are three color families, each with a light and a dark variant.
 | Gruvbox Light | Light | Warm retro paper |
 | Gruvbox Dark | Dark | Retro warm dark with earthy accents |
 
-![Dark magenta color scheme](screenshots/scheme-magenta.png)
+![Dark magenta color scheme](screenshots/dashboard-magenta-dark.png)
 
 ## Building your own colors
 
