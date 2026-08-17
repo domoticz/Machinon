@@ -8,6 +8,10 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 - Three new icon families in both Blue UI and Color: Automatic (a framed gear, for auto-mode switches), Settings (a single gear) and Gears (a three-gear cluster).
 
+### Changed
+
+- Icon-pack icons you have already installed will offer a refresh in the Theme Hub. Every icon was re-cut from its original artwork, so the pictures are a touch cleaner (the difference is hard to see) and the corrected descriptions come with them. Refreshing is optional and nothing changes until you do.
+
 ### Fixed
 
 - The device edit window is usable on a phone again: the fields fit, the Sensor Icon picker opens, and you can scroll down to the buttons.

@@ -13,8 +13,8 @@
    "name": "Access Color",
    "description": "Access granted (green) / denied (red)",
    "tab": "color",
-   "on_sig": "3545-2a605b33",
-   "off_sig": "3450-10dd6bfa"
+   "on_sig": "3502-98ad2d23",
+   "off_sig": "3480-0aaafc2c"
   },
   {
    "base": "machinon_Address",
@@ -37,16 +37,16 @@
    "name": "Air Conditioner/HVAC Color",
    "description": "Air Conditioner/HVAC",
    "tab": "color",
-   "on_sig": "4875-a55a3541",
-   "off_sig": "4338-9a4b852a"
+   "on_sig": "4848-5b91cb6c",
+   "off_sig": "4308-f3e99ccf"
   },
   {
    "base": "machinon_AirMeasure-color",
    "name": "Air Quality Color",
    "description": "Air Quality Measurement",
    "tab": "color",
-   "on_sig": "5825-a6a147bf",
-   "off_sig": "5230-66bf2c06"
+   "on_sig": "5754-77374202",
+   "off_sig": "5181-32bef598"
   },
   {
    "base": "machinon_Alarm-color",
@@ -61,24 +61,24 @@
    "name": "Alien",
    "description": "Alien",
    "tab": "fun",
-   "on_sig": "9851-a98073b8",
-   "off_sig": "8806-a0936c79"
+   "on_sig": "9951-259f910c",
+   "off_sig": "8850-9c91359a"
   },
   {
    "base": "machinon_Alien-color",
    "name": "Alien Color",
    "description": "Alien",
    "tab": "fun",
-   "on_sig": "9631-5e497af6",
-   "off_sig": "8597-85c4f20d"
+   "on_sig": "9686-72712204",
+   "off_sig": "8610-0b3ffe77"
   },
   {
    "base": "machinon_Amplifier-color",
    "name": "Amplifier Color",
    "description": "Device that controls audio",
    "tab": "color",
-   "on_sig": "5570-d02d0ab7",
-   "off_sig": "4882-9e513eb3"
+   "on_sig": "5342-ef11ad91",
+   "off_sig": "4758-50d2f89a"
   },
   {
    "base": "machinon_Aquarium",
@@ -93,8 +93,8 @@
    "name": "Aquarium Color",
    "description": "Aquarium / fish tank",
    "tab": "color",
-   "on_sig": "7227-62f6e851",
-   "off_sig": "6307-bd6b2d6a"
+   "on_sig": "7265-ae03e469",
+   "off_sig": "6312-82b4309f"
   },
   {
    "base": "machinon_Automatic",
@@ -181,15 +181,15 @@
    "name": "Battery Charging Color",
    "description": "Charging (on) / charged (off)",
    "tab": "color",
-   "on_sig": "1663-4156fb47",
-   "off_sig": "767-23611a6e"
+   "on_sig": "1662-e029cddd",
+   "off_sig": "750-f840df3b"
   },
   {
    "base": "machinon_Battery-color",
    "name": "Battery Color",
    "description": "Battery charged (on) / empty (off)",
    "tab": "color",
-   "on_sig": "767-23611a6e",
+   "on_sig": "750-f840df3b",
    "off_sig": "772-9671d439"
   },
   {
@@ -205,8 +205,8 @@
    "name": "Battery Low Color",
    "description": "Low battery (native) / ok (grey)",
    "tab": "color",
-   "on_sig": "884-0a21f074",
-   "off_sig": "794-62063ade"
+   "on_sig": "848-e81710b4",
+   "off_sig": "770-be4750db"
   },
   {
    "base": "machinon_Bed",
@@ -221,8 +221,8 @@
    "name": "Bed Color",
    "description": "Bed / bed occupancy",
    "tab": "color",
-   "on_sig": "3550-c1ba0a05",
-   "off_sig": "3021-b9db17cd"
+   "on_sig": "3526-b16b8969",
+   "off_sig": "2904-e6c0fc46"
   },
   {
    "base": "machinon_Blinds-color",
@@ -237,16 +237,16 @@
    "name": "Captain America",
    "description": "Captain America",
    "tab": "fun",
-   "on_sig": "10809-92b999f8",
-   "off_sig": "9202-0330a219"
+   "on_sig": "10965-bca15bf2",
+   "off_sig": "9214-58d0ae18"
   },
   {
    "base": "machinon_CaptainAmerica-color",
    "name": "Captain America Color",
    "description": "Captain America",
    "tab": "fun",
-   "on_sig": "10864-5c90fedb",
-   "off_sig": "9078-555387f6"
+   "on_sig": "10935-647a55ef",
+   "off_sig": "9277-c5a8d6d5"
   },
   {
    "base": "machinon_Car",
@@ -277,8 +277,8 @@
    "name": "Car Color",
    "description": "Car / vehicle",
    "tab": "color",
-   "on_sig": "5557-d9b568d2",
-   "off_sig": "4846-1d8ad69b"
+   "on_sig": "5526-200342f2",
+   "off_sig": "4793-9c574da8"
   },
   {
    "base": "machinon_ChristmasTree-color",
@@ -293,16 +293,16 @@
    "name": "Clock Color",
    "description": "Chronological device",
    "tab": "color",
-   "on_sig": "8308-a98afc23",
-   "off_sig": "7182-d27e7e03"
+   "on_sig": "8493-b81c73b3",
+   "off_sig": "7385-593a75bf"
   },
   {
    "base": "machinon_Coffee-color",
    "name": "Coffee Machine Color",
    "description": "Coffee Machine",
    "tab": "color",
-   "on_sig": "4588-baa73d48",
-   "off_sig": "4151-d876f9b1"
+   "on_sig": "4626-8d858b1d",
+   "off_sig": "4187-63886a10"
   },
   {
    "base": "machinon_ColdWater",
@@ -317,24 +317,24 @@
    "name": "Cold Water Color",
    "description": "Cold water",
    "tab": "color",
-   "on_sig": "6526-601c77c2",
-   "off_sig": "5989-85ebafe9"
+   "on_sig": "6545-aea1f90b",
+   "off_sig": "6078-09d9af60"
   },
   {
    "base": "machinon_Computer-color",
    "name": "Computer Laptop Color",
    "description": "Laptop computer",
    "tab": "color",
-   "on_sig": "2488-3cdcc2e3",
-   "off_sig": "2250-85175316"
+   "on_sig": "2451-cd0d787a",
+   "off_sig": "2230-f5cf4b98"
   },
   {
    "base": "machinon_ComputerPC-color",
    "name": "Computer PC Color",
    "description": "Desktop computer tower",
    "tab": "color",
-   "on_sig": "2605-0aab6a2a",
-   "off_sig": "2300-9855e181"
+   "on_sig": "2445-f60c128d",
+   "off_sig": "2167-7bfd573e"
   },
   {
    "base": "machinon_Connection",
@@ -349,7 +349,7 @@
    "name": "Connection Color",
    "description": "Connected (on) / disconnected (off)",
    "tab": "color",
-   "on_sig": "4937-b8720307",
+   "on_sig": "5627-61c35a22",
    "off_sig": "6469-cb064c43"
   },
   {
@@ -358,7 +358,7 @@
    "description": "Contact",
    "tab": "color",
    "on_sig": "3890-39580bb3",
-   "off_sig": "1333-57e194aa"
+   "off_sig": "1311-95bb130e"
   },
   {
    "base": "machinon_Cooktop",
@@ -389,24 +389,24 @@
    "name": "Custom Color",
    "description": "Custom",
    "tab": "color",
-   "on_sig": "5750-2519364c",
-   "off_sig": "4214-fa866a11"
+   "on_sig": "5766-dea846ba",
+   "off_sig": "4148-46a0253d"
   },
   {
    "base": "machinon_Daredevil",
    "name": "Daredevil",
    "description": "Daredevil",
    "tab": "fun",
-   "on_sig": "7141-d3e3b824",
-   "off_sig": "6298-a957d7d3"
+   "on_sig": "7051-143eb54b",
+   "off_sig": "6379-00a797b4"
   },
   {
    "base": "machinon_Daredevil-color",
    "name": "Daredevil Color",
    "description": "Daredevil",
    "tab": "fun",
-   "on_sig": "6688-b75b36d2",
-   "off_sig": "6055-c1378e47"
+   "on_sig": "6631-96daf62d",
+   "off_sig": "6050-71d6303b"
   },
   {
    "base": "machinon_DewPoint",
@@ -461,8 +461,8 @@
    "name": "Dishwasher Color",
    "description": "Dishwasher running / off (grey)",
    "tab": "color",
-   "on_sig": "3993-77c75045",
-   "off_sig": "3549-a87d0f97"
+   "on_sig": "3905-20c7cdda",
+   "off_sig": "3443-8c425076"
   },
   {
    "base": "machinon_Distance",
@@ -502,7 +502,7 @@
    "description": "Door",
    "tab": "color",
    "on_sig": "1960-dd7fce82",
-   "off_sig": "972-38c37990"
+   "off_sig": "887-f984ff4a"
   },
   {
    "base": "machinon_Lock",
@@ -517,8 +517,8 @@
    "name": "Door Lock Color",
    "description": "Locked (green) / unlocked (red)",
    "tab": "color",
-   "on_sig": "2772-7271570f",
-   "off_sig": "2664-5d0930f3"
+   "on_sig": "2741-060342f7",
+   "off_sig": "2614-32dfc91e"
   },
   {
    "base": "machinon_Duck",
@@ -533,8 +533,8 @@
    "name": "Duck Color",
    "description": "Duck",
    "tab": "fun",
-   "on_sig": "6729-b2c40475",
-   "off_sig": "6097-5da672d2"
+   "on_sig": "6761-6b925d63",
+   "off_sig": "6101-d613aacb"
   },
   {
    "base": "machinon_EnergyCounter",
@@ -549,8 +549,8 @@
    "name": "Energy Counter Color",
    "description": "Energy / electricity counter",
    "tab": "color",
-   "on_sig": "5815-84afd70e",
-   "off_sig": "5080-d70408a3"
+   "on_sig": "5799-d39c2790",
+   "off_sig": "5098-4a5b4c49"
   },
   {
    "base": "machinon_EnergyMeter",
@@ -565,8 +565,8 @@
    "name": "Energy Meter Color",
    "description": "Electricity / energy meter",
    "tab": "color",
-   "on_sig": "7159-acd465cb",
-   "off_sig": "5873-0d7e68cd"
+   "on_sig": "7163-cfdd5baa",
+   "off_sig": "5852-6a799c0e"
   },
   {
    "base": "machinon_Family",
@@ -597,8 +597,8 @@
    "name": "Family Home Color",
    "description": "Family home (native) / away (grey)",
    "tab": "color",
-   "on_sig": "8465-314a9bb8",
-   "off_sig": "8155-a13cd37e"
+   "on_sig": "8345-f001675d",
+   "off_sig": "8042-d65dcd90"
   },
   {
    "base": "machinon_Fan-color",
@@ -613,16 +613,16 @@
    "name": "Fantastic Four",
    "description": "Fantastic Four",
    "tab": "fun",
-   "on_sig": "9552-e7ec0506",
-   "off_sig": "8446-53393e64"
+   "on_sig": "9712-519279d9",
+   "off_sig": "8639-d4604d07"
   },
   {
    "base": "machinon_FantasticFour-color",
    "name": "Fantastic Four Color",
    "description": "Fantastic Four",
    "tab": "fun",
-   "on_sig": "9327-ea93c419",
-   "off_sig": "8251-2e7c3ec6"
+   "on_sig": "9370-69211727",
+   "off_sig": "8418-f4f78b15"
   },
   {
    "base": "machinon_Fingerprint",
@@ -637,40 +637,40 @@
    "name": "Fingerprint Color",
    "description": "Fingerprint OK / idle (grey)",
    "tab": "color",
-   "on_sig": "18219-3b2da69f",
-   "off_sig": "17631-3697e39a"
+   "on_sig": "18233-b07920e3",
+   "off_sig": "17577-95b3429d"
   },
   {
    "base": "machinon_FlashHead",
    "name": "Flash Head",
    "description": "The Flash",
    "tab": "fun",
-   "on_sig": "8979-c1eab748",
-   "off_sig": "8048-06fe717a"
+   "on_sig": "8962-7737293f",
+   "off_sig": "8094-d95655e7"
   },
   {
    "base": "machinon_FlashHead-color",
    "name": "Flash Head Color",
    "description": "The Flash",
    "tab": "fun",
-   "on_sig": "9088-18db5b70",
-   "off_sig": "8179-24729e9e"
+   "on_sig": "9071-cd1d434d",
+   "off_sig": "8144-fabd9cc7"
   },
   {
    "base": "machinon_FlashSign",
    "name": "Flash Sign",
    "description": "The Flash emblem",
    "tab": "fun",
-   "on_sig": "8934-183dc96d",
-   "off_sig": "8033-89daf87f"
+   "on_sig": "9059-6356594e",
+   "off_sig": "8111-a896938d"
   },
   {
    "base": "machinon_FlashSign-color",
    "name": "Flash Sign Color",
    "description": "The Flash emblem",
    "tab": "fun",
-   "on_sig": "8762-ec442d72",
-   "off_sig": "7829-b44a7b02"
+   "on_sig": "8760-49b5596b",
+   "off_sig": "7810-7cd3a36f"
   },
   {
    "base": "machinon_FluidMeter",
@@ -701,8 +701,8 @@
    "name": "Fountain Color",
    "description": "Fountain",
    "tab": "color",
-   "on_sig": "6590-f17e90e0",
-   "off_sig": "6074-5b3c360a"
+   "on_sig": "6466-33aec31d",
+   "off_sig": "6091-3dbc9409"
   },
   {
    "base": "machinon_Fridge",
@@ -725,8 +725,8 @@
    "name": "Game Controller Color",
    "description": "Gamepad / console controller",
    "tab": "color",
-   "on_sig": "7441-f7f52416",
-   "off_sig": "6430-7798e4f3"
+   "on_sig": "7464-74943de0",
+   "off_sig": "6452-c108343e"
   },
   {
    "base": "machinon_Garage",
@@ -741,32 +741,32 @@
    "name": "Garage Door Color",
    "description": "Garage door open (on) / closed (off)",
    "tab": "color",
-   "on_sig": "4829-82a3a20f",
-   "off_sig": "4908-e1de68ab"
+   "on_sig": "4771-85ce27de",
+   "off_sig": "4798-e31009cf"
   },
   {
    "base": "machinon_GLight-color",
    "name": "Garden Light Color",
    "description": "Garden Light",
    "tab": "color",
-   "on_sig": "3481-9c542c6c",
-   "off_sig": "3216-e44650c1"
+   "on_sig": "3379-25766e54",
+   "off_sig": "3142-f9aee3c9"
   },
   {
    "base": "machinon_GasCounter",
    "name": "Gas Counter",
    "description": "Gas counter",
    "tab": "blue",
-   "on_sig": "5817-4424e2f2",
-   "off_sig": "5325-5cb194b8"
+   "on_sig": "5815-e254297e",
+   "off_sig": "5320-6eeba039"
   },
   {
    "base": "machinon_GasCounter-color",
    "name": "Gas Counter Color",
    "description": "Gas counter",
    "tab": "color",
-   "on_sig": "6862-75406eb9",
-   "off_sig": "5973-c743f037"
+   "on_sig": "6809-ea473ec8",
+   "off_sig": "5973-2ace5286"
   },
   {
    "base": "machinon_Gate",
@@ -837,8 +837,8 @@
    "name": "Graph Color",
    "description": "Graph / statistics",
    "tab": "color",
-   "on_sig": "4829-49f10602",
-   "off_sig": "4380-36f5816f"
+   "on_sig": "4859-2d93cbf1",
+   "off_sig": "4365-55296a15"
   },
   {
    "base": "machinon_Gremlin",
@@ -861,48 +861,48 @@
    "name": "Grey Alien",
    "description": "Grey alien",
    "tab": "fun",
-   "on_sig": "8279-f9f3540d",
-   "off_sig": "7263-642035ca"
+   "on_sig": "8280-9ba0e255",
+   "off_sig": "7237-83bd9e98"
   },
   {
    "base": "machinon_GreyAlien-color",
    "name": "Grey Alien Color",
    "description": "Grey alien",
    "tab": "fun",
-   "on_sig": "8046-27e6356a",
-   "off_sig": "7025-b72fa00e"
+   "on_sig": "8026-facd3d24",
+   "off_sig": "7067-f7d6b10f"
   },
   {
    "base": "machinon_Harddisk-color",
    "name": "Hard Disk Color",
    "description": "Hard disk drive",
    "tab": "color",
-   "on_sig": "5649-53b12eec",
-   "off_sig": "4860-2a1e15dd"
+   "on_sig": "5589-eb777c31",
+   "off_sig": "4791-fe09cfa2"
   },
   {
    "base": "machinon_HarryPotter",
    "name": "Harry Potter",
    "description": "Harry Potter",
    "tab": "fun",
-   "on_sig": "4745-d13058a6",
-   "off_sig": "4266-129cf6f4"
+   "on_sig": "4647-9e5869f8",
+   "off_sig": "4184-c231ca3b"
   },
   {
    "base": "machinon_HarryPotter-color",
    "name": "Harry Potter Color",
    "description": "Harry Potter",
    "tab": "fun",
-   "on_sig": "4830-067420e2",
-   "off_sig": "4351-d7ed8c78"
+   "on_sig": "4770-41281cc8",
+   "off_sig": "4290-30a4510b"
   },
   {
    "base": "machinon_Heating-color",
    "name": "Heating Color",
    "description": "Heating device",
    "tab": "color",
-   "on_sig": "4223-c72da01b",
-   "off_sig": "3909-e3875c44"
+   "on_sig": "4072-09a3753f",
+   "off_sig": "3716-5f5b71df"
   },
   {
    "base": "machinon_Height",
@@ -933,8 +933,8 @@
    "name": "Hot Water Color",
    "description": "Hot water / boiler",
    "tab": "color",
-   "on_sig": "5893-f07ecdeb",
-   "off_sig": "5432-41587fd8"
+   "on_sig": "5836-773066ec",
+   "off_sig": "5397-16ba6c60"
   },
   {
    "base": "machinon_HouseLock",
@@ -957,16 +957,16 @@
    "name": "Human Torch",
    "description": "Human Torch",
    "tab": "fun",
-   "on_sig": "8922-7dda79b7",
-   "off_sig": "7978-2fd2e287"
+   "on_sig": "8904-522e790e",
+   "off_sig": "8041-e491cbe2"
   },
   {
    "base": "machinon_HumanTorch-color",
    "name": "Human Torch Color",
    "description": "Human Torch",
    "tab": "fun",
-   "on_sig": "8051-fd244967",
-   "off_sig": "7329-bc4d6655"
+   "on_sig": "8001-3ef527f8",
+   "off_sig": "7352-3fffde6a"
   },
   {
    "base": "machinon_Hygrometer",
@@ -981,8 +981,8 @@
    "name": "Hygrometer Color",
    "description": "Humidity / hygrometer sensor",
    "tab": "color",
-   "on_sig": "6511-1ae2e2d0",
-   "off_sig": "5942-106f50a5"
+   "on_sig": "6300-b35f131c",
+   "off_sig": "5764-1dfbbeca"
   },
   {
    "base": "machinon_InfraredSensor",
@@ -997,32 +997,32 @@
    "name": "Infrared Sensor Color",
    "description": "IR detected (native) / clear (grey)",
    "tab": "color",
-   "on_sig": "7836-899e7299",
-   "off_sig": "7201-54cfc17e"
+   "on_sig": "7698-21d57e83",
+   "off_sig": "7060-ee9df2e8"
   },
   {
    "base": "machinon_Inverter-color",
    "name": "Inverter Color",
    "description": "Inverter",
    "tab": "color",
-   "on_sig": "3203-80b02b98",
-   "off_sig": "2786-a89af9c4"
+   "on_sig": "3156-8181e5e6",
+   "off_sig": "2722-6d36e23e"
   },
   {
    "base": "machinon_IronMan",
    "name": "Iron Man",
    "description": "Iron Man",
    "tab": "fun",
-   "on_sig": "6716-b6dd4fa9",
-   "off_sig": "5913-a3f08928"
+   "on_sig": "6723-05bdf699",
+   "off_sig": "5949-24495cb0"
   },
   {
    "base": "machinon_IronMan-color",
    "name": "Iron Man Color",
    "description": "Iron Man",
    "tab": "fun",
-   "on_sig": "6641-829af840",
-   "off_sig": "5768-73f1daee"
+   "on_sig": "6688-af3b18f2",
+   "off_sig": "5739-ad7d2dc1"
   },
   {
    "base": "machinon_Jacuzzi",
@@ -1037,8 +1037,8 @@
    "name": "Jacuzzi Color",
    "description": "Jacuzzi / hot tub",
    "tab": "color",
-   "on_sig": "6555-44701ef0",
-   "off_sig": "5832-494fa556"
+   "on_sig": "6509-14c414e8",
+   "off_sig": "5816-32e2bbae"
   },
   {
    "base": "machinon_Kettle",
@@ -1053,8 +1053,8 @@
    "name": "Kettle Color",
    "description": "Kettle boiling (native) / off (grey)",
    "tab": "color",
-   "on_sig": "8924-6c0b4259",
-   "off_sig": "7928-f1369517"
+   "on_sig": "8893-8e5ffd32",
+   "off_sig": "7911-34064cb8"
   },
   {
    "base": "machinon_LightAuto",
@@ -1069,8 +1069,8 @@
    "name": "Light Automation Color",
    "description": "Automated light on / off",
    "tab": "color",
-   "on_sig": "8161-47889880",
-   "off_sig": "7220-99f11c0f"
+   "on_sig": "8171-5a46069a",
+   "off_sig": "7193-e6b21f9e"
   },
   {
    "base": "machinon_Light-color",
@@ -1093,8 +1093,8 @@
    "name": "Link Color",
    "description": "Link connected (on) / broken (off)",
    "tab": "color",
-   "on_sig": "7574-d5f5970d",
-   "off_sig": "9068-0a7aa48a"
+   "on_sig": "7603-e7a5e585",
+   "off_sig": "9117-81d5bbb2"
   },
   {
    "base": "machinon_Mailbox",
@@ -1141,8 +1141,8 @@
    "name": "Man Home Color",
    "description": "Man home (native) / away (grey)",
    "tab": "color",
-   "on_sig": "6555-8798ca58",
-   "off_sig": "6428-d1d95bdf"
+   "on_sig": "6421-7199ecef",
+   "off_sig": "6298-e8061e6a"
   },
   {
    "base": "machinon_Mario",
@@ -1181,8 +1181,8 @@
    "name": "Microwave Color",
    "description": "Microwave running / off (grey)",
    "tab": "color",
-   "on_sig": "3460-d6a05a45",
-   "off_sig": "2859-6a23d062"
+   "on_sig": "3449-ef5f1c0e",
+   "off_sig": "2894-88ae3748"
   },
   {
    "base": "machinon_Mobile",
@@ -1213,8 +1213,8 @@
    "name": "Mood Color",
    "description": "Mood: happy / sad face (native)",
    "tab": "color",
-   "on_sig": "7515-7a0c91a6",
-   "off_sig": "7617-36cc82f1"
+   "on_sig": "7556-097db3ac",
+   "off_sig": "7640-08eb08cf"
   },
   {
    "base": "machinon_MotionDetector",
@@ -1245,24 +1245,24 @@
    "name": "Music Color",
    "description": "Music note",
    "tab": "color",
-   "on_sig": "5604-e2842c40",
-   "off_sig": "5088-13bc2748"
+   "on_sig": "5648-6c2a5ab8",
+   "off_sig": "5109-223eaede"
   },
   {
    "base": "machinon_Navi",
    "name": "Na'vi",
    "description": "Na'vi (Avatar)",
    "tab": "fun",
-   "on_sig": "9085-7b024138",
-   "off_sig": "7758-dd0f5c32"
+   "on_sig": "8810-7b013562",
+   "off_sig": "7616-a88a780a"
   },
   {
    "base": "machinon_Navi-color",
    "name": "Na'vi Color",
    "description": "Na'vi (Avatar)",
    "tab": "fun",
-   "on_sig": "8350-88c95c8f",
-   "off_sig": "6733-94dcc39b"
+   "on_sig": "8121-32ff7b33",
+   "off_sig": "6631-b5f06c54"
   },
   {
    "base": "machinon_NAS",
@@ -1285,16 +1285,16 @@
    "name": "Ninja Turtle",
    "description": "Ninja Turtle",
    "tab": "fun",
-   "on_sig": "10177-6595c40a",
-   "off_sig": "9062-b798c34a"
+   "on_sig": "10198-1e7ab684",
+   "off_sig": "9098-dd13a004"
   },
   {
    "base": "machinon_NinjaTurtle-color",
    "name": "Ninja Turtle Color",
    "description": "Ninja Turtle",
    "tab": "fun",
-   "on_sig": "9629-0a7730a3",
-   "off_sig": "8443-77c413e8"
+   "on_sig": "9689-4bece3e1",
+   "off_sig": "8447-e813a516"
   },
   {
    "base": "machinon_OilTank",
@@ -1421,8 +1421,8 @@
    "name": "Padlock Color",
    "description": "Padlock locked (on) / unlocked (off)",
    "tab": "color",
-   "on_sig": "3205-ae4bc20c",
-   "off_sig": "3087-edcb1634"
+   "on_sig": "3109-3f7eb1e3",
+   "off_sig": "3029-df382fe8"
   },
   {
    "base": "machinon_Pet",
@@ -1501,16 +1501,16 @@
    "name": "Predator",
    "description": "Predator",
    "tab": "fun",
-   "on_sig": "13027-11aa2be3",
-   "off_sig": "11495-391c4de4"
+   "on_sig": "13211-1b90ec14",
+   "off_sig": "11665-b4774271"
   },
   {
    "base": "machinon_Predator-color",
    "name": "Predator Color",
    "description": "Predator",
    "tab": "fun",
-   "on_sig": "12636-3969f4f7",
-   "off_sig": "11046-cc376b77"
+   "on_sig": "12704-96c432fa",
+   "off_sig": "11126-f2300938"
   },
   {
    "base": "machinon_Presence",
@@ -1525,8 +1525,8 @@
    "name": "Presence Color",
    "description": "At home (native) / away (grey)",
    "tab": "color",
-   "on_sig": "6430-0239f34e",
-   "off_sig": "6352-1a30243b"
+   "on_sig": "6334-013120de",
+   "off_sig": "6199-a98a1571"
   },
   {
    "base": "machinon_PresenceGreen",
@@ -1541,8 +1541,8 @@
    "name": "Presence Green Color",
    "description": "At home (green) / away (grey)",
    "tab": "color",
-   "on_sig": "6472-f01c4d9f",
-   "off_sig": "6352-1a30243b"
+   "on_sig": "6347-9a7ef5b8",
+   "off_sig": "6199-a98a1571"
   },
   {
    "base": "machinon_Pressure",
@@ -1605,7 +1605,7 @@
    "name": "Radiator Color",
    "description": "Radiator",
    "tab": "color",
-   "on_sig": "7441-83627d6e",
+   "on_sig": "7345-4c5eceac",
    "off_sig": "5859-af0c1b9c"
   },
   {
@@ -1621,8 +1621,8 @@
    "name": "Radio Tower Color",
    "description": "Radio active (native) / off (grey)",
    "tab": "color",
-   "on_sig": "13548-c2667740",
-   "off_sig": "12277-445c848e"
+   "on_sig": "13612-76f04691",
+   "off_sig": "12410-f4b60454"
   },
   {
    "base": "machinon_Rain-color",
@@ -1661,8 +1661,8 @@
    "name": "RFID Color",
    "description": "RFID read (native) / idle (grey)",
    "tab": "color",
-   "on_sig": "11877-98c11591",
-   "off_sig": "10756-9ddf4ade"
+   "on_sig": "12135-373a7871",
+   "off_sig": "11004-a4b9c5a6"
   },
   {
    "base": "machinon_Robot",
@@ -1765,8 +1765,8 @@
    "name": "Shower Color",
    "description": "Shower",
    "tab": "color",
-   "on_sig": "5348-826e9935",
-   "off_sig": "4771-7cf5e4cc"
+   "on_sig": "6454-4a41a6be",
+   "off_sig": "5932-e38e7ec6"
   },
   {
    "base": "machinon_Signal",
@@ -1782,7 +1782,7 @@
    "description": "Signal present (native) / none (grey)",
    "tab": "color",
    "on_sig": "1491-75be9fa0",
-   "off_sig": "1435-84e0f5ba"
+   "off_sig": "1280-653f6910"
   },
   {
    "base": "machinon_Soil-color",
@@ -1861,16 +1861,16 @@
    "name": "Switch Color",
    "description": "Toggle switch on / off (native)",
    "tab": "color",
-   "on_sig": "1013-4d442464",
-   "off_sig": "982-7ce8def5"
+   "on_sig": "1016-9525f9bc",
+   "off_sig": "992-e798905b"
   },
   {
    "base": "machinon_Tap-color",
    "name": "Tap/Valve Color",
    "description": "Tap or valve",
    "tab": "color",
-   "on_sig": "5384-8152b0b1",
-   "off_sig": "4881-1a0817e8"
+   "on_sig": "5294-4c5c901a",
+   "off_sig": "4779-2336dbeb"
   },
   {
    "base": "machinon_TARDIS",
@@ -1893,16 +1893,16 @@
    "name": "Targaryen",
    "description": "House Targaryen sigil",
    "tab": "fun",
-   "on_sig": "10281-1c5979c3",
-   "off_sig": "9250-78014ef5"
+   "on_sig": "10229-1d7993c6",
+   "off_sig": "9211-42f86f46"
   },
   {
    "base": "machinon_Targaryen-color",
    "name": "Targaryen Color",
    "description": "House Targaryen sigil",
    "tab": "fun",
-   "on_sig": "10056-469bb6a6",
-   "off_sig": "8961-0348a270"
+   "on_sig": "9980-316a4623",
+   "off_sig": "8933-6dce5d99"
   },
   {
    "base": "machinon_TV-color",
@@ -1917,16 +1917,16 @@
    "name": "Thor",
    "description": "Thor",
    "tab": "fun",
-   "on_sig": "8420-eb67174f",
-   "off_sig": "7620-f58da8ce"
+   "on_sig": "8506-d7d10e57",
+   "off_sig": "7590-9eee2550"
   },
   {
    "base": "machinon_Thor-color",
    "name": "Thor Color",
    "description": "Thor",
    "tab": "fun",
-   "on_sig": "8611-943a5d26",
-   "off_sig": "7664-a7d572dd"
+   "on_sig": "8577-a04903b6",
+   "off_sig": "7638-3c1e9df4"
   },
   {
    "base": "machinon_Unicorn",
@@ -1965,16 +1965,16 @@
    "name": "Venom",
    "description": "Venom",
    "tab": "fun",
-   "on_sig": "8482-bdd2c557",
-   "off_sig": "7541-55ad6118"
+   "on_sig": "8532-917a3cb1",
+   "off_sig": "7561-beea4510"
   },
   {
    "base": "machinon_Venom-color",
    "name": "Venom Color",
    "description": "Venom",
    "tab": "fun",
-   "on_sig": "8315-c8715dcf",
-   "off_sig": "7284-cbc3389f"
+   "on_sig": "8312-e466ed4b",
+   "off_sig": "7245-b307ab72"
   },
   {
    "base": "machinon_Vibration",
@@ -2005,16 +2005,16 @@
    "name": "Walter White",
    "description": "Walter White",
    "tab": "fun",
-   "on_sig": "6610-4176b3c9",
-   "off_sig": "5709-3662c9ef"
+   "on_sig": "6576-e147ec05",
+   "off_sig": "5644-af7b9326"
   },
   {
    "base": "machinon_WalterWhite-color",
    "name": "Walter White Color",
    "description": "Walter White",
    "tab": "fun",
-   "on_sig": "6758-c6426ada",
-   "off_sig": "5779-e91ca8e0"
+   "on_sig": "6638-a30bfaee",
+   "off_sig": "5785-8c573659"
   },
   {
    "base": "machinon_WashingMachine-color",
@@ -2037,8 +2037,8 @@
    "name": "Water Counter Color",
    "description": "Water counter",
    "tab": "color",
-   "on_sig": "5865-a0f68269",
-   "off_sig": "5245-e2363306"
+   "on_sig": "5852-ed8ff4f3",
+   "off_sig": "5203-0a9fab9d"
   },
   {
    "base": "machinon_Weight",
@@ -2077,8 +2077,8 @@
    "name": "Wind Gauge Color",
    "description": "Anemometer / wind-speed gauge",
    "tab": "color",
-   "on_sig": "7146-f43d34fa",
-   "off_sig": "6386-39c83741"
+   "on_sig": "7135-0d968982",
+   "off_sig": "6438-21f08079"
   },
   {
    "base": "machinon_Window-color",
@@ -2086,7 +2086,7 @@
    "description": "Window sensor or control",
    "tab": "color",
    "on_sig": "3890-39580bb3",
-   "off_sig": "1333-57e194aa"
+   "off_sig": "1311-95bb130e"
   },
   {
    "base": "machinon_WindowLock",
@@ -2101,8 +2101,8 @@
    "name": "Window Lock Color",
    "description": "Window closed (green) / open (red)",
    "tab": "color",
-   "on_sig": "3298-a88018ab",
-   "off_sig": "3244-21ba7654"
+   "on_sig": "3252-53b1a621",
+   "off_sig": "3210-89ddaa7f"
   },
   {
    "base": "machinon_WiredNetwork",
@@ -2149,40 +2149,40 @@
    "name": "Woman Home Color",
    "description": "Woman home (native) / away (grey)",
    "tab": "color",
-   "on_sig": "6789-1a7f0c53",
-   "off_sig": "6623-80b35dcf"
+   "on_sig": "6636-270b9455",
+   "off_sig": "6497-51da884d"
   },
   {
    "base": "machinon_WonderWoman",
    "name": "Wonder Woman",
    "description": "Wonder Woman",
    "tab": "fun",
-   "on_sig": "8059-1134cfaa",
-   "off_sig": "7529-8a930e65"
+   "on_sig": "8052-ca7c44cc",
+   "off_sig": "7532-72304f40"
   },
   {
    "base": "machinon_WonderWoman-color",
    "name": "Wonder Woman Color",
    "description": "Wonder Woman",
    "tab": "fun",
-   "on_sig": "6867-0f42a897",
-   "off_sig": "6465-758627d4"
+   "on_sig": "6896-82248208",
+   "off_sig": "6481-4ff7c3c4"
   },
   {
    "base": "machinon_XMen",
    "name": "X-Men",
    "description": "X-Men emblem",
    "tab": "fun",
-   "on_sig": "10448-9aa027ea",
-   "off_sig": "8823-3432a15b"
+   "on_sig": "10886-0ac907c8",
+   "off_sig": "8976-19f981d1"
   },
   {
    "base": "machinon_XMen-color",
    "name": "X-Men Color",
    "description": "X-Men emblem",
    "tab": "fun",
-   "on_sig": "10331-84b2387e",
-   "off_sig": "8367-1726b1b5"
+   "on_sig": "10561-5b48adce",
+   "off_sig": "8979-3d4c36b9"
   }
  ]
 }
