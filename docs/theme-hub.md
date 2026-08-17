@@ -25,6 +25,39 @@ missing](troubleshooting-and-faq.md#the-theme-hub-entry-is-missing) if neither m
 
 ![Theme Hub settings page](screenshots/theme-hub.png)
 
+## Bookmark any tab
+
+The Theme Hub is a real page with its own address, not a popup, so you can
+bookmark it and reload it like anything else. Add `#/Theme` to your Domoticz
+address:
+
+```text
+http://your-domoticz:8080/#/Theme
+```
+
+Add a tab name to land straight on that tab:
+
+```text
+http://your-domoticz:8080/#/Theme/colors
+```
+
+| Tab | Address |
+| --- | --- |
+| General | `#/Theme/general` |
+| Menus | `#/Theme/menus` |
+| Dashboard | `#/Theme/dashboard` |
+| Device cards | `#/Theme/cards` |
+| Charts | `#/Theme/charts` |
+| Background | `#/Theme/background` |
+| Colors and schemes | `#/Theme/colors` |
+| Icon packs | `#/Theme/iconpacks` |
+| About | `#/Theme/about` |
+
+Reloading keeps you where you were, and the browser's back button works the
+way you expect. Both addresses are specific to Machinon: Domoticz on its own
+has no page at either one, so they only work while Machinon is the active
+theme.
+
 ## The nine groups
 
 The Theme Hub is organized into nine tabs, in this order:

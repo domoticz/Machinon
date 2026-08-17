@@ -22,6 +22,14 @@ and how to tell the two apart in the Theme Hub itself.
 turned on, for example Standby after (minutes) only matters while Screen standby is on. Every
 row below that depends on another one says so directly in its "What it does" column.
 
+The Domoticz Setup menu, restyled as a grid of tiles, has its own address too:
+
+```text
+http://your-domoticz:8080/#/SetupMenu
+```
+
+Like `#/Theme`, this one exists only while Machinon is active.
+
 ## General
 
 | Key | Setting | What it does | Applies to |
