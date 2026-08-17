@@ -3,8 +3,8 @@
 ## A browsable library, not a single pack
 
 Despite the name, Machinon's icon pack isn't one all-or-nothing set you switch on. It's a
-browsable library of 267 device icons in three visual styles, 85 Blue UI, 112 Color, and 70 Fun,
-and you install only the ones you actually want, one at a time, onto individual devices.
+browsable library of over 250 device icons, and you install only the ones you actually want,
+one at a time, onto individual devices.
 Everything else in your dashboard keeps its existing icon.
 
 ## The three styles

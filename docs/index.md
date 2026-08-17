@@ -19,7 +19,7 @@ detail.
   custom color picker if you want to design your own palette.
 - **One settings page**: every setting lives in the Theme Hub, reachable from Domoticz's Setup
   menu once the theme is active.
-- **Refreshed icons**: a library of 267 device icons in three styles, installed one at a time
+- **Refreshed icons**: a library of over 250 device icons, installed one at a time
   onto individual devices from the Theme Hub.
 - **Mobile-ready**: dashboards, menus, and dialogs adapt to small screens instead of just
   shrinking the desktop layout.
