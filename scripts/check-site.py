@@ -43,6 +43,15 @@
    card does not toggle, and then fixing a duplicate-icon defect silently
    orphaned Dimmer48_On.png the moment its card pointed at a different icon.
 
+5b. iconpack/ and images/ references resolve. The icon gallery points
+   directly at the theme's real shipped artwork under those two repo-root
+   trees (see resolve_asset()), and unlike site/assets/ this is a one-way
+   check: only dangling references are flagged. The orphan direction does
+   not apply here, since both trees hold hundreds of files the gallery
+   deliberately does not reference (every icon that is not in the gallery's
+   sample, every unused style variant), and demanding each one be
+   referenced from the landing page would be a false requirement.
+
 6. Tour manifest drift. site/tour.js holds the hero's eight slides: one
    Dashboard capture per scheme, and a light and a dark capture for each of
    the other seven. This check proves every path exists, that the Dashboard
@@ -80,6 +89,12 @@ TOKENS = SITE / "tokens.css"
 APP_JS = SITE / "app.js"
 SCHEME_JS = ROOT / "src" / "js" / "scheme.js"
 ASSETS = SITE / "assets"
+
+# The two repo-root trees the icon gallery points at directly (see check 5b
+# and resolve_asset()). Unlike site/assets/, only the dangling-reference
+# direction is checked against these: both hold hundreds of files the
+# gallery deliberately does not reference.
+EXTERNAL_REF_ROOTS = ("iconpack/", "images/")
 TOUR_JS = SITE / "tour.js"
 
 # The published prefix every asset URL resolves under. og:image, og:url and
@@ -353,12 +368,14 @@ def png_size(path):
 def resolve_asset(ref):
     """Map an index.html reference to the file that serves it, once built.
 
-    docs/... references resolve against the repo root: mkdocs owns that
-    tree, and scripts/serve-site.sh copies it under build/docs alongside
-    site/'s own files, so the real pixel data for a docs/ screenshot lives
-    outside site/ entirely. Everything else resolves against site/ itself.
+    Three trees resolve against the repo root rather than site/: docs/ is
+    owned by mkdocs, and iconpack/ and images/ are the theme's real shipped
+    artwork, which the icon gallery points at directly so the site cannot
+    drift from what installs. All three are copied into the built tree by
+    deploy-docs.yml and by scripts/serve-site.sh. Everything else resolves
+    against site/ itself.
     """
-    if ref.startswith("docs/"):
+    if ref.split("/", 1)[0] in ("docs", "iconpack", "images"):
         return ROOT / ref
     return SITE / ref
 
@@ -377,6 +394,22 @@ def asset_refs(html_text):
         if ref.startswith(SITE_URL):
             ref = ref[len(SITE_URL):]
         if ref.startswith("assets/"):
+            refs.add(ref)
+    return sorted(refs)
+
+
+def external_refs(html_text):
+    """Return every distinct iconpack/... or images/... path referenced in
+    index.html.
+
+    Companion to asset_refs(), but one-directional (see check 5b): this
+    feeds only a dangling-reference check, never an orphan check, since
+    both trees hold hundreds of files the gallery legitimately never
+    references.
+    """
+    refs = set()
+    for ref in _ASSET_REF.findall(html_text):
+        if ref.startswith(EXTERNAL_REF_ROOTS):
             refs.add(ref)
     return sorted(refs)
 
@@ -476,6 +509,15 @@ def main():
             "referenced from site/index.html.".format(path)
         )
 
+    # --- Check 5b: iconpack/ and images/ references resolve (one direction) ---
+    icon_refs = external_refs(html)
+    for ref in icon_refs:
+        if not resolve_asset(ref).exists():
+            failures.append(
+                'dangling reference "{}" in site/index.html: no such file '
+                "under {}/.".format(ref, ref.split("/", 1)[0])
+            )
+
     # --- Check 6: the tour manifest resolves, and covers every scheme ---
     tour_js = TOUR_JS.read_text()
     dashboard_shots = tour_dashboard_shots(tour_js)
@@ -544,10 +586,10 @@ def main():
         return 1
     print(
         "check-site: OK ({} schemes, {} mapped colour keys, {} image "
-        "dimensions checked, {} assets referenced, {} tour captures, no "
-        "absolute references)".format(
+        "dimensions checked, {} assets referenced, {} iconpack/images "
+        "references, {} tour captures, no absolute references)".format(
             len(schemes), len(generator), dimension_checks, len(existing),
-            len(tour_refs),
+            len(icon_refs), len(tour_refs),
         )
     )
     return 0

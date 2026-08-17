@@ -136,6 +136,8 @@ select:focus-visible {
 .feature-grid,
 .scheme-grid,
 .showcase-shot,
+.showcase.icons > .icon-grid,
+.icon-pack,
 .phone-grid,
 .install-steps,
 .install-blocks,
@@ -816,6 +818,92 @@ button.switch {
     border-radius: var(--site-radius-container);
     box-shadow: var(--dz-elev-overlay);
     margin: 0 auto;
+}
+
+/* ---- Icons ------------------------------------------------------------ */
+
+.icon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(4.5rem, 1fr));
+    gap: 0.5rem;
+    margin: 0 0 2rem;
+    padding: 0;
+    list-style: none;
+}
+
+.icon-grid li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.9rem 0;
+    /* Same surface and radius the demo device cards use, so the tiles read as
+       part of the theme rather than as a web-page widget. */
+    background: var(--dz-widget-bg);
+    border: 1px solid var(--dz-input-border);
+    border-radius: var(--site-radius-interactive);
+}
+
+/* 96px art in a 48px box is the sharpness claim made literal, so the box is
+   pinned rather than left to the img { max-width: 100% } reset. */
+.icon-grid img {
+    width: 48px;
+    height: 48px;
+    max-width: none;
+}
+
+/* Mirrors img[hidden] above: .icon-grid's own display: grid would otherwise
+   out-specify the UA [hidden] rule, and the style switch's JS-driven hiding
+   would have no visible effect. The markup itself carries no hidden
+   attribute on load, so without JavaScript both the line and colour grids
+   stay visible; app.js hides the inactive one once it runs. */
+.icon-grid[hidden] { display: none; }
+
+/* .section-head above centers its heading and copy; .icon-pack is a second,
+   un-nested block in the same section (the pack, after the default set) and
+   without this it reads as a stray left-aligned paragraph instead of a
+   section of its own. */
+.icon-pack {
+    text-align: center;
+}
+
+.icon-pack h3 {
+    margin: 0 0 0.75rem;
+    font-size: var(--site-text-xl);
+}
+
+.icon-styles {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 1.25rem 0;
+}
+
+.icon-style-btn {
+    padding: 0.4rem 0.9rem;
+    font: inherit;
+    font-size: var(--site-text-xs);
+    color: var(--secondary-text-color);
+    background: transparent;
+    border: 1px solid var(--dz-input-border);
+    border-radius: var(--site-radius-button);
+    cursor: pointer;
+}
+
+.icon-style-btn.is-active {
+    color: var(--dz-accent-text);
+    background: var(--dz-accent-color);
+    border-color: var(--dz-accent-color);
+}
+
+.icon-style-btn:focus-visible {
+    outline: 2px solid var(--dz-accent-color);
+    outline-offset: 2px;
+}
+
+.icon-extras-note {
+    margin: 0 0 0.75rem;
+    font-size: var(--site-text-xs);
+    color: var(--secondary-text-color);
 }
 
 /* ---- Mobile screenshots ---------------------------------------------- */

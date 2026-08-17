@@ -50,6 +50,13 @@ jobs:
           mkdocs build --strict -d build/docs
           cp -r site/* build/
           cp -r fonts build/fonts
+          # The icon gallery on the landing page points at the files that
+          # actually install into Domoticz, so the site cannot drift from what
+          # ships. Copying beats duplicating PNGs into site/assets/, and beats
+          # hotlinking raw.githubusercontent.com, which is rate limited,
+          # uncacheable and dead in the local preview.
+          cp -r iconpack build/iconpack
+          cp -r images build/images
           touch build/.nojekyll
 
       - name: Upload the Pages artifact

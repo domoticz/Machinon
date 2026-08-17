@@ -29,6 +29,11 @@ rm -rf build build-preview
 mkdocs build -d build/docs
 cp -r site/* build/
 cp -r fonts build/fonts
+# Keep in lockstep with .github/workflows/deploy-docs.yml: this script's whole
+# value is assembling the tree the same way, so a preview that passes means
+# production passes.
+cp -r iconpack build/iconpack
+cp -r images build/images
 touch build/.nojekyll
 
 # Serve build/ under a /Machinon/ prefix without copying the tree twice.

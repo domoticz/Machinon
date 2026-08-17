@@ -303,10 +303,44 @@
         }
     }
 
+    /* The pack's line and colour grids carry no hidden attribute in the
+       markup, so without JavaScript a visitor sees both stacked, which is
+       honest and useful rather than one stranded behind a dead button. With
+       JavaScript, applyIconStyle() runs once on init (matching the button
+       already marked .is-active) and again on every click, collapsing the
+       page to one grid at a time. */
+    function wireIconStyles() {
+        var buttons = document.querySelectorAll('[data-icon-style]');
+        if (!buttons.length) { return; }
+
+        function applyIconStyle(wanted) {
+            var groups = document.querySelectorAll('[data-icon-style-group]');
+            for (var g = 0; g < groups.length; g++) {
+                groups[g].hidden = groups[g].getAttribute('data-icon-style-group') !== wanted;
+            }
+            for (var b = 0; b < buttons.length; b++) {
+                buttons[b].classList.toggle(
+                    'is-active',
+                    buttons[b].getAttribute('data-icon-style') === wanted
+                );
+            }
+        }
+
+        for (var i = 0; i < buttons.length; i++) {
+            buttons[i].addEventListener('click', function (event) {
+                applyIconStyle(event.currentTarget.getAttribute('data-icon-style'));
+            });
+        }
+
+        var active = document.querySelector('[data-icon-style].is-active') || buttons[0];
+        applyIconStyle(active.getAttribute('data-icon-style'));
+    }
+
     buildSchemeGrid();
     wirePicker();
     wireReveals();
     wireCopyButtons();
+    wireIconStyles();
     wireGarageCard();
     wireLightsCard();
     wireDimmerCard();

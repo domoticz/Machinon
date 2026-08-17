@@ -147,8 +147,13 @@ def test_png_size_rejects_non_png_files(tmp_path):
         pass
 
 
-def test_resolve_asset_maps_docs_refs_to_the_repo_root():
+def test_resolve_asset_maps_the_repo_root_trees():
+    """docs/, iconpack/ and images/ are copied into the built tree from the
+    repo root, so a reference to one must not be resolved under site/."""
     assert check.resolve_asset("docs/screenshots/a.png") == check.ROOT / "docs/screenshots/a.png"
+    assert check.resolve_asset("iconpack/machinon_Bed48_On.png") == check.ROOT / "iconpack/machinon_Bed48_On.png"
+    assert check.resolve_asset("images/Light48_On.png") == check.ROOT / "images/Light48_On.png"
+    assert check.resolve_asset("assets/favicon.png") == check.SITE / "assets/favicon.png"
 
 
 def test_resolve_asset_maps_other_refs_under_site():
@@ -179,6 +184,29 @@ def test_asset_refs_normalizes_absolute_site_url_references():
         "assets/icons/temp48.png",
         "assets/social-preview.png",
     ]
+
+
+def test_external_refs_reads_iconpack_and_images_paths():
+    html = (
+        '<img src="iconpack/machinon_Bed48_On.png">'
+        '<img src="images/Light48_On.png">'
+        '<img src="assets/icons/temp48.png">'
+        '<a href="docs/">not an external ref</a>'
+    )
+    assert check.external_refs(html) == [
+        "iconpack/machinon_Bed48_On.png",
+        "images/Light48_On.png",
+    ]
+
+
+def test_external_refs_deduplicates_repeated_references():
+    html = '<img src="images/Light48_On.png"><img src="images/Light48_On.png">'
+    assert check.external_refs(html) == ["images/Light48_On.png"]
+
+
+def test_external_refs_returns_empty_without_iconpack_or_images_refs():
+    html = '<img src="assets/icons/temp48.png"><a href="docs/">d</a>'
+    assert check.external_refs(html) == []
 
 
 def test_asset_files_lists_nested_files_as_assets_relative_paths(tmp_path):

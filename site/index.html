@@ -82,7 +82,7 @@
       <h1>Your Domoticz dashboard, redrawn.</h1>
       <p class="hero-sub">Machinon replaces Domoticz's default interface with a clean, card-based
         layout: 8 color schemes in matching light and dark pairs, a library of over 250 device icons
-        in three styles installed one at a time, and 34 settings on one page inside Domoticz.</p>
+        installed one at a time, and every theme setting on one page inside Domoticz.</p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="#install">Install</a>
         <a class="btn btn-outline" href="docs/">Documentation</a>
@@ -215,9 +215,9 @@
     </div>
     <div class="feature-grid">
       <article class="feature-card"><h3>8 color schemes</h3><p>Machinon, Gruvbox, Magenta and Paper, each with a light and a dark variant, so the whole interface follows your preference.</p></article>
-      <article class="feature-card"><h3>34 settings, one page</h3><p>Every theme setting on one page inside Domoticz, reachable from the Setup menu once the theme is active.</p></article>
+      <article class="feature-card"><h3>Every setting, one page</h3><p>Every theme setting on one page inside Domoticz, reachable from the Setup menu once the theme is active.</p></article>
       <article class="feature-card"><h3>Custom colors</h3><p>Design your own palette in the Colors and schemes tab and save it as a preset, with contrast checked as you go.</p></article>
-      <article class="feature-card"><h3>250+ device icons</h3><p>Three styles, on and off states, installed individually per device from the Theme Hub. Request more on GitHub.</p></article>
+      <article class="feature-card"><h3>250+ device icons</h3><p>A line style and a colour style, plus playful extras, each with on and off states, installed individually per device from the Theme Hub. Request more on GitHub.</p></article>
       <article class="feature-card"><h3>Mobile layouts</h3><p>Dashboards, menus and dialogs adapt to small screens instead of just shrinking the desktop layout.</p></article>
       <article class="feature-card"><h3>Card based</h3><p>Devices sit in a responsive grid you can reorder by dragging, with card width under your control.</p></article>
       <article class="feature-card"><h3>Settings that stick</h3><p>Personal settings follow your own Domoticz login where the installation has separate accounts; shared settings apply to everyone. With one login shared by everyone, every change applies to everyone.</p></article>
@@ -254,18 +254,100 @@
     </figure>
   </section>
 
-  <section class="showcase" id="icons">
+  <section class="showcase icons" id="icons">
     <div class="section-head">
-      <span class="section-label">Icon packs</span>
-      <h2>Icons, installed one at a time</h2>
-      <p class="section-desc">A browsable library in three styles, Blue UI, Color and Fun, each
-        icon drawn for both its on and off state. Install just the ones you want onto individual
-        devices, straight from the Theme Hub. Missing one?
+      <span class="section-label">Icons</span>
+      <h2>One icon language, across every device</h2>
+      <!-- No icon COUNT in this heading, deliberately. The old heading said
+           "267 icons, installed one at a time" and that number goes stale the
+           moment the pack grows, in the one place a reader trusts most. Counts
+           in prose are generalized to "over 250" across the site and manual. -->
+
+      <p class="section-desc">Machinon redraws the icons Domoticz ships, as one family: the same
+        weight, the same corner treatment, the same way of showing an on state and an off state.
+        Every one is drawn at double the size it is displayed at, so it stays sharp on phone
+        screens and high-density displays.</p>
+    </div>
+
+    <!-- Beat one: the default set, shown rather than described. These are the
+         real files the theme paints on cards, served from images/ by the same
+         copy step that puts them in the release. -->
+    <ul class="icon-grid" aria-label="Machinon's default device icons">
+      <li><img src="images/Light48_On.png" width="48" height="48" alt="Light" loading="lazy"></li>
+      <li><img src="images/GLight48_On.png" width="48" height="48" alt="Garden light" loading="lazy"></li>
+      <li><img src="images/RGB48_On.png" width="48" height="48" alt="RGB light" loading="lazy"></li>
+      <li><img src="images/Strip48_On.png" width="48" height="48" alt="Light strip" loading="lazy"></li>
+      <li><img src="images/WallSocket48_On.png" width="48" height="48" alt="Wall socket" loading="lazy"></li>
+      <li><img src="images/Door48_On.png" width="48" height="48" alt="Door" loading="lazy"></li>
+      <li><img src="images/Window48_On.png" width="48" height="48" alt="Window" loading="lazy"></li>
+      <li><img src="images/blinds48_On.png" width="48" height="48" alt="Blinds" loading="lazy"></li>
+      <li><img src="images/Contact48_On.png" width="48" height="48" alt="Contact" loading="lazy"></li>
+      <li><img src="images/AC48_On.png" width="48" height="48" alt="Air conditioning" loading="lazy"></li>
+      <li><img src="images/Heating48_On.png" width="48" height="48" alt="Heating" loading="lazy"></li>
+      <li><img src="images/Cooling48_On.png" width="48" height="48" alt="Cooling" loading="lazy"></li>
+      <li><img src="images/Radiator48_On.png" width="48" height="48" alt="Radiator" loading="lazy"></li>
+      <li><img src="images/Fan48_On.png" width="48" height="48" alt="Fan" loading="lazy"></li>
+      <li><img src="images/Fireplace48_On.png" width="48" height="48" alt="Fireplace" loading="lazy"></li>
+      <li><img src="images/AirMeasure48_On.png" width="48" height="48" alt="Air quality" loading="lazy"></li>
+      <li><img src="images/Moisture48_On.png" width="48" height="48" alt="Moisture" loading="lazy"></li>
+      <li><img src="images/Soil48_On.png" width="48" height="48" alt="Soil moisture" loading="lazy"></li>
+      <li><img src="images/Rain48_On.png" width="48" height="48" alt="Rain" loading="lazy"></li>
+      <li><img src="images/Sun48_On.png" width="48" height="48" alt="Sun" loading="lazy"></li>
+      <li><img src="images/Water48_On.png" width="48" height="48" alt="Water" loading="lazy"></li>
+      <li><img src="images/Solar48_On.png" width="48" height="48" alt="Solar" loading="lazy"></li>
+      <li><img src="images/Inverter48_On.png" width="48" height="48" alt="Inverter" loading="lazy"></li>
+      <li><img src="images/Charger48_On.png" width="48" height="48" alt="Charger" loading="lazy"></li>
+      <li><img src="images/TV48_On.png" width="48" height="48" alt="Television" loading="lazy"></li>
+      <li><img src="images/Media48_On.png" width="48" height="48" alt="Media player" loading="lazy"></li>
+      <li><img src="images/Speaker48_On.png" width="48" height="48" alt="Speaker" loading="lazy"></li>
+      <li><img src="images/Amplifier48_On.png" width="48" height="48" alt="Amplifier" loading="lazy"></li>
+      <li><img src="images/WashingMachine48_On.png" width="48" height="48" alt="Washing machine" loading="lazy"></li>
+      <li><img src="images/Coffee48_On.png" width="48" height="48" alt="Coffee machine" loading="lazy"></li>
+      <li><img src="images/Pump48_On.png" width="48" height="48" alt="Pump" loading="lazy"></li>
+    </ul>
+
+    <!-- Beat two: the pack. Two styles of the same device, plus the extras,
+         all real files from iconpack/. -->
+    <div class="icon-pack">
+      <h3>Make any card instantly recognizable</h3>
+      <p class="section-desc">Beyond the defaults, the icon pack holds over 250 icons you install
+        onto individual devices from the Theme Hub, one at a time. Most come in a line style and a
+        colour style, so a card can match the rest of the interface or stand out from it.</p>
+
+      <div class="icon-styles" role="group" aria-label="Icon style">
+        <button type="button" class="icon-style-btn is-active" data-icon-style="line">Line</button>
+        <button type="button" class="icon-style-btn" data-icon-style="color">Colour</button>
+      </div>
+
+      <ul class="icon-grid icon-grid-pack" data-icon-style-group="line">
+        <li><img src="iconpack/machinon_Aquarium48_On.png" width="48" height="48" alt="Aquarium" loading="lazy"></li>
+        <li><img src="iconpack/machinon_Bathtub48_On.png" width="48" height="48" alt="Bathtub" loading="lazy"></li>
+        <li><img src="iconpack/machinon_Bed48_On.png" width="48" height="48" alt="Bed" loading="lazy"></li>
+        <li><img src="iconpack/machinon_CarCharging48_On.png" width="48" height="48" alt="Car charging" loading="lazy"></li>
+        <li><img src="iconpack/machinon_Dishwasher48_On.png" width="48" height="48" alt="Dishwasher" loading="lazy"></li>
+        <li><img src="iconpack/machinon_Mailbox48_On.png" width="48" height="48" alt="Mailbox" loading="lazy"></li>
+      </ul>
+
+      <ul class="icon-grid icon-grid-pack" data-icon-style-group="color">
+        <li><img src="iconpack/machinon_Aquarium-color48_On.png" width="48" height="48" alt="Aquarium" loading="lazy"></li>
+        <li><img src="iconpack/machinon_Bathtub-color48_On.png" width="48" height="48" alt="Bathtub" loading="lazy"></li>
+        <li><img src="iconpack/machinon_Bed-color48_On.png" width="48" height="48" alt="Bed" loading="lazy"></li>
+        <li><img src="iconpack/machinon_CarCharging-color48_On.png" width="48" height="48" alt="Car charging" loading="lazy"></li>
+        <li><img src="iconpack/machinon_Dishwasher-color48_On.png" width="48" height="48" alt="Dishwasher" loading="lazy"></li>
+        <li><img src="iconpack/machinon_Mailbox-color48_On.png" width="48" height="48" alt="Mailbox" loading="lazy"></li>
+      </ul>
+
+      <p class="icon-extras-note">And a set of playful extras, for the devices that deserve one.</p>
+      <ul class="icon-grid icon-grid-pack" aria-label="Playful extras">
+        <li><img src="iconpack/machinon_Batman-color48_On.png" width="48" height="48" alt="Batman" loading="lazy"></li>
+        <li><img src="iconpack/machinon_Alien-color48_On.png" width="48" height="48" alt="Alien" loading="lazy"></li>
+        <li><img src="iconpack/machinon_Avengers-color48_On.png" width="48" height="48" alt="Avengers" loading="lazy"></li>
+        <li><img src="iconpack/machinon_Dinosaur-color48_On.png" width="48" height="48" alt="Dinosaur" loading="lazy"></li>
+      </ul>
+
+      <p class="section-desc">Missing one?
         <a href="https://github.com/domoticz/Machinon/issues/new?template=icon_request.yml" target="_blank" rel="noopener noreferrer">Request it on GitHub</a>.</p>
     </div>
-    <figure class="showcase-shot">
-      <img src="docs/screenshots/icon-packs.png" width="1440" height="900" alt="The icon pack installer in the Theme Hub" loading="lazy">
-    </figure>
   </section>
 
   <section class="showcase" id="floorplan">
