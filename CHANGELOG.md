@@ -4,6 +4,10 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+### Fixed
+
+- The device edit window is usable on a phone again: the fields fit, the Sensor Icon picker opens, and you can scroll down to the buttons.
+
 ## [2.0.3] - 2026-08-16
 
 ### Added

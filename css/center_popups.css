@@ -1,13 +1,33 @@
 /**** ./center_popups.css ***/
 /* force popups to be centered on the screen. */
 
+/* Centering used to be left:50% + translate(-50%,-50%). That centers correctly
+   but STARVES the box: for a position:fixed element, left:50% leaves only half
+   the viewport as available width, and core opens its device edit dialogs with
+   jQuery UI's width:'auto', i.e. shrink-to-fit against exactly that available
+   width. At 360px the dialog therefore collapsed onto the min-width below,
+   squashing its fields to ~8px slivers (measured: a 200px dialog whose Text and
+   Description textareas were 8.2px wide).
+
+   So: center with auto inline margins against a full-viewport containing block
+   (left:0/right:0), and ask for fit-content explicitly - with both left and
+   right set, width:auto resolves to "fill the viewport" rather than
+   shrink-to-fit. The box now sizes to its content up to the viewport width.
+   Only the vertical half-offset still needs a transform. Nothing changes on
+   desktop, where the content already fit inside the old half-viewport budget
+   (measured before and after: the same two dialogs render 497px and 529px at
+   1440px wide). The viewport clamp itself is custom.css's
+   `.ui-dialog { max-width: calc(100vw - 20px) }`, which applies whether or not
+   this optional feature is on, so it is deliberately not repeated here. */
 .ui-dialog,
 .ui-popup {
     height: auto!important;
-    width: auto!important;
+    width: fit-content!important;
     position: fixed!important;
     top: 50vh!important;
-    left: 50%!important;
-    transform: translate(-50%, -50%)!important;
+    left: 0!important;
+    right: 0!important;
+    margin-inline: auto!important;
+    transform: translateY(-50%)!important;
     min-width: 200px!important;
 }

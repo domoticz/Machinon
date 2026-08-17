@@ -495,14 +495,143 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
     max-height: 45vh;
 }
 
+/* ddslick also sizes the picker itself with a hardcoded inline `width: 260`
+   (core app/widgets/dzUtilityWidget.js), written onto the container, the
+   closed select box AND the open menu - hence !important, which an inline
+   style otherwise wins against. 260px does not fit the icon cell of an edit
+   dialog on a phone, and the slice that overflows contains the open-chevron,
+   so the icon cannot be changed there at all (owner-reported 2026-08-17).
+   Make it fluid in whatever cell it lands in, capped at core's own 260px so
+   nothing changes on wider screens. Drop the cap, not the rule, if core ever
+   makes the picker responsive. */
+.dd-container,
+.dd-select {
+    width: 100% !important;
+    max-width: 260px !important;
+}
+
+/* The OPEN menu is sized independently of the closed box. It is absolutely
+   positioned inside .dd-container, so following the box down to a ~143px cell
+   would shred the icon labels ("Air Condit ioner/ HVAC"); it needs core's full
+   260px even when its cell is half that. It can afford to, because the
+   :has(.dd-container) rules above let it escape the dialog - but escaping to
+   the RIGHT would put it back off-screen, so anchor it to the container's
+   right edge and let it grow leftwards into the dialog instead. On desktop the
+   closed box is already 260px, so left- and right-anchoring coincide and
+   nothing moves. */
+.dd-options {
+    width: 260px !important;
+    max-width: calc(100vw - 24px) !important;
+    left: auto !important;
+    right: 0 !important;
+}
+
+/* Core writes fixed pixel widths inline on the edit-dialog FIELDS too
+   (views/utility.html: 250px name inputs, 356px description textareas, a 240px
+   axis label), which overflow the same way in a narrow dialog. Cap them at
+   their cell rather than re-declaring a width: a max-width leaves the inline
+   width untouched wherever it already fits, so desktop keeps core's intended
+   sizes and only a too-narrow cell shrinks them. border-box keeps the field's
+   own padding inside that cap (it also trims the rendered desktop width by the
+   padding, e.g. 262px -> 250px, which is core's declared width honoured
+   exactly). */
+.ui-dialog input.text,
+.ui-dialog textarea.text,
+.ui-dialog select {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
 @media (max-width: 767px) {
+    /* Make the dialog a scrolling sheet. The :has(.dd-container) rules above
+       hand the picker its escape hatch by turning OFF the dialog's overflow -
+       which also turns off the only thing that scrolled. A dialog is
+       position:fixed, so once its content paints past the fold no scroll the
+       user can perform reaches it: measured at 360x640 (a real phone height
+       once the URL and gesture bars are subtracted), the edit dialog painted
+       its whole button pane 37px BELOW the viewport, unreachable, with
+       overflow-y:visible and nothing scrollable. Owner-reported on Firefox/S24.
+
+       So on phones the dialog is a flex column instead: title bar and button
+       pane keep their natural height, the content pane takes the rest and
+       scrolls. Nothing here needs a magic pixel budget for the chrome, and the
+       picker menu stays usable because it now lives INSIDE the scroller rather
+       than escaping a box that has no scroll. Desktop keeps the escape hatch,
+       where dialogs are far shorter than the window.
+
+       NOTE the deliberately un-!important `display`. jQuery UI hides a CLOSED
+       dialog with an inline `display: none` on this same element and gives an
+       OPEN one no inline display at all, so a plain declaration lands exactly
+       where it should: the inline none still wins while the dialog is closed,
+       and this rule applies once it opens. With `!important` here it beat the
+       inline none instead and rendered all ten of core's edit dialogs at once
+       (verified live - every #dialog-* wrapper painted, stacked). */
+    .ui-dialog,
+    .ui-dialog:has(.dd-container) {
+        display: flex;
+        flex-direction: column;
+        max-height: calc(100vh - 20px) !important;
+        overflow: hidden !important;
+    }
+
+    .ui-dialog .ui-dialog-content,
+    .ui-dialog:has(.dd-container) .ui-dialog-content {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        /* jQuery UI writes an inline height on the content pane; auto releases
+           it so flex, not that number, decides the height. */
+        height: auto !important;
+        max-height: none !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+
+    .ui-dialog .ui-dialog-titlebar,
+    .ui-dialog .ui-dialog-buttonpane {
+        flex: 0 0 auto !important;
+    }
+
     .ui-dialog .ui-dialog-content table {
         width: 100% !important;
         table-layout: fixed;
     }
 
+    /* Core's device edit DIALOGS (views/utility.html: table.display inside
+       #dialog-edittextdevice and its eight siblings) are the same shape as the
+       .table-details edit PAGES handled further down, and fail the same way: a
+       right-aligned label column pinned by an inline width (120px, or 200px on
+       the custom-sensor dialog) plus fields carrying inline pixel widths, which
+       at 360px left every field 61px wide. Same remedy, for consistency with
+       that block: stack each label above its field and let the field fill the
+       row. Direct-child selectors so a nested table inside a dialog keeps
+       laying itself out. */
+    .ui-dialog .ui-dialog-content table.display > tbody > tr > td,
+    .ui-dialog .ui-dialog-content table.display > tr > td {
+        display: block;
+        width: auto !important;
+        text-align: left;
+    }
+
+    .ui-dialog .ui-dialog-content input.text,
+    .ui-dialog .ui-dialog-content textarea.text,
+    .ui-dialog .ui-dialog-content select,
+    .ui-dialog .ui-dialog-content .dd-container,
+    .ui-dialog .ui-dialog-content .dd-select {
+        width: 100% !important;
+        max-width: none !important;
+        box-sizing: border-box;
+    }
+
+    /* NO overflow:hidden here. It used to be, and it silently undid the
+       `:has(.dd-container)` overflow:visible fix above one level deeper: the
+       ddslick menu is absolutely positioned inside its <td>, so clipping the
+       CELL clipped the menu to the cell's ~47px height and left the picker
+       impossible to open on a phone even though the dialog itself no longer
+       clipped it (measured: a 391px menu with 40 options, painted as a
+       sliver). Only the wrapping half was ever wanted here - long unbroken
+       values still have to wrap inside a narrow fixed-layout cell rather than
+       push the table wide. */
     .ui-dialog .ui-dialog-content td {
-        overflow: hidden;
         word-wrap: break-word;
     }
 
