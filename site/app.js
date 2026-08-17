@@ -26,15 +26,6 @@
         { id: 'gruvbox-dark', label: 'Gruvbox Dark', base: 'dark' }
     ];
 
-    /* Screenshots exist for three schemes only. Anything else falls back to
-       the base image for its light/dark side, which is honest: the page never
-       claims an image is of a scheme it is not. */
-    var SHOTS = {
-        'machinon-light': 'docs/screenshots/dashboard-light.png',
-        'machinon-dark': 'docs/screenshots/dashboard-dark.png',
-        'magenta-dark': 'docs/screenshots/dashboard-magenta-dark.png'
-    };
-
     function byId(id) { return document.getElementById(id); }
 
     function schemeById(id) {
@@ -65,16 +56,11 @@
         var picker = byId('scheme-picker');
         if (picker && picker.value !== scheme.id) { picker.value = scheme.id; }
 
-        var shot = byId('hero-screenshot');
-        if (shot) {
-            var src = SHOTS[scheme.id]
-                || (scheme.base === 'dark'
-                    ? 'docs/screenshots/dashboard-dark.png'
-                    : 'docs/screenshots/dashboard-light.png');
-            if (shot.getAttribute('src') !== src) { shot.setAttribute('src', src); }
-            shot.setAttribute('alt',
-                'The Machinon dashboard showing device cards in the '
-                + scheme.label + ' scheme');
+        /* The hero belongs to tour.js, which owns eight slides and two source
+           rules; this only tells it which scheme is live. Guarded because
+           tour.js is a separate deferred file and may not have run yet. */
+        if (window.machinonTour) {
+            window.machinonTour.setScheme(scheme.id, scheme.base);
         }
 
         var active = document.querySelectorAll('.scheme-swatch');

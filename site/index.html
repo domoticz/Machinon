@@ -81,7 +81,7 @@
     <div class="hero-inner">
       <h1>Your Domoticz dashboard, redrawn.</h1>
       <p class="hero-sub">Machinon replaces Domoticz's default interface with a clean, card-based
-        layout: 8 color schemes in matching light and dark pairs, a library of 267 device icons
+        layout: 8 color schemes in matching light and dark pairs, a library of over 250 device icons
         in three styles installed one at a time, and 34 settings on one page inside Domoticz.</p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="#install">Install</a>
@@ -93,10 +93,22 @@
     </div>
     <figure class="hero-shot">
       <div class="hero-frame">
-        <img id="hero-screenshot" src="docs/screenshots/dashboard-light.png"
+        <!-- is-active is in the markup, not left for tour.js to add: without it
+             a no-JS visitor gets an empty frame, because .hero-frame img is
+             opacity:0 until this class applies. tour.js's own
+             classList.add('is-active') on this element becomes a harmless
+             no-op once it runs. Do not remove this class. -->
+        <img id="hero-screenshot" class="is-active" src="docs/screenshots/dashboard-light.png"
              alt="The Machinon dashboard in the Machinon Light scheme"
              width="1440" height="900">
       </div>
+      <figcaption class="hero-caption">
+        <span id="hero-slide-name">Dashboard, your devices as cards</span>
+      </figcaption>
+      <!-- Filled by tour.js. role="group" and not role="tablist": there is one
+           panel and no tab semantics to honour, and the group pattern is much
+           harder to get wrong. -->
+      <div class="hero-dots" role="group" aria-label="Screenshot tour"></div>
     </figure>
   </section>
 
@@ -205,7 +217,7 @@
       <article class="feature-card"><h3>8 color schemes</h3><p>Machinon, Gruvbox, Magenta and Paper, each with a light and a dark variant, so the whole interface follows your preference.</p></article>
       <article class="feature-card"><h3>34 settings, one page</h3><p>Every theme setting on one page inside Domoticz, reachable from the Setup menu once the theme is active.</p></article>
       <article class="feature-card"><h3>Custom colors</h3><p>Design your own palette in the Colors and schemes tab and save it as a preset, with contrast checked as you go.</p></article>
-      <article class="feature-card"><h3>267 device icons</h3><p>Three styles, on and off states, installed individually per device from the Theme Hub. Request more on GitHub.</p></article>
+      <article class="feature-card"><h3>250+ device icons</h3><p>Three styles, on and off states, installed individually per device from the Theme Hub. Request more on GitHub.</p></article>
       <article class="feature-card"><h3>Mobile layouts</h3><p>Dashboards, menus and dialogs adapt to small screens instead of just shrinking the desktop layout.</p></article>
       <article class="feature-card"><h3>Card based</h3><p>Devices sit in a responsive grid you can reorder by dragging, with card width under your control.</p></article>
       <article class="feature-card"><h3>Settings that stick</h3><p>Personal settings follow your own Domoticz login where the installation has separate accounts; shared settings apply to everyone. With one login shared by everyone, every change applies to everyone.</p></article>
@@ -245,7 +257,7 @@
   <section class="showcase" id="icons">
     <div class="section-head">
       <span class="section-label">Icon packs</span>
-      <h2>267 icons, installed one at a time</h2>
+      <h2>Icons, installed one at a time</h2>
       <p class="section-desc">A browsable library in three styles, Blue UI, Color and Fun, each
         icon drawn for both its on and off state. Install just the ones you want onto individual
         devices, straight from the Theme Hub. Missing one?
@@ -364,6 +376,7 @@ git clone https://github.com/domoticz/Machinon.git machinon</code></pre>
     Fonts: Inter, JetBrains Mono and Ionicons.</p>
 </footer>
 
+<script src="tour.js" defer></script>
 <script src="app.js" defer></script>
 </body>
 </html>

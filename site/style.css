@@ -339,6 +339,43 @@ main > section[id] { scroll-margin-top: 4.5rem; }
     height: 100%;
 }
 
+.hero-frame img { opacity: 0; }
+
+.hero-frame img.is-active { opacity: 1; }
+
+.hero-caption {
+    margin-top: 0.85rem;
+    font-size: var(--site-text-xs);
+    color: var(--secondary-text-color);
+}
+
+.hero-dots {
+    display: flex;
+    gap: 0.45rem;
+    margin-top: 0.6rem;
+}
+
+.hero-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--dz-input-border);
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.hero-dot[aria-current="true"] {
+    background: var(--dz-accent-color);
+    transform: scale(1.25);
+}
+
+.hero-dot:focus-visible {
+    outline: 2px solid var(--dz-accent-color);
+    outline-offset: 2px;
+}
+
 /* ---- Section heads --------------------------------------------------- */
 
 .section-head {
@@ -1082,6 +1119,12 @@ button.switch {
 
     .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.5s ease, transform 0.5s ease; }
     .reveal.is-visible { opacity: 1; transform: none; }
+
+    /* Crossfade only for visitors who want motion. Without it the buffers swap
+       instantly, which is correct rather than broken: tour.js also refuses to
+       auto-advance under reduced motion, so an instant swap only ever follows a
+       deliberate dot click. */
+    .hero-frame img { transition: opacity 0.45s ease; }
 }
 
 /* ---- Responsive ------------------------------------------------------ */
@@ -1123,6 +1166,19 @@ button.switch {
     .section-head { margin-bottom: 2rem; }
 
     .install-blocks { grid-template-columns: minmax(0, 1fr); }
+
+    /* The phone hero is a phone screenshot, so the box is phone-shaped, and
+       capped in width: at the full 350px a 390x844 image would be taller than
+       the viewport and push the install buttons off the first screen. 260px is
+       67% of native, which is legible, unlike the 24% a desktop capture got
+       here before. */
+    .hero-frame { aspect-ratio: 390 / 844; }
+
+    .hero-shot {
+        width: min(100%, 260px);
+        margin-left: auto;
+        margin-right: auto;
+    }
 
     .footer-inner {
         flex-direction: column;
