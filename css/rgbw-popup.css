@@ -28,6 +28,13 @@
     right: 0;
     margin-inline: auto;
     transform: translateY(-50%);
+    /* border-box: max-width must cap the PADDED box, not just the content.
+       Content-box (the default) lets max-width's content-only cap leave the
+       40px horizontal padding unaccounted for, overflowing the rendered box
+       past the viewport on phones (the narrow-viewport centered mode has no
+       other guard against this; a long device name makes it visible first,
+       but the padding math is wrong regardless of title length). */
+    box-sizing: border-box;
     width: fit-content;
     max-width: calc(100vw - 20px);
     max-height: 90vh;
