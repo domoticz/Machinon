@@ -116,3 +116,42 @@
     width: 90px;
 }
 #mk-rgbw-hex:disabled { border-bottom-color: var(--dz-input-border); }
+
+/* Brightness row: outline bulb (dim) .. slider .. filled bulb (bright). */
+.mk-rgbw-bright { display: flex; align-items: center; gap: 10px; }
+.mk-rgbw-bright .icon {
+    font-size: var(--dz-icon-size-sm);
+    color: var(--secondary-text-color);
+}
+
+/* Range inputs in the card dimmer-slider language: flat 5px track,
+   {rounded.sm}, 15px solid accent circle thumb. */
+#mk-rgbw-popup input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1;
+    height: var(--dz-card-slider-height);
+    border-radius: var(--dz-card-slider-radius);
+    background: var(--dz-card-slider-track-bg);
+    outline: none;
+}
+#mk-rgbw-popup input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: var(--dz-card-slider-handle-size);
+    height: var(--dz-card-slider-handle-size);
+    border-radius: 50%;
+    background: var(--dz-accent-color);
+    border: none;
+    cursor: pointer;
+}
+#mk-rgbw-popup input[type="range"]::-moz-range-thumb {
+    width: var(--dz-card-slider-handle-size);
+    height: var(--dz-card-slider-handle-size);
+    border-radius: 50%;
+    background: var(--dz-accent-color);
+    border: none;
+    cursor: pointer;
+}
+#mk-rgbw-popup input[type="range"]:focus-visible {
+    box-shadow: var(--dz-btn-focus-ring);
+}

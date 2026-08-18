@@ -161,6 +161,22 @@
             updateReadout();
             onPick(); flushSend();
         });
+        var br = el("div", "mk-rgbw-bright", body);
+        var dim = el("i", "icon ion-ios-bulb", br);         /* outline bulb = dim end */
+        dim.setAttribute("aria-hidden", "true");
+        var slider = el("input", null, br);
+        slider.id = "mk-rgbw-bright";
+        slider.type = "range"; slider.min = 1; slider.max = 100; slider.value = state.bright;
+        slider.setAttribute("aria-label", $.t("Brightness"));
+        var lit = el("i", "icon ion-md-bulb", br);          /* filled bulb = bright end */
+        lit.setAttribute("aria-hidden", "true");
+        paintRangeFill(slider);
+        slider.addEventListener("input", function () {
+            state.bright = parseInt(this.value, 10) || 1;
+            paintRangeFill(this);
+            scheduleSend();
+        });
+        slider.addEventListener("change", flushSend);
         updateReadout();
     }
 
@@ -264,8 +280,63 @@
         };
     }
 
-    function onPick() { /* Task 6 attaches the send pipeline here */ }
-    function flushSend() {}
+    /* Accent range fill on a native range input (the card slider language's
+       filled track); CSS alone cannot paint a fill on input[type=range]. */
+    function paintRangeFill(inp) {
+        var p = ((inp.value - inp.min) / (inp.max - inp.min)) * 100;
+        inp.style.background =
+            "linear-gradient(to right, rgba(var(--dz-accent-values),0.5) 0 " + p + "%, " +
+            "var(--dz-card-slider-track-bg) " + p + "% 100%)";
+    }
+
+    /* Colour payloads exactly as core's getJSONColor builds them
+       (domoticz.js:1644): m:3 RGB, m:2 temperature, m:1 fixed white. */
+    function buildColorJSON() {
+        var c;
+        if (state.mode === "color") {
+            var rgb = hsvToRgb(state.h, state.s, 1);
+            c = { m: 3, t: 0, r: rgb.r, g: rgb.g, b: rgb.b, cw: 0, ww: 0 };
+        } else if (state.led && state.led.bHasTemperature) {
+            var t = Math.round(state.warmth * 255);
+            c = { m: 2, t: t, r: 0, g: 0, b: 0, cw: Math.round((1 - state.warmth) * 255), ww: Math.round(state.warmth * 255) };
+        } else {
+            c = { m: 1, t: 0, r: 0, g: 0, b: 0, cw: 255, ww: 255 };
+        }
+        return JSON.stringify(c);
+    }
+
+    function sendColor() {
+        if (!state.idx) return;
+        var colorJSON = buildColorJSON();
+        if (typeof window.SetColValue === "function") {
+            /* Page-global from the Angular controllers: keeps permission
+               checks and page behaviour (LightsController.js etc.). */
+            window.SetColValue(state.idx, colorJSON, state.bright);
+        } else {
+            $.ajax({ url: "json.htm?type=command&param=setcolbrightnessvalue&idx=" + state.idx +
+                          "&color=" + encodeURIComponent(colorJSON) + "&brightness=" + state.bright,
+                     dataType: "json" });
+        }
+    }
+
+    /* Deadline rate-limit, NOT a resettable debounce: the timer is never
+       reset by new events, so a continuous drag sends every 400ms instead
+       of starving until the pointer pauses (core's own code marks its
+       debounce with "TODO: Rate limit instead of debounce"). */
+    var sendTimer = null, sendDirty = false;
+    function scheduleSend() {
+        sendDirty = true;
+        if (sendTimer) return;
+        sendTimer = setTimeout(function () {
+            sendTimer = null;
+            if (sendDirty) { sendDirty = false; sendColor(); }
+        }, 400);
+    }
+    function flushSend() {
+        if (sendTimer) { clearTimeout(sendTimer); sendTimer = null; }
+        if (sendDirty) { sendDirty = false; sendColor(); }
+    }
+    function onPick() { scheduleSend(); }
 
     /* The wheel drag surface changes identity every popup open (buildBody
        rebuilds the canvas from scratch), but the drag gesture itself is
