@@ -195,6 +195,28 @@ function dzPreviewDialogCenter() {
     return box;
 }
 
+/* rgbw_popup -> a mini dialog with a colour wheel disc and a slider bar (the
+   setting swaps core's colour picker for the Machinon modal). Wheel disc is a
+   conic-gradient, the one CSS paint that reads as "colour wheel" at this scale;
+   fixed literal hues by design (they depict the physical hue circle, not a
+   scheme colour). */
+function dzSketchRgbwPopup() {
+    var box = dzMiniBox("background:var(--dz-body-bg);padding:0;position:relative;");
+    var frame = dzMiniEl("div", "position:absolute;inset:0;display:flex;align-items:center;justify-content:center;");
+    var dialog = dzMiniEl("div",
+        "width:46%;height:72%;border-radius:4px;background:var(--dz-modal-bg);" +
+        "border:1px solid var(--dz-input-border);display:flex;flex-direction:column;" +
+        "align-items:center;justify-content:center;gap:4px;");
+    var wheel = dzMiniEl("div",
+        "width:45%;aspect-ratio:1;border-radius:50%;" +
+        "background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red);");
+    var bar = dzMiniEl("div",
+        "width:70%;height:3px;border-radius:2px;background:rgba(var(--dz-accent-values),0.5);");
+    dialog.appendChild(wheel); dialog.appendChild(bar);
+    frame.appendChild(dialog); box.appendChild(frame);
+    return box;
+}
+
 /* card_min_width / card_max_width -> a row of card blocks with a width caliper
    beneath (the setting sets the card width range). Blocks are --dz-widget-bg;
    the caliper bar is accent, so the whole mini follows the scheme. */
@@ -317,6 +339,7 @@ var DZ_HUB_PREVIEWS = {
     "menu-tilegrid": dzPreviewMenuTilegrid,
     "dash-columns":  dzPreviewDashColumns,
     "dialog-center": dzPreviewDialogCenter,
+    "sketch-rgbw-popup": dzSketchRgbwPopup,
     "card-width":    dzPreviewCardWidth,
     "chart-bands":   dzPreviewChartBands,
     // SVG sketch fallbacks (scheme-neutral)

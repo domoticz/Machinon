@@ -224,19 +224,36 @@ function readSwitchStatus(item) {
    wrap state depends on viewport/tile width and can change with no DOM
    mutation for the MutationObserver in initDeviceObserver to catch. */
 function retagSelectorWrapCorners() {
+    /* Two shells wrap a joined selector, and neither can tell CSS which button is
+       first or last WITHIN a wrapped row: the card's `.item .btn-group`, and the
+       mobile dashboard's own shell, where the buttons sit one level deeper inside
+       a display:contents span (css/dashboard_mobile.css). Collected together so
+       both get the same corner treatment from one pass. */
+    var shells = [];
     $("#main-view .item .btn-group").each(function() {
-        var $shell = $(this);
-        if ($shell.closest(".span3").length) return; // compact dashboard: css/cards.css excludes it identically
+        if ($(this).closest(".span3").length) return; // compact dashboard: css/cards.css excludes it identically
+        shells.push({ el: this, $btns: $(this).children(".btn") });
+    });
+    $("#main-view td#status > span > span > .btn-mini").each(function() {
+        var outer = this.parentElement.parentElement;
+        for (var i = 0; i < shells.length; i++) {
+            if (shells[i].el === outer) return;
+        }
+        shells.push({ el: outer, $btns: $(outer).find(".btn-mini") });
+    });
 
-        var $btns = $shell.children(".btn");
+    shells.forEach(function(shell) {
+        var $btns = shell.$btns;
         $btns.removeAttr("data-wrap-corner-tr").removeAttr("data-wrap-corner-bl").removeAttr("data-wrap-corner-br");
         if ($btns.length < 2) return;
 
-        /* Group by row via offsetTop, shell-relative (the shell carries
-           position:relative, css/cards.css) so this needs no viewport-
-           relative getBoundingClientRect math. Rounded to the nearest
-           pixel: sub-pixel layout can otherwise split one visual row into
-           two row-buckets that differ by a fraction of a pixel. */
+        /* Group by row via offsetTop, so this needs no viewport-relative
+           getBoundingClientRect math. Only buttons of the SAME shell are
+           compared and they share an offsetParent, so which ancestor the
+           offset is relative to does not matter (the card shell is
+           position:relative, the mobile one need not be). Rounded to the
+           nearest pixel: sub-pixel layout can otherwise split one visual row
+           into two row-buckets that differ by a fraction of a pixel. */
         var rows = new Map(); // rounded offsetTop -> [button...]
         $btns.each(function() {
             var top = Math.round(this.offsetTop);
@@ -738,7 +755,12 @@ function initDeviceObserver() {
            (.switch/.options-cell existence checks) make both stages
            idempotent, so this replaces both the old unprocessed-items
            branch and the per-item switch/options re-apply loop. */
-        if ($("#main-view").find(".item").length > 0) {
+        /* The mobile dashboard renders rows, not `.item` cards, so an `.item`-only
+           gate skipped this whole block there - and with it the deferred pass that
+           repairs a wrapped selector's corners. Its shell is the second selector
+           below. The card passes iterate `.item` themselves, so they simply find
+           nothing on that surface and cost a no-op. */
+        if ($("#main-view").find(".item, td#status > span > span > .btn-mini").length > 0) {
             /* Contained like the subscriber loop below: a deterministically
                throwing card must not abort the flush, because everything
                after this block (subscriber flush, takeRecords drain) keeps

@@ -1,1 +1,1 @@
-.ui-dialog, .ui-popup { height: auto!important; width: auto!important; position: fixed!important; top: 50vh!important; left: 50%!important; transform: translate(-50%, -50%)!important; min-width: 200px!important; }
+.ui-dialog, .ui-popup { height: auto!important; width: fit-content!important; position: fixed!important; top: 50vh!important; left: 0!important; right: 0!important; margin-inline: auto!important; transform: translateY(-50%)!important; min-width: 200px!important; }

@@ -115,6 +115,9 @@ function loadSettings() {
             if (theme.features && !theme.features.floorplan_popup_details) {
                 theme.features.floorplan_popup_details = { id: 44, enabled: false, files: ["floorplan_popup_details.css"] };
             }
+            if (theme.features && !theme.features.rgbw_popup) {
+                theme.features.rgbw_popup = { id: 45, enabled: true, files: ["rgbw-popup.js", "rgbw-popup.css"] };
+            }
             // Settings cached before the scheme picker existed: derive the
             // selection from the legacy feature flags.
             if (theme.features && !theme.scheme) {
