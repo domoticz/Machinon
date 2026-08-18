@@ -150,15 +150,22 @@
         state.warmth = col.t !== undefined ? col.t / 255 : 0.5;
         /* Reset on every seed (not just when col.m === 4): a leftover mix
            from a previously opened device must never leak into the next
-           one's Colour pane. The channel sum must branch the same way the
+           one's Colour pane. The channel read must branch the same way the
            send side does (buildColorJSON): bHasTemperature devices split
            mix across cw+ww (cw=mix*(1-warmth)*255, ww=mix*warmth*255, they
-           sum to mix*255), but bHasCustom-without-temperature devices
-           (RGBWZ) set cw=ww=mix*255 each, so reading cw+ww back would
-           double the seeded mix (bug found in field testing: seed 20%,
-           reopen, reads back 40%). state.led is already set by openPopup
-           before this call runs. */
-        var chan = state.led && state.led.bHasTemperature ? (col.cw || 0) + (col.ww || 0) : (col.cw || 0);
+           sum to mix*255, so a plain sum reads them back correctly).
+           bHasCustom-without-temperature devices (RGBWZ) are asymmetric on
+           the wire: OUR OWN sends set cw=ww=mix*255 (both channels carry
+           the full value), but the DEVICE's own state echo only carries it
+           in ww, reporting cw:0 (confirmed via MQTT capture on real
+           hardware); reading cw alone missed a genuinely mixed lamp
+           entirely (0%), and reading cw+ww double-counted our own sends.
+           max(cw,ww) inverts both conventions correctly, since at least
+           one of the two channels always holds the true mix value here.
+           state.led is already set by openPopup before this call runs. */
+        var chan = state.led && state.led.bHasTemperature
+            ? (col.cw || 0) + (col.ww || 0)
+            : Math.max(col.cw || 0, col.ww || 0);
         state.mix = col.m === 4 ? Math.max(0, Math.min(1, chan / 255)) : 0;
     }
 
