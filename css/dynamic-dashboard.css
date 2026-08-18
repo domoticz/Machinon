@@ -55,6 +55,14 @@
     font-size: var(--dz-text-widget-value);
 }
 
+/* .dd-stat-line is the two-column row form (the Battery card's kWh / % / V
+   pairs), 1.3em and nowrap in core. It needs the same cap for the same reason,
+   and capping only .dd-stat-value missed it: at full width the right column ran
+   5px past the card edge and "54.6 V" vanished into overflow: hidden. */
+.dd-stat-card .dd-stat-line {
+    font-size: var(--dz-text-widget-line);
+}
+
 /* Edit-mode widget header (shown only while editing the board) */
 .dd-widget-header {
     background: var(--dz-nav-bg);

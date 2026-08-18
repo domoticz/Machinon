@@ -102,6 +102,13 @@
        resolves against the container's CONTENT box; 18cqi is calibrated, not
        chosen. Used by css/dynamic-dashboard.css; see DESIGN.md. */
     --dz-text-widget-value: min(1.9em, 18cqi);
+    /* Same treatment for core's .dd-stat-line (1.3em, white-space: nowrap),
+       the two-column rows the Battery card uses. Capping only the value left
+       these uncapped, and at full width the card's right column ran 5px past
+       its own edge and lost "54.6 V" entirely to overflow: hidden. Lower cqi
+       than the value's because the constraint here is TWO columns sharing the
+       card's width, not one centred number. */
+    --dz-text-widget-line: min(1.3em, 9cqi);
     /* ---- Semantic type aliases ----
        Components should say what a piece of text IS, not how big it is. --dz-text-lg
        carries two unrelated jobs (device values and section headings); these aliases let
@@ -460,6 +467,22 @@
 html:root {
     --dz-widget-accent: var(--dz-accent-color);
     --dz-accent-red:    var(--dz-accent-red-base);
+    /* Core USES --dz-widget-sunpv twice and DEFINES it nowhere:
+       views/dashboardDynamic/widgets/energy-dashboard.html:186 (the battery
+       voltage line) and battery-status.html:59. An unresolved var() with no
+       fallback makes the declaration invalid at computed-value time, and
+       `color` is inherited, so the line takes whatever colour it inherits --
+       measured here as rgb(255,255,255), i.e. white text on a white card, with
+       the element correctly positioned and fully opaque. Nothing about the
+       layout is wrong; the text is simply invisible.
+
+       Defining it is squarely inside the --dz-* contract, and unlike the
+       energy/weather/moon colours above there is no core default to defer to.
+       Aliased to the PV colour because that is what the NAME says, and it
+       already reads on both our panels (the same amber carries the import
+       arrows in that card). Core's actual intent is unknowable from the source;
+       reported upstream. Remove this once core defines it. */
+    --dz-widget-sunpv:  var(--dz-widget-amber);
 }
 
 /* Standby clock steps down on small screens. Breakpoint (979px) matches the

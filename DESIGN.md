@@ -487,6 +487,17 @@ only on the cards that would cut. Note `cqi` resolves against the container's CO
 was tried first and rendered 14.2px against the default theme's 25.3px, which is a different defect,
 not a fix. 18cqi gives 21.3px, the largest that fits.
 
+`.dd-stat-line` (core's 1.3em two-column rows, used by the Battery card) needs the same cap via
+`--dz-text-widget-line`, at a lower `cqi` because the constraint there is two columns sharing the
+card rather than one centred number. Capping only the value missed it: at full width the right
+column ran 5px past the card edge and lost `54.6 V` to `overflow: hidden`.
+
+Separately, `--dz-widget-sunpv` is defined in `dz-tokens.css` because **core uses it twice and
+defines it nowhere** (`energy-dashboard.html:186`, `battery-status.html:59`). An unresolved `var()`
+with no fallback is invalid at computed-value time, and `color` inherits, so that line rendered
+`rgb(255,255,255)` on a white card: correctly positioned, fully opaque, and invisible. Aliased to
+`--dz-widget-amber` because that is what the name implies; remove once core defines it.
+
 The container belongs on the CARD, not the widget cell. An earlier attempt put it on the cell and
 changed nothing, because the cell is wide while the box that is actually too narrow is one of six
 cards inside it.

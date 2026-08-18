@@ -74,7 +74,7 @@ done
 # express. Inlining it would fail the font-size check instead, so there would be
 # no legal way to write it at all. Exempt by name, like the clock, so adding
 # another stays a deliberate edit.
-clock_exempt="--dz-text-clock|--dz-text-clock-sub|--dz-text-widget-value"
+clock_exempt="--dz-text-clock|--dz-text-clock-sub|--dz-text-widget-value|--dz-text-widget-line"
 out=$(grep -n -- "--dz-text-[a-z-]*:" dz-tokens.css \
       | grep -vE "^[0-9]+:[[:space:]]*(${clock_exempt}):" \
       | grep -vE ":[[:space:]]*([0-9]*\.?[0-9]+rem|var\(--dz-[a-z-]+\))[[:space:]]*;")
