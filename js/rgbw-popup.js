@@ -20,7 +20,121 @@
         if ((DimmerType && DimmerType === "rel") || led.bHasCustom) {
             return orig.apply(this, arguments);
         }
-        return orig.apply(this, arguments); /* Task 4 replaces this line with the modal open */
+        window.HandleProtection(Protected, function () {
+            openPopup({ idx: idx, led: led, maxDim: MaxDimLevel, levelInt: LevelInt, colorJSON: color });
+        });
     };
     window.ShowRGBWPopup._mkHooked = true;
+
+    var state = { idx: null, led: null, mode: "color", h: 0, s: 1, warmth: 0.5, bright: 100, maxDim: 100 };
+    var openerEl = null;
+
+    function el(tag, cls, parent) {
+        var n = document.createElement(tag);
+        if (cls) n.className = cls;
+        if (parent) parent.appendChild(n);
+        return n;
+    }
+
+    function ensureDom() {
+        if (document.getElementById("mk-rgbw-popup")) return;
+        var scrim = el("div", null, document.body);
+        scrim.id = "mk-rgbw-scrim";
+        scrim.addEventListener("click", closePopup);
+        var pop = el("div", null, document.body);
+        pop.id = "mk-rgbw-popup";
+        pop.setAttribute("role", "dialog");
+        pop.setAttribute("aria-modal", "true");
+        pop.setAttribute("aria-labelledby", "mk-rgbw-title");
+        var head = el("div", "mk-rgbw-head", pop);
+        var title = el("span", null, head);
+        title.id = "mk-rgbw-title";
+        var close = el("div", "ui-close", head);
+        close.setAttribute("role", "button");
+        close.setAttribute("tabindex", "0");
+        close.setAttribute("aria-label", $.t("Close"));
+        close.addEventListener("click", closePopup);
+        close.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") closePopup(); });
+        el("div", "mk-rgbw-body", pop);
+    }
+
+    function onKeydown(e) {
+        if (e.key === "Escape") { closePopup(); }
+    }
+
+    function openPopup(args) {
+        ensureDom();
+        state.idx = String(args.idx);
+        state.led = args.led;
+        state.maxDim = parseInt(args.maxDim, 10) || 100;
+        state.bright = Math.max(1, Math.min(100, Math.round(((parseInt(args.levelInt, 10) || 0) / state.maxDim) * 99) + 1));
+        seedFromColor(args.colorJSON);
+        document.getElementById("mk-rgbw-title").textContent = state.led.bHasRGB ? $.t("Color") : $.t("White");
+        buildBody(state.led);
+        openerEl = document.activeElement;
+        document.getElementById("mk-rgbw-scrim").style.display = "block";
+        document.getElementById("mk-rgbw-popup").style.display = "block";
+        document.addEventListener("keydown", onKeydown);
+        var c = document.querySelector("#mk-rgbw-popup .ui-close");
+        if (c) c.focus();
+    }
+
+    function closePopup() {
+        var pop = document.getElementById("mk-rgbw-popup");
+        if (!pop) return;
+        pop.style.display = "none";
+        document.getElementById("mk-rgbw-scrim").style.display = "none";
+        document.removeEventListener("keydown", onKeydown);
+        if (openerEl && typeof openerEl.focus === "function") openerEl.focus();
+        openerEl = null;
+    }
+
+    function seedFromColor(colorJSON) {
+        var col = {};
+        try { col = typeof colorJSON === "string" ? JSON.parse(colorJSON) : (colorJSON || {}); } catch (e) {}
+        state.mode = (col.m === 1 || col.m === 2) ? "white" : "color";
+        if (col.r !== undefined || col.g !== undefined || col.b !== undefined) {
+            var hsv = rgbToHsv(col.r || 0, col.g || 0, col.b || 0);
+            state.h = hsv.h; state.s = hsv.s;
+        }
+        state.warmth = col.t !== undefined ? col.t / 255 : 0.5;
+    }
+
+    function buildBody(led) {
+        var body = document.querySelector("#mk-rgbw-popup .mk-rgbw-body");
+        body.innerHTML = ""; /* Tasks 5-8 populate */
+    }
+
+    /* Task 5's pure color-conversion interface, reproduced here so this
+       module parses and runs standalone; seedFromColor above needs
+       rgbToHsv. hsvToRgb/toHex are unused until Task 5 wires the swatches
+       and inputs, but ship together as one small, self-contained unit. */
+    function hsvToRgb(h, s, v) {
+        var i = Math.floor(h * 6), f = h * 6 - i;
+        var p = v * (1 - s), q = v * (1 - f * s), t = v * (1 - (1 - f) * s);
+        var r, g, b;
+        switch (i % 6) {
+            case 0: r = v; g = t; b = p; break;
+            case 1: r = q; g = v; b = p; break;
+            case 2: r = p; g = v; b = t; break;
+            case 3: r = p; g = q; b = v; break;
+            case 4: r = t; g = p; b = v; break;
+            default: r = v; g = p; b = q;
+        }
+        return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
+    }
+
+    function rgbToHsv(r, g, b) {
+        r /= 255; g /= 255; b /= 255;
+        var max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+        var h = 0, s = max === 0 ? 0 : d / max;
+        if (d !== 0) {
+            if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+            else if (max === g) h = ((b - r) / d + 2) / 6;
+            else h = ((r - g) / d + 4) / 6;
+        }
+        return { h: h, s: s, v: max };
+    }
+
+    function toHex(n) { return ("0" + n.toString(16)).slice(-2); }
 })();

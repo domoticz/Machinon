@@ -1,1 +1,77 @@
-/* rgbw-popup worktree marker */
+/*
+  rgbw-popup.css - Machinon colour popup (feature: rgbw_popup).
+  Feature-loaded stylesheet (theme.json), not part of custom.css.
+  Shell: widget surface, container radius, overlay elevation. Centering uses
+  the center_popups.css idiom (left/right 0 + auto inline margins; left:50%
+  starves shrink-to-fit, see that file's header). clampCorePopups needs no
+  change: a centered in-viewport modal always computes dx=dy=0 (no-op), and
+  the clamp still owns core's #rgbw_popup for the feature-off path.
+*/
+
+/* Modal scrim: dim only, NO blur, per the codified modal-scrim language
+   (DESIGN.md; the anti-glass ruling measured blur/glass failing AA on busy
+   backdrops). Fixed literal by design: a scrim is shadow geometry, not a
+   scheme colour. */
+#mk-rgbw-scrim {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+}
+
+#mk-rgbw-popup {
+    display: none;
+    position: fixed;
+    top: 50vh;
+    left: 0;
+    right: 0;
+    margin-inline: auto;
+    transform: translateY(-50%);
+    width: fit-content;
+    max-width: calc(100vw - 20px);
+    max-height: 90vh;
+    overflow-y: auto;
+    z-index: 2001;
+    background: var(--dz-widget-bg);
+    color: var(--dz-body-text);
+    border-radius: 6px;            /* {rounded.container} */
+    box-shadow: var(--dz-elev-overlay);
+    padding: 15px 20px 20px;
+}
+
+/* Dialog title: 14px semibold sentence case, the codified dialog-title
+   language (no uppercase tracking anywhere in the theme). */
+.mk-rgbw-head {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 30px;
+    padding-right: 34px;           /* room for the 30px .ui-close box */
+}
+#mk-rgbw-title {
+    font-size: var(--dz-text-sm);
+    font-weight: var(--dz-weight-semibold);
+}
+/* .ui-close glyph/hover comes from css/setpoint.css (shared close language);
+   here only its box position inside our head row. */
+#mk-rgbw-popup .ui-close {
+    position: absolute;
+    top: 0;
+    right: -8px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+}
+#mk-rgbw-popup .ui-close:focus-visible {
+    outline: none;
+    box-shadow: var(--dz-btn-focus-ring);
+    border-radius: 5px;            /* {rounded.interactive} */
+}
+
+.mk-rgbw-body {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 250px;
+}
