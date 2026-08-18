@@ -1,8 +1,12 @@
 /* Machinon colour popup (feature: rgbw_popup). Wraps core's ShowRGBWPopup;
    the Machinon modal lives in its own #mk-rgbw-popup div, core's #rgbw_popup
    markup is never touched so delegation to the original always works.
-   Delegates to core for: DimmerType "rel", custom w/ww subtypes, or any
-   drift-guard failure (core signature changed -> never hook, zero risk). */
+   Custom w/ww subtypes (RGBWZ, RGBWWZ) open the Machinon popup too: core's
+   m:4 mix mode is not offered, buildBody/seedFromColor already key off
+   bHasRGB/bHasWhite/bHasTemperature so those subtypes just get the same
+   Colour/White tabs as RGBW/RGBWW. Delegates to core for: DimmerType "rel",
+   or any drift-guard failure (core signature changed -> never hook, zero
+   risk). */
 (function () {
     "use strict";
     if (typeof window.ShowRGBWPopup !== "function" ||
@@ -18,7 +22,7 @@
 
     window.ShowRGBWPopup = function (event, idx, Protected, MaxDimLevel, LevelInt, color, SubType, DimmerType) {
         var led = window.getLEDType(SubType || "");
-        if ((DimmerType && DimmerType === "rel") || led.bHasCustom) {
+        if (DimmerType && DimmerType === "rel") {
             return orig.apply(this, arguments);
         }
         window.HandleProtection(Protected, function () {
