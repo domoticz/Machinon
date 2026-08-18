@@ -72,12 +72,17 @@
         var head = el("div", "mk-rgbw-head", pop);
         var title = el("span", null, head);
         title.id = "mk-rgbw-title";
-        var close = el("div", "ui-close", head);
-        close.setAttribute("role", "button");
-        close.setAttribute("tabindex", "0");
+        /* Icon-quiet dialog-close (owner revision 2026-08-18, codified as the
+           dialog-close language): a native <button>, not a div-with-role-
+           and-a-keydown-shim, so Enter/Space activation is free. .ui-close
+           stays the legacy cursor-popup close (setpoint, core's own
+           rgbw_popup); this popup never uses it. */
+        var close = el("button", "mk-rgbw-close", head);
+        close.type = "button";
         close.setAttribute("aria-label", $.t("Close"));
+        var closeIcon = el("i", "icon ion-md-close", close);
+        closeIcon.setAttribute("aria-hidden", "true");
         close.addEventListener("click", closePopup);
-        close.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") closePopup(); });
         el("div", "mk-rgbw-body", pop);
     }
 
@@ -140,7 +145,7 @@
             pop.style.display = "block";
         }
         document.addEventListener("keydown", onKeydown);
-        var c = document.querySelector("#mk-rgbw-popup .ui-close");
+        var c = document.querySelector("#mk-rgbw-popup .mk-rgbw-close");
         if (c) c.focus();
         checkOffState(state.idx);
     }

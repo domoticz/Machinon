@@ -1752,6 +1752,12 @@ m:4 mode, see below). `js/rgbw-popup.js` + `css/rgbw-popup.css`, feature id 45.
   Centered mode uses the center_popups idiom (left/right 0 + auto inline margins).
 - Title: `{typography.sm}` + `--dz-weight-semibold`, sentence case - the codified
   dialog-title language (no uppercase tracking anywhere in the theme).
+- Close control (codified here as the dialog-close language): an icon-quiet family
+  button (`.mk-rgbw-close`, own class, not `.btn-icon` itself) holding a 16px
+  `ion-md-close` Ionicon; transparent, no border, `--dz-btn-icon-box` hit-box, the
+  same tonal glyph hover filter as `.btn-icon`, `--dz-btn-focus-ring` focus.
+  `.ui-close` remains the legacy cursor-popup close (setpoint, core's own
+  `rgbw_popup`); this popup does not use it.
 - Tabs: the flat underlined sub-tab idiom, text-only.
 - Sliders: card dimmer-slider language on native range inputs. Brightness sits between
   `0%`/`100%` end labels (`{typography.micro}`, secondary text) and a live value readout

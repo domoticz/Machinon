@@ -54,7 +54,7 @@
     display: flex;
     align-items: center;
     min-height: 30px;
-    padding-right: 34px;           /* room for the 30px .ui-close box */
+    padding-right: 34px;           /* room for the 28px .mk-rgbw-close box */
 }
 #mk-rgbw-title {
     font-size: var(--dz-text-sm);
@@ -64,20 +64,40 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-/* .ui-close glyph/hover comes from css/setpoint.css (shared close language);
-   here only its box position inside our head row. */
-#mk-rgbw-popup .ui-close {
+/* Dialog close (owner revision 2026-08-18, codified as the dialog-close
+   language): the icon-quiet family (css/buttons.css's .btn-icon), reimplemented
+   here with our own class rather than adopting .btn-icon itself, so this popup
+   never couples to a core-region selector. Fully transparent, no border, no
+   resting shadow; hit-box is the button system's own --dz-btn-icon-box. This
+   popup no longer uses .ui-close (the legacy cursor-popup close, css/setpoint.css). */
+#mk-rgbw-popup .mk-rgbw-close {
     position: absolute;
     top: 0;
     right: -8px;
-    width: 30px;
-    height: 30px;
+    width: var(--dz-btn-icon-box);
+    height: var(--dz-btn-icon-box);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
     cursor: pointer;
 }
-#mk-rgbw-popup .ui-close:focus-visible {
+#mk-rgbw-popup .mk-rgbw-close i {
+    font-size: var(--dz-icon-size-sm);
+    color: var(--dz-body-text);
+    transition: filter 0.18s ease;
+}
+/* Hover/focus affordance: the same in-place tonal glyph pop as .btn-icon
+   (css/buttons.css) - saturate/brightness on the glyph, no background wash. */
+#mk-rgbw-popup .mk-rgbw-close:hover i,
+#mk-rgbw-popup .mk-rgbw-close:focus-visible i {
+    filter: saturate(1.12) brightness(1.05);
+}
+#mk-rgbw-popup .mk-rgbw-close:focus-visible {
     outline: none;
     box-shadow: var(--dz-btn-focus-ring);
-    border-radius: 5px;            /* {rounded.interactive} */
+    border-radius: 10px;           /* {rounded.button} */
 }
 
 .mk-rgbw-body {
