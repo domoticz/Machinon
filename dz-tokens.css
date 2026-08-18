@@ -91,6 +91,17 @@
     --dz-text-md: 1rem;           /* 16px @16 - settings panels, dropdown panes, mobile h1 */
     --dz-text-lg: 1.25rem;        /* 20px @16 - device values (bigtext), section headings */
     --dz-text-display: 1.625rem;  /* 26px @16 - page-title h1, login heading */
+    /* Dynamic Dashboard stat values. NOT a size on the scale and not a theme
+       decision: it is a CEILING of core's own 1.9em with a container-relative
+       cap under it, so the value renders at exactly what core asks for
+       whenever the card is wide enough, and shrinks only on the cards that
+       would otherwise cut the text. Lives here rather than inline because
+       check-typography.sh requires font-size to come from a token; it is
+       exempt by name in that script for the same reason as the clock pair,
+       since neither a bare rem nor a var() alias can express a min(). NOTE cqi
+       resolves against the container's CONTENT box; 18cqi is calibrated, not
+       chosen. Used by css/dynamic-dashboard.css; see DESIGN.md. */
+    --dz-text-widget-value: min(1.9em, 18cqi);
     /* ---- Semantic type aliases ----
        Components should say what a piece of text IS, not how big it is. --dz-text-lg
        carries two unrelated jobs (device values and section headings); these aliases let

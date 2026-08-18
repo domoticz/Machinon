@@ -68,7 +68,13 @@ done
 # the standby surface); dz-tokens.css carries the full reasoning. Exempting by name rather
 # than by "px is fine anywhere" keeps every other type token honest, and means adding a new
 # px type token is a deliberate edit to this list, not an accident.
-clock_exempt="--dz-text-clock|--dz-text-clock-sub"
+# --dz-text-widget-value is exempt for a different reason than the clock pair:
+# it is not a size but a min() ceiling of core's own 1.9em with a
+# container-relative cap, which neither a bare rem nor a var() alias can
+# express. Inlining it would fail the font-size check instead, so there would be
+# no legal way to write it at all. Exempt by name, like the clock, so adding
+# another stays a deliberate edit.
+clock_exempt="--dz-text-clock|--dz-text-clock-sub|--dz-text-widget-value"
 out=$(grep -n -- "--dz-text-[a-z-]*:" dz-tokens.css \
       | grep -vE "^[0-9]+:[[:space:]]*(${clock_exempt}):" \
       | grep -vE ":[[:space:]]*([0-9]*\.?[0-9]+rem|var\(--dz-[a-z-]+\))[[:space:]]*;")

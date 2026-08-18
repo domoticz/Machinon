@@ -468,6 +468,29 @@ Body text is theme-owned at `--dz-text-sm` (14px), replacing core's `10pt` (13.3
 titles (`.page-header-small h1`) are theme-owned at `--dz-text-display` (26px) on desktop, stepping
 down to `--dz-text-md` (16px) under 768px so long device names hold one or two lines on a phone.
 
+**Dynamic Dashboard stat cards need two corrections, and both are this theme's doing.** Measured
+like-for-like on the same dashboard at the same 1600px viewport, the default theme fits every card
+in the Energy Dashboard widget with 5-9px to spare, while Machinon cut two of them.
+
+*Width.* `css/nav.css` sets `.bannercontent { padding: 90px 2% 0 2% }`, a gutter that suits the
+classic list pages. The dash2 board brings its own (`.dd-page { padding: 10px 8px 8px }`), so ours
+was pure loss: 30.89px a side, and with the scrollbar the grid ran 1467px against the default
+theme's 1544px, costing 38px on every 6-column widget and 8px on every stat card (136 vs 144).
+`css/dynamic-dashboard.css` zeroes the horizontal padding on that page only, via
+`.bannercontent:has(.dd-page)`; the vertical padding stays, since the 90px top clears the navbar.
+
+*Type width.* Core renders `.dd-stat-value` at 1.9em, which is 133px of 13.33px Arial for
+"0.809 m3" inside a 144px card. The same string in this theme's 14px Inter is 148px, about 11%
+wider, so it was cut. `--dz-text-widget-value` caps it with `min(1.9em, 18cqi)` and makes
+`.dd-stat-card` the container, so the value renders at core's own size whenever it fits and shrinks
+only on the cards that would cut. Note `cqi` resolves against the container's CONTENT box: 12cqi
+was tried first and rendered 14.2px against the default theme's 25.3px, which is a different defect,
+not a fix. 18cqi gives 21.3px, the largest that fits.
+
+The container belongs on the CARD, not the widget cell. An earlier attempt put it on the cell and
+changed nothing, because the cell is wide while the box that is actually too narrow is one of six
+cards inside it.
+
 Core and vendor CSS that sets its own family or size directly on a descendant element is retargeted
 in `css/typography.css`: form controls, headings (including `.brand h1`/`.brand h2`, the always-visible
 navbar wordmark), the navbar links and dropdown, jQuery UI widgets (including dialog buttons),

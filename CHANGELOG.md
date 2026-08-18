@@ -15,6 +15,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ### Fixed
 
+- On the Dynamic Dashboard, values like `0.809 m3` and `440 Liter` are no longer cut off in the Energy Dashboard's tiles: the tiles get the full page width, and a value that would not fit is drawn slightly smaller instead of being clipped.
 - The device edit window is usable on a phone again: the fields fit, the Sensor Icon picker opens, and you can scroll down to the buttons.
 - On a narrow dynamic dashboard tile, a selector device's dropdown no longer sits on top of the device icon: it now stays in its own half of the card.
 - On a narrow dynamic dashboard tile, the device's value no longer prints on top of its name: the name gets the full first line and the value sits on the line below it, so both are readable and long names are no longer cut short.

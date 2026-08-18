@@ -6,6 +6,55 @@
   This file holds chrome + fixes unique to that board. Colours come from --dz-* tokens.
 */
 
+/* A: give the grid back the width the page gutter takes from it.
+   ------------------------------------------------------------------------
+   css/nav.css sets `.bannercontent { padding: 90px 2% 0 2% }`, a page gutter
+   that suits the classic list pages. The dash2 board brings its own gutter
+   (core's `.dd-page { padding: 10px 8px 8px }`), so on this surface ours is
+   pure loss: 2% of 1545px is 30.89px a side, and with the scrollbar that left
+   the grid 77px narrower than the default theme's at a 1600px viewport
+   (1467 vs 1544), which is 38px off every 6-column widget and 8px off every
+   stat card inside it (136 vs 144).
+
+   Scoped to the page that carries the board, so every other surface keeps the
+   gutter exactly as it was. The vertical padding is deliberately preserved:
+   the 90px top clears the fixed navbar. */
+.bannercontent:has(.dd-page) {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+/* B: let a stat value shrink to the card that holds it.
+   ------------------------------------------------------------------------
+   Core sizes .dd-stat-value at 1.9em and lets .dd-stat-card clip it. That is
+   fine for core, whose 13.33px Arial renders "0.809 m3" at 133px inside a
+   144px card. This theme's 14px Inter renders the SAME string at 148px, ~11%
+   wider, so it is cut. Measured like-for-like on the same dashboard at the
+   same viewport, so this is our defect, not core's: the default theme fits
+   every card in that widget with 5-9px to spare.
+
+   The container is the CARD, not the widget cell. Putting it on the cell (an
+   earlier attempt) does nothing here, because the cell is wide while the box
+   that is actually too narrow is one of six cards inside it.
+
+   min() keeps core's own size as the CEILING: the value renders at core's
+   1.9em whenever it fits, and only the cards that would cut shrink. Nothing
+   pins a size, so a future core change to .dd-stat-value still applies.
+   The cap was CALIBRATED, and the first attempt was wrong: cqi resolves
+   against the container's CONTENT box, not its border box, so 12cqi rendered
+   the value at 14.2px where the default theme shows 25.3px -- a fix that
+   overshot into a different defect. 18cqi lands at 21.3px on a 143px card,
+   which fits "0.809 m3" (118px of Inter) inside 119px of content box with room
+   to spare, and is the largest size that does fit. Wide cards are untouched at
+   core's 26.6px. */
+.dd-stat-card {
+    container-type: inline-size;
+}
+
+.dd-stat-card .dd-stat-value {
+    font-size: var(--dz-text-widget-value);
+}
+
 /* Edit-mode widget header (shown only while editing the board) */
 .dd-widget-header {
     background: var(--dz-nav-bg);
