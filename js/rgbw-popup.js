@@ -135,13 +135,37 @@
 
     function buildBody(led) {
         var body = document.querySelector("#mk-rgbw-popup .mk-rgbw-body");
-        body.innerHTML = ""; /* Tasks 5-8 populate */
+        body.innerHTML = "";
+        if (led.bHasRGB) {
+            var pane = el("div", "mk-rgbw-pane-color", body);
+            var canvas = el("canvas", null, pane);
+            canvas.id = "mk-rgbw-wheel";
+            canvas.width = WHEEL; canvas.height = WHEEL;
+            drawWheel(canvas);
+            attachWheel(canvas);
+        }
+        var readout = el("div", "mk-rgbw-readout", body);
+        el("span", "mk-rgbw-swatch", readout);
+        var hx = el("input", null, readout);
+        hx.id = "mk-rgbw-hex";
+        hx.type = "text"; hx.maxLength = 7; hx.autocomplete = "off";
+        hx.setAttribute("aria-label", $.t("Color"));
+        hx.addEventListener("change", function () {
+            var m = /^#?([0-9a-f]{6})$/i.exec(this.value.trim());
+            if (!m) { updateReadout(); return; }
+            var v = parseInt(m[1], 16);
+            var hsv = rgbToHsv((v >> 16) & 255, (v >> 8) & 255, v & 255);
+            state.h = hsv.h; state.s = hsv.s; state.mode = "color";
+            var c = document.getElementById("mk-rgbw-wheel");
+            if (c) drawWheel(c);
+            updateReadout();
+            onPick(); flushSend();
+        });
+        updateReadout();
     }
 
-    /* Task 5's pure color-conversion interface, reproduced here so this
-       module parses and runs standalone; seedFromColor above needs
-       rgbToHsv. hsvToRgb/toHex are unused until Task 5 wires the swatches
-       and inputs, but ship together as one small, self-contained unit. */
+    /* Pure HSV<->RGB math (textbook formulas; own implementation, no code
+       taken from any other theme). h,s,v in 0..1; r,g,b in 0..255. */
     function hsvToRgb(h, s, v) {
         var i = Math.floor(h * 6), f = h * 6 - i;
         var p = v * (1 - s), q = v * (1 - f * s), t = v * (1 - (1 - f) * s);
@@ -170,4 +194,99 @@
     }
 
     function toHex(n) { return ("0" + n.toString(16)).slice(-2); }
+
+    var WHEEL = 210, WR = WHEEL / 2, wheelImage = null;
+
+    function drawWheelBase(ctx) {
+        if (!wheelImage) {
+            var img = ctx.createImageData(WHEEL, WHEEL);
+            var d = img.data;
+            for (var y = 0; y < WHEEL; y++) {
+                for (var x = 0; x < WHEEL; x++) {
+                    var dx = x - WR, dy = y - WR, dist = Math.sqrt(dx * dx + dy * dy);
+                    var i4 = (y * WHEEL + x) * 4;
+                    if (dist > WR) { d[i4 + 3] = 0; continue; }
+                    var hue = (Math.atan2(dy, dx) / (2 * Math.PI) + 1) % 1;
+                    var rgb = hsvToRgb(hue, Math.min(dist / WR, 1), 1);
+                    d[i4] = rgb.r; d[i4 + 1] = rgb.g; d[i4 + 2] = rgb.b; d[i4 + 3] = 255;
+                }
+            }
+            wheelImage = img;
+        }
+        ctx.putImageData(wheelImage, 0, 0);
+    }
+
+    function drawWheel(canvas) {
+        var ctx = canvas.getContext("2d");
+        drawWheelBase(ctx);
+        /* Picker cursor: 15px circle (slider-handle scale) FILLED with the
+           picked colour, 2px widget-bg ring; the codified 2D-picker-cursor
+           language. */
+        var ang = state.h * 2 * Math.PI, rad = state.s * (WR - 8);
+        var cx = WR + rad * Math.cos(ang), cy = WR + rad * Math.sin(ang);
+        var rgb = hsvToRgb(state.h, state.s, 1);
+        ctx.beginPath();
+        ctx.arc(cx, cy, 7.5, 0, 2 * Math.PI);
+        ctx.fillStyle = "rgb(" + rgb.r + "," + rgb.g + "," + rgb.b + ")";
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue("--dz-widget-bg").trim() || "#fff";
+        ctx.stroke();
+    }
+
+    function updateReadout() {
+        var sw = document.querySelector(".mk-rgbw-swatch");
+        var hx = document.getElementById("mk-rgbw-hex");
+        if (!sw || !hx) return;
+        if (state.mode === "color") {
+            var rgb = hsvToRgb(state.h, state.s, 1);
+            sw.style.background = "rgb(" + rgb.r + "," + rgb.g + "," + rgb.b + ")";
+            hx.value = "#" + toHex(rgb.r) + toHex(rgb.g) + toHex(rgb.b);
+            hx.disabled = false;
+        } else {
+            var w = warmthRgb(state.warmth);
+            sw.style.background = "rgb(" + w.r + "," + w.g + "," + w.b + ")";
+            hx.value = state.led && state.led.bHasTemperature
+                ? (state.warmth < 0.3 ? $.t("Cool") : state.warmth > 0.7 ? $.t("Warm") : $.t("White"))
+                : $.t("White");
+            hx.disabled = true;
+        }
+    }
+
+    /* Warmth swatch preview colours: fixed literals by design, they depict
+       physical colour temperature (6500K cool .. 2700K warm), not scheme
+       colours. */
+    function warmthRgb(w) {
+        return {
+            r: Math.round(219 + (255 - 219) * w),
+            g: Math.round(233 + (180 - 233) * w),
+            b: Math.round(255 + (94 - 255) * w)
+        };
+    }
+
+    function onPick() { /* Task 6 attaches the send pipeline here */ }
+    function flushSend() {}
+
+    function attachWheel(canvas) {
+        var dragging = false;
+        function pick(e) {
+            var rect = canvas.getBoundingClientRect();
+            var scale = WHEEL / (rect.width || WHEEL);
+            var px = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+            var py = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+            var dx = px * scale - WR, dy = py * scale - WR;
+            state.h = (Math.atan2(dy, dx) / (2 * Math.PI) + 1) % 1;
+            state.s = Math.min(Math.sqrt(dx * dx + dy * dy) / WR, 1);
+            drawWheel(canvas);
+            updateReadout();
+            onPick();
+        }
+        function up() { if (dragging) { dragging = false; flushSend(); } }
+        canvas.addEventListener("mousedown", function (e) { dragging = true; pick(e); });
+        document.addEventListener("mousemove", function (e) { if (dragging) pick(e); });
+        document.addEventListener("mouseup", up);
+        canvas.addEventListener("touchstart", function (e) { dragging = true; pick(e); e.preventDefault(); }, { passive: false });
+        document.addEventListener("touchmove", function (e) { if (dragging) { pick(e); e.preventDefault(); } }, { passive: false });
+        document.addEventListener("touchend", up);
+    }
 })();

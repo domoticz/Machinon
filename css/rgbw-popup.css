@@ -86,3 +86,33 @@
     transform: none;
     top: auto;
 }
+
+.mk-rgbw-pane-color { display: flex; justify-content: center; }
+#mk-rgbw-wheel {
+    display: block;
+    width: 210px;
+    max-width: 100%;
+    touch-action: none;
+    cursor: crosshair;
+}
+
+.mk-rgbw-readout { display: flex; align-items: center; gap: 10px; }
+/* Swatch chip: checkbox-adjacent scale, {rounded.xs}. */
+.mk-rgbw-swatch {
+    width: 20px;
+    height: 20px;
+    border-radius: 2px;            /* {rounded.xs} */
+    border: 1px solid var(--dz-input-border);
+    flex: none;
+}
+/* Hex field: the form-input text language (transparent, accent bottom
+   border, secondary text). */
+#mk-rgbw-hex {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--dz-accent-color);
+    color: var(--secondary-text-color);
+    font-size: var(--dz-text-sm);
+    width: 90px;
+}
+#mk-rgbw-hex:disabled { border-bottom-color: var(--dz-input-border); }
