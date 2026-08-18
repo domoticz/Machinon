@@ -36,7 +36,14 @@
     };
     window.ShowRGBWPopup._mkHooked = true;
 
-    var state = { idx: null, led: null, mode: "color", h: 0, s: 1, warmth: 0.5, bright: 100, maxDim: 100, protected: null, mix: 0 };
+    /* Brightness is native-unit (mirror-the-card design, 2026-08-18):
+       brightNative is the raw 0..maxDim value, exactly like the card's own
+       dimmer slider (dzLightWidget.js svalue/MaxDimLevel), no percent
+       conversion or +1 seeding formula. brightApplyNative is the floor-1
+       fallback used by colour-path sends while the slider itself sits at
+       0 (see sendColor), so a wheel/warmth/hex pick never turns the lamp
+       off; it always stays >=1. */
+    var state = { idx: null, led: null, mode: "color", h: 0, s: 1, warmth: 0.5, brightNative: 0, brightApplyNative: 1, maxDim: 100, protected: null, mix: 0 };
     var openerEl = null;
     var docListenerTimer = null;
 
@@ -89,7 +96,11 @@
         state.led = args.led;
         state.maxDim = parseInt(args.maxDim, 10) || 100;
         state.protected = args.protected;
-        state.bright = Math.max(1, Math.min(100, Math.round(((parseInt(args.levelInt, 10) || 0) / state.maxDim) * 99) + 1));
+        /* Mirror the card exactly: raw LevelInt, clamped into 0..maxDim, no
+           percent conversion. The popup now opens showing the identical
+           number the card shows. */
+        state.brightNative = Math.max(0, Math.min(state.maxDim, parseInt(args.levelInt, 10) || 0));
+        state.brightApplyNative = Math.max(1, state.brightNative);
         seedFromColor(args.colorJSON);
         document.getElementById("mk-rgbw-title").textContent = args.name || (state.led.bHasRGB ? $.t("Color") : $.t("White"));
         buildBody(state.led);
@@ -215,7 +226,7 @@
                 paintMixTrack();
                 mixInput.addEventListener("input", function () {
                     state.mix = (parseInt(this.value, 10) || 0) / 100;
-                    scheduleSend();
+                    scheduleSend("color");
                 });
                 mixInput.addEventListener("change", flushSend);
             }
@@ -234,7 +245,7 @@
             warm.addEventListener("input", function () {
                 state.warmth = (parseInt(this.value, 10) || 0) / 255;
                 updateReadout();
-                scheduleSend();
+                scheduleSend("color");
             });
             warm.addEventListener("change", flushSend);
         }
@@ -264,43 +275,51 @@
         brMin.textContent = "0%";
         var slider = el("input", null, br);
         slider.id = "mk-rgbw-bright";
-        slider.type = "range"; slider.min = 0; slider.max = 100; slider.value = state.bright;
+        slider.type = "range"; slider.min = 0; slider.max = state.maxDim; slider.value = state.brightNative;
         slider.setAttribute("aria-label", $.t("Brightness"));
         var brMax = el("span", "mk-rgbw-scale", br);
         brMax.textContent = "100%";
         var brVal = el("span", null, br);
         brVal.id = "mk-rgbw-bright-value";
-        brVal.textContent = state.bright + "%";
+        brVal.textContent = displayPct(state.brightNative) + "%";
         paintRangeFill(slider);
         slider.addEventListener("input", function () {
-            /* Card-slider consistency (owner revision 2026-08-18): the
-               brightness slider ranges 0-100 and 0 means Off, exactly like
-               the theme's card dimmer sliders. */
+            /* Mirror-the-card (owner-approved 2026-08-18): the slider is
+               native-unit, min 0 max maxDim, exactly like the card's own
+               dimmer slider. Displayed percent is always the card's own
+               formula (displayPct), so popup and card agree by
+               construction. */
             var v = parseInt(this.value, 10) || 0;
             paintRangeFill(this);
             if (v >= 1) {
-                state.bright = v;
-                brVal.textContent = state.bright + "%";
-                scheduleSend();
+                state.brightNative = v;
+                state.brightApplyNative = v;
+                brVal.textContent = displayPct(v) + "%";
+                scheduleSend("level");
             } else {
                 /* Passing through 0 mid-drag sends nothing: reflect 0 in the
-                   readout, but leave state.bright at its last >=1 value
-                   (floor 1) so the other controls keep sending a valid
-                   brightness, and cancel any send queued moments ago so a
-                   stale >=1 update never fires while the user drags to Off. */
+                   readout and in state.brightNative itself (it is the raw
+                   slider position now), but leave state.brightApplyNative at
+                   its last >=1 value (floor 1) so the other controls keep
+                   sending a valid brightness, and cancel any send queued
+                   moments ago so a stale >=1 update never fires while the
+                   user drags to Off. */
+                state.brightNative = 0;
                 brVal.textContent = "0%";
                 cancelPendingSend();
             }
         });
         slider.addEventListener("change", function () {
-            if ((parseInt(this.value, 10) || 0) === 0) {
-                /* Releasing at 0 sends Off via the protected path, like the
-                   card dimmer sliders; the popup stays open so the user can
-                   drag back up to turn the lamp on again. */
-                window.SwitchLightPopup(state.idx, "Off", state.protected);
-            } else {
-                flushSend();
+            var v = parseInt(this.value, 10) || 0;
+            if (v === 0) {
+                /* Releasing at 0 sends Set Level 0 (exact card parity; core
+                   treats this as off), through the same "level" send kind,
+                   immediately rather than waiting out the deadline. The
+                   popup stays open so the user can drag back up. */
+                state.brightNative = 0;
+                scheduleSend("level");
             }
+            flushSend();
         });
         var presets = el("div", "mk-rgbw-presets", body);
         [["On", "On"], ["Off", "Off"]].forEach(function (p) {
@@ -328,7 +347,7 @@
         updateReadout();
         /* Live-send model: switching the mode applies it (an RGBW White tab
            has no further control to act on). */
-        scheduleSend(); flushSend();
+        scheduleSend("color"); flushSend();
     }
 
     /* Pure HSV<->RGB math (textbook formulas; own implementation, no code
@@ -361,6 +380,11 @@
     }
 
     function toHex(n) { return ("0" + n.toString(16)).slice(-2); }
+
+    /* The card's own display formula (dzLightWidget.js initSliders: fPercentage
+       = parseInt(100.0 / maxValue * ui.value)), used for every percent shown
+       in the popup so the popup and the card always agree by construction. */
+    function displayPct(v) { return Math.floor((100 / state.maxDim) * v); }
 
     var WHEEL = 210, WR = WHEEL / 2, wheelImage = null;
 
@@ -502,52 +526,78 @@
         return JSON.stringify(c);
     }
 
-    /* Card-slider consistency: other controls (wheel/mix/warmth/hex/tab)
-       send using state.bright, which is always >=1 (see the brightness
-       input handler), so a send while the slider visually sits at 0 turns
-       the lamp on at that floor value. Sync the slider's own UI to match
-       what was actually sent, so it stops showing 0% for a lamp that just
-       turned on. */
+    /* Card-slider consistency: the colour path (wheel/mix/warmth/hex/tab)
+       sends using brightApplyNative, which is always >=1 (see the
+       brightness input handler), so a colour send while the slider visually
+       sits at 0 turns the lamp on at that floor level. Sync the slider's
+       own UI to match what was actually sent, so it stops showing 0% for a
+       lamp that just turned on. */
     function syncBrightnessUI() {
         var slider = document.getElementById("mk-rgbw-bright");
-        if (!slider || slider.value !== "0") return;
-        slider.value = state.bright;
+        if (!slider || (parseInt(slider.value, 10) || 0) !== 0) return;
+        state.brightNative = state.brightApplyNative;
+        slider.value = state.brightNative;
         paintRangeFill(slider);
         var brVal = document.getElementById("mk-rgbw-bright-value");
-        if (brVal) brVal.textContent = state.bright + "%";
+        if (brVal) brVal.textContent = displayPct(state.brightNative) + "%";
     }
 
     function sendColor() {
         if (!state.idx) return;
         syncBrightnessUI();
         var colorJSON = buildColorJSON();
+        /* Round-trip inverse of the card's own displayPct formula: ceil
+           provably maps back to this exact native step server-side (this
+           ceiling is what core's old +1 seed crudely approximated). Uses
+           the floor-1 apply level (never brightNative itself) so a colour
+           pick while the slider sits at 0 never sends brightness=0. */
+        var applyNative = state.brightNative > 0 ? state.brightNative : state.brightApplyNative;
+        var pct = Math.max(1, Math.min(100, Math.ceil(applyNative * 100 / state.maxDim)));
         if (typeof window.SetColValue === "function") {
             /* Page-global from the Angular controllers: keeps permission
                checks and page behaviour (LightsController.js etc.). */
-            window.SetColValue(state.idx, colorJSON, state.bright);
+            window.SetColValue(state.idx, colorJSON, pct);
         } else {
             $.ajax({ url: "json.htm?type=command&param=setcolbrightnessvalue&idx=" + state.idx +
-                          "&color=" + encodeURIComponent(colorJSON) + "&brightness=" + state.bright,
+                          "&color=" + encodeURIComponent(colorJSON) + "&brightness=" + pct,
                      dataType: "json" });
         }
+    }
+
+    function sendLevel() {
+        if (!state.idx) return;
+        /* Mirror-the-card send: the same switchlight/Set Level command the
+           card's own dimmer slider issues (dzLightWidget.js
+           ctrl.executeSetLevel), at the raw native level. Protection was
+           already verified once at popup open (HandleProtection in the
+           ShowRGBWPopup wrapper), matching core popup conventions, so no
+           second password prompt is needed here. */
+        $.ajax({ url: "json.htm?type=command&param=switchlight&idx=" + state.idx +
+                      "&switchcmd=" + encodeURIComponent("Set Level") + "&level=" + state.brightNative,
+                 dataType: "json" });
     }
 
     /* Deadline rate-limit, NOT a resettable debounce: the timer is never
        reset by new events, so a continuous drag sends every 400ms instead
        of starving until the pointer pauses (core's own code marks its
-       debounce with "TODO: Rate limit instead of debounce"). */
-    var sendTimer = null, sendDirty = false;
-    function scheduleSend() {
+       debounce with "TODO: Rate limit instead of debounce"). One shared
+       timer serves both send kinds ("level" from the brightness slider,
+       "color" from wheel/mix/warmth/hex/tab): if a pick of one kind lands
+       while the other is pending, the LATEST kind wins the flush (one
+       send, latest intent, never both). */
+    var sendTimer = null, sendDirty = false, pendingKind = null;
+    function scheduleSend(kind) {
         sendDirty = true;
+        pendingKind = kind;
         if (sendTimer) return;
         sendTimer = setTimeout(function () {
             sendTimer = null;
-            if (sendDirty) { sendDirty = false; sendColor(); }
+            if (sendDirty) { sendDirty = false; sendPending(); }
         }, 400);
     }
     function flushSend() {
         if (sendTimer) { clearTimeout(sendTimer); sendTimer = null; }
-        if (sendDirty) { sendDirty = false; sendColor(); }
+        if (sendDirty) { sendDirty = false; sendPending(); }
     }
     /* Card-slider consistency: dragging the brightness slider to 0 must
        drop any send queued a moment earlier (from just before the pointer
@@ -556,8 +606,14 @@
     function cancelPendingSend() {
         if (sendTimer) { clearTimeout(sendTimer); sendTimer = null; }
         sendDirty = false;
+        pendingKind = null;
     }
-    function onPick() { scheduleSend(); }
+    function sendPending() {
+        var kind = pendingKind;
+        pendingKind = null;
+        if (kind === "level") sendLevel(); else sendColor();
+    }
+    function onPick() { scheduleSend("color"); }
 
     /* The wheel drag surface changes identity every popup open (buildBody
        rebuilds the canvas from scratch), but the drag gesture itself is
