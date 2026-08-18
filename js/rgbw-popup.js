@@ -1,12 +1,11 @@
 /* Machinon colour popup (feature: rgbw_popup). Wraps core's ShowRGBWPopup;
    the Machinon modal lives in its own #mk-rgbw-popup div, core's #rgbw_popup
    markup is never touched so delegation to the original always works.
-   Custom w/ww subtypes (RGBWZ, RGBWWZ) open the Machinon popup too: core's
-   m:4 mix mode is not offered, buildBody/seedFromColor already key off
-   bHasRGB/bHasWhite/bHasTemperature so those subtypes just get the same
-   Colour/White tabs as RGBW/RGBWW. Delegates to core for: DimmerType "rel",
-   or any drift-guard failure (core signature changed -> never hook, zero
-   risk). */
+   Custom w/ww subtypes (RGBWZ, RGBWWZ) open the Machinon popup too, on the
+   same Colour/White tabs as RGBW/RGBWW; the Colour pane also grows a
+   white-mix slider for these (core's m:4 mode, see buildColorJSON).
+   Delegates to core for: DimmerType "rel", or any drift-guard failure
+   (core signature changed -> never hook, zero risk). */
 (function () {
     "use strict";
     if (typeof window.ShowRGBWPopup !== "function" ||
@@ -31,7 +30,7 @@
     };
     window.ShowRGBWPopup._mkHooked = true;
 
-    var state = { idx: null, led: null, mode: "color", h: 0, s: 1, warmth: 0.5, bright: 100, maxDim: 100, protected: null };
+    var state = { idx: null, led: null, mode: "color", h: 0, s: 1, warmth: 0.5, bright: 100, maxDim: 100, protected: null, mix: 0 };
     var openerEl = null;
     var docListenerTimer = null;
 
@@ -143,6 +142,10 @@
             state.h = hsv.h; state.s = hsv.s;
         }
         state.warmth = col.t !== undefined ? col.t / 255 : 0.5;
+        /* Reset on every seed (not just when col.m === 4): a leftover mix
+           from a previously opened device must never leak into the next
+           one's Colour pane. */
+        state.mix = col.m === 4 ? Math.max(0, Math.min(1, ((col.cw || 0) + (col.ww || 0)) / 255)) : 0;
     }
 
     function buildBody(led) {
@@ -171,6 +174,22 @@
             canvas.width = WHEEL; canvas.height = WHEEL;
             drawWheel(canvas);
             attachWheel(canvas);
+            if (led.bHasCustom) {
+                /* White-mix slider (m:4 custom subtypes only, RGBWZ/RGBWWZ):
+                   core parity, core offers customw/customww only there. */
+                var mixWrap = el("div", "mk-rgbw-mix-wrap", pane);
+                var mixInput = el("input", null, mixWrap);
+                mixInput.id = "mk-rgbw-mix";
+                mixInput.type = "range"; mixInput.min = 0; mixInput.max = 100;
+                mixInput.value = Math.round(state.mix * 100);
+                mixInput.setAttribute("aria-label", $.t("White"));
+                paintMixTrack();
+                mixInput.addEventListener("input", function () {
+                    state.mix = (parseInt(this.value, 10) || 0) / 100;
+                    scheduleSend();
+                });
+                mixInput.addEventListener("change", flushSend);
+            }
         }
         if (led.bHasTemperature) {
             var wp = el("div", "mk-rgbw-pane-white", body);
@@ -201,22 +220,27 @@
             state.h = hsv.h; state.s = hsv.s; state.mode = "color";
             var c = document.getElementById("mk-rgbw-wheel");
             if (c) drawWheel(c);
+            paintMixTrack();
             updateReadout();
             onPick(); flushSend();
         });
         var br = el("div", "mk-rgbw-bright", body);
-        var dim = el("i", "icon ion-ios-bulb", br);         /* outline bulb = dim end */
-        dim.setAttribute("aria-hidden", "true");
+        var brMin = el("span", "mk-rgbw-scale", br);
+        brMin.textContent = "0%";
         var slider = el("input", null, br);
         slider.id = "mk-rgbw-bright";
         slider.type = "range"; slider.min = 1; slider.max = 100; slider.value = state.bright;
         slider.setAttribute("aria-label", $.t("Brightness"));
-        var lit = el("i", "icon ion-md-bulb", br);          /* filled bulb = bright end */
-        lit.setAttribute("aria-hidden", "true");
+        var brMax = el("span", "mk-rgbw-scale", br);
+        brMax.textContent = "100%";
+        var brVal = el("span", null, br);
+        brVal.id = "mk-rgbw-bright-value";
+        brVal.textContent = state.bright + "%";
         paintRangeFill(slider);
         slider.addEventListener("input", function () {
             state.bright = parseInt(this.value, 10) || 1;
             paintRangeFill(this);
+            brVal.textContent = state.bright + "%";
             scheduleSend();
         });
         slider.addEventListener("change", flushSend);
@@ -353,19 +377,49 @@
        filled track); CSS alone cannot paint a fill on input[type=range]. */
     function paintRangeFill(inp) {
         if (inp.id === "mk-rgbw-warmth") return;
+        if (inp.id === "mk-rgbw-mix") return;    /* its background is the mix gradient, not the accent fill */
         var p = ((inp.value - inp.min) / (inp.max - inp.min)) * 100;
         inp.style.background =
             "linear-gradient(to right, rgba(var(--dz-accent-values),0.5) 0 " + p + "%, " +
             "var(--dz-card-slider-track-bg) " + p + "% 100%)";
     }
 
+    /* White-mix track: live gradient from the currently picked colour to
+       white (repainted on wheel drag and hex edit, so it always shows what
+       mix>0 would blend toward). No-ops when the control is not in the DOM
+       (RGB-only and non-custom subtypes never render it). White is a fixed
+       literal by design: it depicts the physical white channel, not a
+       scheme colour. */
+    function paintMixTrack() {
+        var mixInput = document.getElementById("mk-rgbw-mix");
+        if (!mixInput) return;
+        var rgb = hsvToRgb(state.h, state.s, 1);
+        mixInput.style.background = "linear-gradient(to right, rgb(" + rgb.r + "," + rgb.g + "," + rgb.b + "), #ffffff)";
+    }
+
     /* Colour payloads exactly as core's getJSONColor builds them
-       (domoticz.js:1644): m:3 RGB, m:2 temperature, m:1 fixed white. */
+       (domoticz.js:1644): m:3 RGB, m:2 temperature, m:1 fixed white. The
+       m:4 custom mix branch mirrors core's customw/customww formulas
+       (domoticz.js:1662-1669): RGBWZ splits mix evenly (cw=ww=mix*255),
+       RGBWWZ splits it by warmth (cw=mix*(1-warmth)*255, ww=mix*warmth*255,
+       t=warmth*255). mix===0 keeps sending plain m:3, unchanged. */
     function buildColorJSON() {
         var c;
         if (state.mode === "color") {
             var rgb = hsvToRgb(state.h, state.s, 1);
-            c = { m: 3, t: 0, r: rgb.r, g: rgb.g, b: rgb.b, cw: 0, ww: 0 };
+            if (state.led && state.led.bHasCustom && state.mix > 0) {
+                if (state.led.bHasTemperature) {
+                    var wt = Math.round(state.warmth * 255);
+                    c = { m: 4, t: wt, r: rgb.r, g: rgb.g, b: rgb.b,
+                          cw: Math.round(state.mix * (1 - state.warmth) * 255),
+                          ww: Math.round(state.mix * state.warmth * 255) };
+                } else {
+                    c = { m: 4, t: 0, r: rgb.r, g: rgb.g, b: rgb.b,
+                          cw: Math.round(state.mix * 255), ww: Math.round(state.mix * 255) };
+                }
+            } else {
+                c = { m: 3, t: 0, r: rgb.r, g: rgb.g, b: rgb.b, cw: 0, ww: 0 };
+            }
         } else if (state.led && state.led.bHasTemperature) {
             var t = Math.round(state.warmth * 255);
             c = { m: 2, t: t, r: 0, g: 0, b: 0, cw: Math.round((1 - state.warmth) * 255), ww: Math.round(state.warmth * 255) };
@@ -431,6 +485,7 @@
         state.h = (Math.atan2(dy, dx) / (2 * Math.PI) + 1) % 1;
         state.s = Math.min(Math.sqrt(dx * dx + dy * dy) / WR, 1);
         drawWheel(activeWheel);
+        paintMixTrack();
         updateReadout();
         onPick();
     }

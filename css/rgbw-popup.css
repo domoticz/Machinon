@@ -90,7 +90,7 @@
     top: auto;
 }
 
-.mk-rgbw-pane-color { display: flex; justify-content: center; }
+.mk-rgbw-pane-color { display: flex; flex-direction: column; align-items: center; gap: 10px; }
 #mk-rgbw-wheel {
     display: block;
     width: 210px;
@@ -98,6 +98,13 @@
     touch-action: none;
     cursor: crosshair;
 }
+
+/* White-mix slider (bHasCustom subtypes only, under the wheel): track is a
+   live gradient from the currently picked colour to white, painted by JS
+   (paintMixTrack) on every colour change; the gradient carries the meaning
+   like the warmth slider, so there is no accent fill here (see
+   paintRangeFill's guard) and no icon. */
+.mk-rgbw-mix-wrap { display: flex; align-items: center; min-height: 30px; }
 
 .mk-rgbw-readout { display: flex; align-items: center; gap: 10px; }
 /* Swatch chip: checkbox-adjacent scale, {rounded.xs}. */
@@ -120,11 +127,20 @@
 }
 #mk-rgbw-hex:disabled { border-bottom-color: var(--dz-input-border); }
 
-/* Brightness row: outline bulb (dim) .. slider .. filled bulb (bright). */
+/* Brightness row: 0%/100% end labels .. slider .. live value readout, a
+   fixed-width slot so the row does not jitter while dragging (setpoint-popup
+   value-readout precedent). */
 .mk-rgbw-bright { display: flex; align-items: center; gap: 10px; }
-.mk-rgbw-bright .icon {
-    font-size: var(--dz-icon-size-sm);
+.mk-rgbw-scale {
+    font-size: var(--dz-text-micro);
     color: var(--secondary-text-color);
+}
+#mk-rgbw-bright-value {
+    font-size: var(--dz-text-sm);
+    font-weight: var(--dz-weight-semibold);
+    color: var(--dz-accent-color);
+    min-width: 2.6em;
+    text-align: right;
 }
 
 /* Range inputs in the card dimmer-slider language: flat 5px track,

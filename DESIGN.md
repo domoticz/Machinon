@@ -1741,9 +1741,9 @@ contract.
 
 Machinon-owned popup replacing core's cursor-anchored RGBW picker; core's
 `#rgbw_popup` stays untouched as the delegate path (rel dimmers, drift guard, feature
-off). Custom w/ww subtypes (RGBWZ, RGBWWZ) also open the Machinon popup; core's m:4 mix
-mode is not offered, they get the same Color/White tabs as RGBW/RGBWW. `js/rgbw-popup.js`
-+ `css/rgbw-popup.css`, feature id 45.
+off). Custom w/ww subtypes (RGBWZ, RGBWWZ) also open the Machinon popup, on the same
+Color/White tabs as RGBW/RGBWW; their Color pane also grows a white-mix slider (core's
+m:4 mode, see below). `js/rgbw-popup.js` + `css/rgbw-popup.css`, feature id 45.
 
 - Shell: `--dz-widget-bg`, `{rounded.container}`, `--dz-elev-overlay`, `max-height: 90vh`.
 - Placement adheres to the center_popups setting: anchored near the clicked card (no scrim,
@@ -1753,9 +1753,18 @@ mode is not offered, they get the same Color/White tabs as RGBW/RGBWW. `js/rgbw-
 - Title: `{typography.sm}` + `--dz-weight-semibold`, sentence case - the codified
   dialog-title language (no uppercase tracking anywhere in the theme).
 - Tabs: the flat underlined sub-tab idiom, text-only.
-- Sliders (brightness, warmth): card dimmer-slider language on native range inputs;
-  warmth track is a fixed cool-to-warm gradient (physical color temperature, not a
-  scheme color).
+- Sliders: card dimmer-slider language on native range inputs. Brightness sits between
+  `0%`/`100%` end labels (`{typography.micro}`, secondary text) and a live value readout
+  (`{typography.sm}` `--dz-weight-semibold` `--dz-accent-color`) in a fixed-width slot so
+  the row does not jitter while dragging. Warmth's track is a fixed cool-to-warm gradient
+  (physical color temperature, not a scheme color).
+- White-mix slider (bHasCustom subtypes only, RGBWZ/RGBWWZ): on the Color pane under the
+  wheel, gated on the same capability core uses for its customw/customww modes. Track is a
+  live gradient from the currently picked color to white (repainted on every wheel drag and
+  hex edit), the same fixed-literal-track idiom as the warmth slider. Mix 0 keeps sending
+  plain `m:3`; mix above 0 sends `m:4` with core's own formulas (`cw`/`ww` split evenly for
+  RGBWZ, split by warmth for RGBWWZ). Seeded from an existing `m:4` state's `(cw+ww)/255` so
+  an already-mixed device opens showing its mix, not a reset one.
 - 2D picker cursor (codified here): 15px circle at slider-handle scale, filled with the
   picked color, 2px `--dz-widget-bg` ring.
 - Presets: On/Off, both plain ghost family (owner call: Off is not destructive).
