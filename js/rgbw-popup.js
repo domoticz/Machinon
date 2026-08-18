@@ -264,7 +264,7 @@
         brMin.textContent = "0%";
         var slider = el("input", null, br);
         slider.id = "mk-rgbw-bright";
-        slider.type = "range"; slider.min = 1; slider.max = 100; slider.value = state.bright;
+        slider.type = "range"; slider.min = 0; slider.max = 100; slider.value = state.bright;
         slider.setAttribute("aria-label", $.t("Brightness"));
         var brMax = el("span", "mk-rgbw-scale", br);
         brMax.textContent = "100%";
@@ -273,12 +273,35 @@
         brVal.textContent = state.bright + "%";
         paintRangeFill(slider);
         slider.addEventListener("input", function () {
-            state.bright = parseInt(this.value, 10) || 1;
+            /* Card-slider consistency (owner revision 2026-08-18): the
+               brightness slider ranges 0-100 and 0 means Off, exactly like
+               the theme's card dimmer sliders. */
+            var v = parseInt(this.value, 10) || 0;
             paintRangeFill(this);
-            brVal.textContent = state.bright + "%";
-            scheduleSend();
+            if (v >= 1) {
+                state.bright = v;
+                brVal.textContent = state.bright + "%";
+                scheduleSend();
+            } else {
+                /* Passing through 0 mid-drag sends nothing: reflect 0 in the
+                   readout, but leave state.bright at its last >=1 value
+                   (floor 1) so the other controls keep sending a valid
+                   brightness, and cancel any send queued moments ago so a
+                   stale >=1 update never fires while the user drags to Off. */
+                brVal.textContent = "0%";
+                cancelPendingSend();
+            }
         });
-        slider.addEventListener("change", flushSend);
+        slider.addEventListener("change", function () {
+            if ((parseInt(this.value, 10) || 0) === 0) {
+                /* Releasing at 0 sends Off via the protected path, like the
+                   card dimmer sliders; the popup stays open so the user can
+                   drag back up to turn the lamp on again. */
+                window.SwitchLightPopup(state.idx, "Off", state.protected);
+            } else {
+                flushSend();
+            }
+        });
         var presets = el("div", "mk-rgbw-presets", body);
         [["On", "On"], ["Off", "Off"]].forEach(function (p) {
             var b = el("button", "mk-rgbw-preset", presets);
@@ -479,8 +502,24 @@
         return JSON.stringify(c);
     }
 
+    /* Card-slider consistency: other controls (wheel/mix/warmth/hex/tab)
+       send using state.bright, which is always >=1 (see the brightness
+       input handler), so a send while the slider visually sits at 0 turns
+       the lamp on at that floor value. Sync the slider's own UI to match
+       what was actually sent, so it stops showing 0% for a lamp that just
+       turned on. */
+    function syncBrightnessUI() {
+        var slider = document.getElementById("mk-rgbw-bright");
+        if (!slider || slider.value !== "0") return;
+        slider.value = state.bright;
+        paintRangeFill(slider);
+        var brVal = document.getElementById("mk-rgbw-bright-value");
+        if (brVal) brVal.textContent = state.bright + "%";
+    }
+
     function sendColor() {
         if (!state.idx) return;
+        syncBrightnessUI();
         var colorJSON = buildColorJSON();
         if (typeof window.SetColValue === "function") {
             /* Page-global from the Angular controllers: keeps permission
@@ -509,6 +548,14 @@
     function flushSend() {
         if (sendTimer) { clearTimeout(sendTimer); sendTimer = null; }
         if (sendDirty) { sendDirty = false; sendColor(); }
+    }
+    /* Card-slider consistency: dragging the brightness slider to 0 must
+       drop any send queued a moment earlier (from just before the pointer
+       reached 0), otherwise a stale >=1 brightness update could still fire
+       while the user's intent is Off. */
+    function cancelPendingSend() {
+        if (sendTimer) { clearTimeout(sendTimer); sendTimer = null; }
+        sendDirty = false;
     }
     function onPick() { scheduleSend(); }
 
