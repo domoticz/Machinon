@@ -46,6 +46,11 @@
     var state = { idx: null, led: null, mode: "color", h: 0, s: 1, warmth: 0.5, brightNative: 0, brightApplyNative: 1, maxDim: 100, protected: null, mix: 0 };
     var openerEl = null;
     var docListenerTimer = null;
+    /* Off-state seeding (owner 2026-08-18): brightTouched is false until the
+       user's first brightness-slider interaction, and gates the async
+       getdevices re-check below (see openPopup) so a status arriving after
+       the user already moved the slider never overwrites their choice. */
+    var brightTouched = false;
 
     function el(tag, cls, parent) {
         var n = document.createElement(tag);
@@ -101,6 +106,7 @@
            number the card shows. */
         state.brightNative = Math.max(0, Math.min(state.maxDim, parseInt(args.levelInt, 10) || 0));
         state.brightApplyNative = Math.max(1, state.brightNative);
+        brightTouched = false;
         seedFromColor(args.colorJSON);
         document.getElementById("mk-rgbw-title").textContent = args.name || (state.led.bHasRGB ? $.t("Color") : $.t("White"));
         buildBody(state.led);
@@ -136,6 +142,39 @@
         document.addEventListener("keydown", onKeydown);
         var c = document.querySelector("#mk-rgbw-popup .ui-close");
         if (c) c.focus();
+        checkOffState(state.idx);
+    }
+
+    /* Off-state seeding (owner 2026-08-18, improves on core: even the card's
+       own slider parks at the stale LevelInt when the device is Off): the
+       hook is only passed LevelInt, never on/off status, so a device that is
+       Off but last reported e.g. LevelInt 100 opens the popup showing 100%.
+       One async status re-check fixes this without touching the seeded
+       colour or the relight level: if the popup is still open on the same
+       device and the user has not yet touched the brightness slider, a
+       Status of exactly "Off" drops brightNative (and its paint) to 0 while
+       brightApplyNative is left untouched, so the first colour interaction
+       still relights the lamp at its previous level. Any error, a non-Off
+       status, or the popup having moved on all leave the seeded UI alone;
+       this path never sends anything. */
+    function checkOffState(idx) {
+        $.ajax({
+            url: "json.htm?type=command&param=getdevices&rid=" + idx,
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                if (brightTouched || state.idx !== idx) return;
+                var pop = document.getElementById("mk-rgbw-popup");
+                if (!pop || pop.style.display === "none") return;
+                var dev = data && data.result && data.result[0];
+                if (!dev || dev.Status !== "Off") return;
+                state.brightNative = 0;
+                var slider = document.getElementById("mk-rgbw-bright");
+                if (slider) { slider.value = 0; paintRangeFill(slider); }
+                var brVal = document.getElementById("mk-rgbw-bright-value");
+                if (brVal) brVal.textContent = "0%";
+            }
+        });
     }
 
     function closePopup() {
@@ -290,6 +329,7 @@
                formula (displayPct), so popup and card agree by
                construction. */
             var v = parseInt(this.value, 10) || 0;
+            brightTouched = true;
             paintRangeFill(this);
             if (v >= 1) {
                 state.brightNative = v;
