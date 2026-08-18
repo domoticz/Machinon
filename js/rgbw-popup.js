@@ -98,8 +98,14 @@
             var x = (typeof ev.clientX === "number" ? ev.clientX : vw / 2) + 12;
             var y = (typeof ev.clientY === "number" ? ev.clientY : vh / 2) + 12;
             var w = pop.offsetWidth, h = pop.offsetHeight;
-            pop.style.left = Math.max(10, Math.min(x, vw - 10 - w)) + "px";
-            pop.style.top = Math.max(10, Math.min(y, vh - 10 - h)) + "px";
+            /* Clamp stays in viewport space (matches ev.clientX/Y), then the
+               scroll offset is added so the written coordinates are page
+               coordinates: position is absolute (see rgbw-popup.css), so the
+               popup scrolls with the content like core's own #rgbw_popup. */
+            var clampedX = Math.max(10, Math.min(x, vw - 10 - w));
+            var clampedY = Math.max(10, Math.min(y, vh - 10 - h));
+            pop.style.left = (clampedX + window.scrollX) + "px";
+            pop.style.top = (clampedY + window.scrollY) + "px";
             docListenerTimer = setTimeout(function () { docListenerTimer = null; document.addEventListener("mousedown", onDocMousedown); }, 0);
         } else {
             pop.style.left = "";

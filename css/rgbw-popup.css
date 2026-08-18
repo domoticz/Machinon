@@ -76,11 +76,14 @@
     min-width: 250px;
 }
 
-/* Anchored placement (desktop default, center_popups off): fixed at the
-   clamped click point, no scrim, non-modal feel like the setpoint popup.
-   Inline left/top from JS override the centered defaults below via this
-   class. */
+/* Anchored placement (desktop default, center_popups off): page-anchored at
+   the clamped click point, no scrim, non-modal feel like the setpoint
+   popup. Page-anchored (not viewport-fixed) so it scrolls with the content,
+   like core's own cursor popups (#rgbw_popup, the setpoint popup). Inline
+   left/top from JS are page coordinates (client + scroll offset) that
+   override the centered defaults below via this class. */
 #mk-rgbw-popup.mk-rgbw-anchored {
+    position: absolute;
     right: auto;
     margin-inline: 0;
     transform: none;
