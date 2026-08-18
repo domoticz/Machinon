@@ -658,6 +658,13 @@ fixed here.
 | `--dz-ring-hover` | `var(--dz-elev-card), var(--dz-ring-accent)` | Card hover: composes the resting card shadow with the accent ring |
 | `--dz-ring-hover-inset` | `inset 0px 0px 0px 2px var(--dz-accent-color)` | Card hover on the Dynamic Dashboard (see below) |
 
+### Modal Scrim
+
+`#mk-rgbw-scrim` (css/rgbw-popup.css) codifies the modal scrim language: a full-viewport
+`rgba(0, 0, 0, 0.5)` dim, NO blur or glass (the Menus anti-glass ruling: glass fails AA on busy
+backdrops), fixed literal by design (shadow geometry, not a scheme color). Any future modal
+reuses this scrim, not a new one.
+
 ### Interactive States
 
 - **Card hover**: `--dz-ring-hover`. **Constraint.** `box-shadow` is a single property, so a
@@ -1763,6 +1770,48 @@ contract.
 - Handle: 15px circle, solid `var(--dz-accent-color)`, positioned -5px top
 - Width: `calc(100% - 100px)` (start point fixed relative to the card, so it never crosses the device icon), 55% on wide screens (1200px+)
 - Blinds cards (any card with a second icon cell): track anchored on BOTH edges instead of a fixed width, so it can never overlap the blind icons at any card width. **Constraint.** The anchoring derivation and the Dynamic Dashboard's zeroed-margin variant live with the blinds rules in `css/cards.css`.
+
+### Color Popup (feature: `rgbw_popup`)
+
+Machinon-owned popup replacing core's cursor-anchored RGBW picker; core's
+`#rgbw_popup` stays untouched as the delegate path (rel dimmers, drift guard, feature
+off). Custom w/ww subtypes (RGBWZ, RGBWWZ) also open the Machinon popup, on the same
+Color/White tabs as RGBW/RGBWW; their Color pane also grows a white-mix slider (core's
+m:4 mode, see below). `js/rgbw-popup.js` + `css/rgbw-popup.css`, feature id 45.
+
+- Shell: `--dz-widget-bg`, `{rounded.container}`, `--dz-elev-overlay`, `max-height: 90vh`.
+- Placement adheres to the center_popups setting: anchored near the clicked card (no scrim,
+  self-clamped, non-modal like setpoint) on desktop by default; centered + scrim when
+  center_popups is on; always centered + scrim at or below the 979px mobile boundary.
+  Centered mode uses the center_popups idiom (left/right 0 + auto inline margins).
+- Title: `{typography.sm}` + `--dz-weight-semibold`, sentence case - the codified
+  dialog-title language (no uppercase tracking anywhere in the theme).
+- Close control (codified here as the dialog-close language): an icon-quiet family
+  button (`.mk-rgbw-close`, own class, not `.btn-icon` itself) holding a 16px
+  `ion-md-close` Ionicon; transparent, no border, `--dz-btn-icon-box` hit-box, the
+  same tonal glyph hover filter as `.btn-icon`, `--dz-btn-focus-ring` focus.
+  `.ui-close` remains the legacy cursor-popup close (setpoint, core's own
+  `rgbw_popup`); this popup does not use it.
+- Tabs: the flat underlined sub-tab idiom, text-only.
+- Sliders: card dimmer-slider language on native range inputs. Brightness has no end
+  labels (owner revision: nothing else in the theme labels slider ends); the live value
+  readout (`{typography.sm}` `--dz-weight-semibold` `--dz-accent-color`) in a fixed-width
+  slot carries the scale on its own, and does not jitter while dragging. Warmth's track is
+  a fixed cool-to-warm gradient (physical color temperature, not a scheme color).
+- White-mix slider (bHasCustom subtypes only, RGBWZ/RGBWWZ): on the Color pane under the
+  wheel, gated on the same capability core uses for its customw/customww modes. Track is a
+  live gradient from the currently picked color to white (repainted on every wheel drag and
+  hex edit), the same fixed-literal-track idiom as the warmth slider. Mix 0 keeps sending
+  plain `m:3`; mix above 0 sends `m:4` with core's own formulas (`cw`/`ww` split evenly for
+  RGBWZ, split by warmth for RGBWWZ). Seeded from an existing `m:4` state's `(cw+ww)/255` so
+  an already-mixed device opens showing its mix, not a reset one. On temperature-capable
+  subtypes (RGBWWZ) the mixed-in white's tint follows the White tab's own warmth slider;
+  the mix slider only sets how much white is blended in, not its color.
+- 2D picker cursor (codified here): 15px circle at slider-handle scale, filled with the
+  picked color, 2px `--dz-widget-bg` ring.
+- Presets: On/Off, both plain ghost family (owner call: Off is not destructive).
+- Sends: live, page-global `SetColValue`, 400ms deadline rate-limit (never a resettable
+  debounce). Payloads mirror core's `getJSONColor` exactly.
 
 ### Floorplan Device Popup
 

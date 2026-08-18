@@ -114,7 +114,8 @@
      custom_settings_menu (settings_page.js), log_plot_bands (log_ranges.js),
      standby (standby.js + standby.css), check_update (check_update.js),
      custom_page_menu (custom_page.js), switch_instead_of_bigtext (switch.js +
-     switch.css), dashboard_camera (dashboard_camera.js + dashboard_camera.css).
+     switch.css), dashboard_camera (dashboard_camera.js + dashboard_camera.css),
+     rgbw_popup (rgbw-popup.js + rgbw-popup.css).
    Every other feature's files are CSS-only or empty, so applyThemeDeltaInPlace's
    hasJs branch never triggers for them; disabling unloads the stylesheet (or is
    a no-op for a files:[] feature) live, no reload needed. */
@@ -154,6 +155,13 @@ var THEME_MANIFEST = [
                 label: "Center popup dialogs", description: "Center popup dialogs",
                 appliesTo: "All dialogs", previewId: "dialog-center", parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
+            },
+            {
+                key: "rgbw_popup", storageKey: "rgbw_popup", control: "toggle",
+                label: "Machinon color picker popup",
+                description: "Machinon-styled color picker dialog for color lights",
+                appliesTo: "Color light devices", previewId: "sketch-rgbw-popup", parent: null,
+                reloadOnDisable: true, status: "keep", scope: "user"
             },
             {
                 key: "footer_text_disabled", storageKey: "footer_text_disabled", control: "toggle",

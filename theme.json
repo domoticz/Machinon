@@ -151,6 +151,11 @@
             "id":39,
             "enabled":false,
             "files": []
+        },
+        "rgbw_popup": {
+            "id":45,
+            "enabled":true,
+            "files": ["rgbw-popup.js", "rgbw-popup.css"]
         }
     }
 }

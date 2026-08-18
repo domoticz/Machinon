@@ -1,0 +1,292 @@
+/*
+  rgbw-popup.css - Machinon colour popup (feature: rgbw_popup).
+  Feature-loaded stylesheet (theme.json), not part of custom.css.
+  Shell: widget surface, container radius, overlay elevation. Centering uses
+  the center_popups.css idiom (left/right 0 + auto inline margins; left:50%
+  starves shrink-to-fit, see that file's header). clampCorePopups needs no
+  change: a centered in-viewport modal always computes dx=dy=0 (no-op), and
+  the clamp still owns core's #rgbw_popup for the feature-off path.
+*/
+
+/* Modal scrim: dim only, NO blur, per the codified modal-scrim language
+   (DESIGN.md; the anti-glass ruling measured blur/glass failing AA on busy
+   backdrops). Fixed literal by design: a scrim is shadow geometry, not a
+   scheme colour. */
+#mk-rgbw-scrim {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+}
+
+#mk-rgbw-popup {
+    display: none;
+    position: fixed;
+    top: 50vh;
+    left: 0;
+    right: 0;
+    margin-inline: auto;
+    transform: translateY(-50%);
+    /* border-box: max-width must cap the PADDED box, not just the content.
+       Content-box (the default) lets max-width's content-only cap leave the
+       40px horizontal padding unaccounted for, overflowing the rendered box
+       past the viewport on phones (the narrow-viewport centered mode has no
+       other guard against this; a long device name makes it visible first,
+       but the padding math is wrong regardless of title length). */
+    box-sizing: border-box;
+    width: fit-content;
+    max-width: calc(100vw - 20px);
+    max-height: 90vh;
+    overflow-y: auto;
+    z-index: 2001;
+    background: var(--dz-widget-bg);
+    color: var(--dz-body-text);
+    border-radius: 6px;            /* {rounded.container} */
+    box-shadow: var(--dz-elev-overlay);
+    padding: 15px 20px 20px;
+}
+
+/* Dialog title: 14px semibold sentence case, the codified dialog-title
+   language (no uppercase tracking anywhere in the theme). */
+.mk-rgbw-head {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 30px;
+    padding-right: 34px;           /* room for the 28px .mk-rgbw-close box */
+}
+#mk-rgbw-title {
+    font-size: var(--dz-text-sm);
+    font-weight: var(--dz-weight-semibold);
+    min-width: 0;                  /* let the flex item shrink so text-overflow can apply */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+/* Dialog close (owner revision 2026-08-18, codified as the dialog-close
+   language): the icon-quiet family (css/buttons.css's .btn-icon), reimplemented
+   here with our own class rather than adopting .btn-icon itself, so this popup
+   never couples to a core-region selector. Fully transparent, no border, no
+   resting shadow; hit-box is the button system's own --dz-btn-icon-box. This
+   popup no longer uses .ui-close (the legacy cursor-popup close, css/setpoint.css). */
+#mk-rgbw-popup .mk-rgbw-close {
+    position: absolute;
+    top: 0;
+    right: -8px;
+    width: var(--dz-btn-icon-box);
+    height: var(--dz-btn-icon-box);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+#mk-rgbw-popup .mk-rgbw-close i {
+    font-size: var(--dz-icon-size-sm);
+    color: var(--dz-body-text);
+    transition: filter 0.18s ease;
+}
+/* Hover/focus affordance: the same in-place tonal glyph pop as .btn-icon
+   (css/buttons.css) - saturate/brightness on the glyph, no background wash. */
+#mk-rgbw-popup .mk-rgbw-close:hover i,
+#mk-rgbw-popup .mk-rgbw-close:focus-visible i {
+    filter: saturate(1.12) brightness(1.05);
+}
+#mk-rgbw-popup .mk-rgbw-close:focus-visible {
+    outline: none;
+    box-shadow: var(--dz-btn-focus-ring);
+    border-radius: 10px;           /* {rounded.button} */
+}
+
+.mk-rgbw-body {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 250px;
+}
+
+/* Anchored placement (desktop default, center_popups off): page-anchored at
+   the clamped click point, no scrim, non-modal feel like the setpoint
+   popup. Page-anchored (not viewport-fixed) so it scrolls with the content,
+   like core's own cursor popups (#rgbw_popup, the setpoint popup). Inline
+   left/top from JS are page coordinates (client + scroll offset) that
+   override the centered defaults below via this class. */
+#mk-rgbw-popup.mk-rgbw-anchored {
+    position: absolute;
+    right: auto;
+    margin-inline: 0;
+    transform: none;
+    top: auto;
+}
+
+.mk-rgbw-pane-color { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+#mk-rgbw-wheel {
+    display: block;
+    width: 210px;
+    max-width: 100%;
+    touch-action: none;
+    cursor: crosshair;
+}
+
+/* Slider group: an 11px secondary label above a slider row (owner revision
+   2026-08-18, field test: two anonymous sliders were indistinguishable when
+   the lamp sat on white). Shared by the mix, brightness and warmth rows. */
+.mk-rgbw-slider-group { display: flex; flex-direction: column; gap: 4px; }
+.mk-rgbw-slider-label {
+    font-size: var(--dz-text-micro);
+    color: var(--secondary-text-color);
+}
+
+/* White-mix slider (bHasCustom subtypes only, under the wheel): track is a
+   live gradient from the currently picked colour to white, painted by JS
+   (paintMixTrack) on every colour change; the gradient carries the meaning
+   like the warmth slider, so there is no accent fill here (see
+   paintRangeFill's guard) and no icon. */
+.mk-rgbw-mix-wrap { display: flex; align-items: center; gap: 8px; min-height: 30px; }
+/* Hairline border so the track stays visible when the picked colour is
+   near-white (field finding: an achromatic colour renders a white-to-white
+   gradient that otherwise disappears into the widget background). */
+#mk-rgbw-mix {
+    border: 1px solid var(--dz-input-border);
+}
+/* End chips flanking the mix track (owner revision 2026-08-18): left chip's
+   background is set inline by paintMixTrack (the live picked colour), the
+   right chip stays the CSS default white (the fixed physical channel), the
+   swatch-chip language at a smaller scale. */
+.mk-rgbw-mix-chip {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;            /* {rounded.xs} */
+    border: 1px solid var(--dz-input-border);
+    background: #ffffff;
+    flex: none;
+}
+
+.mk-rgbw-readout { display: flex; align-items: center; gap: 10px; }
+/* Swatch chip: checkbox-adjacent scale, {rounded.xs}. */
+.mk-rgbw-swatch {
+    width: 20px;
+    height: 20px;
+    border-radius: 2px;            /* {rounded.xs} */
+    border: 1px solid var(--dz-input-border);
+    flex: none;
+}
+/* Hex field: the form-input text language (transparent, accent bottom
+   border, secondary text). */
+#mk-rgbw-hex {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--dz-accent-color);
+    color: var(--secondary-text-color);
+    font-size: var(--dz-text-sm);
+    width: 90px;
+}
+#mk-rgbw-hex:disabled { border-bottom-color: var(--dz-input-border); }
+
+/* Brightness row: slider .. live value readout, no end labels (owner
+   revision 2026-08-18: nothing else in the theme labels slider ends; the
+   live value carries the scale), a fixed-width slot so the row does not
+   jitter while dragging (setpoint-popup value-readout precedent). */
+.mk-rgbw-bright { display: flex; align-items: center; gap: 10px; }
+#mk-rgbw-bright-value {
+    font-size: var(--dz-text-sm);
+    font-weight: var(--dz-weight-semibold);
+    color: var(--dz-accent-color);
+    min-width: 2.6em;
+    text-align: right;
+}
+
+/* Range inputs in the card dimmer-slider language: flat 5px track,
+   {rounded.sm}, 15px solid accent circle thumb. */
+#mk-rgbw-popup input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1;
+    height: var(--dz-card-slider-height);
+    border-radius: var(--dz-card-slider-radius);
+    background: var(--dz-card-slider-track-bg);
+    outline: none;
+}
+#mk-rgbw-popup input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: var(--dz-card-slider-handle-size);
+    height: var(--dz-card-slider-handle-size);
+    border-radius: 50%;
+    background: var(--dz-accent-color);
+    border: none;
+    cursor: pointer;
+}
+#mk-rgbw-popup input[type="range"]::-moz-range-thumb {
+    width: var(--dz-card-slider-handle-size);
+    height: var(--dz-card-slider-handle-size);
+    border-radius: 50%;
+    background: var(--dz-accent-color);
+    border: none;
+    cursor: pointer;
+}
+#mk-rgbw-popup input[type="range"]:focus-visible {
+    box-shadow: var(--dz-btn-focus-ring);
+}
+
+/* Mode tabs: the flat underlined sub-tab idiom (Setup strip, iconpack tabs):
+   radius 0, transparent, 2px accent bottom border on hover/active. */
+.mk-rgbw-tabs {
+    display: flex;
+    gap: 15px;
+    border-bottom: 1px solid var(--dz-input-border);
+}
+.mk-rgbw-tabs button {
+    font-size: var(--dz-text-sm);
+    font-weight: var(--dz-weight-semibold);
+    padding: 6px 2px;
+    margin-bottom: -1px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    color: var(--dz-body-text);
+    cursor: pointer;
+}
+.mk-rgbw-tabs button:hover,
+.mk-rgbw-tabs button.active {
+    border-bottom-color: var(--dz-accent-color);
+    color: var(--dz-accent-color);
+}
+.mk-rgbw-tabs button:focus-visible {
+    outline: none;
+    border-bottom-color: var(--dz-accent-color);
+    box-shadow: var(--dz-btn-focus-ring);
+}
+
+/* Warmth slider: same slider language, gradient track. Fixed literal
+   gradient by design: it depicts physical colour temperature (cool 6500K ..
+   warm 2700K), not a scheme colour. The accent fill is meaningless here, so
+   the track IS the gradient. */
+.mk-rgbw-pane-white { display: flex; flex-direction: column; gap: 4px; min-height: 30px; }
+.mk-rgbw-warmth-row { display: flex; align-items: center; }
+#mk-rgbw-popup #mk-rgbw-warmth {
+    background: linear-gradient(to right, #dbe9ff, #fff3da 50%, #ffb45e);
+}
+
+/* Presets: both plain ghost family (owner call: Off is a normal action, not
+   destructive) - transparent, 1px accent border, {rounded.button} 10px,
+   tint on hover, standard focus ring. */
+.mk-rgbw-presets { display: flex; gap: 10px; justify-content: center; }
+.mk-rgbw-preset {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--dz-accent-color);
+    border-radius: 10px;           /* {rounded.button} */
+    color: var(--dz-accent-color);
+    font-size: var(--dz-text-sm);
+    padding: 4px 18px;
+    cursor: pointer;
+    transition: background-color .12s ease, box-shadow .12s ease;
+}
+.mk-rgbw-preset:hover { background: var(--dz-btn-hover-bg); }
+.mk-rgbw-preset:active { box-shadow: var(--dz-btn-shadow-pressed); }
+.mk-rgbw-preset:focus-visible { outline: none; box-shadow: var(--dz-btn-focus-ring); }
