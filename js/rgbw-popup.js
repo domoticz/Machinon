@@ -28,6 +28,7 @@
 
     var state = { idx: null, led: null, mode: "color", h: 0, s: 1, warmth: 0.5, bright: 100, maxDim: 100 };
     var openerEl = null;
+    var docListenerTimer = null;
 
     function el(tag, cls, parent) {
         var n = document.createElement(tag);
@@ -97,7 +98,7 @@
             var w = pop.offsetWidth, h = pop.offsetHeight;
             pop.style.left = Math.max(10, Math.min(x, vw - 10 - w)) + "px";
             pop.style.top = Math.max(10, Math.min(y, vh - 10 - h)) + "px";
-            setTimeout(function () { document.addEventListener("mousedown", onDocMousedown); }, 0);
+            docListenerTimer = setTimeout(function () { docListenerTimer = null; document.addEventListener("mousedown", onDocMousedown); }, 0);
         } else {
             pop.style.left = "";
             pop.style.top = "";
@@ -115,6 +116,7 @@
         pop.style.display = "none";
         document.getElementById("mk-rgbw-scrim").style.display = "none";
         document.removeEventListener("keydown", onKeydown);
+        if (docListenerTimer) { clearTimeout(docListenerTimer); docListenerTimer = null; }
         document.removeEventListener("mousedown", onDocMousedown);
         if (openerEl && typeof openerEl.focus === "function") openerEl.focus();
         openerEl = null;
