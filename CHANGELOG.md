@@ -4,6 +4,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-08-18
+
 ### Added
 
 - Three new icon families in both Blue UI and Color: Automatic (a framed gear, for auto-mode switches), Settings (a single gear) and Gears (a three-gear cluster).
