@@ -75,3 +75,14 @@
     gap: 15px;
     min-width: 250px;
 }
+
+/* Anchored placement (desktop default, center_popups off): fixed at the
+   clamped click point, no scrim, non-modal feel like the setpoint popup.
+   Inline left/top from JS override the centered defaults below via this
+   class. */
+#mk-rgbw-popup.mk-rgbw-anchored {
+    right: auto;
+    margin-inline: 0;
+    transform: none;
+    top: auto;
+}

@@ -21,7 +21,7 @@
             return orig.apply(this, arguments);
         }
         window.HandleProtection(Protected, function () {
-            openPopup({ idx: idx, led: led, maxDim: MaxDimLevel, levelInt: LevelInt, colorJSON: color });
+            openPopup({ idx: idx, led: led, maxDim: MaxDimLevel, levelInt: LevelInt, colorJSON: color, protected: Protected, event: event });
         });
     };
     window.ShowRGBWPopup._mkHooked = true;
@@ -62,6 +62,16 @@
         if (e.key === "Escape") { closePopup(); }
     }
 
+    function resolvePlacement() {
+        if (window.matchMedia && window.matchMedia("(max-width: 979px)").matches) return "centered";
+        return document.querySelector('link[href*="center_popups.css"]') ? "centered" : "anchored";
+    }
+
+    function onDocMousedown(e) {
+        var pop = document.getElementById("mk-rgbw-popup");
+        if (pop && !pop.contains(e.target)) closePopup();
+    }
+
     function openPopup(args) {
         ensureDom();
         state.idx = String(args.idx);
@@ -72,8 +82,28 @@
         document.getElementById("mk-rgbw-title").textContent = state.led.bHasRGB ? $.t("Color") : $.t("White");
         buildBody(state.led);
         openerEl = document.activeElement;
-        document.getElementById("mk-rgbw-scrim").style.display = "block";
-        document.getElementById("mk-rgbw-popup").style.display = "block";
+        var pop = document.getElementById("mk-rgbw-popup");
+        var scrim = document.getElementById("mk-rgbw-scrim");
+        var placement = resolvePlacement();
+        pop.classList.toggle("mk-rgbw-anchored", placement === "anchored");
+        if (placement === "anchored") {
+            scrim.style.display = "none";
+            pop.style.display = "block";
+            var ev = args.event || {};
+            var vw = document.documentElement.clientWidth;
+            var vh = document.documentElement.clientHeight;
+            var x = (typeof ev.clientX === "number" ? ev.clientX : vw / 2) + 12;
+            var y = (typeof ev.clientY === "number" ? ev.clientY : vh / 2) + 12;
+            var w = pop.offsetWidth, h = pop.offsetHeight;
+            pop.style.left = Math.max(10, Math.min(x, vw - 10 - w)) + "px";
+            pop.style.top = Math.max(10, Math.min(y, vh - 10 - h)) + "px";
+            setTimeout(function () { document.addEventListener("mousedown", onDocMousedown); }, 0);
+        } else {
+            pop.style.left = "";
+            pop.style.top = "";
+            scrim.style.display = "block";
+            pop.style.display = "block";
+        }
         document.addEventListener("keydown", onKeydown);
         var c = document.querySelector("#mk-rgbw-popup .ui-close");
         if (c) c.focus();
@@ -85,6 +115,7 @@
         pop.style.display = "none";
         document.getElementById("mk-rgbw-scrim").style.display = "none";
         document.removeEventListener("keydown", onKeydown);
+        document.removeEventListener("mousedown", onDocMousedown);
         if (openerEl && typeof openerEl.focus === "function") openerEl.focus();
         openerEl = null;
     }
