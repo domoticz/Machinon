@@ -197,7 +197,18 @@
     function seedFromColor(colorJSON) {
         var col = {};
         try { col = typeof colorJSON === "string" ? JSON.parse(colorJSON) : (colorJSON || {}); } catch (e) {}
-        state.mode = (col.m === 1 || col.m === 2) ? "white" : "color";
+        /* m:4 (custom) states need the same channel inspection core does
+           before opening a mode (domoticz.js:1785 area): a device can echo
+           its state back as m:4 with every RGB channel at 0 and a lit white
+           channel (field origin: controlling White on a custom-subtype lamp
+           echoes back this way), which is a white state wearing the custom
+           mode number, not a mixed one. Route those to the White tab; any
+           lit colour channel keeps the Colour tab (mix seeded below either
+           way, unchanged). */
+        var isWhiteOnlyCustom = col.m === 4 &&
+            (col.r || 0) === 0 && (col.g || 0) === 0 && (col.b || 0) === 0 &&
+            ((col.cw || 0) > 0 || (col.ww || 0) > 0);
+        state.mode = (col.m === 1 || col.m === 2 || isWhiteOnlyCustom) ? "white" : "color";
         if (col.r !== undefined || col.g !== undefined || col.b !== undefined) {
             var hsv = rgbToHsv(col.r || 0, col.g || 0, col.b || 0);
             state.h = hsv.h; state.s = hsv.s;
