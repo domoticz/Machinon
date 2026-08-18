@@ -150,8 +150,16 @@
         state.warmth = col.t !== undefined ? col.t / 255 : 0.5;
         /* Reset on every seed (not just when col.m === 4): a leftover mix
            from a previously opened device must never leak into the next
-           one's Colour pane. */
-        state.mix = col.m === 4 ? Math.max(0, Math.min(1, ((col.cw || 0) + (col.ww || 0)) / 255)) : 0;
+           one's Colour pane. The channel sum must branch the same way the
+           send side does (buildColorJSON): bHasTemperature devices split
+           mix across cw+ww (cw=mix*(1-warmth)*255, ww=mix*warmth*255, they
+           sum to mix*255), but bHasCustom-without-temperature devices
+           (RGBWZ) set cw=ww=mix*255 each, so reading cw+ww back would
+           double the seeded mix (bug found in field testing: seed 20%,
+           reopen, reads back 40%). state.led is already set by openPopup
+           before this call runs. */
+        var chan = state.led && state.led.bHasTemperature ? (col.cw || 0) + (col.ww || 0) : (col.cw || 0);
+        state.mix = col.m === 4 ? Math.max(0, Math.min(1, chan / 255)) : 0;
     }
 
     function buildBody(led) {
@@ -182,13 +190,21 @@
             attachWheel(canvas);
             if (led.bHasCustom) {
                 /* White-mix slider (m:4 custom subtypes only, RGBWZ/RGBWWZ):
-                   core parity, core offers customw/customww only there. */
-                var mixWrap = el("div", "mk-rgbw-mix-wrap", pane);
+                   core parity, core offers customw/customww only there.
+                   Flanked by end chips (left: live picked colour, right:
+                   fixed white) so the row stays legible even when the
+                   gradient itself goes near-white (field finding). */
+                var mixGroup = el("div", "mk-rgbw-slider-group", pane);
+                var mixLabel = el("span", "mk-rgbw-slider-label", mixGroup);
+                mixLabel.textContent = $.t("White mix");
+                var mixWrap = el("div", "mk-rgbw-mix-wrap", mixGroup);
+                el("span", "mk-rgbw-mix-chip", mixWrap).id = "mk-rgbw-mix-chip-left";
                 var mixInput = el("input", null, mixWrap);
                 mixInput.id = "mk-rgbw-mix";
                 mixInput.type = "range"; mixInput.min = 0; mixInput.max = 100;
                 mixInput.value = Math.round(state.mix * 100);
-                mixInput.setAttribute("aria-label", $.t("White"));
+                mixInput.setAttribute("aria-label", $.t("White mix"));
+                el("span", "mk-rgbw-mix-chip", mixWrap);
                 paintMixTrack();
                 mixInput.addEventListener("input", function () {
                     state.mix = (parseInt(this.value, 10) || 0) / 100;
@@ -200,7 +216,10 @@
         if (led.bHasTemperature) {
             var wp = el("div", "mk-rgbw-pane-white", body);
             if (state.mode !== "white") wp.style.display = "none";
-            var warm = el("input", null, wp);
+            var warmLabel = el("span", "mk-rgbw-slider-label", wp);
+            warmLabel.textContent = $.t("Warmth");
+            var warmRow = el("div", "mk-rgbw-warmth-row", wp);
+            var warm = el("input", null, warmRow);
             warm.id = "mk-rgbw-warmth";
             warm.type = "range"; warm.min = 0; warm.max = 255;
             warm.value = Math.round(state.warmth * 255);
@@ -230,7 +249,10 @@
             updateReadout();
             onPick(); flushSend();
         });
-        var br = el("div", "mk-rgbw-bright", body);
+        var brGroup = el("div", "mk-rgbw-slider-group", body);
+        var brLabel = el("span", "mk-rgbw-slider-label", brGroup);
+        brLabel.textContent = $.t("Brightness");
+        var br = el("div", "mk-rgbw-bright", brGroup);
         var brMin = el("span", "mk-rgbw-scale", br);
         brMin.textContent = "0%";
         var slider = el("input", null, br);
@@ -410,7 +432,12 @@
         var mixInput = document.getElementById("mk-rgbw-mix");
         if (!mixInput) return;
         var rgb = hsvToRgb(state.h, state.s, 1);
-        mixInput.style.background = "linear-gradient(to right, rgb(" + rgb.r + "," + rgb.g + "," + rgb.b + "), #ffffff)";
+        var rgbCss = "rgb(" + rgb.r + "," + rgb.g + "," + rgb.b + ")";
+        mixInput.style.background = "linear-gradient(to right, " + rgbCss + ", #ffffff)";
+        /* Left end chip mirrors the live picked colour; the right chip is a
+           static white background from CSS (the fixed physical channel). */
+        var chipLeft = document.getElementById("mk-rgbw-mix-chip-left");
+        if (chipLeft) chipLeft.style.background = rgbCss;
     }
 
     /* Colour payloads exactly as core's getJSONColor builds them

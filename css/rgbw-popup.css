@@ -103,17 +103,38 @@
     cursor: crosshair;
 }
 
+/* Slider group: an 11px secondary label above a slider row (owner revision
+   2026-08-18, field test: two anonymous sliders were indistinguishable when
+   the lamp sat on white). Shared by the mix, brightness and warmth rows. */
+.mk-rgbw-slider-group { display: flex; flex-direction: column; gap: 4px; }
+.mk-rgbw-slider-label {
+    font-size: var(--dz-text-micro);
+    color: var(--secondary-text-color);
+}
+
 /* White-mix slider (bHasCustom subtypes only, under the wheel): track is a
    live gradient from the currently picked colour to white, painted by JS
    (paintMixTrack) on every colour change; the gradient carries the meaning
    like the warmth slider, so there is no accent fill here (see
    paintRangeFill's guard) and no icon. */
-.mk-rgbw-mix-wrap { display: flex; align-items: center; min-height: 30px; }
+.mk-rgbw-mix-wrap { display: flex; align-items: center; gap: 8px; min-height: 30px; }
 /* Hairline border so the track stays visible when the picked colour is
    near-white (field finding: an achromatic colour renders a white-to-white
    gradient that otherwise disappears into the widget background). */
-#mk-rgbw-popup #mk-rgbw-mix {
+#mk-rgbw-mix {
     border: 1px solid var(--dz-input-border);
+}
+/* End chips flanking the mix track (owner revision 2026-08-18): left chip's
+   background is set inline by paintMixTrack (the live picked colour), the
+   right chip stays the CSS default white (the fixed physical channel), the
+   swatch-chip language at a smaller scale. */
+.mk-rgbw-mix-chip {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;            /* {rounded.xs} */
+    border: 1px solid var(--dz-input-border);
+    background: #ffffff;
+    flex: none;
 }
 
 .mk-rgbw-readout { display: flex; align-items: center; gap: 10px; }
@@ -219,7 +240,8 @@
    gradient by design: it depicts physical colour temperature (cool 6500K ..
    warm 2700K), not a scheme colour. The accent fill is meaningless here, so
    the track IS the gradient. */
-.mk-rgbw-pane-white { display: flex; align-items: center; min-height: 42px; }
+.mk-rgbw-pane-white { display: flex; flex-direction: column; gap: 4px; min-height: 30px; }
+.mk-rgbw-warmth-row { display: flex; align-items: center; }
 #mk-rgbw-popup #mk-rgbw-warmth {
     background: linear-gradient(to right, #dbe9ff, #fff3da 50%, #ffb45e);
 }
