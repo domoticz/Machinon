@@ -628,7 +628,7 @@ fixed here.
 
 `#mk-rgbw-scrim` (css/rgbw-popup.css) codifies the modal scrim language: a full-viewport
 `rgba(0, 0, 0, 0.5)` dim, NO blur or glass (the Menus anti-glass ruling: glass fails AA on busy
-backdrops), fixed literal by design (shadow geometry, not a scheme colour). Any future modal
+backdrops), fixed literal by design (shadow geometry, not a scheme color). Any future modal
 reuses this scrim, not a new one.
 
 ### Interactive States
@@ -1737,7 +1737,7 @@ contract.
 - Width: `calc(100% - 100px)` (start point fixed relative to the card, so it never crosses the device icon), 55% on wide screens (1200px+)
 - Blinds cards (any card with a second icon cell): track anchored on BOTH edges instead of a fixed width, so it can never overlap the blind icons at any card width. **Constraint.** The anchoring derivation and the Dynamic Dashboard's zeroed-margin variant live with the blinds rules in `css/cards.css`.
 
-### Colour Popup (feature: `rgbw_popup`)
+### Color Popup (feature: `rgbw_popup`)
 
 Machinon-owned centered modal replacing core's cursor-anchored RGBW picker; core's
 `#rgbw_popup` stays untouched as the delegate path (rel dimmers, custom w/ww subtypes,
@@ -1752,10 +1752,10 @@ drift guard, feature off). `js/rgbw-popup.js` + `css/rgbw-popup.css`, feature id
   dialog-title language (no uppercase tracking anywhere in the theme).
 - Tabs: the flat underlined sub-tab idiom, text-only.
 - Sliders (brightness, warmth): card dimmer-slider language on native range inputs;
-  warmth track is a fixed cool-to-warm gradient (physical colour temperature, not a
-  scheme colour).
+  warmth track is a fixed cool-to-warm gradient (physical color temperature, not a
+  scheme color).
 - 2D picker cursor (codified here): 15px circle at slider-handle scale, filled with the
-  picked colour, 2px `--dz-widget-bg` ring.
+  picked color, 2px `--dz-widget-bg` ring.
 - Presets: On/Off, both plain ghost family (owner call: Off is not destructive).
 - Sends: live, page-global `SetColValue`, 400ms deadline rate-limit (never a resettable
   debounce). Payloads mirror core's `getJSONColor` exactly.
