@@ -1739,10 +1739,10 @@ contract.
 
 ### Color Popup (feature: `rgbw_popup`)
 
-Machinon-owned centered modal replacing core's cursor-anchored RGBW picker; core's
+Machinon-owned popup replacing core's cursor-anchored RGBW picker; core's
 `#rgbw_popup` stays untouched as the delegate path (rel dimmers, drift guard, feature
 off). Custom w/ww subtypes (RGBWZ, RGBWWZ) also open the Machinon popup; core's m:4 mix
-mode is not offered, they get the same Colour/White tabs as RGBW/RGBWW. `js/rgbw-popup.js`
+mode is not offered, they get the same Color/White tabs as RGBW/RGBWW. `js/rgbw-popup.js`
 + `css/rgbw-popup.css`, feature id 45.
 
 - Shell: `--dz-widget-bg`, `{rounded.container}`, `--dz-elev-overlay`, `max-height: 90vh`.

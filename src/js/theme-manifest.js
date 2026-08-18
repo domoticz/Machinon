@@ -158,10 +158,10 @@ var THEME_MANIFEST = [
             },
             {
                 key: "rgbw_popup", storageKey: "rgbw_popup", control: "toggle",
-                label: "Machinon colour picker popup",
-                description: "Machinon-styled colour picker dialog for colour lights",
-                appliesTo: "Colour light devices", previewId: "sketch-rgbw-popup", parent: null,
-                reloadOnDisable: true, status: "keep", scope: "house"
+                label: "Machinon color picker popup",
+                description: "Machinon-styled color picker dialog for color lights",
+                appliesTo: "Color light devices", previewId: "sketch-rgbw-popup", parent: null,
+                reloadOnDisable: true, status: "keep", scope: "user"
             },
             {
                 key: "footer_text_disabled", storageKey: "footer_text_disabled", control: "toggle",
