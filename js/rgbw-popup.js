@@ -24,8 +24,14 @@
         if (DimmerType && DimmerType === "rel") {
             return orig.apply(this, arguments);
         }
+        /* Title = the clicked card's own name (owner revision 2026-08-18):
+           resolved from the DOM at click time, zero network. No card found
+           (e.g. a stubbed/programmatic call) falls back to the Color/White
+           label in openPopup. */
+        var card = event && event.target && event.target.closest ? event.target.closest(".item") : null;
+        var nameEl = card ? card.querySelector(".item-name, #name") : null;
         window.HandleProtection(Protected, function () {
-            openPopup({ idx: idx, led: led, maxDim: MaxDimLevel, levelInt: LevelInt, colorJSON: color, protected: Protected, event: event });
+            openPopup({ idx: idx, led: led, maxDim: MaxDimLevel, levelInt: LevelInt, colorJSON: color, protected: Protected, event: event, name: nameEl ? nameEl.textContent.trim() : "" });
         });
     };
     window.ShowRGBWPopup._mkHooked = true;
@@ -85,7 +91,7 @@
         state.protected = args.protected;
         state.bright = Math.max(1, Math.min(100, Math.round(((parseInt(args.levelInt, 10) || 0) / state.maxDim) * 99) + 1));
         seedFromColor(args.colorJSON);
-        document.getElementById("mk-rgbw-title").textContent = state.led.bHasRGB ? $.t("Color") : $.t("White");
+        document.getElementById("mk-rgbw-title").textContent = args.name || (state.led.bHasRGB ? $.t("Color") : $.t("White"));
         buildBody(state.led);
         openerEl = document.activeElement;
         var pop = document.getElementById("mk-rgbw-popup");
@@ -344,9 +350,19 @@
     }
 
     function updateReadout() {
+        var readout = document.querySelector(".mk-rgbw-readout");
         var sw = document.querySelector(".mk-rgbw-swatch");
         var hx = document.getElementById("mk-rgbw-hex");
         if (!sw || !hx) return;
+        /* Owner revision 2026-08-18: on the White tab, a device with no
+           colour temperature (RGBW/RGBWZ) has nothing meaningful to show
+           here, a white swatch labelled "White" conveys nothing, so hide
+           the whole row. Devices with a warmth slider (bHasTemperature)
+           keep it: the tinted swatch + Cool/Natural/Warm text reflect the
+           slider. Always visible on the Colour tab. */
+        var hideRow = state.mode === "white" && !(state.led && state.led.bHasTemperature);
+        if (readout) readout.style.display = hideRow ? "none" : "";
+        if (hideRow) return;
         if (state.mode === "color") {
             var rgb = hsvToRgb(state.h, state.s, 1);
             sw.style.background = "rgb(" + rgb.r + "," + rgb.g + "," + rgb.b + ")";

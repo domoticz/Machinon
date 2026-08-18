@@ -52,6 +52,10 @@
 #mk-rgbw-title {
     font-size: var(--dz-text-sm);
     font-weight: var(--dz-weight-semibold);
+    min-width: 0;                  /* let the flex item shrink so text-overflow can apply */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 /* .ui-close glyph/hover comes from css/setpoint.css (shared close language);
    here only its box position inside our head row. */
@@ -105,6 +109,12 @@
    like the warmth slider, so there is no accent fill here (see
    paintRangeFill's guard) and no icon. */
 .mk-rgbw-mix-wrap { display: flex; align-items: center; min-height: 30px; }
+/* Hairline border so the track stays visible when the picked colour is
+   near-white (field finding: an achromatic colour renders a white-to-white
+   gradient that otherwise disappears into the widget background). */
+#mk-rgbw-popup #mk-rgbw-mix {
+    border: 1px solid var(--dz-input-border);
+}
 
 .mk-rgbw-readout { display: flex; align-items: center; gap: 10px; }
 /* Swatch chip: checkbox-adjacent scale, {rounded.xs}. */
