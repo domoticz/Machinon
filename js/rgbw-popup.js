@@ -267,26 +267,41 @@
     function onPick() { /* Task 6 attaches the send pipeline here */ }
     function flushSend() {}
 
+    /* The wheel drag surface changes identity every popup open (buildBody
+       rebuilds the canvas from scratch), but the drag gesture itself is
+       tracked with document-level mousemove/mouseup/touchmove/touchend
+       listeners so dragging still works once the pointer leaves the small
+       canvas. Registering those four listeners inside attachWheel would add
+       a fresh set (and pin the previous, now-detached canvas in a closure)
+       on every popup open with no matching removal. Instead they are
+       registered exactly once here, at module init, and read the current
+       drag target off the module-scope activeWheel/wheelDragging vars;
+       attachWheel only swaps activeWheel and adds the canvas-scoped
+       mousedown/touchstart listeners, which die with the canvas itself. */
+    var activeWheel = null, wheelDragging = false;
+
+    function wheelPick(e) {
+        if (!activeWheel) return;
+        var rect = activeWheel.getBoundingClientRect();
+        var scale = WHEEL / (rect.width || WHEEL);
+        var px = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+        var py = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+        var dx = px * scale - WR, dy = py * scale - WR;
+        state.h = (Math.atan2(dy, dx) / (2 * Math.PI) + 1) % 1;
+        state.s = Math.min(Math.sqrt(dx * dx + dy * dy) / WR, 1);
+        drawWheel(activeWheel);
+        updateReadout();
+        onPick();
+    }
+
+    document.addEventListener("mousemove", function (e) { if (wheelDragging) wheelPick(e); });
+    document.addEventListener("mouseup", function () { if (wheelDragging) { wheelDragging = false; flushSend(); } });
+    document.addEventListener("touchmove", function (e) { if (wheelDragging) { wheelPick(e); e.preventDefault(); } }, { passive: false });
+    document.addEventListener("touchend", function () { if (wheelDragging) { wheelDragging = false; flushSend(); } });
+
     function attachWheel(canvas) {
-        var dragging = false;
-        function pick(e) {
-            var rect = canvas.getBoundingClientRect();
-            var scale = WHEEL / (rect.width || WHEEL);
-            var px = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-            var py = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-            var dx = px * scale - WR, dy = py * scale - WR;
-            state.h = (Math.atan2(dy, dx) / (2 * Math.PI) + 1) % 1;
-            state.s = Math.min(Math.sqrt(dx * dx + dy * dy) / WR, 1);
-            drawWheel(canvas);
-            updateReadout();
-            onPick();
-        }
-        function up() { if (dragging) { dragging = false; flushSend(); } }
-        canvas.addEventListener("mousedown", function (e) { dragging = true; pick(e); });
-        document.addEventListener("mousemove", function (e) { if (dragging) pick(e); });
-        document.addEventListener("mouseup", up);
-        canvas.addEventListener("touchstart", function (e) { dragging = true; pick(e); e.preventDefault(); }, { passive: false });
-        document.addEventListener("touchmove", function (e) { if (dragging) { pick(e); e.preventDefault(); } }, { passive: false });
-        document.addEventListener("touchend", up);
+        activeWheel = canvas;
+        canvas.addEventListener("mousedown", function (e) { wheelDragging = true; wheelPick(e); });
+        canvas.addEventListener("touchstart", function (e) { wheelDragging = true; wheelPick(e); e.preventDefault(); }, { passive: false });
     }
 })();
