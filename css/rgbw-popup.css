@@ -194,3 +194,24 @@
 #mk-rgbw-popup #mk-rgbw-warmth {
     background: linear-gradient(to right, #dbe9ff, #fff3da 50%, #ffb45e);
 }
+
+/* Presets: both plain ghost family (owner call: Off is a normal action, not
+   destructive) - transparent, 1px accent border, {rounded.button} 10px,
+   tint on hover, standard focus ring. */
+.mk-rgbw-presets { display: flex; gap: 10px; justify-content: center; }
+.mk-rgbw-preset {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--dz-accent-color);
+    border-radius: 10px;           /* {rounded.button} */
+    color: var(--dz-accent-color);
+    font-size: var(--dz-text-sm);
+    padding: 4px 18px;
+    cursor: pointer;
+    transition: background-color .12s ease, box-shadow .12s ease;
+}
+.mk-rgbw-preset:hover { background: var(--dz-btn-hover-bg); }
+.mk-rgbw-preset:active { box-shadow: var(--dz-btn-shadow-pressed); }
+.mk-rgbw-preset:focus-visible { outline: none; box-shadow: var(--dz-btn-focus-ring); }

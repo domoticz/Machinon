@@ -8,7 +8,8 @@
     if (typeof window.ShowRGBWPopup !== "function" ||
         window.ShowRGBWPopup.length !== 8 ||           /* (event, idx, Protected, MaxDimLevel, LevelInt, color, SubType, DimmerType) */
         typeof window.HandleProtection !== "function" ||
-        typeof window.getLEDType !== "function") {
+        typeof window.getLEDType !== "function" ||
+        typeof window.SwitchLightPopup !== "function") {
         return; /* upstream drifted: leave core's popup alone */
     }
     if (window.ShowRGBWPopup._mkHooked) return;
@@ -26,7 +27,7 @@
     };
     window.ShowRGBWPopup._mkHooked = true;
 
-    var state = { idx: null, led: null, mode: "color", h: 0, s: 1, warmth: 0.5, bright: 100, maxDim: 100 };
+    var state = { idx: null, led: null, mode: "color", h: 0, s: 1, warmth: 0.5, bright: 100, maxDim: 100, protected: null };
     var openerEl = null;
     var docListenerTimer = null;
 
@@ -78,6 +79,7 @@
         state.idx = String(args.idx);
         state.led = args.led;
         state.maxDim = parseInt(args.maxDim, 10) || 100;
+        state.protected = args.protected;
         state.bright = Math.max(1, Math.min(100, Math.round(((parseInt(args.levelInt, 10) || 0) / state.maxDim) * 99) + 1));
         seedFromColor(args.colorJSON);
         document.getElementById("mk-rgbw-title").textContent = state.led.bHasRGB ? $.t("Color") : $.t("White");
@@ -208,6 +210,16 @@
             scheduleSend();
         });
         slider.addEventListener("change", flushSend);
+        var presets = el("div", "mk-rgbw-presets", body);
+        [["On", "On"], ["Off", "Off"]].forEach(function (p) {
+            var b = el("button", "mk-rgbw-preset", presets);
+            b.type = "button";
+            b.textContent = $.t(p[1]);
+            b.addEventListener("click", function () {
+                window.SwitchLightPopup(state.idx, p[0], state.protected);
+                if (p[0] === "Off") closePopup();
+            });
+        });
         updateReadout();
     }
 
