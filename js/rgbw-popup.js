@@ -326,14 +326,10 @@
         var brLabel = el("span", "mk-rgbw-slider-label", brGroup);
         brLabel.textContent = $.t("Brightness");
         var br = el("div", "mk-rgbw-bright", brGroup);
-        var brMin = el("span", "mk-rgbw-scale", br);
-        brMin.textContent = "0%";
         var slider = el("input", null, br);
         slider.id = "mk-rgbw-bright";
         slider.type = "range"; slider.min = 0; slider.max = state.maxDim; slider.value = state.brightNative;
         slider.setAttribute("aria-label", $.t("Brightness"));
-        var brMax = el("span", "mk-rgbw-scale", br);
-        brMax.textContent = "100%";
         var brVal = el("span", null, br);
         brVal.id = "mk-rgbw-bright-value";
         brVal.textContent = displayPct(state.brightNative) + "%";

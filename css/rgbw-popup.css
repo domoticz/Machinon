@@ -185,14 +185,11 @@
 }
 #mk-rgbw-hex:disabled { border-bottom-color: var(--dz-input-border); }
 
-/* Brightness row: 0%/100% end labels .. slider .. live value readout, a
-   fixed-width slot so the row does not jitter while dragging (setpoint-popup
-   value-readout precedent). */
+/* Brightness row: slider .. live value readout, no end labels (owner
+   revision 2026-08-18: nothing else in the theme labels slider ends; the
+   live value carries the scale), a fixed-width slot so the row does not
+   jitter while dragging (setpoint-popup value-readout precedent). */
 .mk-rgbw-bright { display: flex; align-items: center; gap: 10px; }
-.mk-rgbw-scale {
-    font-size: var(--dz-text-micro);
-    color: var(--secondary-text-color);
-}
 #mk-rgbw-bright-value {
     font-size: var(--dz-text-sm);
     font-weight: var(--dz-weight-semibold);
