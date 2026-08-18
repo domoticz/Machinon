@@ -136,13 +136,44 @@
     function buildBody(led) {
         var body = document.querySelector("#mk-rgbw-popup .mk-rgbw-body");
         body.innerHTML = "";
+        var hasWhiteSide = led.bHasWhite || led.bHasTemperature;
+        if (led.bHasRGB && hasWhiteSide) {
+            var tabs = el("div", "mk-rgbw-tabs", body);
+            tabs.setAttribute("role", "tablist");
+            [["color", $.t("Color")], ["white", $.t("White")]].forEach(function (t) {
+                var b = el("button", state.mode === t[0] ? "active" : null, tabs);
+                b.type = "button";
+                b.setAttribute("role", "tab");
+                b.dataset.mode = t[0];
+                b.textContent = t[1];
+                b.addEventListener("click", function () { setMode(t[0]); });
+            });
+        } else {
+            state.mode = led.bHasRGB ? "color" : "white";
+        }
         if (led.bHasRGB) {
             var pane = el("div", "mk-rgbw-pane-color", body);
+            if (state.mode !== "color") pane.style.display = "none";
             var canvas = el("canvas", null, pane);
             canvas.id = "mk-rgbw-wheel";
             canvas.width = WHEEL; canvas.height = WHEEL;
             drawWheel(canvas);
             attachWheel(canvas);
+        }
+        if (led.bHasTemperature) {
+            var wp = el("div", "mk-rgbw-pane-white", body);
+            if (state.mode !== "white") wp.style.display = "none";
+            var warm = el("input", null, wp);
+            warm.id = "mk-rgbw-warmth";
+            warm.type = "range"; warm.min = 0; warm.max = 255;
+            warm.value = Math.round(state.warmth * 255);
+            warm.setAttribute("aria-label", $.t("White"));
+            warm.addEventListener("input", function () {
+                state.warmth = (parseInt(this.value, 10) || 0) / 255;
+                updateReadout();
+                scheduleSend();
+            });
+            warm.addEventListener("change", flushSend);
         }
         var readout = el("div", "mk-rgbw-readout", body);
         el("span", "mk-rgbw-swatch", readout);
@@ -178,6 +209,22 @@
         });
         slider.addEventListener("change", flushSend);
         updateReadout();
+    }
+
+    function setMode(mode) {
+        state.mode = mode;
+        var pop = document.getElementById("mk-rgbw-popup");
+        pop.querySelectorAll(".mk-rgbw-tabs button").forEach(function (b) {
+            b.classList.toggle("active", b.dataset.mode === mode);
+        });
+        var cp = pop.querySelector(".mk-rgbw-pane-color");
+        var wp = pop.querySelector(".mk-rgbw-pane-white");
+        if (cp) cp.style.display = mode === "color" ? "" : "none";
+        if (wp) wp.style.display = mode === "white" ? "" : "none";
+        updateReadout();
+        /* Live-send model: switching the mode applies it (an RGBW White tab
+           has no further control to act on). */
+        scheduleSend(); flushSend();
     }
 
     /* Pure HSV<->RGB math (textbook formulas; own implementation, no code
@@ -283,6 +330,7 @@
     /* Accent range fill on a native range input (the card slider language's
        filled track); CSS alone cannot paint a fill on input[type=range]. */
     function paintRangeFill(inp) {
+        if (inp.id === "mk-rgbw-warmth") return;
         var p = ((inp.value - inp.min) / (inp.max - inp.min)) * 100;
         inp.style.background =
             "linear-gradient(to right, rgba(var(--dz-accent-values),0.5) 0 " + p + "%, " +

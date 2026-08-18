@@ -155,3 +155,42 @@
 #mk-rgbw-popup input[type="range"]:focus-visible {
     box-shadow: var(--dz-btn-focus-ring);
 }
+
+/* Mode tabs: the flat underlined sub-tab idiom (Setup strip, iconpack tabs):
+   radius 0, transparent, 2px accent bottom border on hover/active. */
+.mk-rgbw-tabs {
+    display: flex;
+    gap: 15px;
+    border-bottom: 1px solid var(--dz-input-border);
+}
+.mk-rgbw-tabs button {
+    font-size: var(--dz-text-sm);
+    font-weight: var(--dz-weight-semibold);
+    padding: 6px 2px;
+    margin-bottom: -1px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    color: var(--dz-body-text);
+    cursor: pointer;
+}
+.mk-rgbw-tabs button:hover,
+.mk-rgbw-tabs button.active {
+    border-bottom-color: var(--dz-accent-color);
+    color: var(--dz-accent-color);
+}
+.mk-rgbw-tabs button:focus-visible {
+    outline: none;
+    border-bottom-color: var(--dz-accent-color);
+    box-shadow: var(--dz-btn-focus-ring);
+}
+
+/* Warmth slider: same slider language, gradient track. Fixed literal
+   gradient by design: it depicts physical colour temperature (cool 6500K ..
+   warm 2700K), not a scheme colour. The accent fill is meaningless here, so
+   the track IS the gradient. */
+.mk-rgbw-pane-white { display: flex; align-items: center; min-height: 42px; }
+#mk-rgbw-popup #mk-rgbw-warmth {
+    background: linear-gradient(to right, #dbe9ff, #fff3da 50%, #ffb45e);
+}
