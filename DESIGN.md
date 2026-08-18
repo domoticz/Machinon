@@ -624,6 +624,13 @@ fixed here.
 | `--dz-ring-hover` | `var(--dz-elev-card), var(--dz-ring-accent)` | Card hover: composes the resting card shadow with the accent ring |
 | `--dz-ring-hover-inset` | `inset 0px 0px 0px 2px var(--dz-accent-color)` | Card hover on the Dynamic Dashboard (see below) |
 
+### Modal Scrim
+
+`#mk-rgbw-scrim` (css/rgbw-popup.css) codifies the modal scrim language: a full-viewport
+`rgba(0, 0, 0, 0.5)` dim, NO blur or glass (the Menus anti-glass ruling: glass fails AA on busy
+backdrops), fixed literal by design (shadow geometry, not a scheme colour). Any future modal
+reuses this scrim, not a new one.
+
 ### Interactive States
 
 - **Card hover**: `--dz-ring-hover`. **Constraint.** `box-shadow` is a single property, so a
@@ -1729,6 +1736,29 @@ contract.
 - Handle: 15px circle, solid `var(--dz-accent-color)`, positioned -5px top
 - Width: `calc(100% - 100px)` (start point fixed relative to the card, so it never crosses the device icon), 55% on wide screens (1200px+)
 - Blinds cards (any card with a second icon cell): track anchored on BOTH edges instead of a fixed width, so it can never overlap the blind icons at any card width. **Constraint.** The anchoring derivation and the Dynamic Dashboard's zeroed-margin variant live with the blinds rules in `css/cards.css`.
+
+### Colour Popup (feature: `rgbw_popup`)
+
+Machinon-owned centered modal replacing core's cursor-anchored RGBW picker; core's
+`#rgbw_popup` stays untouched as the delegate path (rel dimmers, custom w/ww subtypes,
+drift guard, feature off). `js/rgbw-popup.js` + `css/rgbw-popup.css`, feature id 45.
+
+- Shell: `--dz-widget-bg`, `{rounded.container}`, `--dz-elev-overlay`, `max-height: 90vh`.
+- Placement adheres to the center_popups setting: anchored near the clicked card (no scrim,
+  self-clamped, non-modal like setpoint) on desktop by default; centered + scrim when
+  center_popups is on; always centered + scrim at or below the 979px mobile boundary.
+  Centered mode uses the center_popups idiom (left/right 0 + auto inline margins).
+- Title: `{typography.sm}` + `--dz-weight-semibold`, sentence case - the codified
+  dialog-title language (no uppercase tracking anywhere in the theme).
+- Tabs: the flat underlined sub-tab idiom, text-only.
+- Sliders (brightness, warmth): card dimmer-slider language on native range inputs;
+  warmth track is a fixed cool-to-warm gradient (physical colour temperature, not a
+  scheme colour).
+- 2D picker cursor (codified here): 15px circle at slider-handle scale, filled with the
+  picked colour, 2px `--dz-widget-bg` ring.
+- Presets: On/Off, both plain ghost family (owner call: Off is not destructive).
+- Sends: live, page-global `SetColValue`, 400ms deadline rate-limit (never a resettable
+  debounce). Payloads mirror core's `getJSONColor` exactly.
 
 ### Floorplan Device Popup
 

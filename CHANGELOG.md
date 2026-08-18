@@ -8,6 +8,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 - Three new icon families in both Blue UI and Color: Automatic (a framed gear, for auto-mode switches), Settings (a single gear) and Gears (a three-gear cluster).
 - Three more icon families in both Blue UI and Color: Curtains (for curtain motors, alongside the existing Blinds), CO2 Gauge (for CO2 sensors) and Humidity Gauge (a dial reading, alongside the existing Hygrometer droplet).
+- A Machinon-styled colour picker dialog for colour lights: centered, with mode tabs, colour wheel, warmth and brightness sliders and On/Off buttons (new theme feature, on by default; turn it off in the Theme Hub to get the original picker back).
 
 ### Changed
 
