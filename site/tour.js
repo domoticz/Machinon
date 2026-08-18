@@ -1,20 +1,29 @@
 /*
   tour.js - the hero screenshot tour.
 
-  One job: rotate the hero image through eight Domoticz pages and keep it
+  One job: rotate the hero image through a set of Domoticz pages and keep it
   honest about the active colour scheme. Split out of app.js rather than added
   to it so each file stays small: app.js owns the scheme picker, the scroll
   reveal and the copy buttons, this owns the hero.
 
+  TWO SLIDE SETS, ONE MACHINE. Below 768px the hero shows PHONE_SLIDES, six
+  real 390x844 phone captures; above it, SLIDES, eight 1440x900 desktop ones.
+  This is not a nicety: a 1440px capture inside a 360px hero paints at 24% of
+  native and reads as grey mush, which is why the phone showed a single
+  screenshot and no rotation before this set existed. Everything else (the
+  crossfade, the dots, the timer, the scheme handling) is shared, and
+  applyForm() switches sets when the breakpoint is crossed.
+
   HOW THE SOURCES RESOLVE. Two rules, not one, because captures cost repo
-  weight and only the first slide is worth eight of them:
-    - The Dashboard slide has a capture per scheme, so the picker changes the
-      hero exactly on the slide that loads first and that visitors experiment
-      on.
-    - Every other slide has a light and a dark capture, chosen by the active
-      scheme's base. Its alt text therefore names the page and the base only,
-      never the scheme: claiming Gruvbox for a capture that is merely dark
-      would be a lie told only to screen reader users.
+  weight and only the first desktop slide is worth eight of them:
+    - The desktop Dashboard slide has a capture per scheme, so the picker
+      changes the hero exactly on the slide that loads first and that visitors
+      experiment on.
+    - Every other slide, desktop and phone alike, has a light and a dark
+      capture, chosen by the active scheme's base. Its alt text therefore
+      names the page and the base only, never the scheme: claiming Gruvbox for
+      a capture that is merely dark would be a lie told only to screen reader
+      users.
 
   PROGRESSIVE ENHANCEMENT. index.html ships slide one, its caption, and an
   empty dots container. Without JavaScript that is a single labelled
@@ -31,13 +40,6 @@
 
     var ADVANCE_MS = 5000;
     var PHONE_QUERY = '(max-width: 768px)';
-
-    /* Below 768px the desktop captures paint at 24% of native and are not worth
-       showing, so the phone gets one real phone screenshot and no rotation. The
-       #mobile section three screens down already tours the phone UI, so this is
-       a first impression rather than the whole story. A phone tour would need
-       sixteen more captures and is tracked as a follow-up. */
-    var PHONE_SHOT = 'docs/screenshots/mobile-dashboard.png';
 
     /* Slide order. `perScheme` marks the one slide with a capture per scheme;
        the rest carry a light and a dark path. Paths are literal strings on
@@ -59,6 +61,48 @@
           light: 'docs/screenshots/theme-hub.png', dark: 'docs/screenshots/theme-hub-dark.png' },
         { name: 'Icon packs', caption: 'Icon packs, installed onto individual devices',
           light: 'docs/screenshots/icon-packs.png', dark: 'docs/screenshots/icon-packs-dark.png' }
+    ];
+
+    /* The phone set, below PHONE_QUERY. Same shape as SLIDES minus perScheme:
+       there is one phone capture per base, not one per scheme, so the phone
+       hero answers the picker's light/dark half and never claims a scheme in
+       its alt text. `alt` is spelled out per slide rather than derived,
+       because "The Compact dashboard page on a phone" is not a sentence a
+       template produces well.
+
+       Six, not eight: Floorplan and Theme Hub are the two desktop slides with
+       no phone story worth a first impression (the floorplan wants width, the
+       hub is a settings page). The #mobile section further down the page
+       carries the same six captures as a static grid.
+
+       Paths are literal strings on purpose: scripts/check-site.py parses this
+       file to prove every one of them exists and that no slide is missing its
+       dark twin. */
+    var PHONE_SLIDES = [
+        { name: 'Dashboard', caption: 'Dashboard, your devices as cards',
+          alt: 'The dashboard on a phone, cards stacked in one column',
+          light: 'docs/screenshots/mobile-dashboard.png',
+          dark: 'docs/screenshots/mobile-dashboard-dark.png' },
+        { name: 'Compact dashboard', caption: 'Compact dashboard, favorites as rows',
+          alt: 'The compact mobile dashboard listing favorite devices as rows',
+          light: 'docs/screenshots/mobile-dashboard-compact.png',
+          dark: 'docs/screenshots/mobile-dashboard-compact-dark.png' },
+        { name: 'Switches', caption: 'Switches, every light and relay in one place',
+          alt: 'The Switches page on a phone',
+          light: 'docs/screenshots/mobile-switches.png',
+          dark: 'docs/screenshots/mobile-switches-dark.png' },
+        { name: 'Temperature', caption: 'Temperature, every sensor in the house',
+          alt: 'The Temperature page on a phone',
+          light: 'docs/screenshots/mobile-temperature.png',
+          dark: 'docs/screenshots/mobile-temperature-dark.png' },
+        { name: 'Utility', caption: 'Utility, energy, water and gas with bar ranges',
+          alt: 'The Utility page on a phone',
+          light: 'docs/screenshots/mobile-utility.png',
+          dark: 'docs/screenshots/mobile-utility-dark.png' },
+        { name: 'Device log', caption: 'Device log, history charted per device',
+          alt: 'A device log chart scaled to a phone screen',
+          light: 'docs/screenshots/mobile-device-graph.png',
+          dark: 'docs/screenshots/mobile-device-graph-dark.png' }
     ];
 
     /* One per scheme id in tokens.css. check-site.py compares these keys
@@ -103,8 +147,14 @@
         return !!(window.matchMedia && window.matchMedia(PHONE_QUERY).matches);
     }
 
+    /* The live slide set. Every index in this file is an index INTO THIS, never
+       into SLIDES directly: crossing the breakpoint has to swap the whole tour,
+       its dots and its captions, not just the image behind slide n. */
+    function slides() {
+        return onPhone() ? PHONE_SLIDES : SLIDES;
+    }
+
     function pathFor(slide) {
-        if (onPhone()) { return PHONE_SHOT; }
         if (slide.perScheme) {
             return DASHBOARD_SHOTS[scheme] || DASHBOARD_SHOTS['machinon-light'];
         }
@@ -112,12 +162,14 @@
     }
 
     function altFor(slide) {
-        if (onPhone()) { return 'The Machinon dashboard on a phone'; }
         if (slide.perScheme) {
             return 'The Machinon dashboard in the '
                 + (SCHEME_LABELS[scheme] || 'Machinon Light') + ' scheme';
         }
-        return 'The ' + slide.name + ' page, ' + base;
+        /* Phone slides carry their own wording; both forms end in the base, so
+           a screen reader hears which half of the scheme pair it is looking at
+           without either claiming a scheme the capture cannot prove. */
+        return (slide.alt || 'The ' + slide.name + ' page') + ', ' + base;
     }
 
     /* Paint slide `next` into the hidden buffer and swap. Returns immediately;
@@ -135,7 +187,8 @@
         if (!frame || !buffers.length) { return; }
         if (pending && !userInitiated) { return; }
         var token = ++swapToken;
-        var slide = SLIDES[next];
+        var set = slides();
+        var slide = set[next];
         var path = pathFor(slide);
         var incoming = buffers[1 - active];
 
@@ -148,7 +201,7 @@
             index = next;
             paintCaption(slide);
             paintDots();
-            preload(SLIDES[(next + 1) % SLIDES.length]);
+            preload(set[(next + 1) % set.length]);
         };
 
         if (incoming.getAttribute('src') === path) { swap(); return; }
@@ -160,7 +213,7 @@
                production in the first place. */
             incoming.onerror = null;
             pending = false;
-            if (next !== index) { show((next + 1) % SLIDES.length); }
+            if (next !== index) { show((next + 1) % set.length); }
         };
         incoming.setAttribute('alt', altFor(slide));
         incoming.setAttribute('src', path);
@@ -185,9 +238,9 @@
     }
 
     function start() {
-        if (timer || stopped || reduced() || onPhone()) { return; }
+        if (timer || stopped || reduced()) { return; }
         timer = window.setInterval(function () {
-            show((index + 1) % SLIDES.length);
+            show((index + 1) % slides().length);
         }, ADVANCE_MS);
     }
 
@@ -203,18 +256,25 @@
         pause();
     }
 
-    function buildDots(host) {
-        for (var i = 0; i < SLIDES.length; i++) {
+    /* Rebuilt rather than built once, because the two slide sets are different
+       lengths: eight dots for six phone slides would leave two that steer to
+       nothing. Cheap enough to redo wholesale (at most eight buttons, only on
+       init and on a breakpoint crossing) that diffing would be the more
+       fragile choice. */
+    function rebuildDots(host) {
+        var set = slides();
+        while (host.firstChild) { host.removeChild(host.firstChild); }
+        for (var i = 0; i < set.length; i++) {
             var dot = document.createElement('button');
             dot.type = 'button';
             dot.className = 'hero-dot';
-            dot.setAttribute('aria-label', 'Show ' + SLIDES[i].name);
-            if (i === 0) { dot.setAttribute('aria-current', 'true'); }
+            dot.setAttribute('aria-label', 'Show ' + set[i].name);
             dot.addEventListener('click', (function (target) {
                 return function () { stop(); show(target, true); };
             }(i)));
             host.appendChild(dot);
         }
+        paintDots();
     }
 
     /* Called at init and whenever the phone breakpoint is crossed, so a device
@@ -227,23 +287,25 @@
        invalidates any pending swap so that swap's eventual onload cannot
        overwrite what this just painted with a now-stale slide. */
     function applyForm() {
+        var set = slides();
+        /* The sets are different pages, not the same pages at two sizes, so a
+           desktop position has no phone counterpart to carry across. Restart
+           rather than invent a mapping; the alternative is landing a phone
+           visitor on a slide they never chose. */
+        if (index >= set.length) { index = 0; }
         var dotHost = document.querySelector('.hero-dots');
-        if (dotHost) { dotHost.hidden = onPhone(); }
-        if (onPhone()) {
-            pause();
-            index = 0;
-        } else {
-            start();
-        }
+        if (dotHost) { rebuildDots(dotHost); }
+        start();
         swapToken++;
         pending = false;
         var img = buffers.length ? buffers[active] : null;
         if (img) {
-            var path = pathFor(SLIDES[index]);
-            img.setAttribute('alt', altFor(SLIDES[index]));
+            var path = pathFor(set[index]);
+            img.setAttribute('alt', altFor(set[index]));
             if (img.getAttribute('src') !== path) { img.setAttribute('src', path); }
         }
-        paintCaption(SLIDES[index]);
+        paintCaption(set[index]);
+        preload(set[(index + 1) % set.length]);
     }
 
     function init() {
@@ -253,16 +315,30 @@
         if (!frame || !first || !dotHost) { return; }
 
         first.classList.add('is-active');
+
+        /* Hand control of the first buffer over from the markup to this file.
+           index.html wraps it in a <picture> whose <source> serves the phone
+           capture below 768px, which is what a visitor without JavaScript
+           sees and what keeps a phone from ever requesting the 1440x900
+           desktop shot. A <source> outranks the src set below, though, so
+           leaving it in place would pin the phone hero to slide one forever.
+           Removing it re-runs the selection algorithm, and applyForm() sets
+           the right src in this same task, so the intermediate state is never
+           fetched. dz-site-hero.js measures both halves: that the phone
+           issues no request for the desktop capture, and that the rotation
+           still moves afterwards. */
+        var picture = first.parentNode;
+        if (picture && picture.tagName === 'PICTURE') {
+            var sources = picture.getElementsByTagName('source');
+            while (sources.length) { picture.removeChild(sources[0]); }
+        }
+
         var second = document.createElement('img');
         second.setAttribute('width', '1440');
         second.setAttribute('height', '900');
         second.setAttribute('alt', '');
         frame.appendChild(second);
         buffers = [first, second];
-
-        buildDots(dotHost);
-        paintCaption(SLIDES[0]);
-        preload(SLIDES[1]);
 
         frame.parentNode.addEventListener('mouseenter', pause);
         frame.parentNode.addEventListener('mouseleave', start);
@@ -297,14 +373,14 @@
             if (!buffers.length) { return; }
             swapToken++;
             pending = false;
-            var slide = SLIDES[index];
+            var slide = slides()[index];
             var img = buffers[active];
             img.setAttribute('alt', altFor(slide));
             var path = pathFor(slide);
             if (img.getAttribute('src') !== path) { img.setAttribute('src', path); }
         },
         /* Read by the dz-site-hero.js contract harness. */
-        slideCount: function () { return SLIDES.length; },
+        slideCount: function () { return slides().length; },
         currentIndex: function () { return index; },
         allPaths: function () {
             var out = [], key, i;
@@ -314,7 +390,9 @@
                 }
             }
             for (i = 1; i < SLIDES.length; i++) { out.push(SLIDES[i].light, SLIDES[i].dark); }
-            out.push(PHONE_SHOT);
+            for (i = 0; i < PHONE_SLIDES.length; i++) {
+                out.push(PHONE_SLIDES[i].light, PHONE_SLIDES[i].dark);
+            }
             return out;
         }
     };

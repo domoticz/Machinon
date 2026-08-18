@@ -361,10 +361,72 @@ def test_tour_slide_problems_reports_a_double_quoted_entry():
     assert "no readable `name` field" in problems[0]
 
 
-def test_tour_phone_shot_reads_the_path():
-    js = "var PHONE_SHOT = 'docs/screenshots/mobile-dashboard.png';"
-    assert check.tour_phone_shot(js) == "docs/screenshots/mobile-dashboard.png"
+def test_dark_twin_refs_reads_the_pairs():
+    html = (
+        '<img src="docs/screenshots/mobile-switches.png" '
+        'data-dark="docs/screenshots/mobile-switches-dark.png" width="390" height="844">'
+        '<img src="docs/screenshots/floorplan.png" width="1440" height="900">'
+    )
+    assert check.dark_twin_refs(html) == [
+        ("docs/screenshots/mobile-switches.png",
+         "docs/screenshots/mobile-switches-dark.png")
+    ]
 
 
-def test_tour_phone_shot_returns_empty_when_absent():
-    assert check.tour_phone_shot("var SLIDES = [];") == ""
+def test_phone_shots_without_a_twin_are_reported():
+    """A phone capture in index.html with no data-dark is a tile that stays
+    light while the five beside it go dark: exactly the inconsistency the
+    grid was wired to remove."""
+    html = '<img src="docs/screenshots/mobile-utility.png" width="390" height="844">'
+    assert check.phone_shots_missing_twin(html) == ["docs/screenshots/mobile-utility.png"]
+
+
+def test_a_phone_shot_with_a_twin_is_not_reported():
+    html = (
+        '<img src="docs/screenshots/mobile-utility.png" '
+        'data-dark="docs/screenshots/mobile-utility-dark.png" width="390" height="844">'
+    )
+    assert check.phone_shots_missing_twin(html) == []
+
+
+def test_only_mobile_captures_need_a_twin():
+    """The hero's own desktop captures are swapped by tour.js from its
+    manifest, not by a data-dark attribute, so requiring one everywhere
+    would fail the whole page."""
+    html = '<img src="docs/screenshots/dashboard-light.png" width="1440" height="900">'
+    assert check.phone_shots_missing_twin(html) == []
+
+
+def test_tour_slide_paths_reads_the_phone_array():
+    """PHONE_SLIDES parses with the same machinery as SLIDES, and the two
+    arrays do not bleed into each other: `var SLIDES` must not match inside
+    `var PHONE_SLIDES`, or the phone set would be checked twice and the
+    desktop set not at all."""
+    js = (
+        "var SLIDES = [\n"
+        "    { name: 'Weather', light: 'a.png', dark: 'a-dark.png' }\n"
+        "];\n"
+        "var PHONE_SLIDES = [\n"
+        "    { name: 'Switches', light: 'm.png', dark: 'm-dark.png' }\n"
+        "];\n"
+    )
+    assert check.tour_slide_paths(js) == [("Weather", "a.png", "a-dark.png")]
+    assert check.tour_slide_paths(js, phone=True) == [
+        ("Switches", "m.png", "m-dark.png")
+    ]
+
+
+def test_tour_slide_problems_flags_an_absent_phone_array():
+    """A phone hero with no slide array is the regression this whole set
+    exists to stop: it is what left a phone visitor on one light capture
+    that ignored the scheme picker."""
+    problems = check.tour_slide_problems("var SLIDES = [{ name: 'x' }];", phone=True)
+    assert problems
+    assert "PHONE_SLIDES" in problems[0]
+
+
+def test_tour_slide_problems_flags_a_phone_slide_with_no_name():
+    js = "var PHONE_SLIDES = [\n    { light: 'm.png', dark: 'm-dark.png' }\n];"
+    problems = check.tour_slide_problems(js, phone=True)
+    assert problems
+    assert "PHONE_SLIDES" in problems[0]

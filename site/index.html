@@ -98,9 +98,25 @@
              opacity:0 until this class applies. tour.js's own
              classList.add('is-active') on this element becomes a harmless
              no-op once it runs. Do not remove this class. -->
-        <img id="hero-screenshot" class="is-active" src="docs/screenshots/dashboard-light.png"
-             alt="The Machinon dashboard in the Machinon Light scheme"
-             width="1440" height="900">
+        <picture>
+          <!-- The phone fallback, and the reason a phone never downloads the
+               1440x900 capture at all: a <source> is chosen before any script
+               runs, so below 768px the 144K desktop shot is not even
+               requested. Without this, a visitor with JavaScript off got that
+               desktop capture squashed into the phone-shaped frame
+               (measured: 1440x900 painted into 258x561 under object-fit:
+               fill, because .hero-frame img sets width/height 100% and no
+               fit). tour.js REMOVES this source at init: a <source> outranks
+               the src it sets, so leaving it would freeze the phone hero on
+               slide one. Keep the media query in step with PHONE_QUERY in
+               tour.js. -->
+          <source media="(max-width: 768px)"
+                  srcset="docs/screenshots/mobile-dashboard.png"
+                  width="390" height="844">
+          <img id="hero-screenshot" class="is-active" src="docs/screenshots/dashboard-light.png"
+               alt="The Machinon dashboard in the Machinon Light scheme"
+               width="1440" height="900">
+        </picture>
       </div>
       <figcaption class="hero-caption">
         <span id="hero-slide-name">Dashboard, your devices as cards</span>
@@ -372,12 +388,12 @@
       <h2>Made for the phone on the counter</h2>
     </div>
     <div class="phone-grid">
-      <figure class="phone"><img src="docs/screenshots/mobile-dashboard.png" width="390" height="844" alt="The dashboard on a phone, cards stacked in one column" loading="lazy"><figcaption>Dashboard</figcaption></figure>
-      <figure class="phone"><img src="docs/screenshots/mobile-dashboard-compact.png" width="390" height="844" alt="The compact mobile dashboard listing favorite devices as rows" loading="lazy"><figcaption>Compact dashboard</figcaption></figure>
-      <figure class="phone"><img src="docs/screenshots/mobile-switches.png" width="390" height="844" alt="The Switches page on a phone" loading="lazy"><figcaption>Switches</figcaption></figure>
-      <figure class="phone"><img src="docs/screenshots/mobile-temperature.png" width="390" height="844" alt="The Temperature page on a phone" loading="lazy"><figcaption>Temperature</figcaption></figure>
-      <figure class="phone"><img src="docs/screenshots/mobile-utility.png" width="390" height="844" alt="The Utility page on a phone" loading="lazy"><figcaption>Utility</figcaption></figure>
-      <figure class="phone"><img src="docs/screenshots/mobile-device-graph.png" width="390" height="844" alt="A device log chart scaled to a phone screen" loading="lazy"><figcaption>Device log</figcaption></figure>
+      <figure class="phone"><img src="docs/screenshots/mobile-dashboard.png" data-dark="docs/screenshots/mobile-dashboard-dark.png" width="390" height="844" alt="The dashboard on a phone, cards stacked in one column" loading="lazy"><figcaption>Dashboard</figcaption></figure>
+      <figure class="phone"><img src="docs/screenshots/mobile-dashboard-compact.png" data-dark="docs/screenshots/mobile-dashboard-compact-dark.png" width="390" height="844" alt="The compact mobile dashboard listing favorite devices as rows" loading="lazy"><figcaption>Compact dashboard</figcaption></figure>
+      <figure class="phone"><img src="docs/screenshots/mobile-switches.png" data-dark="docs/screenshots/mobile-switches-dark.png" width="390" height="844" alt="The Switches page on a phone" loading="lazy"><figcaption>Switches</figcaption></figure>
+      <figure class="phone"><img src="docs/screenshots/mobile-temperature.png" data-dark="docs/screenshots/mobile-temperature-dark.png" width="390" height="844" alt="The Temperature page on a phone" loading="lazy"><figcaption>Temperature</figcaption></figure>
+      <figure class="phone"><img src="docs/screenshots/mobile-utility.png" data-dark="docs/screenshots/mobile-utility-dark.png" width="390" height="844" alt="The Utility page on a phone" loading="lazy"><figcaption>Utility</figcaption></figure>
+      <figure class="phone"><img src="docs/screenshots/mobile-device-graph.png" data-dark="docs/screenshots/mobile-device-graph-dark.png" width="390" height="844" alt="A device log chart scaled to a phone screen" loading="lazy"><figcaption>Device log</figcaption></figure>
     </div>
   </section>
 

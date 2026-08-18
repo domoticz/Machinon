@@ -120,11 +120,15 @@ _SET_CALL = re.compile(r"set\('(--[\w-]+)',\s*cs\.(\w+)\)")
 # non-greedy match to the first one always ends at the array's close, and the
 # regex does not break the day someone reindents tour.js.
 _SLIDES_ARRAY = re.compile(r"var SLIDES\s*=\s*\[(.*?)\];", re.S)
+# The phone set, below tour.js's 768px breakpoint. A separate array and not a
+# flag on SLIDES because it is a different set of PAGES, not the same pages at
+# another size. "var SLIDES" cannot match inside "var PHONE_SLIDES", so the two
+# patterns stay independent however the file is reordered.
+_PHONE_SLIDES_ARRAY = re.compile(r"var PHONE_SLIDES\s*=\s*\[(.*?)\];", re.S)
 _DASHBOARD_MAP = re.compile(r"var DASHBOARD_SHOTS\s*=\s*\{(.*?)\};", re.S)
 _MAP_PAIR = re.compile(r"'([^']+)'\s*:\s*'([^']+)'")
 _SLIDE_ENTRY = re.compile(r"\{(.*?)\}", re.S)
 _FIELD = re.compile(r"(\w+)\s*:\s*'([^']*)'")
-_PHONE_SHOT = re.compile(r"var PHONE_SHOT\s*=\s*'([^']+)'")
 
 _PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 
@@ -231,7 +235,7 @@ def tour_dashboard_shots(js_text):
     return dict(_MAP_PAIR.findall(match.group(1)))
 
 
-def tour_slide_paths(js_text):
+def tour_slide_paths(js_text, phone=False):
     """Return (name, light, dark) for every slide that is NOT per-scheme.
 
     A missing path comes back as "" rather than being skipped, so main() can
@@ -244,7 +248,7 @@ def tour_slide_paths(js_text):
     tour_slide_problems() below is what turns an unreadable entry into a
     build failure instead of a quiet gap.
     """
-    match = _SLIDES_ARRAY.search(js_text)
+    match = (_PHONE_SLIDES_ARRAY if phone else _SLIDES_ARRAY).search(js_text)
     if not match:
         return []
     slides = []
@@ -258,7 +262,7 @@ def tour_slide_paths(js_text):
     return slides
 
 
-def tour_slide_problems(js_text):
+def tour_slide_problems(js_text, phone=False):
     """Return human-readable reasons the SLIDES manifest could not be fully
     parsed. An empty list means every entry parsed.
 
@@ -269,20 +273,21 @@ def tour_slide_problems(js_text):
     the dangerous outcome for a guard, so an entry it cannot read is now an
     error rather than a skip.
     """
-    match = _SLIDES_ARRAY.search(js_text)
+    name = "PHONE_SLIDES" if phone else "SLIDES"
+    match = (_PHONE_SLIDES_ARRAY if phone else _SLIDES_ARRAY).search(js_text)
     if not match:
-        return ["no `var SLIDES = [...]` array found in site/tour.js"]
+        return ["no `var {} = [...]` array found in site/tour.js".format(name)]
     entries = _SLIDE_ENTRY.findall(match.group(1))
     if not entries:
-        return ["the SLIDES array in site/tour.js contains no entries"]
+        return ["the {} array in site/tour.js contains no entries".format(name)]
     problems = []
     for entry in entries:
         if "perScheme" in entry:
             continue
         if "name" not in dict(_FIELD.findall(entry)):
             problems.append(
-                "a SLIDES entry has no readable `name` field, so its "
-                "captures cannot be checked: "
+                "a {} entry has no readable `name` field, so its "
+                "captures cannot be checked: ".format(name)
                 + " ".join(entry.split())[:90]
             )
     return problems
@@ -320,15 +325,43 @@ def duplicate_tour_paths(dashboard_shots, slides):
     return duplicates
 
 
-def tour_phone_shot(js_text):
-    """Return the PHONE_SHOT path from tour.js, or "" if the line is absent.
+# Phone captures in index.html. These are the ones the #mobile grid swaps by
+# base, so each needs a declared dark twin; the hero's desktop captures are
+# swapped by tour.js from its own manifest and carry no attribute.
+_PHONE_CAPTURE = re.compile(r"docs/screenshots/mobile-[\w-]+\.png$")
 
-    Below the 768px breakpoint the hero shows this one capture instead of
-    rotating the desktop slides. A missing PHONE_SHOT means the hero falls
-    back to a desktop capture painted at a quarter of native there.
+
+def dark_twin_refs(html_text):
+    """Return (light_src, dark_src) for every <img> declaring a data-dark twin.
+
+    app.js reads the light path off src ONCE at load and swaps between the two
+    on every scheme change, so both halves have to exist and, because the
+    tiles reserve a box from their width/height pair, be the same size. A
+    dangling or mis-sized twin is invisible in light and only shows up to a
+    visitor who picks a dark scheme, which is precisely the class of bug this
+    file exists to catch before a release does.
     """
-    match = _PHONE_SHOT.search(js_text)
-    return match.group(1) if match else ""
+    pairs = []
+    for tag in _IMG_TAG.findall(html_text):
+        attrs = dict(_ATTR.findall(tag))
+        if "src" in attrs and "data-dark" in attrs:
+            pairs.append((attrs["src"], attrs["data-dark"]))
+    return pairs
+
+
+def phone_shots_missing_twin(html_text):
+    """Return every mobile-*.png <img> src in index.html with no data-dark.
+
+    Catches the seventh phone figure added without its twin: it would sit in
+    the grid staying light while the six beside it go dark.
+    """
+    missing = []
+    for tag in _IMG_TAG.findall(html_text):
+        attrs = dict(_ATTR.findall(tag))
+        src = attrs.get("src", "")
+        if _PHONE_CAPTURE.search(src) and "data-dark" not in attrs:
+            missing.append(src)
+    return missing
 
 
 def declared_dimensions(html_text):
@@ -518,11 +551,42 @@ def main():
                 "under {}/.".format(ref, ref.split("/", 1)[0])
             )
 
+    # --- Check 5c: every phone capture has a dark twin, same size ---
+    for src in phone_shots_missing_twin(html):
+        failures.append(
+            'phone capture "{}" in site/index.html has no data-dark twin: the '
+            "#mobile grid would leave it light while the tiles beside it go "
+            "dark.".format(src)
+        )
+    for light_ref, dark_ref in dark_twin_refs(html):
+        dark_path = resolve_asset(dark_ref)
+        if not dark_path.exists():
+            failures.append(
+                'dark twin "{}" declared by "{}" does not exist: picking a '
+                "dark scheme would break that image.".format(dark_ref, light_ref)
+            )
+            continue
+        light_path = resolve_asset(light_ref)
+        if not light_path.exists():
+            continue  # check 5 already reports a dangling src
+        light_size = png_size(light_path)
+        dark_size = png_size(dark_path)
+        if light_size != dark_size:
+            failures.append(
+                'dark twin "{}" is {}x{} but "{}" is {}x{}: the tile would '
+                "resize when the scheme changes.".format(
+                    dark_ref, dark_size[0], dark_size[1],
+                    light_ref, light_size[0], light_size[1],
+                )
+            )
+
     # --- Check 6: the tour manifest resolves, and covers every scheme ---
     tour_js = TOUR_JS.read_text()
     dashboard_shots = tour_dashboard_shots(tour_js)
     slides = tour_slide_paths(tour_js)
-    slide_problems = tour_slide_problems(tour_js)
+    phone_slides = tour_slide_paths(tour_js, phone=True)
+    slide_problems = (tour_slide_problems(tour_js)
+                      + tour_slide_problems(tour_js, phone=True))
     for problem in slide_problems:
         failures.append(problem)
     if not slide_problems and not slides:
@@ -550,28 +614,36 @@ def main():
             "site/tour.js DASHBOARD_SHOTS names schemes tokens.css does not "
             "define: {}.".format(", ".join(extra_schemes))
         )
-    for name, light, dark in slides:
+    # The phone set is labelled, not merged blind: the two sets legitimately
+    # share slide NAMES (Dashboard, Switches, Utility, Device log) and must
+    # never share a PATH, so a collision has to say which set it came from.
+    labelled_phone = [
+        ("{} (phone)".format(name), light, dark)
+        for name, light, dark in phone_slides
+    ]
+    for name, light, dark in slides + labelled_phone:
         for label, ref in (("light", light), ("dark", dark)):
             if not ref:
                 failures.append(
                     'tour slide "{}" has no {} capture: the rotation would '
                     "skip it in that base.".format(name, label)
                 )
-    for label_a, label_b, path in duplicate_tour_paths(dashboard_shots, slides):
+    for label_a, label_b, path in duplicate_tour_paths(
+            dashboard_shots, slides + labelled_phone):
         failures.append(
             'tour entries "{}" and "{}" both resolve to "{}": the visitor '
             "sees the same screenshot twice under different captions."
             .format(label_a, label_b, path)
         )
-    phone_shot = tour_phone_shot(tour_js)
-    if not phone_shot:
+    if not phone_slides:
         failures.append(
-            "no PHONE_SHOT found in site/tour.js: below 768px the hero would "
-            "fall back to a desktop capture painted at a quarter of native."
+            "no PHONE_SLIDES entries found in site/tour.js: below 768px the "
+            "hero would fall back to desktop captures painted at a quarter of "
+            "native, or to a single shot that ignores the scheme picker."
         )
     tour_refs = sorted(set(dashboard_shots.values())
-                       | {p for _, light, dark in slides for p in (light, dark) if p}
-                       | ({phone_shot} if phone_shot else set()))
+                       | {p for _, light, dark in slides + labelled_phone
+                          for p in (light, dark) if p})
     for ref in tour_refs:
         if not resolve_asset(ref).exists():
             failures.append(

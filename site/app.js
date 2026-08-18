@@ -48,6 +48,40 @@
         return prefersDark ? 'machinon-dark' : 'machinon-light';
     }
 
+    /* The phone grid in #mobile is static markup, so it needs the same
+       light/dark answer the hero gives, or the page ends up with a
+       scheme-aware hero above six screenshots that stay light in every
+       scheme. Each <img> declares its dark twin in data-dark; the light path
+       is read off src ONCE, here, before any swap can overwrite it, which is
+       why this is a captured list and not a lookup done at paint time.
+       check-site.py proves every twin exists and matches its light half's
+       dimensions, so a swap can never resize a tile. */
+    var phoneShots = [];
+
+    function collectPhoneGrid() {
+        var imgs = document.querySelectorAll('.phone-grid img[data-dark]');
+        for (var i = 0; i < imgs.length; i++) {
+            phoneShots.push({
+                img: imgs[i],
+                light: imgs[i].getAttribute('src'),
+                dark: imgs[i].getAttribute('data-dark')
+            });
+        }
+    }
+
+    /* Alt text is deliberately untouched: it describes the LAYOUT ("cards
+       stacked in one column"), which is true in either base, so there is
+       nothing here a screen reader user would be told wrongly. */
+    function paintPhoneGrid(base) {
+        for (var i = 0; i < phoneShots.length; i++) {
+            var shot = phoneShots[i];
+            var want = base === 'dark' ? shot.dark : shot.light;
+            if (shot.img.getAttribute('src') !== want) {
+                shot.img.setAttribute('src', want);
+            }
+        }
+    }
+
     function applyScheme(id) {
         var scheme = schemeById(id);
         document.documentElement.setAttribute('data-scheme', scheme.id);
@@ -62,6 +96,8 @@
         if (window.machinonTour) {
             window.machinonTour.setScheme(scheme.id, scheme.base);
         }
+
+        paintPhoneGrid(scheme.base);
 
         var active = document.querySelectorAll('.scheme-swatch');
         for (var i = 0; i < active.length; i++) {
@@ -336,6 +372,7 @@
         applyIconStyle(active.getAttribute('data-icon-style'));
     }
 
+    collectPhoneGrid();
     buildSchemeGrid();
     wirePicker();
     wireReveals();
