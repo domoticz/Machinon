@@ -426,9 +426,6 @@ body table#itemtabledoubleicon tbody tr:hover body table#itemtabledoubleicon tr 
     background: none;
 }
 
-body table#itemtabledoubleicon .wrapper {
-    color: orange;
-}
 
 div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
     width: auto;
