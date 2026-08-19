@@ -63,7 +63,7 @@ function dzSvg(tag, attrs) {
 }
 
 /* Scheme-neutral stroke for the SVG sketches: a mid grey that stays legible on
-   both the light (#f4f8fc, 3.01:1) and dark (#0f1620, 5.69:1) body backgrounds.
+   both the light (#f4f8fc, 3.01:1) and dark (#0f1620, 5.65:1) body backgrounds.
    Deliberately NOT a --dz-* token: these settings have no scheme colour to
    mirror. */
 var DZ_SKETCH_INK = "#8a9099";

@@ -270,25 +270,11 @@ function setCustomIconsPage() {
     });
 }
 
-function ajaxSuccessCallback(event, xhr, settings) {
+/* jQuery ajaxSuccess handler (registered in custom.js). It takes no arguments on
+   purpose: nothing here is per-request. The cards a getdevices/getscenes response
+   produces render in a later Angular digest, and the MutationObserver in devices.js
+   already enhances them when they appear (the visible enhancement stage runs on every
+   flush, the deferred stage follows within ~300ms, plus the mobile passes). */
+function ajaxSuccessCallback() {
     setPageTitle();
-
-    /* No per-request enhancement here for getdevices/getscenes: the cards
-       those responses produce render in a later Angular digest, and the
-       MutationObserver in devices.js already enhances when they appear
-       (the visible enhancement stage runs on every flush, the deferred stage
-       follows within ~300ms, plus the mobile passes). */
-    if (settings.url.startsWith("json.htm?type=command&param=switchscene")) {
-        let id = settings.url.split("&")[2];
-        id = id.substr(4);
-        let scene = $(".item#" + id);
-        let statusElem = scene.find("#status .wrapper");
-        statusElem.hide();
-        let switcher = statusElem.parent().siblings(".switch").find("input");
-        if (switcher.length) {
-            let statusText = settings.url.split("&")[3];
-            statusText = statusText.substr(10);
-            switcher.attr("checked", statusText == "On");
-        }
-    }
 }
