@@ -584,10 +584,14 @@ function setDeviceLastUpdate(idx, lastupdate, $trs) {
     var rows = resolveRows(idx, $trs);
     rows.each(function() {
         let lastupdateEl = $(this).find("#lastupdate");
-        /* Core renders its bar-ranges strip (<dz-bar>, views/widgets/utility_widget.html)
-           inside this same cell. Rewriting the cell with .html()/.text() destroys that live
-           Angular element, so detach it first and put it back after. */
-        let barEl = lastupdateEl.children("dz-bar").detach();
+        /* Core renders its bar-ranges strip inside this same cell, through three
+           different elements: <dz-bar> directly (views/widgets/utility_widget.html),
+           and <dz-temp-bar> / <dz-weather-bar> wrapping a <dz-bar>
+           (views/temperature_widget.html, views/weather_widget.html). Rewriting the cell
+           with .html()/.text() destroys whichever live Angular element is there, so
+           detach it first and put it back after. Matching only <dz-bar> silently dropped
+           the strip on every Temp and Weather card. */
+        let barEl = lastupdateEl.children("dz-bar, dz-temp-bar, dz-weather-bar").detach();
         if (theme.features.time_ago.enabled === true) {
             /* Modify existing #lastupdate in-place instead of creating new #timeago */
             let livestampSpan = lastupdateEl.find("span[data-livestamp]");

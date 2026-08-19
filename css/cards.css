@@ -596,8 +596,8 @@ table.mobileitem td.name {
     overflow-wrap: break-word;
 }
 
-/* Bar-ranges gauge (core <dz-bar>, rendered inside td#lastupdate by
-   views/widgets/utility_widget.html). Core stacks it above the timestamp, which overflows
+/* Bar-ranges gauge (core <dz-bar>, rendered inside td#lastupdate by the utility,
+   temperature and weather widgets alike). Core stacks it above the timestamp, which overflows
    the 20px bottom row of our card grid, so the theme draws it as a full-bleed status edge
    along the card top instead. The containing block is the card tr (position: relative in
    the box contract above); absolute positioning also lets it escape the standard
