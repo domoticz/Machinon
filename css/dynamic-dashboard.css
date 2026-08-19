@@ -226,3 +226,22 @@
         letter-spacing: 0;
     }
 }
+
+/* Dial scale ticks. Core strokes these a hardcoded rgba(255,255,255,0.28) /
+   0.14 (dashboard.css .dd-dial-tick / .dd-dial-tick-minor), which is dark-first
+   and NOT a --dz-* token, so no token we publish can reach them. The ticks sit
+   in the bezel band (SVG radii: bezel 49, face 41, so ticks are outside the dark
+   face and on the panel surface), which our light schemes paint white: white on
+   white, invisible, while the scale numbers beside them read fine. They are
+   Core's own values are its ink colour at reduced strength (0.28 major, 0.14
+   minor), so these mirror that shape against the muted text colour the scale
+   numbers beside them already use, keeping the same major-over-minor ratio. The
+   border colour was tried first and rejected by measurement: at #cbd9e6 on a
+   white bezel it comes out at 1.3:1, which is the invisibility this fixes.
+
+   Scoped to .dd-dial-outer for SPECIFICITY, not for reach: core's dashboard.css
+   loads after the theme, so a bare .dd-dial-tick would tie on specificity and
+   lose on source order, exactly as the --dz-* token block in dz-tokens.css
+   documents for the same stylesheet. */
+.dd-dial-outer .dd-dial-tick       { stroke: color-mix(in srgb, var(--secondary-text-color) 45%, transparent); }
+.dd-dial-outer .dd-dial-tick-minor { stroke: color-mix(in srgb, var(--secondary-text-color) 22%, transparent); }

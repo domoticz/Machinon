@@ -147,6 +147,16 @@
        bug happens. */
     --dz-panel-bg:             var(--dz-widget-bg);
     --dz-panel-text:           var(--dz-body-text);
+    /* The Dash2 dial's instrument face (core reads it as --dd-face-fill,
+       dashboard.css:3398, with an untracked rgba(0,0,0,0.75) fallback). It has to
+       stay DARK in every scheme, not follow the surface: core paints the arc
+       track inside it as a hardcoded rgba(255,255,255,0.10), so a light face
+       would erase the track. Derived from the panel rather than copied as a
+       literal so a custom scheme tints it, and mixed to reproduce what the old
+       fallback composited to on a light card while staying darker than the panel
+       on a dark one (where an opaque literal would flatten the face into the
+       bezel and cost the dial its structure). */
+    --dz-panel-bg-dark:        color-mix(in srgb, var(--dz-panel-bg) 25%, #000);
     --dz-border-color:         var(--dz-input-border);
     --dz-dd-grid-line:         rgba(var(--dz-accent-values), 0.12);
     --dz-dd-skeleton-mid:      color-mix(in srgb, var(--dz-body-bg) 90%, var(--dz-body-text));
@@ -491,6 +501,19 @@ html:root {
        arrows in that card). Core's actual intent is unknowable from the source;
        reported upstream. Remove this once core defines it. */
     --dz-widget-sunpv:  var(--dz-widget-amber);
+
+    /* Same class of defect as --dz-widget-sunpv above, but core DOES define this
+       one: dashboard.css:28 sets it to rgba(255,255,255,0.55), a dark-first
+       default. Every consumer draws on a panel surface, so on our light schemes
+       that is white text on a white card. It carries the Dynamic Dashboard dial's
+       scale numbers, unit, wind sub-line and update stamp, plus RSS excerpts,
+       forecast day names / labels / wind, log times and calendar times.
+       This is the muted-text role, so it takes the theme's muted-text token and
+       tracks both schemes. It must live in this html:root block, not in the
+       plain :root above: dashboard.css defines it in its own :root and loads
+       AFTER the theme, so an equal-specificity override loses the source-order
+       tie. */
+    --dz-widget-stat-muted: var(--secondary-text-color);
 }
 
 /* Standby clock steps down on small screens. Breakpoint (979px) matches the
