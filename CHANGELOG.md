@@ -4,6 +4,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-08-19
+
 ### Fixed
 
 - Bar Ranges now show up on temperature, humidity and weather cards too, not only on utility cards. The colored strip was being wiped off those cards as the theme drew the "last seen" line.
