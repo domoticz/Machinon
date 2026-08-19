@@ -102,6 +102,16 @@
 
     function openPopup(args) {
         ensureDom();
+        /* Core parity: ShowRGBWPopup and ShowTherm3Popup both drop a queued
+           $.setColValue as their first act (js/domoticz.js:1968, 2114). Core's
+           own wheel picker debounces its sends by 400ms into that handle
+           (domoticz.js:1888), so a send queued from a previous interaction with
+           core's picker would otherwise land after this popup has opened and
+           overwrite the state it just seeded. This popup replaces
+           ShowRGBWPopup, so it inherits the obligation. Core calls
+           clearInterval on what is a setTimeout handle; that works (browsers
+           share one id space) but clearTimeout is the matching API for it. */
+        clearTimeout($.setColValue);
         state.idx = String(args.idx);
         state.led = args.led;
         state.maxDim = parseInt(args.maxDim, 10) || 100;
@@ -185,6 +195,12 @@
     function closePopup() {
         var pop = document.getElementById("mk-rgbw-popup");
         if (!pop) return;
+        /* Land any debounced edit now rather than after the popup is gone: the
+           send timer is not cancelled by closing, so without this the user's
+           last change still fires, just later, with the popup already dismissed
+           and nothing on screen tying the two together. This only changes WHEN
+           the pending send goes out, never whether it does. */
+        flushSend();
         pop.style.display = "none";
         document.getElementById("mk-rgbw-scrim").style.display = "none";
         document.removeEventListener("keydown", onKeydown);
