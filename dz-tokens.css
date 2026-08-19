@@ -192,6 +192,14 @@
     --dz-card-tooltip-radius: 4px;  /* fine */
     --dz-card-slider-radius:  3px;  /* fine; also table.mobileitem's dimslider (verified duplicate) */
 
+    /* Published for CORE's globally-linked stylesheets, which read it with a 5px fallback:
+       table.mobileitem's frame (www/css/style.css) and .dd-widget-chrome, the Dynamic
+       Dashboard widget panel (www/css/dashboard.css). Machinon imports nothing from core,
+       so core's own :root value in www/css/variables.css never reaches this page and those
+       two surfaces used to fall back to 5px, a tier below every other Machinon card frame.
+       Both are container frames, so they take the frame tier. */
+    --dz-widget-border-radius: var(--dz-card-radius);
+
     /* Grid / container (classic #holder .row + Dynamic Dashboard .dd-widget-body share these) */
     --dz-card-fill-width:               99%;    /* .row .item wrapper fill; reads like an old sub-pixel
                                                    anti-clip hack (paired with the 2px margin-left in
