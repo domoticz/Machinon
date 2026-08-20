@@ -8,11 +8,11 @@
   because the manual is served standalone, without the theme's stylesheets.
 
   The @font-face rules below exist because mkdocs.yml sets theme.font: false
-  to stop Material fetching Roboto from Google's CDN. The paths are relative
-  to this file's built location (build/docs/stylesheets/), reaching the fonts
-  the deploy workflow and scripts/serve-site.sh copy to build/fonts/. Under a
-  bare `mkdocs serve`, build/fonts/ does not exist and font-display: swap
-  leaves the system stack in place; that is dev-only and harmless.
+  to stop the theme fetching its default faces from Google's CDN. The paths
+  are relative to this file's built location (build/docs/stylesheets/),
+  reaching the fonts the deploy workflow and scripts/serve-site.sh copy to
+  build/fonts/. Under a bare `zensical serve`, build/fonts/ does not exist and
+  font-display: swap leaves the system stack in place; dev-only and harmless.
 */
 
 @font-face {

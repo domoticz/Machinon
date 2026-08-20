@@ -9,8 +9,11 @@
   repository link and its icon and drops the requests; the styling rides on
   the md-source class, not the attribute.
 
-  Re-check this file when bumping mkdocs-material: it is a copy of an upstream
+  Re-check this file when bumping zensical: it is a copy of an upstream
   template minus one attribute, so upstream markup changes do not reach it.
+  Verified against zensical 0.0.55 that this override is still load-bearing:
+  built without it, data-md-component="source" reappears and the theme's
+  bundle still carries the api.github.com call.
 
   validate.yml's "Published site makes no external requests" step asserts
   that data-md-component="source" stays absent from the built manual and

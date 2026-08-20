@@ -402,7 +402,7 @@ def resolve_asset(ref):
     """Map an index.html reference to the file that serves it, once built.
 
     Three trees resolve against the repo root rather than site/: docs/ is
-    owned by mkdocs, and iconpack/ and images/ are the theme's real shipped
+    owned by the docs build, and iconpack/ and images/ are the theme's real shipped
     artwork, which the icon gallery points at directly so the site cannot
     drift from what installs. All three are copied into the built tree by
     deploy-docs.yml and by scripts/serve-site.sh. Everything else resolves

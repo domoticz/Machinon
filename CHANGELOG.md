@@ -4,6 +4,10 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+### Changed
+
+- The manual is now built with [Zensical](https://zensical.org/) instead of MkDocs and Material for MkDocs, which entered maintenance mode in November 2025. Every page renders identically; the no-external-requests guarantee and its CI guard are unchanged.
+
 ## [2.1.1] - 2026-08-19
 
 ### Fixed

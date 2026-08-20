@@ -1,4 +1,4 @@
-# Builds the landing page (site/) and the MkDocs manual into one tree and
+# Builds the landing page (site/) and the Zensical manual into one tree and
 # publishes it to GitHub Pages.
 #
 # Layout: the manual builds into build/docs, then site/* is copied over the
@@ -47,7 +47,7 @@ jobs:
 
       - name: Build the manual and assemble the site
         run: |
-          mkdocs build --strict -d build/docs
+          zensical build --clean --strict
           cp -r site/* build/
           cp -r fonts build/fonts
           # The icon gallery on the landing page points at the files that

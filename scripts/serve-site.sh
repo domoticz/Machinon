@@ -26,7 +26,7 @@ PORT="${PORT:-8081}"
 HOST="${HOST:-127.0.0.1}"
 
 rm -rf build build-preview
-mkdocs build -d build/docs
+zensical build --clean
 cp -r site/* build/
 cp -r fonts build/fonts
 # Keep in lockstep with .github/workflows/deploy-docs.yml: this script's whole

@@ -48,12 +48,12 @@ jobs:
         run: python3 scripts/check-settings-docs.py
 
       - name: Manual builds clean
-        run: mkdocs build --strict -d build/docs
+        run: zensical build --clean --strict
 
       - name: Published site makes no external requests
         run: |
           cp -r site/* build/
-          # Material's vendored JS bundle (assets/javascripts/bundle*.min.js
+          # The theme's vendored JS bundle (assets/javascripts/bundle*.min.js
           # and its source map) contains the literal string
           # "https://api.github.com/repos/..." as dead code for the
           # repo-stats widget (star, fork and release counts): that code
@@ -77,13 +77,13 @@ jobs:
           fi
           echo "no external asset hosts in the built site"
 
-          material_version=$(grep -oP 'mkdocs-material==\K.*' requirements-dev.txt)
+          zensical_version=$(grep -oP 'zensical==\K.*' requirements-dev.txt)
 
           if grep -rq 'data-md-component="source"' build/docs/; then
             echo "overrides/partials/source.html is no longer suppressing data-md-component=\"source\"." >&2
-            echo "That attribute is what makes Material's bundle call api.github.com on every page view (see the comment above and in overrides/partials/source.html)." >&2
-            echo "Likely cause: mkdocs-material was bumped past ${material_version} and restructured partials/source.html, renamed it, or moved the attribute to a different element, and the override no longer matches or no longer applies." >&2
-            echo "Compare overrides/partials/source.html against the upstream partials/source.html shipped in the new mkdocs-material version and update the override to match, still without the data-md-component attribute." >&2
+            echo "That attribute is what makes the theme's bundle call api.github.com on every page view (see the comment above and in overrides/partials/source.html)." >&2
+            echo "Likely cause: zensical was bumped past ${zensical_version} and restructured partials/source.html, renamed it, or moved the attribute to a different element, and the override no longer matches or no longer applies." >&2
+            echo "Compare overrides/partials/source.html against the upstream partials/source.html shipped in the new zensical version and update the override to match, still without the data-md-component attribute." >&2
             exit 1
           fi
           echo "data-md-component=\"source\" is absent: the repo-stats fetch stays unreachable"

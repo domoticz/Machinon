@@ -1,7 +1,13 @@
-# Structurally parallel with script.easytv/mkdocs.yml and
-# script.easymovie/mkdocs.yml. Keep the theme block, features list and
-# markdown_extensions in step across all three; site_name, site_url,
-# repo_url, repo_name, edit_uri and nav are per-project.
+# Was structurally parallel with script.easytv/mkdocs.yml and
+# script.easymovie/mkdocs.yml. This project has since moved to Zensical and
+# those two have not, so the theme block, features list and
+# markdown_extensions have diverged on purpose. Re-align when they migrate.
+#
+# Built with Zensical, which reads this mkdocs.yml natively. Material for
+# MkDocs went into maintenance mode in November 2025; Zensical is the same
+# team's successor. Keeping the config here rather than in the native
+# zensical.toml is deliberate: it is what the Zensical project itself does,
+# and it keeps the build tool swappable.
 site_name: Machinon
 site_url: https://domoticz.github.io/Machinon/docs/
 site_description: "Machinon, a modern theme for Domoticz"
@@ -10,19 +16,22 @@ repo_name: domoticz/Machinon
 edit_uri: edit/master/docs/
 
 # Build output goes under build/ (gitignored). The default ./site holds the
-# hand-authored landing page committed to this repo; a bare `mkdocs build`
+# hand-authored landing page committed to this repo; a bare `zensical build`
 # must never overwrite site/index.html, site/style.css or site/tokens.css.
+# Zensical has no `-d` / `--site-dir` flag, so this key is the only thing
+# that decides where the build lands, and both workflows publish this path.
 site_dir: build/docs
 
 theme:
   name: material
-  # Drops data-md-component="source" from the repo link so Material does not
-  # call the GitHub API on every page view. See overrides/partials/source.html.
+  # Drops data-md-component="source" from the repo link so the theme does not
+  # call the GitHub API on every page view. Verified against zensical 0.0.55
+  # that this is still load-bearing. See overrides/partials/source.html.
   custom_dir: overrides
-  # Material links Google Fonts (Roboto and Roboto Mono) from its own CDN
-  # unless font is false. The published site must make no external request at
-  # all, so this is off and the faces are self-hosted from the repo's fonts/
-  # directory via docs/stylesheets/extra.css. Do not remove this line.
+  # The theme links Google Fonts from its own CDN unless font is false. The
+  # published site must make no external request at all, so this is off and
+  # the faces are self-hosted from the repo's fonts/ directory via
+  # docs/stylesheets/extra.css. Verified honoured by Zensical. Do not remove.
   font: false
   favicon: assets/favicon.png
   palette:
@@ -72,21 +81,25 @@ markdown_extensions:
   - attr_list
   - md_in_html
 
-# docs/superpowers/ holds local-only specs and plans and is gitignored.
-# Excluding it keeps `mkdocs build --strict` from failing on files not in nav.
+# docs/superpowers/ holds local-only specs and plans and is gitignored, which
+# is what actually keeps it out of CI and off the published site. This key is
+# only honoured by MkDocs; Zensical ignores exclude_docs, so a local build
+# will include those pages (into gitignored build/) and may fail --strict on
+# dangling anchors inside them. CI never sees them.
 exclude_docs: |
   superpowers/
 
-# MkDocs defaults broken-anchor links (#some-heading that does not exist on
-# the target page) to "info", which --strict does not fail on. Raising this
-# to "warn" makes --strict treat a dangling anchor as a build failure like
-# any other broken internal link, instead of a silent no-op.
+# Kept for the MkDocs path: MkDocs defaults broken-anchor links (#some-heading
+# that does not exist on the target page) to "info", which --strict does not
+# fail on, so this raises it to "warn". Zensical validates links and anchors
+# by default and --strict already fails on a dangling anchor, so this block is
+# redundant there (and documented upstream as deprecated in its current form).
 validation:
   links:
     anchors: warn
 
 # Pages join this nav in the task that writes them (Tasks 5, 6 and 7), so no
-# placeholder page ever exists and `mkdocs build --strict` stays clean at
+# placeholder page ever exists and `zensical build --strict` stays clean at
 # every commit. The finished nav is:
 #   Home, Installation, Using the theme (Theme Hub, Color schemes, Icon packs,
 #   Bar ranges, Mobile layouts), Settings reference, Troubleshooting and FAQ.
