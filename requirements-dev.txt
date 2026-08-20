@@ -1,4 +1,4 @@
 # Dev-only tooling, pinned exactly (supply-chain rule). Dependabot bumps
 # these with a 7-day cooldown; see .github/dependabot.yml.
 pytest==9.1.1
-zensical==0.0.55
+zensical==0.0.56
