@@ -7,6 +7,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 ### Changed
 
 - The manual is now built with [Zensical](https://zensical.org/) instead of MkDocs and Material for MkDocs, which entered maintenance mode in November 2025. Every page renders identically; the no-external-requests guarantee and its CI guard are unchanged.
+- The manual gains an anchor link on every heading, breadcrumbs inside Using the theme, previous/next links at the foot of each page, and click-to-zoom on every screenshot. Screenshots on the Color schemes page no longer navigate away to the raw image; they open in the same overlay as the rest.
 
 ## [2.1.1] - 2026-08-19
 

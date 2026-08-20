@@ -39,42 +39,42 @@ layouts. Click any one to see it full size.
 <div class="grid" markdown>
 
 <figure markdown="span">
-[![The dashboard in the Machinon Light scheme](screenshots/dashboard-light.png){ width="1440" height="900" loading=lazy }](screenshots/dashboard-light.png)
+![The dashboard in the Machinon Light scheme](screenshots/dashboard-light.png){ width="1440" height="900" loading=lazy }
 <figcaption>Machinon Light</figcaption>
 </figure>
 
 <figure markdown="span">
-[![The dashboard in the Machinon Dark scheme](screenshots/dashboard-dark.png){ width="1440" height="900" loading=lazy }](screenshots/dashboard-dark.png)
+![The dashboard in the Machinon Dark scheme](screenshots/dashboard-dark.png){ width="1440" height="900" loading=lazy }
 <figcaption>Machinon Dark</figcaption>
 </figure>
 
 <figure markdown="span">
-[![The dashboard in the Magenta Light scheme](screenshots/dashboard-magenta-light.png){ width="1440" height="900" loading=lazy }](screenshots/dashboard-magenta-light.png)
+![The dashboard in the Magenta Light scheme](screenshots/dashboard-magenta-light.png){ width="1440" height="900" loading=lazy }
 <figcaption>Magenta Light</figcaption>
 </figure>
 
 <figure markdown="span">
-[![The dashboard in the Magenta Dark scheme](screenshots/dashboard-magenta-dark.png){ width="1440" height="900" loading=lazy }](screenshots/dashboard-magenta-dark.png)
+![The dashboard in the Magenta Dark scheme](screenshots/dashboard-magenta-dark.png){ width="1440" height="900" loading=lazy }
 <figcaption>Magenta Dark</figcaption>
 </figure>
 
 <figure markdown="span">
-[![The dashboard in the Paper Light scheme](screenshots/dashboard-paper-light.png){ width="1440" height="900" loading=lazy }](screenshots/dashboard-paper-light.png)
+![The dashboard in the Paper Light scheme](screenshots/dashboard-paper-light.png){ width="1440" height="900" loading=lazy }
 <figcaption>Paper Light</figcaption>
 </figure>
 
 <figure markdown="span">
-[![The dashboard in the Paper Dark scheme](screenshots/dashboard-paper-dark.png){ width="1440" height="900" loading=lazy }](screenshots/dashboard-paper-dark.png)
+![The dashboard in the Paper Dark scheme](screenshots/dashboard-paper-dark.png){ width="1440" height="900" loading=lazy }
 <figcaption>Paper Dark</figcaption>
 </figure>
 
 <figure markdown="span">
-[![The dashboard in the Gruvbox Light scheme](screenshots/dashboard-gruvbox-light.png){ width="1440" height="900" loading=lazy }](screenshots/dashboard-gruvbox-light.png)
+![The dashboard in the Gruvbox Light scheme](screenshots/dashboard-gruvbox-light.png){ width="1440" height="900" loading=lazy }
 <figcaption>Gruvbox Light</figcaption>
 </figure>
 
 <figure markdown="span">
-[![The dashboard in the Gruvbox Dark scheme](screenshots/dashboard-gruvbox-dark.png){ width="1440" height="900" loading=lazy }](screenshots/dashboard-gruvbox-dark.png)
+![The dashboard in the Gruvbox Dark scheme](screenshots/dashboard-gruvbox-dark.png){ width="1440" height="900" loading=lazy }
 <figcaption>Gruvbox Dark</figcaption>
 </figure>
 
