@@ -73,12 +73,52 @@
    "off_sig": "8610-0b3ffe77"
   },
   {
+   "base": "machinon_Amazon",
+   "name": "Amazon",
+   "description": "Amazon on / off (grey)",
+   "tab": "blue",
+   "on_sig": "8804-f68f74c4",
+   "off_sig": "7907-3a10a181"
+  },
+  {
+   "base": "machinon_Amazon-color",
+   "name": "Amazon Color",
+   "description": "Amazon on / off (grey)",
+   "tab": "color",
+   "on_sig": "8845-921ba7f5",
+   "off_sig": "8018-162fd909"
+  },
+  {
+   "base": "machinon_AmazonMusic",
+   "name": "Amazon Music",
+   "description": "Amazon Music on / off (grey)",
+   "tab": "blue",
+   "on_sig": "4954-4d49b90a",
+   "off_sig": "4523-8262f3f5"
+  },
+  {
    "base": "machinon_Amplifier-color",
    "name": "Amplifier Color",
    "description": "Device that controls audio",
    "tab": "color",
    "on_sig": "5342-ef11ad91",
    "off_sig": "4758-50d2f89a"
+  },
+  {
+   "base": "machinon_AppleTV",
+   "name": "Apple TV",
+   "description": "Apple TV on / off (grey)",
+   "tab": "blue",
+   "on_sig": "3559-763c385a",
+   "off_sig": "3258-03ca9d37"
+  },
+  {
+   "base": "machinon_AppleTV-color",
+   "name": "Apple TV Color",
+   "description": "Apple TV on / off (grey)",
+   "tab": "color",
+   "on_sig": "4176-d2a5c380",
+   "off_sig": "3763-91b8723c"
   },
   {
    "base": "machinon_Aquarium",
@@ -209,6 +249,22 @@
    "off_sig": "770-be4750db"
   },
   {
+   "base": "machinon_BBQ",
+   "name": "BBQ Grill",
+   "description": "BBQ grill on / off (grey)",
+   "tab": "blue",
+   "on_sig": "6812-557c7eac",
+   "off_sig": "6089-6bebd39f"
+  },
+  {
+   "base": "machinon_BBQ-color",
+   "name": "BBQ Grill Color",
+   "description": "BBQ grill on / off (grey)",
+   "tab": "color",
+   "on_sig": "6599-68106651",
+   "off_sig": "5798-3207d6d8"
+  },
+  {
    "base": "machinon_Bed",
    "name": "Bed",
    "description": "Bed / bed occupancy",
@@ -279,6 +335,30 @@
    "tab": "color",
    "on_sig": "5526-200342f2",
    "off_sig": "4793-9c574da8"
+  },
+  {
+   "base": "machinon_CeilingFan",
+   "name": "Ceiling Fan",
+   "description": "Ceiling fan on / off (grey)",
+   "tab": "blue",
+   "on_sig": "4248-4835f1f0",
+   "off_sig": "3846-fee2a742"
+  },
+  {
+   "base": "machinon_CeilingFan-color",
+   "name": "Ceiling Fan Color",
+   "description": "Ceiling fan on / off (grey)",
+   "tab": "color",
+   "on_sig": "4174-c34e7743",
+   "off_sig": "3789-70a31f43"
+  },
+  {
+   "base": "machinon_CeilingLight",
+   "name": "Ceiling Light",
+   "description": "Ceiling light on / off (grey)",
+   "tab": "blue",
+   "on_sig": "6501-fd766a62",
+   "off_sig": "5862-f3f32507"
   },
   {
    "base": "machinon_ChristmasTree-color",
@@ -441,6 +521,22 @@
    "off_sig": "6050-71d6303b"
   },
   {
+   "base": "machinon_DeskFan",
+   "name": "Desk Fan",
+   "description": "Desk fan on / off (grey)",
+   "tab": "blue",
+   "on_sig": "6702-056a6ca6",
+   "off_sig": "5965-ec862ab6"
+  },
+  {
+   "base": "machinon_DeskFan-color",
+   "name": "Desk Fan Color",
+   "description": "Desk fan on / off (grey)",
+   "tab": "color",
+   "on_sig": "6819-f644b02a",
+   "off_sig": "5949-80072b60"
+  },
+  {
    "base": "machinon_DewPoint",
    "name": "Dew Point",
    "description": "Dew-point sensor",
@@ -495,6 +591,22 @@
    "tab": "color",
    "on_sig": "3905-20c7cdda",
    "off_sig": "3443-8c425076"
+  },
+  {
+   "base": "machinon_DisneyPlus",
+   "name": "Disney Plus",
+   "description": "Disney Plus on / off (grey)",
+   "tab": "blue",
+   "on_sig": "5573-3ca6b21e",
+   "off_sig": "5150-d5a4fe2d"
+  },
+  {
+   "base": "machinon_DisneyPlus-color",
+   "name": "Disney Plus Color",
+   "description": "Disney Plus on / off (grey)",
+   "tab": "color",
+   "on_sig": "5263-7f75c726",
+   "off_sig": "4827-169cff43"
   },
   {
    "base": "machinon_Distance",
@@ -567,6 +679,22 @@
    "tab": "fun",
    "on_sig": "6761-6b925d63",
    "off_sig": "6101-d613aacb"
+  },
+  {
+   "base": "machinon_Teapot",
+   "name": "Electric Teapot",
+   "description": "Electric teapot on / off (grey)",
+   "tab": "blue",
+   "on_sig": "4688-7a6619ea",
+   "off_sig": "4230-8365d0e2"
+  },
+  {
+   "base": "machinon_Teapot-color",
+   "name": "Electric Teapot Color",
+   "description": "Electric teapot on / off (grey)",
+   "tab": "color",
+   "on_sig": "4580-9f36463c",
+   "off_sig": "4129-99198ba2"
   },
   {
    "base": "machinon_EnergyCounter",
@@ -671,6 +799,22 @@
    "tab": "color",
    "on_sig": "18233-b07920e3",
    "off_sig": "17577-95b3429d"
+  },
+  {
+   "base": "machinon_FireAlarm",
+   "name": "Fire Alarm",
+   "description": "Fire alarm on / off (grey)",
+   "tab": "blue",
+   "on_sig": "7382-dba127b5",
+   "off_sig": "6446-2e036d9d"
+  },
+  {
+   "base": "machinon_FireAlarm-color",
+   "name": "Fire Alarm Color",
+   "description": "Fire alarm on / off (grey)",
+   "tab": "color",
+   "on_sig": "6665-7b261d3c",
+   "off_sig": "6055-96e0cce1"
   },
   {
    "base": "machinon_FlashHead",
@@ -841,6 +985,22 @@
    "off_sig": "5680-5d2e3858"
   },
   {
+   "base": "machinon_Geothermal",
+   "name": "Geothermal",
+   "description": "Geothermal heat on / off (grey)",
+   "tab": "blue",
+   "on_sig": "3545-12e47dd8",
+   "off_sig": "3096-6e408be4"
+  },
+  {
+   "base": "machinon_Geothermal-color",
+   "name": "Geothermal Color",
+   "description": "Geothermal heat on / off (grey)",
+   "tab": "color",
+   "on_sig": "4032-f97e2317",
+   "off_sig": "3364-5ec14d51"
+  },
+  {
    "base": "machinon_Gizmo",
    "name": "Gizmo",
    "description": "Gizmo (mogwai)",
@@ -871,6 +1031,22 @@
    "tab": "color",
    "on_sig": "4859-2d93cbf1",
    "off_sig": "4365-55296a15"
+  },
+  {
+   "base": "machinon_GreenTech",
+   "name": "Green Tech",
+   "description": "Renewable energy on / off (grey)",
+   "tab": "blue",
+   "on_sig": "5543-2db94611",
+   "off_sig": "4947-44537899"
+  },
+  {
+   "base": "machinon_GreenTech-color",
+   "name": "Green Tech Color",
+   "description": "Renewable energy on / off (grey)",
+   "tab": "color",
+   "on_sig": "5323-41cef20b",
+   "off_sig": "4756-4a67bdd6"
   },
   {
    "base": "machinon_Gremlin",
@@ -1329,6 +1505,22 @@
    "off_sig": "2353-9399def7"
   },
   {
+   "base": "machinon_Netflix",
+   "name": "Netflix",
+   "description": "Netflix on / off (grey)",
+   "tab": "blue",
+   "on_sig": "3278-e9a290c2",
+   "off_sig": "2801-3966d02a"
+  },
+  {
+   "base": "machinon_Netflix-color",
+   "name": "Netflix Color",
+   "description": "Netflix on / off (grey)",
+   "tab": "color",
+   "on_sig": "2421-63e35818",
+   "off_sig": "1942-aae3c106"
+  },
+  {
    "base": "machinon_NinjaTurtle",
    "name": "Ninja Turtle",
    "description": "Ninja Turtle",
@@ -1543,6 +1735,22 @@
    "tab": "color",
    "on_sig": "5718-aacc58b8",
    "off_sig": "5239-a3128d20"
+  },
+  {
+   "base": "machinon_PowerPlant",
+   "name": "Power Plant",
+   "description": "Power plant on / off (grey)",
+   "tab": "blue",
+   "on_sig": "5489-4204dddf",
+   "off_sig": "4843-300a7eab"
+  },
+  {
+   "base": "machinon_PowerPlant-color",
+   "name": "Power Plant Color",
+   "description": "Power plant on / off (grey)",
+   "tab": "color",
+   "on_sig": "6245-c9ea8767",
+   "off_sig": "5689-4f1c64cc"
   },
   {
    "base": "machinon_Predator",
@@ -1863,6 +2071,22 @@
    "tab": "fun",
    "on_sig": "7344-e58de16c",
    "off_sig": "6733-40e5ac44"
+  },
+  {
+   "base": "machinon_Spotify",
+   "name": "Spotify",
+   "description": "Spotify on / off (grey)",
+   "tab": "blue",
+   "on_sig": "6759-79c00e4f",
+   "off_sig": "5795-d30b3739"
+  },
+  {
+   "base": "machinon_Spotify-color",
+   "name": "Spotify Color",
+   "description": "Spotify on / off (grey)",
+   "tab": "color",
+   "on_sig": "8651-bacaaf1a",
+   "off_sig": "7869-57b6a9fc"
   },
   {
    "base": "machinon_StarWars",
@@ -2231,6 +2455,30 @@
    "tab": "fun",
    "on_sig": "10561-5b48adce",
    "off_sig": "8979-3d4c36b9"
+  },
+  {
+   "base": "machinon_YouTube",
+   "name": "YouTube",
+   "description": "YouTube on / off (grey)",
+   "tab": "blue",
+   "on_sig": "6361-65342e11",
+   "off_sig": "5531-78c3d122"
+  },
+  {
+   "base": "machinon_YouTube-color",
+   "name": "YouTube Color",
+   "description": "YouTube on / off (grey)",
+   "tab": "color",
+   "on_sig": "5965-1c3de663",
+   "off_sig": "5470-e77bc10e"
+  },
+  {
+   "base": "machinon_YouTubeMusic",
+   "name": "YouTube Music",
+   "description": "YouTube Music on / off (grey)",
+   "tab": "blue",
+   "on_sig": "6921-f8661d7b",
+   "off_sig": "6097-49275ea2"
   }
  ]
 }

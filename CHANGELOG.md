@@ -4,6 +4,10 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+### Added
+
+- The icon pack gains 17 new icons: power plant, renewable energy, geothermal, ceiling fan, desk fan, ceiling light, electric teapot, BBQ grill, fire alarm, Apple TV, Disney Plus, Amazon, Amazon Music, YouTube, YouTube Music, Spotify and Netflix. Fourteen come in both the Blue UI and Color styles; ceiling light, Amazon Music and YouTube Music are Blue UI only. Install them from the Icons tab under Setup > Settings.
+
 ### Changed
 
 - The manual is now built with [Zensical](https://zensical.org/) instead of MkDocs and Material for MkDocs, which entered maintenance mode in November 2025. Every page renders identically; the no-external-requests guarantee and its CI guard are unchanged.
