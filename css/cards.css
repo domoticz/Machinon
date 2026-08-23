@@ -1166,7 +1166,12 @@ body table#itemtable tr > .options {
    Nothing paints today because the anchor holds only an image, but anything that
    does render from it - a missing icon's alt text, any future label - would be
    white on white. inherit keeps it correct in every scheme instead of naming a
-   color here. */
+   color here.
+
+   These three cells are card CHROME. The same core rule also swallows links
+   inside a Text/Alert device's own DATA (the #status cell and its equivalents
+   on every other surface), which is a separate concern with its own
+   cross-surface selector: see css/links.css. */
 .item td#img a,
 .item td#img1 a,
 .item td#name a {

@@ -13,6 +13,11 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - The manual is now built with [Zensical](https://zensical.org/) instead of MkDocs and Material for MkDocs, which entered maintenance mode in November 2025. Every page renders identically; the no-external-requests guarantee and its CI guard are unchanged.
 - The manual gains an anchor link on every heading, breadcrumbs inside Using the theme, previous/next links at the foot of each page, and click-to-zoom on every screenshot. Screenshots on the Color schemes page no longer navigate away to the raw image; they open in the same overlay as the rest.
 
+### Fixed
+
+- A link inside a Text or Alert device's data is now visible on the light color schemes. It was being drawn in white on a white card, so the link text disappeared while the rest of the device's text read fine. Fixed everywhere such a device is shown: the dashboard, the Utility page, the mobile cards and the Dynamic Dashboard's text, note and gauge widgets.
+- The barometer reading on the Dynamic Dashboard's Barometer widget is readable on the light color schemes. It was drawn in white on a white card, unlike the temperature reading next to it.
+
 ## [2.1.1] - 2026-08-19
 
 ### Fixed

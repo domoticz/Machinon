@@ -55,7 +55,7 @@
    migrate it there. Do NOT bulk-reorder rules into feature files (cascade-regression risk); the
    safe move is later/join-existing, and verify with the sort-permutation + computed-style snapshot.
    Extracted feature files: buttons, nav, cards (device tile/dashboard system), compact, tables (DataTables), charts (Highcharts + zoom), login
-   (glass-login + legacy #login), energy, logpage, setpoint, search, device-status. */
+   (glass-login + legacy #login), energy, logpage, setpoint, search, device-status, links. */
 @import url("css/buttons.css");
 @import url("css/nav.css");
 @import url("css/cards.css");
@@ -70,6 +70,10 @@
 @import url("css/device-status.css");
 @import url("css/users.css");
 @import url("css/theme-hub.css");
+/* links.css last of the feature files: it undoes core's unscoped `a:link` on the
+   surfaces that need it, so nothing extracted above should be able to re-break an
+   anchor after it. Its rules win on specificity anyway, not on this position. */
+@import url("css/links.css");
 
 /* Display sidemenu on low resolution devices */
 @import url("css/sidemenu.css") (max-width: 979px);

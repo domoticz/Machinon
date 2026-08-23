@@ -84,7 +84,13 @@ if [ -n "$out" ]; then
 fi
 
 # Retired family names must not appear anywhere in the repo (js/html/json/css).
-out=$(grep -rn "main-font" --include="*.css" --include="*.js" --include="*.html" --include="*.json" . | grep -v "^\./docs/")
+# docs/ is excluded because the manual quotes the retired names when it explains
+# the migration; build/ because mkdocs.yml renders docs/ into build/docs, and a
+# maintainer whose checkout also holds the gitignored docs/superpowers/ planning
+# pages would otherwise fail this guard (and, through it, build-release.sh) on
+# generated copies of prose that is already allowed at its source. CI never sees
+# those pages, so this only ever went red locally.
+out=$(grep -rn "main-font" --include="*.css" --include="*.js" --include="*.html" --include="*.json" . | grep -vE "^\./(docs|build)/")
 if [ -n "$out" ]; then
   fail=1
   echo "$out" | sed -E "s|^([^:]+:[0-9]+):|\1: retired family name: |"
