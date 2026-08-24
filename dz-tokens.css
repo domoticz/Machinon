@@ -325,6 +325,13 @@
        surfaces; dark.css resets to none. Consumed by css/users.css. */
     --dz-ui-icon-filter:        invert(1);
 
+    /* Core's Bootstrap 2 glyphicon sprite (images/glyphicons-halflings.png) is the
+       OPPOSITE asset: DARK glyphs on a transparent ground, correct on light surfaces,
+       invisible on dark ones. Do not reuse --dz-ui-icon-filter for it - that token's
+       polarity is inverted relative to this one. dark.css sets invert(1).
+       Consumed by css/events.css. */
+    --dz-glyph-sprite-filter:   none;
+
     /* Track of core's bar-ranges gauge (style.css, .dz-uw-bar; repositioned to the card top
        edge in css/cards.css). Slightly stronger than core's 0.15 so an empty gauge stays
        visible against the card surface; neutral grey works on both schemes, so dark.css

@@ -1,0 +1,176 @@
+/* Events page (#/Events): make core's editor CHROME follow the active scheme.
+ *
+ * WHY THIS FILE EXISTS. Core's app/events/Events.css hardcodes a light palette
+ * (#CCC, #e8e8e8, #333, white, blue) for every surface on this page. Machinon
+ * paints its own foregrounds scheme-aware, so in a dark scheme the two owners
+ * collide, in whichever direction the pairing happens to run. Measured
+ * 2026-08-24 on #/Events, dark scheme:
+ *
+ *   core foreground on THEME background -> Bootstrap 2's sprite
+ *   (images/glyphicons-halflings.png, bootstrap.css:1509 `[class^="icon-"]`) is a
+ *   dark-glyph raster, rgb(48,48,48). On the tree toolbar and the splitter it
+ *   lands dark-on-dark: Expand All 1.37:1, Collapse All 1.38:1, the Events
+ *   splitter 1.04:1, and the same splitter on #/Devices 1.18:1.
+ *
+ *   theme foreground on CORE background -> the ghost-button rule in
+ *   css/buttons.css puts the dark scheme's light text on core's hardcoded
+ *   #e8e8e8 file header: "Disabled", "A-", "A+" and "Help" all at 1.03:1.
+ *
+ * WHAT THIS FILE DOES, and deliberately does NOT. The chrome (script tree, tabs,
+ * file header, status bar, context menu) follows the Machinon scheme. The CODE
+ * PANE does not: the Ace editor carries the user's own persisted theme
+ * (localStorage `domoticz_ace_settings`, 12 choices, 6 light and 6 dark, default
+ * ace/theme/xcode - app/events/EventViewer.js:23-42). Overriding that would
+ * silently overwrite a preference the user set by hand, so every `.ace_*`
+ * selector and the editor content div are left alone. A light code pane inside
+ * dark chrome is therefore expected, and is the user's choice to change.
+ *
+ * Blockly (.blocklyToolboxDiv, .blocklyTreeLabel) is also left alone: the rig
+ * carries no Blockly event, so nothing here was measured against it.
+ *
+ * SPECIFICITY. Core's Events.css loads BEFORE custom.css (index.html:97 vs 99),
+ * so an equal-specificity rule here wins by source order; !important appears
+ * only where core itself used it.
+ */
+
+/* Chrome tokens, scoped to the page. Local names so nothing here can leak into
+   another surface that happens to reuse a global token. */
+.events-editor,
+.events-context-menu {
+    --dz-events-chrome-bg:     var(--dz-widget-bg);
+    --dz-events-chrome-text:   var(--dz-body-text);
+    --dz-events-chrome-muted:  var(--secondary-text-color);
+    --dz-events-chrome-border: var(--dz-border-color);
+    /* Inactive tabs sit one step off the chrome surface, the way core's #CCC sat
+       one step off its #e8e8e8. Mixing toward the text colour darkens on light
+       schemes and lightens on dark ones, so one expression covers both. */
+    --dz-events-tab-bg:        color-mix(in srgb, var(--dz-widget-bg) 90%, var(--dz-body-text));
+    --dz-events-select-bg:     color-mix(in srgb, var(--dz-accent-color) 15%, transparent);
+}
+
+/* ---- script tree ------------------------------------------------------- */
+
+/* Core: rgba(255,255,255,0.8). Over a dark body that composites to
+   rgb(207,208,210), i.e. the single largest light slab on the page. */
+.events-editor-tree {
+    background-color: var(--dz-events-chrome-bg);
+}
+
+.events-editor-tree-item__file:link,
+.events-editor-folder__header,
+.events-editor-folder__header:link,
+.events-editor-folder__header:visited {
+    color: var(--dz-events-chrome-text);
+}
+
+/* Core used the keyword `blue`, which has no contrast guarantee on a dark
+   surface (measured 2.4:1 on #18202b). The accent tracks the active scheme. */
+.events-editor-tree-item__file:hover,
+.events-editor-tree-item__file:active,
+.events-editor-folder__header:hover,
+.events-editor-folder__header:active,
+.events-editor-tree-item_active .events-editor-tree-item__file:link {
+    color: var(--dz-accent-color);
+}
+
+.events-editor-tree-item_selected,
+.events-editor-folder.drag-over {
+    background-color: var(--dz-events-select-bg);
+}
+
+.events-editor-folder.drag-over > .events-editor-folder__header {
+    color: var(--dz-accent-color);
+}
+
+/* ---- open-file tabs ---------------------------------------------------- */
+
+.events-editor__file {
+    background-color: var(--dz-events-tab-bg);
+    border-color: var(--dz-events-chrome-border);
+    color: var(--dz-events-chrome-text) !important; /* core sets #333 !important */
+}
+
+.events-editor__file_active {
+    background-color: var(--dz-events-chrome-bg);
+}
+
+/* ---- file header / editor toolbar -------------------------------------- */
+
+.events-editor-file__header,
+.events-editor-file__content-table {
+    background-color: var(--dz-events-chrome-bg);
+    color: var(--dz-events-chrome-text);
+}
+
+.events-editor-file__name,
+.events-editor-file__type > select,
+.ace-settings__theme,
+.events-editor__search {
+    background-color: var(--dz-input-bg);
+    color: var(--dz-input-text);
+    border-color: var(--dz-input-border);
+}
+
+.events-editor-file__type,
+.ace-settings__font-size {
+    color: var(--dz-events-chrome-text);
+}
+
+/* ---- Ace status bar ---------------------------------------------------- */
+
+/* Ace's ext-statusbar element, but styled entirely by core's Events.css:443, so
+   it is chrome rather than editor: it sits outside the code pane's own theme. */
+.ace-statusbar {
+    background-color: var(--dz-events-chrome-bg);
+    border-top-color: var(--dz-events-chrome-border);
+    color: var(--dz-events-chrome-muted);
+}
+
+/* ---- splitters --------------------------------------------------------- */
+
+/* Core paints this rgba(255,255,255,0.1) with `color: white`, which is a
+   dark-theme assumption: on a light scheme the white text vanishes.
+
+   The Devices page's splitter is NOT listed here. It is always a direct child of
+   .page-devices, so css/buttons.css's `.page-devices > .splitter` (0,2,0) already
+   owns its surface and outranks anything this file could write at (0,1,1);
+   adding it would be dead code. Only its sprite needs help, below. */
+.events-editor__splitter {
+    background-color: color-mix(in srgb, var(--dz-body-text) 10%, transparent);
+    color: var(--dz-events-chrome-text);
+}
+
+.events-editor__splitter:hover {
+    background-color: color-mix(in srgb, var(--dz-body-text) 22%, transparent);
+}
+
+/* ---- core's Bootstrap 2 glyphicon sprite ------------------------------- */
+
+/* The sprite is a dark-glyph raster with a transparent ground, so inverting the
+   element flips the glyph and leaves the ground alone. --dz-glyph-sprite-filter
+   is `none` on light schemes and `invert(1)` on dark (dz-tokens.css / dark.css).
+   It is the OPPOSITE polarity to --dz-ui-icon-filter, which exists because
+   jQuery UI ships WHITE sprites; the two must not be confused or reused.
+   invert(1) on rgb(48,48,48) gives rgb(207,207,207), which sits next to the dark
+   scheme's own body text rgb(220,230,240). Core also ships
+   glyphicons-halflings-white.png, but that reads at 13.8-18.2:1, brighter than
+   anything else on the page, and would add an asset-path dependency.
+
+   SCOPED, never global: the theme has its own icon-* classes (.icon-grid,
+   .icon-pack, .icon-style-btn, .icon-styles, .icon-extras-note, all in the Theme
+   Hub) which a bare [class^="icon-"] rule would invert too. */
+.events-editor [class^="icon-"],
+.events-editor [class*=" icon-"],
+.events-context-menu [class^="icon-"],
+.events-context-menu [class*=" icon-"],
+button.splitter [class^="icon-"],
+button.splitter [class*=" icon-"] {
+    filter: var(--dz-glyph-sprite-filter);
+}
+
+/* The Wizard tab's Font Awesome icon is a glyph, not a sprite, so it takes a
+   colour rather than a filter, and must not be inverted with the sprites. */
+.events-editor__file .fa-wand-magic-sparkles {
+    color: var(--dz-events-chrome-text);
+    filter: none;
+}

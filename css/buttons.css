@@ -825,16 +825,16 @@ a.btnstyle {
 /* Events editor open-file tab close-x (Events.html:185, Events.css:91-102):
    bare <button>&times;</button>, no color declared, so it renders the
    browser's UA default button color (rgb(0,0,0)) rather than anything this
-   theme controls. The parent tab (.events-editor__file) hardcodes a fixed
-   light chip (background #CCC / #e8e8e8, color #333 !important) that does
-   NOT adapt to the active scheme, so the close-x never actually goes
-   invisible on dark here; a literal var(--dz-body-text) swap would be the
-   regression instead (dark scheme's body-text resolves to white, which
-   would sit white-on-#e8e8e8). Hardened to an explicit value instead,
-   matching the parent chip's fixed-light convention rather than leaving it
-   to an implicit, browser-dependent UA default. */
+   theme controls.
+
+   This used to be pinned to a literal #333, on the reasoning that the parent
+   tab (.events-editor__file) hardcoded a fixed light chip that never adapted
+   to the scheme, so a var(--dz-body-text) swap would have painted white on
+   #e8e8e8. That premise no longer holds: css/events.css now makes the tab
+   itself scheme-aware, so the close-x must track the tab it sits on or it
+   becomes the dark-on-dark case the pin was written to avoid. */
 .events-editor__file-close {
-    color: #333;
+    color: var(--dz-events-chrome-text, #333);
 }
 
 /* ---- Devices splitter, Events Wizard footer, Events toolbar icon parity,

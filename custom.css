@@ -70,6 +70,7 @@
 @import url("css/device-status.css");
 @import url("css/users.css");
 @import url("css/theme-hub.css");
+@import url("css/events.css");
 /* links.css last of the feature files: it undoes core's unscoped `a:link` on the
    surfaces that need it, so nothing extracted above should be able to re-break an
    anchor after it. Its rules win on specificity anyway, not on this position. */
