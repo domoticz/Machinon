@@ -53,8 +53,35 @@ body.dashMobile table.mobileitem > thead > tr > th:first-of-type {
     flex-grow: 1;
 }
 
+/* The -2px shadow fills the strip of page background that shows ABOVE the
+   section banner, which the owner reported twice (2026-08-08, 2026-08-24).
+
+   It is core's own two rules disagreeing about this table's background:
+   `table.mobileitem` (0,1,1) sets `background-color: transparent`, which beats
+   `.mobileitem` (0,1,0) setting `background-color: var(--dz-body-bg)`
+   (style.css:751 and :759). The table also carries `border-spacing: 0 2px`, and
+   that vertical spacing applies BEFORE the first row as well as between rows, so
+   2px of the table's box sits above the banner showing whatever is behind the
+   transparent table: the page background. Measured at 390px, rgb(244,248,252)
+   between the card's rounded top edge and the blue bar.
+
+   border-spacing cannot be removed only from the leading edge, and those same
+   2px ARE the row dividers further down (measured 2.00px between every body
+   row, against `--dz-panel-bg` rows), so zeroing it would flatten the list. A
+   shadow paints into that gap without touching layout, and the table's
+   `overflow: hidden` + `border-radius` clips it to the rounded corner, so the
+   blue follows the curve instead of squaring it off. Verified: the strip is
+   gone and the row gaps are still 2.00px. */
 body.dashMobile table.mobileitem th {
-    box-shadow: none;
+    /* dz-shadow-exception: not elevation. Zero blur, zero spread, a flat -2px
+       offset used purely to FILL the border-spacing gap described above, in the
+       banner's own accent. It is not a member of the elevation, status-glow or
+       ring families and must not be read as a depth cue or retuned with them.
+       The card's real elevation is --dz-elev-popup on the table (DESIGN.md
+       Elevation, level 2, which names "mobile item cards"); this declaration
+       does not touch it, verified byte-identical in an A/B of the pixel column
+       above the card edge. */
+    box-shadow: 0 -2px 0 var(--dz-accent-color);
     display: inline;
     text-shadow: none;
     background: var(--dz-accent-color);

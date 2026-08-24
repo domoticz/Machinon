@@ -21,6 +21,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - The arrow that collapses the device list on the Devices page is visible again on the dark color schemes. It was drawn in a dark grey on a dark background.
 - The sun in the sunrise and sunset line is now the same color everywhere. Domoticz draws that line two different ways, and on the Events page the sun was a fixed bright yellow that was all but invisible on the light color schemes, instead of the themed sun the device pages show.
 - Counter chips, such as the number of scripts in a folder on the Events page, are readable again. They were drawn in the page's normal text color on top of the accent color, which left dark text on a mid-blue chip in the light schemes and light text on it in the dark ones.
+- On phones, the colored bar at the top of each dashboard section now reaches the top edge of its card. A thin strip of page background used to show above it, so the bar looked detached from the card it belongs to.
 
 ## [2.1.1] - 2026-08-19
 
