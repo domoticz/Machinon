@@ -4,6 +4,10 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+### Changed
+
+- The theme's images and icon pack are about 2.8 MB smaller, which makes the theme quicker to load on a phone and over a slow connection. Nothing looks different: every icon is the same picture, stored more efficiently. If you have already installed icons from the pack, the Icons tab will show them as having an update available; reinstalling is optional and changes nothing you can see.
+
 ## [2.1.2] - 2026-08-24
 
 ### Added
