@@ -4,6 +4,7 @@ Run: python3 -m pytest scripts/test_check_png_optimized.py -q"""
 import importlib.util
 import pathlib
 import struct
+import subprocess
 import zlib
 
 _SPEC = importlib.util.spec_from_file_location(
@@ -68,3 +69,22 @@ def test_corrupt_file_is_skipped_without_failing(tmp_path, capsys):
     (tmp_path / "images" / "bad.png").write_bytes(b"\x89PNG\r\n\x1a\n" + b"garbage")
     assert check.main(str(tmp_path)) == 0
     assert "SKIPPED" in capsys.readouterr().err
+
+
+def test_git_tracked_png_outside_any_named_directory_is_measured(tmp_path, capsys):
+    """Coverage comes from git, not a hardcoded directory list.
+
+    docs/assets/favicon.png shipped unoptimised for a whole release because
+    the old check only walked images, iconpack, docs/screenshots and
+    site/assets. This plants a tracked PNG under a directory none of those
+    named, and expects it to show up anyway.
+    """
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    other = tmp_path / "docs" / "assets"
+    other.mkdir(parents=True)
+    _fat_png(other / "favicon.png")
+    subprocess.run(["git", "add", "docs/assets/favicon.png"], cwd=tmp_path, check=True)
+    assert check.main(str(tmp_path)) == 0
+    out = capsys.readouterr().out
+    assert "favicon.png" in out
+    assert "still recoverable" in out

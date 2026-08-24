@@ -7,18 +7,58 @@ other way, or a newer oxipng that learned a better trick. A blocking gate here
 would turn red on a version bump nobody asked for, which is exactly the drift
 trap an advisory check avoids.
 
-The three options below duplicate png_opt.py's policy on purpose: that module
-lives in the icon workspace, which is not part of this repo and is not shipped,
-so there is no import to share. Keep them in step with it.
+Coverage is every PNG this repo tracks in git (`git ls-files`), not a
+hardcoded list of directories. A hardcoded list is exactly what let
+docs/assets/favicon.png slip past this check for a whole release: it lived
+outside every directory the old list named. Enumerating tracked files instead
+means new art is covered the moment it is committed, wherever it lands, with
+nothing here to remember to update. When pointed at a directory that is not a
+git work tree, such as a throwaway fixture in the test suite, it falls back to
+walking that directory for PNGs instead, so it still has something to measure.
+
+OPTS below duplicates png_opt.py's optimisation policy on purpose: that module
+lives in the icon workspace, which is not part of this repo and is not
+shipped, so there is no import to share. Keep it in step with it.
 """
 import os
+import subprocess
 import sys
 
 import oxipng
 
-DIRS = ("images", "iconpack", "docs/screenshots", "site/assets")
 OPTS = {"level": 6, "strip": oxipng.StripChunks.safe(), "optimize_alpha": True}
 TOP = 5
+
+
+def tracked_pngs(root):
+    """Every PNG under root, git-tracked ones by preference.
+
+    `git ls-files` gives every PNG this repo actually ships or documents,
+    by construction, so there is no directory list to keep in step with
+    where art happens to live. A pathspec with no slash matches at any
+    depth, so a single "*.png" pattern reaches every tracked PNG regardless
+    of directory.
+
+    root not being a git work tree (a pytest tmp_path, most likely) falls
+    back to a plain walk, so the test suite can still point this at a
+    throwaway tree that was never `git init`-ed and get a real answer.
+    """
+    try:
+        out = subprocess.run(
+            ["git", "-C", root, "ls-files", "-z", "*.png"],
+            capture_output=True, check=True,
+        )
+        return sorted(
+            os.path.join(root, name.decode())
+            for name in out.stdout.split(b"\0") if name
+        )
+    except (subprocess.CalledProcessError, OSError):
+        found = []
+        for dirpath, _dirnames, filenames in os.walk(root):
+            for fn in filenames:
+                if fn.lower().endswith(".png"):
+                    found.append(os.path.join(dirpath, fn))
+        return sorted(found)
 
 
 def measure(path):
@@ -36,23 +76,18 @@ def measure(path):
 def main(root="."):
     before = after = files = 0
     worst = []
-    for d in DIRS:
-        for dirpath, _dirnames, filenames in os.walk(os.path.join(root, d)):
-            for fn in sorted(filenames):
-                if not fn.lower().endswith(".png"):
-                    continue
-                path = os.path.join(dirpath, fn)
-                b, a = measure(path)
-                if not b:
-                    continue
-                files += 1
-                before += b
-                after += a
-                if b - a:
-                    worst.append((b - a, os.path.relpath(path, root)))
+    for path in tracked_pngs(root):
+        b, a = measure(path)
+        if not b:
+            continue
+        files += 1
+        before += b
+        after += a
+        if b - a:
+            worst.append((b - a, os.path.relpath(path, root)))
     if not files:
         print("check-png-optimized: no PNGs found under {} (wrong working "
-              "directory?)".format(", ".join(DIRS)))
+              "directory?)".format(root))
         return 0
     saved = before - after
     print("check-png-optimized: {} PNGs, {:.2f} MB committed, {:.0f} KB ({:.1f}%) "
