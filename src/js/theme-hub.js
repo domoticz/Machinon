@@ -207,7 +207,25 @@ function dzBuildThemeHub(routeHost) {
     var panel = document.createElement("div");
     panel.className = "dz-hub-panel";
 
+    /* Groups flagged adminOnly are omitted ENTIRELY for a non-admin session,
+       tab and section both. The one such group today is "iconpacks": installing
+       a pack is an instance-level write a non-admin cannot make, so a rendered
+       installer could only fail. Dropped rather than locked, following the
+       promote button (dzHubActionsBlock, `mode.admin && mode.perUser`) which is
+       likewise absent rather than disabled; the house-scope ROWS lock-and-chip
+       instead (dzRenderHubRow) because a house row still shows a real, current
+       value worth reading, which an installer does not.
+
+       dzSettingsMode().admin is read here at build time, matching all three
+       existing gates. dzBuildThemeHub runs from dzOpenThemeHub (a user action,
+       long after boot), not at boot, so window.my_config is already set and the
+       Angular-permissions race dzWaitForAdminKnown exists for does not apply -
+       measured: rights resolve to 2/1 correctly for both sidecar identities at
+       hub-open time. Should the hub ever be built at boot instead, this read
+       becomes racy and must move to dzWaitForAdminKnown. */
+    var hubIsAdmin = (typeof dzSettingsMode === "function") ? dzSettingsMode().admin !== false : true;
     THEME_MANIFEST.forEach(function (group) {
+        if (group.adminOnly && !hubIsAdmin) return;
         var item = document.createElement("button");
         item.type = "button";
         item.className = "dz-hub-tab";
@@ -783,6 +801,17 @@ function dzHubToggleImageEditor(show) {
 function dzHubShowGroup(groupId) {
     var hub = document.getElementById(DZ_HUB_ID);
     if (!hub) return;
+    /* Asking for a group this session does not HAVE would otherwise hide every
+       section and mark no tab active, leaving a blank hub for the rest of the
+       visit. Reachable for real: an adminOnly group is absent for a non-admin
+       (dzBuildThemeHub), so a bookmarked or shared #/Theme/iconpacks link, or
+       any stale deep link, lands here. Fall back to the first group that does
+       exist rather than rendering nothing. */
+    if (!hub.querySelector('.dz-hub-section[data-group="' + groupId + '"]')) {
+        var first = hub.querySelector(".dz-hub-section[data-group]");
+        if (!first) return;
+        groupId = first.getAttribute("data-group");
+    }
     dzHubActiveGroup = groupId;
     hub.querySelectorAll(".dz-hub-section").forEach(function (s) {
         s.style.display = s.getAttribute("data-group") === groupId ? "" : "none";

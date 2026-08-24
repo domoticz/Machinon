@@ -397,6 +397,16 @@ var THEME_MANIFEST = [
     {
         id: "iconpacks",
         label: "Icon packs",
+        /* Admin-only: installing a pack writes to the instance, which a
+           non-admin session cannot do, so the whole group (tab AND section) is
+           omitted from the hub for them rather than shown and left to fail.
+           dzBuildThemeHub reads this; see its comment for why the group is
+           dropped rather than locked, and for the deep-link fallback. This is
+           the only group carrying the flag today, but it is a flag rather than
+           an id check so a second one costs one line here.
+           theme-manifest.js's own contract only requires id/label/entries[] per
+           group, so the extra property is inert to it. */
+        adminOnly: true,
         entries: [
             {
                 key: "iconpacks", storageKey: null, control: "custom",
