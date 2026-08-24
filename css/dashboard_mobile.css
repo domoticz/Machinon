@@ -15,6 +15,33 @@ body.dashMobile section.dashCategory div.row:not(.divider):first-of-type {
     display: none;
 }
 
+/* Give the section room to PAINT the card shadow it was clipping.
+   Core's `SECTION.dashCategory { overflow: hidden }` (style.css:2280) sits at
+   exactly the card's own width - measured at 390px, section and table.mobileitem
+   both span 17.39..372.61 - so a card carrying --dz-elev-popup (0 2px 6px) has
+   ZERO horizontal headroom and its shadow is sliced off flat down both sides.
+   Only the bottom survived, because the 2px y-offset plus the section's trailing
+   16px left room there. Owner-visible as a hard vertical cut beside every card.
+
+   Padding opens the clip box; the matching negative margin puts the section's
+   outer edges back where they were, so the card does not move and does not
+   resize: `table.mobileitem` is width:100% of the CONTENT box, which is
+   unchanged (371.22 border box - 16 padding = the original 355.22). Verified:
+   card left/width identical before and after, shadow feathers 244->235 across
+   the edge instead of jumping 244->234, and document scrollWidth stays 390 at a
+   390 viewport, so no horizontal overflow is introduced.
+
+   overflow:hidden is deliberately KEPT: the theme leans on it further down this
+   file as the backstop for an oversized status cell blowing the table out. That
+   backstop now trips 8px later, which is the price of the shadow; the real fix
+   for that case is the white-space/overflow-wrap rule on td#status, not this. */
+body.dashMobile section.dashCategory {
+    padding-left: var(--dz-mobile-section-shadow-gutter);
+    padding-right: var(--dz-mobile-section-shadow-gutter);
+    margin-left: calc(-1 * var(--dz-mobile-section-shadow-gutter));
+    margin-right: calc(-1 * var(--dz-mobile-section-shadow-gutter));
+}
+
 /* Mobile top bar clock/sunrise/sunset (#topBar, views/dashboard_mobile.html).
    Core paints this bar for its own dark header (style.css: #tbSunGroup #ccc,
    .fa-sun yellow) and loads after the theme, so a same-specificity theme rule

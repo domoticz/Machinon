@@ -308,6 +308,14 @@
     --dz-card-compact-col-widths-triple: 58px 45px 58px;
 
     /* Mobile card (table.mobileitem, css/dashboard_mobile.css - a third card-rendering context) */
+
+    /* Horizontal headroom opened inside core's SECTION.dashCategory{overflow:hidden}
+       so the mobile card's --dz-elev-popup shadow (0 2px 6px) can paint down both
+       sides instead of being sliced off flat. 8px covers the 6px blur with a
+       margin; taken back out with an equal negative margin in
+       css/dashboard_mobile.css so the card neither moves nor resizes. */
+    --dz-mobile-section-shadow-gutter:      8px;
+
     --dz-mobile-card-value-min-height:      25px;
     --dz-mobile-card-name-badge-size:       18px;
     --dz-mobile-card-status-max-width:      60%;
