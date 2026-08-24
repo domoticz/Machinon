@@ -7,6 +7,13 @@ browsable library of over 250 device icons, and you install only the ones you ac
 one at a time, onto individual devices.
 Everything else in your dashboard keeps its existing icon.
 
+## You need admin rights
+
+Installing an icon changes it for everyone using this Domoticz, so it is an administrator action.
+If your account is not an administrator, the **Icon packs** tab is not shown in the Theme Hub at
+all: the rest of the hub works as normal, and the icons an administrator has installed still show
+on your devices.
+
 ## The three tabs
 
 Browse the library from the Theme Hub's **Icon packs** tab, which sorts icons into three tabs:

@@ -23,6 +23,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - Counter chips, such as the number of scripts in a folder on the Events page, are readable again. They were drawn in the page's normal text color on top of the accent color, which left dark text on a mid-blue chip in the light schemes and light text on it in the dark ones.
 - On phones, the colored bar at the top of each dashboard section now reaches the top edge of its card. A thin strip of page background used to show above it, so the bar looked detached from the card it belongs to.
 - On phones, the soft shadow around each dashboard card is no longer sliced off down its left and right sides. The card sat in a container exactly its own width, so only the shadow below it had room to show, which left a hard vertical edge beside every card.
+- The Icon packs tab is now shown only to administrators. Installing an icon changes it for everyone using this Domoticz, so it is an administrator action, and other users were being offered an installer that could only fail. The rest of the Theme Hub is unchanged for them, and icons an administrator has installed still show on their devices.
 
 ## [2.1.1] - 2026-08-19
 

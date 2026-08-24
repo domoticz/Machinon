@@ -50,7 +50,7 @@ http://your-domoticz:8080/#/Theme/colors
 | Charts | `#/Theme/charts` |
 | Background | `#/Theme/background` |
 | Colors and schemes | `#/Theme/colors` |
-| Icon packs | `#/Theme/iconpacks` |
+| Icon packs (administrators only) | `#/Theme/iconpacks` |
 | About | `#/Theme/about` |
 
 Reloading keeps you where you were, and the browser's back button works the
@@ -71,7 +71,7 @@ The Theme Hub is organized into nine tabs, in this order:
 | **Charts and log** | Device history charts: range bands on log graphs. |
 | **Background and branding** | The page background image and the navbar logo. |
 | **Colors and schemes** | Pick a built-in color scheme, or design your own and save it as a preset. |
-| **Icon packs** | Browse the icon library and install icons one at a time onto individual devices. |
+| **Icon packs** | Browse the icon library and install icons one at a time onto individual devices. Shown to administrators only, since an installed icon changes for everyone. |
 | **About** | The theme's version, credits, links, and maintenance actions such as resetting settings back to their defaults. |
 
 Each row also carries a small tag showing which part of the interface it affects (for example
