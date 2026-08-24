@@ -1,0 +1,51 @@
+name: PNG optimisation
+
+# Advisory-only, never fails the build: reports how much oxipng could still
+# shave off the committed art (scripts/check-png-optimized.py). The icon
+# engine writes optimised art on the way in, so this exists to catch drift
+# from a PNG that arrived some other way, or a newer oxipng that learned a
+# better trick.
+#
+# Split out of validate.yml on purpose. Measured: 1m44s locally over 964
+# PNGs at oxipng level 6, so roughly 2.5 to 4 minutes on a GitHub runner.
+# Running that on every push, including a CSS or markdown-only commit, buys
+# nothing: it reports "0 KB" on nearly every run because the tree is
+# optimal and stays that way. The `paths` filter below limits the trigger
+# to commits that actually touch a PNG, so the full oxipng-level-6 scan
+# only runs when there is something new for it to measure.
+#
+# The `**.png` pattern matches at any depth (root or nested), which lines
+# up with how the check itself finds files: it enumerates every tracked
+# PNG via `git ls-files '*.png'` rather than a hardcoded directory list, so
+# the same "anywhere in the repo" reach applies to both the trigger and the
+# scan.
+on:
+  push:
+    paths: ["**.png"]
+  pull_request:
+    paths: ["**.png"]
+  workflow_dispatch: # manual whole-tree answer between art changes, without pushing a throwaway PNG edit
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Install oxipng (pinned version, matching requirements-dev.txt)
+        run: |
+          set -euo pipefail
+          version=$(grep -oP '^pyoxipng==\K.*' requirements-dev.txt)
+          pip install "pyoxipng==${version}"
+
+      - name: PNG optimisation is holding (advisory, never fails)
+        run: python3 scripts/check-png-optimized.py

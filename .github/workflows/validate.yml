@@ -47,8 +47,12 @@ jobs:
       - name: Settings reference covers the manifest
         run: python3 scripts/check-settings-docs.py
 
-      - name: PNG optimisation is holding (advisory, never fails)
-        run: python3 scripts/check-png-optimized.py
+      # scripts/check-png-optimized.py itself runs in .github/workflows/
+      # png-optimized.yml, not here: a full oxipng-level-6 scan over every
+      # tracked PNG takes minutes and only ever changes when a PNG changes,
+      # so it is gated on that instead of running on every push. Its unit
+      # test above still runs on every push; only the slow full-tree scan
+      # moved.
 
       - name: Manual builds clean
         run: zensical build --clean --strict
