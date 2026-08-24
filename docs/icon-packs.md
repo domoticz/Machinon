@@ -38,8 +38,14 @@ image swaps between the two so you can check both before installing.
 3. Click the install button on its card. Once installed, the card is marked **Installed**, and
    the button switches to a remove action.
 
+If a newer version of an icon you already installed becomes available, such as after a theme
+update, its card stays marked **Installed**, but the install button turns into a blue refresh
+button instead of staying disabled. Click it to reinstall the icon with the newer artwork; your
+devices keep showing the older version until you do.
+
 There's also an **Install / update all** button that installs (or refreshes) every icon
-currently shown, useful if you've filtered down to a search result and want the whole set.
+currently shown, useful if you've filtered down to a search result and want the whole set, or
+to bring every outdated icon up to date at once.
 
 ![Icon pack installer in the Theme Hub](screenshots/icon-packs.png)
 
