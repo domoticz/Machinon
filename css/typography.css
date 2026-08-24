@@ -70,15 +70,15 @@ button, input, select, textarea {
     font-family: var(--dz-font-family);
 }
 
-/* Headings: css/style.css sets Arial directly on h1/h2/h3, Oswald on
-   .brand h1 (the always-visible navbar "Domoticz" wordmark), and Georgia on
-   .brand h2 (the "*" version marker beside it). The .brand descendants need
-   their own compound selectors: at (0,1,1) each core rule outranks a bare
-   h1/h2 (0,0,1), so the type-only group cannot reach them. h4 has no core
-   rule targeting it and already inherits Inter correctly. */
-h1, h2, h3,
-.brand h1,
-.brand h2 {
+/* Headings: css/style.css sets Arial directly on h1/h2/h3. h4 has no core rule
+   targeting it and already inherits Inter correctly.
+
+   The `.brand h1` / `.brand h2` compound selectors that used to ride along here
+   are gone: they existed because core sets Oswald on the navbar "Domoticz"
+   wordmark and Georgia on the version marker beside it, at (0,1,1), which a bare
+   h1/h2 (0,0,1) cannot outrank. css/nav.css now hides `.navbar .brand` outright,
+   so neither element ever renders and neither override has anything to reach. */
+h1, h2, h3 {
     font-family: var(--dz-font-family);
 }
 

@@ -1,14 +1,34 @@
 /*
   nav.css - top navbar, brand/logo, dropdown menus, and .sub-tabs / .nav-tabs (Machinon's flat
   underline tab style that overrides core's glass tabs), plus the banner header + the red
-  sub-tabs Apply button. Selectors are nav-specific (.navbar/.sub-tabs/.nav-tabs/.brand). The one
-  responsive `.navbar .brand` override stays in custom.css's Media Queries (breakpoint-grouped).
+  sub-tabs Apply button. Selectors are nav-specific (.navbar/.sub-tabs/.nav-tabs/.brand). .brand is
+  hidden outright (see the block below); its former positioning rule here and its responsive
+  override in custom.css's Media Queries both went with it.
 */
-.brand img,
-.brand h1,
-.brand h2 {
-    display: none;
-  /*Standart header logo*/
+/* Core's brand block (www/index.html:1273) is the Domoticz logo, the "Domoticz"
+   wordmark and the version, wrapped in an <a href="#Dashboard">. Machinon draws
+   its own logo instead (img.header__icon in header.logo, a sibling of .navbar,
+   NOT a descendant of .brand), so the whole block is hidden.
+
+   This used to hide only the three CHILDREN and then force the emptied parent
+   visible with `display: block !important`, which left a 100x20 anchor painting
+   nothing at (218,5), immediately right of the logo. Invisible but live: a click
+   at its centre navigated from #/Utility to #/Dashboard, measured 2026-08-24.
+   Hiding the parent removes the element, the dead click target and the need for
+   the child rule in one go. Verified: exactly one .brand exists per route
+   (always this anchor, always inside .navbar) across six routes, so nothing else
+   is caught, and the Machinon logo is unaffected.
+
+   !important is load-bearing, not a specificity shortcut. Core's markup is
+   `class="brand hidden-phone"`, and Bootstrap's responsive utility
+   `.hidden-tablet, .hidden-phone { display: inline !important }` applies at
+   (max-width: 979px). An !important declaration outranks a non-important one
+   whatever the specificity, so a plain `display: none` here is beaten below
+   980px and the element renders again (measured: 120x40, parked off-screen at
+   x=-675). Same reason the .navbar .divider-vertical rule further down carries
+   one. */
+.navbar .brand {
+    display: none !important;
 }
 
 img.header__icon {
@@ -127,16 +147,6 @@ div.menu-toggle.scrolled {
     display: flex;
     justify-content: space-around;
     float: none;
-}
-
-.navbar .brand {
-    position: absolute;
-    top: 5px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 0;
-    display: block !important;
-    margin: 0;
 }
 
 .navbar .divider-vertical {

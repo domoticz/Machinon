@@ -1032,14 +1032,6 @@ select.ui-corner-all option:hover {
 /* Watermarks */
 /* Media Queries */
 
-@media (min-width: 768px) {
-    .navbar .brand {
-        left: auto;
-        margin-left: 90px;
-        transform: translateX(0);
-    }
-}
-
 /* Selector: the trigger button only, every interactive state (SelectorStyle-1's
    ui-selectmenu-button, jQuery UI's <span> replacement for the <select>). The OPEN popup
    this button owns (.ui-selectmenu-menu, appended to <body>, never a descendant of this
