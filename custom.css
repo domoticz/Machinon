@@ -253,6 +253,32 @@ h4,
     color: var(--dz-sun-color);
 }
 
+/* The SECOND sun. Domoticz has two different time/sunrise strips and only the
+   one above is a Font Awesome glyph the theme could reach:
+
+     #tbTimeSun  - the topbar strip (views/inc_topbar.html:28-31), an
+                   <i class="fa fa-sun">. Renders on the device pages
+                   (#/LightSwitches, #/Scenes, #/Temperature, #/Weather,
+                   #/Utility) and is themed by the rule above.
+     #timesun    - the <timesun> Angular component (app/app.js:361, template at
+                   index.html:428-434), which is a LITERAL "☀" character in
+                   <span style="color: yellow">. Renders on #/Events; the
+                   component is also referenced from views/timers.html:76 and
+                   views/weather.html:405.
+
+   Core writes that yellow as an INLINE STYLE, which outranks every stylesheet
+   rule, so this is the one place in the theme where !important is not a
+   specificity shortcut but the only mechanism available. Measured before the
+   fix: rgb(255,255,0) on the light body is 1.01:1, i.e. invisible, and it had
+   been that way on every light scheme since long before any dark-scheme work.
+
+   span[style] selects it exactly: the sibling that holds the server time
+   (index.html:430) carries ng-hide but no style attribute, so it keeps the
+   surrounding strip's colour and is not caught here. */
+#timesun span[style] {
+    color: var(--dz-sun-color) !important;
+}
+
 .page-header-small {
     border-color: var(--dz-accent-color);
 }
