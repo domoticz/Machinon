@@ -33,7 +33,7 @@ jobs:
         run: python3 -m pytest scripts/test_strip_comments.py -q
 
       - name: Site and docs unit tests
-        run: python3 -m pytest scripts/test_gen_site_tokens.py scripts/test_check_site.py scripts/test_check_contrast.py scripts/test_check_settings_docs.py -q
+        run: python3 -m pytest scripts/test_gen_site_tokens.py scripts/test_check_site.py scripts/test_check_contrast.py scripts/test_check_settings_docs.py scripts/test_check_png_optimized.py -q
 
       - name: Site tokens are in step with the theme's schemes
         run: python3 scripts/gen-site-tokens.py --check
@@ -46,6 +46,9 @@ jobs:
 
       - name: Settings reference covers the manifest
         run: python3 scripts/check-settings-docs.py
+
+      - name: PNG optimisation is holding (advisory, never fails)
+        run: python3 scripts/check-png-optimized.py
 
       - name: Manual builds clean
         run: zensical build --clean --strict
