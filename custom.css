@@ -468,19 +468,35 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
     color: var(--secondary-text-color);
 }
 
+/* Static chips. The foreground must be the ON-ACCENT token, not the body text:
+   the accent background is a mid tone that barely moves between schemes, while
+   --dz-body-text inverts, so pairing the two puts dark text on accent in the
+   light schemes and light text on accent in the dark ones and fails both ways.
+   Measured on the only consumer that reached this rule, the Events folder count
+   (#/Events, span.badge.events-editor-folder__count): 2.65:1 light, 1.34:1 dark.
+   The clickable half of this family already had it right - css/buttons.css:145
+   pairs the same background with --dz-accent-text and measures 5.45 / 10.72 on
+   the Users and Hardware "Set Devices" / "Create Virtual Sensors" chips - so
+   this was two rules in one theme disagreeing, not anything Bootstrap did. */
 .label, .badge {
     font-weight: var(--dz-weight-semibold);
     border-radius: 2px;
     background-color: var(--dz-accent-color);
     text-align: center;
-    color: var(--dz-body-text);
+    color: var(--dz-accent-text);
     padding-right: 10px;
     padding-left: 10px;
 }
 
+/* Fixed red chip, so it needs a fixed foreground rather than the scheme's
+   on-accent token: --dz-accent-text is near-black on the dark schemes, which
+   would land at ~3:1 on this red. White is 5.6:1 in both. Not currently
+   rendered anywhere on the rig, so this is stated explicitly rather than left
+   to inherit whatever the rule above happens to hold. */
 .label-important,
 .badge-important {
     background-color: #b94a48;
+    color: #ffffff;
 }
 
 .ui-dialog {

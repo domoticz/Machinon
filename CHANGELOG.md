@@ -20,6 +20,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - The Events page now follows the active color scheme. On the dark schemes its script list, open-file tabs and editor toolbar stayed a fixed light grey, and anything drawn on top of them disappeared: the round Expand all and Collapse all buttons showed no plus or minus at all, and the Disabled, A-, A+ and Help buttons showed no label. The code editor itself is unchanged: it keeps whatever editor theme you picked from the dropdown, so a light editor inside dark surroundings is still yours to choose.
 - The arrow that collapses the device list on the Devices page is visible again on the dark color schemes. It was drawn in a dark grey on a dark background.
 - The sun in the sunrise and sunset line is now the same color everywhere. Domoticz draws that line two different ways, and on the Events page the sun was a fixed bright yellow that was all but invisible on the light color schemes, instead of the themed sun the device pages show.
+- Counter chips, such as the number of scripts in a folder on the Events page, are readable again. They were drawn in the page's normal text color on top of the accent color, which left dark text on a mid-blue chip in the light schemes and light text on it in the dark ones.
 
 ## [2.1.1] - 2026-08-19
 
