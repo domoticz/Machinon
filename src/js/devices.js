@@ -108,9 +108,10 @@ function getCardDevice(item) {
 
 /* Switch-detection gate, shared by the initial pass below and the
    MutationObserver re-enhance pass (initDeviceObserver). A card is a plain
-   on/off switch when core's device data says its SwitchType actually
-   toggles, its icon is clickable (lcursor), and it carries no dimmer
-   slider, selector levels or button group. The DOM heuristics alone are
+   on/off switch when core gave the device a SwitchType at all (only its
+   light/switch family has one), that SwitchType actually toggles, its icon
+   is clickable (lcursor), and it carries no dimmer slider, selector levels
+   or button group. The DOM heuristics alone are
    NOT sufficient: core marks special-action icons clickable too (see
    NON_TOGGLE_SWITCH_TYPES), so an unreachable scope FAILS CLOSED. The only
    cards without a device scope are scenes (which have their own gated
@@ -123,6 +124,16 @@ function getCardDevice(item) {
 function isPlainOnOffSwitch(item) {
     var device = getCardDevice(item);
     if (!device) return false;
+    /* Switch FAMILY first, before the blocklist below: core emits SwitchType
+       only inside its IsLightOrSwitch() branch (main/WebServer.cpp), so its
+       presence is core's own "this device switches" vocabulary -- the same one
+       NON_TOGGLE_SWITCH_TYPES already mirrors. A blocklist keyed on SwitchType
+       cannot reject a device that has none, and the DOM heuristics below do not
+       either: core marks a text sensor's icon lcursor (it links to the log), so
+       a Text device passed every gate and grew a toggle that hid its own value
+       (issue #203, setDeviceSwitch hides #status alongside #bigtext). Sensors,
+       meters, scenes and groups all land here. */
+    if (typeof device.SwitchType !== "string") return false;
     if (device.Type === "Security" ||
         NON_TOGGLE_SWITCH_TYPES.indexOf(device.SwitchType) !== -1) {
         return false;

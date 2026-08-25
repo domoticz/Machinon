@@ -51,6 +51,8 @@ clean local run there means the eventual release build will also succeed.
 
 Every user-visible change adds a one-line entry under `## [Unreleased]` in `CHANGELOG.md`, in the same commit or pull request as the change itself. Those lines become the next release's notes, so write them for theme users, not developers.
 
+When the change fixes something someone reported, credit them at the end of that line: `(reported by @their-github-handle)`. Because the line becomes a release note, GitHub turns the handle into a link there and the reporter sees their report shipped. Credit the person who reported it, not whoever fixed it, and leave it off for anything we found ourselves.
+
 ### Releasing
 
 This section is for maintainers cutting a release. The steps must happen in this order:

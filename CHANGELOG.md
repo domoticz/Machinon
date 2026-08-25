@@ -4,6 +4,10 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+### Fixed
+
+- A text device that has a custom icon now shows its text on the Dynamic Dashboard. It was appearing as an on/off switch with no text at all, on the Device, Favorites and Room widgets. Text devices using the standard icon were never affected, and the Utility page, the dashboard and the mobile cards always showed the text correctly. (reported by @blooesky)
+
 ### Changed
 
 - The theme's images and icon pack are about 3.2 MB smaller. 0.4 MB of that is the images every page uses, which is what makes the theme load quicker; the other 2.8 MB is the icon pack, which only downloads when you open the Icon packs tab or install an icon. Nothing looks different: every icon is the same picture, stored more efficiently.
