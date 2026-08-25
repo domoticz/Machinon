@@ -10,6 +10,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ### Changed
 
+- The theme downloads about 600 KB less. It shipped its icon font in five different file formats, kept for browsers that predate the theme's own requirements by years, and now ships only the one every browser actually uses. Nothing looks different.
 - The theme's images and icon pack are about 3.2 MB smaller. 0.4 MB of that is the images every page uses, which is what makes the theme load quicker; the other 2.8 MB is the icon pack, which only downloads when you open the Icon packs tab or install an icon. Nothing looks different: every icon is the same picture, stored more efficiently.
 - Icons you already installed from the pack now show a blue refresh button on their card in the Icon packs tab. Install / update all brings them all up to date in one go. Refreshing is optional and changes nothing you can see.
 
