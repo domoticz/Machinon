@@ -15,7 +15,13 @@
    control the theme owns. !important mirrors the Bootstrap-2 constraint
    documented on the reset block below (state rules outrank base rules). */
 .btn, .btnstyle3, .btnstyle3-sel, .btnstyle3-dis,
-.btnsmall, .btnsmall-sel, .btnsmall-dis, .btn-modern, .btn-modern-warning {
+.btnsmall, .btnsmall-sel, .btnsmall-dis, .btn-modern, .btn-modern-warning,
+/* Clickable labels/badges are buttons too (see the label-as-button block
+   below); join them here so they inherit the FULL contract, not a partial
+   subset. This is what clears Bootstrap 2's .label emboss (text-shadow),
+   its 11.844px/14px metrics and content-box sizing, replacing them with the
+   theme's line-height, border-box and flex centering. */
+.label-info[href], .badge-info[href], .label.lcursor, .badge.lcursor {
     border-radius: var(--dz-btn-radius) !important;
     box-shadow: var(--dz-btn-shadow) !important;
     text-shadow: none !important;
@@ -147,9 +153,12 @@ a.btnstyle {
     background-color: var(--dz-accent-color);
     color: var(--dz-accent-text);
     padding: var(--dz-btn-pad-xs) !important;
-    border-radius: var(--dz-btn-radius) !important;
-    box-shadow: var(--dz-btn-shadow) !important;
-    transition: background-color .12s ease, box-shadow .12s ease;
+    /* radius/shadow/text-shadow/line-height/box-sizing/border/centering all
+       come from the shared base contract above. Only the accent colours,
+       the xs padding and the type-scale font size are family-specific.
+       Bootstrap 2's .label sets 11.844px; land on the scale like .btn-small.
+       (0,2,0) beats Bootstrap's (0,1,0), so no !important needed. */
+    font-size: var(--dz-text-micro);
 }
 
 .label-info[href]:hover, .label.lcursor:hover {

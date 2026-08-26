@@ -6,6 +6,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ### Fixed
 
+- The "Create Virtual Sensors" button on the Setup > Hardware page no longer shows a shadow on its text, and now matches the size and shape of the theme's other buttons.
 - A text device that has a custom icon now shows its text on the Dynamic Dashboard. It was appearing as an on/off switch with no text at all, on the Device, Favorites and Room widgets. Text devices using the standard icon were never affected, and the Utility page, the dashboard and the mobile cards always showed the text correctly. (reported by @blooesky)
 
 ### Changed
