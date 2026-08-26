@@ -355,7 +355,12 @@ core; never working documents that do not ship.
 | `--dz-status-ok` | alias of `--dz-btn-success-bg` | (follows) | Status fills: healthy tier (battery base/full bar) |
 
 Derived tokens (`--dz-panel-bg`, `--dz-border-color`, `--dz-table-*`, `--dz-btn-*`, `--dz-input-*`,
-`--dz-modal-*`) reference the rows above rather than restating colors. `--dz-widget-accent` and
+`--dz-modal-*`, and the rest of core's `--dz-widget-*` contract from `css/variables.css` -
+`--dz-widget-shadow` (= `--dz-elev-card`), `--dz-widget-name-*`, `--dz-widget-hover-name-*`,
+`--dz-widget-status-text`, `--dz-btn-danger-bg-alpha`) reference the rows above rather than
+restating colors. The `--dz-widget-*` set matters beyond this page: core imports nothing here, so
+whatever reads the full contract (core `dashboard.css`'s `.dd-widget`, theme-aware external UIs)
+falls back to its own defaults unless Machinon defines them. `--dz-widget-accent` and
 `--dz-accent-red` are additionally set in an `html:root` block, whose `(0,1,1)` specificity beats
 core's later-loaded `:root`.
 

@@ -147,6 +147,28 @@
        bug happens. */
     --dz-panel-bg:             var(--dz-widget-bg);
     --dz-panel-text:           var(--dz-body-text);
+
+    /* Rest of core's --dz-widget-* contract (www/css/variables.css). Machinon
+       imports nothing from core, so core's default values never reach this page
+       (only --dz-widget-bg/-text above were set here). Anything that reads the
+       full contract - core dashboard.css's classic tile CSS, and theme-aware
+       external UIs like PyPluginStore's "Domoticz theme" mode - was falling back
+       to its own defaults and no longer matching Machinon's cards. Values mirror
+       the real card in css/cards.css (surface for the name, --dz-elev-card rest
+       shadow, accent-tinted hover) and derive from scheme-tracking tokens so dark
+       and every custom scheme follow automatically (DESIGN.md derive-don't-copy).
+       Font-size tokens (--dz-widget-name/value-font-size) are deliberately left
+       to core defaults: Machinon's own tiles size via container queries, and
+       minting fixed % here would invent off-scale type. */
+    --dz-widget-shadow:            var(--dz-elev-card);
+    --dz-widget-name-bg:           var(--dz-widget-bg);
+    --dz-widget-name-text:         var(--dz-widget-text);
+    --dz-widget-name-border:       transparent;
+    --dz-widget-hover-name-bg:     color-mix(in srgb, var(--dz-accent-color) 12%, var(--dz-widget-bg));
+    --dz-widget-hover-name-border: var(--dz-accent-color);
+    --dz-widget-status-text:       var(--dz-input-text);
+    --dz-btn-danger-bg-alpha:      rgba(var(--dz-accent-red-values), 0.85);
+
     /* The Dash2 dial's instrument face (core reads it as --dd-face-fill,
        dashboard.css:3398, with an untracked rgba(0,0,0,0.75) fallback). It has to
        stay DARK in every scheme, not follow the surface: core paints the arc
