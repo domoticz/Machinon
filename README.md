@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="images/brand/wordmark-dark.svg">
-    <img alt="Machinon" src="images/brand/wordmark-light.svg" width="300">
+    <source media="(prefers-color-scheme: dark)" srcset="images/machinon/brand/wordmark-dark.svg">
+    <img alt="Machinon" src="images/machinon/brand/wordmark-light.svg" width="300">
   </picture>
 </p>
 
