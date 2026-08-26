@@ -1164,9 +1164,12 @@ vocabulary even where the box around it is not. **Constraint.** `css/cards.css`'
 declaration in `css/settings.css` would be dead on arrival; the cascade account lives beside the
 rules in `css/settings.css`.
 
-One item logged, not resolved: `.mDropdown-Text:hover` (the same nested sub-menu's row-hover text
-colour) is structurally unmatchable today, since the family defines a hover BACKGROUND but no
-hover text colour. Marked `dz-menu-exception`, left as a future refine candidate.
+The sub-menu's row hover was previously an unmatched exception (a hardcoded `rgba(0,0,0,0.5)`,
+unreadable on dark schemes). It is now resolved by mirroring the device card 3-dot menu
+(`.options .btnsmall`, `css/cards.css`), the closest sibling: rows rest on `--secondary-text-color`
+and, on hover, go to `--dz-accent-color` over the family tint `--dz-menu-item-hover-bg`. The rows
+are full-width and padded (`--dz-btn-pad-md`) with the container carrying vertical-only padding, so
+the hover band paints the whole row like every other menu, and the link underline is dropped.
 
 ### The Menu Contract (enforcement)
 

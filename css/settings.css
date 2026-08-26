@@ -143,25 +143,30 @@ input#AcceptNewHardware:checked ~ button {
 }
 
 .mDropdown-Text {
+    /* A full-width menu row, mirroring the device card 3-dot menu
+       (.options .btnsmall, css/cards.css): display:block + --dz-btn-pad-md so
+       the label is indented from the popup edge and the hover band paints the
+       whole row width, not just a tight box around the text. */
+    display: block;
+    padding: var(--dz-btn-pad-md);
     font-size: var(--dz-text-sm);
     font-weight: var(--dz-weight-regular);
     letter-spacing: -0.5px;
     text-align: left;
-    vertical-align: middle;
     color: var(--secondary-text-color);
     text-decoration: none;
 }
 
 .mDropdown-Text:hover {
-    /* dz-menu-exception: this is the settings-tile grouped-tile sub-menu
-       label (js/settings_page.js builds it inside .dropdown-content, a
-       floating menu of the same family as the other dropdowns/flyouts).
-       rgba(0,0,0,0.5) matches neither --dz-menu-text (--dz-body-text) nor
-       any hover token, and there is no family "hover text color" token to
-       compare against: the family only defines an item hover BACKGROUND
-       (--dz-menu-item-hover-bg), not a hover text color, so this remains
-       structurally unmatchable, not merely unmatched today. */
-    color: rgba(0,0,0,0.5);
+    /* Match the device card 3-dot menu (.options .btnsmall, css/cards.css):
+       its rows share this menu's resting --secondary-text-color and, on hover,
+       go to --dz-accent-color over an accent tint. This is a dropdown flyout,
+       so it takes the menu family's own hover-tint token
+       (--dz-menu-item-hover-bg). The old rgba(0,0,0,0.5) was a hardcoded dark
+       text colour: readable on light backgrounds, unreadable on the dark popup
+       in every dark scheme. */
+    color: var(--dz-accent-color);
+    background: var(--dz-menu-item-hover-bg);
     cursor: pointer;
 }
 
@@ -194,15 +199,26 @@ ul.machinon_ul li {
 .dropdown-content {
     display: none;
     min-width: 160px;
-    padding: 12px 16px;
+    /* Vertical-only padding like .options (css/cards.css): the rows carry their
+       own side padding, so the hover band reaches the popup edges instead of
+       being inset by a container gutter. */
+    padding: var(--dz-card-space-md) 0;
     z-index: 1;
     position: absolute;
 }
 
-/* Onto the family text token, see .machinoText above (byte-neutral,
-   same --dz-body-text alias). */
+/* Full-width rows, no underline: a menu, not a paragraph of links. The row
+   padding lives on .mDropdown-Text; the <p> wrappers js/settings_page.js emits
+   would otherwise add ~1em gaps between rows, so they are zeroed. Text colour
+   is onto the family token (see .machinoText above, byte-neutral). */
 .dropdown-content a {
+    display: block;
+    text-decoration: none;
     color: var(--dz-menu-text);
+}
+
+.dropdown-content p {
+    margin: 0;
 }
 
 .rectangle-8-dropdown:hover .dropdown-content {
