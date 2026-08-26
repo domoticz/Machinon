@@ -34,8 +34,9 @@ theme:
   # docs/stylesheets/extra.css. Verified honoured by Zensical. Do not remove.
   font: false
   favicon: assets/favicon.png
-  # Wordmark in the header. White (mono) so it reads on the accent-coloured
-  # Material header; sourced from the images-machinon logo engine.
+  # The square mark (brand blue), shown beside the "Machinon" site name. The
+  # brand blue reads on Zensical's frosted header in both light and dark, where
+  # a single-colour wordmark could not. Sourced from the images-machinon engine.
   logo: assets/logo.svg
   palette:
     - media: "(prefers-color-scheme: light)"
