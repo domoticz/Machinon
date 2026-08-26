@@ -34,6 +34,9 @@ theme:
   # docs/stylesheets/extra.css. Verified honoured by Zensical. Do not remove.
   font: false
   favicon: assets/favicon.png
+  # Wordmark in the header. White (mono) so it reads on the accent-coloured
+  # Material header; sourced from the images-machinon logo engine.
+  logo: assets/logo.svg
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default

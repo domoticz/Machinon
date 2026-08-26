@@ -1,4 +1,9 @@
-# Machinon
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="images/brand/wordmark-dark.svg">
+    <img alt="Machinon" src="images/brand/wordmark-light.svg" width="300">
+  </picture>
+</p>
 
 A modern, responsive theme for [Domoticz](https://www.domoticz.com/).
 

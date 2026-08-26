@@ -200,6 +200,12 @@ main > section[id] { scroll-margin-top: 4.5rem; }
     margin-right: auto;
 }
 
+/* Inline logo wordmark: follows the page scheme like the app header. */
+.wordmark svg { display: block; height: 1.6rem; width: auto; }
+.wordmark .lg-text { fill: currentColor; }
+.wordmark .lg-mark { fill: var(--dz-accent-color); }
+.wordmark .lg-ring { stroke: var(--dz-accent-text); }
+
 .nav-links { display: flex; gap: 0.25rem; }
 
 .nav-links a {

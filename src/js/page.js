@@ -124,7 +124,7 @@ function setLogo() {
         container.prepend(svg);
     };
     if (setLogo._svg) { mount(setLogo._svg); return; }
-    setLogo._pending = setLogo._pending || fetch("images/logo.svg").then(function (r) { return r.text(); });
+    setLogo._pending = setLogo._pending || fetch("images/brand/logo.svg").then(function (r) { return r.text(); });
     setLogo._pending.then(function (t) { setLogo._svg = t; mount(t); });
 }
 
