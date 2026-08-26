@@ -1,7 +1,9 @@
 /**** ./sidemenu.css ***/
-img.header__icon {
+.header__icon {
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
+    /* A touch smaller than the 150px desktop logo on the narrow mobile bar. */
+    width: 125px;
 }
 
 .bannercontent {

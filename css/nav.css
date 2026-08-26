@@ -31,13 +31,25 @@
     display: none !important;
 }
 
-img.header__icon {
+/* .header__icon, not img: the default logo is now an inline <svg> (page.js
+   setLogo), a custom uploaded logo is still an <img>; both take this box. */
+.header__icon {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    left: 0%;
+    /* Padding off the viewport edge; the logo used to sit flush at left:0.
+       On mobile css/sidemenu.css re-centres it (left:50%). */
+    left: 20px;
     width: 150px;
+    /* height:auto so the SVG wordmark keeps its aspect ratio. */
+    height: auto;
+    /* Inline logo colours (harmless on a custom <img>, which has no .lg-*):
+       wordmark text uses currentColor, the mark the scheme accent, the ring the
+       on-accent token, so the logo themes with the active scheme. */
+    color: var(--dz-body-text);
 }
+.header__icon .lg-mark { fill: var(--dz-accent-color); }
+.header__icon .lg-ring { stroke: var(--dz-accent-text); }
 
 div.menu-toggle {
     display: none;
@@ -58,18 +70,12 @@ div.menu-toggle {
 .menu-toggle:before,
 .menu-toggle div {
     /* dz-menu-exception: hamburger icon bars, not a menu surface, so out of the
-       --dz-menu-* family (bg/text/hover/active/separator/radius/shadow of the
-       menu itself). This base rule covers the CLOSED hamburger only (the
-       OPEN/X state is overridden below, see that rule's comment): closed, the
-       bars sit over the header banner (a blue-gradient band, not a
-       --dz-menu-* surface) in both schemes, where #fff reads cleanly.
-       Semantically an icon glyph (arguably --dz-accent-text, "text placed ON
-       an accent surface", since .menu-toggle.scrolled gives it an accent
-       background) rather than a menu-family token; wiring it to --dz-menu-bg
-       would be a coincidental-value swap, not a real match, and breaks once
-       --dz-menu-bg differs from #fff (see the OPEN-state rule below, which
-       needs exactly that fix). */
-    background-color: #fff;
+       --dz-menu-* family. Closed, the bars sit over the header banner, which is
+       now the flat --dz-nav-bg surface (was a blue gradient where #fff worked);
+       --dz-body-text reads on it in both schemes (near-black on the light bar,
+       near-white on the dark). The bars keep this colour when the toggle
+       detaches into its scrolled box (same --dz-nav-bg surface, see below). */
+    background-color: var(--dz-body-text);
     border-radius: 3px;
     content: '';
     display: block;
@@ -78,12 +84,19 @@ div.menu-toggle {
     transition: all .2s ease-in-out;
 }
 
+/* Scrolled, the header has left the viewport, so the hamburger detaches into a
+   floating box. It keeps the header's own neutral surface (--dz-nav-bg) and the
+   same --dz-body-text bars, lifted by a shadow, so scrolling just peels the same
+   hamburger off the bar. (It used to flip to a saturated accent box, which made
+   sense when the header itself was an accent gradient, but reads as a jarring
+   colour jump against the flat header now.) */
 div.menu-toggle.scrolled {
-    background: var(--dz-accent-color);
+    background: var(--dz-nav-bg);
     transition: background-color 1s ease;
     padding: 0 5px 15px 5px;
     border-bottom-left-radius: 6px;
     border-bottom-right-radius: 6px;
+    box-shadow: var(--dz-elev-popup);
 }
 
 /* Once the flyout is open (.slide), these two bars rotate into the close ("X")

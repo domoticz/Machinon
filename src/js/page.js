@@ -99,11 +99,33 @@ function removeRowDivider() {
 // injection is gone with the page it targeted (core's views/login.html has no #login).
 function setLogo() {
     if ($("header.logo").length === 0) {
-        $('<header class="logo"><div class="container-logo"><img class="header__icon"></div></header>').insertBefore(".navbar-inner");
+        $('<header class="logo"><div class="container-logo"></div></header>').insertBefore(".navbar-inner");
     }
-    var img = $("header.logo img.header__icon");
-    img.attr("src", "images/" + (theme.logo && theme.logo.length ? theme.logo : "logo.png"));
-    img.toggle(!(theme.features.hide_logo && theme.features.hide_logo.enabled));
+    var container = $("header.logo .container-logo");
+    var hide = !!(theme.features.hide_logo && theme.features.hide_logo.enabled);
+    // Drop whichever logo node is present (img or inline svg); #search stays.
+    container.children(".header__icon").remove();
+    if (theme.logo && theme.logo.length) {
+        // Custom uploaded logo: an <img>, shown as-is (never recoloured).
+        var img = $('<img class="header__icon">').attr("src", "images/" + theme.logo);
+        if (hide) img.hide();
+        container.prepend(img);
+        return;
+    }
+    // Default: inline the SVG wordmark so its .lg-mark/.lg-ring pick up the scheme
+    // accent (css/nav.css). Inlined once, then cached; DOMParser keeps the SVG
+    // namespace (jQuery's HTML parser would not). insertBefore #search if present.
+    var mount = function (markup) {
+        container.children(".header__icon").remove();
+        var svg = document.importNode(
+            new DOMParser().parseFromString(markup, "image/svg+xml").documentElement, true);
+        svg.setAttribute("class", "header__icon");
+        if (hide) svg.style.display = "none";
+        container.prepend(svg);
+    };
+    if (setLogo._svg) { mount(setLogo._svg); return; }
+    setLogo._pending = setLogo._pending || fetch("images/logo.svg").then(function (r) { return r.text(); });
+    setLogo._pending.then(function (t) { setLogo._svg = t; mount(t); });
 }
 
 /* Apply the user's dashboard background image (settings -> theme.background_img).

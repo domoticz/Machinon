@@ -605,6 +605,14 @@ Settings pages, timer/log forms, and detail views use `.page-content-container`:
 
 The Setup menu is replaced by a tile grid (`settings_page.js`, `.machinon_ul`): fixed `250px` columns, `space-evenly`, `20px` column gap; tiles (`.rectangle-8`) are card-surfaced rows, `min-height: 75px`, icon left and `{typography.md}` label. Tile icons render in a fixed `36x36` box (`object-fit: contain`); new art for `images/settings/` ships as square `72x72` PNGs (2x for high-DPI; legacy sources are ~35px and non-square, which the fixed box normalizes). On mobile the tiles shrink to `100px` centered blocks (see Mobile Adaptations).
 
+### Top Header
+
+The top header (`header.logo`) is a flat `--dz-nav-bg` surface with a 1px `--dz-accent-color` bottom hairline (it was a `--dz-status-disabled` to `--dz-accent-color` gradient). Flat so it matches the theme's other surfaces and gives the logo and search a neutral, tokenised ground in every scheme.
+
+The default logo is an inline SVG wordmark (`images/logo.svg`, lowercase "machinon"), injected by `page.js` `setLogo()` so it themes with the scheme: text `currentColor` = `--dz-body-text`, the mark square `--dz-accent-color`, its open ring `--dz-accent-text` (auto-contrasting). A user-uploaded custom logo (`theme.logo`) stays an `<img>` and is never recoloured; `hide_logo` toggles whichever is shown. The logo is `150px` wide (`125px` on mobile), left-padded `20px`, centred on mobile. Master SVGs live in the `images-machinon` logo engine (`brand/`, `brand/BRAND.md`).
+
+The hamburger bars use `--dz-body-text` (was `#fff` for the old accent bar); scrolled, the toggle detaches into a floating `--dz-nav-bg` box with `--dz-elev-popup`, keeping the same bars (no accent-colour flip). The search box is likewise tokenised (`--dz-body-text`), switching to `--dz-accent-text` when its mobile input expands onto the accent pill.
+
 ## Border Radius
 
 | Token | Value | Usage |

@@ -338,10 +338,13 @@ div#floorplancontent {
     display: none !important;
 }
 
-/* Header */
+/* Header. Flat chrome on the nav surface token (was a status->accent gradient),
+   so the bar matches the rest of the theme and the inline logo can theme itself
+   against a neutral ground instead of a coloured wash. A 1px accent hairline
+   defines the bar. */
 header.logo {
-    background: var(--dz-status-disabled);
-    background: linear-gradient(to right, var(--dz-status-disabled) 0%, var(--dz-accent-color) 100%);
+    background: var(--dz-nav-bg);
+    border-bottom: 1px solid var(--dz-accent-color);
 }
 
 .container-logo {

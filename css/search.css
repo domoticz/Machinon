@@ -6,11 +6,15 @@
   touched search rules here.
 */
 /* Search */
+/* Colours are tokenised (were #fff for the old accent-gradient bar): the header
+   is now the flat --dz-nav-bg surface, so the search reads on it in every scheme,
+   dark text on the light bar, light text on the dark one. The mobile expand popup
+   below keeps its own #fff border (it sits on an accent background). */
 #search {
     float: right;
     margin-top: 5px;
     margin-right: 10px;
-    color: #fff;
+    color: var(--dz-body-text);
     background-color: transparent;
     outline: 0;
     transition: transform .5s;
@@ -22,12 +26,12 @@
 }
 
 #searchInput {
-    color: #fff;
-    border-color: #fff;
+    color: var(--dz-body-text);
+    border-color: var(--dz-body-text);
 }
 
 #searchInput::placeholder {
-    color: #fff;
+    color: var(--dz-body-text);
     opacity: 0.5;
 }
 
@@ -52,12 +56,22 @@
         max-width: unset;
         transform: translate(30px, 45px);
         background: var(--dz-accent-color);
+        /* On the accent pill the typed text and placeholder take the on-accent
+           token (the base rule's --dz-body-text is for the neutral header bar). */
+        color: var(--dz-accent-text);
         box-shadow: var(--dz-elev-popup);
         border-radius: 20px;
         border: 5px solid #fff;
         padding: 10px;
         position: relative;
         z-index: 5;
+    }
+
+    #search:hover #searchInput::placeholder,
+    #search:active #searchInput::placeholder,
+    #search:focus #searchInput::placeholder {
+        color: var(--dz-accent-text);
+        opacity: .6;
     }
 
     #search:not(.readonly):hover,

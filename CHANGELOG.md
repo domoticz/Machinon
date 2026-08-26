@@ -12,6 +12,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ### Changed
 
+- The top header has a new, cleaner look: a flat bar that matches the rest of the theme instead of the old blue gradient, and a refreshed Machinon logo that takes on your colour scheme (its accent follows the active theme). The search box and the menu button read clearly on it in both light and dark, and scrolling down lifts the menu button into a tidy floating button. A custom logo you have uploaded is unchanged, and Hide logo still works.
 - The theme downloads about 600 KB less. It shipped its icon font in five different file formats, kept for browsers that predate the theme's own requirements by years, and now ships only the one every browser actually uses. Nothing looks different.
 - The theme's images and icon pack are about 3.2 MB smaller. 0.4 MB of that is the images every page uses, which is what makes the theme load quicker; the other 2.8 MB is the icon pack, which only downloads when you open the Icon packs tab or install an icon. Nothing looks different: every icon is the same picture, stored more efficiently.
 - Icons you already installed from the pack now show a blue refresh button on their card in the Icon packs tab. Install / update all brings them all up to date in one go. Refreshing is optional and changes nothing you can see.
