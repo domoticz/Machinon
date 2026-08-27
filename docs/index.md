@@ -1,3 +1,7 @@
+<p style="text-align:center;margin:0 0 1.4rem">
+  <img src="assets/social-preview.png" alt="Machinon: a modern theme for Domoticz" style="width:100%;max-width:960px;border-radius:10px">
+</p>
+
 # Machinon
 
 Machinon is a modern theme for [Domoticz](https://www.domoticz.com/). It gives your dashboard

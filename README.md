@@ -1,8 +1,5 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="images/machinon/brand/wordmark-dark.svg">
-    <img alt="Machinon" src="images/machinon/brand/wordmark-light.svg" width="300">
-  </picture>
+  <img alt="Machinon: a modern theme for Domoticz" src="site/assets/social-preview.png">
 </p>
 
 A modern, responsive theme for [Domoticz](https://www.domoticz.com/).
