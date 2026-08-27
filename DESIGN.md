@@ -203,6 +203,9 @@ components:
     rowBorder: "1px solid {colors.light-border}"
     totalBg: "derived: color-mix(in srgb, {colors.light-primary} 15%, {colors.light-surface})"
     totalText: "{colors.light-text}"
+    selectedRowBg: "derived: rgba({colors.light-primary}, 0.18)"
+    selectedRowBorder: "{colors.light-primary}"
+    hoverRowBg: "derived: rgba({colors.light-primary}, 0.08)"
     cellPad: "6px 10px"
     headerPad: "8px 10px"
   navbar:
@@ -313,7 +316,9 @@ core; never working documents that do not ship.
 > another token's value stops tracking schemes and rots silently. Write `var(--dz-widget-bg)` /
 > `rgba(var(--dz-accent-values), a)` / `color-mix(...)`, or document WHY a value is fixed.
 > Derived-by-mix examples: table odd stripe (8% body-text into widget-bg), dd skeleton.
-> Selected table rows sit on the accent and use `--dz-accent-text`.
+> Selected table rows use a soft accent tint fill with an accent left-border marking the
+> selection, and keep body text (not on-accent text), so in-row accent controls stay legible
+> against the tint. Row hover uses a lighter accent tint of its own, distinct from selection.
 >
 > Scheme picks persist to the Domoticz user variables immediately (persistSchemeChoice);
 > user presets and hand-picked customs are contrast-checked at save time

@@ -392,13 +392,29 @@ tr.odd td.sorting_1, tr.even td.sorting_1 {
     background-color: transparent;
 }
 
+/* Selected row: accent TINT + accent left-border + body text (issue #206).
+   The old solid-accent fill was the identical token as the in-row accent
+   label-buttons, so "Create Virtual Sensors" / "Set Devices" camouflaged on a
+   selected row; the tint keeps them legible and drops the whole-row opacity
+   dimming the old fill needed. The left marker is an inset box-shadow on the
+   first cell (no layout shift, unlike a td border-left fighting the row's
+   1px table-border). */
 .dataTables_wrapper table tbody tr.odd.row_selected td,
 .dataTables_wrapper table tbody tr.even.row_selected td {
     background: var(--dz-table-row-selected-bg) !important;
-    /* selected rows sit on the accent: use the on-accent text token, not the
-       body text (unreadable under several schemes) */
-    color: var(--dz-accent-text) !important;
-    opacity: .75;
+    color: var(--dz-table-row-text) !important;
+}
+.dataTables_wrapper table tbody tr.row_selected td:first-child {
+    box-shadow: inset 3px 0 0 var(--dz-table-row-selected-border);
+}
+
+/* Row hover: a quiet accent tint, lighter than the selected tint so the two
+   states stay distinct. No !important, so a selected row (which sets its
+   background with !important) still wins when hovered. Data rows had no hover
+   affordance before this; every other interactive surface in the theme does. */
+.dataTables_wrapper table tbody tr.odd:hover td,
+.dataTables_wrapper table tbody tr.even:hover td {
+    background: var(--dz-table-row-hover-bg);
 }
 
 /* Inter is wider than Open Sans, which wrapped the Devices table's Last Seen date/time

@@ -379,7 +379,18 @@
     --dz-table-row-odd-bg:      color-mix(in srgb, var(--dz-widget-bg) 92%, var(--dz-body-text));
     --dz-table-row-text:        var(--dz-body-text);
     --dz-table-border:          var(--dz-input-border);
-    --dz-table-row-selected-bg: var(--dz-accent-color);
+    /* Selected data-table row: an accent TINT, not the solid accent fill it
+       replaced (issue #206). On a tint with body text, in-row accent controls
+       (label-as-button "Create Virtual Sensors" / "Set Devices") stay legible
+       instead of camouflaging against an identical accent fill, and row text
+       keeps its normal WCAG-safe contrast instead of riding on-accent. An
+       accent left-border marks selection crisply without a heavy fill. Hover
+       is a lighter tint so selected and hover read as distinct. All three
+       derive from --dz-accent-values, so dark tracks from this one definition
+       (dark.css overrides no --dz-table-* token). */
+    --dz-table-row-selected-bg:     rgba(var(--dz-accent-values), 0.18);
+    --dz-table-row-selected-border: var(--dz-accent-color);
+    --dz-table-row-hover-bg:        rgba(var(--dz-accent-values), 0.08);
     --dz-table-control-text:    var(--secondary-text-color);
     /* Totals/summary rows: a quiet accent-tinted band, DERIVED so schemes
        track (a literal copy is how the zebra-stripe class of bug happens).
