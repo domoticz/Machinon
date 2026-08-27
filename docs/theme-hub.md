@@ -91,7 +91,7 @@ Most rows in the Theme Hub are either **personal** or **shared**:
 
 Two rows don't fit either label. The icon pack browser installs into Domoticz's own custom-icon
 library rather than storing a personal or shared value of its own, so an install is effectively
-shared by everyone regardless (see [Icon packs](icon-packs.md)); and the About tab is an
+shared by everyone regardless (see [Icons](icons.md)); and the About tab is an
 information and maintenance panel, not a stored setting.
 
 Most settings are personal (things like your color scheme, card width, or whether relative

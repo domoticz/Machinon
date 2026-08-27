@@ -27,9 +27,9 @@ It works with current Domoticz beta and stable releases.
 
   ![Theme Hub settings page](docs/screenshots/theme-hub.png)
 
-- **Refreshed icon set**: a library of over 250 device icons, install just the ones you want onto individual devices straight from the Theme Hub's built-in pack installer.
+- **Refreshed icon set**: a library of over 250 device icons, install just the ones you want onto individual devices straight from the Theme Hub's built-in icon library.
 
-  ![Icon pack installer in the Theme Hub](docs/screenshots/icon-packs.png)
+  ![The Icon Library in the Theme Hub](docs/screenshots/icon-packs.png)
 
 - **Mobile-polished layouts**: dashboards, menus, and dialogs adapt to small screens instead of just shrinking the desktop layout.
 

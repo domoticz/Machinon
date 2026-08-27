@@ -1,7 +1,7 @@
 # Settings reference
 
 This page documents all 37 rows in the Theme Hub, one row per entry, grouped into the same nine
-tabs as the [Theme Hub](theme-hub.md). Two of those rows, the icon pack browser and the About
+tabs as the [Theme Hub](theme-hub.md). Two of those rows, the icon library and the About
 panel, aren't settings in the toggle-or-value sense (see [Theme Hub: personal settings versus
 shared settings](theme-hub.md#personal-settings-versus-shared-settings)); they're documented here
 for completeness alongside the 35 actual settings. If you're new to the Theme Hub itself, its own
@@ -108,11 +108,11 @@ switching to the classic dashboard makes all five apply exactly as described bel
 | `scheme` | Color scheme | See [Color schemes](color-schemes.md). | Whole UI |
 | `custom_color_scheme` | Custom colors | See [Color schemes: building your own colors](color-schemes.md#building-your-own-colors). | Whole UI |
 
-## Icon packs
+## Icons
 
 | Key | Setting | What it does | Applies to |
 |---|---|---|---|
-| `iconpacks` | Icon packs | See [Icon packs](icon-packs.md). | Device icons |
+| `iconpacks` | Icons | See [Icons](icons.md). | Device icons |
 
 ## About
 

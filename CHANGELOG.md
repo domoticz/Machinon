@@ -12,7 +12,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ### Changed
 
-- The browser-tab and app icon is now the new Machinon mark, a rounded square with a ring, instead of the old wordmark that looked squished as a small square icon. The documentation site and landing page use it too.
+- The Theme Hub tab for device icons is now called **Icons** (previously "Icon packs"), with clearer wording throughout: it is a library you browse to install individual icons onto individual devices, not an all-or-nothing pack. What it does is unchanged.
 - The top header has a new look: a coloured brand bar carrying the refreshed Machinon logo, above the menu, instead of the old blue gradient. The logo takes on your colour scheme, and the search box and menu button read clearly on the bar in both light and dark. Scrolling down lifts the menu button into a tidy floating button. A custom logo you have uploaded is unchanged, and Hide logo still works.
 - The theme downloads about 600 KB less. It shipped its icon font in five different file formats, kept for browsers that predate the theme's own requirements by years, and now ships only the one every browser actually uses. Nothing looks different.
 - The theme's images and icon pack are about 3.2 MB smaller. 0.4 MB of that is the images every page uses, which is what makes the theme load quicker; the other 2.8 MB is the icon pack, which only downloads when you open the Icon packs tab or install an icon. Nothing looks different: every icon is the same picture, stored more efficiently.

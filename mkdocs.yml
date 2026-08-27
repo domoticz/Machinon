@@ -149,7 +149,7 @@ validation:
 # Pages join this nav in the task that writes them (Tasks 5, 6 and 7), so no
 # placeholder page ever exists and `zensical build --strict` stays clean at
 # every commit. The finished nav is:
-#   Home, Installation, Using the theme (Theme Hub, Color schemes, Icon packs,
+#   Home, Installation, Using the theme (Theme Hub, Color schemes, Icons,
 #   Bar ranges, Mobile layouts), Settings reference, Troubleshooting and FAQ.
 nav:
   - Home: index.md
@@ -157,7 +157,7 @@ nav:
   - Using the theme:
       - Theme Hub: theme-hub.md
       - Color schemes: color-schemes.md
-      - Icon packs: icon-packs.md
+      - Icons: icons.md
       - Bar ranges: bar-ranges.md
       - Mobile layouts: mobile.md
   - Settings reference: settings-reference.md

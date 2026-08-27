@@ -33,12 +33,12 @@
                          renamed; the storage seam's positional format is
                          migration-compatible on these names). null on a
                          control:"custom" entry with no direct seam key (the
-                         icon-pack installer writes device icons via the
+                         icon library writes device icons via the
                          Domoticz API directly, not through theme.json).
        control:          "toggle" | "number" | "text" | "select" | "custom".
                          "custom" = hosted section rendered by its own
                          existing UI (scheme picker, color swatches, icon
-                         pack installer), not a single input.
+                         icon library), not a single input.
        label:            short display name.
        description:      one-sentence description of the setting's effect.
                          Rationalization-table "New label" text, verbatim
@@ -396,7 +396,7 @@ var THEME_MANIFEST = [
     },
     {
         id: "iconpacks",
-        label: "Icon packs",
+        label: "Icons",
         /* Admin-only: installing a pack writes to the instance, which a
            non-admin session cannot do, so the whole group (tab AND section) is
            omitted from the hub for them rather than shown and left to fail.
@@ -410,7 +410,7 @@ var THEME_MANIFEST = [
         entries: [
             {
                 key: "iconpacks", storageKey: null, control: "custom",
-                label: "Icon packs", description: "Install and switch device icon packs (tabbed installer)",
+                label: "Icon Library", description: "Browse the icon library and install just the icons you want onto individual devices.",
                 appliesTo: "Device icons", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep", scope: null
             }
@@ -439,7 +439,7 @@ var THEME_MANIFEST = [
 
 /* Lookup by the theme.json storage key (feature key or top-level value name).
    A null/undefined argument returns undefined rather than matching the
-   control:"custom" entries whose storageKey is null (the icon-pack installer):
+   control:"custom" entries whose storageKey is null (the icon library):
    those have no single key to look up by, so callers that need them use
    dzManifestAllEntries() and filter on control instead. */
 function dzManifestEntryByStorageKey(storageKey) {
