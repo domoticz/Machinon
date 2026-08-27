@@ -5,2032 +5,2032 @@
    "name": "Access",
    "description": "Access granted (green) / denied (red)",
    "tab": "blue",
-   "on_sig": "3628-c367d6ba",
-   "off_sig": "3628-e0967cef"
+   "on_sig": "3083-c1044d4c",
+   "off_sig": "3025-8d3a5e6f"
   },
   {
    "base": "machinon_Access-color",
    "name": "Access Color",
    "description": "Access granted (green) / denied (red)",
    "tab": "color",
-   "on_sig": "3502-98ad2d23",
-   "off_sig": "3480-0aaafc2c"
+   "on_sig": "2888-90b6dd44",
+   "off_sig": "2810-15e3c452"
   },
   {
    "base": "machinon_Address",
    "name": "Address",
    "description": "Address / location marker",
    "tab": "blue",
-   "on_sig": "6717-1e317477",
-   "off_sig": "5947-e0a5af00"
+   "on_sig": "4924-3078dce8",
+   "off_sig": "2845-995ea0c7"
   },
   {
    "base": "machinon_Address-color",
    "name": "Address Color",
    "description": "Address / location marker",
    "tab": "color",
-   "on_sig": "6660-f7f2dc33",
-   "off_sig": "5963-590247dd"
+   "on_sig": "5042-1d2c9968",
+   "off_sig": "2916-082a1459"
   },
   {
    "base": "machinon_AC-color",
    "name": "Air Conditioner/HVAC Color",
    "description": "Air Conditioner/HVAC",
    "tab": "color",
-   "on_sig": "4848-5b91cb6c",
-   "off_sig": "4308-f3e99ccf"
+   "on_sig": "3395-8dee7659",
+   "off_sig": "2009-e505dcf2"
   },
   {
    "base": "machinon_AirMeasure-color",
    "name": "Air Quality Color",
    "description": "Air Quality Measurement",
    "tab": "color",
-   "on_sig": "5754-77374202",
-   "off_sig": "5181-32bef598"
+   "on_sig": "4208-d49b4b5c",
+   "off_sig": "2321-0adadfb8"
   },
   {
    "base": "machinon_Alarm-color",
    "name": "Alarm Color",
    "description": "Alarm",
    "tab": "color",
-   "on_sig": "4513-cbe72727",
-   "off_sig": "3839-7b1447d5"
+   "on_sig": "3834-808881b9",
+   "off_sig": "2253-4b652392"
   },
   {
    "base": "machinon_Alien",
    "name": "Alien",
    "description": "Alien",
    "tab": "fun",
-   "on_sig": "9951-259f910c",
-   "off_sig": "8850-9c91359a"
+   "on_sig": "7025-ae468ecd",
+   "off_sig": "4155-a69186fb"
   },
   {
    "base": "machinon_Alien-color",
    "name": "Alien Color",
    "description": "Alien",
    "tab": "fun",
-   "on_sig": "9686-72712204",
-   "off_sig": "8610-0b3ffe77"
+   "on_sig": "6758-ae521430",
+   "off_sig": "4058-a8dad3f6"
   },
   {
    "base": "machinon_Amazon",
    "name": "Amazon",
    "description": "Amazon on / off (grey)",
    "tab": "blue",
-   "on_sig": "8804-f68f74c4",
-   "off_sig": "7907-3a10a181"
+   "on_sig": "6864-fe5df4eb",
+   "off_sig": "3735-91af51af"
   },
   {
    "base": "machinon_Amazon-color",
    "name": "Amazon Color",
    "description": "Amazon on / off (grey)",
    "tab": "color",
-   "on_sig": "8845-921ba7f5",
-   "off_sig": "8018-162fd909"
+   "on_sig": "6960-37861d7d",
+   "off_sig": "3865-8dd90ce2"
   },
   {
    "base": "machinon_AmazonMusic",
    "name": "Amazon Music",
    "description": "Amazon Music on / off (grey)",
    "tab": "blue",
-   "on_sig": "4954-4d49b90a",
-   "off_sig": "4523-8262f3f5"
+   "on_sig": "3401-1fb4bdca",
+   "off_sig": "2116-9a2e5474"
   },
   {
    "base": "machinon_Amplifier-color",
    "name": "Amplifier Color",
    "description": "Device that controls audio",
    "tab": "color",
-   "on_sig": "5342-ef11ad91",
-   "off_sig": "4758-50d2f89a"
+   "on_sig": "3529-066a2b56",
+   "off_sig": "2144-fd29a2fb"
   },
   {
    "base": "machinon_AppleTV",
    "name": "Apple TV",
    "description": "Apple TV on / off (grey)",
    "tab": "blue",
-   "on_sig": "3559-763c385a",
-   "off_sig": "3258-03ca9d37"
+   "on_sig": "2587-4f8f79b0",
+   "off_sig": "1498-8ec77bcd"
   },
   {
    "base": "machinon_AppleTV-color",
    "name": "Apple TV Color",
    "description": "Apple TV on / off (grey)",
    "tab": "color",
-   "on_sig": "4176-d2a5c380",
-   "off_sig": "3763-91b8723c"
+   "on_sig": "3171-f698f257",
+   "off_sig": "1830-301e3b16"
   },
   {
    "base": "machinon_Aquarium",
    "name": "Aquarium",
    "description": "Aquarium / fish tank",
    "tab": "blue",
-   "on_sig": "7125-a538e314",
-   "off_sig": "6439-f9f386f7"
+   "on_sig": "5596-01c84f62",
+   "off_sig": "3124-adc5ed17"
   },
   {
    "base": "machinon_Aquarium-color",
    "name": "Aquarium Color",
    "description": "Aquarium / fish tank",
    "tab": "color",
-   "on_sig": "7265-ae03e469",
-   "off_sig": "6312-82b4309f"
+   "on_sig": "5849-b0dceba6",
+   "off_sig": "3135-0133fc4b"
   },
   {
    "base": "machinon_Automatic",
    "name": "Automatic",
    "description": "Automatic mode on / off (grey)",
    "tab": "blue",
-   "on_sig": "5363-a07c0455",
-   "off_sig": "4601-8edb5ee6"
+   "on_sig": "3309-7a31b1cf",
+   "off_sig": "1515-58b873c1"
   },
   {
    "base": "machinon_Automatic-color",
    "name": "Automatic Color",
    "description": "Automatic mode on / off (grey)",
    "tab": "color",
-   "on_sig": "5216-d0860df3",
-   "off_sig": "4683-3149a636"
+   "on_sig": "3361-34307a4d",
+   "off_sig": "1606-bf8c0abc"
   },
   {
    "base": "machinon_Avengers",
    "name": "Avengers",
    "description": "Avengers logo",
    "tab": "fun",
-   "on_sig": "9782-2bce0a6b",
-   "off_sig": "8957-a0873236"
+   "on_sig": "7281-2703529b",
+   "off_sig": "4134-4ee9df85"
   },
   {
    "base": "machinon_Avengers-color",
    "name": "Avengers Color",
    "description": "Avengers logo",
    "tab": "fun",
-   "on_sig": "9191-41f30229",
-   "off_sig": "8623-903c247d"
+   "on_sig": "6389-96832835",
+   "off_sig": "4034-e88bbb4e"
   },
   {
    "base": "machinon_Bathtub",
    "name": "Bathtub",
    "description": "Bath",
    "tab": "blue",
-   "on_sig": "5402-3bc2c00b",
-   "off_sig": "4991-b63afa8f"
+   "on_sig": "4144-61c94ceb",
+   "off_sig": "2418-c3533519"
   },
   {
    "base": "machinon_Bathtub-color",
    "name": "Bathtub Color",
    "description": "Bath",
    "tab": "color",
-   "on_sig": "5179-4c0fa60d",
-   "off_sig": "4666-f0b76935"
+   "on_sig": "3953-c9fe52e0",
+   "off_sig": "2240-6adb1f39"
   },
   {
    "base": "machinon_Batman",
    "name": "Batman",
    "description": "Batman logo",
    "tab": "fun",
-   "on_sig": "3869-c693a7a3",
-   "off_sig": "3476-32114693"
+   "on_sig": "2998-73f8ba0b",
+   "off_sig": "1631-56332c59"
   },
   {
    "base": "machinon_Batman-color",
    "name": "Batman Color",
    "description": "Batman logo",
    "tab": "fun",
-   "on_sig": "3448-4545c7e7",
-   "off_sig": "3194-e01e32b5"
+   "on_sig": "2485-5ec59575",
+   "off_sig": "1479-46f089ae"
   },
   {
    "base": "machinon_Battery",
    "name": "Battery",
    "description": "Battery charged (on) / empty (off)",
    "tab": "blue",
-   "on_sig": "743-ffa13b81",
-   "off_sig": "661-d823460b"
+   "on_sig": "487-6b97e7c7",
+   "off_sig": "321-ca436078"
   },
   {
    "base": "machinon_BatteryCharging",
    "name": "Battery Charging",
    "description": "Charging (green) / charged (off)",
    "tab": "blue",
-   "on_sig": "1684-a58bbf83",
-   "off_sig": "743-ffa13b81"
+   "on_sig": "1114-cd12cd88",
+   "off_sig": "487-6b97e7c7"
   },
   {
    "base": "machinon_BatteryCharging-color",
    "name": "Battery Charging Color",
    "description": "Charging (on) / charged (off)",
    "tab": "color",
-   "on_sig": "1662-e029cddd",
-   "off_sig": "750-f840df3b"
+   "on_sig": "1212-d203c1ee",
+   "off_sig": "503-9fcb4d6f"
   },
   {
    "base": "machinon_Battery-color",
    "name": "Battery Color",
    "description": "Battery charged (on) / empty (off)",
    "tab": "color",
-   "on_sig": "750-f840df3b",
-   "off_sig": "772-9671d439"
+   "on_sig": "503-9fcb4d6f",
+   "off_sig": "508-062ad15f"
   },
   {
    "base": "machinon_BatteryLow",
    "name": "Battery Low",
    "description": "Low battery (red) / ok (grey)",
    "tab": "blue",
-   "on_sig": "822-4e24a18a",
-   "off_sig": "738-4026ba9c"
+   "on_sig": "567-a6609a86",
+   "off_sig": "356-96d18a6d"
   },
   {
    "base": "machinon_BatteryLow-color",
    "name": "Battery Low Color",
    "description": "Low battery (native) / ok (grey)",
    "tab": "color",
-   "on_sig": "848-e81710b4",
-   "off_sig": "770-be4750db"
+   "on_sig": "620-04cd34a8",
+   "off_sig": "375-3a50adf9"
   },
   {
    "base": "machinon_BBQ",
    "name": "BBQ Grill",
    "description": "BBQ grill on / off (grey)",
    "tab": "blue",
-   "on_sig": "6812-557c7eac",
-   "off_sig": "6089-6bebd39f"
+   "on_sig": "5020-846ed563",
+   "off_sig": "2984-fa6a0a05"
   },
   {
    "base": "machinon_BBQ-color",
    "name": "BBQ Grill Color",
    "description": "BBQ grill on / off (grey)",
    "tab": "color",
-   "on_sig": "6599-68106651",
-   "off_sig": "5798-3207d6d8"
+   "on_sig": "4836-1f4d1d6f",
+   "off_sig": "2829-77c9a46e"
   },
   {
    "base": "machinon_Bed",
    "name": "Bed",
    "description": "Bed / bed occupancy",
    "tab": "blue",
-   "on_sig": "3502-188ad3f0",
-   "off_sig": "3065-ad1264de"
+   "on_sig": "2942-98176c4c",
+   "off_sig": "1616-40b16ac0"
   },
   {
    "base": "machinon_Bed-color",
    "name": "Bed Color",
    "description": "Bed / bed occupancy",
    "tab": "color",
-   "on_sig": "3526-b16b8969",
-   "off_sig": "2904-e6c0fc46"
+   "on_sig": "3127-6c1b19c1",
+   "off_sig": "1580-69b7d83e"
   },
   {
    "base": "machinon_Blinds-color",
    "name": "Blinds Color",
    "description": "Blinds",
    "tab": "color",
-   "on_sig": "2577-ce78c0ac",
-   "off_sig": "2318-77f0df03"
+   "on_sig": "1950-5ff18a00",
+   "off_sig": "1159-ec2547e6"
   },
   {
    "base": "machinon_CaptainAmerica",
    "name": "Captain America",
    "description": "Captain America",
    "tab": "fun",
-   "on_sig": "10965-bca15bf2",
-   "off_sig": "9214-58d0ae18"
+   "on_sig": "7107-4760300a",
+   "off_sig": "3961-d3c4accb"
   },
   {
    "base": "machinon_CaptainAmerica-color",
    "name": "Captain America Color",
    "description": "Captain America",
    "tab": "fun",
-   "on_sig": "10935-647a55ef",
-   "off_sig": "9277-c5a8d6d5"
+   "on_sig": "7347-c86db646",
+   "off_sig": "4234-ba5dadc7"
   },
   {
    "base": "machinon_Car",
    "name": "Car",
    "description": "Car / vehicle",
    "tab": "blue",
-   "on_sig": "5486-fcbcc56b",
-   "off_sig": "4926-f1de0670"
+   "on_sig": "4392-4524a391",
+   "off_sig": "2401-f3a737ac"
   },
   {
    "base": "machinon_CarCharging",
    "name": "Car Charging",
    "description": "EV charging (green) / idle (grey)",
    "tab": "blue",
-   "on_sig": "6401-c8035d36",
-   "off_sig": "5304-0bc0e562"
+   "on_sig": "5223-b9c43547",
+   "off_sig": "2810-f8e3041e"
   },
   {
    "base": "machinon_CarCharging-color",
    "name": "Car Charging Color",
    "description": "EV charging (native) / idle (grey)",
    "tab": "color",
-   "on_sig": "6308-c44e0ec7",
-   "off_sig": "5086-ff90a927"
+   "on_sig": "5334-9a69846f",
+   "off_sig": "2742-5d68dd03"
   },
   {
    "base": "machinon_Car-color",
    "name": "Car Color",
    "description": "Car / vehicle",
    "tab": "color",
-   "on_sig": "5526-200342f2",
-   "off_sig": "4793-9c574da8"
+   "on_sig": "4605-453fbbf0",
+   "off_sig": "2378-9b7d4d3b"
   },
   {
    "base": "machinon_CeilingFan",
    "name": "Ceiling Fan",
    "description": "Ceiling fan on / off (grey)",
    "tab": "blue",
-   "on_sig": "4248-4835f1f0",
-   "off_sig": "3846-fee2a742"
+   "on_sig": "3566-eeebd0e2",
+   "off_sig": "1938-59aa3137"
   },
   {
    "base": "machinon_CeilingFan-color",
    "name": "Ceiling Fan Color",
    "description": "Ceiling fan on / off (grey)",
    "tab": "color",
-   "on_sig": "4174-c34e7743",
-   "off_sig": "3789-70a31f43"
+   "on_sig": "3514-e5e84b8f",
+   "off_sig": "1946-5529e063"
   },
   {
    "base": "machinon_CeilingLight",
    "name": "Ceiling Light",
    "description": "Ceiling light on / off (grey)",
    "tab": "blue",
-   "on_sig": "6501-fd766a62",
-   "off_sig": "5862-f3f32507"
+   "on_sig": "5082-fdef6116",
+   "off_sig": "2691-ca88c93c"
   },
   {
    "base": "machinon_ChristmasTree-color",
    "name": "Christmas Tree Color",
    "description": "Christmas tree",
    "tab": "color",
-   "on_sig": "5240-f4841fe4",
-   "off_sig": "4774-0fe703dd"
+   "on_sig": "3685-dc8b7fd5",
+   "off_sig": "2160-886ed3a6"
   },
   {
    "base": "machinon_Clock-color",
    "name": "Clock Color",
    "description": "Chronological device",
    "tab": "color",
-   "on_sig": "8493-b81c73b3",
-   "off_sig": "7385-593a75bf"
+   "on_sig": "5075-faeef95b",
+   "off_sig": "2856-40f2a4af"
   },
   {
    "base": "machinon_CO2Gauge",
    "name": "CO2 Gauge",
    "description": "CO2 concentration gauge",
    "tab": "blue",
-   "on_sig": "8148-2d0d7742",
-   "off_sig": "7169-3159f04b"
+   "on_sig": "6200-743fac9d",
+   "off_sig": "3468-cc6b30fc"
   },
   {
    "base": "machinon_CO2Gauge-color",
    "name": "CO2 Gauge Color",
    "description": "CO2 concentration gauge",
    "tab": "color",
-   "on_sig": "8158-56f54800",
-   "off_sig": "7122-b5c67941"
+   "on_sig": "6203-c763a6e5",
+   "off_sig": "3510-64b72532"
   },
   {
    "base": "machinon_Coffee-color",
    "name": "Coffee Machine Color",
    "description": "Coffee Machine",
    "tab": "color",
-   "on_sig": "4626-8d858b1d",
-   "off_sig": "4187-63886a10"
+   "on_sig": "3906-8277500a",
+   "off_sig": "2189-fd9a76a7"
   },
   {
    "base": "machinon_ColdWater",
    "name": "Cold Water",
    "description": "Cold water",
    "tab": "blue",
-   "on_sig": "6100-a17c57cd",
-   "off_sig": "5755-8a897944"
+   "on_sig": "4016-c5c8c1ed",
+   "off_sig": "2311-ab54d865"
   },
   {
    "base": "machinon_ColdWater-color",
    "name": "Cold Water Color",
    "description": "Cold water",
    "tab": "color",
-   "on_sig": "6545-aea1f90b",
-   "off_sig": "6078-09d9af60"
+   "on_sig": "4120-08a1398a",
+   "off_sig": "2327-63caa14a"
   },
   {
    "base": "machinon_Computer-color",
    "name": "Computer Laptop Color",
    "description": "Laptop computer",
    "tab": "color",
-   "on_sig": "2451-cd0d787a",
-   "off_sig": "2230-f5cf4b98"
+   "on_sig": "1921-85f38143",
+   "off_sig": "1161-f10fface"
   },
   {
    "base": "machinon_ComputerPC-color",
    "name": "Computer PC Color",
    "description": "Desktop computer tower",
    "tab": "color",
-   "on_sig": "2445-f60c128d",
-   "off_sig": "2167-7bfd573e"
+   "on_sig": "2218-1d3b32c8",
+   "off_sig": "1215-1cb0d421"
   },
   {
    "base": "machinon_Connection",
    "name": "Connection",
    "description": "Connected (on) / disconnected (off)",
    "tab": "blue",
-   "on_sig": "5608-331c28f3",
-   "off_sig": "6613-a0dcf2bd"
+   "on_sig": "3497-2ca7b5aa",
+   "off_sig": "4293-6aef6a86"
   },
   {
    "base": "machinon_Connection-color",
    "name": "Connection Color",
    "description": "Connected (on) / disconnected (off)",
    "tab": "color",
-   "on_sig": "5627-61c35a22",
-   "off_sig": "6469-cb064c43"
+   "on_sig": "3466-872290b8",
+   "off_sig": "4184-4e165dc6"
   },
   {
    "base": "machinon_Contact-color",
    "name": "Contact Color",
    "description": "Contact",
    "tab": "color",
-   "on_sig": "3890-39580bb3",
-   "off_sig": "1311-95bb130e"
+   "on_sig": "2403-50176e78",
+   "off_sig": "712-aa2afb0d"
   },
   {
    "base": "machinon_Cooktop",
    "name": "Cooktop",
    "description": "Cooktop on (red) / off (grey)",
    "tab": "blue",
-   "on_sig": "9434-45b97420",
-   "off_sig": "8681-88f00dd8"
+   "on_sig": "7735-1d8c3df0",
+   "off_sig": "4222-4f4cf6ee"
   },
   {
    "base": "machinon_Cooktop-color",
    "name": "Cooktop Color",
    "description": "Cooktop on / off (grey)",
    "tab": "color",
-   "on_sig": "9228-580a1034",
-   "off_sig": "8276-a2fc74b6"
+   "on_sig": "7509-dbf065bf",
+   "off_sig": "4184-845044e1"
   },
   {
    "base": "machinon_Cooling-color",
    "name": "Cooling Color",
    "description": "Cooling device",
    "tab": "color",
-   "on_sig": "6158-6b428f38",
-   "off_sig": "5676-21070776"
+   "on_sig": "2834-2ba5d2cd",
+   "off_sig": "1630-26eaa2f3"
   },
   {
    "base": "machinon_Curtains",
    "name": "Curtains",
    "description": "Curtains / curtain motor",
    "tab": "blue",
-   "on_sig": "4686-5286987c",
-   "off_sig": "4298-54cb7bf7"
+   "on_sig": "3626-8ac1cd52",
+   "off_sig": "2177-6cb780f6"
   },
   {
    "base": "machinon_Curtains-color",
    "name": "Curtains Color",
    "description": "Curtains / curtain motor",
    "tab": "color",
-   "on_sig": "4620-03edd398",
-   "off_sig": "4210-95d52176"
+   "on_sig": "3588-b7ef4e44",
+   "off_sig": "2125-e678c332"
   },
   {
    "base": "machinon_Custom-color",
    "name": "Custom Color",
    "description": "Custom",
    "tab": "color",
-   "on_sig": "5766-dea846ba",
-   "off_sig": "4148-46a0253d"
+   "on_sig": "2577-0ae02341",
+   "off_sig": "1314-8a3fae80"
   },
   {
    "base": "machinon_Daredevil",
    "name": "Daredevil",
    "description": "Daredevil",
    "tab": "fun",
-   "on_sig": "7051-143eb54b",
-   "off_sig": "6379-00a797b4"
+   "on_sig": "5673-7e64ebe8",
+   "off_sig": "3117-33a2b943"
   },
   {
    "base": "machinon_Daredevil-color",
    "name": "Daredevil Color",
    "description": "Daredevil",
    "tab": "fun",
-   "on_sig": "6631-96daf62d",
-   "off_sig": "6050-71d6303b"
+   "on_sig": "5051-3f41beb7",
+   "off_sig": "3002-ef83a452"
   },
   {
    "base": "machinon_DeskFan",
    "name": "Desk Fan",
    "description": "Desk fan on / off (grey)",
    "tab": "blue",
-   "on_sig": "6702-056a6ca6",
-   "off_sig": "5965-ec862ab6"
+   "on_sig": "5080-041b3690",
+   "off_sig": "3012-c27ac683"
   },
   {
    "base": "machinon_DeskFan-color",
    "name": "Desk Fan Color",
    "description": "Desk fan on / off (grey)",
    "tab": "color",
-   "on_sig": "6819-f644b02a",
-   "off_sig": "5949-80072b60"
+   "on_sig": "5028-bd4e9903",
+   "off_sig": "2996-54f72dca"
   },
   {
    "base": "machinon_DewPoint",
    "name": "Dew Point",
    "description": "Dew-point sensor",
    "tab": "blue",
-   "on_sig": "6908-7aa0fb2b",
-   "off_sig": "6147-46a98e2e"
+   "on_sig": "5426-900fbb0e",
+   "off_sig": "2999-54b6f05a"
   },
   {
    "base": "machinon_DewPoint-color",
    "name": "Dew Point Color",
    "description": "Dew-point sensor",
    "tab": "color",
-   "on_sig": "6736-9cdc34da",
-   "off_sig": "6016-c0d6a45a"
+   "on_sig": "5408-3505321a",
+   "off_sig": "2972-9e85831c"
   },
   {
    "base": "machinon_Dimmer-color",
    "name": "Dimmer Color",
    "description": "Dimmer",
    "tab": "color",
-   "on_sig": "6345-460b5eb8",
-   "off_sig": "4581-68f97e54"
+   "on_sig": "4516-9180e127",
+   "off_sig": "2364-8800e18c"
   },
   {
    "base": "machinon_Dinosaur",
    "name": "Dinosaur",
    "description": "Dinosaur",
    "tab": "fun",
-   "on_sig": "8954-c0366c62",
-   "off_sig": "8081-9f404594"
+   "on_sig": "6989-b36a1836",
+   "off_sig": "3773-a337fbc1"
   },
   {
    "base": "machinon_Dinosaur-color",
    "name": "Dinosaur Color",
    "description": "Dinosaur",
    "tab": "fun",
-   "on_sig": "8596-d78d94bd",
-   "off_sig": "7823-22f2be74"
+   "on_sig": "6636-c8b8e302",
+   "off_sig": "3663-b53dca82"
   },
   {
    "base": "machinon_Dishwasher",
    "name": "Dishwasher",
    "description": "Dishwasher running / off (grey)",
    "tab": "blue",
-   "on_sig": "3684-ea5d95d9",
-   "off_sig": "3278-c109cc0a"
+   "on_sig": "3128-978d5bd5",
+   "off_sig": "1745-daaa1e81"
   },
   {
    "base": "machinon_Dishwasher-color",
    "name": "Dishwasher Color",
    "description": "Dishwasher running / off (grey)",
    "tab": "color",
-   "on_sig": "3905-20c7cdda",
-   "off_sig": "3443-8c425076"
+   "on_sig": "3472-96457766",
+   "off_sig": "1831-b80f644a"
   },
   {
    "base": "machinon_DisneyPlus",
    "name": "Disney Plus",
    "description": "Disney Plus on / off (grey)",
    "tab": "blue",
-   "on_sig": "5573-3ca6b21e",
-   "off_sig": "5150-d5a4fe2d"
+   "on_sig": "3932-c55bb2f6",
+   "off_sig": "2384-1c3df29a"
   },
   {
    "base": "machinon_DisneyPlus-color",
    "name": "Disney Plus Color",
    "description": "Disney Plus on / off (grey)",
    "tab": "color",
-   "on_sig": "5263-7f75c726",
-   "off_sig": "4827-169cff43"
+   "on_sig": "3983-5c5b2b97",
+   "off_sig": "2324-8d5c1a84"
   },
   {
    "base": "machinon_Distance",
    "name": "Distance",
    "description": "Distance sensor",
    "tab": "blue",
-   "on_sig": "7100-37d52fad",
-   "off_sig": "6527-02284743"
+   "on_sig": "4228-f08f8606",
+   "off_sig": "2500-a43bdd6e"
   },
   {
    "base": "machinon_Distance-color",
    "name": "Distance Color",
    "description": "Distance sensor",
    "tab": "color",
-   "on_sig": "7631-64c6ad52",
-   "off_sig": "6717-bfe2c16c"
+   "on_sig": "4600-7b223e30",
+   "off_sig": "2580-058db1b0"
   },
   {
    "base": "machinon_DomeCamera",
    "name": "Dome Camera",
    "description": "Indoor dome camera",
    "tab": "blue",
-   "on_sig": "5191-047784a7",
-   "off_sig": "4642-24ecceca"
+   "on_sig": "4265-4484fa75",
+   "off_sig": "2397-78950817"
   },
   {
    "base": "machinon_DomeCamera-color",
    "name": "Dome Camera Color",
    "description": "Indoor dome camera",
    "tab": "color",
-   "on_sig": "5092-22e505c8",
-   "off_sig": "4377-8d581748"
+   "on_sig": "4082-2335800d",
+   "off_sig": "2288-6a753bec"
   },
   {
    "base": "machinon_Door-color",
    "name": "Door Color",
    "description": "Door",
    "tab": "color",
-   "on_sig": "1960-dd7fce82",
-   "off_sig": "887-f984ff4a"
+   "on_sig": "1780-3ff50734",
+   "off_sig": "633-3ca90abb"
   },
   {
    "base": "machinon_Lock",
    "name": "Door Lock",
    "description": "Locked (green) / unlocked (red)",
    "tab": "blue",
-   "on_sig": "2891-094f2ad0",
-   "off_sig": "2790-bd4650d2"
+   "on_sig": "2626-bd19182c",
+   "off_sig": "2496-b44edaee"
   },
   {
    "base": "machinon_Lock-color",
    "name": "Door Lock Color",
    "description": "Locked (green) / unlocked (red)",
    "tab": "color",
-   "on_sig": "2741-060342f7",
-   "off_sig": "2614-32dfc91e"
+   "on_sig": "2500-e3f8071a",
+   "off_sig": "2403-57e3e75d"
   },
   {
    "base": "machinon_Duck",
    "name": "Duck",
    "description": "Duck",
    "tab": "fun",
-   "on_sig": "6648-2b687671",
-   "off_sig": "5893-e8732216"
+   "on_sig": "5439-e06131f5",
+   "off_sig": "2873-cd973926"
   },
   {
    "base": "machinon_Duck-color",
    "name": "Duck Color",
    "description": "Duck",
    "tab": "fun",
-   "on_sig": "6761-6b925d63",
-   "off_sig": "6101-d613aacb"
+   "on_sig": "5666-1c696e53",
+   "off_sig": "2931-49b416ba"
   },
   {
    "base": "machinon_Teapot",
    "name": "Electric Teapot",
    "description": "Electric teapot on / off (grey)",
    "tab": "blue",
-   "on_sig": "4688-7a6619ea",
-   "off_sig": "4230-8365d0e2"
+   "on_sig": "4094-96322596",
+   "off_sig": "2165-bfa78a3c"
   },
   {
    "base": "machinon_Teapot-color",
    "name": "Electric Teapot Color",
    "description": "Electric teapot on / off (grey)",
    "tab": "color",
-   "on_sig": "4580-9f36463c",
-   "off_sig": "4129-99198ba2"
+   "on_sig": "4029-643230d8",
+   "off_sig": "2160-0a745037"
   },
   {
    "base": "machinon_EnergyCounter",
    "name": "Energy Counter",
    "description": "Energy / electricity counter",
    "tab": "blue",
-   "on_sig": "5101-f268aae4",
-   "off_sig": "4783-4ab9e7dd"
+   "on_sig": "3771-d18aa737",
+   "off_sig": "2233-97a9ebcb"
   },
   {
    "base": "machinon_EnergyCounter-color",
    "name": "Energy Counter Color",
    "description": "Energy / electricity counter",
    "tab": "color",
-   "on_sig": "5799-d39c2790",
-   "off_sig": "5098-4a5b4c49"
+   "on_sig": "4856-f94e6c13",
+   "off_sig": "2525-ae11e3a2"
   },
   {
    "base": "machinon_EnergyMeter",
    "name": "Energy Meter",
    "description": "Electricity / energy meter",
    "tab": "blue",
-   "on_sig": "5680-40c0f1fc",
-   "off_sig": "4880-eb64870d"
+   "on_sig": "4475-ef30e9d2",
+   "off_sig": "2498-47b6cfd5"
   },
   {
    "base": "machinon_EnergyMeter-color",
    "name": "Energy Meter Color",
    "description": "Electricity / energy meter",
    "tab": "color",
-   "on_sig": "7163-cfdd5baa",
-   "off_sig": "5852-6a799c0e"
+   "on_sig": "6157-a2ae5df3",
+   "off_sig": "3008-226690b0"
   },
   {
    "base": "machinon_Family",
    "name": "Family",
    "description": "Family",
    "tab": "blue",
-   "on_sig": "11086-9a639f2d",
-   "off_sig": "9674-0668eb6c"
+   "on_sig": "8950-c7d9aca7",
+   "off_sig": "4883-1444e4d6"
   },
   {
    "base": "machinon_Family-color",
    "name": "Family Color",
    "description": "Family",
    "tab": "color",
-   "on_sig": "11432-e032a45e",
-   "off_sig": "9582-d8d5bdfe"
+   "on_sig": "10399-ed839271",
+   "off_sig": "4948-a3bef87c"
   },
   {
    "base": "machinon_FamilyHome",
    "name": "Family Home",
    "description": "Family home (green) / away (grey)",
    "tab": "blue",
-   "on_sig": "8572-8340ab56",
-   "off_sig": "8288-aa096a75"
+   "on_sig": "7355-3f379f3c",
+   "off_sig": "6389-f0611fdc"
   },
   {
    "base": "machinon_FamilyHome-color",
    "name": "Family Home Color",
    "description": "Family home (native) / away (grey)",
    "tab": "color",
-   "on_sig": "8345-f001675d",
-   "off_sig": "8042-d65dcd90"
+   "on_sig": "7365-506f4cd1",
+   "off_sig": "6533-030997fd"
   },
   {
    "base": "machinon_Fan-color",
    "name": "Fan Color",
    "description": "Airflow Producer",
    "tab": "color",
-   "on_sig": "10306-bd1f5b11",
-   "off_sig": "9267-ff3c2327"
+   "on_sig": "6695-f940ceb8",
+   "off_sig": "4143-c9177d14"
   },
   {
    "base": "machinon_FantasticFour",
    "name": "Fantastic Four",
    "description": "Fantastic Four",
    "tab": "fun",
-   "on_sig": "9712-519279d9",
-   "off_sig": "8639-d4604d07"
+   "on_sig": "5939-64b7e35b",
+   "off_sig": "3491-2e85f7f2"
   },
   {
    "base": "machinon_FantasticFour-color",
    "name": "Fantastic Four Color",
    "description": "Fantastic Four",
    "tab": "fun",
-   "on_sig": "9370-69211727",
-   "off_sig": "8418-f4f78b15"
+   "on_sig": "5677-b15aa81d",
+   "off_sig": "3441-881b561b"
   },
   {
    "base": "machinon_Fingerprint",
    "name": "Fingerprint",
    "description": "Fingerprint OK (green) / idle (grey)",
    "tab": "blue",
-   "on_sig": "18443-c8ead04d",
-   "off_sig": "17009-b3515f13"
+   "on_sig": "10169-1d113794",
+   "off_sig": "6754-8ead3d42"
   },
   {
    "base": "machinon_Fingerprint-color",
    "name": "Fingerprint Color",
    "description": "Fingerprint OK / idle (grey)",
    "tab": "color",
-   "on_sig": "18233-b07920e3",
-   "off_sig": "17577-95b3429d"
+   "on_sig": "10002-bccc352e",
+   "off_sig": "6939-0c0d90a2"
   },
   {
    "base": "machinon_FireAlarm",
    "name": "Fire Alarm",
    "description": "Fire alarm on / off (grey)",
    "tab": "blue",
-   "on_sig": "7382-dba127b5",
-   "off_sig": "6446-2e036d9d"
+   "on_sig": "3550-d28b05d4",
+   "off_sig": "2120-b6889b87"
   },
   {
    "base": "machinon_FireAlarm-color",
    "name": "Fire Alarm Color",
    "description": "Fire alarm on / off (grey)",
    "tab": "color",
-   "on_sig": "6665-7b261d3c",
-   "off_sig": "6055-96e0cce1"
+   "on_sig": "3077-2d04aab1",
+   "off_sig": "1938-68b6ce01"
   },
   {
    "base": "machinon_FlashHead",
    "name": "Flash Head",
    "description": "The Flash",
    "tab": "fun",
-   "on_sig": "8962-7737293f",
-   "off_sig": "8094-d95655e7"
+   "on_sig": "6347-47b49d97",
+   "off_sig": "3783-0cbdfae9"
   },
   {
    "base": "machinon_FlashHead-color",
    "name": "Flash Head Color",
    "description": "The Flash",
    "tab": "fun",
-   "on_sig": "9071-cd1d434d",
-   "off_sig": "8144-fabd9cc7"
+   "on_sig": "6815-9b1bafdd",
+   "off_sig": "3960-93fdc8fb"
   },
   {
    "base": "machinon_FlashSign",
    "name": "Flash Sign",
    "description": "The Flash emblem",
    "tab": "fun",
-   "on_sig": "9059-6356594e",
-   "off_sig": "8111-a896938d"
+   "on_sig": "5859-2a997c09",
+   "off_sig": "3246-3d33aea1"
   },
   {
    "base": "machinon_FlashSign-color",
    "name": "Flash Sign Color",
    "description": "The Flash emblem",
    "tab": "fun",
-   "on_sig": "8760-49b5596b",
-   "off_sig": "7810-7cd3a36f"
+   "on_sig": "5753-24d542d6",
+   "off_sig": "3327-0aa24a9f"
   },
   {
    "base": "machinon_FluidMeter",
    "name": "Fluid Meter",
    "description": "Fluid / glucose meter sensor",
    "tab": "blue",
-   "on_sig": "3421-b7941539",
-   "off_sig": "3045-fc58fd28"
+   "on_sig": "2894-21eac3a4",
+   "off_sig": "1665-00ae0e5b"
   },
   {
    "base": "machinon_FluidMeter-color",
    "name": "Fluid Meter Color",
    "description": "Fluid / glucose meter sensor",
    "tab": "color",
-   "on_sig": "3936-e4a609a5",
-   "off_sig": "3550-360a0448"
+   "on_sig": "3345-2f48c2d0",
+   "off_sig": "1942-84a727fe"
   },
   {
    "base": "machinon_Fountain",
    "name": "Fountain",
    "description": "Fountain",
    "tab": "blue",
-   "on_sig": "6408-5d7d4920",
-   "off_sig": "6143-92ad6eb2"
+   "on_sig": "4008-f9f2a5bf",
+   "off_sig": "2637-e07e3df2"
   },
   {
    "base": "machinon_Fountain-color",
    "name": "Fountain Color",
    "description": "Fountain",
    "tab": "color",
-   "on_sig": "6466-33aec31d",
-   "off_sig": "6091-3dbc9409"
+   "on_sig": "3972-07a766bd",
+   "off_sig": "2632-171519d4"
   },
   {
    "base": "machinon_Fridge",
    "name": "Fridge",
    "description": "Fridge door open / closed (grey)",
    "tab": "blue",
-   "on_sig": "1980-e1bcbff0",
-   "off_sig": "1243-d7bfcbc9"
+   "on_sig": "1816-d943ffdc",
+   "off_sig": "646-12ab3262"
   },
   {
    "base": "machinon_GameController",
    "name": "Game Controller",
    "description": "Gamepad / console controller",
    "tab": "blue",
-   "on_sig": "7070-31687ff6",
-   "off_sig": "6163-dd12ad81"
+   "on_sig": "5704-6ffbee2c",
+   "off_sig": "3243-e46438d9"
   },
   {
    "base": "machinon_GameController-color",
    "name": "Game Controller Color",
    "description": "Gamepad / console controller",
    "tab": "color",
-   "on_sig": "7464-74943de0",
-   "off_sig": "6452-c108343e"
+   "on_sig": "6219-fa969f88",
+   "off_sig": "3408-31f923ce"
   },
   {
    "base": "machinon_Garage",
    "name": "Garage Door",
    "description": "Garage door open (on) / closed (off)",
    "tab": "blue",
-   "on_sig": "4616-d3ffaf5f",
-   "off_sig": "4706-7b3919e8"
+   "on_sig": "3761-f926af53",
+   "off_sig": "3807-30630497"
   },
   {
    "base": "machinon_Garage-color",
    "name": "Garage Door Color",
    "description": "Garage door open (on) / closed (off)",
    "tab": "color",
-   "on_sig": "4771-85ce27de",
-   "off_sig": "4798-e31009cf"
+   "on_sig": "3879-fa585089",
+   "off_sig": "3934-73fbb27a"
   },
   {
    "base": "machinon_GLight-color",
    "name": "Garden Light Color",
    "description": "Garden Light",
    "tab": "color",
-   "on_sig": "3379-25766e54",
-   "off_sig": "3142-f9aee3c9"
+   "on_sig": "2715-826ab112",
+   "off_sig": "1490-c2ead57e"
   },
   {
    "base": "machinon_GasCounter",
    "name": "Gas Counter",
    "description": "Gas counter",
    "tab": "blue",
-   "on_sig": "5815-e254297e",
-   "off_sig": "5320-6eeba039"
+   "on_sig": "4454-52e31f45",
+   "off_sig": "2598-3af01349"
   },
   {
    "base": "machinon_GasCounter-color",
    "name": "Gas Counter Color",
    "description": "Gas counter",
    "tab": "color",
-   "on_sig": "6809-ea473ec8",
-   "off_sig": "5973-2ace5286"
+   "on_sig": "5780-6257d2b7",
+   "off_sig": "3034-e25b0e5a"
   },
   {
    "base": "machinon_Gate",
    "name": "Gate",
    "description": "Gate open (on) / closed (off)",
    "tab": "blue",
-   "on_sig": "4139-b600cc0e",
-   "off_sig": "3980-ac010168"
+   "on_sig": "3087-aaf7badb",
+   "off_sig": "3125-34b067e2"
   },
   {
    "base": "machinon_Gate-color",
    "name": "Gate Color",
    "description": "Gate open (on) / closed (off)",
    "tab": "color",
-   "on_sig": "4028-e7e394e6",
-   "off_sig": "3926-e9900d6e"
+   "on_sig": "2984-6d6f7aad",
+   "off_sig": "3109-bb0f2f94"
   },
   {
    "base": "machinon_Gears",
    "name": "Gears",
    "description": "Automations running / off (grey)",
    "tab": "blue",
-   "on_sig": "11790-bd7b279a",
-   "off_sig": "10579-36e0df61"
+   "on_sig": "8612-d655314c",
+   "off_sig": "4712-c6219a35"
   },
   {
    "base": "machinon_Gears-color",
    "name": "Gears Color",
    "description": "Automations running / off (grey)",
    "tab": "color",
-   "on_sig": "11548-b2d7aacd",
-   "off_sig": "10524-75ae59e0"
+   "on_sig": "8593-81a41564",
+   "off_sig": "4714-fceb00c5"
   },
   {
    "base": "machinon_Generic-color",
    "name": "Generic Color",
    "description": "Generic On/Off switch",
    "tab": "color",
-   "on_sig": "6166-d20eb35b",
-   "off_sig": "5680-5d2e3858"
+   "on_sig": "3616-cee818ac",
+   "off_sig": "2383-5dc2cbc4"
   },
   {
    "base": "machinon_Geothermal",
    "name": "Geothermal",
    "description": "Geothermal heat on / off (grey)",
    "tab": "blue",
-   "on_sig": "3545-12e47dd8",
-   "off_sig": "3096-6e408be4"
+   "on_sig": "3173-fc0bb691",
+   "off_sig": "1767-32782bba"
   },
   {
    "base": "machinon_Geothermal-color",
    "name": "Geothermal Color",
    "description": "Geothermal heat on / off (grey)",
    "tab": "color",
-   "on_sig": "4032-f97e2317",
-   "off_sig": "3364-5ec14d51"
+   "on_sig": "3646-224627e0",
+   "off_sig": "1983-aad6c21e"
   },
   {
    "base": "machinon_Gizmo",
    "name": "Gizmo",
    "description": "Gizmo (mogwai)",
    "tab": "fun",
-   "on_sig": "7473-7ba00bc6",
-   "off_sig": "6780-4207b994"
+   "on_sig": "6093-f443dfb5",
+   "off_sig": "3451-ff139d2b"
   },
   {
    "base": "machinon_Gizmo-color",
    "name": "Gizmo Color",
    "description": "Gizmo (mogwai)",
    "tab": "fun",
-   "on_sig": "7849-cf678da5",
-   "off_sig": "6885-0efb6950"
+   "on_sig": "6346-c3627687",
+   "off_sig": "3475-ce46c9ed"
   },
   {
    "base": "machinon_Graph",
    "name": "Graph",
    "description": "Graph / statistics",
    "tab": "blue",
-   "on_sig": "5182-3a5f5088",
-   "off_sig": "4678-d077cd94"
+   "on_sig": "3682-8ce38979",
+   "off_sig": "2071-e8d28d0e"
   },
   {
    "base": "machinon_Graph-color",
    "name": "Graph Color",
    "description": "Graph / statistics",
    "tab": "color",
-   "on_sig": "4859-2d93cbf1",
-   "off_sig": "4365-55296a15"
+   "on_sig": "3412-2592f7fa",
+   "off_sig": "2004-3de89e26"
   },
   {
    "base": "machinon_GreenTech",
    "name": "Green Tech",
    "description": "Renewable energy on / off (grey)",
    "tab": "blue",
-   "on_sig": "5543-2db94611",
-   "off_sig": "4947-44537899"
+   "on_sig": "4480-050d1751",
+   "off_sig": "2529-b1dff24e"
   },
   {
    "base": "machinon_GreenTech-color",
    "name": "Green Tech Color",
    "description": "Renewable energy on / off (grey)",
    "tab": "color",
-   "on_sig": "5323-41cef20b",
-   "off_sig": "4756-4a67bdd6"
+   "on_sig": "4195-ccbc1758",
+   "off_sig": "2461-1c162043"
   },
   {
    "base": "machinon_Gremlin",
    "name": "Gremlin",
    "description": "Gremlin",
    "tab": "fun",
-   "on_sig": "9205-f2b98d14",
-   "off_sig": "8279-2decf089"
+   "on_sig": "6983-28edaee9",
+   "off_sig": "3987-6c14d6f4"
   },
   {
    "base": "machinon_Gremlin-color",
    "name": "Gremlin Color",
    "description": "Gremlin",
    "tab": "fun",
-   "on_sig": "9878-e2485c46",
-   "off_sig": "8512-fd92c12c"
+   "on_sig": "7507-7a1ede8a",
+   "off_sig": "4236-18496f35"
   },
   {
    "base": "machinon_GreyAlien",
    "name": "Grey Alien",
    "description": "Grey alien",
    "tab": "fun",
-   "on_sig": "8280-9ba0e255",
-   "off_sig": "7237-83bd9e98"
+   "on_sig": "6357-b3fcfa5b",
+   "off_sig": "3535-bad6a647"
   },
   {
    "base": "machinon_GreyAlien-color",
    "name": "Grey Alien Color",
    "description": "Grey alien",
    "tab": "fun",
-   "on_sig": "8026-facd3d24",
-   "off_sig": "7067-f7d6b10f"
+   "on_sig": "5947-24c21b3a",
+   "off_sig": "3523-cf3e31f4"
   },
   {
    "base": "machinon_Harddisk-color",
    "name": "Hard Disk Color",
    "description": "Hard disk drive",
    "tab": "color",
-   "on_sig": "5589-eb777c31",
-   "off_sig": "4791-fe09cfa2"
+   "on_sig": "4373-5cab001e",
+   "off_sig": "2645-45b0d2db"
   },
   {
    "base": "machinon_HarryPotter",
    "name": "Harry Potter",
    "description": "Harry Potter",
    "tab": "fun",
-   "on_sig": "4647-9e5869f8",
-   "off_sig": "4184-c231ca3b"
+   "on_sig": "3810-d0869623",
+   "off_sig": "2111-3f7ec13b"
   },
   {
    "base": "machinon_HarryPotter-color",
    "name": "Harry Potter Color",
    "description": "Harry Potter",
    "tab": "fun",
-   "on_sig": "4770-41281cc8",
-   "off_sig": "4290-30a4510b"
+   "on_sig": "3762-e0b6ea36",
+   "off_sig": "2130-494eb62d"
   },
   {
    "base": "machinon_Heating-color",
    "name": "Heating Color",
    "description": "Heating device",
    "tab": "color",
-   "on_sig": "4072-09a3753f",
-   "off_sig": "3716-5f5b71df"
+   "on_sig": "2296-77c224c9",
+   "off_sig": "1334-7107e485"
   },
   {
    "base": "machinon_Height",
    "name": "Height",
    "description": "Height sensor",
    "tab": "blue",
-   "on_sig": "6546-5fea0674",
-   "off_sig": "6085-cedacd8d"
+   "on_sig": "4045-b3c6c881",
+   "off_sig": "2461-054aeb96"
   },
   {
    "base": "machinon_Height-color",
    "name": "Height Color",
    "description": "Height sensor",
    "tab": "color",
-   "on_sig": "6942-85115e8e",
-   "off_sig": "6364-09525d2d"
+   "on_sig": "4427-8fc3332b",
+   "off_sig": "2534-3f53d2a3"
   },
   {
    "base": "machinon_HotWater",
    "name": "Hot Water",
    "description": "Hot water / boiler",
    "tab": "blue",
-   "on_sig": "6002-d1c058d8",
-   "off_sig": "5280-80e01a05"
+   "on_sig": "4538-6a926175",
+   "off_sig": "2457-bab87bf8"
   },
   {
    "base": "machinon_HotWater-color",
    "name": "Hot Water Color",
    "description": "Hot water / boiler",
    "tab": "color",
-   "on_sig": "5836-773066ec",
-   "off_sig": "5397-16ba6c60"
+   "on_sig": "4383-4c090cd3",
+   "off_sig": "2482-5be1fea5"
   },
   {
    "base": "machinon_HouseLock",
    "name": "House Lock",
    "description": "House secured (green) / open (red)",
    "tab": "blue",
-   "on_sig": "5867-68ff7f46",
-   "off_sig": "5827-db487a6f"
+   "on_sig": "4657-693135b4",
+   "off_sig": "4562-224decc3"
   },
   {
    "base": "machinon_HouseLock-color",
    "name": "House Lock Color",
    "description": "House secured (green) / open (red)",
    "tab": "color",
-   "on_sig": "5830-d3dcc2b8",
-   "off_sig": "5742-3dab927d"
+   "on_sig": "4698-12ae61a4",
+   "off_sig": "4658-947653e4"
   },
   {
    "base": "machinon_HumanTorch",
    "name": "Human Torch",
    "description": "Human Torch",
    "tab": "fun",
-   "on_sig": "8904-522e790e",
-   "off_sig": "8041-e491cbe2"
+   "on_sig": "7040-0d64c867",
+   "off_sig": "3830-a52ad030"
   },
   {
    "base": "machinon_HumanTorch-color",
    "name": "Human Torch Color",
    "description": "Human Torch",
    "tab": "fun",
-   "on_sig": "8001-3ef527f8",
-   "off_sig": "7352-3fffde6a"
+   "on_sig": "5884-b830571b",
+   "off_sig": "3734-b5c6b2c0"
   },
   {
    "base": "machinon_HumidityGauge",
    "name": "Humidity Gauge",
    "description": "Humidity dial gauge",
    "tab": "blue",
-   "on_sig": "9979-b852727e",
-   "off_sig": "8679-07d05edd"
+   "on_sig": "7768-d9cdad02",
+   "off_sig": "4186-3a857862"
   },
   {
    "base": "machinon_HumidityGauge-color",
    "name": "Humidity Gauge Color",
    "description": "Humidity dial gauge",
    "tab": "color",
-   "on_sig": "10018-1e23881c",
-   "off_sig": "8926-7d82f84d"
+   "on_sig": "7898-cbaee1e0",
+   "off_sig": "4161-ee2a2e7b"
   },
   {
    "base": "machinon_Hygrometer",
    "name": "Hygrometer",
    "description": "Humidity / hygrometer sensor",
    "tab": "blue",
-   "on_sig": "6486-91ee8cf9",
-   "off_sig": "5858-7a4a0b24"
+   "on_sig": "4906-41988e90",
+   "off_sig": "2643-589a2896"
   },
   {
    "base": "machinon_Hygrometer-color",
    "name": "Hygrometer Color",
    "description": "Humidity / hygrometer sensor",
    "tab": "color",
-   "on_sig": "6300-b35f131c",
-   "off_sig": "5764-1dfbbeca"
+   "on_sig": "4739-1b78c15f",
+   "off_sig": "2682-209ac947"
   },
   {
    "base": "machinon_InfraredSensor",
    "name": "Infrared Sensor",
    "description": "IR detected (red) / clear (grey)",
    "tab": "blue",
-   "on_sig": "7331-b56d0b4c",
-   "off_sig": "7375-45919949"
+   "on_sig": "3959-9aaf0ea1",
+   "off_sig": "2347-75c8cd5c"
   },
   {
    "base": "machinon_InfraredSensor-color",
    "name": "Infrared Sensor Color",
    "description": "IR detected (native) / clear (grey)",
    "tab": "color",
-   "on_sig": "7698-21d57e83",
-   "off_sig": "7060-ee9df2e8"
+   "on_sig": "4167-1d2cd694",
+   "off_sig": "2409-6ddfa14c"
   },
   {
    "base": "machinon_Inverter-color",
    "name": "Inverter Color",
    "description": "Inverter",
    "tab": "color",
-   "on_sig": "3156-8181e5e6",
-   "off_sig": "2722-6d36e23e"
+   "on_sig": "2609-53b10d9e",
+   "off_sig": "1231-66b90eec"
   },
   {
    "base": "machinon_IronMan",
    "name": "Iron Man",
    "description": "Iron Man",
    "tab": "fun",
-   "on_sig": "6723-05bdf699",
-   "off_sig": "5949-24495cb0"
+   "on_sig": "5262-1a7b4924",
+   "off_sig": "2966-9a3b3ff9"
   },
   {
    "base": "machinon_IronMan-color",
    "name": "Iron Man Color",
    "description": "Iron Man",
    "tab": "fun",
-   "on_sig": "6688-af3b18f2",
-   "off_sig": "5739-ad7d2dc1"
+   "on_sig": "5521-951fa40c",
+   "off_sig": "2974-9ea71924"
   },
   {
    "base": "machinon_Jacuzzi",
    "name": "Jacuzzi",
    "description": "Jacuzzi / hot tub",
    "tab": "blue",
-   "on_sig": "6630-054496a4",
-   "off_sig": "5839-41271a86"
+   "on_sig": "5447-cb250e62",
+   "off_sig": "2991-11a4663e"
   },
   {
    "base": "machinon_Jacuzzi-color",
    "name": "Jacuzzi Color",
    "description": "Jacuzzi / hot tub",
    "tab": "color",
-   "on_sig": "6509-14c414e8",
-   "off_sig": "5816-32e2bbae"
+   "on_sig": "5351-7c191d7f",
+   "off_sig": "2984-0b5562af"
   },
   {
    "base": "machinon_Kettle",
    "name": "Kettle",
    "description": "Kettle boiling / off (grey)",
    "tab": "blue",
-   "on_sig": "8566-c98a8502",
-   "off_sig": "7692-d64a1f81"
+   "on_sig": "6627-c98d5087",
+   "off_sig": "3752-08d3fd3e"
   },
   {
    "base": "machinon_Kettle-color",
    "name": "Kettle Color",
    "description": "Kettle boiling (native) / off (grey)",
    "tab": "color",
-   "on_sig": "8893-8e5ffd32",
-   "off_sig": "7911-34064cb8"
+   "on_sig": "6974-dd63b7c7",
+   "off_sig": "3908-a30e8c85"
   },
   {
    "base": "machinon_LightAuto",
    "name": "Light Automation",
    "description": "Automated light on / off",
    "tab": "blue",
-   "on_sig": "8342-f6b680f8",
-   "off_sig": "7594-2169d45e"
+   "on_sig": "6693-9ededd75",
+   "off_sig": "3601-18ab7de4"
   },
   {
    "base": "machinon_LightAuto-color",
    "name": "Light Automation Color",
    "description": "Automated light on / off",
    "tab": "color",
-   "on_sig": "8171-5a46069a",
-   "off_sig": "7193-e6b21f9e"
+   "on_sig": "6628-1a84f936",
+   "off_sig": "3559-cc86fd54"
   },
   {
    "base": "machinon_Light-color",
    "name": "Light/Switch Color",
    "description": "A Lamp or Switch",
    "tab": "color",
-   "on_sig": "6345-460b5eb8",
-   "off_sig": "4581-68f97e54"
+   "on_sig": "4516-9180e127",
+   "off_sig": "2364-8800e18c"
   },
   {
    "base": "machinon_Link",
    "name": "Link",
    "description": "Link connected (on) / broken (off)",
    "tab": "blue",
-   "on_sig": "8144-916ce92e",
-   "off_sig": "9671-4d8ea0f2"
+   "on_sig": "5873-c315536a",
+   "off_sig": "6807-7917414d"
   },
   {
    "base": "machinon_Link-color",
    "name": "Link Color",
    "description": "Link connected (on) / broken (off)",
    "tab": "color",
-   "on_sig": "7603-e7a5e585",
-   "off_sig": "9117-81d5bbb2"
+   "on_sig": "5183-7748b7c0",
+   "off_sig": "6209-798757d0"
   },
   {
    "base": "machinon_Mailbox",
    "name": "Mailbox",
    "description": "Mail waiting / empty (grey)",
    "tab": "blue",
-   "on_sig": "2761-2d3eebf4",
-   "off_sig": "2451-d77db061"
+   "on_sig": "2482-4e07664f",
+   "off_sig": "1304-8d37bea1"
   },
   {
    "base": "machinon_Mailbox-color",
    "name": "Mailbox Color",
    "description": "Mail waiting (native) / empty (grey)",
    "tab": "color",
-   "on_sig": "2834-ffbd1255",
-   "off_sig": "2187-49b17928"
+   "on_sig": "2538-ccbcbb00",
+   "off_sig": "1217-1689cd0f"
   },
   {
    "base": "machinon_Man",
    "name": "Man",
    "description": "Man",
    "tab": "blue",
-   "on_sig": "5987-a2e5c1e1",
-   "off_sig": "5425-547367f4"
+   "on_sig": "4559-1aa241c1",
+   "off_sig": "2523-aa985137"
   },
   {
    "base": "machinon_Man-color",
    "name": "Man Color",
    "description": "Man",
    "tab": "color",
-   "on_sig": "5688-d7f68f63",
-   "off_sig": "5099-3b052f95"
+   "on_sig": "4571-dd421d3c",
+   "off_sig": "2591-fda77537"
   },
   {
    "base": "machinon_ManHome",
    "name": "Man Home",
    "description": "Man home (green) / away (grey)",
    "tab": "blue",
-   "on_sig": "6766-fd5fd2fd",
-   "off_sig": "6662-b5a4336f"
+   "on_sig": "5462-6377e9fa",
+   "off_sig": "5154-1cbaa665"
   },
   {
    "base": "machinon_ManHome-color",
    "name": "Man Home Color",
    "description": "Man home (native) / away (grey)",
    "tab": "color",
-   "on_sig": "6421-7199ecef",
-   "off_sig": "6298-e8061e6a"
+   "on_sig": "5421-6df36f5b",
+   "off_sig": "5201-72605b81"
   },
   {
    "base": "machinon_Mario",
    "name": "Mario",
    "description": "Mario",
    "tab": "fun",
-   "on_sig": "6345-3e245419",
-   "off_sig": "5345-08120b59"
+   "on_sig": "3924-0fe6a7d9",
+   "off_sig": "2373-ced2a6d4"
   },
   {
    "base": "machinon_Mario-color",
    "name": "Mario Color",
    "description": "Mario",
    "tab": "fun",
-   "on_sig": "6246-3d710615",
-   "off_sig": "5503-810bf789"
+   "on_sig": "3706-a7b5b322",
+   "off_sig": "2492-9eab630a"
   },
   {
    "base": "machinon_Media-color",
    "name": "Media Player Color",
    "description": "Media player device",
    "tab": "color",
-   "on_sig": "5082-7f6306f8",
-   "off_sig": "4547-c6bd8c28"
+   "on_sig": "3674-5b57fa8c",
+   "off_sig": "2161-42a34604"
   },
   {
    "base": "machinon_Microwave",
    "name": "Microwave",
    "description": "Microwave running / off (grey)",
    "tab": "blue",
-   "on_sig": "3499-c1ad8c6d",
-   "off_sig": "2909-637176ab"
+   "on_sig": "2934-b52197ff",
+   "off_sig": "1625-af827bff"
   },
   {
    "base": "machinon_Microwave-color",
    "name": "Microwave Color",
    "description": "Microwave running / off (grey)",
    "tab": "color",
-   "on_sig": "3449-ef5f1c0e",
-   "off_sig": "2894-88ae3748"
+   "on_sig": "2708-92cb47b4",
+   "off_sig": "1503-af186c63"
   },
   {
    "base": "machinon_Mobile",
    "name": "Mobile",
    "description": "Phone present / away (grey)",
    "tab": "blue",
-   "on_sig": "2018-56ca2e11",
-   "off_sig": "1824-d1201045"
+   "on_sig": "1861-218e23df",
+   "off_sig": "981-ea896ce7"
   },
   {
    "base": "machinon_Mobile-color",
    "name": "Mobile Color",
    "description": "Phone present (native) / away (grey)",
    "tab": "color",
-   "on_sig": "2054-c2259b60",
-   "off_sig": "1822-962e084f"
+   "on_sig": "1867-1a316745",
+   "off_sig": "1001-52d98307"
   },
   {
    "base": "machinon_Mood",
    "name": "Mood",
    "description": "Mood: happy (on) / sad (off)",
    "tab": "blue",
-   "on_sig": "7910-036ceebb",
-   "off_sig": "7988-e445cb32"
+   "on_sig": "5574-788b697a",
+   "off_sig": "5684-6609572e"
   },
   {
    "base": "machinon_Mood-color",
    "name": "Mood Color",
    "description": "Mood: happy / sad face (native)",
    "tab": "color",
-   "on_sig": "7556-097db3ac",
-   "off_sig": "7640-08eb08cf"
+   "on_sig": "5300-2c756b89",
+   "off_sig": "5342-b9de53fb"
   },
   {
    "base": "machinon_MotionDetector",
    "name": "Motion Detector",
    "description": "Motion detected (red) / clear (grey)",
    "tab": "blue",
-   "on_sig": "6252-be02d032",
-   "off_sig": "5906-41ee4ed5"
+   "on_sig": "5009-1d992e9c",
+   "off_sig": "2881-2e7e1a42"
   },
   {
    "base": "machinon_MotionDetector-color",
    "name": "Motion Detector Color",
    "description": "Motion detected / clear (grey)",
    "tab": "color",
-   "on_sig": "6146-e0c3691b",
-   "off_sig": "5683-ef2ed9fd"
+   "on_sig": "4855-b0d9255c",
+   "off_sig": "2747-809e5b5c"
   },
   {
    "base": "machinon_Music",
    "name": "Music",
    "description": "Music note",
    "tab": "blue",
-   "on_sig": "6008-bad48c80",
-   "off_sig": "5346-d8a85813"
+   "on_sig": "4866-87958edf",
+   "off_sig": "2632-dd93a2fd"
   },
   {
    "base": "machinon_Music-color",
    "name": "Music Color",
    "description": "Music note",
    "tab": "color",
-   "on_sig": "5648-6c2a5ab8",
-   "off_sig": "5109-223eaede"
+   "on_sig": "4567-c2993ee5",
+   "off_sig": "2503-ce06c90d"
   },
   {
    "base": "machinon_Navi",
    "name": "Na'vi",
    "description": "Na'vi (Avatar)",
    "tab": "fun",
-   "on_sig": "8810-7b013562",
-   "off_sig": "7616-a88a780a"
+   "on_sig": "7071-fa9b8004",
+   "off_sig": "3903-eababe95"
   },
   {
    "base": "machinon_Navi-color",
    "name": "Na'vi Color",
    "description": "Na'vi (Avatar)",
    "tab": "fun",
-   "on_sig": "8121-32ff7b33",
-   "off_sig": "6631-b5f06c54"
+   "on_sig": "7015-f87d29a0",
+   "off_sig": "3603-9284deda"
   },
   {
    "base": "machinon_NAS",
    "name": "NAS",
    "description": "Network-attached storage",
    "tab": "blue",
-   "on_sig": "2728-6f924c8d",
-   "off_sig": "2367-039333a2"
+   "on_sig": "2159-62cc73b0",
+   "off_sig": "1030-6f0fe9f9"
   },
   {
    "base": "machinon_NAS-color",
    "name": "NAS Color",
    "description": "Network-attached storage",
    "tab": "color",
-   "on_sig": "2699-a4fcbc6d",
-   "off_sig": "2353-9399def7"
+   "on_sig": "2200-57e6057e",
+   "off_sig": "1028-f8b53e4c"
   },
   {
    "base": "machinon_Netflix",
    "name": "Netflix",
    "description": "Netflix on / off (grey)",
    "tab": "blue",
-   "on_sig": "3278-e9a290c2",
-   "off_sig": "2801-3966d02a"
+   "on_sig": "2448-7b4ec2e8",
+   "off_sig": "1396-f2d8c3db"
   },
   {
    "base": "machinon_Netflix-color",
    "name": "Netflix Color",
    "description": "Netflix on / off (grey)",
    "tab": "color",
-   "on_sig": "2421-63e35818",
-   "off_sig": "1942-aae3c106"
+   "on_sig": "2190-4607e39c",
+   "off_sig": "1109-d41430bb"
   },
   {
    "base": "machinon_NinjaTurtle",
    "name": "Ninja Turtle",
    "description": "Ninja Turtle",
    "tab": "fun",
-   "on_sig": "10198-1e7ab684",
-   "off_sig": "9098-dd13a004"
+   "on_sig": "7754-e230d5e4",
+   "off_sig": "4278-70a4516c"
   },
   {
    "base": "machinon_NinjaTurtle-color",
    "name": "Ninja Turtle Color",
    "description": "Ninja Turtle",
    "tab": "fun",
-   "on_sig": "9689-4bece3e1",
-   "off_sig": "8447-e813a516"
+   "on_sig": "7776-c5bc581c",
+   "off_sig": "4064-03ee92e9"
   },
   {
    "base": "machinon_OilTank",
    "name": "Oil Tank",
    "description": "Oil tank level",
    "tab": "blue",
-   "on_sig": "3946-d5fb7581",
-   "off_sig": "3593-d766edea"
+   "on_sig": "2644-bdeb995d",
+   "off_sig": "1520-6490e84d"
   },
   {
    "base": "machinon_OilTank-color",
    "name": "Oil Tank Color",
    "description": "Oil tank level",
    "tab": "color",
-   "on_sig": "3661-9e4a79ac",
-   "off_sig": "3384-9e17433d"
+   "on_sig": "2534-b2644a71",
+   "off_sig": "1488-4dcd1757"
   },
   {
    "base": "machinon_OneRing",
    "name": "One Ring",
    "description": "The One Ring",
    "tab": "fun",
-   "on_sig": "11676-b5919b08",
-   "off_sig": "10514-d697664c"
+   "on_sig": "9492-717aa0d3",
+   "off_sig": "4947-c269f207"
   },
   {
    "base": "machinon_OneRing-color",
    "name": "One Ring Color",
    "description": "The One Ring",
    "tab": "fun",
-   "on_sig": "10650-7342d426",
-   "off_sig": "9316-506f1bb7"
+   "on_sig": "8520-9c6200d2",
+   "off_sig": "4582-7c244581"
   },
   {
    "base": "machinon_Online",
    "name": "Online",
    "description": "Online (on) / offline (off) status",
    "tab": "blue",
-   "on_sig": "9500-74aedea4",
-   "off_sig": "10569-d27ae3df"
+   "on_sig": "4768-fd50c9d7",
+   "off_sig": "5848-9ad21e5e"
   },
   {
    "base": "machinon_Online-color",
    "name": "Online Color",
    "description": "Online (on) / offline (off) status",
    "tab": "color",
-   "on_sig": "9045-84c454bf",
-   "off_sig": "9960-eb9b9987"
+   "on_sig": "4511-f08c1b03",
+   "off_sig": "5669-99e4fa72"
   },
   {
    "base": "machinon_OutdoorCamera",
    "name": "Outdoor Camera",
    "description": "Wall-mounted outdoor camera",
    "tab": "blue",
-   "on_sig": "6288-ca74c16b",
-   "off_sig": "5417-be06347e"
+   "on_sig": "4954-19154d84",
+   "off_sig": "2664-e2cd7b84"
   },
   {
    "base": "machinon_OutdoorCamera-color",
    "name": "Outdoor Camera Color",
    "description": "Wall-mounted outdoor camera",
    "tab": "color",
-   "on_sig": "5909-a745e8e3",
-   "off_sig": "5152-9eb7dc78"
+   "on_sig": "4565-def11b04",
+   "off_sig": "2535-e802b30e"
   },
   {
    "base": "machinon_OutsideTemp",
    "name": "Outside Temperature",
    "description": "Outdoor temperature sensor",
    "tab": "blue",
-   "on_sig": "4301-e6efb257",
-   "off_sig": "3893-37cc739f"
+   "on_sig": "3302-2f368fe7",
+   "off_sig": "1752-f9b0a4b7"
   },
   {
    "base": "machinon_OutsideTemp-color",
    "name": "Outside Temperature Color",
    "description": "Outdoor temperature sensor",
    "tab": "color",
-   "on_sig": "3913-4bc8eb04",
-   "off_sig": "3561-dea30b6c"
+   "on_sig": "2923-515a8a52",
+   "off_sig": "1558-e85a9b39"
   },
   {
    "base": "machinon_Oven",
    "name": "Oven",
    "description": "Oven hot / off (grey)",
    "tab": "blue",
-   "on_sig": "4676-95c2ca19",
-   "off_sig": "4045-06f6d17e"
+   "on_sig": "3988-5654bcdc",
+   "off_sig": "2173-285f1e3f"
   },
   {
    "base": "machinon_Oven-color",
    "name": "Oven Color",
    "description": "Oven hot / off (grey)",
    "tab": "color",
-   "on_sig": "5075-d467657f",
-   "off_sig": "4372-fe6a2cf8"
+   "on_sig": "4402-b070dafe",
+   "off_sig": "2314-b4639adb"
   },
   {
    "base": "machinon_Package",
    "name": "Package",
    "description": "Package delivered / none (grey)",
    "tab": "blue",
-   "on_sig": "1790-274995b9",
-   "off_sig": "1574-13623289"
+   "on_sig": "1291-7acf5ff0",
+   "off_sig": "855-74f854f4"
   },
   {
    "base": "machinon_Package-color",
    "name": "Package Color",
    "description": "Package delivered (native) / none (grey)",
    "tab": "color",
-   "on_sig": "1612-8a7fd631",
-   "off_sig": "1450-f4c72170"
+   "on_sig": "1275-38f8571a",
+   "off_sig": "816-a2eda940"
   },
   {
    "base": "machinon_Padlock",
    "name": "Padlock",
    "description": "Padlock locked (on) / unlocked (off)",
    "tab": "blue",
-   "on_sig": "4456-dffdf29e",
-   "off_sig": "4367-e0b9f5fb"
+   "on_sig": "3280-be64a121",
+   "off_sig": "3200-e88233ce"
   },
   {
    "base": "machinon_Padlock-color",
    "name": "Padlock Color",
    "description": "Padlock locked (on) / unlocked (off)",
    "tab": "color",
-   "on_sig": "3109-3f7eb1e3",
-   "off_sig": "3029-df382fe8"
+   "on_sig": "2222-29fb9195",
+   "off_sig": "2151-ef5cd7a1"
   },
   {
    "base": "machinon_Pet",
    "name": "Pet",
    "description": "Pet detected / away (grey)",
    "tab": "blue",
-   "on_sig": "8907-3f4ca487",
-   "off_sig": "8091-d2618be2"
+   "on_sig": "6581-7b03a0ea",
+   "off_sig": "3692-5ec45312"
   },
   {
    "base": "machinon_PetBowl",
    "name": "Pet Bowl",
    "description": "Pet bowl full / empty (grey)",
    "tab": "blue",
-   "on_sig": "7669-e3d4a818",
-   "off_sig": "6638-e2fb3f2c"
+   "on_sig": "5676-96f2e96e",
+   "off_sig": "3330-05477413"
   },
   {
    "base": "machinon_PetBowl-color",
    "name": "Pet Bowl Color",
    "description": "Pet bowl full (native) / empty (grey)",
    "tab": "color",
-   "on_sig": "7866-cbc50d30",
-   "off_sig": "6880-899c7517"
+   "on_sig": "5961-603e4311",
+   "off_sig": "3505-7008d1a9"
   },
   {
    "base": "machinon_Pet-color",
    "name": "Pet Color",
    "description": "Pet detected (native) / away (grey)",
    "tab": "color",
-   "on_sig": "8231-0fc12697",
-   "off_sig": "7463-3b96acf6"
+   "on_sig": "5918-914d8fbd",
+   "off_sig": "3533-82e40862"
   },
   {
    "base": "machinon_PHMeter",
    "name": "pH Meter",
    "description": "pH sensor",
    "tab": "blue",
-   "on_sig": "7466-5d85eee0",
-   "off_sig": "6484-5223e135"
+   "on_sig": "5897-bee2f623",
+   "off_sig": "3194-f639de1c"
   },
   {
    "base": "machinon_PHMeter-color",
    "name": "pH Meter Color",
    "description": "pH sensor",
    "tab": "color",
-   "on_sig": "7047-2bcd5b0a",
-   "off_sig": "5855-48c8f72b"
+   "on_sig": "5958-d124f3b1",
+   "off_sig": "2935-064f594a"
   },
   {
    "base": "machinon_PixarLamp",
    "name": "Pixar Lamp",
    "description": "Pixar lamp",
    "tab": "fun",
-   "on_sig": "5212-98bcfa6c",
-   "off_sig": "4827-abb00abc"
+   "on_sig": "4120-82a7fa46",
+   "off_sig": "2242-4cfe5f1e"
   },
   {
    "base": "machinon_PixarLamp-color",
    "name": "Pixar Lamp Color",
    "description": "Pixar lamp",
    "tab": "fun",
-   "on_sig": "5279-f07083c7",
-   "off_sig": "4860-0cb3bb11"
+   "on_sig": "4155-a9eaa263",
+   "off_sig": "2258-af702f49"
   },
   {
    "base": "machinon_Pool-color",
    "name": "Pool Color",
    "description": "Swimming pool",
    "tab": "color",
-   "on_sig": "5718-aacc58b8",
-   "off_sig": "5239-a3128d20"
+   "on_sig": "4376-713c30be",
+   "off_sig": "2356-856810c7"
   },
   {
    "base": "machinon_PowerPlant",
    "name": "Power Plant",
    "description": "Power plant on / off (grey)",
    "tab": "blue",
-   "on_sig": "5489-4204dddf",
-   "off_sig": "4843-300a7eab"
+   "on_sig": "4674-8f63b0a4",
+   "off_sig": "2509-c9b22000"
   },
   {
    "base": "machinon_PowerPlant-color",
    "name": "Power Plant Color",
    "description": "Power plant on / off (grey)",
    "tab": "color",
-   "on_sig": "6245-c9ea8767",
-   "off_sig": "5689-4f1c64cc"
+   "on_sig": "5222-5bd255fd",
+   "off_sig": "2953-9d56c138"
   },
   {
    "base": "machinon_Predator",
    "name": "Predator",
    "description": "Predator",
    "tab": "fun",
-   "on_sig": "13211-1b90ec14",
-   "off_sig": "11665-b4774271"
+   "on_sig": "9561-1bf8a7ab",
+   "off_sig": "5730-c106a21f"
   },
   {
    "base": "machinon_Predator-color",
    "name": "Predator Color",
    "description": "Predator",
    "tab": "fun",
-   "on_sig": "12704-96c432fa",
-   "off_sig": "11126-f2300938"
+   "on_sig": "9451-02c0714b",
+   "off_sig": "5563-ffdfe0e5"
   },
   {
    "base": "machinon_Presence",
    "name": "Presence",
    "description": "At home (blue) / away (grey)",
    "tab": "blue",
-   "on_sig": "6548-05219340",
-   "off_sig": "6435-23bb0625"
+   "on_sig": "5057-87b7dfae",
+   "off_sig": "4908-faf4c376"
   },
   {
    "base": "machinon_Presence-color",
    "name": "Presence Color",
    "description": "At home (native) / away (grey)",
    "tab": "color",
-   "on_sig": "6334-013120de",
-   "off_sig": "6199-a98a1571"
+   "on_sig": "5216-3ccc4a69",
+   "off_sig": "4995-c89dde54"
   },
   {
    "base": "machinon_PresenceGreen",
    "name": "Presence Green",
    "description": "At home (green) / away (grey)",
    "tab": "blue",
-   "on_sig": "6632-64b11ff8",
-   "off_sig": "6435-23bb0625"
+   "on_sig": "5202-8cc0e2d1",
+   "off_sig": "4908-faf4c376"
   },
   {
    "base": "machinon_PresenceGreen-color",
    "name": "Presence Green Color",
    "description": "At home (green) / away (grey)",
    "tab": "color",
-   "on_sig": "6347-9a7ef5b8",
-   "off_sig": "6199-a98a1571"
+   "on_sig": "5248-6b4f7799",
+   "off_sig": "4995-c89dde54"
   },
   {
    "base": "machinon_Pressure",
    "name": "Pressure",
    "description": "Barometric pressure gauge",
    "tab": "blue",
-   "on_sig": "7953-83d5f4d0",
-   "off_sig": "6959-151df762"
+   "on_sig": "6341-f57341ba",
+   "off_sig": "3397-dce28aa8"
   },
   {
    "base": "machinon_Pressure-color",
    "name": "Pressure Color",
    "description": "Barometric pressure gauge",
    "tab": "color",
-   "on_sig": "7970-bf5872f4",
-   "off_sig": "7025-aaa1abdc"
+   "on_sig": "6570-adf7aa47",
+   "off_sig": "3453-8ee84d66"
   },
   {
    "base": "machinon_Printer-color",
    "name": "Printer Color",
    "description": "Printer",
    "tab": "color",
-   "on_sig": "2982-b298323a",
-   "off_sig": "2606-b6773550"
+   "on_sig": "2480-f931e3d5",
+   "off_sig": "1399-6ecea023"
   },
   {
    "base": "machinon_Projector",
    "name": "Projector",
    "description": "Projector on (blue) / off (grey)",
    "tab": "blue",
-   "on_sig": "5225-cceb0bf9",
-   "off_sig": "4686-5db58b08"
+   "on_sig": "3604-942d0ee5",
+   "off_sig": "1930-9e6ff96e"
   },
   {
    "base": "machinon_Projector-color",
    "name": "Projector Color",
    "description": "Projector on (native) / off (grey)",
    "tab": "color",
-   "on_sig": "5214-48203730",
-   "off_sig": "4717-d0e98d5a"
+   "on_sig": "3671-ddcb7994",
+   "off_sig": "1926-6348804a"
   },
   {
    "base": "machinon_Proximity",
    "name": "Proximity",
    "description": "Proximity detected (red) / idle (grey)",
    "tab": "blue",
-   "on_sig": "10468-d26d0146",
-   "off_sig": "9771-7a8170be"
+   "on_sig": "5861-f4b5ab35",
+   "off_sig": "3554-96277e9f"
   },
   {
    "base": "machinon_Proximity-color",
    "name": "Proximity Color",
    "description": "Proximity detected / idle (grey)",
    "tab": "color",
-   "on_sig": "10766-ed7ca9a2",
-   "off_sig": "9694-4e09f63f"
+   "on_sig": "6985-c69878bc",
+   "off_sig": "4168-e12bd621"
   },
   {
    "base": "machinon_Radiator-color",
    "name": "Radiator Color",
    "description": "Radiator",
    "tab": "color",
-   "on_sig": "7345-4c5eceac",
-   "off_sig": "5859-af0c1b9c"
+   "on_sig": "4858-e85db823",
+   "off_sig": "2046-967bb722"
   },
   {
    "base": "machinon_RadioTower",
    "name": "Radio Tower",
    "description": "Radio active (blue) / off (grey)",
    "tab": "blue",
-   "on_sig": "13585-b2d7eef1",
-   "off_sig": "12324-1dd0c497"
+   "on_sig": "8223-04f11558",
+   "off_sig": "4952-19f180e4"
   },
   {
    "base": "machinon_RadioTower-color",
    "name": "Radio Tower Color",
    "description": "Radio active (native) / off (grey)",
    "tab": "color",
-   "on_sig": "13612-76f04691",
-   "off_sig": "12410-f4b60454"
+   "on_sig": "8186-e7efc604",
+   "off_sig": "5062-d8219567"
   },
   {
    "base": "machinon_Rain-color",
    "name": "Rain Color",
    "description": "Rain sensor",
    "tab": "color",
-   "on_sig": "5634-ccd1c258",
-   "off_sig": "5157-ce83e115"
+   "on_sig": "4246-04e99e2e",
+   "off_sig": "2365-76babbad"
   },
   {
    "base": "machinon_ReflectorBulb",
    "name": "Reflector Bulb",
    "description": "Spotlight bulb on / off",
    "tab": "blue",
-   "on_sig": "5527-4376daa1",
-   "off_sig": "5032-a7f5c851"
+   "on_sig": "4300-96c4f4b3",
+   "off_sig": "2441-3bdcbcaa"
   },
   {
    "base": "machinon_ReflectorBulb-color",
    "name": "Reflector Bulb Color",
    "description": "Spotlight bulb on / off (grey)",
    "tab": "color",
-   "on_sig": "4633-db06d510",
-   "off_sig": "4248-da23fadf"
+   "on_sig": "3568-a5141c71",
+   "off_sig": "2066-c8d2fc1e"
   },
   {
    "base": "machinon_RFID",
    "name": "RFID",
    "description": "RFID read / idle (grey)",
    "tab": "blue",
-   "on_sig": "11911-7a4c241e",
-   "off_sig": "10886-97e85bed"
+   "on_sig": "7913-52e585bf",
+   "off_sig": "4733-407c90b8"
   },
   {
    "base": "machinon_RFID-color",
    "name": "RFID Color",
    "description": "RFID read (native) / idle (grey)",
    "tab": "color",
-   "on_sig": "12135-373a7871",
-   "off_sig": "11004-a4b9c5a6"
+   "on_sig": "8107-9f15ed90",
+   "off_sig": "4799-55344fce"
   },
   {
    "base": "machinon_Robot",
    "name": "Robot",
    "description": "Robot",
    "tab": "fun",
-   "on_sig": "6428-104ac2c4",
-   "off_sig": "5757-5607235d"
+   "on_sig": "4777-df4f3d9b",
+   "off_sig": "2860-3c4781b0"
   },
   {
    "base": "machinon_Robot-color",
    "name": "Robot Color",
    "description": "Robot",
    "tab": "fun",
-   "on_sig": "5782-2fda130e",
-   "off_sig": "5345-764f9f6e"
+   "on_sig": "4328-01369471",
+   "off_sig": "2676-fd8b8ebc"
   },
   {
    "base": "machinon_RobotVacuum",
    "name": "Robot Vacuum",
    "description": "Vacuum running / docked (grey)",
    "tab": "blue",
-   "on_sig": "8261-ad31d2a2",
-   "off_sig": "5271-93d70bf5"
+   "on_sig": "5695-b70ffb93",
+   "off_sig": "2673-8cd40442"
   },
   {
    "base": "machinon_Rocket",
    "name": "Rocket",
    "description": "Rocket",
    "tab": "fun",
-   "on_sig": "8494-edc525cb",
-   "off_sig": "7690-189adf69"
+   "on_sig": "6710-78c5c3a2",
+   "off_sig": "3551-e8bf87bf"
   },
   {
    "base": "machinon_Rocket-color",
    "name": "Rocket Color",
    "description": "Rocket",
    "tab": "fun",
-   "on_sig": "8203-f1c3a362",
-   "off_sig": "7367-55ee0649"
+   "on_sig": "6656-21268cda",
+   "off_sig": "3447-35d21300"
   },
   {
    "base": "machinon_Router",
    "name": "Router",
    "description": "Router online / offline (grey)",
    "tab": "blue",
-   "on_sig": "7951-b4371a49",
-   "off_sig": "6425-7959f7a6"
+   "on_sig": "6579-4f0f1698",
+   "off_sig": "3639-c63d0833"
   },
   {
    "base": "machinon_Router-color",
    "name": "Router Color",
    "description": "Router online (native) / offline (grey)",
    "tab": "color",
-   "on_sig": "7576-9d973f71",
-   "off_sig": "6180-2ad94cb9"
+   "on_sig": "6969-ab837da4",
+   "off_sig": "3379-53bdd91f"
   },
   {
    "base": "machinon_Safe",
    "name": "Safe",
    "description": "Safe locked (on) / open (off)",
    "tab": "blue",
-   "on_sig": "7502-3a04e2ac",
-   "off_sig": "5542-9f1d7cea"
+   "on_sig": "6085-0ad2964d",
+   "off_sig": "4220-a25eeae2"
   },
   {
    "base": "machinon_Safe-color",
    "name": "Safe Color",
    "description": "Safe locked / open (native)",
    "tab": "color",
-   "on_sig": "7573-75ccd960",
-   "off_sig": "5886-07baa82f"
+   "on_sig": "6406-f34350da",
+   "off_sig": "4520-db8df2fe"
   },
   {
    "base": "machinon_Settings",
    "name": "Settings",
    "description": "Setting active / off (grey)",
    "tab": "blue",
-   "on_sig": "8533-9689cf31",
-   "off_sig": "7438-3e90c119"
+   "on_sig": "4723-312eeef6",
+   "off_sig": "2686-f93cd688"
   },
   {
    "base": "machinon_Settings-color",
    "name": "Settings Color",
    "description": "Setting active / off (grey)",
    "tab": "color",
-   "on_sig": "8615-343f0276",
-   "off_sig": "7495-ff31bbfe"
+   "on_sig": "4665-a3dee158",
+   "off_sig": "2667-aba419e6"
   },
   {
    "base": "machinon_Shower",
    "name": "Shower",
    "description": "Shower",
    "tab": "blue",
-   "on_sig": "6373-59153757",
-   "off_sig": "5767-09258668"
+   "on_sig": "3613-0a273491",
+   "off_sig": "2225-93e06d5a"
   },
   {
    "base": "machinon_Shower-color",
    "name": "Shower Color",
    "description": "Shower",
    "tab": "color",
-   "on_sig": "6454-4a41a6be",
-   "off_sig": "5932-e38e7ec6"
+   "on_sig": "3719-0031fb92",
+   "off_sig": "2262-35e10145"
   },
   {
    "base": "machinon_Signal",
    "name": "Signal",
    "description": "Signal present (on) / none (off)",
    "tab": "blue",
-   "on_sig": "1588-58c7ddc4",
-   "off_sig": "1336-1aac52e9"
+   "on_sig": "1502-0451c4d9",
+   "off_sig": "770-80a07f9c"
   },
   {
    "base": "machinon_Signal-color",
@@ -2038,447 +2038,447 @@
    "description": "Signal present (native) / none (grey)",
    "tab": "color",
    "on_sig": "1491-75be9fa0",
-   "off_sig": "1280-653f6910"
+   "off_sig": "738-a074d02a"
   },
   {
    "base": "machinon_Soil-color",
    "name": "Soil Color",
    "description": "Soil moisture sensor",
    "tab": "color",
-   "on_sig": "8800-0408af34",
-   "off_sig": "7829-2e0dd519"
+   "on_sig": "6231-109a2b1d",
+   "off_sig": "3491-234cd32b"
   },
   {
    "base": "machinon_Speaker-color",
    "name": "Speaker Color",
    "description": "Audio speaker",
    "tab": "color",
-   "on_sig": "6695-0769e419",
-   "off_sig": "6128-44e2c8e7"
+   "on_sig": "3540-14a3ace7",
+   "off_sig": "2026-1632caa9"
   },
   {
    "base": "machinon_SpiderMan",
    "name": "Spider-Man",
    "description": "Spider-Man",
    "tab": "fun",
-   "on_sig": "7525-399be379",
-   "off_sig": "6800-ef09158f"
+   "on_sig": "5214-275d038e",
+   "off_sig": "3286-4b41a56c"
   },
   {
    "base": "machinon_SpiderMan-color",
    "name": "Spider-Man Color",
    "description": "Spider-Man",
    "tab": "fun",
-   "on_sig": "7344-e58de16c",
-   "off_sig": "6733-40e5ac44"
+   "on_sig": "4899-0e1245a0",
+   "off_sig": "3267-59b7f59f"
   },
   {
    "base": "machinon_Spotify",
    "name": "Spotify",
    "description": "Spotify on / off (grey)",
    "tab": "blue",
-   "on_sig": "6759-79c00e4f",
-   "off_sig": "5795-d30b3739"
+   "on_sig": "4265-3b4f77b6",
+   "off_sig": "2432-128b4134"
   },
   {
    "base": "machinon_Spotify-color",
    "name": "Spotify Color",
    "description": "Spotify on / off (grey)",
    "tab": "color",
-   "on_sig": "8651-bacaaf1a",
-   "off_sig": "7869-57b6a9fc"
+   "on_sig": "5116-8977e4a3",
+   "off_sig": "3153-e5fec9d5"
   },
   {
    "base": "machinon_StarWars",
    "name": "Star Wars",
    "description": "Rebel Alliance emblem",
    "tab": "fun",
-   "on_sig": "8509-6ae0ac87",
-   "off_sig": "7682-d172786a"
+   "on_sig": "5798-813249c2",
+   "off_sig": "3528-03f460e5"
   },
   {
    "base": "machinon_StarWars-color",
    "name": "Star Wars Color",
    "description": "Rebel Alliance emblem",
    "tab": "fun",
-   "on_sig": "7937-4a031ce2",
-   "off_sig": "7317-b78a4dfd"
+   "on_sig": "5126-43ec8156",
+   "off_sig": "3368-995e98c5"
   },
   {
    "base": "machinon_Superman",
    "name": "Superman",
    "description": "Superman",
    "tab": "fun",
-   "on_sig": "6146-56b37c64",
-   "off_sig": "5503-afd79d52"
+   "on_sig": "4651-4445d4a4",
+   "off_sig": "2494-17362260"
   },
   {
    "base": "machinon_Superman-color",
    "name": "Superman Color",
    "description": "Superman",
    "tab": "fun",
-   "on_sig": "8242-53b4c446",
-   "off_sig": "7305-39bd0f30"
+   "on_sig": "6423-3c178175",
+   "off_sig": "3480-404d005a"
   },
   {
    "base": "machinon_Switch",
    "name": "Switch",
    "description": "Toggle switch on / off",
    "tab": "blue",
-   "on_sig": "1135-6ae495dc",
-   "off_sig": "1211-1bc5f481"
+   "on_sig": "722-507111e3",
+   "off_sig": "787-5586cb9f"
   },
   {
    "base": "machinon_Switch-color",
    "name": "Switch Color",
    "description": "Toggle switch on / off (native)",
    "tab": "color",
-   "on_sig": "1016-9525f9bc",
-   "off_sig": "992-e798905b"
+   "on_sig": "614-e1d81a44",
+   "off_sig": "556-e37c32a1"
   },
   {
    "base": "machinon_Tap-color",
    "name": "Tap/Valve Color",
    "description": "Tap or valve",
    "tab": "color",
-   "on_sig": "5294-4c5c901a",
-   "off_sig": "4779-2336dbeb"
+   "on_sig": "4500-f420af16",
+   "off_sig": "2381-fe629363"
   },
   {
    "base": "machinon_TARDIS",
    "name": "TARDIS",
    "description": "TARDIS",
    "tab": "fun",
-   "on_sig": "3200-8b2c851f",
-   "off_sig": "2859-35360434"
+   "on_sig": "2716-0e9075cd",
+   "off_sig": "1604-921b6444"
   },
   {
    "base": "machinon_TARDIS-color",
    "name": "TARDIS Color",
    "description": "TARDIS",
    "tab": "fun",
-   "on_sig": "3647-ee53e550",
-   "off_sig": "3149-7cf0c842"
+   "on_sig": "3137-04ee6e59",
+   "off_sig": "1805-cd6a1f3d"
   },
   {
    "base": "machinon_Targaryen",
    "name": "Targaryen",
    "description": "House Targaryen sigil",
    "tab": "fun",
-   "on_sig": "10229-1d7993c6",
-   "off_sig": "9211-42f86f46"
+   "on_sig": "7976-aeb698ce",
+   "off_sig": "4410-432e20e1"
   },
   {
    "base": "machinon_Targaryen-color",
    "name": "Targaryen Color",
    "description": "House Targaryen sigil",
    "tab": "fun",
-   "on_sig": "9980-316a4623",
-   "off_sig": "8933-6dce5d99"
+   "on_sig": "7992-e5d48217",
+   "off_sig": "4329-fc99dfb3"
   },
   {
    "base": "machinon_TV-color",
    "name": "Television Color",
    "description": "Television",
    "tab": "color",
-   "on_sig": "3635-404d545d",
-   "off_sig": "3123-aeb5998f"
+   "on_sig": "3079-60417463",
+   "off_sig": "1564-073c050c"
   },
   {
    "base": "machinon_Thor",
    "name": "Thor",
    "description": "Thor",
    "tab": "fun",
-   "on_sig": "8506-d7d10e57",
-   "off_sig": "7590-9eee2550"
+   "on_sig": "6258-24a4aba6",
+   "off_sig": "3778-706b8efc"
   },
   {
    "base": "machinon_Thor-color",
    "name": "Thor Color",
    "description": "Thor",
    "tab": "fun",
-   "on_sig": "8577-a04903b6",
-   "off_sig": "7638-3c1e9df4"
+   "on_sig": "6606-f23b3fb5",
+   "off_sig": "3928-1fcc4423"
   },
   {
    "base": "machinon_Unicorn",
    "name": "Unicorn",
    "description": "Unicorn",
    "tab": "fun",
-   "on_sig": "9785-0d0e5805",
-   "off_sig": "8812-af4244ef"
+   "on_sig": "7317-5c8b5f55",
+   "off_sig": "3907-0bc8f33e"
   },
   {
    "base": "machinon_Unicorn-color",
    "name": "Unicorn Color",
    "description": "Unicorn",
    "tab": "fun",
-   "on_sig": "9769-a7ed7ca8",
-   "off_sig": "8742-02e7a90e"
+   "on_sig": "7336-1d3504ad",
+   "off_sig": "3855-5158a12f"
   },
   {
    "base": "machinon_User",
    "name": "User",
    "description": "Person / user",
    "tab": "blue",
-   "on_sig": "4441-07168759",
-   "off_sig": "4048-5f23087a"
+   "on_sig": "3182-1903c6fb",
+   "off_sig": "1894-e41dda88"
   },
   {
    "base": "machinon_User-color",
    "name": "User Color",
    "description": "Person / user",
    "tab": "color",
-   "on_sig": "4298-5fa0f5d9",
-   "off_sig": "3981-c1772543"
+   "on_sig": "3093-8425b576",
+   "off_sig": "1861-ee7cbaf1"
   },
   {
    "base": "machinon_Venom",
    "name": "Venom",
    "description": "Venom",
    "tab": "fun",
-   "on_sig": "8532-917a3cb1",
-   "off_sig": "7561-beea4510"
+   "on_sig": "6562-381ac94f",
+   "off_sig": "3791-6afbed4d"
   },
   {
    "base": "machinon_Venom-color",
    "name": "Venom Color",
    "description": "Venom",
    "tab": "fun",
-   "on_sig": "8312-e466ed4b",
-   "off_sig": "7245-b307ab72"
+   "on_sig": "6388-57bf1aa6",
+   "off_sig": "3668-0b01af75"
   },
   {
    "base": "machinon_Vibration",
    "name": "Vibration",
    "description": "Vibration detected / still (grey)",
    "tab": "blue",
-   "on_sig": "6318-8f6f35b5",
-   "off_sig": "5221-5fbd7925"
+   "on_sig": "5566-4de30bc9",
+   "off_sig": "3050-bab9da5e"
   },
   {
    "base": "machinon_Vibration-color",
    "name": "Vibration Color",
    "description": "Vibration detected / still (grey)",
    "tab": "color",
-   "on_sig": "7892-75e939ab",
-   "off_sig": "6050-e722f581"
+   "on_sig": "7431-f9cfb7f6",
+   "off_sig": "3418-8a18674c"
   },
   {
    "base": "machinon_Voltage",
    "name": "Voltage",
    "description": "Voltage sensor",
    "tab": "blue",
-   "on_sig": "2758-cc671ee3",
-   "off_sig": "2366-a1a03a6a"
+   "on_sig": "1929-bc88a81d",
+   "off_sig": "991-9595e820"
   },
   {
    "base": "machinon_WalterWhite",
    "name": "Walter White",
    "description": "Walter White",
    "tab": "fun",
-   "on_sig": "6576-e147ec05",
-   "off_sig": "5644-af7b9326"
+   "on_sig": "5311-77074956",
+   "off_sig": "2974-696efbd7"
   },
   {
    "base": "machinon_WalterWhite-color",
    "name": "Walter White Color",
    "description": "Walter White",
    "tab": "fun",
-   "on_sig": "6638-a30bfaee",
-   "off_sig": "5785-8c573659"
+   "on_sig": "5626-b22ddd66",
+   "off_sig": "3058-54d0c0b1"
   },
   {
    "base": "machinon_WashingMachine-color",
    "name": "Washer/Dryer Color",
    "description": "Washing machine or dryer",
    "tab": "color",
-   "on_sig": "4473-653cb0e8",
-   "off_sig": "3961-21758e17"
+   "on_sig": "3637-a92b9b61",
+   "off_sig": "1990-93de3b65"
   },
   {
    "base": "machinon_WaterCounter",
    "name": "Water Counter",
    "description": "Water counter",
    "tab": "blue",
-   "on_sig": "5184-3c1239c5",
-   "off_sig": "4918-f80aaff0"
+   "on_sig": "3855-284c9344",
+   "off_sig": "2294-ea3661bd"
   },
   {
    "base": "machinon_WaterCounter-color",
    "name": "Water Counter Color",
    "description": "Water counter",
    "tab": "color",
-   "on_sig": "5852-ed8ff4f3",
-   "off_sig": "5203-0a9fab9d"
+   "on_sig": "4966-73c8e86f",
+   "off_sig": "2655-77f01ccb"
   },
   {
    "base": "machinon_Weight",
    "name": "Weight",
    "description": "Weight / scale sensor",
    "tab": "blue",
-   "on_sig": "5858-fec72578",
-   "off_sig": "5132-6d0eebed"
+   "on_sig": "4377-cc427e09",
+   "off_sig": "2763-0f867cfe"
   },
   {
    "base": "machinon_WiFi",
    "name": "Wi-Fi",
    "description": "Wireless network",
    "tab": "blue",
-   "on_sig": "7212-19e809c6",
-   "off_sig": "6305-fe5eb5b0"
+   "on_sig": "4823-3313b46c",
+   "off_sig": "2885-99ce1060"
   },
   {
    "base": "machinon_Wind",
    "name": "Wind",
    "description": "Wind / airflow / ventilation",
    "tab": "blue",
-   "on_sig": "7295-fade08cc",
-   "off_sig": "6821-dfb23ab3"
+   "on_sig": "5434-6009bb30",
+   "off_sig": "2927-5b825eb2"
   },
   {
    "base": "machinon_WindGauge",
    "name": "Wind Gauge",
    "description": "Anemometer / wind-speed gauge",
    "tab": "blue",
-   "on_sig": "6967-0d47b975",
-   "off_sig": "6268-602826a7"
+   "on_sig": "5304-2871417a",
+   "off_sig": "3073-0ff115dd"
   },
   {
    "base": "machinon_WindGauge-color",
    "name": "Wind Gauge Color",
    "description": "Anemometer / wind-speed gauge",
    "tab": "color",
-   "on_sig": "7135-0d968982",
-   "off_sig": "6438-21f08079"
+   "on_sig": "5523-3f741b20",
+   "off_sig": "3171-0825529f"
   },
   {
    "base": "machinon_Window-color",
    "name": "Window Color",
    "description": "Window sensor or control",
    "tab": "color",
-   "on_sig": "3890-39580bb3",
-   "off_sig": "1311-95bb130e"
+   "on_sig": "2403-50176e78",
+   "off_sig": "712-aa2afb0d"
   },
   {
    "base": "machinon_WindowLock",
    "name": "Window Lock",
    "description": "Window closed (green) / open (red)",
    "tab": "blue",
-   "on_sig": "3290-c7dad659",
-   "off_sig": "3233-d2446fd8"
+   "on_sig": "2743-cd0167a4",
+   "off_sig": "2578-86f3cac4"
   },
   {
    "base": "machinon_WindowLock-color",
    "name": "Window Lock Color",
    "description": "Window closed (green) / open (red)",
    "tab": "color",
-   "on_sig": "3252-53b1a621",
-   "off_sig": "3210-89ddaa7f"
+   "on_sig": "2752-b89f568e",
+   "off_sig": "2629-fec172b4"
   },
   {
    "base": "machinon_WiredNetwork",
    "name": "Wired Network",
    "description": "Ethernet / wired network",
    "tab": "blue",
-   "on_sig": "1679-41d4fe2e",
-   "off_sig": "1435-4c07c3bc"
+   "on_sig": "1436-00005021",
+   "off_sig": "718-02c048b5"
   },
   {
    "base": "machinon_WiredNetwork-color",
    "name": "Wired Network Color",
    "description": "Ethernet / wired network",
    "tab": "color",
-   "on_sig": "1897-850f15af",
-   "off_sig": "1614-df731615"
+   "on_sig": "1617-1ad0ade4",
+   "off_sig": "788-247b4be0"
   },
   {
    "base": "machinon_Woman",
    "name": "Woman",
    "description": "Woman",
    "tab": "blue",
-   "on_sig": "6677-26c07412",
-   "off_sig": "5968-fecf3b7e"
+   "on_sig": "5182-bc536820",
+   "off_sig": "2867-7e980acf"
   },
   {
    "base": "machinon_Woman-color",
    "name": "Woman Color",
    "description": "Woman",
    "tab": "color",
-   "on_sig": "6153-4c932434",
-   "off_sig": "5393-a3e4eed5"
+   "on_sig": "5103-b020fcf6",
+   "off_sig": "2834-fe8998a8"
   },
   {
    "base": "machinon_WomanHome",
    "name": "Woman Home",
    "description": "Woman home (green) / away (grey)",
    "tab": "blue",
-   "on_sig": "7080-7e6a8061",
-   "off_sig": "6941-ac106575"
+   "on_sig": "5729-70ab5bc9",
+   "off_sig": "5312-cb375653"
   },
   {
    "base": "machinon_WomanHome-color",
    "name": "Woman Home Color",
    "description": "Woman home (native) / away (grey)",
    "tab": "color",
-   "on_sig": "6636-270b9455",
-   "off_sig": "6497-51da884d"
+   "on_sig": "5627-7b6c5a9d",
+   "off_sig": "5365-de0aa86a"
   },
   {
    "base": "machinon_WonderWoman",
    "name": "Wonder Woman",
    "description": "Wonder Woman",
    "tab": "fun",
-   "on_sig": "8052-ca7c44cc",
-   "off_sig": "7532-72304f40"
+   "on_sig": "5042-36cdd149",
+   "off_sig": "3083-f8201296"
   },
   {
    "base": "machinon_WonderWoman-color",
    "name": "Wonder Woman Color",
    "description": "Wonder Woman",
    "tab": "fun",
-   "on_sig": "6896-82248208",
-   "off_sig": "6481-4ff7c3c4"
+   "on_sig": "4291-4608d2d9",
+   "off_sig": "2659-3c227c62"
   },
   {
    "base": "machinon_XMen",
    "name": "X-Men",
    "description": "X-Men emblem",
    "tab": "fun",
-   "on_sig": "10886-0ac907c8",
-   "off_sig": "8976-19f981d1"
+   "on_sig": "6851-691bad1c",
+   "off_sig": "3891-9a5c512c"
   },
   {
    "base": "machinon_XMen-color",
    "name": "X-Men Color",
    "description": "X-Men emblem",
    "tab": "fun",
-   "on_sig": "10561-5b48adce",
-   "off_sig": "8979-3d4c36b9"
+   "on_sig": "6172-88dfb06e",
+   "off_sig": "3715-440e09f9"
   },
   {
    "base": "machinon_YouTube",
    "name": "YouTube",
    "description": "YouTube on / off (grey)",
    "tab": "blue",
-   "on_sig": "6361-65342e11",
-   "off_sig": "5531-78c3d122"
+   "on_sig": "5314-91cfad10",
+   "off_sig": "3004-0e33951f"
   },
   {
    "base": "machinon_YouTube-color",
    "name": "YouTube Color",
    "description": "YouTube on / off (grey)",
    "tab": "color",
-   "on_sig": "5965-1c3de663",
-   "off_sig": "5470-e77bc10e"
+   "on_sig": "5025-1c245e9f",
+   "off_sig": "3037-0c8cecc9"
   },
   {
    "base": "machinon_YouTubeMusic",
    "name": "YouTube Music",
    "description": "YouTube Music on / off (grey)",
    "tab": "blue",
-   "on_sig": "6921-f8661d7b",
-   "off_sig": "6097-49275ea2"
+   "on_sig": "3767-03847b24",
+   "off_sig": "2168-4b470c69"
   }
  ]
 }

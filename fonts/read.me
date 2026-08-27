@@ -4,7 +4,13 @@ Theme fonts (self-hosted, no CDN, no local() fallbacks):
   https://github.com/rsms/inter/releases/tag/v4.1
 - JetBrains Mono v2.304 (Regular 400, Bold 700), SIL OFL 1.1
   https://github.com/JetBrains/JetBrainsMono/releases/tag/v2.304
-- Ionicons icon font (ionicons.*), MIT
+- Ionicons v4.6.2 icon font (ionicons.woff2), MIT
+  https://github.com/ionic-team/ionicons/releases/tag/v4.6.2
+  woff2 ONLY: the upstream package also ships eot, svg, ttf and woff, which no
+  browser able to run this theme would ever request. Declared in
+  css/ionicons.min.css (see the local-modification note at the top of that file).
+  4.6.2 is the last Ionicons release with an icon font; v5 and later are SVG web
+  components, so there is no newer version of this file to move to.
 
 Declared in css/typography.css; consumed only via --dz-font-family /
 --dz-font-mono tokens (see DESIGN.md Typography and scripts/check-typography.sh).
