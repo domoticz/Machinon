@@ -80,7 +80,13 @@
       trailing chrome is 20px (0 from bannercontent's zeroed bottom + 20 from
       container-fluid) at BOTH 1440x900 and 1024x768 (the offset does not depend on
       viewport height, only the chrome above/below it does) - calc(100vh - 143px)
-      lands body.scrollHeight exactly on innerHeight at both widths, no rounding slop.
+      landed body.scrollHeight exactly on innerHeight at both widths when this was
+      derived, no rounding slop. Re-checked 2026-08-27: core chrome above/below
+      the wrapper has since grown by 1px (the table census measured Devices at
+      scrollHeight 901 vs a 900 viewport and 769 vs 768, a uniform +1px page
+      scroll at both desktop widths; the same drift grew the Setup page from 900
+      to 976 over the same period), so the subtrahend is bumped 143 -> 144 to
+      restore the exact fit. The dz-table-census.js overflow check gates this.
     Mobile (<=979px): sidemenu.css zeroes .bannercontent's padding entirely (0 2% 0 2%)
       and takes the navbar out of position:fixed into normal flow (its own comment,
       further down this file's sibling css/sidemenu.css, on the resulting #holder
@@ -115,7 +121,7 @@
 */
 @media (min-width: 980px) {
     .page-devices-wrapper {
-        height: calc(100vh - 143px);
+        height: calc(100vh - 144px);
     }
 }
 @media (max-width: 979px) {
