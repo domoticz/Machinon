@@ -338,13 +338,15 @@ div#floorplancontent {
     display: none !important;
 }
 
-/* Header. Flat chrome on the nav surface token (was a status->accent gradient),
-   so the bar matches the rest of the theme and the inline logo can theme itself
-   against a neutral ground instead of a coloured wash. A 1px accent hairline
-   defines the bar. */
+/* Header logo row: the brand strip (was a status->accent gradient). It carries
+   the accent colour, with the inline logo, search and hamburger in the on-accent
+   token so they read on it. The menu bar below (.navbar-inner, css/nav.css) stays
+   neutral --dz-nav-bg, so the two rows are distinct in colour without a line
+   between them; an accent hairline under the menu marks the header block's bottom.
+   The accent tracks the scheme (pale in the dark scheme, so the strip is lighter
+   there). */
 header.logo {
-    background: var(--dz-nav-bg);
-    border-bottom: 1px solid var(--dz-accent-color);
+    background: var(--dz-accent-color);
 }
 
 .container-logo {

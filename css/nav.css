@@ -31,6 +31,7 @@
     display: none !important;
 }
 
+
 /* .header__icon, not img: the default logo is now an inline <svg> (page.js
    setLogo), a custom uploaded logo is still an <img>; both take this box. */
 .header__icon {
@@ -46,10 +47,10 @@
     /* Inline logo colours (harmless on a custom <img>, which has no .lg-*):
        wordmark text uses currentColor, the mark the scheme accent, the ring the
        on-accent token, so the logo themes with the active scheme. */
-    color: var(--dz-body-text);
+    color: var(--dz-accent-text);
 }
-.header__icon .lg-mark { fill: var(--dz-accent-color); }
-.header__icon .lg-ring { stroke: var(--dz-accent-text); }
+.header__icon .lg-mark { fill: var(--dz-accent-text); }
+.header__icon .lg-ring { stroke: var(--dz-accent-color); }
 
 div.menu-toggle {
     display: none;
@@ -70,12 +71,11 @@ div.menu-toggle {
 .menu-toggle:before,
 .menu-toggle div {
     /* dz-menu-exception: hamburger icon bars, not a menu surface, so out of the
-       --dz-menu-* family. Closed, the bars sit over the header banner, which is
-       now the flat --dz-nav-bg surface (was a blue gradient where #fff worked);
-       --dz-body-text reads on it in both schemes (near-black on the light bar,
-       near-white on the dark). The bars keep this colour when the toggle
-       detaches into its scrolled box (same --dz-nav-bg surface, see below). */
-    background-color: var(--dz-body-text);
+       --dz-menu-* family. Closed, the bars sit over the accent header logo row,
+       so they take the on-accent token to read on it, and keep it in the scrolled
+       accent box (below). When the flyout opens the bars become the close X on the
+       neutral drawer and flip to --dz-body-text (see the .slide override below). */
+    background-color: var(--dz-accent-text);
     border-radius: 3px;
     content: '';
     display: block;
@@ -85,13 +85,12 @@ div.menu-toggle {
 }
 
 /* Scrolled, the header has left the viewport, so the hamburger detaches into a
-   floating box. It keeps the header's own neutral surface (--dz-nav-bg) and the
-   same --dz-body-text bars, lifted by a shadow, so scrolling just peels the same
-   hamburger off the bar. (It used to flip to a saturated accent box, which made
-   sense when the header itself was an accent gradient, but reads as a jarring
-   colour jump against the flat header now.) */
+   floating box. It keeps the accent header's surface and the on-accent bars,
+   lifted by a shadow, so scrolling just peels the same hamburger off the bar.
+   When the flyout is open the box is dropped (see the .slide rule below) so the
+   close X sits on the neutral drawer instead of on this accent box. */
 div.menu-toggle.scrolled {
-    background: var(--dz-nav-bg);
+    background: var(--dz-accent-color);
     transition: background-color 1s ease;
     padding: 0 5px 15px 5px;
     border-bottom-left-radius: 6px;
@@ -106,10 +105,10 @@ div.menu-toggle.scrolled {
    --dz-body-text is token-based and reads correctly in both schemes without
    a scheme-specific override - light resolves near-black against the
    now-white panel, dark resolves white against the dark panel (byte-identical
-   to the #fff this replaces there, so no visible change in dark).
+   the drawer panel this X sits on.
    Deliberately scoped to the .slide sibling selector only - the CLOSED
-   hamburger (base rule above) sits on the header banner, not this panel, and
-   stays #fff unchanged. */
+   hamburger (base rule above) sits on the accent header logo row, not this
+   panel, and stays --dz-accent-text there. */
 .navbar-inverse .navbar-inner.slide + .menu-toggle:before,
 .navbar-inverse .navbar-inner.slide + .menu-toggle:after {
     background-color: var(--dz-body-text);
@@ -127,8 +126,26 @@ div.menu-toggle.scrolled {
     transform: scale(0);
 }
 
+/* Flyout open: the close X belongs on the drawer, not on the scrolled accent
+   box. Drop that box here, otherwise a scrolled-then-opened toggle shows a black
+   (--dz-body-text) X sitting on the dark accent box. Cleared, the X is the same
+   dark-on-light-drawer close as when the flyout is opened from the top, and the
+   :before/:after body-text override above reads against the drawer. */
+.navbar-inverse .navbar-inner.slide + .menu-toggle {
+    background: transparent;
+    box-shadow: none;
+    padding: 0 5px;
+    border-radius: 0;
+}
+
 .navbar-inverse .navbar-inner {
+    /* The menu bar: neutral --dz-nav-bg, below the accent logo row (header.logo).
+       The two rows differ in colour, so they read as distinct without a line
+       between them; the accent hairline here marks the header block's bottom,
+       under the menu. On mobile css/sidemenu.css re-purposes this element as the
+       off-canvas drawer (border:none). */
     border: none;
+    border-bottom: 1px solid var(--dz-accent-color);
     background: var(--dz-nav-bg);
     box-shadow: var(--dz-elev-popup);
 }

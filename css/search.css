@@ -14,7 +14,7 @@
     float: right;
     margin-top: 5px;
     margin-right: 10px;
-    color: var(--dz-body-text);
+    color: var(--dz-accent-text);
     background-color: transparent;
     outline: 0;
     transition: transform .5s;
@@ -26,12 +26,12 @@
 }
 
 #searchInput {
-    color: var(--dz-body-text);
-    border-color: var(--dz-body-text);
+    color: var(--dz-accent-text);
+    border-color: var(--dz-accent-text);
 }
 
 #searchInput::placeholder {
-    color: var(--dz-body-text);
+    color: var(--dz-accent-text);
     opacity: 0.5;
 }
 
@@ -55,13 +55,13 @@
         width: calc(100% - 60px);
         max-width: unset;
         transform: translate(30px, 45px);
-        background: var(--dz-accent-color);
-        /* On the accent pill the typed text and placeholder take the on-accent
-           token (the base rule's --dz-body-text is for the neutral header bar). */
-        color: var(--dz-accent-text);
+        /* A neutral widget-surface field so it stands out from the accent header
+           (an accent pill would blend into it); accent border + popup shadow. */
+        background: var(--dz-widget-bg);
+        color: var(--dz-body-text);
         box-shadow: var(--dz-elev-popup);
         border-radius: 20px;
-        border: 5px solid #fff;
+        border: 2px solid var(--dz-accent-color);
         padding: 10px;
         position: relative;
         z-index: 5;
@@ -70,7 +70,7 @@
     #search:hover #searchInput::placeholder,
     #search:active #searchInput::placeholder,
     #search:focus #searchInput::placeholder {
-        color: var(--dz-accent-text);
+        color: var(--dz-body-text);
         opacity: .6;
     }
 
