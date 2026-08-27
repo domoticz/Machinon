@@ -254,9 +254,12 @@ ul.machinon_ul li {
    invisible to documentElement.scrollWidth: #settings .row-fluid is
    justify-content: center, so a wrapped child wider than the viewport overflows
    symmetrically off BOTH edges without moving scrollWidth - measure candidate
-   spacing with getBoundingClientRect() on the child, never with scrollWidth. */
+   spacing with getBoundingClientRect() on the child, never with scrollWidth.
+   The 8px 10px value now lives in the --dz-form-cell-pad token (dz-tokens.css),
+   shared with the other label:value form tables; the horizontal-must-not-widen
+   constraint above is documented at the token too. */
 #settingscontent .tab-pane td {
-    padding: 8px 10px;
+    padding: var(--dz-form-cell-pad);
 }
 
 /* Core inline-width mitigation (Security tab, LocalNetworks/reverse-proxy table): an

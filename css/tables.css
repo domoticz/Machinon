@@ -554,6 +554,25 @@ tr.odd td.sorting_1, tr.even td.sorting_1 {
     text-align: right;
 }
 
+/* Events Current States (www/app/events/CurrentStates.js columns array; the
+   <table> carries class .events-editor-file__content-table and no id, so scope
+   through that class like the device-timers table scopes through its
+   container). #/Events opens with activeEventId 'states' by default
+   (Events.js), so this table renders on a plain page load. Columns: 0 Idx(num)
+   1 Last update(date-us) 2 Name(text) 3 State(text) 4 Value(text). Numeric +
+   datetime -> right; the rest keep the text->left default. Census surface added
+   in dz-table-census.js so this stays contract-enforced. The `.dataTable` class
+   (DataTables adds it to this table) is chained in to raise the header selector
+   to (0,3,2): core's base `table.dataTable thead th.ui-state-default` left-aligns
+   headers at (0,2,3), which a plain class selector (0,2,2) would lose to. The
+   other per-table rules dodge this with an ID selector; this table has no id. */
+.events-editor-file__content-table.dataTable thead th:nth-child(1),
+.events-editor-file__content-table.dataTable tbody td:nth-child(1),
+.events-editor-file__content-table.dataTable thead th:nth-child(2),
+.events-editor-file__content-table.dataTable tbody td:nth-child(2) {
+    text-align: right;
+}
+
 /* Devices-table battery bar: core's style.css hardcodes scheme-blind hexes
    (#B8DB23 base/full, #ED3745 empty, #F9D023 half, black shell outline) and
    loads after the theme, winning equal-specificity ties, so these rules are

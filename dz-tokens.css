@@ -401,6 +401,13 @@
        de facto 4/8/10 cluster; specific tables may deviate by design). */
     --dz-table-cell-pad:   6px 10px;
     --dz-table-header-pad: 8px 10px;
+    /* Form (label:value) tables - Setup tabs, edit-form .table-details. A
+       SEPARATE rhythm from the data-cell pad above: these are forms, not data
+       rows, and their vertical pad is intentionally 8px (matching the header
+       rhythm, not the tighter 6px data rhythm). Horizontal stays 10px and must
+       NOT widen - a wider pad overflows the Setup tabs at mobile width (see the
+       #settingscontent rule in css/settings.css). */
+    --dz-form-cell-pad:    8px 10px;
 
     /* Button (--dz-btn-*) contract - core dashboard.css/style.css consume these; retargeted
        Machinon button rules in custom.css consume them too. Values = current Machinon palette.

@@ -961,6 +961,7 @@ All twelve `--dz-table-*` tokens live in `dz-tokens.css`; only `css/tables.css` 
 | `--dz-table-total-text` | `var(--dz-body-text)` | Totals/summary row text |
 | `--dz-table-cell-pad` | `6px 10px` | Body-cell padding rhythm (see Padding Rhythm below) |
 | `--dz-table-header-pad` | `8px 10px` | Header-cell padding rhythm |
+| `--dz-form-cell-pad` | `8px 10px` | Form (label:value) cell padding for Setup tabs and edit-form `.table-details`; a separate rhythm from the data-cell pad (forms, not data rows), horizontal deliberately not widened (mobile overflow) |
 
 ### Totals Rows
 
