@@ -566,12 +566,15 @@ tr.odd td.sorting_1, tr.even td.sorting_1 {
    container). #/Events opens with activeEventId 'states' by default
    (Events.js), so this table renders on a plain page load. Columns: 0 Idx(num)
    1 Last update(date-us) 2 Name(text) 3 State(text) 4 Value(text). Numeric +
-   datetime -> right; the rest keep the text->left default. Census surface added
-   in dz-table-census.js so this stays contract-enforced. The `.dataTable` class
+   datetime -> right; the rest keep the text->left default. NOTE: not currently
+   census-gated - #/Events opens the script editor when saved events exist, so
+   dz-table-census.js finds no visible table on this surface; gating it would need
+   a reveal-states click in the harness (decision pending). The `.dataTable` class
    (DataTables adds it to this table) is chained in to raise the header selector
-   to (0,3,2): core's base `table.dataTable thead th.ui-state-default` left-aligns
-   headers at (0,2,3), which a plain class selector (0,2,2) would lose to. The
-   other per-table rules dodge this with an ID selector; this table has no id. */
+   to (0,3,2): the theme's own base header rule `table.dataTable thead
+   th.ui-state-default` (this file, above) left-aligns headers at (0,2,3), which a
+   plain class selector (0,2,2) would lose to. The other per-table rules dodge
+   this with an ID selector; this table has no id. */
 .events-editor-file__content-table.dataTable thead th:nth-child(1),
 .events-editor-file__content-table.dataTable tbody td:nth-child(1),
 .events-editor-file__content-table.dataTable thead th:nth-child(2),

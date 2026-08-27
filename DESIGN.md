@@ -945,7 +945,7 @@ selects on an aria-label fingerprint instead; the fragility account lives with t
 
 ### Token Table (Tables)
 
-All twelve `--dz-table-*` tokens live in `dz-tokens.css`; only `css/tables.css` consumes them.
+The fourteen `--dz-table-*` tokens live in `dz-tokens.css` and are consumed by `css/tables.css`. The related `--dz-form-cell-pad` (last row) lives alongside them but is a form rhythm consumed by `css/settings.css`, not a data-table token.
 
 | Token | Value | Notes |
 |-------|-------|-------|
@@ -955,7 +955,9 @@ All twelve `--dz-table-*` tokens live in `dz-tokens.css`; only `css/tables.css` 
 | `--dz-table-row-odd-bg` | `color-mix(in srgb, var(--dz-widget-bg) 92%, var(--dz-body-text))` | Odd-row stripe; DERIVED (8% body text mixed into the widget background) so striping stays readable under every scheme - the old fixed greys failed WCAG under some schemes' text colors |
 | `--dz-table-row-text` | `var(--dz-body-text)` | Row text |
 | `--dz-table-border` | `var(--dz-input-border)` | Row border |
-| `--dz-table-row-selected-bg` | `var(--dz-accent-color)` | Selected-row background (75% opacity, text swaps to `--dz-accent-text`) |
+| `--dz-table-row-selected-bg` | `rgba(var(--dz-accent-values), 0.18)` | Selected-row background; a soft accent tint (row text stays `--dz-table-row-text`, no opacity dimming). See Selected/Hover Rows |
+| `--dz-table-row-selected-border` | `var(--dz-accent-color)` | Selected-row accent edge; an inset left box-shadow on the first cell |
+| `--dz-table-row-hover-bg` | `rgba(var(--dz-accent-values), 0.08)` | Row hover tint; lighter than the selected tint so the two states stay distinct |
 | `--dz-table-control-text` | `var(--secondary-text-color)` | DataTables length/filter/info chrome text |
 | `--dz-table-total-bg` | `color-mix(in srgb, var(--dz-accent-color) 15%, var(--dz-widget-bg))` | Totals/summary row background; DERIVED so schemes track (see Totals Rows below) |
 | `--dz-table-total-text` | `var(--dz-body-text)` | Totals/summary row text |
