@@ -8,10 +8,10 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ### Fixed
 
-- Submenu links on the Settings page (the tiles with a fly-out list, such as Data Push) are now readable when you hover them. On a dark theme the hovered link used to turn dark and disappear; it now highlights the whole row like the device card menu, in both light and dark themes.
-- The "Create Virtual Sensors" button on the Setup > Hardware page no longer shows a shadow on its text, and now matches the size and shape of the theme's other buttons.
-- A text device that has a custom icon now shows its text on the Dynamic Dashboard. It was appearing as an on/off switch with no text at all, on the Device, Favorites and Room widgets. Text devices using the standard icon were never affected, and the Utility page, the dashboard and the mobile cards always showed the text correctly. (reported by @blooesky)
-- Selected table rows now use a soft accent tint with an accent edge, so in-row buttons stay readable.
+- Submenu links on the Settings page (the tiles with a fly-out list, such as Data Push) are now readable when you hover them. On a dark theme the hovered link used to turn dark and disappear; it now highlights the whole row like the device card menu, in both light and dark themes. (#205)
+- The "Create Virtual Sensors" button on the Setup > Hardware page no longer shows a shadow on its text, and now matches the size and shape of the theme's other buttons. (#204)
+- A text device that has a custom icon now shows its text on the Dynamic Dashboard. It was appearing as an on/off switch with no text at all, on the Device, Favorites and Room widgets. Text devices using the standard icon were never affected, and the Utility page, the dashboard and the mobile cards always showed the text correctly. (#203)
+- Selected table rows now use a soft accent tint with an accent edge, so in-row buttons stay readable. (#206)
 
 ### Changed
 
