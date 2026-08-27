@@ -4,6 +4,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-08-27
+
 ### Fixed
 
 - Submenu links on the Settings page (the tiles with a fly-out list, such as Data Push) are now readable when you hover them. On a dark theme the hovered link used to turn dark and disappear; it now highlights the whole row like the device card menu, in both light and dark themes.
