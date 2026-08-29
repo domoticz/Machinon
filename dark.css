@@ -27,8 +27,18 @@ html[data-dz-scheme="dark"] {
      here; the light base keeps white. Keep contrast at 3:1 or better (WCAG SC
      1.4.11 non-text threshold), matching dz-tokens.css. */
   --dz-accent-text:         #0f1620;
-  /* Sunrise/sunset sun, warm against the navy base (light base: #8c730e). */
-  --dz-sun-color:           #fad232;
+  /* Semantic identity colours (dark). These five are CORE's own values,
+     unchanged: measured on the dark schemes they run 4.22:1 to 9.56:1 against
+     the card, so they already clear the floor and there is no reason to move
+     them. Keeping them identical is also what guarantees this change is
+     invisible to everyone already on a dark scheme. See the long note in
+     dz-tokens.css for why these live per base rather than per scheme. */
+  --dz-widget-amber:         #ffb300;
+  --dz-widget-energy-export: #66bb6a;
+  --dz-widget-energy-gas:    #ff7043;
+  --dz-widget-energy-water:  #29b6f6;
+  --dz-widget-energy-price:  #c8a0ff;
+  --dz-sun-color:            #fad232;
 
   /* Dynamic Dashboard chrome tokens (dark). panel-bg and skeleton derive in
      dz-tokens.css and track this scheme's widget-bg/body tokens; only the

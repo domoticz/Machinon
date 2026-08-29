@@ -74,10 +74,38 @@
     --dz-status-danger: var(--dz-accent-red);
     --dz-status-warn:   var(--dz-btn-warning-bg);
     --dz-status-ok:     var(--dz-btn-success-bg);
-    /* The sunrise/sunset sun icon (desktop #timesun row + mobile top bar).
-       Semantic like error/success/warning, and like them overridable per
-       scheme (scheme colors key: sun); every built-in scheme keeps the
-       default. */
+    /* ---- Semantic IDENTITY colours (light) ----------------------------------
+       Gas is orange because gas is orange; water is blue because water is blue.
+       These are not palette choices a user makes, which is why they are NOT
+       scheme keys and NOT colour-picker swatches: the hue is a theme constant
+       and only the LIGHTNESS has to change between a white card and a near-black
+       one. So each one is defined once per BASE, here for light and in dark.css
+       for dark, and every scheme (built-in, custom, or a saved user preset)
+       resolves them through the data-dz-scheme underlay that already governs
+       every token a scheme does not set.
+
+       Five of the names are CORE's (www/css/dashboard.css defines them for the
+       Dynamic Dashboard and reads them throughout), so defining them here is all
+       that is needed for core's own CSS to follow the scheme. Core's values are
+       tuned for its dark stock theme, which is why the light column had to be
+       derived: measured on the light schemes, core's defaults land between
+       1.43:1 and 2.74:1 against the card, well under WCAG SC 1.4.11's 3:1
+       non-text floor. The values below hold core's hue EXACTLY (0.0 degrees of
+       drift) and lower the lightness until they clear it: worst case 3.23:1
+       (gruvbox-light price), typical 4.2:1.
+
+       A scheme overrides these only when its own identity demands it, which
+       today is Paper alone (deliberately monochrome; schemes/paper-*.json).
+       Re-measure with scripts/measure-icon-contrast.py after any change here or
+       to a scheme's card colour. */
+    --dz-widget-amber:             #a37300;  /* grid import, bolt, plug, low battery */
+    --dz-widget-energy-export:     #3e8c42;  /* export arrow, battery, leaf */
+    --dz-widget-energy-gas:        #e83700;
+    --dz-widget-energy-water:      #0883bb;
+    --dz-widget-energy-price:      #9d55ff;
+    /* The sunrise/sunset sun (desktop #timesun row + mobile top bar). Same
+       family: it was the first member, and carried the per-scheme override
+       hook on its own before the rest existed. */
     --dz-sun-color:                #8c730e;
 
     /* ---- Typography tokens (scheme-independent; schemes never override) ----
@@ -555,6 +583,13 @@
 html:root {
     --dz-widget-accent: var(--dz-accent-color);
     --dz-accent-red:    var(--dz-accent-red-base);
+    /* Light-scheme identity colours (higher specificity than core's :root).
+       These override core's dark-tuned defaults so light schemes render correctly. */
+    --dz-widget-amber:             #a37300;
+    --dz-widget-energy-export:     #3e8c42;
+    --dz-widget-energy-gas:        #e83700;
+    --dz-widget-energy-water:      #0883bb;
+    --dz-widget-energy-price:      #9d55ff;
     /* Core USES --dz-widget-sunpv twice and DEFINES it nowhere:
        views/dashboardDynamic/widgets/energy-dashboard.html:186 (the battery
        voltage line) and battery-status.html:59. An unresolved var() with no
