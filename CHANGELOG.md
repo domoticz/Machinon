@@ -4,13 +4,18 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+## [2.2.1] - 2026-08-29
+
 ### Fixed
 
-- The manual explains the new **Icon style** setting: what picking Font Awesome glyphs instead of classic images changes, and that an icon you assigned to a device yourself keeps showing either way. The steps for assigning an icon are updated for Domoticz's new icon picker.
-- With the new **Settings > System > Icon style** set to "Font Awesome glyphs", every entry in the menu bar drew two icons at once, the classic picture and the new glyph side by side. Each entry shows a single icon again, in both icon styles. (#207)
 - The icons Domoticz now draws as glyphs rather than pictures follow your colour scheme again. Device, blinds and scene icons, the action buttons in the Devices and Users tables, the trend arrows, the battery indicator and the favourite star kept Domoticz's own fixed blue, grey, green, amber and red whichever scheme you had chosen, and several were too faint to read on the light schemes. (#207)
-- Your custom page button in the menu bar now follows the **Icon style** setting like every other entry. With Font Awesome glyphs chosen it was the one picture icon left in a row of glyphs. Turning the theme's own **Navbar icons** setting off now also hides the menu icons in that style; it was only hiding them in the classic one.
 - The coloured icons on the Dynamic Dashboard follow your colour scheme. On the light schemes the energy arrows, sun, bolt, plug, flame and water drop kept the colours meant for a dark background and were washed out against the white card, and the sunrise and sunset icons had the same problem. The icons in the widget library, which were close to invisible on a light scheme, and the show/hide and kiosk buttons in the dashboard toolbar are readable too. (#208)
+- With the new **Settings > System > Icon style** set to "Font Awesome glyphs", every entry in the menu bar drew two icons at once, the classic picture and the new glyph side by side. Each entry shows a single icon again, in both icon styles. (#207)
+- Your custom page button in the menu bar now follows the **Icon style** setting like every other entry. With Font Awesome glyphs chosen it was the one picture icon left in a row of glyphs. Turning the theme's own **Navbar icons** setting off now also hides the menu icons in that style; it was only hiding them in the classic one.
+
+### Changed
+
+- The manual explains the new **Icon style** setting: what picking Font Awesome glyphs instead of classic images changes, and that an icon you assigned to a device yourself keeps showing either way. The steps for assigning an icon are updated for Domoticz's new icon picker.
 
 ## [2.2.0] - 2026-08-27
 
