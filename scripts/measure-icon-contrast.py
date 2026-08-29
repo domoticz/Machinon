@@ -25,7 +25,8 @@ DARK = {
     "water": "#29b6f6", "price": "#c8a0ff", "sun": "#fad232", "moon": "#8ba4d8",
 }
 # Paper is deliberately monochrome and overrides the family (see the plan's
-# Task 3). Same hues at 38% saturation, lightness solved for 3.5:1.
+# Task 3). Same hues at 38% of the base saturation (export ends at 14.5%
+# absolute), lightness solved for 3.5:1.
 PAPER_LIGHT = {
     "import": "#9e8447", "export": "#6d926f", "gas": "#b97964",
     "water": "#5390ac", "price": "#9879c3", "sun": "#96884f", "moon": "#7a87a4",
@@ -34,6 +35,33 @@ PAPER_DARK = {
     "import": "#89733e", "export": "#5b7b5d", "gas": "#a9624c",
     "water": "#467991", "price": "#8864b9", "sun": "#80733c", "moon": "#657595",
 }
+
+# These constants are a second source of truth for the same hex values: they let
+# contrast be measured without parsing CSS/JSON, but nothing ties them back to
+# the files that actually ship the colours, so the two can drift silently while
+# this script keeps reporting OK. Pin them: --check also confirms every
+# constant's hex string still appears in the file that should carry it.
+PINNED_FILES = {
+    "LIGHT": "dz-tokens.css",
+    "DARK": "dark.css",
+    "PAPER_LIGHT": os.path.join("schemes", "paper-light.json"),
+    "PAPER_DARK": os.path.join("schemes", "paper-dark.json"),
+}
+
+
+def check_pinned():
+    """Presence check only: does each constant's hex string still occur
+    (case-insensitively) in the file that should carry it? Returns a list of
+    human-readable descriptions of anything missing."""
+    root = os.path.join(os.path.dirname(__file__), "..")
+    missing = []
+    for var_name, rel_path in PINNED_FILES.items():
+        with open(os.path.join(root, rel_path), encoding="utf-8") as handle:
+            content = handle.read().lower()
+        for role, value in globals()[var_name].items():
+            if value.lower() not in content:
+                missing.append(f"{var_name}/{role} {value} not found in {rel_path}")
+    return missing
 
 
 def rgb(value):
@@ -85,12 +113,21 @@ def main():
                 failures.append(f"{name}/{role} {value} on {card} = {ratio}:1")
             print(f"{name:16} {role:8} {value} on {card} = {ratio}:1{flag}")
 
-    if failures and args.check:
-        print(f"\n{len(failures)} value(s) under the {FLOOR}:1 floor:", file=sys.stderr)
-        for line in failures:
-            print("  " + line, file=sys.stderr)
+    pinned_missing = check_pinned() if args.check else []
+
+    if (failures or pinned_missing) and args.check:
+        if failures:
+            print(f"\n{len(failures)} value(s) under the {FLOOR}:1 floor:", file=sys.stderr)
+            for line in failures:
+                print("  " + line, file=sys.stderr)
+        if pinned_missing:
+            print(f"\n{len(pinned_missing)} constant(s) missing from their shipped file:", file=sys.stderr)
+            for line in pinned_missing:
+                print("  " + line, file=sys.stderr)
         return 1
     print(f"\nOK: every value clears {FLOOR}:1 on its own scheme's card")
+    if args.check:
+        print("OK: every constant is present in its shipped file")
     return 0
 
 

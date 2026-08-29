@@ -365,9 +365,10 @@ Derived tokens (`--dz-panel-bg`, `--dz-border-color`, `--dz-table-*`, `--dz-btn-
 `--dz-widget-status-text`, `--dz-btn-danger-bg-alpha`) reference the rows above rather than
 restating colors. The `--dz-widget-*` set matters beyond this page: core imports nothing here, so
 whatever reads the full contract (core `dashboard.css`'s `.dd-widget`, theme-aware external UIs)
-falls back to its own defaults unless Machinon defines them. `--dz-widget-accent` and
-`--dz-accent-red` are additionally set in an `html:root` block, whose `(0,1,1)` specificity beats
-core's later-loaded `:root`.
+falls back to its own defaults unless Machinon defines them. `--dz-widget-accent`,
+`--dz-accent-red`, `--dz-widget-amber`, `--dz-widget-energy-export`, `--dz-widget-energy-gas`,
+`--dz-widget-energy-water` and `--dz-widget-energy-price` are additionally set in an `html:root`
+block, whose `(0,1,1)` specificity beats core's later-loaded `:root`.
 
 ### Special-Cased Colors
 
@@ -376,7 +377,7 @@ scheme (Label important, Header gradient); others vary by scheme through their o
 than the shared mapping table, so "theme-independent" no longer describes the whole group.
 
 - **On primary** (`{colors.on-primary}`): white text on filled buttons and accent backgrounds - the light value only. Varies by scheme: the real token is `--dz-accent-text`, which `dark.css` overrides because Blue UI Dark's accent is pale (schemes set it via the `accent_text` key; see Colors above)
-- **Sun icon** (`--dz-sun-color`): unlike the rest of this list, it now differs by scheme (light and dark values live in `dz-tokens.css`/`dark.css`; see Colors > CSS Custom Property Mapping context above)
+- **Sun and moon icons** (`--dz-sun-color`, `--dz-moon-color`): see Semantic identity colours below, which covers both alongside the five energy tokens
 - **Label important** (`{colors.label-important}`): `#b94a48` for critical badges - a deliberate literal, no `--dz-*` token (matched by `scripts/check-tokens.sh` against its `custom.css` declaration instead)
 - **Header gradient**: `{colors.gradient-start}` to `{colors.light-primary}` (light), `{colors.gradient-dark-start}` to `#0073a7` (dark) - the dark end-stop is a deliberate literal, no token (part of the legacy `dark_theme.css` gradient called out as not tokenized above)
 

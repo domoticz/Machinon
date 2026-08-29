@@ -32,8 +32,7 @@
        Not themselves --dz-* contract tokens: they exist only so that values
        consumed by both blocks derive from one place instead of two literals
        silently drifting apart. See the specificity note near the html:root
-       block (around line 570) and the derive-not-copy pattern documented
-       there. */
+       block below and the derive-not-copy pattern documented there. */
     --dz-accent-red-base:             #992f2b;
     --dz-widget-amber-base:           #a37300;
     --dz-widget-energy-export-base:   #3e8c42;
@@ -96,9 +95,17 @@
        tuned for its dark stock theme, which is why the light column had to be
        derived: measured on the light schemes, core's defaults land between
        1.43:1 and 2.74:1 against the card, well under WCAG SC 1.4.11's 3:1
-       non-text floor. The values below hold core's hue EXACTLY (0.0 degrees of
-       drift) and lower the lightness until they clear it: worst case 3.23:1
-       (gruvbox-light price), typical 4.2:1.
+       non-text floor. The values below hold core's hue within 0.25 degrees at
+       most (the floor of 8-bit hex rounding, not a deliberate shift) and lower
+       the lightness until they clear it: worst case 3.23:1 (gruvbox-light
+       price), typical 4.2:1.
+
+       This is also why the five are declared twice, once here in :root and
+       again in the html:root block below via their -base privates, while sun
+       and moon further down are single :root literals: core defines the same
+       five names, so Machinon's value needs the html:root override to win the
+       source-order tie, whereas core defines neither sun nor moon, so a plain
+       :root literal already wins outright.
 
        A scheme overrides these only when its own identity demands it, which
        today is Paper alone (deliberately monochrome; schemes/paper-*.json).
@@ -587,7 +594,9 @@
   beats :root (0,1,0) in both schemes; dark.css's html[data-dz-scheme="dark"] (also 0,1,1) still
   wins over this via source order when the dark attribute is set. The brand accent, brand red,
   and light-scheme identity colours (amber, export, gas, water, price) are Machinon-ised;
-  weather and moon stay at core defaults. Energy colours are Machinon-ised because their hue is
+  core's --dz-widget-weather-* and --dz-widget-moon-color stay at core defaults (not to be
+  confused with Machinon's own --dz-moon-color, defined in :root above and out of scope for
+  this block). Energy colours are Machinon-ised because their hue is
   a theme constant (gas is orange, water is blue) and only the lightness changes per scheme.
   All values in this block derive from private base tokens (--*-base) to follow the derive-not-copy
   pattern: references in both :root and html:root point to the same base, preventing silent drift
