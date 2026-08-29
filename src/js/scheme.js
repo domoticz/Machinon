@@ -69,13 +69,14 @@ function getSchemeDefaults() {
    them inline. So they must be listed here, or switching away from Paper leaves
    its muted values pinned to every scheme chosen afterwards.
 
-   --dz-sun-color IS here, because it predates that decision and schemes may
-   still carry a `sun` key (schemes/paper-*.json uses it deliberately). */
+   --dz-sun-color and --dz-moon-color ARE here, because they predate that
+   decision and schemes may still carry `sun` / `moon` keys (schemes/paper-*.json
+   uses both deliberately). */
 var DZ_CUSTOM_TOKENS = [
     '--dz-body-bg', '--dz-body-text', '--dz-nav-bg', '--dz-widget-bg', '--dz-widget-text',
     '--dz-accent-color', '--dz-input-border', '--dz-status-disabled', '--dz-accent-red',
     '--dz-btn-success-bg', '--dz-btn-warning-bg', '--secondary-text-color', '--dz-accent-values',
-    '--dz-accent-text', '--dz-sun-color', '--dz-accent-red-values',
+    '--dz-accent-text', '--dz-sun-color', '--dz-moon-color', '--dz-accent-red-values',
     '--dz-widget-amber', '--dz-widget-energy-export', '--dz-widget-energy-gas',
     '--dz-widget-energy-water', '--dz-widget-energy-price'
 ];
@@ -104,6 +105,8 @@ function applyCustomColorScheme(cs) {
     set('--dz-accent-text', cs.accent_text);
     /* Sunrise/sunset sun icon; semantic default #8c730e light / #fad232 dark unless a scheme says otherwise */
     set('--dz-sun-color', cs.sun);
+    /* Dynamic Dashboard sunset/moon icon, the sun's counterpart; semantic default #567ac6 light / #8ba4d8 dark unless a scheme says otherwise */
+    set('--dz-moon-color', cs.moon);
     /* Energy identity colours. Same contract as sun above: the base defines
        them, a scheme overrides only when its identity demands it. Paper is the
        only one that does (monochrome). `set` is a no-op for a missing key, so

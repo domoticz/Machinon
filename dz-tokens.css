@@ -113,6 +113,13 @@
        family: it was the first member, and carried the per-scheme override
        hook on its own before the rest existed. */
     --dz-sun-color:                #8c730e;
+    /* The Dynamic Dashboard's sunset/moon icon, the sun's missing counterpart.
+       Core hardcodes it (www/css/dashboard.css .dd-sun-icon-set: #8ba4d8),
+       which measures 1.99:1 at worst on a light card, so it needs a token of
+       its own rather than inheriting --dz-sun-color. Hue held exactly against
+       core's value and lightness lowered until it clears the floor: worst
+       case 3.33:1 across the light schemes' own cards. */
+    --dz-moon-color:               #567ac6;
 
     /* ---- Typography tokens (scheme-independent; schemes never override) ----
        The ONLY place font sizes/weights/families are defined. Enforced by

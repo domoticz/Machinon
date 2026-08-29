@@ -18,21 +18,21 @@ FLOOR = 3.2
 # theme constant, which is why gas reads as gas in both.
 LIGHT = {
     "import": "#a37300", "export": "#3e8c42", "gas": "#e83700",
-    "water": "#0883bb", "price": "#9d55ff", "sun": "#8c730e",
+    "water": "#0883bb", "price": "#9d55ff", "sun": "#8c730e", "moon": "#567ac6",
 }
 DARK = {
     "import": "#ffb300", "export": "#66bb6a", "gas": "#ff7043",
-    "water": "#29b6f6", "price": "#c8a0ff", "sun": "#fad232",
+    "water": "#29b6f6", "price": "#c8a0ff", "sun": "#fad232", "moon": "#8ba4d8",
 }
 # Paper is deliberately monochrome and overrides the family (see the plan's
 # Task 3). Same hues at 38% saturation, lightness solved for 3.5:1.
 PAPER_LIGHT = {
     "import": "#9e8447", "export": "#6d926f", "gas": "#b97964",
-    "water": "#5390ac", "price": "#9879c3", "sun": "#96884f",
+    "water": "#5390ac", "price": "#9879c3", "sun": "#96884f", "moon": "#7a87a4",
 }
 PAPER_DARK = {
     "import": "#89733e", "export": "#5b7b5d", "gas": "#a9624c",
-    "water": "#467991", "price": "#8864b9", "sun": "#80733c",
+    "water": "#467991", "price": "#8864b9", "sun": "#80733c", "moon": "#657595",
 }
 
 

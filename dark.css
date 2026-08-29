@@ -39,6 +39,12 @@ html[data-dz-scheme="dark"] {
   --dz-widget-energy-water:  #29b6f6;
   --dz-widget-energy-price:  #c8a0ff;
   --dz-sun-color:            #fad232;
+  /* The Dynamic Dashboard's sunset/moon icon, the sun's missing counterpart.
+     Core's own value (www/css/dashboard.css .dd-sun-icon-set), unchanged:
+     it already clears the floor on dark cards, worst case 4.64:1 across the
+     dark schemes, so there is no reason to move it. See the long note in
+     dz-tokens.css for why this lives per base rather than per scheme. */
+  --dz-moon-color:           #8ba4d8;
 
   /* Dynamic Dashboard chrome tokens (dark). panel-bg and skeleton derive in
      dz-tokens.css and track this scheme's widget-bg/body tokens; only the

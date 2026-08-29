@@ -301,3 +301,21 @@ html:root .dd-library-item-icon .fa-regular {
 html:root .dd-topbar-btn.dd-topbar-nav-on {
     color: var(--dz-accent-text) !important;
 }
+
+/* Sunrise/sunset icons (desktop #timesun row's Dynamic Dashboard counterpart).
+   Core hardcodes both in www/css/dashboard.css:
+     .dd-sun-icon-rise { color: #f5a52a; }
+     .dd-sun-icon-set  { color: #8ba4d8; }
+   Theme tokens rather than --dz-widget-* ones, because core hardcodes the
+   pair outright: there is no existing --dz-* token these consume, so there
+   is nothing to override short of publishing our own. --dz-sun-color already
+   exists for the #timesun row; --dz-moon-color is its counterpart, added for
+   this rule (see dz-tokens.css / dark.css).
+
+   html:root prefix, NOT a bare class selector: core's rule is the identical
+   (0,1,0) specificity and its stylesheet loads after the theme's, so a
+   matching selector would tie and lose on source order, exactly as the
+   .dd-library-item-icon and .dd-topbar-btn rules above document for the same
+   stylesheet. */
+html:root .dd-sun-icon-rise { color: var(--dz-sun-color); }
+html:root .dd-sun-icon-set  { color: var(--dz-moon-color); }
