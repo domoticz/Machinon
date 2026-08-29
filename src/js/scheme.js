@@ -53,7 +53,19 @@ function getSchemeDefaults() {
     return defaults;
 }
 
-// --dz-* tokens the custom colour scheme may override (used to clear them on a scheme switch).
+/* Tokens a CUSTOM scheme may set inline on <html>, and which
+   clearCustomColorScheme() must therefore remove when switching away.
+
+   The energy identity colours (--dz-widget-amber, --dz-widget-energy-*) are
+   deliberately ABSENT: they are never set from the picker, because a user does
+   not choose "what colour is water". They are defined once per base in
+   dz-tokens.css / dark.css and a custom scheme inherits them through its
+   scheme_base underlay, exactly as it inherits shadows and panel backgrounds.
+   Adding them here, or to applyCustomColorScheme below, would mean growing the
+   colour picker by five swatches to feed them. Do not.
+
+   --dz-sun-color IS here, because it predates that decision and schemes may
+   still carry a `sun` key (schemes/paper-*.json uses it deliberately). */
 var DZ_CUSTOM_TOKENS = [
     '--dz-body-bg', '--dz-body-text', '--dz-nav-bg', '--dz-widget-bg', '--dz-widget-text',
     '--dz-accent-color', '--dz-input-border', '--dz-status-disabled', '--dz-accent-red',
