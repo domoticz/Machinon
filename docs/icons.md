@@ -10,10 +10,6 @@ Domoticz itself, not Machinon, controls whether your whole interface shows pictu
 Font Awesome glyphs. The setting lives at **Setup > Settings > System > Icon style**, with two
 options: **Classic images** (the default) and **Font Awesome glyphs**.
 
-This setting arrived in Domoticz build 18308. A handful of earlier 2026.3 beta builds, spanning
-roughly six hours, showed glyphs with no setting to change them back. If you're seeing glyphs and
-can't find this option, update Domoticz.
-
 The important part: an icon you've deliberately assigned to a device, including one you
 installed from Machinon's library, keeps showing as that picture in both styles. Switching to
 **Font Awesome glyphs** only replaces the automatic default icons on devices that have never had
