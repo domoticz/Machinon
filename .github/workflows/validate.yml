@@ -35,6 +35,12 @@ jobs:
       - name: Site and docs unit tests
         run: python3 -m pytest scripts/test_gen_site_tokens.py scripts/test_check_site.py scripts/test_check_contrast.py scripts/test_check_settings_docs.py scripts/test_check_png_optimized.py -q
 
+      - name: Icon-contrast unit tests
+        run: python3 -m pytest scripts/test_measure_icon_contrast.py -q
+
+      - name: Icon colours clear the contrast floor on every scheme
+        run: python3 scripts/measure-icon-contrast.py --check
+
       - name: Site tokens are in step with the theme's schemes
         run: python3 scripts/gen-site-tokens.py --check
 
