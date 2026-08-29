@@ -53,12 +53,32 @@ function getSchemeDefaults() {
     return defaults;
 }
 
-// --dz-* tokens the custom colour scheme may override (used to clear them on a scheme switch).
+/* Tokens a CUSTOM scheme may set inline on <html>, and which
+   clearCustomColorScheme() must therefore remove when switching away.
+
+   This array is about what may be set INLINE, not about what the colour picker
+   exposes. Those are different lists: the picker is a separate hardcoded set of
+   swatches in src/js/theme-hub.js and never reads this array, so adding a token
+   here does not add a swatch there.
+
+   The energy identity colours are NOT offered in the picker, because a user does
+   not choose "what colour is water": they are defined once per base in
+   dz-tokens.css / dark.css and a scheme inherits them through its scheme_base
+   underlay. But a scheme MAY override them in its own JSON when its identity
+   demands it (schemes/paper-*.json does), and applyCustomColorScheme then sets
+   them inline. So they must be listed here, or switching away from Paper leaves
+   its muted values pinned to every scheme chosen afterwards.
+
+   --dz-sun-color and --dz-moon-color ARE here, because they predate that
+   decision and schemes may still carry `sun` / `moon` keys (schemes/paper-*.json
+   uses both deliberately). */
 var DZ_CUSTOM_TOKENS = [
     '--dz-body-bg', '--dz-body-text', '--dz-nav-bg', '--dz-widget-bg', '--dz-widget-text',
     '--dz-accent-color', '--dz-input-border', '--dz-status-disabled', '--dz-accent-red',
     '--dz-btn-success-bg', '--dz-btn-warning-bg', '--secondary-text-color', '--dz-accent-values',
-    '--dz-accent-text', '--dz-sun-color', '--dz-accent-red-values'
+    '--dz-accent-text', '--dz-sun-color', '--dz-moon-color', '--dz-accent-red-values',
+    '--dz-widget-amber', '--dz-widget-energy-export', '--dz-widget-energy-gas',
+    '--dz-widget-energy-water', '--dz-widget-energy-price'
 ];
 
 // Apply the user's custom colours as --dz-* overrides on <html> via setProperty.
@@ -85,6 +105,17 @@ function applyCustomColorScheme(cs) {
     set('--dz-accent-text', cs.accent_text);
     /* Sunrise/sunset sun icon; semantic default #8c730e light / #fad232 dark unless a scheme says otherwise */
     set('--dz-sun-color', cs.sun);
+    /* Dynamic Dashboard sunset/moon icon, the sun's counterpart; semantic default #567ac6 light / #8ba4d8 dark unless a scheme says otherwise */
+    set('--dz-moon-color', cs.moon);
+    /* Energy identity colours. Same contract as sun above: the base defines
+       them, a scheme overrides only when its identity demands it. Paper is the
+       only one that does (monochrome). `set` is a no-op for a missing key, so
+       every other scheme falls through to the base underlay. */
+    set('--dz-widget-amber', cs.energy_import);
+    set('--dz-widget-energy-export', cs.energy_export);
+    set('--dz-widget-energy-gas', cs.energy_gas);
+    set('--dz-widget-energy-water', cs.energy_water);
+    set('--dz-widget-energy-price', cs.energy_price);
     if (cs.main_color) { s.setProperty('--dz-accent-values', hexToRGB(cs.main_color, true)); }
     /* danger-button tints derive from this triplet; without it schemes kept
        the base red's rgba tints under their own error colour */

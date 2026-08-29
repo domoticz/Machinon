@@ -15,7 +15,6 @@
         "error": "#FA5D57",
         "success": "#73D173",
         "warning": "#F2B03D",
-        "accent_text": "#1A0F16",
-        "sun": "#FAD232"
+        "accent_text": "#1A0F16"
     }
 }
