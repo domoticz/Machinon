@@ -296,9 +296,25 @@ html:root .dd-library-item-icon .fa-regular {
    Not in scope here, flagged for a follow-up task: core's kiosk toggle
    (.dd-topbar-btn.dd-topbar-kiosk-active, dashboard.css) has the identical
    hardcoded "color: #fff !important" shape on an accent pill, so it likely
-   carries the same contrast defect; this task only measured and fixed the
-   eye button. */
+   carries the same defect, and it does: measured below. */
 html:root .dd-topbar-btn.dd-topbar-nav-on {
+    color: var(--dz-accent-text) !important;
+}
+
+/* Kiosk toggle, the same defect as the eye button above and fixed the same way.
+   Core: `.dd-topbar-btn.dd-topbar-kiosk-active { color:#fff !important;
+   background: var(--dz-widget-accent) !important }` (www/css/dashboard.css),
+   i.e. it takes the pill from OUR token and then hardcodes the glyph white.
+   --dz-widget-accent resolves to --dz-accent-color, so on the dark scheme's
+   light accent that measured white on #98ccfd = 1.69:1, identical to the eye
+   button. --dz-accent-text is the token for text ON an accent surface and is
+   contract-guaranteed to clear 3:1 against it in every scheme.
+
+   Measuring this one needs care: `.dd-topbar-btn` carries a CSS transition, so
+   reading the computed background immediately after adding the class returns
+   the transition's STARTING value (transparent) and makes the rule look like it
+   never applied. Let it settle before believing the number. */
+html:root .dd-topbar-btn.dd-topbar-kiosk-active {
     color: var(--dz-accent-text) !important;
 }
 
