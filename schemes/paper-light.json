@@ -16,6 +16,11 @@
         "success": "#1b5e20",
         "warning": "#8a6d00",
         "accent_text": "#ffffff",
-        "sun": "#555555"
+        "sun": "#96884f",
+        "energy_import": "#9e8447",
+        "energy_export": "#6d926f",
+        "energy_gas": "#b97964",
+        "energy_water": "#5390ac",
+        "energy_price": "#9879c3"
     }
 }
