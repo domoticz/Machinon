@@ -406,6 +406,22 @@ div.menu-toggle.scrolled {
     display: none;
 }
 
+/* The glyph half of the icon twin Domoticz 2026.3 ships (upstream PR #6995),
+   hidden by default in the same breath as the image above, because this pair is
+   ONE feature: "navbar icons". Core only hides .dz-nav-glyph in the classic icon
+   style, so without this rule turning the theme's navbar_icons feature OFF stopped
+   working the moment a user picked the Font Awesome icon style: images went away
+   and glyphs took their place, measured 8 of them. css/navbar_icons.css re-shows
+   these when the feature is ON, at a specificity that outranks this.
+
+   This lives in nav.css, which is ALWAYS loaded, rather than in the feature file:
+   it has to hold whether the feature is on or off, and on a Domoticz that predates
+   the rework, where nothing ever re-shows the glyph, it is what keeps a theme-emitted
+   twin (js/custom_page.js) showing exactly the image it shows today. */
+.nav li a .dz-nav-glyph {
+    display: none;
+}
+
 .sub-tabs > li > a,
 .sub-tabs > li > a:hover,
 .sub-tabs > li > a:focus,
