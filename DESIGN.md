@@ -380,6 +380,33 @@ than the shared mapping table, so "theme-independent" no longer describes the wh
 - **Label important** (`{colors.label-important}`): `#b94a48` for critical badges - a deliberate literal, no `--dz-*` token (matched by `scripts/check-tokens.sh` against its `custom.css` declaration instead)
 - **Header gradient**: `{colors.gradient-start}` to `{colors.light-primary}` (light), `{colors.gradient-dark-start}` to `#0073a7` (dark) - the dark end-stop is a deliberate literal, no token (part of the legacy `dark_theme.css` gradient called out as not tokenized above)
 
+### Semantic identity colours
+
+`--dz-widget-amber`, `--dz-widget-energy-export`, `--dz-widget-energy-gas`,
+`--dz-widget-energy-water`, `--dz-widget-energy-price`, `--dz-sun-color` and
+`--dz-moon-color` name what a thing IS, not what the user picked: gas is orange
+because gas is orange. Five of the names are core's own
+(`www/css/dashboard.css` reads them for the Dynamic Dashboard), so defining
+them here is what makes core's icons follow the theme. The sun and moon pair
+are the theme's own: core hardcodes those two icons rather than tokenising
+them, so `css/dynamic-dashboard.css` overrides them by rule instead.
+
+They are defined once per scheme BASE, in `dz-tokens.css` for light and
+`dark.css` for dark, and NOT as scheme keys or colour-picker swatches. The hue
+is a theme constant; only the lightness has to differ between a white card and
+a near-black one. Every scheme, including a custom one or a saved preset,
+resolves them through the `data-dz-scheme` underlay that already governs every
+token a scheme does not set.
+
+A scheme overrides one only when its own identity demands it. Today that is
+Paper alone, which is deliberately monochrome and carries the whole family at
+38% of the base saturation.
+
+Floor is WCAG SC 1.4.11's 3:1 for non-text, measured against each scheme's own
+card colour; the shipped values target 3.2:1 so none sits on the line. Check
+with `scripts/measure-icon-contrast.py --check` and
+`dz-glyph-audit.js --scheme all` on the test rig.
+
 ### Status Glow Colors (hardcoded, not yet mapped to custom properties)
 
 | Status | Glow color | Card opacity |
