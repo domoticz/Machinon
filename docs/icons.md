@@ -4,6 +4,32 @@ Machinon ships a browsable library of over 250 device icons. You install only th
 actually want, one at a time, onto individual devices; everything else in your dashboard keeps
 its existing icon.
 
+## Icon style: classic images or glyphs
+
+Domoticz itself, not Machinon, controls whether your whole interface shows picture icons or
+Font Awesome glyphs. The setting lives at **Setup > Settings > System > Icon style**, with two
+options: **Classic images** (the default) and **Font Awesome glyphs**.
+
+This setting arrived in Domoticz build 18308. A handful of earlier 2026.3 beta builds, spanning
+roughly six hours, showed glyphs with no setting to change them back. If you're seeing glyphs and
+can't find this option, update Domoticz.
+
+The important part: an icon you've deliberately assigned to a device, including one you
+installed from Machinon's library, keeps showing as that picture in both styles. Switching to
+**Font Awesome glyphs** only replaces the automatic default icons on devices that have never had
+an icon chosen. Installing icons from the library is never wasted, even if you switch styles
+later.
+
+When glyphs are active, they follow your active Machinon color scheme (see [Color
+schemes](color-schemes.md)).
+
+Neither style is more correct than the other; it comes down to preference. **Font Awesome
+glyphs** gives you one uniform set that follows your color scheme; **Classic images** keeps each
+device's own artwork, including the on and off states described below.
+
+Nothing else about the icon library changes. It's still picture artwork you install and assign
+the same way, covered through the rest of this page.
+
 ## You need admin rights
 
 Installing an icon changes it for everyone using this Domoticz, so it is an administrator action.
@@ -64,8 +90,9 @@ Installing an icon makes it available; it doesn't put it on a device by itself. 
 
 1. Open the device you want to change (its Edit dialog, from the Devices page or a card's edit
    button).
-2. Find the **Custom Icon** or **Image** field and pick the icon you just installed from the
-   list.
+2. Click the **Change...** button to open the icon picker, then switch to the **Custom** source;
+   that's where the icons you've installed from Machinon's library appear. Pick the one you
+   want.
 3. Save the device.
 
 ## Requesting a new icon
