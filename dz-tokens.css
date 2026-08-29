@@ -46,6 +46,21 @@
        non-text threshold on the card background in both schemes (5.45:1 light
        resting, 9.68:1 dark), so no separate icon colour is needed. */
     --dz-card-icon-accent:    var(--dz-accent-color);
+    /* OFF/inactive state for an icon drawn as TEXT (core's Font Awesome device,
+       blinds, scene and trend glyphs; see css/glyphs.css). An icon still has to
+       be READ when it is off, so it carries the same 3:1 non-text floor as the
+       accent above - which rules out --dz-status-disabled, the obvious
+       candidate: measured against each scheme's own card colour it fails on
+       five of the eight built-ins (light 2.69, gruvbox-dark 1.78,
+       gruvbox-light 2.92, magenta-light 2.91, paper-light 2.85).
+       --secondary-text-color is guaranteed legible by every scheme but reads
+       as ordinary content at 5.3-9.7:1, so it is mixed 70% toward the card to
+       get a state that is visibly quieter yet still clears the floor
+       everywhere: worst case gruvbox-dark 3.45:1, best paper-dark 4.47:1.
+       Both inputs are scheme-driven (src/js/scheme.js applyCustomColorScheme),
+       so this one definition follows light, dark and every preset. Re-measure
+       with scripts/dz-glyph-audit.js --scheme all if either input changes. */
+    --dz-icon-off: color-mix(in srgb, var(--secondary-text-color) 70%, var(--dz-widget-bg));
     /* Device status glows (card shadows), as r,g,b triplets so consumers
        can alpha them with rgba(). */
     --dz-status-timeout-values:    199, 67, 67;

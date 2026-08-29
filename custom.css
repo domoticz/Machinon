@@ -76,6 +76,11 @@
    anchor after it. Its rules win on specificity anyway, not on this position. */
 @import url("css/links.css");
 
+/* Core-rendered Font Awesome glyphs (Domoticz 2026.3 icon rework), mapped onto the
+   --dz-* tokens. After links.css because it only sets colours on core's own glyph
+   classes and shares no selector with any file above it. */
+@import url("css/glyphs.css");
+
 /* Display sidemenu on low resolution devices */
 @import url("css/sidemenu.css") (max-width: 979px);
 

@@ -4,6 +4,11 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+### Fixed
+
+- With the new **Settings > System > Icon style** set to "Font Awesome glyphs", every entry in the menu bar drew two icons at once, the classic picture and the new glyph side by side. Each entry shows a single icon again, in both icon styles. (#207)
+- The icons Domoticz now draws as glyphs rather than pictures follow your colour scheme again. Device, blinds and scene icons, the action buttons in the Devices and Users tables, the trend arrows, the battery indicator and the favourite star kept Domoticz's own fixed blue, grey, green, amber and red whichever scheme you had chosen, and several were too faint to read on the light schemes. (#207)
+
 ## [2.2.0] - 2026-08-27
 
 ### Fixed

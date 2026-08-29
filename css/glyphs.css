@@ -1,0 +1,201 @@
+/**** ./glyphs.css ***/
+/* Core-rendered Font Awesome GLYPHS, mapped onto the theme's --dz-* tokens.
+
+   Domoticz 2026.3 (upstream PR #6995 "Implementing new icon picker and
+   defaulting to fa-icons" and the follow-ups merged 2026-08-28) replaced a
+   large set of PNG icons with Font Awesome glyphs. Two kinds arrived:
+
+     - UNCONDITIONAL chrome glyphs (.dz-chrome-icon): the table row-action
+       icons, the column-header signal/battery icons, the report trend arrows,
+       the battery-level indicator, the favourite star, the floorplan popup
+       chrome. These draw as glyphs in BOTH icon styles, so they are what every
+       user sees from this Domoticz version onwards.
+     - STYLE-GATED device glyphs (.dz-icon-glyph, .DeviceIconGlyph): shown only
+       when Settings > System > Icon style is "Font Awesome glyphs". The
+       "Classic images" default keeps the PNGs the theme already styles.
+
+   A glyph is text, so the theme can no longer reach it through the image rules
+   in buttons.css / tables.css / cards.css: it needs `color`, not a filter or a
+   box. Core gives every family a class and paints it with a hardcoded hex
+   (#43A4D3, #6c6e74, #5cb85c, #f0ad4e, #d9534f, ...), chosen against the stock
+   dark theme. Those hexes ignore the active Machinon colour scheme entirely,
+   so on Magenta or on either light scheme the icons drift out of the palette
+   and some drop under the WCAG SC 1.4.11 3:1 non-text contrast floor. Every
+   rule below re-points one such family at the token the theme already uses for
+   that meaning, so the glyphs follow the scheme the way the artwork did.
+
+   SPECIFICITY: core's rules live in www/css/style.css and www/css/icons-chrome.css,
+   both linked BEFORE styles/<theme>/custom.css, so a selector of equal
+   specificity here wins on order alone. Each rule below therefore mirrors
+   core's own selector shape rather than escalating - including core's
+   `:where(.btn.btn-icon)` wrapper, which deliberately holds the button default
+   at one class so a .dz-act-* modifier on the icon still outranks it.
+
+   PRE-REWORK CORES: every selector here is keyed on a class that only exists
+   after the icon rework. On an older Domoticz none of them match anything and
+   this file is inert, which is what keeps the theme identical for users who
+   have not updated. Verified with scripts/dz-core-parity.js against
+   domoticz/domoticz:2026-beta.18266 (the last beta before the rework).
+   The image-based rules elsewhere in the theme are kept for exactly the same
+   reason: those cores still emit the PNGs. */
+
+
+/* --- Device icons (glyph icon style only) ---------------------------------
+
+   The widget cards render through <dz-device-icon>, the floorplan draws the
+   same icon inside an SVG foreignObject as .DeviceIconGlyph. Core paints both
+   #43A4D3 when the device is on and #6c6e74 when it is off. --dz-card-icon-accent
+   is the token the theme's own card icons use (dz-tokens.css, restated in
+   dark.css); the off state uses --dz-icon-off rather than the obvious
+   --dz-status-disabled, which is scheme-driven and drops under the 3:1 non-text
+   floor on five of the eight built-in schemes (measured; see the token's own
+   comment in dz-tokens.css). A glyph card now reads with the same two-state
+   language as an image card, in every scheme. */
+dz-device-icon > .dz-icon-glyph,
+.DeviceIconGlyph {
+    color: var(--dz-card-icon-accent);
+}
+
+dz-device-icon > .dz-icon-glyph.dz-icon--off,
+.DeviceIconGlyph.dz-icon--off {
+    color: var(--dz-icon-off);
+}
+
+
+/* --- Blinds Open / Stop / Close buttons (glyph icon style only) -----------
+
+   Actions rather than device state, but core gives them the same on/off pair,
+   and the theme has no separate colour for them either: the reachable
+   direction is the accent, the one already travelled is the disabled grey. */
+.dz-blind-glyph {
+    color: var(--dz-card-icon-accent);
+}
+
+.dz-blind-glyph.dz-icon--off {
+    color: var(--dz-icon-off);
+}
+
+
+/* --- Scene and group buttons (glyph icon style only) ----------------------
+
+   Run is neutral-active (accent), On is affirmative (success), Off is the
+   state already held (disabled grey), matching core's own semantics with the
+   theme's status tokens. */
+.dz-scene-run {
+    color: var(--dz-card-icon-accent);
+}
+
+.dz-scene-on {
+    color: var(--dz-status-ok);
+}
+
+.dz-scene-off {
+    color: var(--dz-icon-off);
+}
+
+
+/* --- Table row-action icons (both icon styles) ----------------------------
+
+   The Devices/Users/Hardware/Events action columns. Core's colour-carries-the-
+   meaning scheme is kept, only re-tokenised: add = success, edit = accent,
+   warn = warning, danger = the theme red, neutral = plain body text.
+
+   :where() holds the button default at one class of specificity exactly as
+   core does, so the .dz-act-* modifiers below still win without repeating the
+   button selector. */
+:where(.btn.btn-icon) > .dz-chrome-icon {
+    color: var(--dz-btn-ghost-text);
+}
+
+.dz-chrome-icon.dz-act-add {
+    color: var(--dz-status-ok);
+}
+
+.dz-chrome-icon.dz-act-edit {
+    color: var(--dz-accent-color);
+}
+
+.dz-chrome-icon.dz-act-warn {
+    color: var(--dz-status-warn);
+}
+
+.dz-chrome-icon.dz-act-danger {
+    color: var(--dz-status-danger);
+}
+
+.dz-chrome-icon.dz-act-neutral {
+    color: var(--dz-btn-ghost-text);
+}
+
+/* Core darkens the icon on hover (filter: brightness(0.85)), which reads as a
+   press on its light stock theme but as "switching off" on a dark scheme.
+   Use the same in-place tonal pop the theme already gives the action-button
+   images and the device-card icons (css/buttons.css .btn-icon:hover img), so
+   image and glyph buttons behave identically. Selector matches core's own, so
+   file order decides. */
+.btn.btn-icon:hover > .dz-chrome-icon,
+.dz-chrome-icon.dz-act-add:hover,
+.dz-chrome-icon.dz-act-edit:hover,
+.dz-chrome-icon.dz-act-warn:hover,
+.dz-chrome-icon.dz-act-danger:hover,
+.dz-chrome-icon.dz-act-neutral:hover {
+    filter: saturate(1.12) brightness(1.05);
+}
+
+
+/* --- Trend arrows (both icon styles) --------------------------------------
+
+   Report tables, the temperature and utility widgets. Core sends rising to
+   #d9534f, falling to #43a4d3 and flat to grey. Rising/falling keep that
+   warm/cool reading through the theme's own warm and cool tokens; flat is the
+   quiet body colour rather than a fourth grey. Both class families are listed
+   because core applies the modifier to a chrome icon on some surfaces and to a
+   device glyph on others. */
+.dz-chrome-icon.dz-trend-up,
+.dz-icon-glyph.dz-trend-up {
+    color: var(--dz-status-danger);
+}
+
+.dz-chrome-icon.dz-trend-down,
+.dz-icon-glyph.dz-trend-down {
+    color: var(--dz-accent-color);
+}
+
+.dz-chrome-icon.dz-trend-flat,
+.dz-icon-glyph.dz-trend-flat {
+    color: var(--dz-icon-off);
+}
+
+
+/* --- Battery level (both icon styles) -------------------------------------
+
+   Core replaced the level bar in the Devices and Matter tables with a
+   fa-battery glyph filled by level. The theme already paints its own battery
+   bar (css/tables.css td .battery) from --dz-status-danger / --dz-status-warn;
+   the glyph now uses the same three tokens so both readings agree. */
+.dz-chrome-icon.dz-batt-empty {
+    color: var(--dz-status-danger);
+}
+
+.dz-chrome-icon.dz-batt-low {
+    color: var(--dz-status-warn);
+}
+
+.dz-chrome-icon.dz-batt-ok {
+    color: var(--dz-status-ok);
+}
+
+
+/* --- Favourite star (both icon styles) ------------------------------------
+
+   Core paints it #f9d023, a yellow picked against a dark background: on the
+   theme's light schemes that is roughly 1.6:1 against the page and the star
+   effectively disappears. The theme's own card star (css/cards.css .favorite)
+   is --dz-accent-color, so core's star on the weather and temperature pages
+   now matches it. The third selector repeats core's most specific one
+   (.btn.btn-icon > ...) so the button case is covered too. */
+.dz-icon-glyph.fa-star,
+.dz-chrome-icon.fa-star,
+.btn.btn-icon > .dz-chrome-icon.fa-star {
+    color: var(--dz-accent-color);
+}

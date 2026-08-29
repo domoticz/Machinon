@@ -29,3 +29,37 @@
 .navbar .nav li.clWeather a img {
     content: url(../images/machinon/weather.png);
 }
+
+/* --- Settings > System > Icon style: "Font Awesome glyphs" -----------------
+
+   Domoticz 2026.3 (upstream PR #6995 and the icon follow-ups merged
+   2026-08-28) ships BOTH halves of every navigation entry - the classic
+   <img class="dz-nav-img"> and an <i class="dz-nav-glyph"> - and hides one
+   with `html.dz-icons-glyph .dz-nav-img { display: none }`. That rule is two
+   classes and one element (0,2,1); the `.navbar .nav li a img` rule at the top
+   of this file is two classes and three elements (0,2,3), so it outranked the
+   hide and the image stayed painted: in the glyph style EVERY entry in the top
+   bar and in the Setup dropdown drew its PNG and its glyph side by side.
+
+   Re-assert the hide at this file's own specificity rather than weakening the
+   sizing rule, which the classic style still needs. Keyed on .dz-icons-glyph
+   and .dz-nav-img, neither of which exists on a Domoticz that predates the
+   rework, so this block is inert there. */
+html.dz-icons-glyph .navbar .nav li a img.dz-nav-img {
+    display: none;
+}
+
+/* The surviving glyph takes the box the 24px image had, so the bar keeps its
+   height and the labels keep their baseline whichever icon style is chosen.
+   Core sizes nav glyphs at 16px (css/icons-chrome.css `.nav li a > i`), which
+   is the stock bar's size, not this feature's. Colour is deliberately left to
+   inherit: the anchor already carries the accent on the current page and the
+   nav text colour elsewhere, so the glyph follows the scheme for free. */
+html.dz-icons-glyph .navbar .nav li a .dz-nav-glyph {
+    display: inline-block;
+    width: 24px;
+    font-size: var(--dz-icon-size-md);
+    line-height: 24px;
+    text-align: center;
+    vertical-align: middle;
+}
