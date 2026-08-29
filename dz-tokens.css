@@ -28,12 +28,18 @@
     --dz-btn-warning-bg:  #7a5412;
 
     /* Machinon aux tokens (no core --dz-* equivalent) */
-    /* Private base for the light danger red. Not itself a --dz-* contract
-       token: it exists only so --dz-accent-red above and the html:root
-       override below (see the specificity note near that block) both
-       derive from one place instead of two literals silently drifting
-       apart. */
-    --dz-accent-red-base:     #992f2b;
+    /* Private bases for tokens that appear in both :root and html:root.
+       Not themselves --dz-* contract tokens: they exist only so that values
+       consumed by both blocks derive from one place instead of two literals
+       silently drifting apart. See the specificity note near the html:root
+       block (around line 570) and the derive-not-copy pattern documented
+       there. */
+    --dz-accent-red-base:             #992f2b;
+    --dz-widget-amber-base:           #a37300;
+    --dz-widget-energy-export-base:   #3e8c42;
+    --dz-widget-energy-gas-base:      #e83700;
+    --dz-widget-energy-water-base:    #0883bb;
+    --dz-widget-energy-price-base:    #9d55ff;
     --secondary-text-color:   #3e5568;
     --dz-accent-values: 57,109,158;
     --dz-accent-red-values:   153,47,43;
@@ -98,11 +104,11 @@
        today is Paper alone (deliberately monochrome; schemes/paper-*.json).
        Re-measure with scripts/measure-icon-contrast.py after any change here or
        to a scheme's card colour. */
-    --dz-widget-amber:             #a37300;  /* grid import, bolt, plug, low battery */
-    --dz-widget-energy-export:     #3e8c42;  /* export arrow, battery, leaf */
-    --dz-widget-energy-gas:        #e83700;
-    --dz-widget-energy-water:      #0883bb;
-    --dz-widget-energy-price:      #9d55ff;
+    --dz-widget-amber:             var(--dz-widget-amber-base);
+    --dz-widget-energy-export:     var(--dz-widget-energy-export-base);
+    --dz-widget-energy-gas:        var(--dz-widget-energy-gas-base);
+    --dz-widget-energy-water:      var(--dz-widget-energy-water-base);
+    --dz-widget-energy-price:      var(--dz-widget-energy-price-base);
     /* The sunrise/sunset sun (desktop #timesun row + mobile top bar). Same
        family: it was the first member, and carried the per-scheme override
        hook on its own before the rest existed. */
@@ -572,24 +578,22 @@
   --dz-accent-red (plus the energy/weather/moon/stat tokens) in its own :root, loaded after the
   theme, so a plain :root override loses the source-order tie. html:root (specificity 0,1,1)
   beats :root (0,1,0) in both schemes; dark.css's html[data-dz-scheme="dark"] (also 0,1,1) still
-  wins over this via source order when the dark attribute is set. Only the brand accent + brand
-  red are Machinon-ised - the energy/weather/moon colours are semantic and stay at core defaults.
-  --dz-accent-red: without this line core's #DF2D3A overrides Machinon's red in light mode (dark
-  was already correct via the higher-specificity attribute selector). References the same
-  --dz-accent-red-base private token as the plain :root --dz-accent-red above (derive-not-copy:
-  a literal copy here would drift from the :root value silently whenever only one of the two
-  is edited).
+  wins over this via source order when the dark attribute is set. The brand accent, brand red,
+  and light-scheme identity colours (amber, export, gas, water, price) are Machinon-ised;
+  weather and moon stay at core defaults. Energy colours are Machinon-ised because their hue is
+  a theme constant (gas is orange, water is blue) and only the lightness changes per scheme.
+  All values in this block derive from private base tokens (--*-base) to follow the derive-not-copy
+  pattern: references in both :root and html:root point to the same base, preventing silent drift
+  if only one location is edited.
 */
 html:root {
     --dz-widget-accent: var(--dz-accent-color);
     --dz-accent-red:    var(--dz-accent-red-base);
-    /* Light-scheme identity colours (higher specificity than core's :root).
-       These override core's dark-tuned defaults so light schemes render correctly. */
-    --dz-widget-amber:             #a37300;
-    --dz-widget-energy-export:     #3e8c42;
-    --dz-widget-energy-gas:        #e83700;
-    --dz-widget-energy-water:      #0883bb;
-    --dz-widget-energy-price:      #9d55ff;
+    --dz-widget-amber:             var(--dz-widget-amber-base);
+    --dz-widget-energy-export:     var(--dz-widget-energy-export-base);
+    --dz-widget-energy-gas:        var(--dz-widget-energy-gas-base);
+    --dz-widget-energy-water:      var(--dz-widget-energy-water-base);
+    --dz-widget-energy-price:      var(--dz-widget-energy-price-base);
     /* Core USES --dz-widget-sunpv twice and DEFINES it nowhere:
        views/dashboardDynamic/widgets/energy-dashboard.html:186 (the battery
        voltage line) and battery-status.html:59. An unresolved var() with no
