@@ -245,3 +245,59 @@
    documents for the same stylesheet. */
 .dd-dial-outer .dd-dial-tick       { stroke: color-mix(in srgb, var(--secondary-text-color) 45%, transparent); }
 .dd-dial-outer .dd-dial-tick-minor { stroke: color-mix(in srgb, var(--secondary-text-color) 22%, transparent); }
+
+/* Widget library (Edit, then Add Widget). Core paints every entry's icon
+   rgba(255,255,255,0.85) in www/css/dashboard.css, which is a dark-theme
+   assumption rather than a token, so no --dz-* override can reach it. On a
+   light scheme that measures 1.12:1 against the panel: 44 icons that are
+   effectively invisible, the worst contrast on the page. Inherit the panel's
+   own text colour instead, which is scheme-correct by construction.
+
+   html:root prefix, NOT a bare class selector: core's own rule for these three
+   selectors is the identical (0,1,1) specificity and its stylesheet is linked
+   AFTER the theme's (index.html: styles/default/custom.css then
+   css/dashboard.css), so a matching selector loses the source-order tie and the
+   rule would be a silent no-op. This is the same trap dz-tokens.css documents
+   around its own html:root block. */
+html:root .dd-library-item-icon i,
+html:root .dd-library-item-icon .fa-solid,
+html:root .dd-library-item-icon .fa-regular {
+    color: var(--dz-body-text);
+}
+
+/* Dashboard toolbar eye button (dd-topbar-fullpage, toggled on when nav is
+   showing). Root cause, found by probing computed styles rather than
+   reading CSS: NOT the theme's own .btn family (this element carries no
+   .btn-primary/.btn-info/.active class - it is plain "btn btn-xs
+   dd-topbar-btn dd-topbar-fullpage dd-topbar-nav-on").
+   The paint comes from core's own www/css/dashboard.css:
+     .dd-topbar-btn.dd-topbar-nav-on { color: #fff !important; background:
+     var(--dz-btn-primary-bg, #337ab7) !important; border-radius: 10px; }
+   Core already consumes OUR --dz-btn-primary-bg token for the background, so
+   that part is scheme-correct by construction (measured rgb(152,204,253) on
+   dark = --dz-btn-primary-bg's #98ccfd). The glyph colour is the bug: core
+   hardcodes #fff with !important instead of pairing it with a token, so on
+   the dark scheme's light accent pill it renders white-on-light-blue,
+   measured 1.69:1. --dz-accent-text is the theme's existing token for
+   exactly this pairing (text ON an accent-coloured surface; already how
+   --dz-btn-primary-text and --dz-btn-toggle-selected-text solve the
+   identical problem elsewhere) and is contract-guaranteed to clear 3:1
+   against --dz-accent-color, which --dz-btn-primary-bg resolves to, in
+   every scheme.
+
+   html:root, not a bare compound: core's selector is
+   ".dd-topbar-btn.dd-topbar-nav-on", two classes, (0,2,0), with !important,
+   loaded after the theme. A same-specificity rule here would tie and lose on
+   source order even with !important of our own (among tied !important
+   declarations specificity still decides, then source order); html:root
+   raises this rule to (0,3,1), which outranks core's (0,2,0) regardless of
+   load order.
+
+   Not in scope here, flagged for a follow-up task: core's kiosk toggle
+   (.dd-topbar-btn.dd-topbar-kiosk-active, dashboard.css) has the identical
+   hardcoded "color: #fff !important" shape on an accent pill, so it likely
+   carries the same contrast defect; this task only measured and fixed the
+   eye button. */
+html:root .dd-topbar-btn.dd-topbar-nav-on {
+    color: var(--dz-accent-text) !important;
+}
