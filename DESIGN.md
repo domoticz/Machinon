@@ -798,10 +798,16 @@ fixed here.
 
 ### Modal Scrim
 
-`#mk-rgbw-scrim` (css/rgbw-popup.css) codifies the modal scrim language: a full-viewport
+`#mk-rgbw-scrim` (css/theme-wizard.css) codifies the modal scrim language: a full-viewport
 `rgba(0, 0, 0, 0.5)` dim, NO blur or glass (the Menus anti-glass ruling: glass fails AA on busy
 backdrops), fixed literal by design (shadow geometry, not a scheme color). Any future modal
 reuses this scrim, not a new one.
+
+It keeps its `mk-` name from the colour popup that introduced it, but the rule lives in an
+ALWAYS-LOADED sheet. It cannot move back into `css/rgbw-popup.css`: that file belongs to the
+`rgbw_popup` feature (id 45) and the loader removes it when the feature is off, which would
+leave the always-loaded Theme Wizard with an undimmed backdrop and a zero-height click-to-close
+target. Any shared chrome an always-loaded consumer depends on must live outside a feature file.
 
 ### Interactive States
 
