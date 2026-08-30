@@ -19,7 +19,7 @@ It works with current Domoticz beta and stable releases.
 
 ## Highlights
 
-- **Color schemes**: eight built in, Machinon's own light and dark default plus Gruvbox, Magenta, and Paper each in a light and dark variant, plus a custom color picker in the Theme Hub's "Colors and schemes" tab if you want to design your own palette and save it as a preset.
+- **Color schemes**: eight built in, Machinon's own light and dark default plus Gruvbox, Magenta, and Paper each in a light and dark variant. Want your own? The Theme Hub's "Colors and schemes" tab has a wizard that turns one or two colors into a matching light and dark theme in a few clicks, plus a manual color editor for full creative control over every swatch.
 
   ![Dark magenta color scheme](docs/screenshots/dashboard-magenta-dark.png)
 
