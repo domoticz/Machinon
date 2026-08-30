@@ -74,6 +74,32 @@ dz-device-icon > .dz-icon-glyph.dz-icon--off,
 }
 
 
+/* --- Device icon in the Devices table's toggle button (glyph style only) ---
+
+   Setup > Devices renders a togglable device's own icon inside a
+   <button class="btn btn-icon js-toggle-state"> (core's Devices.js
+   iconRenderer). Core colours a .dz-icon-glyph ONLY as a child of
+   dz-device-icon (www/css/style.css), and this one is a child of a button, so
+   NO core rule matches it and it inherits bootstrap's .btn { color: #333 }.
+   Measured on gruvbox-dark: 1.09:1 on an even row, 1.17:1 on an odd one, i.e.
+   effectively invisible. Core's own comment above that rule says device glyphs
+   "use the theme's own link blue rather than inheriting the body text colour,
+   which rendered them black" - this button is exactly the case that comment
+   describes and the selector misses.
+
+   One colour, not the two-state pair the cards get: the renderer emits no
+   dz-icon--on / dz-icon--off here, so there is no state in the markup to read.
+   It is a device icon, so it takes the device-icon accent rather than the
+   Dynamic Dashboard's identity palette, which encodes what is being MEASURED
+   (gas, water, solar) and means nothing for a switch.
+
+   The Devices row-action icons beside it are a different family
+   (.dz-chrome-icon.dz-act-*) and are handled further down. */
+.btn.btn-icon > .dz-icon-glyph {
+    color: var(--dz-card-icon-accent);
+}
+
+
 /* --- Blinds Open / Stop / Close buttons (glyph icon style only) -----------
 
    Actions rather than device state, but core gives them the same on/off pair,
