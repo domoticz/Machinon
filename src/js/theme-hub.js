@@ -1218,6 +1218,12 @@ function dzBuildColorField(label, value, onChange, opts) {
         input: input,
         anchor: opts.disclosureAnchor || wrap,
         label: label,
+        /* Same signal that already decides the native input's own binding
+           ("input" = continuous, the wizard; "change" = commit-only, the
+           hub): a wheel drag's liveness follows it too, rather than
+           inventing a second, differently-named toggle for the same idea.
+           See dzColorFieldOpen's onPick handler for what this controls. */
+        liveWheel: (opts.nativeEvent || "change") === "input",
         commit: function (hex) {
             input.value = hex;
             onChange(hex.toUpperCase());
@@ -1347,12 +1353,32 @@ function dzColorFieldOpen(field) {
     if (typeof window.dzAttachColorWheel === "function") {
         window.dzAttachColorWheel(canvas, DZ_COLOR_FIELD_WHEEL_SIZE, function (hueDegrees, saturation) {
             var rgb = dzColorFieldHsvToRgb((((hueDegrees % 360) + 360) % 360) / 360, saturation, 1);
-            paintFrom(dzColorFieldRgbToHex(rgb.r, rgb.g, rgb.b));
+            var liveHex = dzColorFieldRgbToHex(rgb.r, rgb.g, rgb.b);
+            paintFrom(liveHex);
+            /* Two consumers, two different costs for committing on every
+               drag frame, so this branches on field.liveWheel rather than
+               always doing one or the other:
+               - The wizard (liveWheel true, nativeEvent "input") commits on
+                 every pick: cheap (regenerates a scheme, repaints two small
+                 mockups, no network), and Task 6 deliberately made the
+                 wizard's preview track the native picker live for exactly
+                 this reason - a wheel that only updated on release would be
+                 a regression from that, and an odd thing to ship given the
+                 wheel exists BECAUSE the native input is poor on some
+                 browsers.
+               - The hub editor (liveWheel false, nativeEvent "change")
+                 does NOT commit here: its onChange calls dzHubPersist(),
+                 a network write, and firing that on every drag frame would
+                 be the very thing js/rgbw-popup.js's schedule-during-drag /
+                 flush-on-release contract exists to avoid. It commits once
+                 below, on release, instead. */
+            if (field.liveWheel) { field.commit(liveHex); }
         }, function () {
-            // Commit once on release, mirroring js/rgbw-popup.js's
-            // schedule-during-drag / flush-on-release send contract, so the
-            // (potentially network-persisting) onChange never fires on
-            // every drag frame.
+            // Release: always commit once here too (redundant with the last
+            // liveWheel pick above for the wizard, the ONLY commit for the
+            // hub), mirroring js/rgbw-popup.js's flush-on-release so a
+            // pending change always lands even if a caller never sees a
+            // last onPick (e.g. a plain click with no drag).
             field.commit(hex.value);
         });
     }
