@@ -157,3 +157,144 @@
     .dz-wizard { width: calc(100% - 16px); }
     .dz-wizard-body { padding: 8px; }
 }
+
+/* --- Step 1: colour fields ------------------------------------------- */
+
+.dz-wizard-swatches {
+    margin-bottom: 8px; /* future --dz-gap token site (spacing project) */
+}
+
+.dz-wizard-check {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* future --dz-gap token site (spacing project) */
+    font-family: var(--dz-font-family);
+    font-size: var(--dz-text-sm);
+    color: var(--dz-body-text);
+    cursor: pointer;
+}
+
+/* --- Step 2: look tiles, the .scheme-card idiom ----------------------- */
+
+.dz-wizard-looks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px; /* future --dz-gap token site (spacing project) */
+    /* 2px of padding so a selected tile's 2px outer ring has somewhere to
+       draw: .dz-wizard-body scrolls, and a ring at the content edge would be
+       clipped. Same reservation .dz-hub-scheme-picker makes, for the same
+       reason. */
+    padding: 2px;
+    margin: 6px 0; /* future --dz-gap token site (spacing project) */
+}
+
+.dz-wizard-look {
+    position: relative;
+    cursor: pointer;
+    width: 208px; /* two miniatures at 96px plus the 8px pair gap and 6px padding */
+    padding: 6px; /* future --dz-gap token site (spacing project) */
+    border: 1px solid var(--dz-input-border);
+    border-radius: var(--dz-btn-radius);
+    transition: border-color 0.15s ease;
+}
+
+.dz-wizard-look:hover { border-color: var(--dz-accent-color); }
+
+.dz-wizard-look.is-selected {
+    border-color: var(--dz-accent-color);
+    box-shadow: var(--dz-ring-accent);
+}
+
+.dz-wizard-look-name {
+    margin-top: 6px; /* future --dz-gap token site (spacing project) */
+    font-family: var(--dz-font-family);
+    font-size: var(--dz-text-xs);
+    text-align: center;
+    color: var(--dz-body-text);
+}
+
+.dz-wizard-look-desc {
+    margin-top: 2px;
+    font-family: var(--dz-font-family);
+    font-size: var(--dz-text-micro);
+    line-height: 1.3;
+    text-align: center;
+    color: var(--secondary-text-color);
+}
+
+/* --- The miniature ---------------------------------------------------- */
+
+.dz-wizard-previews,
+.dz-wizard-look-pair {
+    display: flex;
+    gap: 8px; /* future --dz-gap token site (spacing project) */
+    flex-wrap: wrap;
+}
+
+.dz-wizard-previews .dz-wizard-mock { flex: 1 1 210px; }
+.dz-wizard-look-pair .dz-wizard-mock { flex: 1 1 96px; min-width: 0; }
+
+.dz-wizard-mock {
+    border: var(--dz-card-border-width) solid; /* colour set inline: scheme data, not chrome */
+    border-radius: var(--dz-card-radius);
+    overflow: hidden;
+}
+
+.dz-wizard-mock-nav {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 6px;
+    font-family: var(--dz-font-family);
+    font-size: var(--dz-text-micro);
+    font-weight: var(--dz-weight-semibold);
+}
+
+.dz-wizard-mock-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+
+.dz-wizard-mock-body {
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* The miniature's cards mirror the real device-card shell (css/cards.css):
+   --dz-card-border-width, --dz-card-radius. Only the colours come from the
+   generated scheme, set inline. */
+.dz-wizard-mock-card {
+    border: var(--dz-card-border-width) solid;
+    border-radius: var(--dz-card-radius);
+    padding: 5px 6px;
+}
+
+.dz-wizard-mock-t,
+.dz-wizard-mock-v {
+    font-family: var(--dz-font-family);
+    font-size: var(--dz-text-micro);
+    font-weight: var(--dz-weight-semibold);
+}
+
+.dz-wizard-mock-s,
+.dz-wizard-mock-cap,
+.dz-wizard-mock-chip,
+.dz-wizard-mock-btn {
+    font-family: var(--dz-font-family);
+    font-size: var(--dz-text-micro);
+}
+
+.dz-wizard-mock-row { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+
+.dz-wizard-mock-btn {
+    font-weight: var(--dz-weight-semibold);
+    padding: 2px 7px;
+    border-radius: var(--dz-btn-radius);
+}
+
+.dz-wizard-mock-chip {
+    padding: 1px 4px;
+    border: 1px solid;
+    border-radius: var(--dz-btn-radius);
+}
+
+.dz-wizard-mock-cap { text-align: center; padding: 4px; }
