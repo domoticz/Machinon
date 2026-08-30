@@ -24,6 +24,16 @@
     display: none;
     position: fixed;
     top: 50vh;
+    /* dvh with a vh fallback (invalid-value cascade, not a media query -
+       browsers without dvh support ignore the second declaration and keep
+       the first): same mechanism as css/settings.css's #settingscontent,
+       adopted here (and in css/theme-wizard.css, which copied this popup's
+       centring idiom) after the wizard was found mis-centred on Firefox
+       Android. Plain vh resolves against the LARGE viewport (chrome
+       hidden); a bottom URL bar shrinks what is actually visible, so 50vh
+       alone centres this popup lower than intended. dvh tracks the visible
+       ("small") viewport instead. */
+    top: 50dvh;
     left: 0;
     right: 0;
     margin-inline: auto;
@@ -38,6 +48,13 @@
     width: fit-content;
     max-width: calc(100vw - 20px);
     max-height: 90vh;
+    /* Same dvh-with-vh-fallback mechanism as `top` above, for correctness
+       and consistency with the wizard's fix. This popup scrolls itself
+       (overflow-y:auto right below), so a too-tall cap does not strand a
+       fixed footer the way it did in the wizard - measured at 360x780 with
+       an RGBW dummy device, the tallest pane's lowest control still sits
+       well clear of the fold even before this change. */
+    max-height: 90dvh;
     overflow-y: auto;
     z-index: 2001;
     background: var(--dz-widget-bg);

@@ -17,6 +17,15 @@
        left:50% + translate(-50%,-50%), which is a different technique the
        theme does not use. */
     top: 50vh;
+    /* dvh with a vh fallback (invalid-value cascade, not a media query -
+       browsers without dvh support ignore the second declaration and keep
+       the first): same mechanism as css/settings.css's #settingscontent.
+       Plain vh resolves against the LARGE viewport (browser chrome hidden).
+       Firefox Android keeps a bottom URL bar on screen, so 50vh centres the
+       dialog against a taller-than-visible height, pushing it down past the
+       fold with no page scroll available to bring it back. dvh tracks the
+       actual visible ("small") viewport instead. */
+    top: 50dvh;
     left: 0;
     right: 0;
     margin-inline: auto;
@@ -33,6 +42,12 @@
     width: calc(100% - 20px);
     max-width: 720px;
     max-height: 90vh;
+    /* Same dvh-with-vh-fallback mechanism as `top` above: an oversized cap
+       computed from the large viewport lets the dialog's total height (head
+       + scrolling body + foot) run taller than what is actually on screen,
+       so the foot - flex:none, outside the body's own scroll region - can
+       render below the real fold with nothing able to scroll it back up. */
+    max-height: 90dvh;
     background: var(--dz-widget-bg);
     color: var(--dz-body-text);
     border-radius: var(--dz-card-radius);
