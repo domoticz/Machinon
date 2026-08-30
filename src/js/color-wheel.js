@@ -8,6 +8,18 @@
    colour they are editing, keep their own state, and re-draw the wheel
    themselves via dzDrawColorWheel whenever that colour changes.
 
+   Singleton state (owner review, 2026-08-30): activeCanvas/dragging and
+   the wheelImage cache below are module-scope, not per-canvas, so only one
+   wheel can be live at a time -- attaching a second one silently steals the
+   drag gesture from the first. That was already true of the code this file
+   was extracted from (js/rgbw-popup.js only ever has one popup open), and
+   is fine today because nothing calls dzAttachColorWheel twice
+   concurrently. The wizard (Task 13) becomes the second consumer; if it and
+   the RGBW popup are ever live at once, or the wizard draws at a different
+   size than the popup, drawWheelBase's cache does a full recompute on every
+   size switch rather than caching both. Not a bug to fix speculatively, but
+   worth knowing before assuming two wheels can coexist.
+
    Style: var/function only, no arrow functions/let/const/classes/ES
    modules (src/js/ convention, see custom.js THEME_MODULES). */
 (function () {
@@ -37,7 +49,9 @@
        asks for a different size than the one already cached. The RGBW
        popup always draws at one fixed size (210), so in practice this is
        still a compute-once cache for that caller, exactly like the
-       original wheelImage cache in js/rgbw-popup.js. */
+       original wheelImage cache in js/rgbw-popup.js. See the singleton-state
+       note above the module comment: a second consumer drawing at a
+       different size thrashes this cache rather than getting a second slot. */
     var wheelImageSize = 0, wheelImage = null;
 
     function drawWheelBase(ctx, size) {
@@ -95,20 +109,30 @@
        drag gesture itself is tracked with document-level mousemove/mouseup/
        touchmove/touchend listeners so dragging still works once the pointer
        leaves the small canvas. Registering those four listeners inside
-       dzAttachColorWheel would add a fresh set (and pin the previous, now-
-       detached canvas in a closure) on every attach with no matching
-       removal. Instead they are registered exactly once here, at module
-       init, and read the current drag target off the module-scope
-       activeCanvas/dragging vars; dzAttachColorWheel only swaps activeCanvas
-       (and the pick/commit callbacks) and adds the canvas-scoped
-       mousedown/touchstart listeners, which die with the canvas itself.
-       Carried from js/rgbw-popup.js attachWheel/wheelPick. */
-    var activeCanvas = null, activeOnPick = null, activeOnCommit = null, dragging = false;
+       dzAttachColorWheel on every call would add a fresh set (and pin the
+       previous, now-detached canvas in a closure) on every attach with no
+       matching removal, so they are registered exactly once -- but NOT at
+       module init (owner review, 2026-08-30): this file is always loaded
+       (THEME_MODULES), unlike js/rgbw-popup.js, which only loads when
+       feature 45 is on. Registering at module init would put a
+       non-passive `touchmove` listener on `document` for every visitor,
+       including one who has the colour popup switched off and will never
+       see a wheel -- a real mobile scroll-perf cost for a feature they
+       opted out of, and a global side effect a pure refactor must not add.
+       Wiring is deferred to the first dzAttachColorWheel call instead (see
+       wired/dzWireDocumentListeners below), which preserves "registered
+       exactly once" while keeping it inert until something actually uses a
+       wheel. dzAttachColorWheel only swaps activeCanvas/activeSize (and the
+       pick/commit callbacks) and adds the canvas-scoped mousedown/
+       touchstart listeners, which die with the canvas itself. Carried from
+       js/rgbw-popup.js attachWheel/wheelPick. */
+    var activeCanvas = null, activeSize = 0, activeOnPick = null, activeOnCommit = null, dragging = false;
+    var wired = false;
 
     function pick(e) {
         if (!activeCanvas) return;
         var rect = activeCanvas.getBoundingClientRect();
-        var size = activeCanvas.width;
+        var size = activeSize;
         var scale = size / (rect.width || size);
         var px = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
         var py = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
@@ -119,28 +143,37 @@
         if (activeOnPick) activeOnPick(h * 360, s);
     }
 
-    document.addEventListener("mousemove", function (e) { if (dragging) pick(e); });
-    document.addEventListener("mouseup", function () {
-        if (dragging) { dragging = false; if (activeOnCommit) activeOnCommit(); }
-    });
-    document.addEventListener("touchmove", function (e) { if (dragging) { pick(e); e.preventDefault(); } }, { passive: false });
-    document.addEventListener("touchend", function () {
-        if (dragging) { dragging = false; if (activeOnCommit) activeOnCommit(); }
-    });
+    function dzWireDocumentListeners() {
+        if (wired) return;
+        wired = true;
+        document.addEventListener("mousemove", function (e) { if (dragging) pick(e); });
+        document.addEventListener("mouseup", function () {
+            if (dragging) { dragging = false; if (activeOnCommit) activeOnCommit(); }
+        });
+        document.addEventListener("touchmove", function (e) { if (dragging) { pick(e); e.preventDefault(); } }, { passive: false });
+        document.addEventListener("touchend", function () {
+            if (dragging) { dragging = false; if (activeOnCommit) activeOnCommit(); }
+        });
+    }
 
-    /* Attaches drag handling to canvas. onPick(hueDegrees, saturation) fires
-       on every position update while dragging (the initial mousedown/
-       touchstart and every document-level move that follows), mirroring
-       what js/rgbw-popup.js's wheelPick used to do inline (update state,
-       redraw, refresh readouts, schedule a send) -- this module does none
-       of that itself, the caller does, from inside onPick. onCommit(), if
-       given, fires once when the drag releases (mouseup/touchend),
-       mirroring the popup's separate flushSend()-on-release call so a
-       caller can reproduce its schedule-during-drag / flush-on-release send
-       contract without owning the drag gesture itself. Carried from
-       js/rgbw-popup.js attachWheel. */
-    function dzAttachColorWheel(canvas, onPick, onCommit) {
+    /* Attaches drag handling to canvas, at `size` px (must match the size
+       canvas was/will be drawn at via dzDrawColorWheel: pick math scales
+       pointer coordinates by size/rect.width, so a mismatch would silently
+       pick the wrong colour rather than error). onPick(hueDegrees,
+       saturation) fires on every position update while dragging (the
+       initial mousedown/touchstart and every document-level move that
+       follows), mirroring what js/rgbw-popup.js's wheelPick used to do
+       inline (update state, redraw, refresh readouts, schedule a send) --
+       this module does none of that itself, the caller does, from inside
+       onPick. onCommit(), if given, fires once when the drag releases
+       (mouseup/touchend), mirroring the popup's separate flushSend()-on-
+       release call so a caller can reproduce its schedule-during-drag /
+       flush-on-release send contract without owning the drag gesture
+       itself. Carried from js/rgbw-popup.js attachWheel. */
+    function dzAttachColorWheel(canvas, size, onPick, onCommit) {
+        dzWireDocumentListeners();
         activeCanvas = canvas;
+        activeSize = size;
         activeOnPick = onPick;
         activeOnCommit = onCommit || null;
         canvas.addEventListener("mousedown", function (e) { dragging = true; pick(e); });

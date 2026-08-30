@@ -690,7 +690,7 @@
             onPick();
         }
         if (typeof window.dzAttachColorWheel === "function") {
-            window.dzAttachColorWheel(canvas, handlePick, flushSend);
+            window.dzAttachColorWheel(canvas, WHEEL, handlePick, flushSend);
         }
     }
 })();
