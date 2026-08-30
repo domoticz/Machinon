@@ -110,6 +110,45 @@ function dzFindPairMate(slug, schemes, userSchemes) {
     return found;
 }
 
+/* Pair ids must be unique within one install: a user may generate two pairs
+   from the same seed colours and name them differently, and a name collision
+   would otherwise merge them. The counter guarantees uniqueness within a
+   session and the timestamp disambiguates across sessions; neither is a
+   randomness source, so nothing here depends on Math.random. */
+var DZ_PAIR_SEQ = 0;
+
+function dzNewPairId(name) {
+    DZ_PAIR_SEQ += 1;
+    var slug = String(name || "theme").toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 20);
+    return "u:" + slug + "-" + Date.now().toString(36) + "-" + DZ_PAIR_SEQ;
+}
+
+/* Persist both variants of a generated pair and apply the one matching the
+   base the user is currently on, so saving never yanks them from dark to
+   light. Replaces any existing pair of the same name, so re-running the
+   wizard with the same name updates rather than duplicating. */
+function dzSaveGeneratedPair(name, seed, pairColors) {
+    name = (name || "").trim().slice(0, 40);
+    if (!name) { return null; }
+    var pairId = dzNewPairId(name);
+    theme.user_schemes = (theme.user_schemes || []).filter(function (p) {
+        return p.name !== name;
+    });
+    ["light", "dark"].forEach(function (variant) {
+        theme.user_schemes.push({
+            name: name, variant: variant, pair: pairId, base: variant,
+            seed: { accent: seed.accent, surface: seed.surface || null, look: seed.look },
+            colors: Object.assign({}, pairColors[variant])
+        });
+    });
+    var wantDark = theme.scheme_base === "dark";
+    var slug = "user:" + name + "|" + (wantDark ? "dark" : "light");
+    cacheThemeSettings();
+    applyScheme(slug);
+    renderSchemePicker();
+    return slug;
+}
+
 /* Repair a stored pick of a retired scheme, once, at load. applyScheme already
    sets scheme/scheme_base/color_scheme, toggles custom_color_scheme, caches and
    persists, so the repair is written back and the next boot reads the survivor
@@ -203,9 +242,25 @@ function saveCurrentColorsAsScheme(name) {
     warnIfContrastFails(theme.color_scheme, 'Preset "' + name + '" saved, but it');
 }
 
-function deleteUserScheme(name) {
-    theme.user_schemes = (theme.user_schemes || []).filter(function(p) { return p.name !== name; });
-    if (theme.scheme === "user:" + name) { theme.scheme = "custom"; }
+/* Deleting one half of a generated pair deletes both: the two cards are one
+   thing to the user, and leaving an orphan half is worse than either
+   outcome. Legacy unpaired presets (no `pair`) delete singly, unchanged. */
+function deleteUserScheme(name, variant) {
+    var all = theme.user_schemes || [];
+    var target = null;
+    all.forEach(function (p) {
+        if (p.name === name && (variant === undefined || p.variant === variant)) { target = p; }
+    });
+    theme.user_schemes = all.filter(function (p) {
+        if (target && target.pair) { return p.pair !== target.pair; }
+        return p.name !== name;
+    });
+    var wasSlug = target && target.variant
+        ? "user:" + name + "|" + target.variant
+        : "user:" + name;
+    if (theme.scheme === wasSlug || theme.scheme === "user:" + name) {
+        theme.scheme = "custom";
+    }
     cacheThemeSettings();
     persistSchemeChoice();
     renderSchemePicker();
@@ -235,7 +290,14 @@ function applyScheme(slug) {
         return Promise.resolve();
     }
     if (slug.indexOf("user:") === 0) {
-        var preset = (theme.user_schemes || []).filter(function(p) { return "user:" + p.name === slug; })[0];
+        var rest = slug.substring(5);
+        var bar = rest.lastIndexOf("|");
+        var wantName = bar === -1 ? rest : rest.substring(0, bar);
+        var wantVariant = bar === -1 ? null : rest.substring(bar + 1);
+        var preset = (theme.user_schemes || []).filter(function (p) {
+            return p.name === wantName &&
+                   (wantVariant === null || p.variant === wantVariant);
+        })[0];
         if (!preset) return Promise.resolve();
         theme.scheme = slug;
         theme.scheme_base = preset.base === "dark" ? "dark" : "light";
@@ -326,15 +388,20 @@ function renderSchemePicker() {
            dz-tokens.css / dark.css token defaults, and their descriptions are
            authored here for the same reason. */
         var cards = [
-            { slug: "light", name: "Machinon Light", desc: "The default look: clean blue on white", colors: { background: "#f4f8fc", navbar: "#e9f2fb", item: "#ffffff", main_color: "#396d9e", main_text: "#1b2b3a", alt_text: "#3e5568", disabled: "#8ca0b3" } },
-            { slug: "dark", name: "Machinon Dark", desc: "The default look: blue glowing on navy", colors: { background: "#0f1620", navbar: "#0a0f16", item: "#18202b", main_color: "#98ccfd", main_text: "#dce6f0", alt_text: "#9db2c6", disabled: "#5e7183" } }
+            { slug: "light", name: "Machinon Light", pair: "machinon", desc: "The default look: clean blue on white", colors: { background: "#f4f8fc", navbar: "#e9f2fb", item: "#ffffff", main_color: "#396d9e", main_text: "#1b2b3a", alt_text: "#3e5568", disabled: "#8ca0b3" } },
+            { slug: "dark", name: "Machinon Dark", pair: "machinon", desc: "The default look: blue glowing on navy", colors: { background: "#0f1620", navbar: "#0a0f16", item: "#18202b", main_color: "#98ccfd", main_text: "#dce6f0", alt_text: "#9db2c6", disabled: "#5e7183" } }
         ];
         Object.keys(schemes).forEach(function(slug) {
             var s = schemes[slug];
-            cards.push({ slug: slug, name: s.name, desc: s.description, colors: s.colors || {} });
+            cards.push({ slug: slug, name: s.name, pair: s.pair, desc: s.description, colors: s.colors || {} });
         });
+        /* Generated pairs render as "<name> Light" / "<name> Dark" adjacent to
+           each other; legacy unpaired presets keep their bare name and slug. */
         (theme.user_schemes || []).forEach(function(p) {
-            cards.push({ slug: "user:" + p.name, name: p.name, deletable: true, colors: p.colors || {} });
+            var slug = p.variant ? "user:" + p.name + "|" + p.variant : "user:" + p.name;
+            var label = p.variant ? p.name + " " + (p.variant === "dark" ? "Dark" : "Light") : p.name;
+            cards.push({ slug: slug, name: label, pair: p.pair, variant: p.variant,
+                         presetName: p.name, deletable: true, colors: p.colors || {} });
         });
         /* colors: null = the Custom card, resolved to the user's live
            colours at render time below. */
@@ -378,7 +445,7 @@ function renderSchemePicker() {
                     del.title = "Delete preset";
                     del.addEventListener("click", function(e) {
                         e.stopPropagation();
-                        deleteUserScheme(card.name);
+                        deleteUserScheme(card.presetName || card.name, card.variant);
                     });
                     el.appendChild(del);
                 }

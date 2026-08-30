@@ -67,3 +67,29 @@ test("findPairMate returns null for an unpaired legacy preset", () => {
     assert.equal(dz.dzFindPairMate("user:Old", SCHEMES, users), null);
     assert.equal(dz.dzFindPairMate("custom", SCHEMES, []), null);
 });
+
+test("a saved generated pair round-trips through findPairMate", () => {
+    const users = [];
+    const seed = { accent: "#E2703A", surface: null, look: "soft" };
+    // Shape produced by dzSaveGeneratedPair, asserted directly so the storage
+    // contract is pinned without needing the browser globals it writes to.
+    const pairId = "u:sunset-3f2a";
+    for (const variant of ["light", "dark"]) {
+        users.push({ name: "Sunset", variant, pair: pairId, base: variant,
+                     seed, colors: { background: "#FFFFFF" } });
+    }
+    assert.equal(dz.dzFindPairMate("user:Sunset|light", SCHEMES, users), "user:Sunset|dark");
+    for (const u of users) {
+        assert.equal(u.seed.look, "soft");
+        assert.equal(u.base, u.variant, "base must mirror variant for a generated preset");
+    }
+});
+
+test("pair ids are unique per generation", () => {
+    const seen = new Set();
+    for (let i = 0; i < 200; i++) {
+        const id = dz.dzNewPairId("Sunset");
+        assert.ok(!seen.has(id), `duplicate pair id ${id}`);
+        seen.add(id);
+    }
+});
