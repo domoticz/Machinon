@@ -417,6 +417,98 @@ with `scripts/measure-icon-contrast.py --check` and
 | Low Battery | `rgb(255,255,0)` | 1.0 |
 | Off (fade) | default card shadow | 0.5 |
 
+### Theme Wizard: Generated Scheme Pairs
+
+The "Create a theme" wizard (`src/js/theme-wizard.js`, dialog documented under
+[Theme Wizard](#theme-wizard) in Components) generates a matching light+dark pair from one or
+two seed colours through a pure, DOM-free computer: `src/js/scheme-generator.js`. This section
+is the contract that computer must keep; the dialog only collects the seed and a look, then
+calls `dzGenerateSchemePair(seed)` and saves the result exactly like a hand-picked custom scheme
+(same `dzSaveGeneratedPair` path as [Scheme pairing](#scheme-pairing) below).
+
+**Three looks, five axes.** `DZ_LOOKS` (`crisp`/`soft`/`deep`, `DZ_LOOK_ORDER`) differ
+STRUCTURALLY, not just in how much hue is mixed into the greys. Grey tint alone was tried first
+and measured as nearly invisible in light mode: with only chroma (`nC`) varying, `item` came out
+BYTE-IDENTICAL across every look (all three used pure white cards) and `background` differed by
+only dE 0.009-0.024. Each look therefore also owns:
+
+1. **Grey tint** (`nC`) - the OKLCH chroma carried into every neutral (navbar/background/item/
+   border/disabled), tinted by the second seed's hue if one is given.
+2. **Page-to-card lightness gap** - the `light`/`dark` `[navbar, background, item]` lightness
+   tuples: Crisp keeps cards close to white with a visible page tint; Deep spreads them wide so
+   cards float.
+3. **Border treatment** - Crisp is the only `hardBorder` look: it SOLVES a real edge against the
+   background at a target ratio (`borderRatio`, contrast-solved via `dzSolveLightness`). Soft and
+   Deep instead offset a fixed perceptual distance from the background (`borderOffset`, no ratio
+   target) - a whisper, not a line. This is most of what makes Crisp read as its own thing rather
+   than a slightly greyer Soft.
+4. **Body-text and accent contrast floors** (`body`, `alt`, `acc` below) - higher in Crisp, eased
+   in Soft/Deep.
+5. **Dark-page depth** (`danchor`, the dark `[navbar, background, item]` tuple) - how far into
+   black the dark variant's page sits.
+
+**A fourth look, "High Contrast", was specified and cut.** At stricter ratios only (varying axis
+4 alone, holding 1-3 and 5 fixed), it measured within OKLab dE 0.031 of Crisp - a near-duplicate.
+Text is placed at a lightness ANCHOR and its contrast ratio is enforced as a FLOOR, not a target
+(solving text down to exactly its ratio produced washed-out mid-greys, e.g. `#585352` on
+near-white, where the shipping schemes sit at 10.7-13.6:1); anchors already sit near the extremes,
+so raising a floor from 7 to 10 binds on nothing the anchor wasn't already clearing. Three looks
+that genuinely differ beat four where one is a passenger. **Constraint for anyone re-adding a
+look:** it must vary WHAT the look changes (one of the five axes above, or a new one), never HOW
+STRICT an existing floor is - a stricter-floor-only look will keep measuring as a duplicate.
+Users who need AAA use the manual seven-swatch editor, which has no floor at all.
+
+**Twelve keys generated, by construction.** `dzGenerateScheme(seed, variant)` returns exactly the
+keys `applyCustomColorScheme()` (`src/js/scheme.js`) consumes for a scheme: `background`, `item`,
+`navbar`, `main_color`, `main_text`, `alt_text`, `border`, `disabled`, `accent_text`, `error`,
+`success`, `warning` - 12. Every ratio in the table below is met BY CONSTRUCTION (solved directly
+via `dzSolveLightness`, or verified and nudged in a loop for `accent_text`/`main_color`), not
+warned about afterwards: `schemeContrastFailures()` is a backstop here, not the gate it is for
+hand-picked colours.
+
+| Pair | Crisp | Soft | Deep |
+|---|---|---|---|
+| main_text vs background | 8.0 | 7.0 | 7.0 |
+| alt_text vs background | 5.0 | 4.6 | 4.6 |
+| main_color vs background | 4.5 | 4.5 | 5.5 |
+| accent_text vs main_color | 4.5 | 4.5 | 4.5 |
+| disabled vs background | 3.2 | 3.2 | 3.2 |
+| error/success/warning vs background | 4.5 | 4.5 | 5.5 |
+
+Semantic hues (`error` 27deg, `success` 145deg, `warning` 75deg in OKLCH) stay FIXED whatever the
+accent is - a purple accent must not make "error" purple - only their chroma follows the accent's
+own chroma (clamped to `semC`), so they read as siblings of it rather than pasted-in defaults.
+
+`main_color` and `disabled` are the two keys deliberately NOT spread across looks (no per-look
+value beyond the one `acc` floor and the universal 3.2 disabled floor): the accent is the user's
+own colour and must look like itself whichever look they pick, and disabled is a de-emphasis
+colour with one right answer, not a design axis.
+
+**Deliberately NOT generated: `sun`, `moon`, the five `energy_*` keys.** These are device
+semantics - gas is orange because gas is orange, not because a user chose it (see [Semantic
+identity colours](#semantic-identity-colours) above) - defined once per scheme BASE in
+`dz-tokens.css`/`dark.css`. A generated scheme sets `theme.scheme_base` like any other custom
+scheme and inherits them through that underlay untouched. A user does not choose what colour
+water is.
+
+### Scheme pairing
+
+`pair` and `variant` are declared metadata, not derived: every built-in scheme JSON
+(`schemes/*.json`) now carries them (e.g. Paper Light/Dark both carry `"pair": "paper"`, with
+`"variant": "light"`/`"dark"`), and `dzSaveGeneratedPair` (`src/js/schemes.js`) writes them onto
+both halves of a wizard-generated pair (`pair` a fresh id from `dzNewPairId`, `variant` its base).
+The two hardcoded default cards (Machinon Light/Dark in `renderSchemePicker`) carry `pair:
+"machinon"` the same way. A legacy hand-saved preset (`saveCurrentColorsAsScheme`, predating this
+metadata) has no `pair` and is correctly treated as unpaired.
+
+`dzFindPairMate(slug, schemes, userSchemes)` resolves a slug's counterpart: the two base cards via
+a hardcoded `DZ_BASE_PAIR` map, everything else by matching `pair` with the opposite `variant`
+among the built-in schemes list and the user's saved presets, returning `null` for anything
+unpaired. **It deliberately has no UI caller yet.** This is groundwork for a future header
+light/dark toggle (flip the active scheme to its counterpart without opening the hub), not dead
+code left over from a removed feature - the same deliberate-unread-field pattern as `card.pair` in
+the scheme picker's card data.
+
 ## Typography
 
 ### Font Families
@@ -1864,6 +1956,100 @@ m:4 mode, see below). `js/rgbw-popup.js` + `css/rgbw-popup.css`, feature id 45.
 - Presets: On/Off, both plain ghost family (owner call: Off is not destructive).
 - Sends: live, page-global `SetColValue`, 400ms deadline rate-limit (never a resettable
   debounce). Payloads mirror core's `getJSONColor` exactly.
+
+### Theme Wizard
+
+The "Create a theme" wizard (`src/js/theme-wizard.js` + `css/theme-wizard.css`) is a 3-step
+dialog - Colours, Look, Name - over the pure generator documented under [Theme Wizard: Generated
+Scheme Pairs](#theme-wizard-generated-scheme-pairs) in Colors. It owns DOM, state and persistence;
+nothing outside the dialog is mutated until Save, so Cancel is free at every step and needs no
+restore path (the alternative, repainting the real UI live, means judging colours through the 50%
+scrim plus a restore path that has to survive Escape, backdrop click, route change and a
+mid-wizard reload).
+
+Assembled entirely from the house vocabulary, deliberately not its own: a user should not be able
+to tell this dialog was added later.
+
+- Shell: the Color Popup shell language above (`--dz-elev-overlay`, `{rounded.container}`), the
+  center_popups centring idiom (`top`/`left`/`right` + auto inline margins + `translateY(-50%)`,
+  not `left:50%` + a 2D translate), `box-sizing: border-box` with the same phone-overflow reason
+  as `#mk-rgbw-popup`, `max-width: calc(100vw - 20px)`.
+- Reuses `#mk-rgbw-scrim`, the codified [Modal Scrim](#modal-scrim), rather than introducing a
+  second one. **Constraint.** The dialog's `z-index` is `2001`, one above the shared scrim's
+  `2000` - anything below 2000 renders BEHIND the dim it sits on.
+- Title/close: the codified dialog-title and dialog-close languages (`{typography.sm}` +
+  semibold sentence case; an icon-quiet `ion-md-close` button, not `.btn-icon` itself).
+- Step strip: the flat underlined sub-tab idiom (`.dz-hub-tab`), with the active step's accent
+  carried on both the underline and the label. **Deliberately INERT** - `cursor: default`, no
+  click handler - because Back is the dialog's only navigation and forward-jumping past an
+  unfinished step is invalid (Step 3 needs a name); `aria-current="step"` carries the affordance
+  a clickable tab would otherwise imply.
+- Look tiles: the `.scheme-card` idiom (border, `--dz-card-border-width`, `--dz-card-radius`,
+  hover, `--dz-ring-accent` on the selected tile - correct here since a look tile has no resting
+  card shadow of its own for a ring to compete with).
+- Buttons: `.btn-primary` (Save/Next) / `.btn-default` (Cancel/Back), the Filled-primary and
+  Ghost families used everywhere else.
+- Sizing: the dvh-with-vh-fallback rule below.
+
+**Shared colour field** (`dzBuildColorField`, `src/js/theme-hub.js`) - one factory used by BOTH
+this wizard's colour fields and the Theme Hub's 7-swatch custom-colour editor (swatch order and
+list documented under [Colors](#colors) above). Renders the existing
+`.dz-hub-swatch` (native `<input type="color">`, unchanged markup/classes) plus a wheel-picker
+toggle button and a hex text field. The native input is KEPT, not replaced: it is the
+keyboard-accessible path and is genuinely good on desktop and Chrome Android. It was joined by a
+wheel and hex field because Firefox on Android renders `<input type="color">` as a coarse
+seven-band palette, which guts a feature whose entire premise is picking a colour - a
+pre-existing limitation that hit the manual editor too, not something the wizard introduced.
+
+Only ONE wheel/hex disclosure exists for the whole page (`DZ_COLOR_FIELD_DISCLOSURE`), moved to
+sit after whichever field is open (`field.anchor.insertAdjacentElement("afterend", ...)`) and
+rebuilt from scratch on every open, rather than one permanently attached under every swatch.
+**Constraint, and the reason for the one-panel design:** `src/js/color-wheel.js`'s
+`dzAttachColorWheel` assigns its drag state (`activeCanvas`, `dragging`, `activeOnPick`) to
+MODULE-SCOPE singletons at attach time, not per-canvas, so a second concurrently-attached wheel
+would silently steal the drag gesture from the first. A wheel permanently attached under every one
+of the hub's seven swatches (or even both of the wizard's two fields) would therefore ship a
+visibly broken first wheel; a single shared, move-and-rebuild disclosure sidesteps the singleton
+rather than fighting it, and is better on phones anyway (a full wheel under every swatch would not
+fit at 360px). `onChange` fires once per COMPLETED pick - the native input's own change/input
+event, a wheel drag's release, or a valid hex entry - never continuously during a drag, mirroring
+the Color Popup's schedule-during-drag/flush-on-release contract, so a caller that persists on
+every call (the hub writes to the server on every change) is never hammered.
+
+**Constraint, cross-feature hazard closed in review:** leaving a field's disclosure open and then
+opening the Color Popup elsewhere re-attaches the SAME module singletons to the popup's own
+canvas; without a fix, dragging the still-open disclosure afterward would drive the popup's
+`handlePick`/`flushSend` instead - a real light on the user's wall reacting to an unrelated screen.
+Closed by reclaiming the singletons AT DRAG TIME (`dzReclaimColorWheel`, a listener registered
+BEFORE the module's own `mousedown` handler), not by trying to close the disclosure on every
+possible navigation path - enumerating those paths is exactly how the hazard was missed the first
+time.
+
+**`src/js/color-wheel.js`** - the wheel itself, extracted from `js/rgbw-popup.js` (feature-toggled,
+feature id 45, may be switched off) so that this always-loaded consumer could use it without the
+wizard or hub depending on toggleable code. **Constraint.** Its four `document` listeners
+(mousemove/mouseup/touchmove/touchend, including a `{passive:false}` touchmove that would
+otherwise kill the scroll fast path on mobile) are wired LAZILY, on the first `dzAttachColorWheel`
+call, behind a `wired` flag - never at module load. The module itself loads on every page
+regardless of feature 45 or whether a user ever opens a wheel; registering the listeners
+unconditionally at load, harmless inside the feature-toggled file it was extracted from, becomes a
+global side effect the moment the same code lives in an always-loaded file.
+
+**dvh sizing rule.** `.dz-wizard`'s `top`/`max-height` are declared twice, `vh` then `dvh`
+(an invalid-value cascade, not a media query: a browser without `dvh` support ignores the second
+declaration and keeps the first) - the same technique already shipped for `css/settings.css`'s
+`#settingscontent` (the Setup page's own tab-content height, predating the wizard). Plain `vh`
+resolves against the LARGE viewport
+(browser chrome hidden); Firefox Android keeps a bottom URL bar on screen, so a dialog centred and
+capped with plain `vh` sizes and centres against a taller-than-visible area, and its footer -
+`flex: none`, outside the body's own scroll region - can render below the real fold with no page
+scroll available to bring it back. `dvh` tracks the actual visible ("small") viewport instead.
+Confirmed on hardware (Galaxy S24, Firefox Android): the footer was unreachable before this fix.
+`#mk-rgbw-popup` (`css/rgbw-popup.css`) carries the identical `vh`-then-`dvh` pair for consistency,
+but its own defect was MEASURED rather than assumed to exist: at 360x780 its lowest control sits
+~185px clear of the viewport bottom (vs. the wizard's ~72px), and the popup scrolls itself as a
+whole rather than pinning a footer outside a scroll region, so it never actually reproduced the
+cutoff - the `dvh` there is defense-in-depth, not a fix, and carries no CHANGELOG line of its own.
 
 ### Floorplan Device Popup
 
