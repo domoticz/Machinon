@@ -1350,37 +1350,81 @@ function dzColorFieldOpen(field) {
         field.commit(parsed);
     });
 
+    function onWheelPick(hueDegrees, saturation) {
+        var rgb = dzColorFieldHsvToRgb((((hueDegrees % 360) + 360) % 360) / 360, saturation, 1);
+        var liveHex = dzColorFieldRgbToHex(rgb.r, rgb.g, rgb.b);
+        paintFrom(liveHex);
+        /* Two consumers, two different costs for committing on every
+           drag frame, so this branches on field.liveWheel rather than
+           always doing one or the other:
+           - The wizard (liveWheel true, nativeEvent "input") commits on
+             every pick: cheap (regenerates a scheme, repaints two small
+             mockups, no network), and Task 6 deliberately made the
+             wizard's preview track the native picker live for exactly
+             this reason - a wheel that only updated on release would be
+             a regression from that, and an odd thing to ship given the
+             wheel exists BECAUSE the native input is poor on some
+             browsers.
+           - The hub editor (liveWheel false, nativeEvent "change")
+             does NOT commit here: its onChange calls dzHubPersist(),
+             a network write, and firing that on every drag frame would
+             be the very thing js/rgbw-popup.js's schedule-during-drag /
+             flush-on-release contract exists to avoid. It commits once
+             below, on release, instead. */
+        if (field.liveWheel) { field.commit(liveHex); }
+    }
+
+    function onWheelCommit() {
+        /* Release: always commit once here too (redundant with the last
+           liveWheel pick above for the wizard, the ONLY commit for the
+           hub), mirroring js/rgbw-popup.js's flush-on-release so a pending
+           change always lands even on a gesture with no intermediate
+           drag - a plain click still calls pick() once from the canvas's
+           own mousedown/touchstart handler (src/js/color-wheel.js
+           dzAttachColorWheel: pick(e) runs unconditionally on
+           mousedown/touchstart, not only once dragging is already true),
+           so this is never the FIRST time hex.value was set, but it is
+           re-validated here anyway rather than trusted: dzColorFieldParseHex
+           with a fallback to the field's own current value, so this - the
+           one write into theme.color_scheme on the release path - is never
+           an unvalidated string reaching the caller's onChange. */
+        var parsed = dzColorFieldParseHex(hex.value) || field.input.value;
+        field.commit(parsed);
+    }
+
+    /* Reclaims the module singletons (src/js/color-wheel.js
+       dzReclaimColorWheel) on every mousedown/touchstart, registered HERE -
+       BEFORE dzAttachColorWheel's own mousedown/touchstart below - so it
+       runs first (same event, same target, listeners fire in registration
+       order) and the shared pick() always reads THIS canvas's state.
+
+       Why this is needed at all: this disclosure is not torn down and
+       re-attached on every use the way the RGBW popup's canvas is on every
+       popup open - it stays live in the DOM across a leave-and-return to
+       the Theme page (dzBuildThemeHub/dzAdoptHubInto reuse the SAME hub
+       container rather than rebuilding it, and dzCloseThemeHubOnLeave only
+       display:none's the fallback-mode hub; the routed path has no leave
+       hook at all). If the RGBW popup opens and closes on another screen
+       in between (js/rgbw-popup.js attachWheel calls dzAttachColorWheel
+       too), the module singletons now belong to the popup; dragging this
+       still-open wheel afterward would otherwise silently drive the
+       POPUP's callbacks instead of this field's - sending a colour command
+       to a real light from an unrelated screen. Reclaiming at the moment
+       of use fixes that regardless of what attached in between, rather
+       than depending on enumerating every navigation path that could leave
+       this panel open (the routed path demonstrably has none today). Not a
+       second dzAttachColorWheel call - see dzReclaimColorWheel's own doc
+       comment for why that would be wrong here. */
+    function reclaimWheelSingleton() {
+        if (typeof window.dzReclaimColorWheel === "function") {
+            window.dzReclaimColorWheel(canvas, DZ_COLOR_FIELD_WHEEL_SIZE, onWheelPick, onWheelCommit);
+        }
+    }
+
     if (typeof window.dzAttachColorWheel === "function") {
-        window.dzAttachColorWheel(canvas, DZ_COLOR_FIELD_WHEEL_SIZE, function (hueDegrees, saturation) {
-            var rgb = dzColorFieldHsvToRgb((((hueDegrees % 360) + 360) % 360) / 360, saturation, 1);
-            var liveHex = dzColorFieldRgbToHex(rgb.r, rgb.g, rgb.b);
-            paintFrom(liveHex);
-            /* Two consumers, two different costs for committing on every
-               drag frame, so this branches on field.liveWheel rather than
-               always doing one or the other:
-               - The wizard (liveWheel true, nativeEvent "input") commits on
-                 every pick: cheap (regenerates a scheme, repaints two small
-                 mockups, no network), and Task 6 deliberately made the
-                 wizard's preview track the native picker live for exactly
-                 this reason - a wheel that only updated on release would be
-                 a regression from that, and an odd thing to ship given the
-                 wheel exists BECAUSE the native input is poor on some
-                 browsers.
-               - The hub editor (liveWheel false, nativeEvent "change")
-                 does NOT commit here: its onChange calls dzHubPersist(),
-                 a network write, and firing that on every drag frame would
-                 be the very thing js/rgbw-popup.js's schedule-during-drag /
-                 flush-on-release contract exists to avoid. It commits once
-                 below, on release, instead. */
-            if (field.liveWheel) { field.commit(liveHex); }
-        }, function () {
-            // Release: always commit once here too (redundant with the last
-            // liveWheel pick above for the wizard, the ONLY commit for the
-            // hub), mirroring js/rgbw-popup.js's flush-on-release so a
-            // pending change always lands even if a caller never sees a
-            // last onPick (e.g. a plain click with no drag).
-            field.commit(hex.value);
-        });
+        canvas.addEventListener("mousedown", reclaimWheelSingleton);
+        canvas.addEventListener("touchstart", reclaimWheelSingleton);
+        window.dzAttachColorWheel(canvas, DZ_COLOR_FIELD_WHEEL_SIZE, onWheelPick, onWheelCommit);
     }
 }
 
@@ -1478,7 +1522,20 @@ function dzHubSyncSchemeSwatches() {
     DZ_COLOR_SCHEME_FIELDS.forEach(function (field) {
         var input = hub.querySelector("#" + DZ_HUB_COLOR_INPUT_PREFIX + field.suffix);
         if (!input) return;
-        if (cs[field.field]) { input.value = cs[field.field]; }
+        if (cs[field.field]) {
+            input.value = cs[field.field];
+            /* If this exact field's wheel/hex disclosure happens to be
+               open, repaint it too: otherwise a Reset colours or a preset
+               pick changes theme.color_scheme and this input's value
+               underneath the still-open panel, which keeps showing the OLD
+               colour, and the next wheel release would commit that stale
+               value straight back over the reset (dzColorFieldPaint never
+               ran from anywhere but the native-input change handler
+               before this fix). */
+            if (DZ_COLOR_FIELD_ACTIVE && DZ_COLOR_FIELD_ACTIVE.input === input) {
+                dzColorFieldPaint(input.value);
+            }
+        }
         input.disabled = !isCustom;
         var wrap = input.closest(".dz-color-field");
         var wheelBtn = wrap && wrap.querySelector(".dz-color-field-wheel-btn");

@@ -180,6 +180,46 @@
         canvas.addEventListener("touchstart", function (e) { dragging = true; pick(e); e.preventDefault(); }, { passive: false });
     }
 
+    /* Re-establishes the singletons (activeCanvas/activeSize/activeOnPick/
+       activeOnCommit) for `canvas` WITHOUT touching any listener -
+       deliberately NOT a second dzAttachColorWheel call, which would add a
+       FRESH mousedown/touchstart to `canvas` every time it runs (that
+       listener dies only with the canvas itself), so calling it repeatedly
+       on a long-lived canvas would accumulate handlers and fire pick()
+       multiple times per gesture.
+
+       For a caller whose canvas can outlive its moment of attachment: a
+       long-lived disclosure (src/js/theme-hub.js dzBuildColorField) is
+       attached once per open, but stays in the live DOM afterward (the
+       Theme Hub reuses rather than rebuilds its own container across a
+       leave-and-return, per dzBuildThemeHub/dzAdoptHubInto) rather than
+       being torn down and re-attached like the RGBW popup's canvas is on
+       every popup open. If some OTHER consumer calls dzAttachColorWheel in
+       between - the RGBW popup opening and closing on a different screen,
+       js/rgbw-popup.js attachWheel - the singletons now point at that
+       consumer's canvas/callbacks, and the still-open, still-interactive
+       first canvas's OWN mousedown/touchstart handler (installed by its
+       original dzAttachColorWheel call) would call the shared pick(), which
+       reads activeCanvas/activeOnPick from module scope: it would drive the
+       WRONG consumer's callback. For the RGBW popup that means sending a
+       colour command to a real light from an unrelated screen.
+
+       The fix is not to prevent other consumers from attaching (the
+       singleton design is deliberate and documented above), but to let a
+       long-lived canvas reclaim ownership at the moment it is actually
+       used: call this from that canvas's own mousedown/touchstart handler,
+       registered BEFORE dzAttachColorWheel's own (so it runs first, same
+       event, same target - listeners fire in registration order), so by
+       the time the shared pick() runs, the singletons are guaranteed to be
+       this canvas's again, regardless of what attached in between. */
+    function dzReclaimColorWheel(canvas, size, onPick, onCommit) {
+        activeCanvas = canvas;
+        activeSize = size;
+        activeOnPick = onPick;
+        activeOnCommit = onCommit || null;
+    }
+
     window.dzDrawColorWheel = dzDrawColorWheel;
     window.dzAttachColorWheel = dzAttachColorWheel;
+    window.dzReclaimColorWheel = dzReclaimColorWheel;
 })();
