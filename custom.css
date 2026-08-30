@@ -81,6 +81,11 @@
    classes and shares no selector with any file above it. */
 @import url("css/glyphs.css");
 
+/* Domoticz's icon-picker modal (2026.3 icon rework). Same reasoning as glyphs.css:
+   it only restyles core's own .dz-ip-* classes and shares no selector with any
+   file above it. */
+@import url("css/icon-picker.css");
+
 /* Display sidemenu on low resolution devices */
 @import url("css/sidemenu.css") (max-width: 979px);
 

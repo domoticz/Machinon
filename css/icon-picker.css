@@ -1,0 +1,290 @@
+/**** ./icon-picker.css ***/
+/* Domoticz's icon-picker modal (<dz-icon-picker-modal>), mapped onto the theme's
+   --dz-* tokens and onto the theme's own dialog language.
+
+   Domoticz 2026.3 (upstream PR #6995) replaced the ddslick "Custom Icon" select
+   in the device edit dialog with a browse-and-pick modal. Core styles it in
+   www/css/icons-chrome.css: a ~460-line block that reads six --dz-* tokens for
+   its SURFACES and then hardcodes every FOREGROUND on top of them
+   (rgba(255,255,255,.55) secondary text x10, rgba(255,255,255,.12) borders x6,
+   rgba(255,255,255,.08) hover fills x5, #43A4D3 accents, #90a7bf off-swatch).
+   Those literals were chosen against a dark dialog, which is what every theme
+   Domoticz ships leaves it as. Machinon gives the dialog the card surface, so on
+   a light scheme the picker was white on white: measured, 90 of the 101
+   foregrounds in it were core literals, and on all four light schemes all 90
+   fell under the WCAG floor, with the icon NAMES at 1:1. Not one icon in the
+   grid had a readable label. Reported as Machinon#209; the shared root cause was
+   reported upstream as domoticz/domoticz#7009, where core tokenised the device
+   and table glyphs and left the picker interior as a follow-up.
+
+   DIALOG LANGUAGE, not just contrast. The theme already codifies what one of its
+   dialogs looks like (DESIGN.md > Color Popup, the closest analogue and the one
+   Machinon built itself): ONE surface, a title row carrying no fill of its own,
+   the title at --dz-text-sm semibold in sentence case, and an icon-quiet close
+   control. Tables and cards say the same thing a second and third way
+   (--dz-table-header-bg equals the even-row fill; --dz-widget-name-bg equals
+   --dz-widget-bg with a transparent border). In this theme an accent tint means
+   STATE - hover, selected, active - never structural chrome; the one accent band
+   anywhere is the top header's brand strip. So the picker's header takes the
+   dialog's own surface rather than a tinted band, which is handled entirely by
+   defining --dz-modal-header-bg in dz-tokens.css - core's own rule then paints
+   it, and this file needs no .dz-ip-head background rule at all.
+
+   Four things core does that the theme has already ruled against are corrected
+   here as part of the same decision: the uppercase + letter-spaced group
+   headings (DESIGN.md: no uppercase tracking anywhere in the theme), the 10px
+   type on the tile names and group headings (below --dz-text-micro, the scale's
+   floor), the bold title weight (--dz-weight-semibold is the codified one), and
+   the bare coloured close glyph (the codified dialog-close language is the
+   icon-quiet family with the --dz-btn-icon-box hit-box).
+
+   SPECIFICITY: core's icons-chrome.css is linked BEFORE styles/<theme>/custom.css,
+   so a selector of equal specificity here wins on file order alone. Every rule
+   below mirrors core's own selector shape rather than escalating.
+
+   PRE-REWORK CORES: every selector is keyed on a .dz-ip-* class that only exists
+   once the picker ships. On an older Domoticz none of them match and this file is
+   inert, which is what keeps the theme identical for users who have not updated.
+   Verified with scripts/dz-core-parity.js against domoticz/domoticz:stable and
+   domoticz/domoticz:beta, the standing baseline pair. */
+
+
+/* --- Shell -----------------------------------------------------------------
+
+   The dialog is one surface (--dz-modal-bg, via core's own rule) inside the
+   theme's scrim. Core's frame is a literal #666; the theme has one border
+   colour and it tracks the scheme. The header's fill is NOT set here: see the
+   --dz-modal-header-bg definition in dz-tokens.css. */
+.dz-ip-dialog {
+    border-color: var(--dz-border-color);
+}
+
+/* Every rule inside the picker that separates one region from another: the
+   header underline, the rail's right edge, the sticky group headings, the
+   footer and action rules, and the rail's own separator bar. Core draws all of
+   them with the same rgba(255,255,255,.12), i.e. one decision, so they collapse
+   back into one token here. */
+.dz-ip-head,
+.dz-ip-group-head,
+.dz-ip-foot,
+.dz-ip-actions {
+    border-color: var(--dz-border-color);
+}
+
+.dz-ip-rail {
+    border-right-color: var(--dz-border-color);
+}
+
+.dz-ip-rail-sep {
+    background: var(--dz-border-color);
+}
+
+
+/* --- Title and close -------------------------------------------------------
+
+   The codified dialog-title language (DESIGN.md > Color Popup): --dz-text-sm,
+   --dz-weight-semibold, sentence case, in the dialog's own text colour, exactly
+   as #mk-rgbw-title carries it. Core sets 14px `bold`, which is the right size
+   through the wrong door. */
+.dz-ip-title {
+    font-size: var(--dz-text-sm);
+    font-weight: var(--dz-weight-semibold);
+    color: var(--dz-modal-text);
+}
+
+/* The codified dialog-close language: the icon-quiet family, transparent with
+   no border, sized by the button system's own square hit-box, and hovered with
+   the same in-place tonal pop .btn-icon gives its glyph. Core paints the resting
+   glyph a translucent white and turns it red on hover; red is the theme's danger
+   colour and closing a picker destroys nothing, so the hover stays tonal. */
+.dz-ip-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--dz-btn-icon-box);
+    height: var(--dz-btn-icon-box);
+    color: var(--secondary-text-color);
+    transition: filter 0.18s ease;
+}
+
+.dz-ip-close:hover {
+    color: var(--secondary-text-color);
+    filter: saturate(1.12) brightness(1.05);
+}
+
+
+/* --- Source rail -----------------------------------------------------------
+
+   The rail is a vertical list of sources you click to switch pane: a MENU, in
+   the theme's terms, so it takes the menu surface family (dz-tokens.css) that
+   the navbar dropdown, the card 3-dot flyout and the mobile side menu already
+   share. Core instead fills it with rgba(0,0,0,.2), which recesses it on a dark
+   dialog and greys it on a light one. */
+.dz-ip-rail {
+    background: var(--dz-menu-bg);
+}
+
+.dz-ip-rail-row:hover {
+    background: var(--dz-menu-item-hover-bg);
+}
+
+.dz-ip-rail-glyph,
+.dz-ip-rail-count {
+    color: var(--secondary-text-color);
+}
+
+/* The current source is the menu family's current item, which the theme draws
+   with NO fill (--dz-menu-item-active-bg is transparent by design), an accent
+   left edge and accent text - see css/sidemenu.css's
+   ".navbar .nav .current_page_item > a". Core's inset 3px box-shadow is already
+   that left edge, so only the fill and the text colour move. The whole row goes
+   accent, count included: leaving the count quiet put secondary text on a tinted
+   fill and measured 4.02 against the 4.5 floor on gruvbox-dark, and a
+   half-emphasised current item is not the theme's idiom anyway. */
+.dz-ip-rail-sel,
+.dz-ip-rail-sel:hover {
+    background: var(--dz-menu-item-active-bg);
+    box-shadow: inset 3px 0 0 var(--dz-accent-color);
+    color: var(--dz-accent-color);
+    font-weight: var(--dz-weight-semibold);
+}
+
+.dz-ip-rail-sel .dz-ip-rail-glyph,
+.dz-ip-rail-sel .dz-ip-rail-count {
+    color: var(--dz-accent-color);
+}
+
+.dz-ip-rail-sel:hover {
+    background: var(--dz-menu-item-hover-bg);
+}
+
+/* A source that failed to load. Core stacks a translucent white on opacity .45,
+   which compounds to invisible on a light dialog; --dz-icon-off is the theme's
+   own measured off-state (see its comment in dz-tokens.css) and needs no second
+   dimming on top. */
+.dz-ip-rail-dis,
+.dz-ip-rail-dis .dz-ip-rail-glyph {
+    color: var(--dz-icon-off);
+    opacity: 1;
+}
+
+
+/* --- Category chips --------------------------------------------------------
+
+   A row of small pills with exactly one active: the theme's segmented-control
+   idiom, the same one the chart zoom range uses (css/charts.css .zoom-button,
+   which DESIGN.md calls out as sharing ONE active-state language rather than a
+   chart-local variant). So the resting chip is the GHOST tier and the active one
+   is TOGGLE-SELECTED: an accent fill with on-accent text, flat, no shadow. Core
+   already ships the right geometry (its 10px pill radius is --dz-btn-radius to
+   the pixel) and only the colours and the bold weight need moving. */
+.dz-ip-chip {
+    border: var(--dz-btn-ghost-border);
+    background: transparent;
+    color: var(--dz-btn-ghost-text);
+    border-radius: var(--dz-btn-radius);
+}
+
+.dz-ip-chip:hover {
+    background: var(--dz-btn-hover-bg);
+}
+
+.dz-ip-chip-sel,
+.dz-ip-chip-sel:hover {
+    border-color: var(--dz-btn-toggle-selected-bg);
+    background: var(--dz-btn-toggle-selected-bg);
+    color: var(--dz-btn-toggle-selected-text);
+    font-weight: var(--dz-weight-semibold);
+    box-shadow: none;
+}
+
+
+/* --- Tile hover ------------------------------------------------------------
+
+   A tile is a small card of art, so it hovers the way a device card's name row
+   does. Core's rgba(255,255,255,.08) is a lightening step, which on a light
+   dialog moves the surface the wrong way. */
+.dz-ip-tile:hover {
+    background: var(--dz-widget-hover-name-bg);
+}
+
+
+/* --- Group headings --------------------------------------------------------
+
+   Core sets `text-transform: uppercase` with 0.06em tracking at 10px. DESIGN.md
+   states the theme carries no uppercase tracking anywhere, and 10px is below
+   --dz-text-micro, the type scale's floor. Sentence case at the micro size, with
+   the tracking removed. */
+.dz-ip-group-name {
+    font-size: var(--dz-text-micro);
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.dz-ip-group-count {
+    color: var(--secondary-text-color);
+}
+
+
+/* --- Icon tiles ------------------------------------------------------------
+
+   The tile icon is a device icon shown at device-icon size, so it takes the
+   token the theme's own card icons use rather than the generic chrome accent.
+   The name under it is core's smallest text at 10px; --dz-text-micro is the
+   scale's floor and the size the theme uses for every other caption. */
+.dz-ip-tile-icon {
+    color: var(--dz-card-icon-accent);
+}
+
+.dz-ip-tile-name {
+    font-size: var(--dz-text-micro);
+    color: var(--secondary-text-color);
+}
+
+/* Keyboard highlight vs. current selection. Core gives the two nearly the same
+   treatment (a translucent white edge vs. the accent, over the same fill), which
+   on a light dialog leaves only the edge to tell them apart. Keeping the fills
+   distinct instead: highlight is a hover, and the selected tile takes the
+   theme's selected-row pairing verbatim (DESIGN.md > Tables: selectedRowBg
+   rgba(accent, .18) with selectedRowBorder accent). Not the toggle-selected
+   accent fill the chips use - that would bury the icon the tile exists to show. */
+.dz-ip-tile-hl {
+    border-color: var(--dz-accent-color);
+    background: var(--dz-widget-hover-name-bg);
+}
+
+.dz-ip-tile-sel {
+    border-color: var(--dz-accent-color);
+    background: rgba(var(--dz-accent-values), 0.18);
+}
+
+.dz-ip-note {
+    color: var(--secondary-text-color);
+}
+
+
+/* --- Footer preview --------------------------------------------------------
+
+   The on/off swatches preview the icon at the sizes the widgets draw it, so
+   they carry the same two-state language the glyph cards do (css/glyphs.css):
+   the card icon accent when on, --dz-icon-off when off. Core's #90a7bf was
+   picked as "the widgets' off grey, lightened enough to read on a dark
+   dialog", which is exactly the assumption that does not survive a light one. */
+.dz-ip-foot-label,
+.dz-ip-disclose,
+.dz-ip-off-hint {
+    color: var(--secondary-text-color);
+}
+
+.dz-ip-on {
+    color: var(--dz-card-icon-accent);
+}
+
+.dz-ip-off .dz-ip-swatch,
+.dz-ip-swatch.dz-ip-off {
+    color: var(--dz-icon-off);
+}
+
+.dz-ip-slot-active {
+    border-color: var(--dz-accent-color);
+}

@@ -533,12 +533,20 @@
     /* Input + modal contract - core style.css/dashboard.css consume these (fallbacks were
        #fff/#000 for inputs, #013 navy/#ddd for modals, wrong on Machinon's schemes; the #013
        fallback leaked into unstyled .ui-dialog regions). Map to Machinon's card/text so
-       core-rendered inputs and modals match the theme. --dz-input-border already defined above;
-       --dz-modal-header-bg omitted (not consumed by any globally-linked file). */
+       core-rendered inputs and modals match the theme. --dz-input-border already defined above.
+
+       --dz-modal-header-bg was omitted while nothing globally linked consumed it. Domoticz
+       2026.3's icons-chrome.css now does: the icon picker's .dz-ip-head reads it, falling back
+       to core's #283750 navy, which is a band the theme does not otherwise draw. Mapping it to
+       the modal surface gives the picker the one-surface dialog the theme codifies (DESIGN.md >
+       Color Popup; the same shape tables and card name rows already use), and does it through
+       core's own rule, so css/icon-picker.css needs no header-background override. On a
+       Domoticz without the picker nothing reads the token and the line is inert. */
     --dz-input-bg:            var(--dz-widget-bg);
     --dz-input-text:          var(--dz-body-text);
     --dz-modal-bg:            var(--dz-widget-bg);
     --dz-modal-text:          var(--dz-body-text);
+    --dz-modal-header-bg:     var(--dz-modal-bg);
 
     /* MENU surface family: the top menu bar and every floating menu (navbar
        dropdown, card 3-dot flyout) share ONE colour, the scheme's "navbar"
