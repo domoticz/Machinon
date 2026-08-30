@@ -83,13 +83,24 @@ function dzFindPairMate(slug, schemes, userSchemes) {
 
     if (slug.indexOf("user:") === 0) {
         var rest = slug.substring(5);
-        var bar = rest.lastIndexOf("|");
-        if (bar === -1) { return null; } // legacy unpaired preset
-        var name = rest.substring(0, bar), variant = rest.substring(bar + 1);
-        var mine = null;
+        /* Exact legacy match first, same reasoning as applyScheme: a
+           hand-saved preset's own name may contain "|", so check whether any
+           preset owns the whole remainder before splitting it. */
+        var mine = null, variant;
         (userSchemes || []).forEach(function (p) {
-            if (p.name === name && p.variant === variant) { mine = p; }
+            if (p.name === rest) { mine = p; }
         });
+        if (mine) {
+            variant = mine.variant;
+        } else {
+            var bar = rest.lastIndexOf("|");
+            if (bar === -1) { return null; } // legacy unpaired preset
+            var name = rest.substring(0, bar);
+            variant = rest.substring(bar + 1);
+            (userSchemes || []).forEach(function (p) {
+                if (p.name === name && p.variant === variant) { mine = p; }
+            });
+        }
         if (!mine || !mine.pair) { return null; }
         var mate = null;
         (userSchemes || []).forEach(function (p) {
@@ -291,13 +302,23 @@ function applyScheme(slug) {
     }
     if (slug.indexOf("user:") === 0) {
         var rest = slug.substring(5);
-        var bar = rest.lastIndexOf("|");
-        var wantName = bar === -1 ? rest : rest.substring(0, bar);
-        var wantVariant = bar === -1 ? null : rest.substring(bar + 1);
+        /* Exact legacy match first: a hand-saved preset may contain "|" in its
+           own name, and splitting on it would silently resolve to nothing.
+           Only if no preset owns the whole string do we read it as the
+           generated "<name>|<variant>" form. */
         var preset = (theme.user_schemes || []).filter(function (p) {
-            return p.name === wantName &&
-                   (wantVariant === null || p.variant === wantVariant);
+            return p.name === rest;
         })[0];
+        if (!preset) {
+            var bar = rest.lastIndexOf("|");
+            if (bar !== -1) {
+                var wantName = rest.substring(0, bar);
+                var wantVariant = rest.substring(bar + 1);
+                preset = (theme.user_schemes || []).filter(function (p) {
+                    return p.name === wantName && p.variant === wantVariant;
+                })[0];
+            }
+        }
         if (!preset) return Promise.resolve();
         theme.scheme = slug;
         theme.scheme_base = preset.base === "dark" ? "dark" : "light";

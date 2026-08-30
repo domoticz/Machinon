@@ -93,3 +93,29 @@ test("pair ids are unique per generation", () => {
         seen.add(id);
     }
 });
+
+test("findPairMate matches an exact legacy name before splitting on a literal pipe", () => {
+    // A hand-saved preset's own name may contain "|" (saveCurrentColorsAsScheme
+    // does not forbid it). A decoy unrelated pair named "Warm" with variant
+    // "Cool" is included so that splitting on "|" first would silently
+    // resolve "user:Warm|Cool" to THAT pair's mate instead of recognising the
+    // exact, unpaired, legacy preset actually named "Warm|Cool". Without the
+    // decoy, splitting happens to find no match either way and the case does
+    // not distinguish exact-first from split-first ordering.
+    const legacyUsers = [
+        { name: "Warm|Cool", base: "light", colors: {} },
+        { name: "Warm", variant: "Cool",  pair: "decoy", base: "light", colors: {} },
+        { name: "Warm", variant: "other", pair: "decoy", base: "dark",  colors: {} }
+    ];
+    assert.equal(dz.dzFindPairMate("user:Warm|Cool", SCHEMES, legacyUsers), null);
+
+    // A generated pair whose name also happens to contain "|" must still
+    // resolve via the split fallback once the exact match misses, proving
+    // the ordering (exact-first, then split) is correct rather than merely
+    // different from before.
+    const pairedUsers = [
+        { name: "Warm|Cool", variant: "light", pair: "p1", base: "light", colors: {} },
+        { name: "Warm|Cool", variant: "dark",  pair: "p1", base: "dark",  colors: {} }
+    ];
+    assert.equal(dz.dzFindPairMate("user:Warm|Cool|light", SCHEMES, pairedUsers), "user:Warm|Cool|dark");
+});
