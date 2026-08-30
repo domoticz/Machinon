@@ -339,11 +339,23 @@ function dzWizardStepName(host) {
     input.maxLength = 40;
     input.placeholder = "My theme";
     input.value = DZ_WIZARD.name;
-    input.addEventListener("input", function () { DZ_WIZARD.name = input.value; });
 
-    dzWizardEl("p", "dz-wizard-lead", host).textContent =
-        "Saved as two schemes, “" + (DZ_WIZARD.name || "My theme") +
-        " Light” and “" + (DZ_WIZARD.name || "My theme") + " Dark”.";
+    /* The summary line below must track what the user is typing, but the
+       `input` handler must NOT call dzWizardRender(): a full re-render would
+       destroy and recreate this very field mid-keystroke, losing focus and
+       the caret position (the same class of bug Task 6 fixed for the colour
+       swatch). So the one line is rewritten in place via a kept reference
+       instead - textContent only, never markup, since this is user input. */
+    var lead = dzWizardEl("p", "dz-wizard-lead", host);
+    function dzWizardNameSummary() {
+        var shown = DZ_WIZARD.name.trim() || "My theme";
+        lead.textContent = "Saved as two schemes, “" + shown + " Light” and “" + shown + " Dark”.";
+    }
+    dzWizardNameSummary();
+    input.addEventListener("input", function () {
+        DZ_WIZARD.name = input.value;
+        dzWizardNameSummary();
+    });
 
     dzWizardPreviewRow(host, pair);
     dzWizardAccentDrift(host, pair);
