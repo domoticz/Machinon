@@ -463,43 +463,20 @@
        in the popup so the popup and the card always agree by construction. */
     function displayPct(v) { return Math.floor((100 / state.maxDim) * v); }
 
-    var WHEEL = 210, WR = WHEEL / 2, wheelImage = null;
+    var WHEEL = 210;
 
-    function drawWheelBase(ctx) {
-        if (!wheelImage) {
-            var img = ctx.createImageData(WHEEL, WHEEL);
-            var d = img.data;
-            for (var y = 0; y < WHEEL; y++) {
-                for (var x = 0; x < WHEEL; x++) {
-                    var dx = x - WR, dy = y - WR, dist = Math.sqrt(dx * dx + dy * dy);
-                    var i4 = (y * WHEEL + x) * 4;
-                    if (dist > WR) { d[i4 + 3] = 0; continue; }
-                    var hue = (Math.atan2(dy, dx) / (2 * Math.PI) + 1) % 1;
-                    var rgb = hsvToRgb(hue, Math.min(dist / WR, 1), 1);
-                    d[i4] = rgb.r; d[i4 + 1] = rgb.g; d[i4 + 2] = rgb.b; d[i4 + 3] = 255;
-                }
-            }
-            wheelImage = img;
-        }
-        ctx.putImageData(wheelImage, 0, 0);
-    }
-
+    /* Draws the wheel canvas at the current state.h/state.s via the shared
+       src/js/color-wheel.js module (extracted from this file: the wheel is
+       needed by the always-loaded theme wizard and Theme Hub colour editor,
+       which cannot depend on this feature-toggled popup). Guarded the way
+       the codebase guards other cross-module calls: THEME_MODULES loads
+       color-wheel.js before any feature file gets a chance to run, so this
+       should never miss in practice, but a load-order surprise degrades to
+       a blank/unresponsive wheel rather than a throw. */
     function drawWheel(canvas) {
-        var ctx = canvas.getContext("2d");
-        drawWheelBase(ctx);
-        /* Picker cursor: 15px circle (slider-handle scale) FILLED with the
-           picked colour, 2px widget-bg ring; the codified 2D-picker-cursor
-           language. */
-        var ang = state.h * 2 * Math.PI, rad = state.s * (WR - 8);
-        var cx = WR + rad * Math.cos(ang), cy = WR + rad * Math.sin(ang);
-        var rgb = hsvToRgb(state.h, state.s, 1);
-        ctx.beginPath();
-        ctx.arc(cx, cy, 7.5, 0, 2 * Math.PI);
-        ctx.fillStyle = "rgb(" + rgb.r + "," + rgb.g + "," + rgb.b + ")";
-        ctx.fill();
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue("--dz-widget-bg").trim() || "#fff";
-        ctx.stroke();
+        if (typeof window.dzDrawColorWheel === "function") {
+            window.dzDrawColorWheel(canvas, WHEEL, state.h * 360, state.s);
+        }
     }
 
     function updateReadout() {
@@ -692,42 +669,28 @@
     }
     function onPick() { scheduleSend("color"); }
 
-    /* The wheel drag surface changes identity every popup open (buildBody
-       rebuilds the canvas from scratch), but the drag gesture itself is
-       tracked with document-level mousemove/mouseup/touchmove/touchend
-       listeners so dragging still works once the pointer leaves the small
-       canvas. Registering those four listeners inside attachWheel would add
-       a fresh set (and pin the previous, now-detached canvas in a closure)
-       on every popup open with no matching removal. Instead they are
-       registered exactly once here, at module init, and read the current
-       drag target off the module-scope activeWheel/wheelDragging vars;
-       attachWheel only swaps activeWheel and adds the canvas-scoped
-       mousedown/touchstart listeners, which die with the canvas itself. */
-    var activeWheel = null, wheelDragging = false;
-
-    function wheelPick(e) {
-        if (!activeWheel) return;
-        var rect = activeWheel.getBoundingClientRect();
-        var scale = WHEEL / (rect.width || WHEEL);
-        var px = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-        var py = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-        var dx = px * scale - WR, dy = py * scale - WR;
-        state.h = (Math.atan2(dy, dx) / (2 * Math.PI) + 1) % 1;
-        state.s = Math.min(Math.sqrt(dx * dx + dy * dy) / WR, 1);
-        drawWheel(activeWheel);
-        paintMixTrack();
-        updateReadout();
-        onPick();
-    }
-
-    document.addEventListener("mousemove", function (e) { if (wheelDragging) wheelPick(e); });
-    document.addEventListener("mouseup", function () { if (wheelDragging) { wheelDragging = false; flushSend(); } });
-    document.addEventListener("touchmove", function (e) { if (wheelDragging) { wheelPick(e); e.preventDefault(); } }, { passive: false });
-    document.addEventListener("touchend", function () { if (wheelDragging) { wheelDragging = false; flushSend(); } });
-
+    /* Drag handling for the wheel canvas now lives in the shared
+       src/js/color-wheel.js module (dzAttachColorWheel): it owns the
+       document-level mousemove/mouseup/touchmove/touchend listeners and the
+       canvas-scoped mousedown/touchstart ones, and reports picks as
+       (hueDegrees, saturation). This wrapper converts that back into the
+       popup's own state.h/state.s (0..1 fractions) and reproduces exactly
+       what the old inline wheelPick did on every pick: redraw the wheel,
+       repaint the mix track, refresh the readout and schedule a debounced
+       send; onCommit (drag release) reproduces the old
+       mouseup/touchend->flushSend() so a pending send still lands the
+       moment the user lets go, not later. Guarded like drawWheel above. */
     function attachWheel(canvas) {
-        activeWheel = canvas;
-        canvas.addEventListener("mousedown", function (e) { wheelDragging = true; wheelPick(e); });
-        canvas.addEventListener("touchstart", function (e) { wheelDragging = true; wheelPick(e); e.preventDefault(); }, { passive: false });
+        function handlePick(hueDegrees, saturation) {
+            state.h = (((hueDegrees % 360) + 360) % 360) / 360;
+            state.s = saturation;
+            drawWheel(canvas);
+            paintMixTrack();
+            updateReadout();
+            onPick();
+        }
+        if (typeof window.dzAttachColorWheel === "function") {
+            window.dzAttachColorWheel(canvas, handlePick, flushSend);
+        }
     }
 })();

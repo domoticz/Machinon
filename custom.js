@@ -22,6 +22,7 @@ var THEME_MODULES = [
     "src/js/page.js",
     "src/js/theme-hub-previews.js",
     "src/js/theme-hub.js",
+    "src/js/color-wheel.js",
     "src/js/theme-wizard.js",
     "src/js/devices.js",
     "src/js/card-drag-handle.js",
