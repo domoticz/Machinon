@@ -10,6 +10,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ### Fixed
 
+- On a Domoticz version that predates Domoticz's own built-in theme-settings storage, theme settings no longer silently fail to save once you have saved several custom colour themes or a lot of custom icons. It looked like a normal save, until the settings disappeared the next time you opened the theme in another browser or cleared your cache. Saves now use a method with no such limit.
+- If a save of your theme settings to Domoticz fails for any reason, including a permissions problem, you are shown a message instead of losing your settings silently.
 - With **Icon style** set to Font Awesome glyphs, the device icon on each row of **Setup > Devices** is readable on the dark colour schemes. For a device you can switch on or off, that icon was drawn almost black against the dark row.
 - The small icon preview beside the **Change...** button, when you edit a device's icon, follows your colour scheme instead of staying Domoticz's fixed blue.
 - The arrows that page between floorplans are readable on the light colour schemes and follow your accent. They were a white chevron on a translucent grey panel that all but vanished over a light floorplan; they are now a solid accent button with a soft shadow, matching the floating menu button.
