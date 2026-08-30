@@ -8,7 +8,13 @@
    follow the codified dialog-title and dialog-close languages, the step strip
    reuses the flat underlined sub-tab idiom from .dz-hub-tab, the colour fields
    reuse .dz-hub-swatch verbatim, and the look tiles mirror .scheme-card. A
-   user should not be able to tell this dialog was added later. */
+   user should not be able to tell this dialog was added later.
+
+   The colour fields' wheel + hex disclosure (.dz-color-field and friends) are
+   ALSO reused verbatim from css/theme-hub.css, which is where the shared
+   factory that builds them (dzBuildColorField, src/js/theme-hub.js) lives -
+   nothing here redefines that component; this file only styles the parts
+   unique to the wizard's own swatches row (.dz-wizard-swatches below). */
 
 .dz-wizard {
     position: fixed;

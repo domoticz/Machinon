@@ -182,20 +182,24 @@ function dzWizardMockup(colors, label) {
     return wrap;
 }
 
-/* One colour field in the hub's swatch language. Mirrors
-   dzHubBuildColorSwatch (src/js/theme-hub.js): a <label> wrapping a centered
-   caption above a full-width type=color input. Built here rather than called
-   from the hub because that function binds directly to theme.color_scheme,
-   and the wizard must not touch live theme state before Save. */
-function dzWizardSwatch(label, value, onChange) {
-    var cell = dzWizardEl("label", "dz-hub-swatch");
-    var span = dzWizardEl("span", "dz-hub-swatch-label", cell);
-    span.textContent = label;
-    var input = dzWizardEl("input", "dz-hub-swatch-input", cell);
-    input.type = "color";
-    input.value = value;
-    input.addEventListener("input", function () { onChange(input.value.toUpperCase()); });
-    return cell;
+/* One colour field, via the shared factory dzBuildColorField
+   (src/js/theme-hub.js - loaded before this file, THEME_MODULES in
+   custom.js): the hub's .dz-hub-swatch label/geometry plus the wheel + hex
+   disclosure, so the wizard and the hub's 7-swatch editor share one
+   implementation rather than drifting. `anchor` is the swatches row
+   (`.dz-wizard-swatches`) the wheel/hex panel is inserted after when opened.
+   `onChange` is called here, never bound directly to theme.color_scheme:
+   the wizard must not touch live theme state before Save, so the caller
+   (dzWizardStepColours) only ever updates DZ_WIZARD's own local state. The
+   native input keeps firing "input" (continuous), not "change" - see
+   dzWizardRefreshPreviews for why a full re-render on every event would
+   fight the native colour picker mid-drag. */
+function dzWizardSwatch(label, value, onChange, anchor) {
+    var built = dzBuildColorField(label, value, onChange, {
+        nativeEvent: "input",
+        disclosureAnchor: anchor
+    });
+    return built.wrap;
 }
 
 function dzWizardCurrentPair() {
@@ -248,12 +252,12 @@ function dzWizardStepColours(host) {
     swatches.appendChild(dzWizardSwatch("Main colour", DZ_WIZARD.accent, function (value) {
         DZ_WIZARD.accent = value;
         dzWizardRefreshPreviews(host);
-    }));
+    }, swatches));
     if (DZ_WIZARD.surface !== null) {
         swatches.appendChild(dzWizardSwatch("Grey tint", DZ_WIZARD.surface, function (value) {
             DZ_WIZARD.surface = value;
             dzWizardRefreshPreviews(host);
-        }));
+        }, swatches));
     }
 
     var toggleLabel = dzWizardEl("label", "dz-wizard-check", host);

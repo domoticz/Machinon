@@ -1079,6 +1079,294 @@ function dzHubSchemeMount(entry) {
     return mount;
 }
 
+/* ===================================================================== *
+ *  Shared colour field: wheel + hex disclosure                          *
+ * ===================================================================== *
+
+   One factory (dzBuildColorField), used by BOTH this hub's 7-swatch custom-
+   colour editor (dzHubBuildColorSwatch below) and the theme wizard's colour
+   fields (dzWizardSwatch, src/js/theme-wizard.js - loaded straight after
+   this file, THEME_MODULES in custom.js, so it can call a function defined
+   here). Built for one reason: Firefox on Android renders <input
+   type="color"> as a coarse seven-band palette, which guts a feature whose
+   entire premise is picking a colour. The native input is KEPT, not
+   replaced - it is the keyboard-accessible path and is genuinely good on
+   desktop and Chrome Android - the wheel and hex field are additions for
+   the browsers where it is not.
+
+   Only one wheel may be attached at a time: src/js/color-wheel.js's
+   dzAttachColorWheel assigns its drag state to module-scope singletons at
+   ATTACH time (see that file's own header note), so attaching a second
+   wheel silently steals the drag gesture from the first. A permanently
+   attached wheel under every one of the hub's 7 swatches (or even both of
+   the wizard's 2 fields) would therefore ship a visibly broken first wheel.
+   Instead there is exactly ONE shared disclosure panel for the whole page
+   (DZ_COLOR_FIELD_DISCLOSURE): opening a field MOVES that panel to sit
+   after that field's row (field.anchor.insertAdjacentElement("afterend",
+   ...)) and rebuilds its canvas from scratch (never re-attaches a kept
+   one - the same "wheel drag surface changes identity every open" contract
+   js/rgbw-popup.js already follows), so switching fields re-attaches
+   correctly by construction rather than by care at each call site. */
+
+var DZ_COLOR_FIELD_DISCLOSURE = null;
+var DZ_COLOR_FIELD_ACTIVE = null;
+var DZ_COLOR_FIELD_WHEEL_SIZE = 180;
+
+/* Pure HSV<->RGB math (textbook formulas; own implementation, no code taken
+   from any other theme) plus hex packing/parsing. A third small, standalone
+   copy of the same conversions src/js/color-wheel.js and js/rgbw-popup.js
+   each already carry - see color-wheel.js's own note on why hsvToRgb is
+   duplicated rather than shared: every caller needs it for its own hex/
+   readout work, and the wheel module itself must stay free of DOM/hex/
+   theme-state concerns. */
+function dzColorFieldHsvToRgb(h, s, v) {
+    var i = Math.floor(h * 6), f = h * 6 - i;
+    var p = v * (1 - s), q = v * (1 - f * s), t = v * (1 - (1 - f) * s);
+    var r, g, b;
+    switch (i % 6) {
+        case 0: r = v; g = t; b = p; break;
+        case 1: r = q; g = v; b = p; break;
+        case 2: r = p; g = v; b = t; break;
+        case 3: r = p; g = q; b = v; break;
+        case 4: r = t; g = p; b = v; break;
+        default: r = v; g = p; b = q;
+    }
+    return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
+}
+
+function dzColorFieldRgbToHsv(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    var max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+    var h = 0, s = max === 0 ? 0 : d / max;
+    if (d !== 0) {
+        if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+        else if (max === g) h = ((b - r) / d + 2) / 6;
+        else h = ((r - g) / d + 4) / 6;
+    }
+    return { h: h, s: s, v: max };
+}
+
+function dzColorFieldToHex2(n) { return ("0" + n.toString(16)).slice(-2); }
+function dzColorFieldRgbToHex(r, g, b) {
+    return "#" + dzColorFieldToHex2(r) + dzColorFieldToHex2(g) + dzColorFieldToHex2(b);
+}
+
+/* Validates a hex colour the same way #mk-rgbw-hex does (js/rgbw-popup.js):
+   accepts "#RRGGBB" or "RRGGBB" (case-insensitive), rejects everything else.
+   Returns the normalised "#RRGGBB" (uppercase) or null. Deliberately
+   narrower than scheme.js hexToRGB, which SILENTLY returns black for
+   anything it cannot parse - exactly the trap this validation exists to
+   keep out of the generator: an invalid hex must leave the previous value
+   in place, never fall through to hexToRGB as if the user had chosen
+   black. */
+function dzColorFieldParseHex(raw) {
+    var m = /^#?([0-9a-f]{6})$/i.exec(String(raw || "").trim());
+    return m ? ("#" + m[1]).toUpperCase() : null;
+}
+
+/* One colour field: the house .dz-hub-swatch label (caption + native
+   type="color" input, markup/classes UNCHANGED from before this task) plus
+   a small wheel-picker toggle button. `value` is the field's current hex
+   string. `onChange(hexUpper)` fires once per COMPLETED pick: the native
+   input's own change/input event (unchanged), a wheel drag's release, or a
+   valid hex entry - never continuously while dragging the wheel, so a
+   caller that persists on every call (the hub writes to the server) is
+   never hammered the way an unthrottled drag would hammer it; the wheel's
+   own moving cursor/swatch already gives a live picture during the drag
+   itself, mirroring js/rgbw-popup.js's schedule-during-drag /
+   flush-on-release contract.
+
+   `opts`: { inputId, dataColorKey, disabled, nativeEvent ("change"|"input",
+   default "change"), disclosureAnchor (the row element the wheel/hex panel
+   is inserted after when opened - the hub's/wizard's swatches row) }.
+   Returns { wrap, input, anchor, label, commit }; `wrap` is what the caller
+   appends. */
+function dzBuildColorField(label, value, onChange, opts) {
+    opts = opts || {};
+    var wrap = document.createElement("div");
+    wrap.className = "dz-color-field";
+
+    var cell = document.createElement("label");
+    cell.className = "dz-hub-swatch";
+    var span = document.createElement("span");
+    span.className = "dz-hub-swatch-label";
+    span.textContent = label;
+    cell.appendChild(span);
+
+    var input = document.createElement("input");
+    input.type = "color";
+    input.className = "dz-hub-swatch-input";
+    if (opts.inputId) input.id = opts.inputId;
+    if (opts.dataColorKey) input.setAttribute("data-color-key", opts.dataColorKey);
+    input.value = value || "#000000";
+    if (opts.disabled) input.disabled = true;
+    cell.appendChild(input);
+    wrap.appendChild(cell);
+
+    var wheelBtn = document.createElement("button");
+    wheelBtn.type = "button";
+    wheelBtn.className = "dz-color-field-wheel-btn";
+    wheelBtn.disabled = !!opts.disabled;
+    wheelBtn.setAttribute("aria-label", "Pick " + label + " with a colour wheel");
+    var icon = document.createElement("i");
+    icon.className = "icon ion-md-color-palette";
+    wheelBtn.appendChild(icon);
+    wrap.appendChild(wheelBtn);
+
+    var field = {
+        wrap: wrap,
+        input: input,
+        anchor: opts.disclosureAnchor || wrap,
+        label: label,
+        commit: function (hex) {
+            input.value = hex;
+            onChange(hex.toUpperCase());
+        }
+    };
+
+    input.addEventListener(opts.nativeEvent || "change", function () {
+        onChange(input.value.toUpperCase());
+        // Keep an already-open disclosure for THIS field in step with a
+        // native-picker edit (a desktop/Chrome Android user may still use
+        // the native input while the disclosure happens to be open).
+        if (DZ_COLOR_FIELD_ACTIVE === field) { dzColorFieldPaint(input.value); }
+    });
+    wheelBtn.addEventListener("click", function () { dzColorFieldToggle(field); });
+
+    return field;
+}
+
+/* Lazily creates the single shared disclosure element (wheel canvas + hex
+   field). Exactly one exists for the whole page - see the singleton note
+   above the module comment - and it is MOVED to sit after whichever field
+   is currently open, never duplicated per field. */
+function dzColorFieldDisclosure() {
+    if (!DZ_COLOR_FIELD_DISCLOSURE) {
+        DZ_COLOR_FIELD_DISCLOSURE = document.createElement("div");
+        DZ_COLOR_FIELD_DISCLOSURE.className = "dz-color-field-disclosure";
+    }
+    return DZ_COLOR_FIELD_DISCLOSURE;
+}
+
+function dzColorFieldClose() {
+    if (!DZ_COLOR_FIELD_DISCLOSURE) return;
+    if (DZ_COLOR_FIELD_DISCLOSURE.parentNode) {
+        DZ_COLOR_FIELD_DISCLOSURE.parentNode.removeChild(DZ_COLOR_FIELD_DISCLOSURE);
+    }
+    DZ_COLOR_FIELD_DISCLOSURE.textContent = "";
+    DZ_COLOR_FIELD_ACTIVE = null;
+}
+
+function dzColorFieldToggle(field) {
+    if (DZ_COLOR_FIELD_ACTIVE === field) { dzColorFieldClose(); return; }
+    dzColorFieldOpen(field);
+}
+
+/* Opens (moving, if already open elsewhere) the shared disclosure for
+   `field`. A fresh canvas is built every open - never re-attached without
+   rebuilding, the documented color-wheel.js convention ("the wheel drag
+   surface changes identity every time a caller rebuilds its canvas") - so
+   re-opening after switching fields always re-attaches against the RIGHT
+   canvas, never the previous field's. */
+function dzColorFieldOpen(field) {
+    if (field.input.disabled) return;
+    var panel = dzColorFieldDisclosure();
+    panel.textContent = "";
+    DZ_COLOR_FIELD_ACTIVE = field;
+
+    var head = document.createElement("div");
+    head.className = "dz-color-field-disclosure-head";
+    var title = document.createElement("span");
+    title.className = "dz-color-field-disclosure-title";
+    title.textContent = field.label;
+    var close = document.createElement("button");
+    close.type = "button";
+    close.className = "dz-color-field-disclosure-close";
+    close.setAttribute("aria-label", "Close");
+    var closeIcon = document.createElement("i");
+    closeIcon.className = "icon ion-md-close";
+    close.appendChild(closeIcon);
+    close.addEventListener("click", dzColorFieldClose);
+    head.appendChild(title);
+    head.appendChild(close);
+    panel.appendChild(head);
+
+    var wheelWrap = document.createElement("div");
+    wheelWrap.className = "dz-color-field-wheel-wrap";
+    var canvas = document.createElement("canvas");
+    canvas.className = "dz-color-field-wheel";
+    canvas.width = DZ_COLOR_FIELD_WHEEL_SIZE;
+    canvas.height = DZ_COLOR_FIELD_WHEEL_SIZE;
+    wheelWrap.appendChild(canvas);
+    panel.appendChild(wheelWrap);
+
+    var readout = document.createElement("div");
+    readout.className = "dz-color-field-readout";
+    var swatch = document.createElement("span");
+    swatch.className = "dz-color-field-swatch";
+    var hex = document.createElement("input");
+    hex.type = "text";
+    hex.className = "dz-color-field-hex";
+    hex.maxLength = 7;
+    hex.autocomplete = "off";
+    hex.setAttribute("aria-label", field.label + " hex value");
+    readout.appendChild(swatch);
+    readout.appendChild(hex);
+    panel.appendChild(readout);
+
+    field.anchor.insertAdjacentElement("afterend", panel);
+
+    // Repaints the swatch/hex/wheel from a hex string, WITHOUT committing
+    // (no onChange call) and without re-attaching the wheel. Invalid input
+    // is ignored (see the hex "change" handler and dzColorFieldParseHex's
+    // own doc comment): the previous value stays on screen, never black.
+    function paintFrom(hexValue) {
+        var parsed = dzColorFieldParseHex(hexValue);
+        if (!parsed) return;
+        var v = parseInt(parsed.slice(1), 16);
+        var r = (v >> 16) & 255, g = (v >> 8) & 255, b = v & 255;
+        swatch.style.background = "rgb(" + r + "," + g + "," + b + ")";
+        hex.value = parsed;
+        field.input.value = parsed;
+        if (typeof window.dzDrawColorWheel === "function") {
+            var hsv = dzColorFieldRgbToHsv(r, g, b);
+            window.dzDrawColorWheel(canvas, DZ_COLOR_FIELD_WHEEL_SIZE, hsv.h * 360, hsv.s);
+        }
+    }
+    field.paint = paintFrom; // dzColorFieldPaint below reaches this while this field is active
+
+    paintFrom(field.input.value);
+
+    hex.addEventListener("change", function () {
+        var parsed = dzColorFieldParseHex(hex.value);
+        if (!parsed) { paintFrom(field.input.value); return; } // invalid: leave the previous value on screen, never snap to black
+        paintFrom(parsed);
+        field.commit(parsed);
+    });
+
+    if (typeof window.dzAttachColorWheel === "function") {
+        window.dzAttachColorWheel(canvas, DZ_COLOR_FIELD_WHEEL_SIZE, function (hueDegrees, saturation) {
+            var rgb = dzColorFieldHsvToRgb((((hueDegrees % 360) + 360) % 360) / 360, saturation, 1);
+            paintFrom(dzColorFieldRgbToHex(rgb.r, rgb.g, rgb.b));
+        }, function () {
+            // Commit once on release, mirroring js/rgbw-popup.js's
+            // schedule-during-drag / flush-on-release send contract, so the
+            // (potentially network-persisting) onChange never fires on
+            // every drag frame.
+            field.commit(hex.value);
+        });
+    }
+}
+
+/* Repaints the open disclosure's swatch/hex/wheel from a hex string, without
+   re-attaching the wheel (used when the native input changes while its own
+   disclosure happens to be open). No-op if nothing is open. */
+function dzColorFieldPaint(hex) {
+    if (DZ_COLOR_FIELD_ACTIVE && typeof DZ_COLOR_FIELD_ACTIVE.paint === "function") {
+        DZ_COLOR_FIELD_ACTIVE.paint(hex);
+    }
+}
+
 /* Mounts the 7-swatch custom-colour editor (Background, Menu, Item, Main,
    Text, Secondary Text, Disabled: same fields/order as
    DZ_COLOR_SCHEME_FIELDS in schemes.js) plus a "Save as preset" action
@@ -1094,7 +1382,7 @@ function dzHubCustomColorsMount(entry) {
     var row = document.createElement("div");
     row.className = "dz-hub-swatches";
     DZ_COLOR_SCHEME_FIELDS.forEach(function (field) {
-        row.appendChild(dzHubBuildColorSwatch(field));
+        row.appendChild(dzHubBuildColorSwatch(field, row));
     });
     mount.appendChild(row);
 
@@ -1116,29 +1404,18 @@ function dzHubCustomColorsMount(entry) {
     return mount;
 }
 
-/* One swatch: a type=color input bound directly to theme.color_scheme[field],
+/* One swatch: a type=color input (plus the shared wheel/hex disclosure,
+   dzBuildColorField above) bound directly to theme.color_scheme[field],
    instant-apply (like every other hub control, DZ_HUB_APPLIERS above) rather
    than the deleted legacy form's Save-button batch harvest. Enabled only
    while theme.scheme === "custom" (dzHubSyncSchemeSwatches keeps this live as
-   the picker selection changes). */
-function dzHubBuildColorSwatch(field) {
-    var cell = document.createElement("label");
-    cell.className = "dz-hub-swatch";
-
-    var span = document.createElement("span");
-    span.className = "dz-hub-swatch-label";
-    span.textContent = field.label;
-
-    var input = document.createElement("input");
-    input.type = "color";
-    input.className = "dz-hub-swatch-input";
-    input.id = DZ_HUB_COLOR_INPUT_PREFIX + field.suffix;
-    input.setAttribute("data-color-key", field.suffix);
-    input.value = (theme.color_scheme && theme.color_scheme[field.field]) || "#000000";
-    input.disabled = theme.scheme !== "custom";
-    input.addEventListener("change", function () {
+   the picker selection changes). `anchor` is the swatches row (`row` in
+   dzHubCustomColorsMount) the wheel/hex panel is inserted after when opened. */
+function dzHubBuildColorSwatch(field, anchor) {
+    var current = (theme.color_scheme && theme.color_scheme[field.field]) || "#000000";
+    var built = dzBuildColorField(field.label, current, function (hex) {
         theme.color_scheme = theme.color_scheme || {};
-        theme.color_scheme[field.field] = input.value;
+        theme.color_scheme[field.field] = hex;
         // scheme.js applyCustomColorScheme: the same setProperty applier a
         // scheme pick runs, unchanged.
         applyCustomColorScheme(theme.color_scheme);
@@ -1147,11 +1424,14 @@ function dzHubBuildColorSwatch(field) {
         // schemes.js warnIfContrastFails: the same WCAG gate the deleted
         // legacy Save handler ran, preserved.
         warnIfContrastFails(theme.color_scheme, "The custom colour scheme");
+    }, {
+        inputId: DZ_HUB_COLOR_INPUT_PREFIX + field.suffix,
+        dataColorKey: field.suffix,
+        disabled: theme.scheme !== "custom",
+        nativeEvent: "change",
+        disclosureAnchor: anchor
     });
-
-    cell.appendChild(span);
-    cell.appendChild(input);
-    return cell;
+    return built.wrap;
 }
 
 /* Keeps the hub's swatches in step with the scheme picker: called by
@@ -1159,7 +1439,11 @@ function dzHubBuildColorSwatch(field) {
    after theme.scheme/theme.color_scheme change. No-op if the hub is not
    built yet (fail-open: schemes.js calls this unconditionally, guarded by
    typeof at the call site, so a pre-hub-build call is simply impossible, and
-   a post-build call while the hub happens to be closed is harmless). */
+   a post-build call while the hub happens to be closed is harmless).
+
+   Also locks/unlocks each field's wheel-picker button (found via the shared
+   .dz-color-field wrapper, dzBuildColorField above) and closes the shared
+   disclosure if the field it is open for just got locked out from under it. */
 function dzHubSyncSchemeSwatches() {
     var hub = document.getElementById(DZ_HUB_ID);
     if (!hub) return;
@@ -1170,6 +1454,14 @@ function dzHubSyncSchemeSwatches() {
         if (!input) return;
         if (cs[field.field]) { input.value = cs[field.field]; }
         input.disabled = !isCustom;
+        var wrap = input.closest(".dz-color-field");
+        var wheelBtn = wrap && wrap.querySelector(".dz-color-field-wheel-btn");
+        if (wheelBtn) {
+            wheelBtn.disabled = !isCustom;
+            if (!isCustom && DZ_COLOR_FIELD_ACTIVE && DZ_COLOR_FIELD_ACTIVE.input === input) {
+                dzColorFieldClose();
+            }
+        }
     });
 }
 

@@ -532,6 +532,141 @@
    dz-hub-swatch-save-btn" (see the reload-button note above); identity class
    kept as a harness/JS hook only. */
 
+/* ---- Shared colour field: wheel + hex disclosure ---------------------------
+   dzBuildColorField (src/js/theme-hub.js), shared verbatim by this editor's 7
+   swatches and the theme wizard's colour fields (css/theme-wizard.css does
+   not redefine any of this - see its own header note). .dz-hub-swatch keeps
+   its pre-existing geometry unchanged; .dz-color-field is the new outer
+   column (swatch label+input, then the wheel toggle below it), so the flex
+   item inside .dz-hub-swatches is now this wrapper instead of .dz-hub-swatch
+   directly, sized the same as before by .dz-hub-swatch's own 72px width. */
+.dz-color-field {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px; /* future --dz-gap token site (spacing project) */
+}
+
+/* Wheel-picker toggle: the codified icon-quiet family (own class, never
+   .btn-icon itself), matching .dz-wizard-close/.mk-rgbw-close's hit-box,
+   transparent background and tonal glyph hover filter. */
+.dz-color-field-wheel-btn {
+    width: var(--dz-btn-icon-box);
+    height: var(--dz-btn-icon-box);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.dz-color-field-wheel-btn i {
+    font-size: var(--dz-icon-size-sm);
+    color: var(--dz-body-text);
+    transition: filter 0.18s ease;
+}
+
+.dz-color-field-wheel-btn:hover i,
+.dz-color-field-wheel-btn:focus-visible i { filter: saturate(1.6) brightness(1.15); }
+
+.dz-color-field-wheel-btn:focus-visible { box-shadow: var(--dz-btn-focus-ring); }
+
+.dz-color-field-wheel-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.dz-color-field-wheel-btn:disabled i { filter: none; }
+
+/* The shared disclosure panel (exactly one on the page - see the singleton
+   note in dzBuildColorField): a plain inline reveal below the field's row,
+   the same "divider + spacing, no floating box" idiom as .dz-hub-about,
+   never a shadowed popup - it lives inline in the page/dialog flow, not as
+   an overlay. */
+.dz-color-field-disclosure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px; /* future --dz-gap token site (spacing project) */
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 8px; /* future --dz-gap token site (spacing project) */
+    padding-top: 8px; /* future --dz-gap token site (spacing project) */
+    border-top: 1px solid var(--dz-input-border);
+}
+
+.dz-color-field-disclosure-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 200px; /* the wheel's own width plus a little breathing room */
+}
+
+/* Codified dialog-title language: sm + semibold, sentence case (matches
+   .dz-wizard-title). */
+.dz-color-field-disclosure-title {
+    font-family: var(--dz-font-family);
+    font-size: var(--dz-text-sm);
+    font-weight: var(--dz-weight-semibold);
+    color: var(--dz-body-text);
+}
+
+/* Codified dialog-close language, matching .dz-wizard-close/.mk-rgbw-close. */
+.dz-color-field-disclosure-close {
+    width: var(--dz-btn-icon-box);
+    height: var(--dz-btn-icon-box);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.dz-color-field-disclosure-close i {
+    font-size: var(--dz-icon-size-sm);
+    color: var(--dz-body-text);
+    transition: filter 0.18s ease;
+}
+
+.dz-color-field-disclosure-close:hover i,
+.dz-color-field-disclosure-close:focus-visible i { filter: saturate(1.6) brightness(1.15); }
+
+.dz-color-field-disclosure-close:focus-visible { box-shadow: var(--dz-btn-focus-ring); }
+
+/* Wheel canvas: same idiom as #mk-rgbw-wheel (css/rgbw-popup.css), a little
+   narrower to sit comfortably inline at 360px. */
+.dz-color-field-wheel-wrap { display: flex; justify-content: center; }
+.dz-color-field-wheel {
+    display: block;
+    width: 180px;
+    max-width: 100%;
+    touch-action: none;
+    cursor: crosshair;
+}
+
+/* Readout row: same idiom as .mk-rgbw-readout/.mk-rgbw-swatch/#mk-rgbw-hex
+   (css/rgbw-popup.css) - the swatch chip plus the form-input hex field
+   (transparent, accent bottom border, secondary text). */
+.dz-color-field-readout { display: flex; align-items: center; gap: 10px; }
+.dz-color-field-swatch {
+    width: 20px;
+    height: 20px;
+    border-radius: 2px; /* {rounded.xs} */
+    border: 1px solid var(--dz-input-border);
+    flex: none;
+}
+.dz-color-field-hex {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--dz-accent-color);
+    color: var(--secondary-text-color);
+    font-size: var(--dz-text-sm);
+    width: 90px;
+}
+
 /* ---- About content ---------------------------------------------------------
    dzBuildHubAbout's content lives INSIDE the About tab (the manifest's
    ninth group, hosted by dzHubAboutMount), no longer as a persistent footer
