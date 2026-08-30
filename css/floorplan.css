@@ -207,6 +207,55 @@ image#twisty {
    @import css/sidemenu.css (max-width: 979px). At desktop widths the navbar
    is fixed again, so core's document scrolling loses nothing and stays
    untouched. */
+/* --- Plan-to-plan nav arrows ----------------------------------------------
+
+   The left/right chevrons that page between floorplans. Core inlines their
+   whole treatment in www/views/floorplans.html: `.fp-nav-arrow { background:
+   rgba(0,0,0,0.3); color: white }`, a fixed translucent scrim with a fixed
+   white glyph. Over a light plan that scrim composites to a mid grey and the
+   chevron measures 2.19:1 - 2.37:1, under the WCAG SC 1.4.11 3:1 non-text
+   floor, on all four light schemes (dz-glyph-audit.js, both icon styles; dark
+   schemes are unaffected). Core has already fixed the sibling case, 3b30e888f
+   "keep the pagination dots on screen when zoomed and visible on light plans"
+   (#6954), and left the arrows.
+
+   ADDRESSED BY ID, no !important. Core's rule is (0,1,0) and lives in a <style>
+   the view injects at runtime, so it lands after every theme sheet; #fpNavLeft
+   / #fpNavRight is (1,0,0) and outranks it whatever the order. MEASURED, not
+   reasoned about: the same rule inserted as the FIRST <style> in <head>, the
+   worst possible source order, still won. The :hover pair below covers core's
+   own (0,2,0) hover rule the same way.
+
+   TREATMENT is the theme's existing floating-navigation language (DESIGN.md >
+   Top Header, css/nav.css "div.menu-toggle.scrolled"): a control that peels off
+   the chrome and floats over content becomes an --dz-accent-color box with
+   on-accent glyphs, a 6px radius and --dz-elev-popup. Making the box OPAQUE is
+   also what actually fixes the contrast: core's ratio depended on whichever
+   plan image happened to sit under the scrim, while an accent/--dz-accent-text
+   pair is scheme-guaranteed and independent of the plan.
+
+   NOT INERT ON OLDER CORES, deliberately, unlike css/glyphs.css and
+   css/icon-picker.css. These arrows have shipped since ec51de0dd (2026-03-14)
+   and are present on stable, so this changes their look on every core that has
+   them - which is the point, because the defect is on those cores too. */
+#fpNavLeft,
+#fpNavRight {
+    background: var(--dz-accent-color);
+    color: var(--dz-accent-text);
+    border-radius: var(--dz-card-radius);
+    box-shadow: var(--dz-elev-popup);
+}
+
+/* Core darkens the scrim on hover (rgba(0,0,0,0.6)), which on an opaque accent
+   box would read as a different control rather than as feedback. The theme's
+   own in-place tonal pop instead, the one .btn-icon and the glyph buttons use. */
+#fpNavLeft:hover,
+#fpNavRight:hover {
+    background: var(--dz-accent-color);
+    filter: saturate(1.12) brightness(1.05);
+}
+
+
 @media (max-width: 979px) {
     /* overflow-y is pinned too: making the stage a scroll container on the x
        axis flips its computed overflow-y from visible to auto (CSS overflow

@@ -6,6 +6,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ### Fixed
 
+- The arrows that page between floorplans are readable on the light colour schemes and follow your accent. They were a white chevron on a translucent grey panel that all but vanished over a light floorplan; they are now a solid accent button with a soft shadow, matching the floating menu button.
 - The icon picker Domoticz opens when you assign an icon to a device follows your colour scheme. On the light schemes not one icon in it had a readable name: the names under the icons, the counts beside each icon source, the search box and the window title were all drawn in colours meant for a dark dialog. The picker now matches the theme's other dialogs, and its icons, chips and selected source take your scheme's accent. (#209)
 
 ## [2.2.1] - 2026-08-29
