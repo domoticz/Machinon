@@ -210,6 +210,29 @@ function dzWizardPreviewRow(host, pair) {
     row.appendChild(dzWizardMockup(pair.dark, "Dark"));
 }
 
+/* Repaint the step-1 preview miniatures in place, WITHOUT touching the
+   swatch inputs above them. This exists because a type=color input fires
+   `input` continuously while the user drags inside the OS colour picker,
+   and dzWizardRender() starts with `dialog.textContent = ""`: rebuilding the
+   whole dialog on every `input` would destroy and recreate the very
+   <input type=color> element the native picker is anchored to mid-drag,
+   which can close or stall it in some browsers. That is exactly why the
+   hub's own swatch (dzHubBuildColorSwatch, src/js/theme-hub.js) binds
+   `change`, not `input` - it can afford a full re-render because it only
+   fires once, on commit. The wizard cannot copy that: the whole point of
+   this preview is that it updates WHILE you choose, so it needs `input`,
+   which means it must never re-render. Structural changes (the grey-tint
+   checkbox, selecting a look, moving between steps) are not driven by a
+   picker drag and still go through the normal dzWizardRender() path. */
+function dzWizardRefreshPreviews(host) {
+    var row = host.querySelector(".dz-wizard-previews");
+    if (!row) { return; }
+    row.textContent = "";
+    var pair = dzWizardCurrentPair();
+    row.appendChild(dzWizardMockup(pair.light, "Light"));
+    row.appendChild(dzWizardMockup(pair.dark, "Dark"));
+}
+
 function dzWizardStepColours(host) {
     dzWizardEl("p", "dz-wizard-lead", host).textContent =
         "Pick your main colour. Everything else is calculated from it and checked for contrast.";
@@ -219,14 +242,17 @@ function dzWizardStepColours(host) {
        the seven swatches sitting directly behind this dialog in the Colors
        group. No wizard-specific colour input exists. */
     var swatches = dzWizardEl("div", "dz-hub-swatches dz-wizard-swatches", host);
+    /* Both swatches update ONLY the preview row, not dzWizardRender() - see
+       the comment on dzWizardRefreshPreviews for why a full re-render here
+       would fight the native colour picker mid-drag. */
     swatches.appendChild(dzWizardSwatch("Main colour", DZ_WIZARD.accent, function (value) {
         DZ_WIZARD.accent = value;
-        dzWizardRender();
+        dzWizardRefreshPreviews(host);
     }));
     if (DZ_WIZARD.surface !== null) {
         swatches.appendChild(dzWizardSwatch("Grey tint", DZ_WIZARD.surface, function (value) {
             DZ_WIZARD.surface = value;
-            dzWizardRender();
+            dzWizardRefreshPreviews(host);
         }));
     }
 

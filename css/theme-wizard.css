@@ -207,7 +207,6 @@
 
 .dz-wizard-look-name {
     margin-top: 6px; /* future --dz-gap token site (spacing project) */
-    font-family: var(--dz-font-family);
     font-size: var(--dz-text-xs);
     text-align: center;
     color: var(--dz-body-text);
@@ -215,7 +214,6 @@
 
 .dz-wizard-look-desc {
     margin-top: 2px;
-    font-family: var(--dz-font-family);
     font-size: var(--dz-text-micro);
     line-height: 1.3;
     text-align: center;
