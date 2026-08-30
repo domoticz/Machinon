@@ -61,6 +61,55 @@ var DZ_SCHEME_MIGRATIONS = {
     "solarized-light":  "light"
 };
 
+/* Slug of the light/dark counterpart of `slug`, or null when it has none.
+
+   Pairing is declared metadata, not a filename convention: "magenta-light"
+   and "magenta-dark" used to be related only by how they were named, and
+   applyScheme() treats every slug as unrelated, so nothing could answer
+   "what is the dark version of what I am on". This is the lookup a header
+   light/dark toggle needs. It has no UI caller yet; it exists now because
+   retrofitting pairing onto presets already saved in users' installs is far
+   more expensive than declaring it from the start.
+
+   `schemes` and `userSchemes` are parameters rather than globals so this has
+   no load-order dependency and can be unit-tested. Generated user pairs use
+   the slug form "user:<name>|<variant>"; legacy hand-saved presets have no
+   pair and correctly return null. */
+var DZ_BASE_PAIR = { light: "dark", dark: "light" };
+
+function dzFindPairMate(slug, schemes, userSchemes) {
+    if (!slug) { return null; }
+    if (DZ_BASE_PAIR[slug]) { return DZ_BASE_PAIR[slug]; }
+
+    if (slug.indexOf("user:") === 0) {
+        var rest = slug.substring(5);
+        var bar = rest.lastIndexOf("|");
+        if (bar === -1) { return null; } // legacy unpaired preset
+        var name = rest.substring(0, bar), variant = rest.substring(bar + 1);
+        var mine = null;
+        (userSchemes || []).forEach(function (p) {
+            if (p.name === name && p.variant === variant) { mine = p; }
+        });
+        if (!mine || !mine.pair) { return null; }
+        var mate = null;
+        (userSchemes || []).forEach(function (p) {
+            if (p.pair === mine.pair && p.variant !== variant) { mate = p; }
+        });
+        return mate ? "user:" + mate.name + "|" + mate.variant : null;
+    }
+
+    var self = schemes && schemes[slug];
+    if (!self || !self.pair) { return null; }
+    var found = null;
+    Object.keys(schemes).forEach(function (other) {
+        var s = schemes[other];
+        if (other !== slug && s.pair === self.pair && s.variant !== self.variant) {
+            found = other;
+        }
+    });
+    return found;
+}
+
 /* Repair a stored pick of a retired scheme, once, at load. applyScheme already
    sets scheme/scheme_base/color_scheme, toggles custom_color_scheme, caches and
    persists, so the repair is written back and the next boot reads the survivor

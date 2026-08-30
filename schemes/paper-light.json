@@ -2,6 +2,8 @@
     "name": "Paper Light",
     "description": "Monochrome paper: zero-chrome interface, colour reserved for states",
     "base": "light",
+    "pair": "paper",
+    "variant": "light",
     "preview": { "bg": "#fafafa", "surface": "#ffffff", "accent": "#222222", "text": "#111111" },
     "colors": {
         "background": "#fafafa",

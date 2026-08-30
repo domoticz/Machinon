@@ -2,6 +2,8 @@
     "name": "Gruvbox Dark",
     "description": "Retro warm dark with earthy accents",
     "base": "dark",
+    "pair": "gruvbox",
+    "variant": "dark",
     "preview": {
         "bg": "#282828",
         "surface": "#3c3836",
