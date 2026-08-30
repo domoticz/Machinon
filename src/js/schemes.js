@@ -154,7 +154,10 @@ function dzSaveGeneratedPair(name, seed, pairColors) {
     });
     var wantDark = theme.scheme_base === "dark";
     var slug = "user:" + name + "|" + (wantDark ? "dark" : "light");
-    cacheThemeSettings();
+    /* No cacheThemeSettings() here: applyScheme(slug) always finds the preset
+       just pushed above (the slug names one of the two entries added this
+       call) and caches on that found-preset path itself; caching twice would
+       be redundant. */
     applyScheme(slug);
     renderSchemePicker();
     return slug;
@@ -262,14 +265,23 @@ function deleteUserScheme(name, variant) {
     all.forEach(function (p) {
         if (p.name === name && (variant === undefined || p.variant === variant)) { target = p; }
     });
+    var removed = [];
     theme.user_schemes = all.filter(function (p) {
-        if (target && target.pair) { return p.pair !== target.pair; }
-        return p.name !== name;
+        var goesAway = target && target.pair ? p.pair === target.pair : p.name === name;
+        if (goesAway) { removed.push(p); }
+        return !goesAway;
     });
-    var wasSlug = target && target.variant
-        ? "user:" + name + "|" + target.variant
-        : "user:" + name;
-    if (theme.scheme === wasSlug || theme.scheme === "user:" + name) {
+    /* Reset theme.scheme when it names ANY entry being removed, not just the
+       clicked card: deleting "Sunset Light" while parked on "Sunset Dark"
+       removes both, and a reset keyed only on the clicked slug would leave
+       theme.scheme dangling on the now-gone mate (no card renders selected,
+       the hub's custom-colour editor stays disabled with nothing to edit,
+       and the dangling slug survives a reboot since applyScheme is never
+       re-run for the cached slug on restore). */
+    var removedSlugs = removed.map(function (p) {
+        return p.variant ? "user:" + p.name + "|" + p.variant : "user:" + p.name;
+    });
+    if (removedSlugs.indexOf(theme.scheme) !== -1) {
         theme.scheme = "custom";
     }
     cacheThemeSettings();
@@ -407,7 +419,13 @@ function renderSchemePicker() {
         var SWATCH_KEYS = ["background", "navbar", "item", "main_color", "main_text", "alt_text", "disabled"];
         /* Base (schemeless) themes have no JSON; their colours mirror the
            dz-tokens.css / dark.css token defaults, and their descriptions are
-           authored here for the same reason. */
+           authored here for the same reason.
+
+           Every card below carries a `pair` id (declared metadata, mirroring
+           the scheme JSONs' own `pair` field), but nothing reads card.pair
+           yet: it is groundwork for a future header light/dark toggle, the
+           same reason dzFindPairMate has no caller yet either. Both landed
+           together on purpose, not as an oversight. */
         var cards = [
             { slug: "light", name: "Machinon Light", pair: "machinon", desc: "The default look: clean blue on white", colors: { background: "#f4f8fc", navbar: "#e9f2fb", item: "#ffffff", main_color: "#396d9e", main_text: "#1b2b3a", alt_text: "#3e5568", disabled: "#8ca0b3" } },
             { slug: "dark", name: "Machinon Dark", pair: "machinon", desc: "The default look: blue glowing on navy", colors: { background: "#0f1620", navbar: "#0a0f16", item: "#18202b", main_color: "#98ccfd", main_text: "#dce6f0", alt_text: "#9db2c6", disabled: "#5e7183" } }

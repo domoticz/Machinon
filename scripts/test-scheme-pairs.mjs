@@ -119,3 +119,30 @@ test("findPairMate matches an exact legacy name before splitting on a literal pi
     ];
     assert.equal(dz.dzFindPairMate("user:Warm|Cool|light", SCHEMES, pairedUsers), "user:Warm|Cool|dark");
 });
+
+test("deleting one half of a pair does not leave theme.scheme dangling on the other half", () => {
+    // deleteUserScheme reads/writes the theme global directly and calls
+    // cacheThemeSettings, persistSchemeChoice, and renderSchemePicker.
+    // persistSchemeChoice is already defined by the loaded schemes.js and
+    // no-ops here (neither dzHubPersist nor storeUserVariableThemeSettings
+    // exists in this harness); renderSchemePicker is also already defined
+    // and no-ops because DZ_SCHEME_PICKER_CONTAINER_IDS starts empty. Only
+    // theme and cacheThemeSettings need stubbing.
+    dz.theme = {
+        user_schemes: [
+            { name: "Sunset", variant: "light", pair: "u:sunset-1", base: "light", colors: {} },
+            { name: "Sunset", variant: "dark",  pair: "u:sunset-1", base: "dark",  colors: {} }
+        ],
+        // The user is on the DARK half; deleting the LIGHT half must not
+        // leave theme.scheme pointing at "user:Sunset|dark", which is about
+        // to be removed too (pairs delete together).
+        scheme: "user:Sunset|dark"
+    };
+    dz.cacheThemeSettings = function () {};
+
+    dz.deleteUserScheme("Sunset", "light");
+
+    assert.equal(dz.theme.scheme, "custom",
+                 "theme.scheme must not be left pointing at the deleted mate's slug");
+    assert.deepEqual(dz.theme.user_schemes, [], "both halves of the pair must be removed");
+});
