@@ -61,8 +61,17 @@
 
     function ensureDom() {
         if (document.getElementById("mk-rgbw-popup")) return;
-        var scrim = el("div", null, document.body);
-        scrim.id = "mk-rgbw-scrim";
+        /* The scrim is SHARED (DESIGN.md "Modal Scrim"): src/js/theme-wizard.js
+           may have created it before any colour popup was ever opened. Guarding
+           its creation on #mk-rgbw-popup alone appends a SECOND #mk-rgbw-scrim,
+           and getElementById then returns the other feature's orphaned one,
+           leaving this popup toggling display on an element nobody sees and its
+           backdrop click dead. Reuse whatever is already in the document. */
+        var scrim = document.getElementById("mk-rgbw-scrim");
+        if (!scrim) {
+            scrim = el("div", null, document.body);
+            scrim.id = "mk-rgbw-scrim";
+        }
         scrim.addEventListener("click", closePopup);
         var pop = el("div", null, document.body);
         pop.id = "mk-rgbw-popup";

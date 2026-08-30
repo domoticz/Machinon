@@ -84,7 +84,10 @@ function dzWizardRender() {
     var steps = dzWizardEl("div", "dz-wizard-steps", head);
     ["Colours", "Look", "Name"].forEach(function (label, i) {
         var stepEl = dzWizardEl("span", "dz-wizard-step", steps);
-        if (i + 1 === DZ_WIZARD.step) { stepEl.className += " is-current"; }
+        if (i + 1 === DZ_WIZARD.step) {
+            stepEl.className += " is-current";
+            stepEl.setAttribute("aria-current", "step");
+        }
         stepEl.textContent = label;
     });
 

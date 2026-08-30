@@ -81,7 +81,11 @@
     transition: filter 0.18s ease;
 }
 
-.dz-wizard-close:hover i { filter: saturate(1.6) brightness(1.15); }
+/* Tint on both hover AND keyboard focus, matching .mk-rgbw-close
+   (css/rgbw-popup.css): a focus-only ring with no tint would make keyboard
+   and pointer affordance inconsistent. */
+.dz-wizard-close:hover i,
+.dz-wizard-close:focus-visible i { filter: saturate(1.6) brightness(1.15); }
 
 .dz-wizard-close:focus-visible { box-shadow: var(--dz-btn-focus-ring); }
 
@@ -93,6 +97,10 @@
     margin-bottom: -1px; /* overlap the head's 1px border, like .dz-hub-tabs */
 }
 
+/* A progress indicator, not a tab. It borrows .dz-hub-tab's underline for
+   visual consistency, but navigation is the Back button: jumping forward
+   past an unfinished step is not valid, so the strip is deliberately inert.
+   Do not add cursor:pointer or a click handler. */
 .dz-wizard-step {
     flex: 0 0 auto;
     white-space: nowrap;
@@ -101,7 +109,11 @@
     font-weight: var(--dz-weight-semibold);
     padding: 6px 2px; /* future --dz-gap token site (spacing project) */
     border-bottom: 2px solid transparent;
-    color: color-mix(in srgb, var(--dz-body-text) 62%, transparent);
+    /* Full-strength body text, matching .dz-hub-tab and .mk-rgbw-tabs button:
+       both inactive-tab precedents stay at full contrast and only gain colour
+       on hover/active, so muting this one would be a new pattern, not theirs. */
+    color: var(--dz-body-text);
+    cursor: default;
 }
 
 /* Active state matches .mk-rgbw-tabs button.active exactly: the accent
