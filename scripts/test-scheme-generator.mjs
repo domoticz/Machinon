@@ -23,7 +23,7 @@ const KEYS = ["background", "item", "navbar", "main_color", "main_text", "alt_te
    [foreground key, background key, ratio-picking function]. */
 function floorsFor(look) {
     const P = dz.DZ_LOOKS[look];
-    return [
+    const floors = [
         ["main_text",   "background", P.body],
         ["alt_text",    "background", P.alt],
         ["main_color",  "background", P.acc],
@@ -33,11 +33,24 @@ function floorsFor(look) {
         ["success",     "background", P.acc],
         ["warning",     "background", P.acc]
     ];
+    /* Only a hardBorder look solves its border to a real ratio; the other
+       looks place it at a fixed perceptual offset with no ratio floor to
+       hold, so only sweep it where there is one. */
+    if (P.hardBorder) { floors.push(["border", "background", P.borderRatio]); }
+    return floors;
 }
 
 test("parity with the Python prototype (<=1 per channel)", () => {
+    /* Frozen golden-file baseline: the exact output of the Python design
+       prototype that this generator was ported from, for a fixed set of
+       seeds. It lives under scripts/fixtures (tracked by git, unlike
+       docs/superpowers/ which is gitignored) so CI can read it on a clean
+       checkout. If the generator's design is ever deliberately changed,
+       regenerate this fixture from the NEW generator and review the diff
+       like any other behaviour change; it is not meant to pin the old
+       behaviour forever. */
     const fixture = JSON.parse(
-        readFileSync("docs/superpowers/plans/2026-08-30-generator-parity-fixture.json", "utf8"));
+        readFileSync("scripts/fixtures/scheme-generator-parity.json", "utf8"));
     const drift = [];
     for (const [caseKey, expected] of Object.entries(fixture)) {
         const [look, accent, variant, surfaceRaw] = caseKey.split("|");
@@ -83,6 +96,44 @@ test("every generated scheme clears every contrast floor", () => {
     assert.equal(checked, dz.DZ_LOOK_ORDER.length * hues.length * chromas.length * 2);
     assert.equal(checked, 864, "3 looks x 36 hues x 4 chromas x 2 variants");
     console.log(`  swept ${checked} generated schemes`);
+});
+
+test("text falls back to a solve when the look's anchor undershoots its floor", () => {
+    /* The 864-scheme sweep above never exercises the solve fallback inside
+       floored(): across every swept hue/chroma/look/variant combination the
+       raw anchor colour already clears its floor, so the branch that calls
+       dzSolveLightness for main_text/alt_text is dead weight as far as that
+       sweep can tell. Prove it independently by installing a temporary look
+       whose anchor sits deliberately too close to its own background to
+       clear "body", and confirming the returned text still meets the floor
+       (which is only possible via the solve, not the raw anchor). DZ_LOOKS
+       is restored afterwards so no other test sees the temporary look. */
+    const original = dz.DZ_LOOKS;
+    const bad = Object.assign({}, original.soft, { anchor: 0.94 });
+    original.__badAnchorTest = bad;
+    try {
+        const accent = "#3B7DD8";
+        const hs = dz.dzHexToOklch(accent).h;
+        const tC = bad.nC * 1.5;
+
+        // Sanity check on the test fixture itself: the raw anchor must NOT
+        // clear the floor, otherwise this test would not reach the fallback
+        // branch at all and would pass for the wrong reason.
+        const rawAnchorColor = dz.dzOklchToHex(bad.anchor, tC, hs);
+        const rawRatio = dz.dzContrastRatio(rawAnchorColor, dz.dzOklchToHex(bad.light[1], bad.nC, hs));
+        assert.ok(rawRatio < bad.body,
+            `test setup invalid: raw anchor already clears the floor (${rawRatio.toFixed(2)} >= ${bad.body})`);
+
+        const cs = dz.dzGenerateScheme({ accent, surface: null, look: "__badAnchorTest" }, "light");
+        const textRatio = dz.dzContrastRatio(cs.main_text, cs.background);
+        const altRatio = dz.dzContrastRatio(cs.alt_text, cs.background);
+        assert.ok(textRatio >= bad.body - 0.01,
+            `main_text did not fall back to a solve: ${textRatio.toFixed(2)} < ${bad.body}`);
+        assert.ok(altRatio >= bad.alt - 0.01,
+            `alt_text did not fall back to a solve: ${altRatio.toFixed(2)} < ${bad.alt}`);
+    } finally {
+        delete original.__badAnchorTest;
+    }
 });
 
 test("every scheme defines exactly the 12 keys applyCustomColorScheme consumes", () => {
