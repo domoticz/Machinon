@@ -38,6 +38,9 @@ jobs:
       - name: Icon-contrast unit tests
         run: python3 -m pytest scripts/test_measure_icon_contrast.py -q
 
+      - name: Scheme generator maths and contrast floors
+        run: node --test scripts/test-color-oklch.mjs scripts/test-scheme-generator.mjs
+
       - name: Icon colours clear the contrast floor on every scheme
         run: python3 scripts/measure-icon-contrast.py --check
 
