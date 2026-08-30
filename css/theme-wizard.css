@@ -16,6 +16,26 @@
    nothing here redefines that component; this file only styles the parts
    unique to the wizard's own swatches row (.dz-wizard-swatches below). */
 
+/* #mk-rgbw-scrim: the shared modal scrim (DESIGN.md, "Modal Scrim"), styled
+   HERE rather than in css/rgbw-popup.css even though the RGBW popup is its
+   other consumer. This file (theme-wizard.css) is always loaded (custom.css
+   @import); rgbw-popup.css only loads when feature 45 (rgbw_popup) is on and
+   is REMOVED entirely by the loader when it is off. The wizard reuses this
+   element unconditionally (src/js/theme-wizard.js dzOpenThemeWizard), so its
+   styling cannot live in a file that can disappear out from under an
+   always-loaded consumer - with the feature off it would otherwise open with
+   no dim and a zero-height, unstyled backdrop. Dim only, NO blur, per the
+   codified modal-scrim language (the anti-glass ruling measured blur/glass
+   failing AA on busy backdrops). Fixed literal by design: a scrim is shadow
+   geometry, not a scheme colour. */
+#mk-rgbw-scrim {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+}
+
 .dz-wizard {
     position: fixed;
     /* Centring is the center_popups idiom used by #mk-rgbw-popup: top at 50vh

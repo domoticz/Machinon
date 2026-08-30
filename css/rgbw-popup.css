@@ -8,17 +8,12 @@
   the clamp still owns core's #rgbw_popup for the feature-off path.
 */
 
-/* Modal scrim: dim only, NO blur, per the codified modal-scrim language
-   (DESIGN.md; the anti-glass ruling measured blur/glass failing AA on busy
-   backdrops). Fixed literal by design: a scrim is shadow geometry, not a
-   scheme colour. */
-#mk-rgbw-scrim {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 2000;
-}
+/* #mk-rgbw-scrim (the shared modal scrim) moved to css/theme-wizard.css: the
+   theme wizard (src/js/theme-wizard.js) is always loaded and reuses this same
+   element, but this file only loads when feature 45 (rgbw_popup) is on. With
+   the feature off, the loader drops this file entirely and the wizard's scrim
+   would render with no dim and no styled backdrop. See that file for the rule
+   itself. */
 
 #mk-rgbw-popup {
     display: none;

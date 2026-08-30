@@ -154,6 +154,19 @@
         document.addEventListener("touchend", function () {
             if (dragging) { dragging = false; if (activeOnCommit) activeOnCommit(); }
         });
+        /* touchcancel (a system gesture, an incoming call) is PRE-EXISTING as
+           a gap: js/rgbw-popup.js's own attachWheel (git show
+           master:js/rgbw-popup.js) never handled it either. It mattered less
+           there because that file has exactly one consumer, feature-gated.
+           This module now has three (the RGBW popup, the wizard's colour
+           step, the hub's custom-colour editor), so leaving it unhandled
+           lets ANY of them strand `dragging === true` forever: the next
+           touchmove anywhere calls pick() and preventDefault()s a scroll the
+           user did not intend, and its touchend fires activeOnCommit(),
+           committing a colour the user never actually picked. Only clear the
+           flag here - do NOT call activeOnCommit: a cancelled gesture is not
+           a commit. */
+        document.addEventListener("touchcancel", function () { dragging = false; });
     }
 
     /* Attaches drag handling to canvas, at `size` px (must match the size

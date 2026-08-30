@@ -160,6 +160,15 @@ function dzSaveGeneratedPair(name, seed, pairColors) {
        be redundant. */
     applyScheme(slug);
     renderSchemePicker();
+    // Keep the hub's own custom-colour swatches (value + enabled state) in
+    // step with the save, the same as every other apply path (the per-card
+    // click handler below and dzHubBuildColorSwatch's own edits): without
+    // this, the seven inputs behind the wizard keep showing the OLD colours
+    // and stay enabled (theme.scheme is no longer "custom"), so editing one
+    // writes into theme.color_scheme under a preset slug that the next load
+    // silently overwrites again via applyScheme. Guarded: schemes.js must
+    // not hard-depend on the hub module.
+    if (typeof dzHubSyncSchemeSwatches === "function") { dzHubSyncSchemeSwatches(); }
     return slug;
 }
 
@@ -236,6 +245,24 @@ function warnIfContrastFails(cs, what) {
     return fails;
 }
 
+/* Shared "|" guard for every scheme-name save path. "|" separates name from
+   variant in a generated pair's slug (user:<name>|<variant>, dzSaveGeneratedPair
+   above). A hand-saved preset named e.g. "Sunset|light" would collide with the
+   light half of a generated pair named "Sunset": renderSchemePicker would emit
+   two cards with the identical data-scheme, both showing selected, and
+   applyScheme's exact-name-first rule makes the generated half unreachable.
+   Centralized here (rather than duplicated per caller, which is exactly how
+   it drifted before: theme-wizard.js had this check and saveCurrentColorsAsScheme
+   below did not) so every current AND future save path enforces the same
+   rule. Returns an error message to show the user, or null when the name is
+   fine. */
+function dzSchemeNameError(name) {
+    if ((name || "").indexOf("|") !== -1) {
+        return "A theme name cannot contain the | character.";
+    }
+    return null;
+}
+
 /* User-saved presets: snapshots of the current colours under a chosen name.
    Stored on the theme object (theme.user_schemes), so they ride the same
    localStorage cache and Domoticz user-variable sync as everything else.
@@ -243,6 +270,11 @@ function warnIfContrastFails(cs, what) {
 function saveCurrentColorsAsScheme(name) {
     name = (name || "").trim().slice(0, 40);
     if (!name) return;
+    var nameError = dzSchemeNameError(name);
+    if (nameError) {
+        if (typeof generate_noty === "function") { generate_noty("warning", nameError, 5000); }
+        return;
+    }
     theme.user_schemes = (theme.user_schemes || []).filter(function(p) { return p.name !== name; });
     theme.user_schemes.push({
         name: name,

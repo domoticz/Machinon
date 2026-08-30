@@ -250,11 +250,20 @@ function dzWizardStepColours(host) {
        the comment on dzWizardRefreshPreviews for why a full re-render here
        would fight the native colour picker mid-drag. */
     swatches.appendChild(dzWizardSwatch("Main colour", DZ_WIZARD.accent, function (value) {
+        /* DZ_WIZARD can go null between this callback being wired and it
+           firing: pressing Escape while dragging the wheel closes the
+           dialog (dzCloseThemeWizard nulls DZ_WIZARD) but the drag's
+           document-level mouseup still runs, and its onCommit still calls
+           this onChange. Console-only and self-recovering without the
+           guard (a TypeError here does not corrupt any state), but cheap
+           to avoid. */
+        if (!DZ_WIZARD) { return; }
         DZ_WIZARD.accent = value;
         dzWizardRefreshPreviews(host);
     }, swatches));
     if (DZ_WIZARD.surface !== null) {
         swatches.appendChild(dzWizardSwatch("Grey tint", DZ_WIZARD.surface, function (value) {
+            if (!DZ_WIZARD) { return; } // see the same guard above
             DZ_WIZARD.surface = value;
             dzWizardRefreshPreviews(host);
         }, swatches));
@@ -376,16 +385,13 @@ function dzWizardSave() {
         }
         return;
     }
-    /* "|" separates name from variant in a generated pair's slug
-       (user:<name>|<variant>). A name containing one would collide with that
-       grammar: a preset literally called "Sunset|light" and the light half of
-       a pair called "Sunset" produce the same slug. applyScheme resolves the
-       ambiguity by preferring an exact name match, so nothing breaks, but one
-       of the two becomes unreachable. Cheaper to refuse the character here
-       than to carry the ambiguity. */
-    if (name.indexOf("|") !== -1) {
+    /* Shared with saveCurrentColorsAsScheme (src/js/schemes.js, loaded before
+       this file in THEME_MODULES): see dzSchemeNameError there for why "|" is
+       refused and why the check lives in one place rather than here alone. */
+    var nameError = dzSchemeNameError(name);
+    if (nameError) {
         if (typeof generate_noty === "function") {
-            generate_noty("warning", "A theme name cannot contain the | character.", 5000);
+            generate_noty("warning", nameError, 5000);
         }
         return;
     }
