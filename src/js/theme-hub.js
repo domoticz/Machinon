@@ -1050,6 +1050,21 @@ function dzHubSchemeMount(entry) {
     mount.setAttribute("data-custom", entry.key);
     mount.appendChild(dzHubCustomHeader(entry));
 
+    /* The generated-theme on-ramp, above the picker it writes into. The manual
+       seven-swatch editor below is untouched: this is an easier route to the
+       same place, not a replacement for it. */
+    var actions = document.createElement("div");
+    actions.className = "dz-hub-swatch-actions";
+    var createBtn = document.createElement("button");
+    createBtn.type = "button";
+    createBtn.className = "btn btn-primary dz-hub-wizard-btn";
+    createBtn.textContent = "Create a theme";
+    createBtn.addEventListener("click", function () {
+        if (typeof dzOpenThemeWizard === "function") { dzOpenThemeWizard(); }
+    });
+    actions.appendChild(createBtn);
+    mount.appendChild(actions);
+
     var picker = document.createElement("div");
     picker.id = DZ_HUB_SCHEME_PICKER_ID;
     picker.className = "dz-hub-scheme-picker";

@@ -4,6 +4,10 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+### Added
+
+- New "Create a theme" button in Settings > Theme > Colors: pick one or two colours and a look, and Machinon generates a matching light and dark theme with readable, contrast-checked colours throughout.
+
 ### Fixed
 
 - With **Icon style** set to Font Awesome glyphs, the device icon on each row of **Setup > Devices** is readable on the dark colour schemes. For a device you can switch on or off, that icon was drawn almost black against the dark row.

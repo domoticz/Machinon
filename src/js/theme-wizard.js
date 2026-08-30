@@ -300,6 +300,100 @@ function dzWizardStepLook(host) {
     });
 }
 
-/* Stub: Task 7 fills in the real step-3 body and save logic. */
-function dzWizardStepName(host) { host.textContent = "step 3"; }
-function dzWizardSave() { dzCloseThemeWizard(); }
+/* Contrast forces the accent's lightness to move whenever the picked colour
+   cannot clear its ratio as-is - a bright yellow must darken a lot on a light
+   background. Showing the before/after makes that an honest adjustment the
+   user can see rather than a silent override of their choice. */
+function dzWizardAccentDrift(host, pair) {
+    var lightDrift = pair.light.main_color.toUpperCase() !== DZ_WIZARD.accent.toUpperCase();
+    var darkDrift = pair.dark.main_color.toUpperCase() !== DZ_WIZARD.accent.toUpperCase();
+    if (!lightDrift && !darkDrift) { return; }
+    var wrap = dzWizardEl("div", "dz-wizard-drift", host);
+    dzWizardEl("span", "dz-wizard-drift-label", wrap).textContent =
+        "Your colour was adjusted to stay readable:";
+    [["Light", pair.light.main_color], ["Dark", pair.dark.main_color]].forEach(function (row) {
+        var line = dzWizardEl("span", "dz-wizard-drift-row", wrap);
+        var from = dzWizardEl("span", "dz-wizard-drift-chip", line);
+        from.style.background = DZ_WIZARD.accent;
+        line.appendChild(document.createTextNode(" → "));
+        var to = dzWizardEl("span", "dz-wizard-drift-chip", line);
+        to.style.background = row[1];
+        line.appendChild(document.createTextNode(" " + row[0]));
+    });
+}
+
+function dzWizardStepName(host) {
+    var pair = dzWizardCurrentPair();
+
+    /* The input carries NO wizard styling: the theme already styles
+       input[type="text"] globally (css/search.css) as transparent with an
+       accent underline, and checkboxes likewise. Overriding that here would
+       make this one dialog's fields look foreign. */
+    var field = dzWizardEl("div", "dz-wizard-name-field", host);
+    var label = dzWizardEl("label", "dz-wizard-name-label", field);
+    label.textContent = "Theme name";
+    label.setAttribute("for", "dz-wizard-name-input");
+    var input = dzWizardEl("input", "dz-wizard-name", field);
+    input.id = "dz-wizard-name-input";
+    input.type = "text";
+    input.maxLength = 40;
+    input.placeholder = "My theme";
+    input.value = DZ_WIZARD.name;
+    input.addEventListener("input", function () { DZ_WIZARD.name = input.value; });
+
+    dzWizardEl("p", "dz-wizard-lead", host).textContent =
+        "Saved as two schemes, “" + (DZ_WIZARD.name || "My theme") +
+        " Light” and “" + (DZ_WIZARD.name || "My theme") + " Dark”.";
+
+    dzWizardPreviewRow(host, pair);
+    dzWizardAccentDrift(host, pair);
+}
+
+/* The generator meets every floor by construction, so a failure here is a
+   generator bug, not a user mistake. Refuse rather than persist a scheme that
+   fails the theme's own accessibility gate. */
+function dzWizardSave() {
+    var name = (DZ_WIZARD.name || "").trim();
+    if (!name) {
+        if (typeof generate_noty === "function") {
+            generate_noty("warning", "Give your theme a name first.", 4000);
+        }
+        return;
+    }
+    /* "|" separates name from variant in a generated pair's slug
+       (user:<name>|<variant>). A name containing one would collide with that
+       grammar: a preset literally called "Sunset|light" and the light half of
+       a pair called "Sunset" produce the same slug. applyScheme resolves the
+       ambiguity by preferring an exact name match, so nothing breaks, but one
+       of the two becomes unreachable. Cheaper to refuse the character here
+       than to carry the ambiguity. */
+    if (name.indexOf("|") !== -1) {
+        if (typeof generate_noty === "function") {
+            generate_noty("warning", "A theme name cannot contain the | character.", 5000);
+        }
+        return;
+    }
+    var pair = dzWizardCurrentPair();
+    var problems = [];
+    ["light", "dark"].forEach(function (variant) {
+        if (typeof schemeContrastFailures === "function") {
+            schemeContrastFailures(pair[variant]).forEach(function (f) {
+                problems.push(variant + ": " + f);
+            });
+        }
+    });
+    if (problems.length) {
+        console.log(themeName + " - generator produced a failing scheme:", problems);
+        if (typeof generate_noty === "function") {
+            generate_noty("error",
+                "That combination could not be made readable. Please report this.", 8000);
+        }
+        return;
+    }
+    var seed = { accent: DZ_WIZARD.accent, surface: DZ_WIZARD.surface, look: DZ_WIZARD.look };
+    dzSaveGeneratedPair(name, seed, pair);
+    dzCloseThemeWizard();
+    if (typeof generate_noty === "function") {
+        generate_noty("success", "“" + name + "” created.", 4000);
+    }
+}

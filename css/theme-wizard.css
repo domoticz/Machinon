@@ -296,3 +296,44 @@
 }
 
 .dz-wizard-mock-cap { text-align: center; padding: 4px; }
+
+/* --- Step 3: name field and accent drift ------------------------------ */
+
+.dz-wizard-name-field {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* future --dz-gap token site (spacing project) */
+    margin-bottom: 8px; /* future --dz-gap token site (spacing project) */
+}
+
+.dz-wizard-name-label {
+    font-family: var(--dz-font-family);
+    font-size: var(--dz-text-sm);
+    font-weight: var(--dz-weight-semibold);
+    color: var(--dz-body-text);
+}
+
+.dz-wizard-drift {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px; /* future --dz-gap token site (spacing project) */
+    margin-top: 8px; /* future --dz-gap token site (spacing project) */
+}
+
+.dz-wizard-drift-label,
+.dz-wizard-drift-row {
+    font-family: var(--dz-font-family);
+    font-size: var(--dz-text-micro);
+    color: color-mix(in srgb, var(--dz-body-text) 62%, transparent);
+}
+
+.dz-wizard-drift-row { display: inline-flex; align-items: center; gap: 4px; }
+
+.dz-wizard-drift-chip {
+    width: 12px;
+    height: 12px;
+    border-radius: 4px; /* the .swatches colour-band radius */
+    display: inline-block;
+    border: 1px solid var(--dz-input-border);
+}
