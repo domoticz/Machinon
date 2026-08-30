@@ -24,6 +24,18 @@
    rule below re-points one such family at the token the theme already uses for
    that meaning, so the glyphs follow the scheme the way the artwork did.
 
+   TWO HALVES, since 2026-08-30. Core's `48e52d56e` (the fix for
+   domoticz/domoticz#7009) moved every one of those hexes onto
+   `var(--dz-icon-*, <literal>)` / `var(--dz-batt-*, <literal>)`. Machinon now
+   DECLARES those tokens in dz-tokens.css, which is the half that reaches
+   surfaces this file names nowhere. This file is the other half: it reaches
+   cores built between the rework and that commit, which have the glyph classes
+   but no token reads at all. Every rule below whose meaning matches core's own
+   token consumes the theme's declaration of that token rather than restating a
+   value, so the two halves cannot drift; the rules that deliberately diverge
+   from core's collapsed meanings are marked SPLIT and read a theme token
+   directly.
+
    SPECIFICITY: core's rules live in www/css/style.css and www/css/icons-chrome.css,
    both linked BEFORE styles/<theme>/custom.css, so a selector of equal
    specificity here wins on order alone. Each rule below therefore mirrors
@@ -86,7 +98,7 @@ dz-device-icon > .dz-icon-glyph.dz-icon--off,
 }
 
 .dz-scene-on {
-    color: var(--dz-status-ok);
+    color: var(--dz-icon-success);
 }
 
 .dz-scene-off {
@@ -100,6 +112,12 @@ dz-device-icon > .dz-icon-glyph.dz-icon--off,
    meaning scheme is kept, only re-tokenised: add = success, edit = accent,
    warn = warning, danger = the theme red, neutral = plain body text.
 
+   Where the meaning matches core's own token the rule consumes the theme's
+   DECLARATION of that token (dz-tokens.css) rather than restating its value, so
+   this file and the declaration cannot drift apart. Where the theme deliberately
+   splits a meaning core collapses, the rule reads the theme token directly and
+   says so.
+
    :where() holds the button default at one class of specificity exactly as
    core does, so the .dz-act-* modifiers below still win without repeating the
    button selector. */
@@ -108,21 +126,27 @@ dz-device-icon > .dz-icon-glyph.dz-icon--off,
 }
 
 .dz-chrome-icon.dz-act-add {
-    color: var(--dz-status-ok);
+    color: var(--dz-icon-success);
 }
 
+/* SPLIT from core: core spends --dz-icon-accent here as well as on device
+   glyphs. An edit pencil is chrome, not device art, so it takes the chrome
+   accent while the card glyphs take --dz-card-icon-accent. */
 .dz-chrome-icon.dz-act-edit {
     color: var(--dz-accent-color);
 }
 
 .dz-chrome-icon.dz-act-warn {
-    color: var(--dz-status-warn);
+    color: var(--dz-icon-warn);
 }
 
 .dz-chrome-icon.dz-act-danger {
-    color: var(--dz-status-danger);
+    color: var(--dz-icon-danger);
 }
 
+/* SPLIT from core: core's --dz-icon-muted covers both this and every off state.
+   A neutral action is a resting button glyph, so it takes the ghost-button text
+   colour; the off states take the measured --dz-icon-off instead. */
 .dz-chrome-icon.dz-act-neutral {
     color: var(--dz-btn-ghost-text);
 }
@@ -153,9 +177,10 @@ dz-device-icon > .dz-icon-glyph.dz-icon--off,
    device glyph on others. */
 .dz-chrome-icon.dz-trend-up,
 .dz-icon-glyph.dz-trend-up {
-    color: var(--dz-status-danger);
+    color: var(--dz-icon-danger);
 }
 
+/* SPLIT from core, same reason as dz-act-edit: a trend arrow is chrome. */
 .dz-chrome-icon.dz-trend-down,
 .dz-icon-glyph.dz-trend-down {
     color: var(--dz-accent-color);
@@ -174,15 +199,15 @@ dz-device-icon > .dz-icon-glyph.dz-icon--off,
    bar (css/tables.css td .battery) from --dz-status-danger / --dz-status-warn;
    the glyph now uses the same three tokens so both readings agree. */
 .dz-chrome-icon.dz-batt-empty {
-    color: var(--dz-status-danger);
+    color: var(--dz-batt-empty);
 }
 
 .dz-chrome-icon.dz-batt-low {
-    color: var(--dz-status-warn);
+    color: var(--dz-batt-low);
 }
 
 .dz-chrome-icon.dz-batt-ok {
-    color: var(--dz-status-ok);
+    color: var(--dz-batt-ok);
 }
 
 
@@ -197,5 +222,5 @@ dz-device-icon > .dz-icon-glyph.dz-icon--off,
 .dz-icon-glyph.fa-star,
 .dz-chrome-icon.fa-star,
 .btn.btn-icon > .dz-chrome-icon.fa-star {
-    color: var(--dz-accent-color);
+    color: var(--dz-icon-star);
 }

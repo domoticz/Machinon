@@ -548,6 +548,39 @@
     --dz-modal-text:          var(--dz-body-text);
     --dz-modal-header-bg:     var(--dz-modal-bg);
 
+    /* ICON GLYPH contract - Domoticz 2026.3 only. The icon rework (PR #6995) painted every
+       Font Awesome glyph family with a literal hex; domoticz/domoticz#7009 got those moved onto
+       `var(--dz-icon-*, <literal>)` / `var(--dz-batt-*, <literal>)` in 48e52d56e. Core declares
+       stock values in www/css/variables.css, which Machinon never loads (custom.css imports only
+       its own leaf files, never legacy.css), so under this theme every one of them resolves to
+       core's fallback literal unless WE declare it. Measured on beta 18324: all nine read
+       "(unset)" before this block existed.
+
+       Declaring them is the structural half of the fix and css/glyphs.css is the compatibility
+       half. A token reaches every surface core paints from it, including ones the theme names
+       nowhere (today that is `.dz-icon-field-preview`, the swatch beside the device edit
+       dialog's "Change..." button); the class rules in glyphs.css reach cores between the rework
+       and 48e52d56e, which have the classes but no token reads. Each rule there consumes the
+       token declared here rather than restating its value, so the two halves cannot drift.
+
+       On a Domoticz without the rework nothing reads any of these and the block is inert, which
+       is a stronger guarantee than a class override: there is no selector to accidentally match.
+
+       Core spends ONE --dz-icon-accent across device glyphs, blinds, dz-act-edit, dz-trend-down
+       and dz-scene-run, and ONE --dz-icon-muted across every off state plus dz-act-neutral and
+       dz-trend-flat. The theme splits both (card-icon accent vs chrome accent; the measured
+       --dz-icon-off vs plain ghost-button text), so these two take the reading that fits the
+       surfaces glyphs.css does NOT name, and glyphs.css keeps the splits explicitly. */
+    --dz-icon-accent:         var(--dz-card-icon-accent);
+    --dz-icon-muted:          var(--dz-icon-off);
+    --dz-icon-success:        var(--dz-status-ok);
+    --dz-icon-warn:           var(--dz-status-warn);
+    --dz-icon-danger:         var(--dz-status-danger);
+    --dz-icon-star:           var(--dz-accent-color);
+    --dz-batt-empty:          var(--dz-status-danger);
+    --dz-batt-low:            var(--dz-status-warn);
+    --dz-batt-ok:             var(--dz-status-ok);
+
     /* MENU surface family: the top menu bar and every floating menu (navbar
        dropdown, card 3-dot flyout) share ONE colour, the scheme's "navbar"
        colour, which the settings UI labels "Menu". Schemes author it as a
