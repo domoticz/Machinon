@@ -21,6 +21,13 @@ def test_rgb_tolerates_a_missing_hash():
     assert measure.rgb("a37300") == [163, 115, 0]
 
 
+def test_rgb_parses_the_shipped_triplet_format():
+    """The status glow tokens ship as "r, g, b" (dz-tokens.css/dark.css), not
+    hex, so rgb() must read that format too."""
+    assert measure.rgb("196, 64, 65") == [196, 64, 65]
+    assert measure.rgb("0, 0, 139") == [0, 0, 139]
+
+
 def test_luminance_of_the_extremes():
     assert measure.luminance([0, 0, 0]) == 0
     assert measure.luminance([255, 255, 255]) == 1
@@ -193,6 +200,20 @@ def test_status_palette_selection_follows_base_not_scheme_name():
     assert palette is measure.STATUS_LIGHT
 
 
+def test_status_constants_are_pinned_to_the_shipped_triplet_not_the_comment_hex():
+    """The bug this guard exists to catch: the tokens ship as an RGB triplet
+    with the hex only in a trailing CSS comment. A pin keyed off the hex
+    stayed green when only the triplet was edited and the comment was left
+    untouched (proven manually: the pre-fix script reported OK against
+    dz-tokens.css with --dz-status-lowbat-values-base changed to 255, 255, 0
+    and its comment unchanged). Pinning on the triplet means that same edit,
+    with or without the comment, is exactly what makes this fail."""
+    for value in measure.STATUS_LIGHT.values():
+        assert "," in value, "status constants must be the shipped triplet, not a hex string"
+    for value in measure.STATUS_DARK.values():
+        assert "," in value, "status constants must be the shipped triplet, not a hex string"
+
+
 def test_status_constants_are_pinned_to_their_shipped_files():
     assert measure.PINNED_FILES["STATUS_LIGHT"] == "dz-tokens.css"
     assert measure.PINNED_FILES["STATUS_DARK"] == "dark.css"
@@ -209,4 +230,20 @@ def test_the_status_pin_actually_catches_drift(monkeypatch):
     assert len(missing) == 1
     assert "STATUS_LIGHT/lowbat" in missing[0]
     assert "#FFFF00" in missing[0]
+    assert "dz-tokens.css" in missing[0]
+
+
+def test_the_status_pin_catches_a_triplet_drift_with_its_comment_untouched(monkeypatch):
+    """The finding this guard was fixed for: drift the constant to a triplet
+    that is NOT in the shipped file, exactly like an edited
+    --dz-status-*-values-base with its trailing hex comment left alone. A
+    hex-pinned script would have kept reporting OK here, because the comment
+    (the only hex in the file) never changed."""
+    drifted = dict(measure.STATUS_LIGHT)
+    drifted["lowbat"] = "255, 255, 0"     # a triplet edit, comment untouched
+    monkeypatch.setattr(measure, "STATUS_LIGHT", drifted)
+    missing = measure.check_pinned()
+    assert len(missing) == 1
+    assert "STATUS_LIGHT/lowbat" in missing[0]
+    assert "255, 255, 0" in missing[0]
     assert "dz-tokens.css" in missing[0]

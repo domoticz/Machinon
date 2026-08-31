@@ -66,14 +66,26 @@ PAPER_DARK = {
 # is measured against, not repeated here) clears its own 3:1 non-text floor
 # with margin - see dz-tokens.css / dark.css for the full rationale,
 # including the deliberate lowbat hue change to amber.
-STATUS_LIGHT = {"timeout": "#C44041", "lowbat": "#8E6900", "protected": "#00008B"}
-STATUS_DARK = {"timeout": "#F56D69", "lowbat": "#FFC107", "protected": "#6595FF"}
+#
+# Pinned on the RGB TRIPLET, not a hex string: the tokens ship as
+# "--dz-status-*-values-base: r, g, b;" (dz-tokens.css/dark.css), and the hex
+# appears only in a trailing comment. A script that pinned on the hex could
+# have the triplet edited to anything - a completely different, un-measured
+# colour - while the untouched comment kept check_pinned() green. Proven: set
+# --dz-status-lowbat-values-base to 255, 255, 0 and leave the comment alone;
+# the old hex-pinned script still reported OK. Pinning on the triplet means an
+# edit to the shipped value, with or without touching the comment, is exactly
+# what makes the presence check fail.
+STATUS_LIGHT = {"timeout": "196, 64, 65", "lowbat": "142, 105, 0", "protected": "0, 0, 139"}
+STATUS_DARK = {"timeout": "245, 109, 105", "lowbat": "255, 193, 7", "protected": "101, 149, 255"}
 
-# These constants are a second source of truth for the same hex values: they let
-# contrast be measured without parsing CSS/JSON, but nothing ties them back to
-# the files that actually ship the colours, so the two can drift silently while
-# this script keeps reporting OK. Pin them: --check also confirms every
-# constant's hex string still appears in the file that should carry it.
+# These constants are a second source of truth for the same shipped values:
+# they let contrast be measured without parsing CSS/JSON, but nothing ties
+# them back to the files that actually ship the colours, so the two can drift
+# silently while this script keeps reporting OK. Pin them: --check also
+# confirms every constant's value (hex string for the identity colours,
+# RGB triplet for the status glows) still appears in the file that should
+# carry it.
 PINNED_FILES = {
     "LIGHT": "dz-tokens.css",
     "DARK": "dark.css",
@@ -100,6 +112,11 @@ def check_pinned():
 
 
 def rgb(value):
+    """Accepts either a "#rrggbb" hex string, with or without the leading
+    "#" (the identity colours), or a "r, g, b" triplet (the status glows,
+    matching how they actually ship)."""
+    if "," in value:
+        return [int(part.strip()) for part in value.split(",")]
     value = value.lstrip("#")
     return [int(value[i:i + 2], 16) for i in (0, 2, 4)]
 
