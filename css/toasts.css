@@ -64,6 +64,24 @@
 .dz-toast--device-timeout { border-left-color: rgb(var(--dz-status-timeout-values)); }
 .dz-toast--device-battery { border-left-color: rgb(var(--dz-status-lowbat-values)); }
 
+.dz-toast-icon {
+    flex: 0 0 auto;
+    font-size: 20px;
+    line-height: 1;
+    margin-top: 1px;
+    color: var(--dz-menu-text);
+}
+
+.dz-toast--success .dz-toast-icon { color: var(--dz-status-ok); }
+.dz-toast--warning .dz-toast-icon { color: var(--dz-status-warn); }
+.dz-toast--error   .dz-toast-icon { color: var(--dz-status-danger); }
+.dz-toast--info    .dz-toast-icon { color: var(--dz-accent-color); }
+
+.dz-toast-content {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
 .dz-toast-title {
     font-size: var(--dz-text-toast-title);
     font-weight: var(--dz-weight-semibold);
@@ -73,6 +91,28 @@
     font-size: var(--dz-text-toast-body);
     color: var(--secondary-text-color);
     margin-top: var(--dz-card-space-2xs);
+}
+
+.dz-toast-action-row {
+    margin-top: var(--dz-card-space-xs);
+}
+
+/* Core ships an unscoped `a:link { color: #FFF }` (www/css/style.css:1391,
+   specificity 0,1,1) and a bare `a { color: #43A4D3 }` (0,0,1) for the
+   unvisited and visited case respectively; see css/links.css for the full
+   write-up of that fight. A single class selector alone (0,1,0) loses to
+   a:link on the b component. Pairing the class with :any-link (which
+   matches both link and visited, so a previously-visited release page does
+   not fall through to core's bare `a`) adds a second b-component, landing
+   at 0,2,0, which outranks both of core's rules on b alone, before c is
+   even compared. `inherit` reuses the toast's own title colour, the same
+   surface token DESIGN.md's elevation contract already guards for AA
+   against --dz-menu-bg, so the link needs no new colour pair of its own;
+   the user agent's underline is left alone so it still reads as a link
+   without one. */
+.dz-toast-action:any-link {
+    color: inherit;
+    font-weight: var(--dz-weight-semibold);
 }
 
 .dz-toast-close {

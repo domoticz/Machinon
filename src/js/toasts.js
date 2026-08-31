@@ -24,6 +24,16 @@ var DZ_TOAST_COALESCE_MS = 1200;
 var DZ_TOAST_LOG_MAX = 50;
 var DZ_TOAST_NAME_CAP = 3;
 
+/* Default glyph by severity, used when an event carries no explicit ev.icon.
+   Ionicons is loaded unconditionally (custom.css imports css/ionicons.min.css),
+   so every one of these classes is always available. */
+var DZ_TOAST_DEFAULT_ICON = {
+    success: "ion-ios-checkmark-circle",
+    warning: "ion-ios-alert",
+    error: "ion-ios-close-circle",
+    info: "ion-ios-information-circle"
+};
+
 function dzToastCreateState() {
     return { seen: {}, log: [] };
 }
@@ -104,6 +114,44 @@ function dzToastLine(cls, text) {
     return el;
 }
 
+/* Accepts an href ONLY when it parses as an absolute http or https URL.
+   The URL constructor (not a regex) does the parsing, so this rejects
+   javascript:, data:, and every other scheme the same way a browser's own
+   scheme allow-list would, without trying to enumerate the deny-list by
+   hand. Returns the normalised href on success, null otherwise. */
+function dzToastValidHttpUrl(href) {
+    try {
+        var u = new URL(String(href), (typeof document !== "undefined" && document.baseURI) || undefined);
+        return (u.protocol === "http:" || u.protocol === "https:") ? u.href : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+/* ev.action is a structured { label, href }, never raw markup: it exists so a
+   toast can carry a real link (e.g. the update notice's release page) without
+   the body ever being allowed to contain HTML. A rejected href still shows the
+   label, as plain text, so a bad action degrades to information rather than
+   silently disappearing. */
+function dzToastBuildAction(action) {
+    var row = document.createElement("div");
+    row.className = "dz-toast-action-row";
+    var label = (action && action.label) || "";
+    var url = action ? dzToastValidHttpUrl(action.href) : null;
+    if (url) {
+        var a = document.createElement("a");
+        a.className = "dz-toast-action";
+        a.href = url;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.appendChild(document.createTextNode(label));
+        row.appendChild(a);
+    } else {
+        row.appendChild(document.createTextNode(label));
+    }
+    return row;
+}
+
 function dzToastBuild(ev) {
     var el = document.createElement("div");
     el.className = "dz-toast dz-toast--" + (ev.type || "info");
@@ -111,10 +159,17 @@ function dzToastBuild(ev) {
     if (ev.source === "device-warning" && ev.group) {
         el.classList.add("dz-toast--" + ev.group);
     }
+
+    var icon = document.createElement("i");
+    icon.className = "dz-toast-icon " + (ev.icon || DZ_TOAST_DEFAULT_ICON[ev.type] || DZ_TOAST_DEFAULT_ICON.info);
+    icon.setAttribute("aria-hidden", "true");
+    el.appendChild(icon);
+
     var content = document.createElement("div");
     content.className = "dz-toast-content";
     content.appendChild(dzToastLine("dz-toast-title", ev.title || ""));
     if (ev.body) content.appendChild(dzToastLine("dz-toast-body", ev.body));
+    if (ev.action) content.appendChild(dzToastBuildAction(ev.action));
     el.appendChild(content);
 
     var close = document.createElement("button");
