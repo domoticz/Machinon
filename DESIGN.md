@@ -408,15 +408,6 @@ card colour; the shipped values target 3.2:1 so none sits on the line. Check
 with `scripts/measure-icon-contrast.py --check` and
 `dz-glyph-audit.js --scheme all` on the test rig.
 
-### Status Glow Colors (hardcoded, not yet mapped to custom properties)
-
-| Status | Glow color | Card opacity |
-|--------|-----------|-------------|
-| Timeout | `rgb(199,67,67)` | 0.5 |
-| Protected | `rgb(0,0,139)` | 1.0 |
-| Low Battery | `rgb(255,255,0)` | 1.0 |
-| Off (fade) | default card shadow | 0.5 |
-
 ### Theme Wizard: Generated Scheme Pairs
 
 The "Create a theme" wizard (`src/js/theme-wizard.js`, dialog documented under
@@ -787,6 +778,36 @@ Consumed by `css/device-status.css` (timeout/protected/low-battery card states).
 Each derives its color from the matching `--dz-status-*-values` RGB triplet (see
 [CSS Custom Property Mapping](#css-custom-property-mapping)); only the alpha and geometry are
 fixed here.
+
+**Scheme-base dependent, same policy as the [semantic identity colours](#semantic-identity-colours)
+above.** All three name what a status IS, not what a user picked: a timed-out sensor is red, a
+flat battery is yellow, a protected device is blue. The HUE is a theme constant; only the
+LIGHTNESS differs between the light and dark base. Each is defined once per base - in
+`dz-tokens.css` for light, `dark.css` for dark - not as a scheme key: no `schemes/*.json` file
+overrides any of the three (the only status token a scheme can set is the unrelated
+`--dz-status-disabled`), so every scheme, built-in or custom, inherits one of the two bases
+untouched. The hue being held and only the lightness moving between the two bases is
+deliberate, not an oversight to "simplify" back into one shared value.
+
+Floor is WCAG SC 1.4.11's 3:1 for non-text, measured against each scheme's own card colour, the
+same methodology as the identity colours. First solved 2026-08-31 against only the two plain
+bases (`#ffffff` / `#182430`) and shipped that way; re-solved the same day once
+`scripts/measure-icon-contrast.py` was extended to check every shipped scheme's own card rather
+than just the two bases, which caught two of the three values failing on Gruvbox's more
+mid-toned cards (`#f2e5bc` light, `#3c3836` dark) - a failure the plain-base check had no way to
+see. Shipped values target 3.10:1, not exactly 3.00:1, so none sits on the line:
+
+| Token | Base | Worst case | Scheme |
+|-------|------|-----------|--------|
+| `--dz-status-timeout-values` | light | 3.87:1 | gruvbox-light |
+| `--dz-status-timeout-values` | dark | 3.11:1 | gruvbox-dark |
+| `--dz-status-lowbat-values` | light | 3.12:1 | gruvbox-light |
+| `--dz-status-lowbat-values` | dark | 10.80:1 | gruvbox-dark |
+| `--dz-status-protected-values` | light | 12.17:1 | gruvbox-light |
+| `--dz-status-protected-values` | dark | 3.14:1 | gruvbox-dark |
+
+Check with `scripts/measure-icon-contrast.py --check`, which walks every shipped scheme's own
+card colour for these three tokens the same way it already does for the identity colours above.
 
 ### Accent Rings
 

@@ -68,9 +68,32 @@
     --dz-icon-off: color-mix(in srgb, var(--secondary-text-color) 70%, var(--dz-widget-bg));
     /* Device status glows (card shadows), as r,g,b triplets so consumers
        can alpha them with rgba(). */
-    --dz-status-timeout-values:    199, 67, 67;
-    --dz-status-protected-values:  0, 0, 139;
-    --dz-status-lowbat-values:     255, 255, 0;
+    /* Device-status identity hues. Same policy as the energy/weather identity
+       colours above: the HUE is a theme constant (a timed-out sensor is red, a
+       flat battery is yellow, a protected device is blue) and only the
+       LIGHTNESS moves per scheme, until the colour clears WCAG SC 1.4.11's 3:1
+       non-text floor against the card it paints on.
+       First measured 2026-08-31 against only white and one generic dark card
+       (#182430); shipped that way, then caught by scripts/measure-icon-
+       contrast.py once it was extended to check every shipped scheme's own
+       card rather than just the two bases: gruvbox-light (#f2e5bc) and
+       gruvbox-dark (#3c3836) are mid-toned enough that the first-pass values
+       failed there (lowbat 2.45:1 on gruvbox-light, timeout 2.38:1 and
+       protected 2.24:1 on gruvbox-dark) despite clearing the floor on the
+       plain bases. Re-solved 2026-08-31 against EVERY shipped scheme's own
+       card colour, which is why each worst case below names the SCHEME that
+       produced it, not just a ratio - a ratio alone is exactly what hid the
+       first failure. Targeted 3.10, not exactly 3.00, so the values are not
+       sitting on a knife edge, matching the headroom the energy identity
+       colours above already carry.
+       Re-measure with scripts/measure-icon-contrast.py --check after any
+       change here. */
+    --dz-status-timeout-values-base:   199, 67, 67;    /* #C74343, worst 3.87 on gruvbox-light */
+    --dz-status-lowbat-values-base:    133, 133, 0;    /* #858500, worst 3.12 on gruvbox-light */
+    --dz-status-protected-values-base: 0, 0, 139;      /* #00008B, worst 12.17 on gruvbox-light */
+    --dz-status-timeout-values:    var(--dz-status-timeout-values-base);
+    --dz-status-lowbat-values:     var(--dz-status-lowbat-values-base);
+    --dz-status-protected-values:  var(--dz-status-protected-values-base);
     /* Semantic status FILLS (danger/warn/ok), for non-button status surfaces
        (first consumer: the Devices-table battery bar). Pure aliases of the
        existing palette on purpose: no new colors, the dark scheme's overrides

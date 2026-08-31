@@ -79,6 +79,22 @@ html[data-dz-scheme="dark"] {
   --dz-elev-popup:   0 2px 6px rgba(0,0,0,0.56);
   --dz-elev-overlay: 0 3px 10px rgba(0,0,0,0.60);
   --dz-elev-drag:    0 6px 14px rgba(0,0,0,0.60);
+  /* Device-status identity hues (dark). Same policy as the identity colours
+     above: hue held constant, only lightness re-solved per scheme. First
+     measured 2026-08-31 against only the plain dark base card (#182430);
+     that pass missed gruvbox-dark's more mid-toned card (#3c3836), where
+     timeout (2.38:1) and protected (2.24:1) both failed despite clearing the
+     floor on the plain base. Re-solved 2026-08-31 against EVERY shipped dark
+     scheme's own card colour, worst case named by SCHEME below rather than
+     left as a bare ratio - see the long note in dz-tokens.css for why that
+     matters. Targeted 3.10, not exactly 3.00, for headroom. Lowbat needed no
+     change (still clears comfortably at 10.80:1 worst case). */
+  --dz-status-timeout-values-base:   222, 88, 85;    /* #DE5855, worst 3.11 on gruvbox-dark */
+  --dz-status-lowbat-values-base:    255, 255, 0;    /* #FFFF00, worst 10.80 on gruvbox-dark */
+  --dz-status-protected-values-base: 71, 126, 254;   /* #477EFE, worst 3.14 on gruvbox-dark */
+  --dz-status-timeout-values:    var(--dz-status-timeout-values-base);
+  --dz-status-lowbat-values:     var(--dz-status-lowbat-values-base);
+  --dz-status-protected-values:  var(--dz-status-protected-values-base);
   --dz-glow-timeout:   0px 0px 10px 2px rgba(var(--dz-status-timeout-values), 0.5);
   --dz-glow-protected: 0px 0px 10px 2px rgba(var(--dz-status-protected-values), 0.4);
   --dz-glow-battery:   0px 0px 10px 2px rgba(var(--dz-status-lowbat-values), 0.4);
