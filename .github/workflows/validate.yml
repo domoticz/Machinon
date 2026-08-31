@@ -35,13 +35,13 @@ jobs:
       - name: Site and docs unit tests
         run: python3 -m pytest scripts/test_gen_site_tokens.py scripts/test_check_site.py scripts/test_check_contrast.py scripts/test_check_settings_docs.py scripts/test_check_png_optimized.py -q
 
-      - name: Icon-contrast unit tests
+      - name: Icon and status-glow contrast unit tests
         run: python3 -m pytest scripts/test_measure_icon_contrast.py -q
 
       - name: Scheme generator maths and contrast floors
-        run: node --test scripts/test-color-oklch.mjs scripts/test-scheme-generator.mjs scripts/test-scheme-pairs.mjs
+        run: node --test scripts/test-color-oklch.mjs scripts/test-scheme-generator.mjs scripts/test-scheme-pairs.mjs scripts/test-toast-policy.mjs
 
-      - name: Icon colours clear the contrast floor on every scheme
+      - name: Icon and status-glow colours clear the contrast floor on every scheme
         run: python3 scripts/measure-icon-contrast.py --check
 
       - name: Site tokens are in step with the theme's schemes

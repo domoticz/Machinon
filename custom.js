@@ -1,4 +1,29 @@
 var theme = {}, themeName = "", isMobile, lang, themeFolder;
+
+/* Toast bootstrap. index.html loads js/domoticz.js (line 137) and then this
+   file (142) as SYNCHRONOUS scripts, so both toast globals already exist here
+   and can be replaced with no polling and no race. THEME_MODULES below are
+   injected as async=false scripts and run later, so anything raised in that
+   window is BUFFERED as a raw call and drained by src/js/toast-hooks.js. Raw,
+   not interpreted: core's signatures stay knowledge of exactly one file. */
+(function() {
+    var buf = window.__dzToastBuffer = [];
+    function shim(fn) {
+        return function() {
+            var entry = { fn: fn, args: [].slice.call(arguments), cancelled: false, handle: null };
+            buf.push(entry);
+            /* generate_noty's return value is load-bearing in core:
+               $.cachenoty = generate_noty(...) then $.cachenoty.close(). */
+            return { close: function() {
+                entry.cancelled = true;
+                if (entry.handle) entry.handle.close();
+            } };
+        };
+    }
+    window.generate_noty = shim("noty");
+    window.ShowNotify = shim("shownotify");
+})();
+
 isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 var supported_lang = "en fr de sv nl pl";
 // The scheme colour palette now lives solely in the --dz-* tokens (dz-tokens.css / dark.css). The
@@ -9,6 +34,8 @@ var supported_lang = "en fr de sv nl pl";
 /* The theme's always-loaded modules, in load order. Feature-toggled files
    (theme.json "files") are separate and load on demand via the feature loader. */
 var THEME_MODULES = [
+    "src/js/toasts.js",
+    "src/js/toast-hooks.js",
     "src/js/settings-transport.js",
     "src/js/settings-store.js",
     "src/js/feature-loader.js",

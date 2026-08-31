@@ -384,6 +384,12 @@ function dzEnhanceDeviceCard($item, stage) {
     }
 }
 
+/* Ordering matters: setAllDevicesIconsStatus() (via dzWarnPass/dzCardIdx)
+   resolves each card's idx from tr[data-idx], which dzEnhanceDeviceCard's
+   "visible" stage tags onto every tr in the loop just above. It must run
+   AFTER that loop, not before or interleaved with it, or idx resolution
+   silently falls through to the itemtable fallback (or fails outright) for
+   cards not yet tagged. */
 function dzRunDevicePass(stage) {
     $("#main-view .item").each(function() {
         dzEnhanceDeviceCard($(this), stage);
@@ -427,31 +433,206 @@ function setAllDevicesFeatures() {
     dzRunDevicePass("deferred");
 }
 
+/* Resolve a card's device idx. The warning key must be per DEVICE, not per
+   card: the old guard tested "does this card already carry the icon", so a
+   re-render was a fresh card and the same device warned again on every route
+   change. Measured 2026-08-31: the identical toast, verbatim, after leaving
+   the dashboard and coming back.
+
+   tr[data-idx] is the real resolution path, and the only one confirmed to
+   fire: dzEnhanceDeviceCard's "visible" stage tags every tr in a card with
+   data-idx before setAllDevicesIconsStatus() runs in dzRunDevicePass (see
+   the ordering note there), so by the time this is called every visible
+   card's rows already carry it. The itemtable id below is a DEFENSIVE
+   fallback, not a second primary path: none of the templates checked
+   live (light, utility, temperature, scene, weather) embed digits in that
+   id, so this branch is not known to ever fire on this codebase, but
+   floorplan and mobile card markup were not confirmed, so it stays rather
+   than being deleted on a partial survey. */
+function dzCardIdx($card) {
+    var tr = $card.find("tr[data-idx]").attr("data-idx");
+    if (tr) return tr;
+    var t = $card.find("table[id^='itemtable']").attr("id");
+    var m = t && t.match(/(\d+)/);
+    return m ? m[1] : null;
+}
+
 function setAllDevicesIconsStatus() {
     $("div.item.statusProtected").each(function() {
         if ($(this).find("#name > i.ion-ios-lock").length === 0) {
             $(this).find("#name").prepend("<i class='ion-ios-lock' title='" + $.t("Protected") + "'></i>&nbsp;");
         }
     });
-    $("div.item.statusTimeout").each(function() {
-        if ($(this).find("#name > i.ion-ios-wifi").length === 0) {
-            if (theme.features.notification.enabled === true) {
-                // Noty renders its text as HTML; device names come from hardware/plugins,
-                // so they must be escaped before entering the toast markup.
-                var timeoutName = $("<span>").text($(this).find("#name").text()).html();
-                generate_noty('warning', "Sensor " + timeoutName + " " + language.is + " " + language.timedout, 4000);
-            }
-            $(this).find("#name").prepend("<i class='ion-ios-wifi blink warning-text' title='" + $.t("Sensor Timeout") + "'></i>&nbsp;");
-        }
+
+    /* Core's GetItemBackgroundStatus (app/app.js:853) makes these mutually
+       exclusive: HaveTimeout beats BatteryLevel <= 10, so a timed-out device
+       never also reports low battery. Two independent toggles all the same,
+       because they are two different things to be told about. */
+    dzWarnPass({
+        selector: "div.item.statusTimeout",
+        cleared: "div.item:not(.statusTimeout)",
+        feature: "warn_timeout",
+        icon: "ion-ios-wifi",
+        toastIcon: "ion-ios-wifi",
+        iconTitle: "Sensor Timeout",
+        keyPrefix: "timeout",
+        group: "device-timeout",
+        title: $.t("Sensor Timeout"),
+        groupTitle: function(c) { return c + " " + language.sensors_timed_out; }
     });
-    $("div.item.statusLowBattery").each(function() {
-        if ($(this).find("#name > i.ion-ios-battery-dead").length === 0) {
-            if (theme.features.notification.enabled === true) {
-                var batteryName = $("<span>").text($(this).find("#name").text()).html();
-                generate_noty('warning', batteryName + ' ' + $.t("Battery Level") + ' ' + $.t("Low"), 4000)
-            }
-            $(this).find("#name").prepend("<i class='ion-ios-battery-dead blink warning-text' title='" + $.t("Battery Low Level") + "'></i>&nbsp;");
+
+    /* toastIcon deliberately DIFFERS from the card's icon (owner decision
+       2026-08-31): on the card the glyph sits alone with only a tooltip, so
+       a full-battery shape there would read as the opposite of what it
+       means. On the toast the words "Battery low" sit right beside the
+       glyph, so ion-md-battery-full is unambiguous there - and it is a
+       SOLID shape, unlike ion-ios-battery-dead's outline, which on a
+       near-black tile background reads as a dim rim instead of a filled
+       icon (measured 2026-08-31, base dark scheme). */
+    dzWarnPass({
+        selector: "div.item.statusLowBattery",
+        cleared: "div.item:not(.statusLowBattery)",
+        feature: "warn_battery",
+        icon: "ion-ios-battery-dead",
+        toastIcon: "ion-md-battery-full",
+        iconTitle: "Battery Low Level",
+        keyPrefix: "battery",
+        group: "device-battery",
+        title: $.t("Battery Level") + " " + $.t("Low"),
+        groupTitle: function(c) { return c + " " + language.devices_low_on_battery; }
+    });
+}
+
+/* Backs src/js/toasts.js's dzWarnRepeatAllows/dzWarnRecord/dzWarnPrune with
+   the single localStorage key themeFolder + DZ_WARN_STORE_KEY_SUFFIX (one
+   JSON blob of key -> last-warned-ms). localStorage ONLY, never the server:
+   see the "Persisted warn state" comment in toasts.js for why. Lazily built
+   and cached for the page's life: dzWarnStore() itself does not touch
+   localStorage until get/set/remove/keys is actually called on it (load()
+   is deferred), but dzWarnPass's cleared-pass calls remove() for every
+   HEALTHY card on every render (see there), so "never touches localStorage"
+   is only true when no key was ever recorded in this browser AND that pass
+   is behind its own enabled/exists guards -- do not restate it more broadly
+   than that; this comment has already been wrong once (see the cleared-pass
+   note in dzWarnPass). remove() below is a no-op (no save()) when the key
+   was never present, so a house full of healthy devices costs zero writes
+   per render burst, not one per card. get/set/remove/keys are the ONLY
+   surface toasts.js's pure functions call, and every one of them can throw
+   (private browsing, full or disabled storage, corrupt JSON) -- that throw
+   is what lets dzWarnRepeatAllows degrade to `visit` behaviour instead of
+   the theme trying to defend against a broken value itself. */
+var dzWarnStoreCache = null;
+function dzWarnStore() {
+    if (dzWarnStoreCache) return dzWarnStoreCache;
+    var storageKey = themeFolder + DZ_WARN_STORE_KEY_SUFFIX;
+    var data = null;
+    function load() {
+        if (!data) {
+            var raw = localStorage.getItem(storageKey);
+            data = raw ? JSON.parse(raw) : {};
         }
+        return data;
+    }
+    function save() { localStorage.setItem(storageKey, JSON.stringify(data || {})); }
+    dzWarnStoreCache = {
+        get: function(key) { return load()[key]; },
+        set: function(key, value) { load()[key] = value; save(); },
+        /* Only a key that actually existed causes a write. Called once per
+           HEALTHY card on every render pass (dzWarnPass's cleared branch),
+           so an unconditional save() here would be a synchronous
+           localStorage write per healthy device, per render, forever. */
+        remove: function(key) {
+            var d = load();
+            if (!Object.prototype.hasOwnProperty.call(d, key)) return;
+            delete d[key];
+            save();
+        },
+        keys: function() { return Object.keys(load()); }
+    };
+    /* One prune per page load, on first real use, not on every pass. Best
+       effort: dzWarnPrune already tolerates a throwing store internally. */
+    dzWarnPrune(dzWarnStoreCache, Date.now());
+    return dzWarnStoreCache;
+}
+
+function dzWarnPass(cfg) {
+    var f = theme.features[cfg.feature];
+    var enabled = !!f && f.enabled === true;
+    var mode = theme.warn_repeat || "daily";
+    var now = Date.now();
+
+    $(cfg.selector).each(function() {
+        var $card = $(this);
+        if ($card.find("#name > i." + cfg.icon).length === 0) {
+            $card.find("#name").prepend("<i class='" + cfg.icon + " blink warning-text' title='" +
+                $.t(cfg.iconTitle) + "'></i>&nbsp;");
+        }
+        if (!enabled) return;
+        var idx = dzCardIdx($card);
+        var key = idx ? cfg.keyPrefix + ":" + idx : null;
+        /* The persisted preference (visit/daily/episode), on top of dzToast's
+           own per-session dedupe below. A key with no idx is never persisted,
+           same rule dzToast already applies to its own session dedupe. */
+        if (key && !dzWarnRepeatAllows(dzWarnStore(), key, mode, now)) return;
+        /* Read as plain text, not escaped. dzToast() (src/js/toasts.js) inserts
+           both title and body as TEXT NODES via createTextNode, never innerHTML,
+           so there is no markup context here for a device name to inject into.
+           Escaping it first, the way the old generate_noty call did with
+           $("<span>").text(name).html(), would be actively wrong now: escaped
+           text placed inside a text node renders its entities literally, so a
+           device named "Kitchen & Hall" would show on screen as
+           "Kitchen &amp; Hall". Harness check C9 in dz-toast-surface.js asserts
+           the no-innerHTML contract this relies on. */
+        var name = $card.find("#name").text().trim();
+        var result = dzToast({
+            type: "warning",
+            title: cfg.title,
+            body: name,
+            deviceName: name,
+            deviceIdx: idx,
+            key: key,
+            group: cfg.group,
+            groupTitle: cfg.groupTitle,
+            source: "device-warning",
+            /* Toast-specific glyph, separate from cfg.icon (the card's own
+               prepended icon): see the toastIcon comment on the battery
+               dzWarnPass() call above for why the two can differ. Without
+               this, dzToastBuild falls back to DZ_TOAST_DEFAULT_ICON.warning
+               (the generic alert glyph) for every device warning. */
+            icon: cfg.toastIcon
+        });
+        /* Record only when dzToast actually registered the event (shown,
+           merged, or queued), not when its own session dedupe swallowed it:
+           recording on every allowed call, whether shown or not, persists
+           "last allowed" instead of "last shown", so a tab left open past
+           the dedupe window silently re-records without the user ever
+           seeing the warning again. */
+        if (key && result.shown) dzWarnRecord(dzWarnStore(), key, mode, now);
+    });
+
+    /* Re-arm: a device whose card is on this page and NO LONGER carries the
+       status class has genuinely recovered, so it may warn again next time.
+       Restricted to cards actually present - a device simply absent from this
+       route has not recovered, it is just not rendered. Clears BOTH the
+       session dedupe and the persisted store, in every repeat mode: a
+       condition clearing and coming back is new information and must not
+       wait out the daily timer.
+
+       Gated on `enabled`: when this warning type is off, dzWarnPass's trigger
+       loop above never runs (it returns before dzToastMarkSeen/dzWarnRecord),
+       so nothing was ever recorded for it this session -- there is nothing to
+       clear, and running this loop over every healthy card anyway would be
+       pure waste on every render pass, for every house, forever. remove()
+       itself is also a no-op unless the key was actually present (see
+       dzWarnStore above), so this is a second, cheaper backstop, not the only
+       guard against the write storm. */
+    if (!enabled) return;
+    $(cfg.cleared).each(function() {
+        var idx = dzCardIdx($(this));
+        if (!idx) return;
+        var key = cfg.keyPrefix + ":" + idx;
+        dzToastClearKey(dzToastState, key);
+        try { dzWarnStore().remove(key); } catch (e) { /* best effort */ }
     });
 }
 

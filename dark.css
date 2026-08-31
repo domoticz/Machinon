@@ -79,6 +79,29 @@ html[data-dz-scheme="dark"] {
   --dz-elev-popup:   0 2px 6px rgba(0,0,0,0.56);
   --dz-elev-overlay: 0 3px 10px rgba(0,0,0,0.60);
   --dz-elev-drag:    0 6px 14px rgba(0,0,0,0.60);
+  /* Device-status identity hues (dark). Same policy as the identity colours
+     above: hue held constant, only lightness re-solved per scheme - EXCEPT
+     lowbat, deliberately re-hued to amber; see that value's own comment
+     below and the fuller rationale beside the light value in dz-tokens.css.
+     First measured 2026-08-31 against only the plain dark base card (#182430);
+     that pass missed gruvbox-dark's more mid-toned card (#3c3836), where
+     timeout (2.38:1) and protected (2.24:1) both failed despite clearing the
+     floor on the plain base. Re-solved 2026-08-31 against EVERY shipped dark
+     scheme's own card colour, worst case named by SCHEME below rather than
+     left as a bare ratio - see the long note in dz-tokens.css for why that
+     matters. Targeted 3.10, not exactly 3.00, for headroom (commit 58ebdf5).
+     RE-SOLVED AGAIN 2026-08-31 (owner decision, supersedes 58ebdf5) to the
+     same 4.0 target as the light base and for the same toast-tile reason -
+     see dz-tokens.css. */
+  --dz-status-timeout-values-base:   245, 109, 105;  /* #F56D69, worst 4.02 on gruvbox-dark */
+  /* This IS the amber seed (#FFC107) the light value's hue is measured
+     against, so by definition it carries no hue drift of its own - see the
+     light value's comment in dz-tokens.css for the re-hue rationale. */
+  --dz-status-lowbat-values-base:    255, 193, 7;    /* #FFC107, worst 7.11 on gruvbox-dark */
+  --dz-status-protected-values-base: 101, 149, 255;  /* #6595FF, worst 4.03 on gruvbox-dark */
+  --dz-status-timeout-values:    var(--dz-status-timeout-values-base);
+  --dz-status-lowbat-values:     var(--dz-status-lowbat-values-base);
+  --dz-status-protected-values:  var(--dz-status-protected-values-base);
   --dz-glow-timeout:   0px 0px 10px 2px rgba(var(--dz-status-timeout-values), 0.5);
   --dz-glow-protected: 0px 0px 10px 2px rgba(var(--dz-status-protected-values), 0.4);
   --dz-glow-battery:   0px 0px 10px 2px rgba(var(--dz-status-lowbat-values), 0.4);

@@ -68,9 +68,50 @@
     --dz-icon-off: color-mix(in srgb, var(--secondary-text-color) 70%, var(--dz-widget-bg));
     /* Device status glows (card shadows), as r,g,b triplets so consumers
        can alpha them with rgba(). */
-    --dz-status-timeout-values:    199, 67, 67;
-    --dz-status-protected-values:  0, 0, 139;
-    --dz-status-lowbat-values:     255, 255, 0;
+    /* Device-status identity hues. Same policy as the energy/weather identity
+       colours above: the HUE is a theme constant (a timed-out sensor is red, a
+       flat battery is amber, a protected device is blue) and only the
+       LIGHTNESS moves per scheme, until the colour clears WCAG SC 1.4.11's 3:1
+       non-text floor against the card it paints on.
+       First measured 2026-08-31 against only white and one generic dark card
+       (#182430); shipped that way, then caught by scripts/measure-icon-
+       contrast.py once it was extended to check every shipped scheme's own
+       card rather than just the two bases: gruvbox-light (#f2e5bc) and
+       gruvbox-dark (#3c3836) are mid-toned enough that the first-pass values
+       failed there (lowbat 2.45:1 on gruvbox-light, timeout 2.38:1 and
+       protected 2.24:1 on gruvbox-dark) despite clearing the floor on the
+       plain bases. Re-solved 2026-08-31 against EVERY shipped scheme's own
+       card colour, which is why each worst case below names the SCHEME that
+       produced it, not just a ratio - a ratio alone is exactly what hid the
+       first failure. Targeted 3.10, not exactly 3.00 (commit 58ebdf5).
+       RE-SOLVED AGAIN 2026-08-31 (owner decision, supersedes 58ebdf5) to a
+       4.0 target: the toast severity tile mixes this same colour into its
+       own panel background, a separate pair with its own 3:1 non-text floor,
+       and 3.10 left several scheme/severity tiles too close to that floor.
+       The higher glow target gives the diluted tile real margin instead. Mix
+       percentage, what background it is measured against, and its own worst
+       case live in css/toasts.css, not repeated here - a stale copy of that
+       number is exactly what this comment carried before. Worst glow case
+       now 4.01, gruvbox-light/lowbat.
+       Re-measure with scripts/measure-icon-contrast.py --check after any
+       change here. */
+    --dz-status-timeout-values-base:   196, 64, 65;     /* #C44041, worst 4.02 on gruvbox-light */
+    /* Lowbat is a HUE CHANGE, not a re-lit of the same hue: pure yellow
+       (h=109.8 in OKLCH) matched nothing else in the theme and read as the
+       odd one out in every scheme. Re-anchored on the amber seed #FFC107
+       (h=84.9), close to but distinct from the theme's own warning family
+       (h=75.6 in OKLCH) so low-battery still reads as its own state, not a
+       repaint of "warning". This light value's own hue (h=84.2) drifts
+       0.76deg from the seed - over the ~0.25deg budget the timeout/protected
+       pair above hold between their own light and dark values - and that is
+       accepted, not an oversight: the hue here was deliberately re-chosen,
+       not held fixed from a prior constant, so there was never a fixed hue
+       for this value to drift away from. */
+    --dz-status-lowbat-values-base:    142, 105, 0;     /* #8E6900, worst 4.01 on gruvbox-light */
+    --dz-status-protected-values-base: 0, 0, 139;       /* #00008B, worst 12.17 on gruvbox-light (unchanged) */
+    --dz-status-timeout-values:    var(--dz-status-timeout-values-base);
+    --dz-status-lowbat-values:     var(--dz-status-lowbat-values-base);
+    --dz-status-protected-values:  var(--dz-status-protected-values-base);
     /* Semantic status FILLS (danger/warn/ok), for non-button status surfaces
        (first consumer: the Devices-table battery bar). Pure aliases of the
        existing palette on purpose: no new colors, the dark scheme's overrides
@@ -188,6 +229,11 @@
     --dz-text-nav-touch:     var(--dz-text-lg);  /* mobile flyout menu links (touch targets,
                                                     deliberately larger than desktop nav's
                                                     --dz-text-sm) */
+
+    /* Toast surface (css/toasts.css). Aliases, not raw sizes: components say
+       what a piece of text IS, not how big it is. */
+    --dz-text-toast-title: var(--dz-text-sm);
+    --dz-text-toast-body:  var(--dz-text-xs);
 
     /* The standby clock stays px DELIBERATELY. It is sized to fill a screen rather than to
        be read at body scale, so a raised font preference should not enlarge it further -
@@ -626,6 +672,24 @@
     --dz-menu-separator:       var(--dz-status-disabled);
     --dz-menu-radius:          6px;
     --dz-menu-shadow:          var(--dz-elev-popup);
+
+    /* Clear of the top header (desktop; the phone override lives in
+       css/toasts.css's existing max-width:767px block, which measured
+       differently since the navbar collapses to a hamburger there).
+       Measured 2026-08-31 at 1400x950, light and dark identical:
+       .navbar.navbar-inverse.navbar-fixed-top is the only fixed element in
+       the header, bottom edge 118px, z-index 1030. 118 + --dz-card-space-lg
+       (10px) = 128px. The earlier 70px was only ever checked against C1
+       containment (fits inside the viewport) in dz-toast-surface.js, never
+       against occlusion by the navbar, which sits at a higher z-index than
+       the stack's old 1010; see css/toasts.css for the z-index fix.
+       RE-MEASURED 2026-08-31 after the presentation task's 34px severity
+       tile grew each toast's height: this offset is the top of the STACK,
+       set once against the fixed header chrome, not against any individual
+       toast's own height, so a taller toast cannot change it. Re-ran the
+       same measurement anyway rather than assume - identical result, 118px,
+       128px unchanged. */
+    --dz-toast-top: 128px;
 }
 
 /*
