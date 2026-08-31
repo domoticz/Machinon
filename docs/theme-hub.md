@@ -64,7 +64,7 @@ The Theme Hub is organized into nine tabs, in this order:
 
 | Group | What it covers |
 | --- | --- |
-| **General** | Behavior that isn't tied to one page: screen standby, the update notice, device warning toasts, centering popup dialogs, the footer text, and expandable floorplan popups. |
+| **General** | Behavior that isn't tied to one page: screen standby, the update notice, device warning pop-up messages and how often they repeat, centering popup dialogs, the footer text, and expandable floorplan popups. |
 | **Menus and navbar** | The navigation bar and Setup menu: the tile-grid settings menu, navbar icons, an optional custom menu page, and whether desktop uses the side menu. |
 | **Dashboard** | The classic dashboard: the last-seen line on cards, the wide-screen column layout, and camera previews. |
 | **Device cards** | How individual device cards look and behave everywhere they appear: relative times, dimming devices that are off, toggles instead of status text, the wind direction arrow, device photos, and the card width range. |

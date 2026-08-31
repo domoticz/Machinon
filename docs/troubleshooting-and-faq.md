@@ -44,6 +44,21 @@ broken or half-styled.
    confirmed to be caching, and clearing your browser's cache (not just refreshing) will fix it
    in your normal window too.
 
+## Pop-up messages are showing up that never appeared before
+
+Domoticz posts its own status messages when something needs your attention: "You do not have
+permission to do that", a failed save on a hardware or setup page, or this theme's own warning
+that your settings didn't save. Machinon used to hide the part of the page that shows those
+messages, so they never appeared, even though Domoticz kept sending them the whole time.
+
+As of this update, those messages show up again, in a pop-up that matches your color scheme and
+dark mode, with a close button, and Esc to dismiss it. Seeing one now isn't a sign the theme just
+started breaking something: it's the theme finally showing you what Domoticz already knew.
+
+If a specific message is confusing on its own, treat it as a Domoticz message rather than a
+Machinon one: the theme only displays the text, it doesn't write it, so look for what it means in
+Domoticz's own documentation or issue tracker rather than here.
+
 ## The Theme Hub entry is missing
 
 You expected to find **Theme** in the Setup menu, but it isn't there.
