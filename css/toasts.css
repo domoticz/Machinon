@@ -6,10 +6,13 @@
    DESIGN.md's elevation table cited a "search message toast" (.msg in
    css/search.css) as the level-4 example; that rule is dead and is not a
    reference - see the 2026-08-31 todo.md entry.
-   Severity is a 3px LEADING EDGE, not a fill: that is the theme's existing
-   accent-edge "you are here" language rotated to a new surface, and it keeps
-   text on the theme's own surface token so AA follows from the scheme's already
-   guarded text-on-panel contract instead of 32 new colour pairs. */
+   Severity is a SQUARE TILE on the leading edge, not a border rail: six
+   treatments were mocked on the rig (owner decision 2026-08-31) and the tile
+   won over a header strip because the strip mostly restated the title and its
+   variable width implied a scale that does not exist. Title/body text stays
+   on the theme's own surface token regardless of severity, so AA follows from
+   the scheme's already guarded text-on-panel contract instead of a new colour
+   pair per severity. */
 
 #dz-toast-stack {
     position: fixed;
@@ -46,7 +49,6 @@
     color: var(--dz-menu-text);
     border-radius: 6px;
     box-shadow: var(--dz-elev-overlay);
-    border-left: 3px solid var(--dz-status-warn);
     opacity: 0;
     transform: translateX(16px);
     transition: opacity 0.24s ease-out, transform 0.24s ease-out;
@@ -54,33 +56,68 @@
 
 .dz-toast--in { opacity: 1; transform: translateX(0); }
 
-.dz-toast--success { border-left-color: var(--dz-status-ok); }
-.dz-toast--warning { border-left-color: var(--dz-status-warn); }
-.dz-toast--error   { border-left-color: var(--dz-status-danger); }
-.dz-toast--info    { border-left-color: var(--dz-accent-color); }
+/* Single source of truth for the severity colour: one custom property per
+   toast, consumed once below by the tile's background mix and glyph colour.
+   Never a private hex - every value here is a token Task 6 already carries
+   an AA/3:1 contract for. */
+.dz-toast--success { --dz-toast-severity: var(--dz-status-ok); }
+.dz-toast--warning { --dz-toast-severity: var(--dz-status-warn); }
+.dz-toast--error   { --dz-toast-severity: var(--dz-status-danger); }
+.dz-toast--info    { --dz-toast-severity: var(--dz-accent-color); }
 
 /* Device warnings carry the SAME hue as the glow on the card that is warning
-   (css/device-status.css), so the toast reads as "that card". */
-.dz-toast--device-timeout { border-left-color: rgb(var(--dz-status-timeout-values)); }
-.dz-toast--device-battery { border-left-color: rgb(var(--dz-status-lowbat-values)); }
+   (css/device-status.css), so the toast reads as "that card". These two
+   classes are added ALONGSIDE .dz-toast--warning (src/js/toasts.js
+   dzToastBuild), so this rule must win the specificity tie: it does, purely
+   by appearing later in the cascade, same as the border-left rule it
+   replaces. */
+.dz-toast--device-timeout { --dz-toast-severity: rgb(var(--dz-status-timeout-values)); }
+.dz-toast--device-battery { --dz-toast-severity: rgb(var(--dz-status-lowbat-values)); }
 
-/* --dz-icon-size-sm (16px, dz-tokens.css:203, documented "inline/tab
-   ionicons"): this glyph sits inline beside a 14px title, which is exactly
-   that tier's use case. PLACEHOLDER: the presentation task is going to
-   restyle this glyph into a 34px tile, at which point this token choice
-   gets revisited against that geometry - it is not a settled final size. */
+/* The severity tile: a 34px square on the leading edge (owner decision
+   2026-08-31), background a mix of the severity colour into the PANEL,
+   glyph in the severity colour itself. 34px is fixed geometry, not a scale
+   step, the same way the toast's own 325px width and 6px corner radius are;
+   only the GLYPH inside is typographic and therefore must come from the
+   icon-size scale (check-typography.sh).
+   --dz-icon-size-md (24px) is the tier that fits: all three tiers were
+   rendered inside the 34px box and compared glyph-by-glyph (wifi, battery,
+   close-circle) before picking. -sm (16px) leaves the tile looking mostly
+   empty, roughly a third of the box unused on every side. -lg (30px) leaves
+   almost no margin, crowding the battery glyph's tab against the 5px corner
+   radius. -md (24px) is the one with real breathing room AND a confident
+   fill: Ionicons' "ios" glyphs carry their own internal padding, so 24px of
+   font-size reads as roughly a 20px mark centred in the 34px box, the same
+   visual weight card-option icons already carry inside their own tiles
+   (css/buttons.css, css/navbar_icons.css).
+   The PANEL the mix measures against is `--dz-menu-bg` (this rule's own
+   background token), which aliases `--dz-nav-bg` - the scheme's NAVBAR
+   colour, not the widget/card colour. Naming this explicitly because a first
+   pass at solving the glyph tokens (dz-tokens.css) was checked against the
+   card colour by mistake, which is a different, usually lighter/darker
+   surface - stating the real background here is what keeps that mistake
+   from recurring.
+   Mix percentage: 18% originally (2026-08-31), then measured against the
+   real `--dz-menu-bg` and found 2 of 24 scheme/severity tiles under WCAG SC
+   1.4.11's 3:1 non-text floor (worst 2.95, gruvbox-light/timeout) without
+   touching the already-approved glyph colours. RE-SOLVED SAME DAY to 15%: a
+   three-point tint change, clears the floor on all 24 combinations, worst
+   case now 3.07 on gruvbox-light/timeout. Re-verify with a script that reads
+   the real `color-mix()` output (not a hand luminance formula against the
+   wrong background) if this changes again. */
 .dz-toast-icon {
     flex: 0 0 auto;
-    font-size: var(--dz-icon-size-sm);
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    font-size: var(--dz-icon-size-md);
     line-height: 1;
-    margin-top: 1px;
-    color: var(--dz-menu-text);
+    background: color-mix(in srgb, var(--dz-toast-severity, var(--dz-status-warn)) 15%, var(--dz-menu-bg));
+    color: var(--dz-toast-severity, var(--dz-status-warn));
 }
-
-.dz-toast--success .dz-toast-icon { color: var(--dz-status-ok); }
-.dz-toast--warning .dz-toast-icon { color: var(--dz-status-warn); }
-.dz-toast--error   .dz-toast-icon { color: var(--dz-status-danger); }
-.dz-toast--info    .dz-toast-icon { color: var(--dz-accent-color); }
 
 .dz-toast-content {
     flex: 1 1 auto;
@@ -148,9 +185,37 @@
            element to clear), so the tallest fixed chrome left is the
            hamburger trigger .menu-toggle. Measured 2026-08-31 at 390x844,
            light and dark identical: bottom edge 25px, z-index 1002.
-           25 + --dz-card-space-lg (10px) = 35px. */
+           25 + --dz-card-space-lg (10px) = 35px. The closed mobile flyout
+           panel (.navbar-inner) is also position:fixed with a taller
+           z-index (1001) but sits translated off-screen at rest (measured
+           x -562px in a 390px viewport), so it is not top chrome to clear.
+           RE-MEASURED 2026-08-31 after the severity tile grew toast height:
+           unchanged, 35px, for the same reason as the desktop value above. */
         --dz-toast-top: 35px;
     }
+
+    /* Owner-found defect, 2026-08-31: a REAL tap on #search (not a
+       programmatic .focus(), which does not expand it) grows the pill from
+       31px to 41px tall and drops #searchInput to y 50..91. The collapsed
+       35px toast top only clears the COLLAPSED pill (bottom 36px); expanded,
+       elementFromPoint() at the input's centre resolved to the toast's own
+       DIV.dz-toast-body in both Chromium and Firefox - a 39px overlap
+       (input bottom 91 vs toast top 35, toast bottom 89), not a near miss.
+       A static constant cannot fix this: 35px is still correct while the
+       pill is collapsed (the common case, and the value the desktop
+       measurement above shares its derivation with), and pushing every
+       toast down to clear the EXPANDED height would waste 66px of vertical
+       space the rest of the time. :has() is the only mechanism that can
+       express "only when the pill is actually open" without JS: it re-runs
+       automatically on focus/blur, which a plain --dz-toast-top constant
+       cannot. Do not simplify this back into one number.
+       101 = measured expanded input bottom (91) + --dz-card-space-lg (10px),
+       the same gap the base 35px value budgets. Re-measured 2026-08-31 with
+       the CSS applied, both engines identical: collapsed stays 35, expanded
+       moves to 101 (input bottom 91, 10px clear), and elementFromPoint() at
+       the input centre now returns the page's own element (Chromium) or the
+       INPUT itself (Firefox) - never the toast. */
+    body:has(#search:focus-within) #dz-toast-stack { top: 101px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

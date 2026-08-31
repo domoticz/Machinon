@@ -473,6 +473,7 @@ function setAllDevicesIconsStatus() {
         cleared: "div.item:not(.statusTimeout)",
         feature: "warn_timeout",
         icon: "ion-ios-wifi",
+        toastIcon: "ion-ios-wifi",
         iconTitle: "Sensor Timeout",
         keyPrefix: "timeout",
         group: "device-timeout",
@@ -480,11 +481,20 @@ function setAllDevicesIconsStatus() {
         groupTitle: function(c) { return c + " " + language.sensors_timed_out; }
     });
 
+    /* toastIcon deliberately DIFFERS from the card's icon (owner decision
+       2026-08-31): on the card the glyph sits alone with only a tooltip, so
+       a full-battery shape there would read as the opposite of what it
+       means. On the toast the words "Battery low" sit right beside the
+       glyph, so ion-md-battery-full is unambiguous there - and it is a
+       SOLID shape, unlike ion-ios-battery-dead's outline, which on a
+       near-black tile background reads as a dim rim instead of a filled
+       icon (measured 2026-08-31, base dark scheme). */
     dzWarnPass({
         selector: "div.item.statusLowBattery",
         cleared: "div.item:not(.statusLowBattery)",
         feature: "warn_battery",
         icon: "ion-ios-battery-dead",
+        toastIcon: "ion-md-battery-full",
         iconTitle: "Battery Low Level",
         keyPrefix: "battery",
         group: "device-battery",
@@ -529,7 +539,13 @@ function dzWarnPass(cfg) {
             key: idx ? cfg.keyPrefix + ":" + idx : null,
             group: cfg.group,
             groupTitle: cfg.groupTitle,
-            source: "device-warning"
+            source: "device-warning",
+            /* Toast-specific glyph, separate from cfg.icon (the card's own
+               prepended icon): see the toastIcon comment on the battery
+               dzWarnPass() call above for why the two can differ. Without
+               this, dzToastBuild falls back to DZ_TOAST_DEFAULT_ICON.warning
+               (the generic alert glyph) for every device warning. */
+            icon: cfg.toastIcon
         });
     });
 

@@ -60,8 +60,13 @@ PAPER_DARK = {
 # lowbat or protected), so every built-in and custom scheme inherits one of
 # these two dicts purely by its `base` - there is no per-family (Paper-style)
 # branch to take here, unlike LIGHT/DARK above.
-STATUS_LIGHT = {"timeout": "#C74343", "lowbat": "#858500", "protected": "#00008B"}
-STATUS_DARK = {"timeout": "#DE5855", "lowbat": "#FFFF00", "protected": "#477EFE"}
+# Re-solved 2026-08-31 (owner decision, supersedes the 3.10-target values this
+# script originally pinned) to a 4.0 target, so the toast severity tile
+# (css/toasts.css, an 18% mix of this same colour into the panel) clears its
+# own 3:1 non-text floor with margin - see dz-tokens.css / dark.css for the
+# full rationale, including the deliberate lowbat hue change to amber.
+STATUS_LIGHT = {"timeout": "#C44041", "lowbat": "#8E6900", "protected": "#00008B"}
+STATUS_DARK = {"timeout": "#F56D69", "lowbat": "#FFC107", "protected": "#6595FF"}
 
 # These constants are a second source of truth for the same hex values: they let
 # contrast be measured without parsing CSS/JSON, but nothing ties them back to

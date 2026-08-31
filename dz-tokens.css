@@ -70,7 +70,7 @@
        can alpha them with rgba(). */
     /* Device-status identity hues. Same policy as the energy/weather identity
        colours above: the HUE is a theme constant (a timed-out sensor is red, a
-       flat battery is yellow, a protected device is blue) and only the
+       flat battery is amber, a protected device is blue) and only the
        LIGHTNESS moves per scheme, until the colour clears WCAG SC 1.4.11's 3:1
        non-text floor against the card it paints on.
        First measured 2026-08-31 against only white and one generic dark card
@@ -83,14 +83,29 @@
        plain bases. Re-solved 2026-08-31 against EVERY shipped scheme's own
        card colour, which is why each worst case below names the SCHEME that
        produced it, not just a ratio - a ratio alone is exactly what hid the
-       first failure. Targeted 3.10, not exactly 3.00, so the values are not
-       sitting on a knife edge, matching the headroom the energy identity
-       colours above already carry.
+       first failure. Targeted 3.10, not exactly 3.00 (commit 58ebdf5).
+       RE-SOLVED AGAIN 2026-08-31 (owner decision, supersedes 58ebdf5) to a
+       4.0 target: the toast severity tile (css/toasts.css) mixes this same
+       colour at 18% into the panel, a separate pair with its own 3:1
+       non-text floor, and 3.10 left several scheme/severity tiles too close
+       to that floor. The higher glow target gives the diluted tile real
+       margin instead. Worst glow case now 4.01, gruvbox-light/lowbat.
        Re-measure with scripts/measure-icon-contrast.py --check after any
        change here. */
-    --dz-status-timeout-values-base:   199, 67, 67;    /* #C74343, worst 3.87 on gruvbox-light */
-    --dz-status-lowbat-values-base:    133, 133, 0;    /* #858500, worst 3.12 on gruvbox-light */
-    --dz-status-protected-values-base: 0, 0, 139;      /* #00008B, worst 12.17 on gruvbox-light */
+    --dz-status-timeout-values-base:   196, 64, 65;     /* #C44041, worst 4.02 on gruvbox-light */
+    /* Lowbat is a HUE CHANGE, not a re-lit of the same hue: pure yellow
+       (h=109.8 in OKLCH) matched nothing else in the theme and read as the
+       odd one out in every scheme. Re-anchored on the amber seed #FFC107
+       (h=84.9), close to but distinct from the theme's own warning family
+       (h=75.6 in OKLCH) so low-battery still reads as its own state, not a
+       repaint of "warning". This light value's own hue (h=84.2) drifts
+       0.76deg from the seed - over the ~0.25deg budget the timeout/protected
+       pair above hold between their own light and dark values - and that is
+       accepted, not an oversight: the hue here was deliberately re-chosen,
+       not held fixed from a prior constant, so there was never a fixed hue
+       for this value to drift away from. */
+    --dz-status-lowbat-values-base:    142, 105, 0;     /* #8E6900, worst 4.01 on gruvbox-light */
+    --dz-status-protected-values-base: 0, 0, 139;       /* #00008B, worst 12.17 on gruvbox-light (unchanged) */
     --dz-status-timeout-values:    var(--dz-status-timeout-values-base);
     --dz-status-lowbat-values:     var(--dz-status-lowbat-values-base);
     --dz-status-protected-values:  var(--dz-status-protected-values-base);
@@ -664,7 +679,13 @@
        (10px) = 128px. The earlier 70px was only ever checked against C1
        containment (fits inside the viewport) in dz-toast-surface.js, never
        against occlusion by the navbar, which sits at a higher z-index than
-       the stack's old 1010; see css/toasts.css for the z-index fix. */
+       the stack's old 1010; see css/toasts.css for the z-index fix.
+       RE-MEASURED 2026-08-31 after the presentation task's 34px severity
+       tile grew each toast's height: this offset is the top of the STACK,
+       set once against the fixed header chrome, not against any individual
+       toast's own height, so a taller toast cannot change it. Re-ran the
+       same measurement anyway rather than assume - identical result, 118px,
+       128px unchanged. */
     --dz-toast-top: 128px;
 }
 
