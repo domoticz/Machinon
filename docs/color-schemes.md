@@ -112,6 +112,13 @@ and checks every color it generates for readability, so text stays easy to read 
 lands. Both new schemes are added to the picker above, and whichever one matches the mode
 (light or dark) you're currently in is applied right away.
 
+Both saved schemes are personal, the same as any other scheme pick: they follow the account that
+saved them, and other people on the same Domoticz don't see them. You don't need admin rights to
+create one. That's different from installing an icon, which changes the icon library for everyone
+and is an administrator action (see [Icons](icons.md)). If your installation has no separate
+logins, Domoticz can't tell users apart, so themes created there are shared like every other
+setting; see [Theme Hub](theme-hub.md#personal-settings-versus-shared-settings).
+
 <div class="grid" markdown>
 
 <figure markdown="span">

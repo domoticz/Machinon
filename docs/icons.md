@@ -16,6 +16,13 @@ installed from Machinon's library, keeps showing as that picture in both styles.
 an icon chosen. Installing icons from the library is never wasted, even if you switch styles
 later.
 
+The library also stays fully usable while glyphs are switched on. Machinon's icons are still
+listed in Domoticz's icon picker, so you can open any device, pick one, and it will show as that
+artwork. Glyphs replace a built-in icon because Domoticz knows a matching glyph for it; a
+Machinon icon has no glyph equivalent, so it keeps its own picture. That means **Font Awesome
+glyphs** is not an all-or-nothing switch: you can run glyphs everywhere as the default and still
+give individual devices their full Machinon artwork, device by device, whenever you want it.
+
 When glyphs are active, they follow your active Machinon color scheme (see [Color
 schemes](color-schemes.md)).
 
