@@ -4,6 +4,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+- Error and confirmation messages from Domoticz now appear again. They were being hidden by the theme, so failures like "you do not have permission to do that" and a theme settings save that did not work were silently invisible.
+
 ## [2.3.0] - 2026-08-31
 
 ### Added

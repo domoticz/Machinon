@@ -239,7 +239,15 @@ h4,
     display: none;
 }
 
-/* Hide upstream "Switching On/Off" notification - inconsistent timing */
+/* Belt and braces. Core's ShowNotify writes into this div and fades it in; the
+   theme's adapter (src/js/toast-hooks.js) intercepts every call before that
+   happens, so the element is never populated. Kept hidden so a call that
+   somehow bypassed the adapter cannot paint core's un-themed centred box.
+   NOTE: this rule used to be the whole mechanism, aimed at core's
+   "Switching On/Off" chatter. Matching the ELEMENT rather than the message
+   silenced all 565 ShowNotify call sites, including the theme's own
+   settings-save failure. The chatter is now filtered by message in the
+   adapter. See the 2026-08-31 audit in todo.md. */
 #notification {
     display: none !important;
 }
