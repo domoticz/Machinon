@@ -2,6 +2,8 @@
     "name": "Gruvbox Light",
     "description": "Warm retro paper",
     "base": "light",
+    "pair": "gruvbox",
+    "variant": "light",
     "preview": { "bg": "#fbf1c7", "surface": "#f2e5bc", "accent": "#076678", "text": "#3c3836" },
     "colors": {
         "background": "#fbf1c7",

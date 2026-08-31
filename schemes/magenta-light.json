@@ -2,6 +2,8 @@
     "name": "Magenta Light",
     "description": "Warm magenta on white",
     "base": "light",
+    "pair": "magenta",
+    "variant": "light",
     "preview": { "bg": "#FAF0F7", "surface": "#FFFFFF", "accent": "#99407E", "text": "#292528" },
     "colors": {
         "background": "#FAF0F7",

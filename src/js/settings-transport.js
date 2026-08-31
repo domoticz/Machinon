@@ -554,20 +554,50 @@ function dzThemeSettingsSaveNow(action) {
         theme.card_min_width, theme.card_max_width, theme.dashboard_camera_refresh
     ];
 
+    /* POST, not GET: the params used to ride the query string, which Domoticz's
+       HTTP server caps at an 8192-byte URI (measured: 200 OK at 8000 chars of
+       value, 414 URI Too Long by ~8109). A generated theme pair costs ~1400
+       encoded characters, so a handful of saved pairs (fewer still with icons
+       configured, since the whole custom array shares this one payload) used
+       to hit that wall. The endpoint accepts the identical parameters as a
+       form-encoded POST body with no such cap (measured up to 1,000,000
+       chars), and the stored value is byte-identical either way. */
     function saveVariable(varName, value) {
-        var url = "json.htm?type=command&param=" + action + "uservariable&vname=" + varName + "&vtype=2&vvalue=" + encodeURIComponent(value);
-        return fetch(url, { credentials: "include" })
-            .then(function(r) { return r.json(); })
+        var body = new URLSearchParams();
+        body.set("type", "command");
+        body.set("param", action + "uservariable");
+        body.set("vname", varName);
+        body.set("vtype", "2");
+        body.set("vvalue", value);
+        function notifyFailed() {
+            if (typeof generate_noty === "function") {
+                generate_noty("error", "Theme settings could not be saved to Domoticz; kept in this browser only.", 6000);
+            }
+        }
+        return fetch("json.htm", { method: "POST", credentials: "include", body: body })
+            .then(function(r) {
+                if (!r.ok) {
+                    console.warn(themeName + " - HTTP " + r.status + " saving theme settings uservariable (" + varName + "), values kept in this browser only");
+                    notifyFailed();
+                    return null;
+                }
+                return r.json();
+            })
             .then(function(data) {
+                if (!data) return;
                 if (data.status == "ERR") {
                     console.warn(themeName + " - unable to create or update theme settings uservariable (" + varName + "), values kept in this browser only");
                     if (varName.indexOf("-features") !== -1) unableCreateUserVariable = true;
+                    notifyFailed();
                 }
                 if (data.status == "OK") {
                     console.log(themeName + " - theme settings uservariable is updated");
                 }
             })
-            .catch(function() { console.warn(themeName + " - ajax error saving theme settings uservariable (" + varName + ")"); });
+            .catch(function() {
+                console.warn(themeName + " - ajax error saving theme settings uservariable (" + varName + ")");
+                notifyFailed();
+            });
     }
 
     return Promise.all([

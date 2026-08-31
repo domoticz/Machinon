@@ -61,6 +61,117 @@ var DZ_SCHEME_MIGRATIONS = {
     "solarized-light":  "light"
 };
 
+/* Slug of the light/dark counterpart of `slug`, or null when it has none.
+
+   Pairing is declared metadata, not a filename convention: "magenta-light"
+   and "magenta-dark" used to be related only by how they were named, and
+   applyScheme() treats every slug as unrelated, so nothing could answer
+   "what is the dark version of what I am on". This is the lookup a header
+   light/dark toggle needs. It has no UI caller yet; it exists now because
+   retrofitting pairing onto presets already saved in users' installs is far
+   more expensive than declaring it from the start.
+
+   `schemes` and `userSchemes` are parameters rather than globals so this has
+   no load-order dependency and can be unit-tested. Generated user pairs use
+   the slug form "user:<name>|<variant>"; legacy hand-saved presets have no
+   pair and correctly return null. */
+var DZ_BASE_PAIR = { light: "dark", dark: "light" };
+
+function dzFindPairMate(slug, schemes, userSchemes) {
+    if (!slug) { return null; }
+    if (DZ_BASE_PAIR[slug]) { return DZ_BASE_PAIR[slug]; }
+
+    if (slug.indexOf("user:") === 0) {
+        var rest = slug.substring(5);
+        /* Exact legacy match first, same reasoning as applyScheme: a
+           hand-saved preset's own name may contain "|", so check whether any
+           preset owns the whole remainder before splitting it. */
+        var mine = null, variant;
+        (userSchemes || []).forEach(function (p) {
+            if (p.name === rest) { mine = p; }
+        });
+        if (mine) {
+            variant = mine.variant;
+        } else {
+            var bar = rest.lastIndexOf("|");
+            if (bar === -1) { return null; } // legacy unpaired preset
+            var name = rest.substring(0, bar);
+            variant = rest.substring(bar + 1);
+            (userSchemes || []).forEach(function (p) {
+                if (p.name === name && p.variant === variant) { mine = p; }
+            });
+        }
+        if (!mine || !mine.pair) { return null; }
+        var mate = null;
+        (userSchemes || []).forEach(function (p) {
+            if (p.pair === mine.pair && p.variant !== variant) { mate = p; }
+        });
+        return mate ? "user:" + mate.name + "|" + mate.variant : null;
+    }
+
+    var self = schemes && schemes[slug];
+    if (!self || !self.pair) { return null; }
+    var found = null;
+    Object.keys(schemes).forEach(function (other) {
+        var s = schemes[other];
+        if (other !== slug && s.pair === self.pair && s.variant !== self.variant) {
+            found = other;
+        }
+    });
+    return found;
+}
+
+/* Pair ids must be unique within one install: a user may generate two pairs
+   from the same seed colours and name them differently, and a name collision
+   would otherwise merge them. The counter guarantees uniqueness within a
+   session and the timestamp disambiguates across sessions; neither is a
+   randomness source, so nothing here depends on Math.random. */
+var DZ_PAIR_SEQ = 0;
+
+function dzNewPairId(name) {
+    DZ_PAIR_SEQ += 1;
+    var slug = String(name || "theme").toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 20);
+    return "u:" + slug + "-" + Date.now().toString(36) + "-" + DZ_PAIR_SEQ;
+}
+
+/* Persist both variants of a generated pair and apply the one matching the
+   base the user is currently on, so saving never yanks them from dark to
+   light. Replaces any existing pair of the same name, so re-running the
+   wizard with the same name updates rather than duplicating. */
+function dzSaveGeneratedPair(name, seed, pairColors) {
+    name = (name || "").trim().slice(0, 40);
+    if (!name) { return null; }
+    var pairId = dzNewPairId(name);
+    theme.user_schemes = (theme.user_schemes || []).filter(function (p) {
+        return p.name !== name;
+    });
+    ["light", "dark"].forEach(function (variant) {
+        theme.user_schemes.push({
+            name: name, variant: variant, pair: pairId, base: variant,
+            seed: { accent: seed.accent, surface: seed.surface || null, look: seed.look },
+            colors: Object.assign({}, pairColors[variant])
+        });
+    });
+    var wantDark = theme.scheme_base === "dark";
+    var slug = "user:" + name + "|" + (wantDark ? "dark" : "light");
+    /* No cacheThemeSettings() here: applyScheme(slug) always finds the preset
+       just pushed above (the slug names one of the two entries added this
+       call) and caches on that found-preset path itself; caching twice would
+       be redundant. */
+    applyScheme(slug);
+    renderSchemePicker();
+    // Keep the hub's own custom-colour swatches (value + enabled state) in
+    // step with the save, the same as every other apply path (the per-card
+    // click handler below and dzHubBuildColorSwatch's own edits): without
+    // this, the seven inputs behind the wizard keep showing the OLD colours
+    // and stay enabled (theme.scheme is no longer "custom"), so editing one
+    // writes into theme.color_scheme under a preset slug that the next load
+    // silently overwrites again via applyScheme. Guarded: schemes.js must
+    // not hard-depend on the hub module.
+    if (typeof dzHubSyncSchemeSwatches === "function") { dzHubSyncSchemeSwatches(); }
+    return slug;
+}
+
 /* Repair a stored pick of a retired scheme, once, at load. applyScheme already
    sets scheme/scheme_base/color_scheme, toggles custom_color_scheme, caches and
    persists, so the repair is written back and the next boot reads the survivor
@@ -134,6 +245,24 @@ function warnIfContrastFails(cs, what) {
     return fails;
 }
 
+/* Shared "|" guard for every scheme-name save path. "|" separates name from
+   variant in a generated pair's slug (user:<name>|<variant>, dzSaveGeneratedPair
+   above). A hand-saved preset named e.g. "Sunset|light" would collide with the
+   light half of a generated pair named "Sunset": renderSchemePicker would emit
+   two cards with the identical data-scheme, both showing selected, and
+   applyScheme's exact-name-first rule makes the generated half unreachable.
+   Centralized here (rather than duplicated per caller, which is exactly how
+   it drifted before: theme-wizard.js had this check and saveCurrentColorsAsScheme
+   below did not) so every current AND future save path enforces the same
+   rule. Returns an error message to show the user, or null when the name is
+   fine. */
+function dzSchemeNameError(name) {
+    if ((name || "").indexOf("|") !== -1) {
+        return "A theme name cannot contain the | character.";
+    }
+    return null;
+}
+
 /* User-saved presets: snapshots of the current colours under a chosen name.
    Stored on the theme object (theme.user_schemes), so they ride the same
    localStorage cache and Domoticz user-variable sync as everything else.
@@ -141,6 +270,11 @@ function warnIfContrastFails(cs, what) {
 function saveCurrentColorsAsScheme(name) {
     name = (name || "").trim().slice(0, 40);
     if (!name) return;
+    var nameError = dzSchemeNameError(name);
+    if (nameError) {
+        if (typeof generate_noty === "function") { generate_noty("warning", nameError, 5000); }
+        return;
+    }
     theme.user_schemes = (theme.user_schemes || []).filter(function(p) { return p.name !== name; });
     theme.user_schemes.push({
         name: name,
@@ -154,9 +288,34 @@ function saveCurrentColorsAsScheme(name) {
     warnIfContrastFails(theme.color_scheme, 'Preset "' + name + '" saved, but it');
 }
 
-function deleteUserScheme(name) {
-    theme.user_schemes = (theme.user_schemes || []).filter(function(p) { return p.name !== name; });
-    if (theme.scheme === "user:" + name) { theme.scheme = "custom"; }
+/* Deleting one half of a generated pair deletes both: the two cards are one
+   thing to the user, and leaving an orphan half is worse than either
+   outcome. Legacy unpaired presets (no `pair`) delete singly, unchanged. */
+function deleteUserScheme(name, variant) {
+    var all = theme.user_schemes || [];
+    var target = null;
+    all.forEach(function (p) {
+        if (p.name === name && (variant === undefined || p.variant === variant)) { target = p; }
+    });
+    var removed = [];
+    theme.user_schemes = all.filter(function (p) {
+        var goesAway = target && target.pair ? p.pair === target.pair : p.name === name;
+        if (goesAway) { removed.push(p); }
+        return !goesAway;
+    });
+    /* Reset theme.scheme when it names ANY entry being removed, not just the
+       clicked card: deleting "Sunset Light" while parked on "Sunset Dark"
+       removes both, and a reset keyed only on the clicked slug would leave
+       theme.scheme dangling on the now-gone mate (no card renders selected,
+       the hub's custom-colour editor stays disabled with nothing to edit,
+       and the dangling slug survives a reboot since applyScheme is never
+       re-run for the cached slug on restore). */
+    var removedSlugs = removed.map(function (p) {
+        return p.variant ? "user:" + p.name + "|" + p.variant : "user:" + p.name;
+    });
+    if (removedSlugs.indexOf(theme.scheme) !== -1) {
+        theme.scheme = "custom";
+    }
     cacheThemeSettings();
     persistSchemeChoice();
     renderSchemePicker();
@@ -186,7 +345,24 @@ function applyScheme(slug) {
         return Promise.resolve();
     }
     if (slug.indexOf("user:") === 0) {
-        var preset = (theme.user_schemes || []).filter(function(p) { return "user:" + p.name === slug; })[0];
+        var rest = slug.substring(5);
+        /* Exact legacy match first: a hand-saved preset may contain "|" in its
+           own name, and splitting on it would silently resolve to nothing.
+           Only if no preset owns the whole string do we read it as the
+           generated "<name>|<variant>" form. */
+        var preset = (theme.user_schemes || []).filter(function (p) {
+            return p.name === rest;
+        })[0];
+        if (!preset) {
+            var bar = rest.lastIndexOf("|");
+            if (bar !== -1) {
+                var wantName = rest.substring(0, bar);
+                var wantVariant = rest.substring(bar + 1);
+                preset = (theme.user_schemes || []).filter(function (p) {
+                    return p.name === wantName && p.variant === wantVariant;
+                })[0];
+            }
+        }
         if (!preset) return Promise.resolve();
         theme.scheme = slug;
         theme.scheme_base = preset.base === "dark" ? "dark" : "light";
@@ -275,17 +451,28 @@ function renderSchemePicker() {
         var SWATCH_KEYS = ["background", "navbar", "item", "main_color", "main_text", "alt_text", "disabled"];
         /* Base (schemeless) themes have no JSON; their colours mirror the
            dz-tokens.css / dark.css token defaults, and their descriptions are
-           authored here for the same reason. */
+           authored here for the same reason.
+
+           Every card below carries a `pair` id (declared metadata, mirroring
+           the scheme JSONs' own `pair` field), but nothing reads card.pair
+           yet: it is groundwork for a future header light/dark toggle, the
+           same reason dzFindPairMate has no caller yet either. Both landed
+           together on purpose, not as an oversight. */
         var cards = [
-            { slug: "light", name: "Machinon Light", desc: "The default look: clean blue on white", colors: { background: "#f4f8fc", navbar: "#e9f2fb", item: "#ffffff", main_color: "#396d9e", main_text: "#1b2b3a", alt_text: "#3e5568", disabled: "#8ca0b3" } },
-            { slug: "dark", name: "Machinon Dark", desc: "The default look: blue glowing on navy", colors: { background: "#0f1620", navbar: "#0a0f16", item: "#18202b", main_color: "#98ccfd", main_text: "#dce6f0", alt_text: "#9db2c6", disabled: "#5e7183" } }
+            { slug: "light", name: "Machinon Light", pair: "machinon", desc: "The default look: clean blue on white", colors: { background: "#f4f8fc", navbar: "#e9f2fb", item: "#ffffff", main_color: "#396d9e", main_text: "#1b2b3a", alt_text: "#3e5568", disabled: "#8ca0b3" } },
+            { slug: "dark", name: "Machinon Dark", pair: "machinon", desc: "The default look: blue glowing on navy", colors: { background: "#0f1620", navbar: "#0a0f16", item: "#18202b", main_color: "#98ccfd", main_text: "#dce6f0", alt_text: "#9db2c6", disabled: "#5e7183" } }
         ];
         Object.keys(schemes).forEach(function(slug) {
             var s = schemes[slug];
-            cards.push({ slug: slug, name: s.name, desc: s.description, colors: s.colors || {} });
+            cards.push({ slug: slug, name: s.name, pair: s.pair, desc: s.description, colors: s.colors || {} });
         });
+        /* Generated pairs render as "<name> Light" / "<name> Dark" adjacent to
+           each other; legacy unpaired presets keep their bare name and slug. */
         (theme.user_schemes || []).forEach(function(p) {
-            cards.push({ slug: "user:" + p.name, name: p.name, deletable: true, colors: p.colors || {} });
+            var slug = p.variant ? "user:" + p.name + "|" + p.variant : "user:" + p.name;
+            var label = p.variant ? p.name + " " + (p.variant === "dark" ? "Dark" : "Light") : p.name;
+            cards.push({ slug: slug, name: label, pair: p.pair, variant: p.variant,
+                         presetName: p.name, deletable: true, colors: p.colors || {} });
         });
         /* colors: null = the Custom card, resolved to the user's live
            colours at render time below. */
@@ -329,7 +516,7 @@ function renderSchemePicker() {
                     del.title = "Delete preset";
                     del.addEventListener("click", function(e) {
                         e.stopPropagation();
-                        deleteUserScheme(card.name);
+                        deleteUserScheme(card.presetName || card.name, card.variant);
                     });
                     el.appendChild(del);
                 }

@@ -2,6 +2,8 @@
     "name": "Paper Dark",
     "description": "Ink on slate: the monochrome pair of Paper Light",
     "base": "dark",
+    "pair": "paper",
+    "variant": "dark",
     "preview": { "bg": "#121212", "surface": "#1E1E1E", "accent": "#D0D0D0", "text": "#EDEDED" },
     "colors": {
         "background": "#121212",

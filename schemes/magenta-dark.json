@@ -2,6 +2,8 @@
     "name": "Magenta Dark",
     "description": "Magenta glow on plum black",
     "base": "dark",
+    "pair": "magenta",
+    "variant": "dark",
     "preview": { "bg": "#171015", "surface": "#21191F", "accent": "#FC72D3", "text": "#EBD3E4" },
     "colors": {
         "background": "#171015",
