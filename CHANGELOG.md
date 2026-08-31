@@ -4,6 +4,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-08-31
+
 ### Added
 
 - New "Create a theme" button in Settings > Theme > Colors: pick one or two colours and a look, and Machinon generates a matching light and dark theme with readable, contrast-checked colours throughout.
