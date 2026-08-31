@@ -384,6 +384,12 @@ function dzEnhanceDeviceCard($item, stage) {
     }
 }
 
+/* Ordering matters: setAllDevicesIconsStatus() (via dzWarnPass/dzCardIdx)
+   resolves each card's idx from tr[data-idx], which dzEnhanceDeviceCard's
+   "visible" stage tags onto every tr in the loop just above. It must run
+   AFTER that loop, not before or interleaved with it, or idx resolution
+   silently falls through to the itemtable fallback (or fails outright) for
+   cards not yet tagged. */
 function dzRunDevicePass(stage) {
     $("#main-view .item").each(function() {
         dzEnhanceDeviceCard($(this), stage);
@@ -431,13 +437,24 @@ function setAllDevicesFeatures() {
    card: the old guard tested "does this card already carry the icon", so a
    re-render was a fresh card and the same device warned again on every route
    change. Measured 2026-08-31: the identical toast, verbatim, after leaving
-   the dashboard and coming back. */
+   the dashboard and coming back.
+
+   tr[data-idx] is the real resolution path, and the only one confirmed to
+   fire: dzEnhanceDeviceCard's "visible" stage tags every tr in a card with
+   data-idx before setAllDevicesIconsStatus() runs in dzRunDevicePass (see
+   the ordering note there), so by the time this is called every visible
+   card's rows already carry it. The itemtable id below is a DEFENSIVE
+   fallback, not a second primary path: none of the templates checked
+   live (light, utility, temperature, scene, weather) embed digits in that
+   id, so this branch is not known to ever fire on this codebase, but
+   floorplan and mobile card markup were not confirmed, so it stays rather
+   than being deleted on a partial survey. */
 function dzCardIdx($card) {
+    var tr = $card.find("tr[data-idx]").attr("data-idx");
+    if (tr) return tr;
     var t = $card.find("table[id^='itemtable']").attr("id");
     var m = t && t.match(/(\d+)/);
-    if (m) return m[1];
-    var tr = $card.find("tr[data-idx]").attr("data-idx");
-    return tr || null;
+    return m ? m[1] : null;
 }
 
 function setAllDevicesIconsStatus() {
