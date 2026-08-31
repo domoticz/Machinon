@@ -13,7 +13,18 @@
 
 #dz-toast-stack {
     position: fixed;
-    z-index: 1010;
+    /* Measured 2026-08-31 at 1400x950 and 390x844, light and dark identical:
+       the highest z-index in the top chrome is .navbar-fixed-top's 1030
+       (desktop; on mobile the navbar collapses to position:static and the
+       hamburger trigger .menu-toggle is 1002). The old 1010 sat BELOW that,
+       so the navbar painted over the stack regardless of top offset - a
+       coalesced toast could render entirely hidden behind it. 1035 is 1030
+       plus a small margin, clearing all measured top chrome while staying
+       below the dialog range this must never cross: bootstrap/bootbox
+       .modal-backdrop is 1040 and .modal is 1050 (css/bootstrap.css), and
+       jQuery UI's .ui-dialog/.ui-widget-overlay run 9998-9999 at runtime. A
+       toast does not need to, and must not, outrank an open dialog. */
+    z-index: 1035;
     display: flex;
     flex-direction: column;
     gap: var(--dz-card-space-md);
@@ -87,6 +98,13 @@
         left: var(--dz-card-space-xl);
         right: var(--dz-card-space-xl);
         width: auto;
+        /* Overrides dz-tokens.css's desktop --dz-toast-top: the navbar
+           collapses to position:static below 767px (no longer a fixed
+           element to clear), so the tallest fixed chrome left is the
+           hamburger trigger .menu-toggle. Measured 2026-08-31 at 390x844,
+           light and dark identical: bottom edge 25px, z-index 1002.
+           25 + --dz-card-space-lg (10px) = 35px. */
+        --dz-toast-top: 35px;
     }
 }
 

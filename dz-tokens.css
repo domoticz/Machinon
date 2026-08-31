@@ -632,9 +632,17 @@
     --dz-menu-radius:          6px;
     --dz-menu-shadow:          var(--dz-elev-popup);
 
-    /* Clear of the top header. Value confirmed by measurement in
-       dz-toast-surface.js (C1), not guessed. */
-    --dz-toast-top: 70px;
+    /* Clear of the top header (desktop; the phone override lives in
+       css/toasts.css's existing max-width:767px block, which measured
+       differently since the navbar collapses to a hamburger there).
+       Measured 2026-08-31 at 1400x950, light and dark identical:
+       .navbar.navbar-inverse.navbar-fixed-top is the only fixed element in
+       the header, bottom edge 118px, z-index 1030. 118 + --dz-card-space-lg
+       (10px) = 128px. The earlier 70px was only ever checked against C1
+       containment (fits inside the viewport) in dz-toast-surface.js, never
+       against occlusion by the navbar, which sits at a higher z-index than
+       the stack's old 1010; see css/toasts.css for the z-index fix. */
+    --dz-toast-top: 128px;
 }
 
 /*
