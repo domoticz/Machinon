@@ -507,8 +507,16 @@ function setAllDevicesIconsStatus() {
    the single localStorage key themeFolder + DZ_WARN_STORE_KEY_SUFFIX (one
    JSON blob of key -> last-warned-ms). localStorage ONLY, never the server:
    see the "Persisted warn state" comment in toasts.js for why. Lazily built
-   and cached for the page's life, so a session that never actually warns
-   never touches localStorage at all. get/set/remove/keys are the ONLY
+   and cached for the page's life: dzWarnStore() itself does not touch
+   localStorage until get/set/remove/keys is actually called on it (load()
+   is deferred), but dzWarnPass's cleared-pass calls remove() for every
+   HEALTHY card on every render (see there), so "never touches localStorage"
+   is only true when no key was ever recorded in this browser AND that pass
+   is behind its own enabled/exists guards -- do not restate it more broadly
+   than that; this comment has already been wrong once (see the cleared-pass
+   note in dzWarnPass). remove() below is a no-op (no save()) when the key
+   was never present, so a house full of healthy devices costs zero writes
+   per render burst, not one per card. get/set/remove/keys are the ONLY
    surface toasts.js's pure functions call, and every one of them can throw
    (private browsing, full or disabled storage, corrupt JSON) -- that throw
    is what lets dzWarnRepeatAllows degrade to `visit` behaviour instead of
@@ -529,7 +537,16 @@ function dzWarnStore() {
     dzWarnStoreCache = {
         get: function(key) { return load()[key]; },
         set: function(key, value) { load()[key] = value; save(); },
-        remove: function(key) { delete load()[key]; save(); },
+        /* Only a key that actually existed causes a write. Called once per
+           HEALTHY card on every render pass (dzWarnPass's cleared branch),
+           so an unconditional save() here would be a synchronous
+           localStorage write per healthy device, per render, forever. */
+        remove: function(key) {
+            var d = load();
+            if (!Object.prototype.hasOwnProperty.call(d, key)) return;
+            delete d[key];
+            save();
+        },
         keys: function() { return Object.keys(load()); }
     };
     /* One prune per page load, on first real use, not on every pass. Best
@@ -593,7 +610,17 @@ function dzWarnPass(cfg) {
        route has not recovered, it is just not rendered. Clears BOTH the
        session dedupe and the persisted store, in every repeat mode: a
        condition clearing and coming back is new information and must not
-       wait out the daily timer. */
+       wait out the daily timer.
+
+       Gated on `enabled`: when this warning type is off, dzWarnPass's trigger
+       loop above never runs (it returns before dzToastMarkSeen/dzWarnRecord),
+       so nothing was ever recorded for it this session -- there is nothing to
+       clear, and running this loop over every healthy card anyway would be
+       pure waste on every render pass, for every house, forever. remove()
+       itself is also a no-op unless the key was actually present (see
+       dzWarnStore above), so this is a second, cheaper backstop, not the only
+       guard against the write storm. */
+    if (!enabled) return;
     $(cfg.cleared).each(function() {
         var idx = dzCardIdx($(this));
         if (!idx) return;

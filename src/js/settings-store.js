@@ -135,7 +135,29 @@ function loadSettings() {
                warn_battery were just seeded above (from theme.json's shipped
                default if this is the first time either is seen), so seed them
                from the actual legacy value now, then drop the legacy key so it
-               never lingers as dead state. */
+               never lingers as dead state.
+
+               DELIBERATELY NOT "only when absent" here, unlike
+               dzMigrateNotificationSplit below: this branch OVERWRITES
+               warn_timeout/warn_battery unconditionally whenever a legacy
+               notification key is found, even if this exact warm-boot pass
+               already seeded them moments ago from theme.json defaults. That
+               is safe ONLY because this raw-cache paint is provisional: an
+               authoritative load always runs afterwards this same boot
+               (checkUserVariableThemeSettings -> dzApiLoad or
+               checkUserVariableThemeSettingsLegacy, both further down the
+               boot chain) and re-applies onto theme.features from the real
+               stored snapshot, then re-caches -- so a value this branch gets
+               "wrong" for one JS tick is corrected before the user ever sees
+               it. If that ordering ever changes (an authoritative load moves
+               before this cache read, or stops running on a boot where a
+               legacy key is found), this becomes a real data-loss bug: it
+               would silently stomp a value the user had already set
+               individually for warn_timeout/warn_battery. Do not add an
+               "only when absent" guard here casually either -- the whole
+               point is that the legacy value must win over the JUST-SEEDED
+               default from a few lines above, which usually differs from
+               "absent". */
             if (theme.features && theme.features.notification) {
                 var dzLegacyWarnWas = theme.features.notification.enabled === true;
                 theme.features.warn_timeout.enabled = dzLegacyWarnWas;
