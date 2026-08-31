@@ -62,14 +62,18 @@
                          card-lastseen, navbar-strip, menu-tilegrid,
                          dash-columns, dialog-center, card-width, chart-bands)
                          built from --dz-* tokens so it follows the scheme, and
-                         a scheme-neutral SVG SKETCH (sketch-standby,
-                         sketch-update, sketch-notification) for the three
-                         non-visualizable settings. card_min_width and
-                         card_max_width share "card-width" (one width-range
-                         picture). Null is used where no faithful token mini
-                         exists (image-backed background/logo settings), the mini
-                         would duplicate another (time_ago vs the last-seen line),
-                         or the setting is a child/variant/retire-candidate.
+                         a scheme-neutral SVG SKETCH for a setting with no
+                         on-screen colour to mirror. Which previewId is which
+                         kind is not enumerated here: DZ_HUB_PREVIEWS above is
+                         the single source, and a restated subset list is
+                         exactly what went stale when warn_timeout/warn_battery
+                         split sketch-notification across two settings.
+                         card_min_width and card_max_width share "card-width"
+                         (one width-range picture). Null is used where no
+                         faithful token mini exists (image-backed
+                         background/logo settings), the mini would duplicate
+                         another (time_ago vs the last-seen line), or the
+                         setting is a child/variant/retire-candidate.
        parent:            the manifest key this entry indents under and is
                          disabled together with, or null. Set ONLY for the
                          five checkbox-gated pairs the legacy Theme tab
