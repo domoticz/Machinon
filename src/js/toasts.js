@@ -258,6 +258,22 @@ function dzToast(ev) {
 
 function dzToastLog() { return dzToastState.log.slice(); }
 
+/* Tear down every toast through the real removal path. Removing .dz-toast
+   DOM nodes directly (as a caller resetting the surface might be tempted to
+   do) leaks a visible slot forever: dzToastVisible only shrinks via
+   dzToastRemove, which the close button and the per-toast timer call. Skip
+   that path and every dzToast() call afterward is silently queued against
+   slots that still look occupied, starving the stack for good. Both the dev
+   preview panel's "close all" button and the screenshot gallery harness
+   need this, so it lives here once instead of being reimplemented, wrong,
+   in each caller. Iterate a COPY of dzToastVisible: dzToastRemove splices
+   the live array, so iterating it directly would skip every other entry.
+   Also empties dzToastQueue so nothing queued drains in behind the wipe. */
+function dzToastCloseAll() {
+    dzToastVisible.slice().forEach(dzToastRemove);
+    dzToastQueue.length = 0;
+}
+
 /* Esc dismisses the newest toast. Guarded by a typeof check because this file
    is also executed in a node:vm context with no DOM by
    scripts/test-toast-policy.mjs; a bare top-level document reference would

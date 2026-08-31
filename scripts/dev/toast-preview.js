@@ -85,7 +85,7 @@
     });
 
     btn("close all", function () {
-        document.querySelectorAll(".dz-toast").forEach(function (t) { t.remove(); });
+        dzToastCloseAll();
     });
 
     btn("x", function () { panel.remove(); });
