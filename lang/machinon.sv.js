@@ -16,5 +16,7 @@ language = {
   warning: "Varning",
   storage_removed: "Localstorage borttagen",
   clear_localstorage: "Rensa webbläsare",
-  resetTheme_message: "Vill du återställa temat till standardinställningar eller bara radera webbläsarlagring"
+  resetTheme_message: "Vill du återställa temat till standardinställningar eller bara radera webbläsarlagring",
+  sensors_timed_out: "sensorer har nått tidsgränsen",
+  devices_low_on_battery: "enheter har lågt batteri"
 };

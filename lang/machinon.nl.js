@@ -16,6 +16,8 @@ language = {
   warning: "Waarschuwing",
   storage_removed: "Lokale opslag gewist",
   clear_localstorage: "Wis browser cache",
-  resetTheme_message: "Wil je de standaard instellingen herstellen of alleen de browser cache wissen?"
+  resetTheme_message: "Wil je de standaard instellingen herstellen of alleen de browser cache wissen?",
+  sensors_timed_out: "sensoren hebben een time-out",
+  devices_low_on_battery: "apparaten met lage batterij"
 };
 

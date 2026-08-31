@@ -6,6 +6,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 - Error and confirmation messages from Domoticz now appear again. They were being hidden by the theme, so failures like "you do not have permission to do that" and a theme settings save that did not work were silently invisible.
 - The "new version available" notice now reads as information rather than a success message, and keeps its clickable download link instead of showing "Click here to download" as plain, unclickable text.
+- Sensor-timeout and low-battery warnings no longer repeat every time you leave a page and come back. Each device now warns once until the problem actually clears, and several warnings at once merge into a single summary instead of a flood of separate messages.
 
 ## [2.3.0] - 2026-08-31
 

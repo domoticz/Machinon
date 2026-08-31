@@ -427,31 +427,93 @@ function setAllDevicesFeatures() {
     dzRunDevicePass("deferred");
 }
 
+/* Resolve a card's device idx. The warning key must be per DEVICE, not per
+   card: the old guard tested "does this card already carry the icon", so a
+   re-render was a fresh card and the same device warned again on every route
+   change. Measured 2026-08-31: the identical toast, verbatim, after leaving
+   the dashboard and coming back. */
+function dzCardIdx($card) {
+    var t = $card.find("table[id^='itemtable']").attr("id");
+    var m = t && t.match(/(\d+)/);
+    if (m) return m[1];
+    var tr = $card.find("tr[data-idx]").attr("data-idx");
+    return tr || null;
+}
+
 function setAllDevicesIconsStatus() {
     $("div.item.statusProtected").each(function() {
         if ($(this).find("#name > i.ion-ios-lock").length === 0) {
             $(this).find("#name").prepend("<i class='ion-ios-lock' title='" + $.t("Protected") + "'></i>&nbsp;");
         }
     });
-    $("div.item.statusTimeout").each(function() {
-        if ($(this).find("#name > i.ion-ios-wifi").length === 0) {
-            if (theme.features.notification.enabled === true) {
-                // Noty renders its text as HTML; device names come from hardware/plugins,
-                // so they must be escaped before entering the toast markup.
-                var timeoutName = $("<span>").text($(this).find("#name").text()).html();
-                generate_noty('warning', "Sensor " + timeoutName + " " + language.is + " " + language.timedout, 4000);
-            }
-            $(this).find("#name").prepend("<i class='ion-ios-wifi blink warning-text' title='" + $.t("Sensor Timeout") + "'></i>&nbsp;");
-        }
+
+    /* Core's GetItemBackgroundStatus (app/app.js:853) makes these mutually
+       exclusive: HaveTimeout beats BatteryLevel <= 10, so a timed-out device
+       never also reports low battery. Two independent toggles all the same,
+       because they are two different things to be told about. */
+    dzWarnPass({
+        selector: "div.item.statusTimeout",
+        cleared: "div.item:not(.statusTimeout)",
+        feature: "warn_timeout",
+        icon: "ion-ios-wifi",
+        iconTitle: "Sensor Timeout",
+        keyPrefix: "timeout",
+        group: "device-timeout",
+        title: $.t("Sensor Timeout"),
+        groupTitle: function(c) { return c + " " + language.sensors_timed_out; }
     });
-    $("div.item.statusLowBattery").each(function() {
-        if ($(this).find("#name > i.ion-ios-battery-dead").length === 0) {
-            if (theme.features.notification.enabled === true) {
-                var batteryName = $("<span>").text($(this).find("#name").text()).html();
-                generate_noty('warning', batteryName + ' ' + $.t("Battery Level") + ' ' + $.t("Low"), 4000)
-            }
-            $(this).find("#name").prepend("<i class='ion-ios-battery-dead blink warning-text' title='" + $.t("Battery Low Level") + "'></i>&nbsp;");
+
+    dzWarnPass({
+        selector: "div.item.statusLowBattery",
+        cleared: "div.item:not(.statusLowBattery)",
+        feature: "warn_battery",
+        icon: "ion-ios-battery-dead",
+        iconTitle: "Battery Low Level",
+        keyPrefix: "battery",
+        group: "device-battery",
+        title: $.t("Battery Level") + " " + $.t("Low"),
+        groupTitle: function(c) { return c + " " + language.devices_low_on_battery; }
+    });
+}
+
+function dzWarnPass(cfg) {
+    /* Reads the split key, falling back to the legacy single `notification`
+       toggle. Task 8 adds the split keys; until it lands, this fallback keeps
+       device warnings working exactly as before, so no intermediate commit
+       ships a silently dead feature. Remove the fallback when the migration in
+       settings-store.js has been in a release. */
+    var f = theme.features[cfg.feature] || theme.features.notification;
+    var enabled = !!f && f.enabled === true;
+
+    $(cfg.selector).each(function() {
+        var $card = $(this);
+        if ($card.find("#name > i." + cfg.icon).length === 0) {
+            $card.find("#name").prepend("<i class='" + cfg.icon + " blink warning-text' title='" +
+                $.t(cfg.iconTitle) + "'></i>&nbsp;");
         }
+        if (!enabled) return;
+        var idx = dzCardIdx($card);
+        var name = $card.find("#name").text().trim();
+        dzToast({
+            type: "warning",
+            title: cfg.title,
+            body: name,
+            deviceName: name,
+            deviceIdx: idx,
+            key: idx ? cfg.keyPrefix + ":" + idx : null,
+            group: cfg.group,
+            groupTitle: cfg.groupTitle,
+            source: "device-warning"
+        });
+    });
+
+    /* Re-arm: a device whose card is on this page and NO LONGER carries the
+       status class has genuinely recovered, so it may warn again next time.
+       Restricted to cards actually present - a device simply absent from this
+       route has not recovered, it is just not rendered. */
+    $(cfg.cleared).each(function() {
+        var idx = dzCardIdx($(this));
+        if (idx) dzToastClearKey(dzToastState, cfg.keyPrefix + ":" + idx);
     });
 }
 

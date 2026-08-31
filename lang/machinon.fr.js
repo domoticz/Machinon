@@ -16,5 +16,7 @@ language = {
   warning: "Attention",
   storage_removed: "Stockage local supprimé",
   clear_localstorage: "Vider le cache du navigateur",
-  resetTheme_message: "Voulez-vous réinitialiser le thème ou vider le cache du navigateur ?"
+  resetTheme_message: "Voulez-vous réinitialiser le thème ou vider le cache du navigateur ?",
+  sensors_timed_out: "capteurs ont expiré",
+  devices_low_on_battery: "appareils à batterie faible"
 };

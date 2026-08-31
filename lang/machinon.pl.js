@@ -16,5 +16,7 @@ language = {
   warning: "Warning",
   storage_removed: "Localstorage removed",
   clear_localstorage: "Clear browser storage",
-  resetTheme_message: "Do you want to reset the theme to default settings, or just clear browser storage"
+  resetTheme_message: "Do you want to reset the theme to default settings, or just clear browser storage",
+  sensors_timed_out: "czujników przekroczyło limit czasu",
+  devices_low_on_battery: "urządzeń ma niski poziom baterii"
 };
