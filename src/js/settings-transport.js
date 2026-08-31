@@ -182,7 +182,7 @@ function dzApiFetchLayers() {
 function dzApiLoad() {
     return dzApiFetchLayers().then(function(outcome) {
         if (outcome !== DZ_LOAD_LOADED) return outcome;
-        /* MIGRATION (v2.4.0, #198): a row stored before the notification split
+        /* MIGRATION (notification split, #198): a row stored before the split
            still carries features.notification and no warn_timeout/warn_battery.
            dzApplySnapshot below only ever writes keys ALREADY present in
            theme.features, so the migration must run on the snapshot BEFORE

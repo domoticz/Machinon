@@ -931,7 +931,7 @@ var DZ_HUB_INPUT_META = {
     card_min_width:           { min: 200, max: 800 },
     card_max_width:           { min: 250, max: 1200 },
     background_type:          { options: [["cover", "Cover"], ["pattern", "Pattern"]] },
-    warn_repeat:              { options: [["visit", "Every visit"], ["daily", "Once a day"], ["episode", "Until it clears"]] }
+    warn_repeat:              { options: [["visit", "Once per visit"], ["daily", "Once a day"], ["episode", "Only when it changes"]] }
 };
 
 /* Current stored value for a plain (number/text/select) entry; "" when unset so

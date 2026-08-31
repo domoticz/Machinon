@@ -127,8 +127,8 @@ function loadSettings() {
             if (!theme.warn_repeat) {
                 theme.warn_repeat = "daily";
             }
-            /* MIGRATION (v2.4.0): the single `notification` toggle became
-               warn_timeout and warn_battery (#198). A cache written before this
+            /* MIGRATION (notification split, #198): the single `notification`
+               toggle became warn_timeout and warn_battery. A cache written before this
                split still carries theme.features.notification (raw
                {id, enabled, files} shape, not the boolean-map shape
                dzMigrateNotificationSplit below works on). warn_timeout/
@@ -183,8 +183,8 @@ function loadSettings() {
     return Promise.resolve();
 }
 
-/* MIGRATION (v2.4.0): the single `notification` toggle became warn_timeout
-   and warn_battery (#198). Operates on a COMPACT snapshot (the
+/* MIGRATION (notification split, #198): the single `notification` toggle
+   became warn_timeout and warn_battery. Operates on a COMPACT snapshot (the
    dzSettingsSnapshot shape: snap.features is key->boolean), not the raw
    theme.features object (key->{id, enabled, files}) -- the two shapes look
    similar but a boolean check against a raw feature object would always read

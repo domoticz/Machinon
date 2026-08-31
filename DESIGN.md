@@ -2243,8 +2243,8 @@ map (`DZ_HUB_APPLIERS`) and the persistence path live in `src/js/theme-hub.js` a
 **Previews.** Each row's `.dz-hub-preview` box renders a mini illustrating the setting
 (`src/js/theme-hub-previews.js`), one of two kinds: a LIVE TOKEN MINI built only from
 `var(--dz-*)` references, so it recolors automatically when the scheme changes with no JS
-re-render; or, for the three settings with no on-screen colour to mirror (`standby`,
-`check_update`, `notification`), a scheme-neutral inline `<svg>` sketch in a fixed muted grey
+re-render; or, for the four settings with no on-screen colour to mirror (`standby`,
+`check_update`, `warn_timeout`, `warn_battery`), a scheme-neutral inline `<svg>` sketch in a fixed muted grey
 that reads on both backgrounds, deliberately not a token
 it has nothing to say about. A setting with neither a faithful mini nor a sensible sketch keeps
 `previewId: null` and renders no preview; the row is still valid.
@@ -2296,11 +2296,11 @@ manifest's own header comment:
 key cannot be overridden per user even by a bug; the enforcement (`dzSnapshotSubset`) lives in
 `src/js/settings-transport.js`.
 
-**The 29/9 split.** Every persisted key falls into exactly one scope:
+**The 33/9 split.** Every persisted key falls into exactly one scope:
 
-| Manifest group | User-scope keys (29 total) | House-scope keys (9 total) |
+| Manifest group | User-scope keys (33 total) | House-scope keys (9 total) |
 |---|---|---|
-| General | `standby`, `standby_after`, `check_update`, `notification`, `center_popups`, `footer_text_disabled` | |
+| General | `standby`, `standby_after`, `check_update`, `warn_timeout`, `warn_battery`, `warn_repeat`, `center_popups`, `rgbw_popup`, `footer_text_disabled`, `floorplan_popup_details` | |
 | Menus and navbar | `custom_settings_menu`, `navbar_icons`, `navbar_icons_text`, `sidemenu` | `custom_page_menu`, `button_name`, `custom_url` |
 | Dashboard | `dashboard_show_last_update`, `dashboard_columns` | `dashboard_camera`, `dashboard_camera_refresh`, `dashboard_camera_section` |
 | Device cards | `time_ago`, `fade_off_items`, `switch_instead_of_bigtext`, `switch_instead_of_bigtext_scenes`, `wind_direction`, `icon_image`, `card_min_width`, `card_max_width` | |
@@ -2401,7 +2401,8 @@ Toggled via `theme.json` features object. Each feature has an `enabled` boolean 
 | Check update | `check_update` | on | `check_update.js` | Checks for Domoticz software updates. |
 | Custom pages | `custom_page_menu` | on | `custom_page.js` | Adds custom page entries to navigation. |
 | Settings menu | `custom_settings_menu` | on | `settings_page.js` | Renders the Setup menu as a tile grid instead of a plain dropdown list; the theme hub itself is always reachable from either. |
-| Notifications | `notification` | on | (none) | Warning toasts (noty) when a sensor times out or reports a low battery. |
+| Sensor timeout warnings | `warn_timeout` | on | (none) | Toast when a sensor stops reporting. |
+| Low battery warnings | `warn_battery` | on | (none) | Toast when a device reports a low battery. |
 | Dashboard camera section | `dashboard_camera_section` | on | (none) | Renders the camera preview as its own dashboard section. Requires `dashboard_camera`. |
 | Expandable floorplan popups | `floorplan_popup_details` | off | `floorplan_popup_details.css` | Reveals core's floorplan popup expander (`image#twisty`), showing Type, Log, Notifications and the favorite star. Hidden by default since 2019; see [Floorplan Device Popup](#floorplan-device-popup). |
 
