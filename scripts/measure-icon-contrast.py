@@ -1,10 +1,25 @@
 #!/usr/bin/env python3
-"""Contrast of the energy/sun identity colours against every scheme's own card.
+"""Contrast of the energy/sun identity colours AND the device-status glow
+colours, against every scheme's own card.
 
-The energy and sun icons are drawn ON the widget card, so the only meaningful
-background is that scheme's `colors.item`. WCAG SC 1.4.11 puts the floor for
-non-text at 3.0:1; this script uses 3.2 so a value never ships sitting on the
-line. Run with --check in CI-ish fashion: exit 1 lists what fails.
+The energy/sun icons and the status glow ring are both drawn ON the widget
+card, so the only meaningful background is that scheme's `colors.item`. WCAG
+SC 1.4.11 puts the floor for non-text at 3.0:1.
+
+Identity colours (LIGHT/DARK/PAPER_LIGHT/PAPER_DARK) target 3.2 so a value
+never ships sitting on the line. Status glows (STATUS_LIGHT/STATUS_DARK)
+check against the literal 3.0 floor: the 2026-08-31 device-status task
+solved them to ~3.10 worst case deliberately, a tighter margin than the
+identity colours carry, so re-using 3.2 here would reject values that
+already clear WCAG with real (if smaller) headroom. That task is also the
+reason this script grew this second half at all: it first shipped status
+glow values checked against only two generic cards (`#ffffff`/`#182430`),
+and gruvbox's own mid-toned cards (`#f2e5bc`/`#3c3836`) turned out to fail
+values that passed on both bases. Checking every shipped scheme's own card,
+not just the two bases, is what this script already did for the identity
+colours and is exactly what would have caught that first miss.
+
+Run with --check in CI-ish fashion: exit 1 lists what fails.
 """
 import argparse
 import glob
@@ -13,6 +28,7 @@ import os
 import sys
 
 FLOOR = 3.2
+STATUS_FLOOR = 3.0
 
 # The shipped values. Light and dark differ in lightness only; the hue is a
 # theme constant, which is why gas reads as gas in both.
@@ -36,6 +52,17 @@ PAPER_DARK = {
     "water": "#467991", "price": "#8864b9", "sun": "#80733c", "moon": "#657595",
 }
 
+# Device-status glow triplets (dz-tokens.css / dark.css), consumed by
+# css/device-status.css and, since the 2026-08-31 notification-system
+# branch, css/toasts.css. Unlike the identity colours above, NO scheme
+# overrides these: src/js/scheme.js only ever sets --dz-status-disabled from
+# a scheme's own JSON (grep confirms no schemes/*.json key for timeout,
+# lowbat or protected), so every built-in and custom scheme inherits one of
+# these two dicts purely by its `base` - there is no per-family (Paper-style)
+# branch to take here, unlike LIGHT/DARK above.
+STATUS_LIGHT = {"timeout": "#C74343", "lowbat": "#858500", "protected": "#00008B"}
+STATUS_DARK = {"timeout": "#DE5855", "lowbat": "#FFFF00", "protected": "#477EFE"}
+
 # These constants are a second source of truth for the same hex values: they let
 # contrast be measured without parsing CSS/JSON, but nothing ties them back to
 # the files that actually ship the colours, so the two can drift silently while
@@ -46,6 +73,8 @@ PINNED_FILES = {
     "DARK": "dark.css",
     "PAPER_LIGHT": os.path.join("schemes", "paper-light.json"),
     "PAPER_DARK": os.path.join("schemes", "paper-dark.json"),
+    "STATUS_LIGHT": "dz-tokens.css",
+    "STATUS_DARK": "dark.css",
 }
 
 
@@ -110,14 +139,30 @@ def main():
             ratio = contrast(rgb(value), rgb(card))
             flag = "" if ratio >= FLOOR else "  UNDER FLOOR"
             if flag:
-                failures.append(f"{name}/{role} {value} on {card} = {ratio}:1")
+                failures.append(f"{name}/{role} {value} on {card} = {ratio}:1 (floor {FLOOR}:1)")
             print(f"{name:16} {role:8} {value} on {card} = {ratio}:1{flag}")
+
+    print()
+    for name, base, card in cards():
+        # No scheme overrides these three: every scheme inherits one of the
+        # two dicts purely by its `base` (see the STATUS_LIGHT/STATUS_DARK
+        # comment above), so there is no Paper-style branch to take here.
+        palette = STATUS_LIGHT if base == "light" else STATUS_DARK
+        for role, value in palette.items():
+            ratio = contrast(rgb(value), rgb(card))
+            flag = "" if ratio >= STATUS_FLOOR else "  UNDER FLOOR"
+            if flag:
+                failures.append(
+                    f"{name}/status-{role} --dz-status-{role}-values {value} on {card} "
+                    f"= {ratio}:1 (floor {STATUS_FLOOR}:1)"
+                )
+            print(f"{name:16} status-{role:9} {value} on {card} = {ratio}:1{flag}")
 
     pinned_missing = check_pinned() if args.check else []
 
     if (failures or pinned_missing) and args.check:
         if failures:
-            print(f"\n{len(failures)} value(s) under the {FLOOR}:1 floor:", file=sys.stderr)
+            print(f"\n{len(failures)} value(s) under their floor:", file=sys.stderr)
             for line in failures:
                 print("  " + line, file=sys.stderr)
         if pinned_missing:
@@ -125,7 +170,8 @@ def main():
             for line in pinned_missing:
                 print("  " + line, file=sys.stderr)
         return 1
-    print(f"\nOK: every value clears {FLOOR}:1 on its own scheme's card")
+    print(f"\nOK: every identity colour clears {FLOOR}:1 and every status glow clears {STATUS_FLOOR}:1, "
+          f"on its own scheme's card")
     if args.check:
         print("OK: every constant is present in its shipped file")
     return 0
