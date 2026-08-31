@@ -493,6 +493,15 @@ function dzWarnPass(cfg) {
         }
         if (!enabled) return;
         var idx = dzCardIdx($card);
+        /* Read as plain text, not escaped. dzToast() (src/js/toasts.js) inserts
+           both title and body as TEXT NODES via createTextNode, never innerHTML,
+           so there is no markup context here for a device name to inject into.
+           Escaping it first, the way the old generate_noty call did with
+           $("<span>").text(name).html(), would be actively wrong now: escaped
+           text placed inside a text node renders its entities literally, so a
+           device named "Kitchen & Hall" would show on screen as
+           "Kitchen &amp; Hall". Harness check C9 in dz-toast-surface.js asserts
+           the no-innerHTML contract this relies on. */
         var name = $card.find("#name").text().trim();
         dzToast({
             type: "warning",
