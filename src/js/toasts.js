@@ -135,7 +135,14 @@ function dzWarnPrune(store, now) {
 function dzToastSummary(names, total) {
     var shown = names.slice(0, DZ_TOAST_NAME_CAP);
     var rest = total - shown.length;
-    return rest > 0 ? shown.join(", ") + " and " + rest + " more" : shown.join(", ");
+    if (rest <= 0) return shown.join(", ");
+    /* Localised, like every other group title in this file (see devices.js's
+       groupTitle functions). Guarded the same way the close button's aria-label
+       guards $.t: this keeps dzToastSummary callable from the node:vm policy
+       test, which loads no lang file. */
+    var and = (typeof language !== "undefined" && language.toast_and) || "and";
+    var more = (typeof language !== "undefined" && language.toast_more) || "more";
+    return shown.join(", ") + " " + and + " " + rest + " " + more;
 }
 
 /* Grouping may only ever RAISE a short deadline to the cap. It never shortens a
@@ -156,8 +163,8 @@ function dzToastPushLog(state, event) {
 var dzToastState = dzToastCreateState();
 var dzToastStackEl = null;
 var dzToastVisible = [];   /* live toast records, oldest first */
-var dzToastQueue = [];     /* events waiting for a slot; never dropped */
-var dzToastGroups = {};    /* group -> live record, for coalescing */
+var dzToastQueue = [];     /* queued entries (dzToastQueuePush) waiting for a slot; never dropped */
+var dzToastGroups = {};    /* group -> live record OR still-queued entry, for coalescing */
 
 /* 4 on desktop, 2 on a phone: a three-line toast stacked three deep eats the
    top third of an 844px viewport, and coalescing keeps a real storm at one or
@@ -279,16 +286,37 @@ function dzToastArm(rec, ms) {
     rec.timer = setTimeout(function() { dzToastRemove(rec); }, ms);
 }
 
-function dzToastPause(rec) {
+/* Low-level countdown control: stop/start the timer and recompute the
+   remaining time, without deciding whether the toast SHOULD be counting down.
+   Used both by the public pause/resume below (hover, focus) and by a group
+   merge extending the deadline, which must not silently restart a timer the
+   user paused. */
+function dzToastStopTimer(rec) {
     if (rec.remaining === false || !rec.timer) return;
     clearTimeout(rec.timer);
     rec.timer = null;
     rec.remaining = Math.max(0, rec.remaining - (Date.now() - rec.startedAt));
 }
 
-function dzToastResume(rec) {
-    if (rec.remaining === false || rec.timer || rec.removed) return;
+function dzToastStartTimer(rec) {
+    if (rec.remaining === false || rec.timer || rec.removed || rec.paused) return;
     dzToastArm(rec, rec.remaining);
+}
+
+/* Explicit paused flag, not one inferred from a null timer: a null rec.timer
+   also happens mid-merge, while the deadline is being recomputed, which is
+   not the same thing as "the user is reading this and it must not
+   disappear". Only hover and focus (via these two) ever set rec.paused, so a
+   merge's internal stop/start dance (dzToastMerge) can never un-pause a toast
+   the user is still hovering or focused on. */
+function dzToastPause(rec) {
+    rec.paused = true;
+    dzToastStopTimer(rec);
+}
+
+function dzToastResume(rec) {
+    rec.paused = false;
+    dzToastStartTimer(rec);
 }
 
 function dzToastShow(ev) {
@@ -296,7 +324,7 @@ function dzToastShow(ev) {
     var rec = {
         el: built.el, group: ev.group || null, names: ev.deviceName ? [ev.deviceName] : [],
         total: ev.deviceName ? 1 : 0, base: ev.timeout, removed: false, timer: null,
-        remaining: ev.timeout, startedAt: 0, ev: ev
+        remaining: ev.timeout, startedAt: 0, paused: false, ev: ev
     };
     built.closeBtn.addEventListener("click", function(e) {
         e.stopPropagation();
@@ -335,53 +363,121 @@ function dzToastMerge(rec, ev) {
         rec.el.querySelector(".dz-toast-content").appendChild(body);
     }
     body.textContent = dzToastSummary(rec.names, rec.total);
-    /* One-way extension only. See dzToastDeadline. */
+    /* One-way extension only. See dzToastDeadline. Stop/start the timer, not
+       pause/resume: a merge recomputing the deadline must never flip
+       rec.paused, or it would silently resume a toast the user is currently
+       hovering or focused on (dzToastStartTimer still no-ops while paused). */
     var want = dzToastDeadline(rec.base, true);
     if (want !== false && !rec.extended) {
         rec.extended = true;
-        dzToastPause(rec);
+        dzToastStopTimer(rec);
         rec.remaining = want;
-        dzToastResume(rec);
+        dzToastStartTimer(rec);
     }
+}
+
+/* Same idea as dzToastMerge, but for a group leader that is still sitting in
+   the queue: no DOM, no timer yet. Fold the arrival into the queued entry
+   directly (title, body, extended deadline) so it renders with the full
+   count the moment a slot opens, instead of every arrival before that being
+   lost. This, plus dzToastGroups registration in dzToastQueuePush below, is
+   what lets a group survive queueing instead of fanning out into one queued
+   event per arrival. */
+function dzToastQueueMerge(entry, ev) {
+    if (ev.deviceName) entry.names.push(ev.deviceName);
+    entry.total += 1;
+    entry.ev.title = ev.groupTitle ? ev.groupTitle(entry.total) : entry.total + " devices";
+    entry.ev.body = dzToastSummary(entry.names, entry.total);
+    if (!entry.extended) {
+        var want = dzToastDeadline(entry.ev.timeout, true);
+        if (want !== false) {
+            entry.extended = true;
+            entry.ev.timeout = want;
+        }
+    }
+}
+
+/* Wrap a queued event with the same group bookkeeping a live toast carries
+   (names, total, createdAt, a removed flag), and register it in
+   dzToastGroups so a same-group arrival that shows up while this one is
+   still queued finds it and merges, instead of queuing a second event. */
+function dzToastQueuePush(ev) {
+    var entry = {
+        ev: ev, queued: true, removed: false, createdAt: Date.now(),
+        names: ev.deviceName ? [ev.deviceName] : [], total: ev.deviceName ? 1 : 0,
+        extended: false
+    };
+    dzToastQueue.push(entry);
+    if (ev.group) dzToastGroups[ev.group] = entry;
+    return entry;
+}
+
+/* Cancel a still-queued entry (its close() handle was called before a slot
+   ever opened). Identity-checked exactly like dzToastRemove clears a live
+   group entry: only delete dzToastGroups[group] if it still points at THIS
+   entry, so cancelling a stale handle can never clobber whatever group
+   record - live or queued - has taken its place since, and a closed group
+   can never be resurrected by a leftover reference. */
+function dzToastCancelQueued(entry) {
+    if (entry.removed) return;
+    entry.removed = true;
+    var i = dzToastQueue.indexOf(entry);
+    if (i >= 0) dzToastQueue.splice(i, 1);
+    if (entry.ev.group && dzToastGroups[entry.ev.group] === entry) delete dzToastGroups[entry.ev.group];
 }
 
 function dzToastDrain() {
     while (dzToastQueue.length && dzToastVisible.length < dzToastMaxVisible()) {
-        dzToastShow(dzToastQueue.shift());
+        var entry = dzToastQueue.shift();
+        var rec = dzToastShow(entry.ev);
+        /* Carry over whatever this leader merged while it was still queued:
+           dzToastShow only knows about entry.ev's own single device. */
+        if (entry.total) {
+            rec.total = entry.total;
+            rec.names = entry.names.slice();
+        }
+        if (entry.extended) rec.extended = true;
     }
 }
 
 /* The single entry point. Everything in the app - core's ~600 call sites, the
    theme's own, and the device warnings - arrives here. */
 function dzToast(ev) {
-    if (!ev || typeof ev !== "object") return { close: function() {} };
+    if (!ev || typeof ev !== "object") return { close: function() {}, shown: false };
     if (ev.timeout === undefined) {
         ev.timeout = ev.type === "error" ? DZ_TOAST_ERROR_MS : DZ_TOAST_BASE_MS;
     }
-    if (dzToastShouldSuppress(dzToastState, ev.key)) return { close: function() {} };
+    if (dzToastShouldSuppress(dzToastState, ev.key)) return { close: function() {}, shown: false };
     dzToastMarkSeen(dzToastState, ev.key);
     dzToastPushLog(dzToastState, {
         t: Date.now(), type: ev.type, title: ev.title, body: ev.body,
         source: ev.source, deviceIdx: ev.deviceIdx || null
     });
 
+    /* dzToastGroups holds either a live rec or a still-queued entry (queued:
+       true); both carry .removed and .createdAt, so the coalesce-window check
+       below is the same regardless of which one it finds. */
     var live = ev.group ? dzToastGroups[ev.group] : null;
     if (live && !live.removed && (Date.now() - live.createdAt) <= DZ_TOAST_COALESCE_MS) {
+        if (live.queued) {
+            dzToastQueueMerge(live, ev);
+            return { close: function() { dzToastCancelQueued(live); }, shown: true };
+        }
         dzToastMerge(live, ev);
-        return { close: function() { dzToastRemove(live); } };
+        return { close: function() { dzToastRemove(live); }, shown: true };
     }
 
     if (dzToastVisible.length >= dzToastMaxVisible()) {
         /* Queue, never drop: dropping the oldest means a storm shows only the
-           last few warnings. */
-        dzToastQueue.push(ev);
-        return { close: function() {
-            var i = dzToastQueue.indexOf(ev);
-            if (i >= 0) dzToastQueue.splice(i, 1);
-        } };
+           last few warnings. Group identity is preserved via dzToastQueuePush,
+           so a same-group storm still coalesces into one toast while it
+           waits for a slot instead of fanning out into a dozen serialised
+           ones. */
+        var entry = dzToastQueuePush(ev);
+        return { close: function() { dzToastCancelQueued(entry); }, shown: true };
     }
     var rec = dzToastShow(ev);
-    return { close: function() { dzToastRemove(rec); } };
+    return { close: function() { dzToastRemove(rec); }, shown: true };
 }
 
 function dzToastLog() { return dzToastState.log.slice(); }
@@ -396,9 +492,14 @@ function dzToastLog() { return dzToastState.log.slice(); }
    need this, so it lives here once instead of being reimplemented, wrong,
    in each caller. Iterate a COPY of dzToastVisible: dzToastRemove splices
    the live array, so iterating it directly would skip every other entry.
-   Also empties dzToastQueue so nothing queued drains in behind the wipe. */
+   Also empties dzToastQueue so nothing queued drains in behind the wipe,
+   clearing dzToastGroups entries a queued entry (still) owns first so no
+   stale reference survives the wipe. */
 function dzToastCloseAll() {
     dzToastVisible.slice().forEach(dzToastRemove);
+    dzToastQueue.forEach(function(entry) {
+        if (entry.ev.group && dzToastGroups[entry.ev.group] === entry) delete dzToastGroups[entry.ev.group];
+    });
     dzToastQueue.length = 0;
 }
 

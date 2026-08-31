@@ -584,7 +584,7 @@ function dzWarnPass(cfg) {
            "Kitchen &amp; Hall". Harness check C9 in dz-toast-surface.js asserts
            the no-innerHTML contract this relies on. */
         var name = $card.find("#name").text().trim();
-        dzToast({
+        var result = dzToast({
             type: "warning",
             title: cfg.title,
             body: name,
@@ -601,7 +601,13 @@ function dzWarnPass(cfg) {
                (the generic alert glyph) for every device warning. */
             icon: cfg.toastIcon
         });
-        if (key) dzWarnRecord(dzWarnStore(), key, mode, now);
+        /* Record only when dzToast actually registered the event (shown,
+           merged, or queued), not when its own session dedupe swallowed it:
+           recording on every allowed call, whether shown or not, persists
+           "last allowed" instead of "last shown", so a tab left open past
+           the dedupe window silently re-records without the user ever
+           seeing the warning again. */
+        if (key && result.shown) dzWarnRecord(dzWarnStore(), key, mode, now);
     });
 
     /* Re-arm: a device whose card is on this page and NO LONGER carries the

@@ -8,8 +8,6 @@ language = {
   theme_settings_saved: "Tema inställningar sparat",
   theme_restored: "Tema återställd",
   allow_new_hardware: "Tillåt ny hårdvara i 5 min",
-  is: "är",
-  timedout: "tidsgränsen uppnådd",
   mainmenu: "Huvud meny",
   you_have: "Du har",
   messages: "meddelande(n)",
@@ -18,5 +16,7 @@ language = {
   clear_localstorage: "Rensa webbläsare",
   resetTheme_message: "Vill du återställa temat till standardinställningar eller bara radera webbläsarlagring",
   sensors_timed_out: "sensorer har nått tidsgränsen",
-  devices_low_on_battery: "enheter har lågt batteri"
+  devices_low_on_battery: "enheter har lågt batteri",
+  toast_and: "och",
+  toast_more: "till"
 };

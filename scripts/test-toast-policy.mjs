@@ -15,6 +15,131 @@ function loadThemeGlobals(files) {
 
 const dz = loadThemeGlobals(["src/js/toasts.js"]);
 
+/* ---- Minimal fake DOM + fake clock, for the coalescing/pause tests below ----
+
+   The renderer half of toasts.js (dzToastShow, dzToastMerge, dzToastDrain,
+   dzToast itself) is only reachable with a `document`, `window` and working
+   timers, none of which the pure-logic context above provides on purpose
+   (that absence is what proves the file's top level never touches the DOM).
+   Rather than skip testing the renderer, give it just enough of a DOM to run
+   for real: createElement/appendChild/classList/querySelector/textContent,
+   a controllable virtual clock standing in for Date.now()/setTimeout, so an
+   8-second toast deadline can be exercised without an 8-second test. */
+function makeFakeClock() {
+    let now = 0;
+    let seq = 0;
+    const timers = new Map(); // id -> { fn, at }
+    return {
+        Date: { now: () => now },
+        setTimeout(fn, ms) {
+            const id = ++seq;
+            timers.set(id, { fn: fn, at: now + ms });
+            return id;
+        },
+        clearTimeout(id) { timers.delete(id); },
+        /* Fires every pending timer due at or before now+ms, in due-time
+           order, advancing `now` as it goes (so a timer's own setTimeout
+           calls schedule relative to the right instant). */
+        advance(ms) {
+            const target = now + ms;
+            for (;;) {
+                let nextId = null, nextAt = Infinity;
+                for (const [id, t] of timers) {
+                    if (t.at <= target && t.at < nextAt) { nextAt = t.at; nextId = id; }
+                }
+                if (nextId === null) break;
+                const t = timers.get(nextId);
+                timers.delete(nextId);
+                now = nextAt;
+                t.fn();
+            }
+            now = target;
+        }
+    };
+}
+
+function makeFakeDom() {
+    function queryDescendant(el, selector) {
+        var cls = selector.charAt(0) === "." ? selector.slice(1) : selector;
+        for (const child of el.children) {
+            if (child._classes && child._classes.has(cls)) return child;
+            const found = queryDescendant(child, selector);
+            if (found) return found;
+        }
+        return null;
+    }
+
+    function createElement() {
+        const classes = new Set();
+        let text = "";
+        const el = {
+            nodeType: 1,
+            children: [],
+            parentNode: null,
+            _attrs: {},
+            offsetHeight: 0,
+            appendChild(child) {
+                if (child.nodeType === 3) { text += child.data; return child; }
+                el.children.push(child);
+                child.parentNode = el;
+                return child;
+            },
+            removeChild(child) {
+                const i = el.children.indexOf(child);
+                if (i >= 0) el.children.splice(i, 1);
+                child.parentNode = null;
+                return child;
+            },
+            setAttribute(name, value) { el._attrs[name] = value; },
+            getAttribute(name) { return el._attrs[name]; },
+            addEventListener() { /* driven directly via dz.dzToastPause/Resume in tests */ },
+            querySelector(selector) { return queryDescendant(el, selector); }
+        };
+        Object.defineProperty(el, "className", {
+            get() { return Array.from(classes).join(" "); },
+            set(v) { classes.clear(); String(v).split(/\s+/).filter(Boolean).forEach(c => classes.add(c)); }
+        });
+        Object.defineProperty(el, "classList", {
+            value: {
+                add(c) { classes.add(c); },
+                remove(c) { classes.delete(c); },
+                contains(c) { return classes.has(c); }
+            }
+        });
+        Object.defineProperty(el, "textContent", {
+            get() { return text; },
+            set(v) { text = String(v); el.children.length = 0; }
+        });
+        Object.defineProperty(el, "_classes", { get() { return classes; } });
+        return el;
+    }
+
+    return {
+        createElement,
+        createTextNode(data) { return { nodeType: 3, data }; },
+        body: createElement(),
+        /* dzToastInstallKeyboard binds the Escape handler here at load time
+           (guarded only by `typeof document !== "undefined"`, which this
+           fake satisfies); it is never exercised by these tests. */
+        addEventListener() {}
+    };
+}
+
+/* A fresh vm context (document/window/clock included) per call, so each test
+   gets isolated dzToastVisible/dzToastQueue/dzToastGroups singletons rather
+   than leaking state between tests. */
+function loadToastRuntime() {
+    const clock = makeFakeClock();
+    const dom = makeFakeDom();
+    const ctx = vm.createContext({
+        Math, console, JSON,
+        document: dom, window: { innerWidth: 1024 },
+        Date: clock.Date, setTimeout: clock.setTimeout, clearTimeout: clock.clearTimeout
+    });
+    vm.runInContext(readFileSync("src/js/toasts.js", "utf8"), ctx, { filename: "src/js/toasts.js" });
+    return { dz: ctx, clock };
+}
+
 test("a key warns once, then is suppressed until it is cleared", () => {
     const s = dz.dzToastCreateState();
     assert.equal(dz.dzToastShouldSuppress(s, "timeout:42"), false);
@@ -152,4 +277,90 @@ test("a throwing storage object degrades to visit behaviour rather than suppress
     // Recording must not throw out through the caller either.
     assert.doesNotThrow(() => dz.dzWarnRecord(store, "timeout:9", "daily", 1000000));
     assert.doesNotThrow(() => dz.dzWarnPrune(store, 1000000));
+});
+
+/* ---- Coalescing and pause must both survive the queue path ---- */
+
+test("a queued group leader keeps coalescing later arrivals instead of fanning out into a dozen toasts", () => {
+    const rt = loadToastRuntime();
+    const d = rt.dz;
+
+    // Fill the stack (4 on this desktop width) with unrelated singles so the
+    // group leader below has nowhere to render immediately.
+    for (let i = 0; i < 4; i++) {
+        d.dzToast({ type: "info", title: "core message " + i, timeout: 4000 });
+    }
+    assert.equal(d.dzToastVisible.length, 4);
+
+    function groupTitle(n) { return n + " devices timed out"; }
+    d.dzToast({
+        type: "warning", title: "Hall timed out", deviceName: "Hall",
+        group: "device-warning-timeout", groupTitle: groupTitle, timeout: 6000
+    });
+    assert.equal(d.dzToastQueue.length, 1, "the group leader queues, stack is full");
+
+    // Eleven more arrivals from the same storm, all inside the 1200ms
+    // coalesce window (the fake clock never advances during this loop).
+    const names = ["Garage", "Attic", "Shed", "Loft", "Porch", "Study",
+                   "Kitchen", "Bath", "Office", "Den", "Yard"];
+    names.forEach(function(name) {
+        d.dzToast({
+            type: "warning", title: name + " timed out", deviceName: name,
+            group: "device-warning-timeout", groupTitle: groupTitle, timeout: 6000
+        });
+    });
+
+    // This is the regression: dzToastDrain used to call dzToastShow directly
+    // on the raw queued event, so a queued leader never registered in
+    // dzToastGroups and every later arrival queued as its own separate
+    // event instead of merging. Fixed, all twelve collapse into one entry.
+    assert.equal(d.dzToastQueue.length, 1,
+        "12 same-group arrivals while queued must coalesce into one queued entry, not 12");
+
+    // Free a slot through the real removal path and let its exit-animation
+    // timeout run, which is what calls dzToastDrain().
+    d.dzToastRemove(d.dzToastVisible[0]);
+    rt.clock.advance(320);
+
+    assert.equal(d.dzToastQueue.length, 0, "the queued group leader drained into the freed slot");
+    assert.equal(d.dzToastVisible.length, 4);
+    const shown = d.dzToastVisible[d.dzToastVisible.length - 1];
+    assert.equal(shown.group, "device-warning-timeout");
+    assert.equal(shown.total, 12, "every merged arrival survived the queue, not just the first");
+    assert.equal(shown.el.querySelector(".dz-toast-title").textContent, groupTitle(12));
+});
+
+test("pausing a coalescing toast survives a group merge; the timer stays off until real resume", () => {
+    const rt = loadToastRuntime();
+    const d = rt.dz;
+
+    function groupTitle(n) { return n + " devices"; }
+    d.dzToast({
+        type: "warning", title: "Hall timed out", deviceName: "Hall",
+        group: "device-warning-timeout", groupTitle: groupTitle, timeout: 6000
+    });
+    const rec = d.dzToastVisible[0];
+    assert.ok(rec.timer, "the toast starts with a running deadline");
+
+    d.dzToastPause(rec); // what mouseenter/focusin call
+    assert.equal(rec.timer, null);
+    assert.equal(rec.paused, true);
+
+    // A second device joins the group while the toast is still being read.
+    d.dzToast({
+        type: "warning", title: "Garage timed out", deviceName: "Garage",
+        group: "device-warning-timeout", groupTitle: groupTitle, timeout: 6000
+    });
+
+    // The regression: dzToastMerge's pause/resume dance unconditionally
+    // rearmed the timer, silently un-pausing a toast the user was still
+    // hovering or focused on. Fixed, the merge only extends rec.remaining;
+    // the timer stays off because rec.paused is still true.
+    assert.equal(rec.timer, null, "a group merge must not rearm the timer while paused");
+    assert.equal(rec.paused, true, "still paused after the merge");
+    assert.equal(rec.remaining, 8000, "the deadline still extends to the group cap while paused");
+
+    d.dzToastResume(rec); // what mouseleave/focusout call
+    assert.ok(rec.timer, "resuming after the merge starts a timer");
+    assert.equal(rec.paused, false);
 });

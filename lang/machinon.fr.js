@@ -8,8 +8,6 @@ language = {
   theme_settings_saved: "Paramètres du thème enregistrés",
   theme_restored: "Thème réinitialisé",
   allow_new_hardware: "Autoriser l'ajout de matériel pendant 5 min",
-  is: "est",
-  timedout: "expiré",
   mainmenu: "Menu principal",
   you_have: "Vous avez",
   messages: "message(s)",
@@ -18,5 +16,7 @@ language = {
   clear_localstorage: "Vider le cache du navigateur",
   resetTheme_message: "Voulez-vous réinitialiser le thème ou vider le cache du navigateur ?",
   sensors_timed_out: "capteurs ont expiré",
-  devices_low_on_battery: "appareils à batterie faible"
+  devices_low_on_battery: "appareils à batterie faible",
+  toast_and: "et",
+  toast_more: "autres"
 };
