@@ -755,7 +755,7 @@ overrides each one to a deepened alpha (see Dark Underlay below).
 | 1 | card | `--dz-elev-card` | `0 1px 4px rgba(0,0,0,0.25)` | Device cards, DataTables, log console, page-content containers |
 | 2 | popup | `--dz-elev-popup` | `0 2px 6px rgba(0,0,0,0.28)` | Navbar inner and dropdown menus (nav, sidemenu, settings), Highcharts export menu, card tooltips, mobile item cards, mobile search input |
 | 3 | button | `--dz-btn-shadow` | see [Buttons](#buttons) Token Table | Resting shadow for every filled button; the value lives in the Buttons section's token table, referenced here rather than duplicated, along with the hover/pressed/focus-ring variants |
-| 4 | overlay | `--dz-elev-overlay` | `0 3px 10px rgba(0,0,0,0.30)` | Card options flyout, setpoint popup, search message toast |
+| 4 | overlay | `--dz-elev-overlay` | `0 3px 10px rgba(0,0,0,0.30)` | Card options flyout, setpoint popup, search message toast, toast surface (`#dz-toast-stack`) |
 | 5 | drag | `--dz-elev-drag` | `0 6px 14px rgba(0,0,0,0.35)` | Drag ghost during card reorder |
 
 The values above follow a crisp-tight direction: small offsets, tight blur, alpha carrying the
@@ -781,13 +781,13 @@ fixed here.
 
 **Scheme-base dependent, same policy as the [semantic identity colours](#semantic-identity-colours)
 above.** All three name what a status IS, not what a user picked: a timed-out sensor is red, a
-flat battery is yellow, a protected device is blue. The HUE is a theme constant; only the
-LIGHTNESS differs between the light and dark base. Each is defined once per base - in
-`dz-tokens.css` for light, `dark.css` for dark - not as a scheme key: no `schemes/*.json` file
-overrides any of the three (the only status token a scheme can set is the unrelated
-`--dz-status-disabled`), so every scheme, built-in or custom, inherits one of the two bases
-untouched. The hue being held and only the lightness moving between the two bases is
-deliberate, not an oversight to "simplify" back into one shared value.
+flat battery is amber, a protected device is blue. The HUE is a theme constant; only the
+LIGHTNESS differs between the light and dark base - EXCEPT low-battery, deliberately re-hued (see
+below). Each is defined once per base - in `dz-tokens.css` for light, `dark.css` for dark - not as
+a scheme key: no `schemes/*.json` file overrides any of the three (the only status token a scheme
+can set is the unrelated `--dz-status-disabled`), so every scheme, built-in or custom, inherits
+one of the two bases untouched. The hue being held and only the lightness moving between the two
+bases is deliberate, not an oversight to "simplify" back into one shared value.
 
 Floor is WCAG SC 1.4.11's 3:1 for non-text, measured against each scheme's own card colour, the
 same methodology as the identity colours. First solved 2026-08-31 against only the two plain
@@ -795,16 +795,32 @@ bases (`#ffffff` / `#182430`) and shipped that way; re-solved the same day once
 `scripts/measure-icon-contrast.py` was extended to check every shipped scheme's own card rather
 than just the two bases, which caught two of the three values failing on Gruvbox's more
 mid-toned cards (`#f2e5bc` light, `#3c3836` dark) - a failure the plain-base check had no way to
-see. Shipped values target 3.10:1, not exactly 3.00:1, so none sits on the line:
+see. Shipped values targeted 3.10:1, not exactly 3.00:1, so none sat on the line.
+
+**RE-SOLVED AGAIN 2026-08-31** to a 4.0 target: the toast severity tile (see
+[Toasts](#toasts) below) mixes this same colour at 15% into its own panel, a
+separate pair with its own 3:1 non-text floor, and the first 3.10-target pass left it too close
+on several scheme/severity combinations. The higher glow target gives that diluted tile real
+margin instead of re-litigating the tile's own mix percentage. Worst case is now 4.01:1
+(gruvbox-light/lowbat):
 
 | Token | Base | Worst case | Scheme |
 |-------|------|-----------|--------|
-| `--dz-status-timeout-values` | light | 3.87:1 | gruvbox-light |
-| `--dz-status-timeout-values` | dark | 3.11:1 | gruvbox-dark |
-| `--dz-status-lowbat-values` | light | 3.12:1 | gruvbox-light |
-| `--dz-status-lowbat-values` | dark | 10.80:1 | gruvbox-dark |
-| `--dz-status-protected-values` | light | 12.17:1 | gruvbox-light |
-| `--dz-status-protected-values` | dark | 3.14:1 | gruvbox-dark |
+| `--dz-status-timeout-values` | light | 4.02:1 | gruvbox-light |
+| `--dz-status-timeout-values` | dark | 4.02:1 | gruvbox-dark |
+| `--dz-status-lowbat-values` | light | 4.01:1 | gruvbox-light |
+| `--dz-status-lowbat-values` | dark | 7.11:1 | gruvbox-dark |
+| `--dz-status-protected-values` | light | 12.17:1 | gruvbox-light (unchanged) |
+| `--dz-status-protected-values` | dark | 4.03:1 | gruvbox-dark |
+
+**Low-battery is also a deliberate HUE change, not just a re-solve.** Pure yellow (OKLCH h=109.8)
+matched nothing else in the theme and read as the odd one out in every scheme. Re-anchored on an
+amber seed (`#FFC107`, OKLCH h=84.9) - close to but distinct from the theme's own warning family
+(OKLCH h=75.6), so low-battery still reads as its own state rather than a repaint of "warning".
+The light value's own solved hue (h=84.2) drifts 0.76 degrees from the seed - over the ~0.25
+degree budget the timeout/protected pair above hold between their own light and dark values -
+stated here rather than hidden: the hue was deliberately re-chosen for this token, not held fixed
+from a prior constant, so there was nothing fixed for it to drift away from.
 
 Check with `scripts/measure-icon-contrast.py --check`, which walks every shipped scheme's own
 card colour for these three tokens the same way it already does for the identity colours above.
@@ -1933,6 +1949,78 @@ contract.
 - Button pane: flex wrap, `5px` gap
 - Dialog buttons: filled primary style
 - Mobile (max-width: 767px): tables forced to `100%` width with `table-layout: fixed`
+
+### Toasts
+
+`#dz-toast-stack` / `.dz-toast` (`css/toasts.css`, `src/js/toasts.js`), the theme's own
+notification surface: intercepts core's two toast globals (`generate_noty`, `ShowNotify`, see
+`src/js/toast-hooks.js`) and is the single entry point (`dzToast()`) every mechanism in the app
+funnels through, including device warnings.
+
+**Surface.** Same floating-surface language as the card options flyout, setpoint popup and RGBW
+popup: `background: var(--dz-menu-bg)`, `color: var(--dz-menu-text)`, `border-radius: 6px`,
+`box-shadow: var(--dz-elev-overlay)`, no scrim. Title/body text stays on this one surface token
+regardless of severity, so AA follows from the scheme's already-guarded text-on-panel contract
+instead of a new colour pair per severity.
+
+**Severity tile.** A 34px square on the leading edge, `border-radius: 5px`, glyph at
+`--dz-icon-size-md` (24px, the tier that fits the box with real breathing room - the other two
+tiers were rendered and rejected: `-sm` leaves the tile looking mostly empty, `-lg` crowds the
+battery glyph's tab against the corner radius). Background is
+`color-mix(in srgb, var(--dz-toast-severity) 15%, var(--dz-menu-bg))`, glyph in the severity
+colour itself - measured against `--dz-menu-bg` (the scheme's NAVBAR colour, the toast panel's own
+background), not the card colour. That distinction matters: an early pass measured this pair
+against the wrong background and shipped a mix that undershot WCAG's 3:1 non-text floor on 2 of 24
+scheme/severity combinations before being caught and corrected. At 15%, worst case is 3.07:1
+(gruvbox-light/timeout), clearing the floor everywhere.
+
+Severity colour source, never a private hex:
+
+| Severity | Colour token |
+|----------|-------------|
+| Device timeout | `rgb(var(--dz-status-timeout-values))` |
+| Device battery | `rgb(var(--dz-status-lowbat-values))` |
+| Error | `var(--dz-status-danger)` |
+| Success | `var(--dz-status-ok)` |
+| Info / update | `var(--dz-accent-color)` |
+
+Glyph, an explicit per-event `icon` overriding a severity default:
+
+| Condition | Glyph | Why |
+|-----------|-------|-----|
+| Sensor timeout | `ion-ios-wifi` | The SAME glyph `devices.js` prepends to the device name on the card |
+| Battery low (toast) | `ion-md-battery-full` | Deliberately DIFFERENT from the card's `ion-ios-battery-dead`: the toast's words ("Battery low") disambiguate a full-battery shape, but the card shows the glyph alone with only a tooltip, where "full" would read as the opposite of what it means. `ion-ios-battery-dead` is also an OUTLINE glyph whose enclosed area shows the tile through it, reading as a dim rim rather than a solid shape on the darkest schemes' near-black tile; `ion-md-battery-full` is solid. |
+| Error | `ion-ios-close-circle` | |
+| Success | `ion-ios-checkmark-circle` | |
+| Info | `ion-ios-information-circle` | |
+| Theme update | `ion-ios-cloud-download` | Set per-event by `check_update.js` |
+
+**Text.** Device warnings read CONDITION as the title over SUBJECT as the body ("Sensor timeout" /
+"Living Room Humidity"), not the device name first. Core's own messages, which have no subject to
+split out, keep the message as the title.
+
+**Placement.** `--dz-toast-top` clears the fixed HEADER chrome, not any individual toast's own
+height (a taller toast cannot change it): desktop `128px` (navbar bottom `118px` +
+`--dz-card-space-lg`); mobile `35px` (collapsed `.menu-toggle` bottom `25px` + the same 10px).
+**Constraint.** A REAL tap on the mobile search pill (not a programmatic `.focus()`, which does
+not expand it) grows it and drops the input to y 50..91, past the collapsed 35px offset - an
+owner-found occlusion defect, `elementFromPoint()` at the input's centre resolving to the toast
+itself. Fixed with `body:has(#search:focus-within) #dz-toast-stack { top: 101px; }` (measured
+input bottom 91 + the same 10px gap). A static offset cannot express this: the pill is expanded or
+not depending on live focus state, and `:has()` re-evaluates automatically on every focus/blur
+where a JS-driven constant would not - do not simplify this back into one number. Both engines
+measured identically (Chromium and Firefox, 390x844).
+
+**Stack.** `dzToastMaxVisible()` caps visible toasts at 4 desktop / 2 phone; anything past the cap
+queues and drains one at a time as a visible toast closes, rather than dropping - a storm shows
+every warning eventually, not just the last few.
+
+**Rejected treatments (owner decision 2026-08-31, do not reinvent).** A leading 3px border-left
+RAIL, the surface's original shipped severity language: replaced because a coloured edge alone
+carries less information than a glyph, and this surface already had room for one. A header STRIP
+spanning the toast's top edge: rejected because across the messages the app actually raises it
+mostly restated the title ("SAVE FAILED" over "Theme settings could not be saved"), and its
+variable width implied a scale that does not exist.
 
 ### Dimmer Slider
 

@@ -7,7 +7,9 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - Error and confirmation messages from Domoticz now appear again. They were being hidden by the theme, so failures like "you do not have permission to do that" and a theme settings save that did not work were silently invisible.
 - The "new version available" notice now reads as information rather than a success message, and keeps its clickable download link instead of showing "Click here to download" as plain, unclickable text.
 - Sensor-timeout and low-battery warnings no longer repeat every time you leave a page and come back. Each device now warns once until the problem actually clears, and several warnings at once merge into a single summary instead of a flood of separate messages.
-- Low-battery and protected markers are now readable in every colour scheme. The low-battery yellow was invisible on light backgrounds and the protected blue was invisible on dark ones.
+- Pop-up messages (like sensor warnings and save confirmations) now match your theme's colours, in every colour scheme and in dark mode, instead of the old fixed style.
+- Pop-up messages no longer cover the top menu, and on mobile no longer cover the search field when it is open.
+- Low-battery and protected markers are now readable in every colour scheme, with more contrast margin than before. Low-battery also moved from a plain yellow to a warmer amber, so it no longer stands out as the one mismatched colour in the palette.
 
 ## [2.3.0] - 2026-08-31
 
