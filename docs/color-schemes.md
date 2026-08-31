@@ -122,17 +122,17 @@ setting; see [Theme Hub](theme-hub.md#personal-settings-versus-shared-settings).
 <div class="grid" markdown>
 
 <figure markdown="span">
-![Step 1 of the theme wizard: picking a color](screenshots/theme-wizard-step1.png){ width="1440" height="900" loading=lazy }
+![Step 1 of the theme wizard: picking a color](screenshots/theme-wizard-step1.png){ width="768" height="513" loading=lazy }
 <figcaption>1. Pick a color</figcaption>
 </figure>
 
 <figure markdown="span">
-![Step 2 of the theme wizard: picking a look](screenshots/theme-wizard-step2.png){ width="1440" height="900" loading=lazy }
+![Step 2 of the theme wizard: picking a look](screenshots/theme-wizard-step2.png){ width="768" height="477" loading=lazy }
 <figcaption>2. Pick a look</figcaption>
 </figure>
 
 <figure markdown="span">
-![Step 3 of the theme wizard: naming the theme](screenshots/theme-wizard-step3.png){ width="1440" height="900" loading=lazy }
+![Step 3 of the theme wizard: naming the theme](screenshots/theme-wizard-step3.png){ width="768" height="450" loading=lazy }
 <figcaption>3. Name it</figcaption>
 </figure>
 
