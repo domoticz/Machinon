@@ -64,9 +64,14 @@
 .dz-toast--device-timeout { border-left-color: rgb(var(--dz-status-timeout-values)); }
 .dz-toast--device-battery { border-left-color: rgb(var(--dz-status-lowbat-values)); }
 
+/* --dz-icon-size-sm (16px, dz-tokens.css:203, documented "inline/tab
+   ionicons"): this glyph sits inline beside a 14px title, which is exactly
+   that tier's use case. PLACEHOLDER: the presentation task is going to
+   restyle this glyph into a 34px tile, at which point this token choice
+   gets revisited against that geometry - it is not a settled final size. */
 .dz-toast-icon {
     flex: 0 0 auto;
-    font-size: 20px;
+    font-size: var(--dz-icon-size-sm);
     line-height: 1;
     margin-top: 1px;
     color: var(--dz-menu-text);
