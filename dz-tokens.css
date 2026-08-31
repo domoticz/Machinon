@@ -189,6 +189,11 @@
                                                     deliberately larger than desktop nav's
                                                     --dz-text-sm) */
 
+    /* Toast surface (css/toasts.css). Aliases, not raw sizes: components say
+       what a piece of text IS, not how big it is. */
+    --dz-text-toast-title: var(--dz-text-sm);
+    --dz-text-toast-body:  var(--dz-text-xs);
+
     /* The standby clock stays px DELIBERATELY. It is sized to fill a screen rather than to
        be read at body scale, so a raised font preference should not enlarge it further -
        it would simply overflow the standby surface. Not covered by the 200% sweep either
@@ -626,6 +631,10 @@
     --dz-menu-separator:       var(--dz-status-disabled);
     --dz-menu-radius:          6px;
     --dz-menu-shadow:          var(--dz-elev-popup);
+
+    /* Clear of the top header. Value confirmed by measurement in
+       dz-toast-surface.js (C1), not guessed. */
+    --dz-toast-top: 70px;
 }
 
 /*

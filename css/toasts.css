@@ -1,0 +1,96 @@
+/**** ./css/toasts.css ***/
+
+/* The toast surface. Design language taken from the theme's existing floating
+   surfaces (card options flyout css/cards.css, setpoint popup css/setpoint.css,
+   RGBW popup, wizard panel): --dz-elev-overlay, a surface token, no scrim.
+   DESIGN.md's elevation table cited a "search message toast" (.msg in
+   css/search.css) as the level-4 example; that rule is dead and is not a
+   reference - see the 2026-08-31 todo.md entry.
+   Severity is a 3px LEADING EDGE, not a fill: that is the theme's existing
+   accent-edge "you are here" language rotated to a new surface, and it keeps
+   text on the theme's own surface token so AA follows from the scheme's already
+   guarded text-on-panel contract instead of 32 new colour pairs. */
+
+#dz-toast-stack {
+    position: fixed;
+    z-index: 1010;
+    display: flex;
+    flex-direction: column;
+    gap: var(--dz-card-space-md);
+    pointer-events: none;
+    top: var(--dz-toast-top);
+    right: var(--dz-card-space-xl);
+    width: 325px;
+    max-width: calc(100vw - (2 * var(--dz-card-space-xl)));
+}
+
+.dz-toast {
+    position: relative;
+    pointer-events: auto;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--dz-card-space-md);
+    padding: var(--dz-card-space-lg) var(--dz-card-space-2xl) var(--dz-card-space-lg) var(--dz-card-space-lg);
+    background: var(--dz-menu-bg);
+    color: var(--dz-menu-text);
+    border-radius: 6px;
+    box-shadow: var(--dz-elev-overlay);
+    border-left: 3px solid var(--dz-status-warn);
+    opacity: 0;
+    transform: translateX(16px);
+    transition: opacity 0.24s ease-out, transform 0.24s ease-out;
+}
+
+.dz-toast--in { opacity: 1; transform: translateX(0); }
+
+.dz-toast--success { border-left-color: var(--dz-status-ok); }
+.dz-toast--warning { border-left-color: var(--dz-status-warn); }
+.dz-toast--error   { border-left-color: var(--dz-status-danger); }
+.dz-toast--info    { border-left-color: var(--dz-accent-color); }
+
+/* Device warnings carry the SAME hue as the glow on the card that is warning
+   (css/device-status.css), so the toast reads as "that card". */
+.dz-toast--device-timeout { border-left-color: rgb(var(--dz-status-timeout-values)); }
+.dz-toast--device-battery { border-left-color: rgb(var(--dz-status-lowbat-values)); }
+
+.dz-toast-title {
+    font-size: var(--dz-text-toast-title);
+    font-weight: var(--dz-weight-semibold);
+}
+
+.dz-toast-body {
+    font-size: var(--dz-text-toast-body);
+    color: var(--secondary-text-color);
+    margin-top: var(--dz-card-space-2xs);
+}
+
+.dz-toast-close {
+    position: absolute;
+    top: var(--dz-card-space-sm);
+    right: var(--dz-card-space-sm);
+    background: none;
+    border: 0;
+    padding: 0 var(--dz-card-space-xs);
+    line-height: 1;
+    cursor: pointer;
+    color: var(--secondary-text-color);
+    font-size: var(--dz-text-toast-title);
+}
+
+.dz-toast-close:hover { color: var(--dz-accent-color); }
+
+/* Phone: top, full-width inset, 2 visible. NOT bottom - DESIGN.md's mobile
+   adaptations put a fixed bottom bar on Settings, and core's fixed Apply bar
+   painting over content is already logged as defect S8. */
+@media (max-width: 767px) {
+    #dz-toast-stack {
+        left: var(--dz-card-space-xl);
+        right: var(--dz-card-space-xl);
+        width: auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dz-toast { transition: opacity 0.01ms; transform: none; }
+    .dz-toast--in { transform: none; }
+}
