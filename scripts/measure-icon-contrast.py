@@ -62,9 +62,10 @@ PAPER_DARK = {
 # branch to take here, unlike LIGHT/DARK above.
 # Re-solved 2026-08-31 (owner decision, supersedes the 3.10-target values this
 # script originally pinned) to a 4.0 target, so the toast severity tile
-# (css/toasts.css, an 18% mix of this same colour into the panel) clears its
-# own 3:1 non-text floor with margin - see dz-tokens.css / dark.css for the
-# full rationale, including the deliberate lowbat hue change to amber.
+# (css/toasts.css - see there for the mix percentage and what background it
+# is measured against, not repeated here) clears its own 3:1 non-text floor
+# with margin - see dz-tokens.css / dark.css for the full rationale,
+# including the deliberate lowbat hue change to amber.
 STATUS_LIGHT = {"timeout": "#C44041", "lowbat": "#8E6900", "protected": "#00008B"}
 STATUS_DARK = {"timeout": "#F56D69", "lowbat": "#FFC107", "protected": "#6595FF"}
 

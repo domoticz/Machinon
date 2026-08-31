@@ -85,11 +85,14 @@
        produced it, not just a ratio - a ratio alone is exactly what hid the
        first failure. Targeted 3.10, not exactly 3.00 (commit 58ebdf5).
        RE-SOLVED AGAIN 2026-08-31 (owner decision, supersedes 58ebdf5) to a
-       4.0 target: the toast severity tile (css/toasts.css) mixes this same
-       colour at 18% into the panel, a separate pair with its own 3:1
-       non-text floor, and 3.10 left several scheme/severity tiles too close
-       to that floor. The higher glow target gives the diluted tile real
-       margin instead. Worst glow case now 4.01, gruvbox-light/lowbat.
+       4.0 target: the toast severity tile mixes this same colour into its
+       own panel background, a separate pair with its own 3:1 non-text floor,
+       and 3.10 left several scheme/severity tiles too close to that floor.
+       The higher glow target gives the diluted tile real margin instead. Mix
+       percentage, what background it is measured against, and its own worst
+       case live in css/toasts.css, not repeated here - a stale copy of that
+       number is exactly what this comment carried before. Worst glow case
+       now 4.01, gruvbox-light/lowbat.
        Re-measure with scripts/measure-icon-contrast.py --check after any
        change here. */
     --dz-status-timeout-values-base:   196, 64, 65;     /* #C44041, worst 4.02 on gruvbox-light */
