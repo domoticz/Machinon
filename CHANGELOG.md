@@ -10,6 +10,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - Pop-up messages (like sensor warnings and save confirmations) now match your theme's colours, in every colour scheme and in dark mode, instead of the old fixed style.
 - Pop-up messages no longer cover the top menu, and on mobile no longer cover the search field when it is open.
 - Low-battery and protected markers are now readable in every colour scheme, with more contrast margin than before. Low-battery also moved from a plain yellow to a warmer amber, so it no longer stands out as the one mismatched colour in the palette.
+- The single "Device warnings" switch is now two: one for sensor-timeout warnings and one for low-battery warnings, so you can keep the one you care about and silence the other. Your existing setting is applied to both, so nothing changes until you change it.
+- New "Repeat device warnings" setting: choose whether a device that already warned you may warn you again on your next visit, once a day (the default), or only once the problem clears and comes back.
 
 ## [2.3.0] - 2026-08-31
 

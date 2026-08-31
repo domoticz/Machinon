@@ -59,6 +59,79 @@ function dzToastClearKey(state, key) {
     delete state.seen[key];
 }
 
+/* Persisted warn state, layered ON TOP OF the session dedupe above. The
+   session dedupe (dzToastShouldSuppress/dzToastMarkSeen) always applies and
+   resets on reload; this is the OPTIONAL extra quiet period a user can pick
+   (theme.warn_repeat: "visit" | "daily" | "episode"), backed by localStorage
+   ONLY, never the server: this is bookkeeping, not preference, and every
+   ThemeSettings write goes through a serialisation queue built for settings
+   edits, so a house with fifteen bad devices would push fifteen writes a day
+   through it. Per-browser is also arguably the right granularity for "have I
+   already told you". A storage failure degrades to `visit` behaviour, never
+   to silence: the functions below never let a throwing store suppress a
+   warning, only fail to remember one.
+
+   `store` is an abstraction, not raw localStorage: { get(key), set(key, ms),
+   remove(key), keys() }, each of which may throw (private browsing, quota,
+   disabled storage). The real implementation (devices.js) backs it with the
+   single localStorage key themeFolder + DZ_WARN_STORE_KEY_SUFFIX, one JSON
+   blob of key->last-warned-ms. Clearing a key (store.remove) is how a
+   recovered-then-failed-again device re-arms in EVERY mode, including
+   `daily`: dzWarnPass calls it the same way it already calls
+   dzToastClearKey for the session store, so a condition clearing is always
+   new information and never waits out the timer. */
+var DZ_WARN_STORE_KEY_SUFFIX = ".warnSeen";
+var DZ_WARN_DAILY_MS = 24 * 60 * 60 * 1000;
+var DZ_WARN_PRUNE_MS = 30 * 24 * 60 * 60 * 1000;
+
+/* true = allowed to warn now. `visit` never touches the store: a reload
+   always warns again, by design. */
+function dzWarnRepeatAllows(store, key, mode, now) {
+    if (mode === "visit") return true;
+    var last;
+    try {
+        last = store.get(key);
+    } catch (e) {
+        return true; /* unusable storage: never suppress, only fail to remember */
+    }
+    if (last === undefined || last === null) return true;
+    if (mode === "episode") return false; /* any recorded warning holds until cleared */
+    return (now - last) >= DZ_WARN_DAILY_MS; /* daily */
+}
+
+/* Record that `key` warned at `now`. Best-effort: a failed write just means
+   the next check also finds nothing and allows again, i.e. it fails open,
+   never silently suppresses. */
+function dzWarnRecord(store, key, mode, now) {
+    if (mode === "visit") return;
+    try {
+        store.set(key, now);
+    } catch (e) { /* best effort */ }
+}
+
+/* Drop entries older than 30 days so the store does not grow forever for a
+   house whose devices come and go. */
+function dzWarnPrune(store, now) {
+    var keys;
+    try {
+        keys = store.keys();
+    } catch (e) {
+        return;
+    }
+    keys.forEach(function(key) {
+        var last;
+        try {
+            last = store.get(key);
+        } catch (e) {
+            return;
+        }
+        if (last === undefined || last === null) return;
+        if (now - last > DZ_WARN_PRUNE_MS) {
+            try { store.remove(key); } catch (e) { /* best effort */ }
+        }
+    });
+}
+
 function dzToastSummary(names, total) {
     var shown = names.slice(0, DZ_TOAST_NAME_CAP);
     var rest = total - shown.length;

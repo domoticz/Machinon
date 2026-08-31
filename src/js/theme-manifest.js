@@ -145,9 +145,24 @@ var THEME_MANIFEST = [
                 reloadOnDisable: true, status: "keep", scope: "user"
             },
             {
-                key: "notification", storageKey: "notification", control: "toggle",
-                label: "Device warnings", description: "Device warnings (battery, timed out)",
-                appliesTo: "Navbar / toasts", previewId: "sketch-notification", parent: null,
+                key: "warn_timeout", storageKey: "warn_timeout", control: "toggle",
+                label: "Sensor timeout warnings",
+                description: "Pops up a message when a sensor stops reporting. The warning icon next to the device name appears either way.",
+                appliesTo: "Toasts", previewId: "sketch-notification", parent: null,
+                reloadOnDisable: false, status: "keep", scope: "user"
+            },
+            {
+                key: "warn_battery", storageKey: "warn_battery", control: "toggle",
+                label: "Low battery warnings",
+                description: "Pops up a message when a device reports a low battery. The warning icon next to the device name appears either way.",
+                appliesTo: "Toasts", previewId: "sketch-notification", parent: null,
+                reloadOnDisable: false, status: "keep", scope: "user"
+            },
+            {
+                key: "warn_repeat", storageKey: "warn_repeat", control: "select",
+                label: "Repeat device warnings",
+                description: "How often the same device may warn you again: once per visit, once a day, or only when the problem clears and comes back. The warning icon next to the device name is always there regardless.",
+                appliesTo: "Toasts", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             },
             {

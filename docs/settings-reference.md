@@ -1,10 +1,10 @@
 # Settings reference
 
-This page documents all 37 rows in the Theme Hub, one row per entry, grouped into the same nine
+This page documents all 39 rows in the Theme Hub, one row per entry, grouped into the same nine
 tabs as the [Theme Hub](theme-hub.md). Two of those rows, the icon library and the About
 panel, aren't settings in the toggle-or-value sense (see [Theme Hub: personal settings versus
 shared settings](theme-hub.md#personal-settings-versus-shared-settings)); they're documented here
-for completeness alongside the 35 actual settings. If you're new to the Theme Hub itself, its own
+for completeness alongside the 37 actual settings. If you're new to the Theme Hub itself, its own
 page explains where to find it, what the nine groups cover, and how personal settings differ
 from shared ones, this page is the per-setting detail it points at, not a repeat of it.
 
@@ -37,7 +37,9 @@ Like `#/Theme`, this one exists only while Machinon is active.
 | `standby` | Screen standby | After the configured number of minutes with no clicks, taps, or (on desktop) mouse movement, blanks the whole page to a plain dark screen showing a large clock and today's date. Any click or tap brings the dashboard straight back. | Whole UI |
 | `standby_after` | Standby after (minutes) | Sets how many minutes of inactivity trigger screen standby. Only takes effect while Screen standby is also on. | Whole UI |
 | `check_update` | Update notice | A few seconds after the page loads, checks Machinon's GitHub repository for a released version newer than the one installed, and shows a toast notification linking to the release page if one exists. It checks against the version that's actually been released, not whatever is mid-development, so it never nags you about a version that isn't out yet. | Navbar badge |
-| `notification` | Device warnings | A timed-out or low-battery device already shows a small warning icon next to its name everywhere it appears; turning this on additionally pops up a toast notification for that timeout or low-battery condition as it happens. | Navbar / toasts |
+| `warn_timeout` | Sensor timeout warnings | A timed-out sensor already shows a small warning icon next to its name everywhere it appears; turning this on additionally pops up a message for that condition as it happens. | Toasts |
+| `warn_battery` | Low battery warnings | A device reporting a low battery already shows a small warning icon next to its name everywhere it appears; turning this on additionally pops up a message for that condition as it happens. | Toasts |
+| `warn_repeat` | Repeat device warnings | Controls how often the same device may warn you again: **Every visit** shows the warning again after you reload the page; **Once a day** (the default) waits 24 hours before repeating it; **Until it clears** stays quiet until the problem goes away and comes back. However you set this, a problem that clears and then comes back always warns again right away, and the warning icon next to the device name is shown regardless of this setting. | Toasts |
 | `center_popups` | Center popup dialogs | Forces every popup dialog to a fixed position centered in the browser window, instead of wherever Domoticz would otherwise place it (often near where you clicked). | All dialogs |
 | `rgbw_popup` | Machinon color picker popup | Replaces Domoticz's own color picker dialog with a Machinon-styled one for color lights. On by default. Turning it off restores the original picker; the change takes effect after the page reloads. Lights with a relative dimmer keep the original picker. | Color light devices |
 | `footer_text_disabled` | Hide the footer text | Hides the copyright line Domoticz prints at the bottom of every page. | Page footer |

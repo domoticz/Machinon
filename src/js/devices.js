@@ -503,14 +503,46 @@ function setAllDevicesIconsStatus() {
     });
 }
 
+/* Backs src/js/toasts.js's dzWarnRepeatAllows/dzWarnRecord/dzWarnPrune with
+   the single localStorage key themeFolder + DZ_WARN_STORE_KEY_SUFFIX (one
+   JSON blob of key -> last-warned-ms). localStorage ONLY, never the server:
+   see the "Persisted warn state" comment in toasts.js for why. Lazily built
+   and cached for the page's life, so a session that never actually warns
+   never touches localStorage at all. get/set/remove/keys are the ONLY
+   surface toasts.js's pure functions call, and every one of them can throw
+   (private browsing, full or disabled storage, corrupt JSON) -- that throw
+   is what lets dzWarnRepeatAllows degrade to `visit` behaviour instead of
+   the theme trying to defend against a broken value itself. */
+var dzWarnStoreCache = null;
+function dzWarnStore() {
+    if (dzWarnStoreCache) return dzWarnStoreCache;
+    var storageKey = themeFolder + DZ_WARN_STORE_KEY_SUFFIX;
+    var data = null;
+    function load() {
+        if (!data) {
+            var raw = localStorage.getItem(storageKey);
+            data = raw ? JSON.parse(raw) : {};
+        }
+        return data;
+    }
+    function save() { localStorage.setItem(storageKey, JSON.stringify(data || {})); }
+    dzWarnStoreCache = {
+        get: function(key) { return load()[key]; },
+        set: function(key, value) { load()[key] = value; save(); },
+        remove: function(key) { delete load()[key]; save(); },
+        keys: function() { return Object.keys(load()); }
+    };
+    /* One prune per page load, on first real use, not on every pass. Best
+       effort: dzWarnPrune already tolerates a throwing store internally. */
+    dzWarnPrune(dzWarnStoreCache, Date.now());
+    return dzWarnStoreCache;
+}
+
 function dzWarnPass(cfg) {
-    /* Reads the split key, falling back to the legacy single `notification`
-       toggle. Task 8 adds the split keys; until it lands, this fallback keeps
-       device warnings working exactly as before, so no intermediate commit
-       ships a silently dead feature. Remove the fallback when the migration in
-       settings-store.js has been in a release. */
-    var f = theme.features[cfg.feature] || theme.features.notification;
+    var f = theme.features[cfg.feature];
     var enabled = !!f && f.enabled === true;
+    var mode = theme.warn_repeat || "daily";
+    var now = Date.now();
 
     $(cfg.selector).each(function() {
         var $card = $(this);
@@ -520,6 +552,11 @@ function dzWarnPass(cfg) {
         }
         if (!enabled) return;
         var idx = dzCardIdx($card);
+        var key = idx ? cfg.keyPrefix + ":" + idx : null;
+        /* The persisted preference (visit/daily/episode), on top of dzToast's
+           own per-session dedupe below. A key with no idx is never persisted,
+           same rule dzToast already applies to its own session dedupe. */
+        if (key && !dzWarnRepeatAllows(dzWarnStore(), key, mode, now)) return;
         /* Read as plain text, not escaped. dzToast() (src/js/toasts.js) inserts
            both title and body as TEXT NODES via createTextNode, never innerHTML,
            so there is no markup context here for a device name to inject into.
@@ -536,7 +573,7 @@ function dzWarnPass(cfg) {
             body: name,
             deviceName: name,
             deviceIdx: idx,
-            key: idx ? cfg.keyPrefix + ":" + idx : null,
+            key: key,
             group: cfg.group,
             groupTitle: cfg.groupTitle,
             source: "device-warning",
@@ -547,15 +584,22 @@ function dzWarnPass(cfg) {
                (the generic alert glyph) for every device warning. */
             icon: cfg.toastIcon
         });
+        if (key) dzWarnRecord(dzWarnStore(), key, mode, now);
     });
 
     /* Re-arm: a device whose card is on this page and NO LONGER carries the
        status class has genuinely recovered, so it may warn again next time.
        Restricted to cards actually present - a device simply absent from this
-       route has not recovered, it is just not rendered. */
+       route has not recovered, it is just not rendered. Clears BOTH the
+       session dedupe and the persisted store, in every repeat mode: a
+       condition clearing and coming back is new information and must not
+       wait out the daily timer. */
     $(cfg.cleared).each(function() {
         var idx = dzCardIdx($(this));
-        if (idx) dzToastClearKey(dzToastState, cfg.keyPrefix + ":" + idx);
+        if (!idx) return;
+        var key = cfg.keyPrefix + ":" + idx;
+        dzToastClearKey(dzToastState, key);
+        try { dzWarnStore().remove(key); } catch (e) { /* best effort */ }
     });
 }
 
