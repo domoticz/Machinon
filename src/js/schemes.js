@@ -390,11 +390,26 @@ function applyScheme(slug) {
 
 /* The dark_theme FEATURE outlived its checkbox (removed once the picker's
    Machinon Dark card superseded it): the feature still carries
-   dark_theme.css (dark-mode adjuncts: scroll fade, mobile search focus,
-   camera-name overlay), persists in the stored feature-id list, and drives
-   the base attribute in setColorScheme(). Load/unload its file here the way
-   the checkbox handler used to. Named dark schemes run WITHOUT it: its
-   values are Machinon-dark specific. */
+   dark_theme.css, persists in the stored feature-id list, and drives the base
+   attribute in setColorScheme(). Load/unload its file here the way the
+   checkbox handler used to.
+
+   Named dark schemes (built-in presets and anything the wizard generates) run
+   WITHOUT it, deliberately. What that costs them is now down to three rules,
+   audited 2026-09-01:
+
+     #login:before                     hardcoded Machinon blue - correct to skip
+     mobile #searchInput focus         hardcoded Machinon blue - correct to skip
+     #bigtext colour                   TOKEN-based, so not Machinon-specific
+
+   The camera-name overlay used to be a fourth and was the one that made this
+   comment's old blanket claim ("its values are Machinon-dark specific") false;
+   it moved to css/dashboard_camera.css in 9f67e98, keyed on the theme's own
+   surface instead. #bigtext is the remaining exception and is left alone on
+   purpose: measured, machinon-dark paints it rgb(220,230,240) (body text) and
+   gruvbox-dark rgb(131,165,152) (its own accent). Both readable, and the
+   scheme's accent there is arguably right, so this is a documented difference
+   rather than a bug to fix. */
 function setDarkFeature(enabled) {
     var was = theme.features.dark_theme.enabled === true;
     theme.features.dark_theme.enabled = enabled;
