@@ -47,18 +47,11 @@ scripts/build-release.sh
 `scripts/build-release.sh` mirrors the packaging step the release workflow runs, so a
 clean local run there means the eventual release build will also succeed.
 
-Two checks are deliberately **not** in CI, so run them by hand if you touch the colour-scheme code
-(`src/js/scheme.js`, `src/js/color-repair.js`, `css/toasts.css`):
-
-```
-node --test scripts/test-color-repair.mjs
-```
-
-and, against a running test instance with the theme bind-mounted,
-`~/docker/domoticz-test/scripts/dz-repair-live.js`, which is the only thing that checks the live
-wiring: that no shipped scheme's colours move, and that hand-built and generated palettes are
-repaired. Neither can run on CI - the first is a deliberate scope call, the second needs a live
-Domoticz.
+One check cannot run in CI: `~/docker/domoticz-test/scripts/dz-repair-live.js` needs a running
+Domoticz with the theme bind-mounted. It is the only thing that checks the live colour-scheme
+wiring - that no shipped scheme's colours move, and that hand-built and generated palettes are
+repaired - so run it by hand if you touch `src/js/scheme.js`, `src/js/color-repair.js` or
+`css/toasts.css`.
 
 ### Changelog
 

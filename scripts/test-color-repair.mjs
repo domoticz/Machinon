@@ -4,20 +4,20 @@
  * pattern as test-color-oklch.mjs: if either file ever reaches for a DOM or a
  * theme global, these tests fail rather than a user's page.
  *
- * LOCAL ONLY, deliberately: not in .github/workflows/validate.yml (owner call,
- * 2026-09-01). Run it by hand while working on the repair, alongside the rig
- * contract that covers the live wiring:
+ * Runs in CI (.github/workflows/validate.yml, the existing node --test step:
+ * measured, it adds 0.09s to a step that already takes 3.84s). Test 1 is the
+ * reason: it is the only thing asserting the design's "no shipped scheme moves"
+ * promise, which no diff makes visible.
  *
- *   node --test scripts/test-color-repair.mjs
- *   node ~/docker/domoticz-test/scripts/dz-repair-live.js
+ * Run: node --test scripts/test-color-repair.mjs
  *
- * What is therefore NOT gated, and matters if you change any of it: that no
- * shipped scheme's colour moves (test 1 below is the only thing asserting the
- * whole design's "your theme is untouched" promise), and the 15% tile mix,
- * which is hardcoded independently in css/toasts.css and in
- * DZ_REPAIR_TILE_MIX. That number was 18% once already. If it moves in one
- * place and not the other, the repair solves against a background the CSS no
- * longer paints and every test here still passes.
+ * NOT covered here, and worth knowing if you change it: the 15% tile mix is
+ * hardcoded independently in css/toasts.css and in DZ_REPAIR_TILE_MIX. That
+ * number was 18% once already. If it moves in one place and not the other, the
+ * repair solves against a background the CSS no longer paints and every test
+ * here still passes. The live wiring is covered by
+ * ~/docker/domoticz-test/scripts/dz-repair-live.js, which needs a running
+ * Domoticz and so cannot be in CI.
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
