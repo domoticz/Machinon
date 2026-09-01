@@ -4,6 +4,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+- On older Domoticz versions, a user without administrator rights no longer sees a Theme Hub that looks editable but silently throws every change away. The settings are shown locked, with a line explaining that the account cannot change them on this Domoticz version.
 - Themes you build yourself now get readable status and energy colours. The warning glow on a card, the icon beside the device name and the energy icons on the dashboard were fixed colours picked for the schemes that ship, so on a colour scheme of your own they could end up almost invisible against your card. They are now checked against your actual colours and adjusted only when they would not read. The schemes that ship with the theme are unchanged.
 - The Gruvbox schemes' warning, success and error colours are readable now. On Gruvbox light the warning colour was too pale against its own buttons and pop-up messages to read; warning is now Gruvbox's orange instead of its yellow, in both the light and dark scheme, and two other colours were nudged. The other colour schemes are unchanged.
 - The warning icon on a device card, shown when a sensor has stopped reporting or a battery is low, now uses your colour scheme's own warning colours instead of a fixed red. On the Gruvbox dark scheme that red was too close to the card colour to read properly.
