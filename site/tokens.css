@@ -161,8 +161,8 @@
     --dz-status-disabled: #928374;
     --dz-accent-red: #9d0006;
     --dz-accent-red-values: 157,0,6;
-    --dz-btn-success-bg: #79740e;
-    --dz-btn-warning-bg: #b57614;
+    --dz-btn-success-bg: #746f03;
+    --dz-btn-warning-bg: #af3a03;
     --secondary-text-color: #504945;
     --dz-sun-color: #8c730e;
     --dz-elev-card: 0 1px 4px rgba(0,0,0,0.25);
@@ -182,10 +182,10 @@
     --dz-accent-values: 131,165,152;
     --dz-input-border: #504945;
     --dz-status-disabled: #665c54;
-    --dz-accent-red: #fb4934;
-    --dz-accent-red-values: 251,73,52;
+    --dz-accent-red: #ff624d;
+    --dz-accent-red-values: 255,98,77;
     --dz-btn-success-bg: #b8bb26;
-    --dz-btn-warning-bg: #fabd2f;
+    --dz-btn-warning-bg: #fe8019;
     --secondary-text-color: #bdae93;
     --dz-sun-color: #fad232;
     --dz-elev-card: 0 1px 4px rgba(0,0,0,0.50);

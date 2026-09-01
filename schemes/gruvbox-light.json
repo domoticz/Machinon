@@ -15,8 +15,8 @@
         "border": "#d5c4a1",
         "disabled": "#928374",
         "error": "#9d0006",
-        "success": "#79740e",
-        "warning": "#b57614",
+        "success": "#746f03",
+        "warning": "#af3a03",
         "accent_text": "#fbf1c7"
     }
 }

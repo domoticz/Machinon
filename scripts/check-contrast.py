@@ -185,11 +185,15 @@ def resolve_color(spec, tokens):
     """Resolve a colour spec to an (r, g, b) triplet against one scheme's tokens.
 
     A spec is one of:
+      ('literal', '#rrggbb')                a fixed colour, e.g. the black a
+                                            hover mix composites over
       ('token', name)                       a --dz-* hex colour token
       ('triplet', name)                     a --dz-*-values "r,g,b" token
       ('composite', alpha, fg_spec, base_spec)   fg_spec over base_spec
     """
     kind = spec[0]
+    if kind == "literal":
+        return hex_to_rgb(spec[1])
     if kind == "token":
         return hex_to_rgb(tokens[spec[1]])
     if kind == "triplet":
@@ -251,6 +255,25 @@ WIDGET_TEXT = ("token", "--dz-widget-text")
 SECONDARY_TEXT = ("token", "--secondary-text-color")
 ACCENT_TEXT = ("token", "--dz-accent-text")
 ACCENT = ("token", "--dz-accent-color")
+
+# Semantic fills: warning/success/error paint a filled button (text is
+# --dz-btn-primary-text = --dz-accent-text, css/buttons.css:244-253), that
+# button's 90%-black hover, the low-battery bar (css/glyphs.css) and the toast
+# severity tile, which is the fill mixed 15% into the navbar
+# (css/toasts.css:115-116). None of those four had a pair here, which is why
+# three real failures shipped in gruvbox while 400 checks passed - see the
+# 2026-09-01 audit. The hover is a black composite, so alpha runs the other way:
+# the FILL at 90% over black.
+WARN_BG = ("token", "--dz-btn-warning-bg")
+OK_BG = ("token", "--dz-btn-success-bg")
+ERR_BG = ("token", "--dz-accent-red")
+BLACK = ("literal", "#000000")
+WARN_HOVER = ("composite", 0.90, WARN_BG, BLACK)
+OK_HOVER = ("composite", 0.90, OK_BG, BLACK)
+ERR_HOVER = ("composite", 0.90, ERR_BG, BLACK)
+TILE_WARN = ("composite", 0.15, WARN_BG, NAV)
+TILE_OK = ("composite", 0.15, OK_BG, NAV)
+TILE_ERR = ("composite", 0.15, ERR_BG, NAV)
 
 # .switch (site/style.css, a faithful copy of css/switch.css lines 10-60,
 # commit f58e565). The track is a low-alpha accent tint at rest, not a flat
@@ -347,6 +370,20 @@ PAIRS = [
         "normal",
         ".noscript-note a",
     ),
+    # Semantic fills, added 2026-09-01 after the audit that found three shipped
+    # gruvbox failures no pair here could see. Four surfaces per colour: the
+    # filled button, its 90%-black hover, the low-battery bar on the card, and
+    # the toast severity tile (the fill at 15% over the navbar).
+    ("warning button text on warning button", ACCENT_TEXT, WARN_BG, "normal", ".btn-warning"),
+    ("warning button text on hover", ACCENT_TEXT, WARN_HOVER, "normal", ".btn-warning:hover"),
+    ("low-battery bar on card", WARN_BG, WIDGET, "non-text", "td .battery"),
+    ("warning toast tile glyph on its tile", WARN_BG, TILE_WARN, "non-text", ".dz-toast--warning .dz-toast-icon"),
+    ("success button text on success button", ACCENT_TEXT, OK_BG, "normal", ".btn-success"),
+    ("success button text on hover", ACCENT_TEXT, OK_HOVER, "normal", ".btn-success:hover"),
+    ("success toast tile glyph on its tile", OK_BG, TILE_OK, "non-text", ".dz-toast--success .dz-toast-icon"),
+    ("danger button text on danger button", ACCENT_TEXT, ERR_BG, "normal", ".btn-danger"),
+    ("danger button text on hover", ACCENT_TEXT, ERR_HOVER, "normal", ".btn-danger:hover"),
+    ("error toast tile glyph on its tile", ERR_BG, TILE_ERR, "non-text", ".dz-toast--error .dz-toast-icon"),
     ("device name on card", WIDGET_TEXT, WIDGET, "normal", ".dc-name"),
     (
         "device value (#bigtext) on device card",
