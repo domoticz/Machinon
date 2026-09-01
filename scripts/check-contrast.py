@@ -87,6 +87,18 @@ ALLOWLIST = {
     ),
 }
 
+
+def _allow_across(scheme_ids, pair_key, reason):
+    """Allowlist one pair across several schemes, with one shared reason.
+
+    A function rather than a module-level `for` loop: the loop variable stays
+    local, so there is no stray module-scope name to `del` afterwards (which
+    also read to a type checker as a possibly-unbound access).
+    """
+    for scheme_id in scheme_ids:
+        ALLOWLIST[(scheme_id, pair_key)] = reason
+
+
 # The switch track is a faint accent tint at rest (css/switch.css lines
 # 30-60, copied faithfully in site/style.css as of commit f58e565), not a
 # flat colour, and its two states are the same hue at different alphas: they
@@ -106,14 +118,14 @@ _SWITCH_TRACK_FAILS_IN = (
     "paper-light", "paper-dark",
     "gruvbox-light", "gruvbox-dark",
 )
-for _scheme_id in _SWITCH_TRACK_FAILS_IN:
-    ALLOWLIST[(_scheme_id, "switch off track on card")] = (
-        "known theme value, not a site defect: css/switch.css's own "
-        "rgba(accent, 0.2) track tint, measured under 3:1 against the card "
-        "in every scheme. The control's perceivability rides the knob, "
-        "gated separately and un-allowlisted below."
-    )
-del _scheme_id
+_allow_across(
+    _SWITCH_TRACK_FAILS_IN,
+    "switch off track on card",
+    "known theme value, not a site defect: css/switch.css's own "
+    "rgba(accent, 0.2) track tint, measured under 3:1 against the card "
+    "in every scheme. The control's perceivability rides the knob, "
+    "gated separately and un-allowlisted below.",
+)
 
 _SWITCH_ON_KNOB_FAILS_IN = (
     # Fails in seven of eight (worst 1.99:1, gruvbox-dark); paper-light is
@@ -123,16 +135,16 @@ _SWITCH_ON_KNOB_FAILS_IN = (
     "paper-dark",
     "gruvbox-light", "gruvbox-dark",
 )
-for _scheme_id in _SWITCH_ON_KNOB_FAILS_IN:
-    ALLOWLIST[(_scheme_id, "switch on-state knob on on-track")] = (
-        "known theme value, not a site defect: the on-state knob "
-        "(--dz-accent-color) against its own on-track tint (rgba(accent, "
-        "0.5)), the same hue at two alphas, which cannot fully separate. "
-        "css/switch.css's own combination. The control's perceivability "
-        "rides the knob-vs-card pair, gated separately and un-allowlisted "
-        "below."
-    )
-del _scheme_id
+_allow_across(
+    _SWITCH_ON_KNOB_FAILS_IN,
+    "switch on-state knob on on-track",
+    "known theme value, not a site defect: the on-state knob "
+    "(--dz-accent-color) against its own on-track tint (rgba(accent, "
+    "0.5)), the same hue at two alphas, which cannot fully separate. "
+    "css/switch.css's own combination. The control's perceivability "
+    "rides the knob-vs-card pair, gated separately and un-allowlisted "
+    "below.",
+)
 
 
 def parse_token_blocks(css_text):

@@ -7,6 +7,9 @@ import pathlib
 _SPEC = importlib.util.spec_from_file_location(
     "measure_icon_contrast", pathlib.Path(__file__).parent / "measure-icon-contrast.py"
 )
+# spec_from_file_location returns ModuleSpec | None; assert so the loader
+# access below is not an Optional-access error.
+assert _SPEC and _SPEC.loader
 measure = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(measure)
 

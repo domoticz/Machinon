@@ -7,6 +7,9 @@ import re
 _SPEC = importlib.util.spec_from_file_location(
     "gen_site_tokens", pathlib.Path(__file__).parent / "gen-site-tokens.py"
 )
+# spec_from_file_location returns ModuleSpec | None; assert so the loader
+# access below is not an Optional-access error.
+assert _SPEC and _SPEC.loader
 gen = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(gen)
 

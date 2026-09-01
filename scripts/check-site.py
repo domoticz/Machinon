@@ -138,6 +138,10 @@ def _generator_mapping():
     spec = importlib.util.spec_from_file_location(
         "gen_site_tokens", ROOT / "scripts" / "gen-site-tokens.py"
     )
+    # spec_from_file_location returns ModuleSpec | None. A raise, not an assert:
+    # this file is a guard run as a script, and -O would strip an assert.
+    if spec is None or spec.loader is None:
+        raise RuntimeError("could not load scripts/gen-site-tokens.py")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module.SCHEME_KEY_TO_TOKENS
