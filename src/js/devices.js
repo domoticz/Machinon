@@ -341,8 +341,21 @@ function dzEnhanceDeviceCard($item, stage) {
             var isGroupCard = $item.find("#img2").length > 0 &&
                 ($item.parents("#scenecontent").length > 0 ||
                  $item.parents("#dashScenes").length > 0);
+            /* typeof guard, and only on this branch: setDeviceSwitch lives in
+               js/switch.js, which theme.json gates on switch_instead_of_bigtext
+               - the PARENT. This branch tests the CHILD
+               (switch_instead_of_bigtext_scenes), and `parent` in the manifest
+               only nests the row in the hub; nothing forces a stored child
+               value off when its parent is turned off. So parent-off +
+               child-on is reachable (an old settings blob, an imported config,
+               a hand-edited value), and the file is then not loaded. Verified
+               2026-09-01 with switch.js network-aborted and the service worker
+               BLOCKED - without blocking it, core's Workbox cache serves the
+               file anyway and the test proves nothing. Same shape as the
+               cameraPreview guard in src/js/page.js:55. The else-if below needs
+               no guard: it tests the parent, which is what gates the file. */
             if (isGroupCard && theme.features.switch_instead_of_bigtext_scenes.enabled === true) {
-                setDeviceSwitch(idx, status);
+                if (typeof setDeviceSwitch === "function") { setDeviceSwitch(idx, status); }
                 $item.find("#bigtext").hide();
             } else if ($item.find("#img2").length === 0 &&
                        isLightSwitchContext($item, status) &&
