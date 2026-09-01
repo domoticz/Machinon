@@ -4,6 +4,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+- The warning icon on a device card, shown when a sensor has stopped reporting or a battery is low, now uses your colour scheme's own warning colours instead of a fixed red. On the Gruvbox dark scheme that red was too close to the card colour to read properly.
 - The name on a camera card is readable again. It was painted straight onto the camera picture with nothing behind it, so it disappeared against a bright sky, and only the standard Machinon dark scheme had ever had a backing. The name now sits on a small rounded plate in your colour scheme, on every scheme including ones you build yourself.
 - Links inside a device's readings are readable again on the light colour schemes. A link in a device's Log table showed as white text on a white row, so it was there but impossible to read. The fix covers every place a device's value can show a link, including places that were never covered before. (#210)
 - Error and confirmation messages from Domoticz now appear again. They were being hidden by the theme, so failures like "you do not have permission to do that" and a theme settings save that did not work were silently invisible.

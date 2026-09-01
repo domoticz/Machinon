@@ -92,6 +92,38 @@ tr.update-pulse {
     box-shadow: inset 0px 0px 0px 2px rgb(var(--dz-status-lowbat-values)) !important;
 }
 
+/* The status GLYPH prepended next to the device name (src/js/devices.js:567,
+   `<i class="<icon> blink warning-text">`). Core paints `.warning-text` a
+   literal `red` (www/css/style.css:1943) and the theme only ever gave that
+   class a font-weight, so until now a timed-out card showed a repaired,
+   scheme-aware glow next to a pure-red icon - three colours on one card.
+
+   Measured 2026-09-01, core's red against each scheme's card on the 3.0
+   non-text floor: machinon 4.00/4.10, magenta 4.00/4.29, paper 4.00/4.17,
+   gruvbox-light 3.18, and gruvbox-dark 2.90 - a SHIPPED scheme already under
+   the floor. A mid-toned custom palette measures 1.01.
+
+   So the glyph takes its own status token: it matches the glow it sits inside,
+   and it follows the scheme everywhere including generated and hand-built
+   palettes. Scoped by the status class on the .item wrapper, which is what
+   keeps core's OTHER `.warning-text` consumers (warning prose on the Hardware
+   setup pages) untouched.
+
+   NOTE for anyone measuring this: the glyph also carries `.blink` below, which
+   animates opacity 1 -> 0 -> 1 every 2s. Sampled live it ranges 0.00 to 0.97,
+   so the ratios above are PEAK values and getComputedStyle(color) alone does
+   not describe what is painted at an arbitrary moment. Freeze the animation
+   (`.blink { animation: none }`, or Playwright's `animations: "disabled"`)
+   before capturing or measuring, or a mid-fade frame reads as a colour
+   regression that is not there. */
+.item.statusTimeout .warning-text {
+    color: rgb(var(--dz-status-timeout-values));
+}
+
+.item.statusLowBattery .warning-text {
+    color: rgb(var(--dz-status-lowbat-values));
+}
+
 .blink {
     animation: blinker 2s linear infinite;
 }
