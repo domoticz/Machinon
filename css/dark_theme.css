@@ -13,7 +13,3 @@
 #bigtext {
     color: var(--dz-body-text) !important;
 }
-
-#holder .row .item table[id^="item"] > tbody > tr.with-cam-preview > #name {
-    background: rgba(0,0, 0, 0.2) !important;
-}

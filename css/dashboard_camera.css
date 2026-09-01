@@ -5,10 +5,58 @@
     cursor: zoom-in;
 }
 
+/* The camera name sits on a still from a camera, so what is behind it is
+   unknowable: bright sky one minute, a black night frame the next. A TINT of
+   that image - the old rgba(255,255,255,0.2) here, and the rgba(0,0,0,0.2)
+   css/dark_theme.css used to force over it - produces a colour nobody can
+   measure, so its contrast is unbounded and no guard can check it. It was also
+   Machinon-dark-only, because that override lived in the dark_theme FEATURE
+   file, which named dark schemes deliberately do not load: measured 2026-09-01,
+   the band was transparent on machinon-light AND on gruvbox-dark, and the name
+   was hard to read over sky on both.
+
+   Per DESIGN.md's "text over imagery" rule the label sits on the theme's OWN
+   surface instead, exactly as the floorplan device label does (css/floorplan.css
+   `rect.header`). The pair becomes --dz-body-text on --dz-widget-bg: the same
+   pair every device card already uses, gated by scripts/check-contrast.py in
+   every shipped scheme, and correct by construction in a wizard or hand-built
+   theme because it is read from that theme's own tokens rather than written
+   here. 85% rather than opaque: the surface still dominates, so the contrast
+   stays inside a knowable band, while a hint of the picture shows through. */
 #holder .row .item table[id^="item"] > tbody > tr.with-cam-preview > #name {
-    background: rgba(255,255, 255, 0.2);
-    border-bottom-right-radius: 5px;
-    width: 100%;
+    /* !important, and only on background: css/cards.css's general card-name rule
+       (`.item #name, div.item.statusNormal td#name, ...`) forces
+       `background: transparent !important` to neutralise core's status-coloured
+       name cells, and the camera row's #name matches it. That is why the OLD
+       rgba(255,255,255,0.2) here never painted either - measured transparent on
+       every scheme, which is what made this look like a dark-scheme bug for a
+       year. An !important can only be beaten by an !important; css/floorplan.css
+       `rect.header` escalates against core the same way. `color` needs no
+       escalation: the cards rule sets it without !important and this selector is
+       more specific. */
+    background: color-mix(in srgb, var(--dz-widget-bg) 85%, transparent) !important;
+    color: var(--dz-body-text);
+    border-radius: var(--dz-card-radius-chrome);
+    margin: var(--dz-card-space-sm);
+    padding: var(--dz-card-space-xs) var(--dz-card-space-md);
+    width: fit-content;
+    display: inline-block;
+}
+
+/* Shrink-to-fit needs the cell out of table layout: as a <td> it fills the
+   table however short its text, which is why width/display alone left a
+   full-width bar (measured: 330px of a 350px card, against 142px with these).
+   Scoped to #itemtablecam, the table the theme's own js/dashboard_camera.js
+   builds for the Cameras section, because that is the markup that was measured.
+   The other consumer of .with-cam-preview is a real device row (same file, the
+   section-off path, which needs a camera linked to a device); there the plate
+   keeps the cell's natural width, which is still correct, just not hugging. */
+#holder .row .item table#itemtablecam {
+    width: auto;
+}
+
+#holder .row .item table#itemtablecam > tbody > tr.with-cam-preview {
+    display: block;
 }
 
 #holder .row .item table[id^="item"] > tbody > tr.with-cam-preview td:not(#name) {

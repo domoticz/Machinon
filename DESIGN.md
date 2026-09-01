@@ -1313,6 +1313,46 @@ measurement account live with the rule in `css/sidemenu.css`.
 below), and its labels (`.machinoText`, `.dropdown-content a`) consume the `--dz-menu-text`
 alias rather than referencing `--dz-body-text` directly.
 
+### Text Over Imagery
+
+**Rule: a label drawn over an image sits on a theme surface, never on a tint of the image.**
+
+Where text lands on a camera still, a floorplan bitmap, or any other picture, the background is
+unknowable: bright sky one minute, a black night frame the next. An alpha tint of that image
+(`rgba(0,0,0,0.2)`, `rgba(255,255,255,0.2)`) resolves to a colour that depends on the picture, so
+the contrast ratio is unbounded, cannot be measured per scheme, and cannot be derived for a theme
+a user invents later. A text shadow or outline has the same problem and is additionally invisible
+to the guard suite.
+
+Instead the label is painted on the theme's own surface token, and takes the theme's own text
+colour. The pair is then `--dz-body-text` on `--dz-widget-bg`: the same pair every device card
+uses, already gated by `scripts/check-contrast.py`'s `device status text on card` row in all
+eight shipped schemes (no new pair is needed, and adding one would be a duplicate), and correct
+by construction for a wizard or hand-built theme because it is read from that theme's tokens rather
+than written into the rule. Note what this does and does not promise: the wizard's
+`schemeContrastFailures` validates main text against `background`, not against `item`, so a custom
+theme has no direct guarantee on this pair. What it does guarantee is that the label can never fail
+**independently** - if that pair is wrong, every card in the theme is already wrong and the user
+sees it everywhere, not in one corner. No surface should own a private failure mode.
+
+Opacity is allowed on the plate, with a floor: `color-mix(in srgb, var(--dz-widget-bg) 85%,
+transparent)` keeps the surface dominant, so the contrast stays inside a knowable band while a hint
+of the picture shows through. Below roughly 85% the image starts to dominate and the guarantee is
+gone.
+
+Two instances today, and they share the treatment deliberately:
+
+| Surface | Rule | Shape |
+|---|---|---|
+| Floorplan device label | `css/floorplan.css` `rect.header` -> `fill: var(--dz-widget-bg)` | plate hugging the text, replacing core's status-coloured plate |
+| Camera card name | `css/dashboard_camera.css` `tr.with-cam-preview > #name` | plate hugging the text at 85%, radius `--dz-card-radius-chrome` |
+
+**Constraint for the camera plate.** Shrink-to-fit needs the cell out of table layout: the name is
+a `<td>`, so `width: fit-content` alone leaves a full-width bar (measured 330px of a 350px card,
+against 142px once the row is `display: block`). That row override is scoped to `#itemtablecam`,
+the table `js/dashboard_camera.js` builds for the Cameras section, since the other consumer of
+`.with-cam-preview` is a real device row.
+
 ### Watch-Only: Sub-Tabs (S6)
 
 Sub-tabs / nav-tabs are a settled family, deliberately outside the `--dz-menu-*` token set. Their
