@@ -47,6 +47,19 @@ scripts/build-release.sh
 `scripts/build-release.sh` mirrors the packaging step the release workflow runs, so a
 clean local run there means the eventual release build will also succeed.
 
+Two checks are deliberately **not** in CI, so run them by hand if you touch the colour-scheme code
+(`src/js/scheme.js`, `src/js/color-repair.js`, `css/toasts.css`):
+
+```
+node --test scripts/test-color-repair.mjs
+```
+
+and, against a running test instance with the theme bind-mounted,
+`~/docker/domoticz-test/scripts/dz-repair-live.js`, which is the only thing that checks the live
+wiring: that no shipped scheme's colours move, and that hand-built and generated palettes are
+repaired. Neither can run on CI - the first is a deliberate scope call, the second needs a live
+Domoticz.
+
 ### Changelog
 
 Every user-visible change adds a one-line entry under `## [Unreleased]` in `CHANGELOG.md`, in the same commit or pull request as the change itself. Those lines become the next release's notes, so write them for theme users, not developers.
