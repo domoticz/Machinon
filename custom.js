@@ -187,8 +187,15 @@ function dzSetupGridRouteController() {
            and registers itself only when core's Setup menu is present. Switched
            off, or no menu to harvest, there is no grid to render: say so once
            and hand the user core's own Settings page rather than a blank route. */
-        console.warn("machinon_routes", "grid_builder_absent", "custom_settings_menu did not register a grid; redirecting to #Setup");
-        location.hash = "#Setup";
+        console.warn("machinon_routes", "grid_builder_absent", "custom_settings_menu did not register a grid; redirecting to #/Setup");
+        /* "#/Setup", not the bare "#Setup" core's own menu markup uses. Angular
+           runs with hashPrefix(''), so both reach the page, but the browser
+           records the bare form as its own history entry BEFORE Angular
+           normalises it. Measured: the bare form pushes TWO entries and Back
+           lands on #/Setup again, i.e. the user is stuck on the page they were
+           bounced to; the routed form pushes one and Back returns where they
+           came from. */
+        location.hash = "#/Setup";
     });
 }
 
