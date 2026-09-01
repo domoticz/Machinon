@@ -7,85 +7,68 @@
 
   Specificity (0,1,1). Core's own theme is dark, so white links are correct
   there and the rule has never needed scoping upstream. Machinon ships light
-  schemes, and (0,1,1) outranks every class- or type-level colour a theme
-  writes, so on a light card any anchor that carries an href computes WHITE.
-  A bare `a` selector cannot beat it; neither can core's own component classes
-  (`.dd-weather-temp` at (0,1,0), for one).
+  schemes, and core's CSS loads AFTER the theme, so an equal-specificity rule
+  loses the tie: a bare `a` selector cannot beat it, and neither can core's own
+  component classes (`.dd-weather-temp` at (0,1,0), for one). On a light card
+  any anchor carrying an href therefore computes WHITE.
 
-  This file holds the rules that take those anchors back. Each one wins on
-  specificity, not on source order, so it survives a re-order of the @import
-  list. Related: css/cards.css ("Card links take the card's own text color")
-  patches the same core rule for the icon/name anchors in a device card - a
-  card-chrome concern, so it stays with the card CSS.
+  This file takes those anchors back. Related: css/cards.css ("Card links take
+  the card's own text color") patches the same core rule for the icon/name
+  anchors in a device card - a card-chrome concern, so it stays with the card
+  CSS.
 */
 
 /* --------------------------------------------------------------------------
-   1. Links inside user- or plugin-supplied device data.
+   1. The base rule: neutralise core's link colours everywhere.
 
-   Domoticz renders a Text or Alert device's data as HTML: `sanitizeHTML`
-   (www/js/domoticzdevices.js:217) runs it through DOMPurify with an allow-list
-   that includes `a` with `href` and `target`. A plugin putting a link in a
-   device's sValue is therefore doing something core explicitly supports, and
-   that anchor is the one case where the link text is the whole point - unlike
-   the card's icon and name anchors, which only wrap an image.
+   This used to be an allow-list of the `<div id="<scopeId>">` wrappers core's
+   `sanitizeHTML` puts around rendered device HTML (dz-mob-, dz-uw-, dz-ua-,
+   dz-um-, dz-dd-, dz-ddg-, dz-txt-, dd-tn-, ltext). That mechanism was wrong:
+   it had to be extended every time core rendered device data somewhere new,
+   and it missed one for a year. Issue #210 - the Data column of a device's Log
+   table (`table.entity-log-table`, app/log/components/DeviceTextLogTable.js)
+   feeds the raw value straight to DataTables with no scope wrapper at all, so
+   there was nothing for an allow-list to hook. Measured on the light schemes:
+   1.00:1, white on white.
 
-   Every one of core's sanitize call sites wraps its output in a
-   `<div id="<scopeId>">`, because sanitizeHTML also CSS-scopes any embedded
-   <style> block to that id. That wrapper is the hook used here. The nine
-   prefixes below are the complete set core emits today:
+   SPECIFICITY IS THE WHOLE DESIGN HERE, and the window is narrow:
 
-     dz-mob-   classic Dashboard card         app/dashboard/DashboardDesktopController.js:279
-     dz-uw-    Utility card, desktop text     app/widgets/dzUtilityWidget.js:555
-     dz-ua-    Utility card, alert            app/widgets/dzUtilityWidget.js:557, 594
-     dz-um-    Utility card, mobile text      app/widgets/dzUtilityWidget.js:592
-     dz-dd-    Dash2 text-sensor widget       app/dashboardDynamic/widgets/ddTextSensor.widget.js:73
-     dz-ddg-   Dash2 gauge widget             app/dashboardDynamic/widgets/ddGauge.widget.js:223
-     dz-txt-   floorplan device tile          js/domoticzdevices.js:713
-     dd-tn-    Dash2 text-note widget         app/dashboardDynamic/widgets/ddTextNote.widget.js:104
-     ltext     Energy dashboard text lines    app/EnergyDashboardController.js:768
+     core   `a:link`                  (0,1,1)  must be beaten, and it loads last
+     here   `html a:link`             (0,1,2)  beats core on element count
+     theme  `.dd-weather-temp:any-link` (0,2,0)  must still win over us
 
-   Addressing the wrapper rather than the cell it happens to sit in is what
-   makes this hold across surfaces: the Dash2 text-sensor widget's anchor is
-   NOT inside a `td#status`, so a cell-scoped selector covers the classic and
-   Utility cards and silently misses that one.
+   `html:root a:link` would be (0,2,2) and would beat the theme's own rules
+   too: measured, it flattens the Dash2 barometer reading (section 2 below)
+   from its accent colour to body text. A contrast-only check reads that as an
+   improvement, which is exactly how a design regression gets shipped. The
+   extra element in `html a` is what keeps us under (0,2,0).
 
-   `inherit` rather than a named colour. The link then reads in whatever the
-   card already paints its text in, which is the only value that is safe by
-   construction: Machinon ships eight schemes AND lets a user pick an arbitrary
-   accent in the Theme Hub, so an accent-coloured link has no contrast
-   guarantee at all (measured, the shipped gruvbox-dark accent is already
-   4.31:1 on its own card, under the 4.5:1 AA floor for body text). The card's
-   own text colour is held to that floor everywhere - measured worst case
-   across the eight schemes is 8.45:1.
+   Both halves are needed. `:link` only matches an anchor that HAS an href,
+   which is the case core's white rule breaks; an anchor without one (DOMPurify
+   allows that too) falls through to core's bare `a { color: #43A4D3 }` at
+   (0,0,1), and only the plain `html a` at (0,0,2) catches that.
+
+   `inherit` rather than a named colour. The link reads in whatever the surface
+   already paints its text in, which is the only value safe by construction:
+   Machinon ships eight schemes AND lets a user pick an arbitrary accent in the
+   Theme Hub, so an accent-coloured link has no contrast guarantee at all
+   (measured, the shipped gruvbox-dark accent is already 4.31:1 on its own
+   card, under the 4.5:1 AA floor for body text). A surface's own text colour
+   is held to that floor everywhere - measured worst case across the eight
+   schemes is 8.45:1.
 
    Nothing here declares text-decoration: the anchor already carries the user
    agent's underline (measured `text-decoration-line: underline` on a live
    card), so it still reads as a link without borrowing a colour.
 
-   The `a` selector and the `a:any-link` one are both needed. `:any-link` only
-   matches an anchor that has an href, which is the case core's `a:link`
-   breaks; an anchor WITHOUT one (DOMPurify allows that too) falls through to
-   core's bare `a { color: #43A4D3 }` instead, which is its own contrast
-   problem on a light card, and only the plain `a` selector catches it.
+   Blast radius measured 2026-09-01 (scripts/dz-link-contrast.js, 10 routes,
+   light and dark, counting only anchors that paint their own text - an anchor
+   whose text lives in a styled child, like Dash2's `a.dd-stat-link`, computes
+   white but paints nothing and must not be counted): 46 anchors unchanged,
+   2 fixed, 0 regressed.
    -------------------------------------------------------------------------- */
-:is([id^="dz-mob-"],
-    [id^="dz-uw-"],
-    [id^="dz-ua-"],
-    [id^="dz-um-"],
-    [id^="dz-dd-"],
-    [id^="dz-ddg-"],
-    [id^="dz-txt-"],
-    [id^="dd-tn-"]) a,
-:is([id^="dz-mob-"],
-    [id^="dz-uw-"],
-    [id^="dz-ua-"],
-    [id^="dz-um-"],
-    [id^="dz-dd-"],
-    [id^="dz-ddg-"],
-    [id^="dz-txt-"],
-    [id^="dd-tn-"]) a:any-link,
-#ltext a,
-#ltext a:any-link {
+html a,
+html a:link {
     color: inherit;
 }
 
@@ -100,12 +83,13 @@
    white while its siblings paint accent. On a light card that is a 1:1 value,
    effectively invisible.
 
-   So this restores the class's own colour rather than using `inherit`: the
-   point is that the barometer reading matches the temperature reading, not
-   that it matches the card's body text. Machinon aliases --dz-widget-accent to
-   --dz-accent-color (dz-tokens.css, html:root block). The value renders at
-   2.2em bold, i.e. WCAG large text, so the 3:1 floor applies and the worst
-   shipped scheme (gruvbox-dark, 4.31:1) clears it.
+   So this restores the class's own colour rather than letting section 1's
+   `inherit` take it: the point is that the barometer reading matches the
+   temperature reading, not that it matches the card's body text. At (0,2,0) it
+   outranks section 1 by design - see the specificity table there. Machinon
+   aliases --dz-widget-accent to --dz-accent-color (dz-tokens.css, html:root
+   block). The value renders at 2.2em bold, i.e. WCAG large text, so the 3:1
+   floor applies and the worst shipped scheme (gruvbox-dark, 4.31:1) clears it.
    -------------------------------------------------------------------------- */
 .dd-weather-temp:any-link {
     color: var(--dz-widget-accent);
