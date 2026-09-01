@@ -4,6 +4,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+- Themes you build yourself now get readable status and energy colours. The warning glow on a card, the icon beside the device name and the energy icons on the dashboard were fixed colours picked for the schemes that ship, so on a colour scheme of your own they could end up almost invisible against your card. They are now checked against your actual colours and adjusted only when they would not read. The schemes that ship with the theme are unchanged.
 - The Gruvbox schemes' warning, success and error colours are readable now. On Gruvbox light the warning colour was too pale against its own buttons and pop-up messages to read; warning is now Gruvbox's orange instead of its yellow, in both the light and dark scheme, and two other colours were nudged. The other colour schemes are unchanged.
 - The warning icon on a device card, shown when a sensor has stopped reporting or a battery is low, now uses your colour scheme's own warning colours instead of a fixed red. On the Gruvbox dark scheme that red was too close to the card colour to read properly.
 - The name on a camera card is readable again. It was painted straight onto the camera picture with nothing behind it, so it disappeared against a bright sky, and only the standard Machinon dark scheme had ever had a backing. The name now sits on a small rounded plate in your colour scheme, on every scheme including ones you build yourself.

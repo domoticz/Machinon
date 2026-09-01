@@ -1313,6 +1313,49 @@ measurement account live with the rule in `css/sidemenu.css`.
 below), and its labels (`.machinoText`, `.dropdown-content a`) consume the `--dz-menu-text`
 alias rather than referencing `--dz-body-text` directly.
 
+### Fixed Colours and Contrast Repair
+
+Ten colours are chosen per light/dark base rather than derived from the active scheme: the three
+device-status colours (`--dz-status-{timeout,lowbat,protected}-values`) and the seven identity
+colours (`--dz-widget-amber`, `--dz-widget-energy-{export,gas,water,price}`, `--dz-sun-color`,
+`--dz-moon-color`). They are constants on purpose - gas is orange because gas is orange, and a
+timed-out card should look the same whichever scheme you use.
+
+That works because every shipped value was measured against every shipped card
+(`scripts/measure-icon-contrast.py`). A theme a user builds is never measured, and no file-walking
+guard can measure it, so `src/js/scheme.js` `repairFixedColors()` checks each of the ten against
+the card the theme actually resolved to and repairs only the ones that fail
+(`src/js/color-repair.js`).
+
+**Repair, not replace.** A colour that already clears its floor is returned untouched, so every
+shipped scheme is byte-identical with the mechanism on or off. Deriving all ten from scratch would
+land each on exactly its target, which is a different theme: protected on a white card would fall
+from navy `#00008B` at 15.30:1 to a mid blue at 4.03:1.
+
+**Hue is held; only lightness moves**, and both directions are tried with the more chromatic result
+winning. Solving one way runs into the gamut corner on a mid-toned card and washes the hue out to
+near-white. Chroma needs no separate handling: `dzOklchToHex` already gamut-maps by reducing C at
+fixed L and h.
+
+**Targets:** status 4.0, identity 3.2 (the numbers the shipped values were solved to), and the
+toast tile 3.0. The tile is lower deliberately - at 4.0 a mid-toned navbar has no solution in the
+hue, so the solve gives up and returns the unrepaired value; asking for more than is reachable
+produces less.
+
+**The toast tile gets its own value.** Its background is the severity mixed 15% into
+`--dz-menu-bg`, a different surface from the card, and one colour cannot serve both: requiring a
+single value to clear the card and the tile is impossible in 473 of 1032 card/navbar combinations,
+because the tile background contains 15% of the colour itself. `css/toasts.css` reads
+`--dz-toast-severity-<status>` with the card value as fallback.
+
+**Cost:** measured in Chromium, 0.04ms for the whole ten-token pass on a shipped scheme, since each
+exits on one contrast comparison. A pathological mid-toned hand-built palette is 3.98ms, 76ms at
+20x CPU throttle. `setColorScheme()` is on the boot path, so that is per page load.
+
+Contract: `~/docker/domoticz-test/scripts/dz-repair-live.js` (shipped schemes unchanged, hand-built
+and wizard-generated palettes repaired, no stale values after a scheme switch) and
+`scripts/test-color-repair.mjs` for the pure function.
+
 ### Text Over Imagery
 
 **Rule: a label drawn over an image sits on a theme surface, never on a tint of the image.**

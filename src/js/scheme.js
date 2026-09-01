@@ -23,6 +23,95 @@ function setColorScheme() {
             html.removeAttribute('data-dz-scheme');
         }
     }
+    repairFixedColors();
+}
+
+/* The theme's FIXED colours are chosen per light/dark base and measured against
+   the schemes that ship. A theme the user builds is not measured, and cannot be
+   by any file-walking guard, so they are checked here against the surface they
+   actually land on and repaired only if they fail. src/js/color-repair.js
+   carries the reasoning and the numbers; this function only reads tokens and
+   writes results.
+
+   Runs for EVERY scheme, not just custom ones, because "is this a built-in"
+   is the wrong question - the right one is "does this colour clear its floor
+   on the card in front of us". A shipped scheme answers yes to all ten and
+   costs one contrast comparison each: measured in Chromium, 0.04ms for the
+   whole pass, so there is nothing to gate on.
+
+   Values are written with setProperty and every one of them comes out of
+   dzOklchToHex, so nothing user-supplied reaches the CSSOM as text. */
+var DZ_REPAIR_STATUS = ['timeout', 'lowbat', 'protected'];
+var DZ_REPAIR_IDENTITY = [
+    '--dz-widget-amber', '--dz-widget-energy-export', '--dz-widget-energy-gas',
+    '--dz-widget-energy-water', '--dz-widget-energy-price',
+    '--dz-sun-color', '--dz-moon-color'
+];
+
+function repairFixedColors() {
+    if (typeof dzRepairAgainstSurface !== 'function') { return; }
+    var html = document.documentElement;
+    var cs = getComputedStyle(html);
+    var read = function (t) { return cs.getPropertyValue(t).trim(); };
+    var card = dzCssColorToHex(read('--dz-widget-bg'));
+    var menu = dzCssColorToHex(read('--dz-nav-bg'));
+    if (!card) { return; }
+
+    /* Status colours are stored as an "r, g, b" triplet because the glow
+       recipes wrap them in rgba(); the glyph and the toast tile read the same
+       token. */
+    for (var i = 0; i < DZ_REPAIR_STATUS.length; i++) {
+        var name = DZ_REPAIR_STATUS[i];
+        var base = dzCssColorToHex('rgb(' + read('--dz-status-' + name + '-values-base') + ')');
+        if (!base) { continue; }
+        var forCard = dzRepairAgainstSurface(base, card, DZ_REPAIR_TARGET_STATUS);
+        html.style.setProperty('--dz-status-' + name + '-values', dzHexToTriplet(forCard));
+        /* The toast tile is a DIFFERENT surface: the severity mixed 15% into
+           the navbar, so it needs its own value. One value cannot serve both -
+           measured, impossible in 473 of 1032 card/navbar combinations. */
+        if (menu) {
+            var forTile = dzRepairAgainstTile(base, menu, DZ_REPAIR_TARGET_TILE);
+            html.style.setProperty('--dz-toast-severity-' + name, forTile);
+        }
+    }
+
+    for (var j = 0; j < DZ_REPAIR_IDENTITY.length; j++) {
+        var token = DZ_REPAIR_IDENTITY[j];
+        var value = dzCssColorToHex(read(token));
+        if (!value) { continue; }
+        html.style.setProperty(token, dzRepairAgainstSurface(value, card, DZ_REPAIR_TARGET_IDENTITY));
+    }
+}
+
+/* Computed tokens come back as "rgb(r, g, b)" or already as a hex literal.
+   Returns "" for anything else (an unset token, or a form we do not model)
+   so the caller can skip rather than repair a colour it misread. */
+function dzCssColorToHex(value) {
+    if (!value) { return ''; }
+    var v = value.trim();
+    if (v.charAt(0) === '#' && (v.length === 7 || v.length === 4)) {
+        if (v.length === 4) {
+            return '#' + v[1] + v[1] + v[2] + v[2] + v[3] + v[3];
+        }
+        return v;
+    }
+    var m = v.match(/^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)/);
+    if (!m) { return ''; }
+    var out = '#';
+    for (var i = 1; i <= 3; i++) {
+        var n = Math.round(parseFloat(m[i]));
+        n = Math.max(0, Math.min(255, n));
+        out += (n < 16 ? '0' : '') + n.toString(16);
+    }
+    return out;
+}
+
+function dzHexToTriplet(hex) {
+    return [
+        parseInt(hex.substr(1, 2), 16),
+        parseInt(hex.substr(3, 2), 16),
+        parseInt(hex.substr(5, 2), 16)
+    ].join(', ');
 }
 
 // Read the current base scheme's DEFAULT palette straight from the --dz-* tokens (single source of
@@ -125,6 +214,18 @@ function applyCustomColorScheme(cs) {
 function clearCustomColorScheme() {
     var s = document.documentElement.style;
     for (var i = 0; i < DZ_CUSTOM_TOKENS.length; i++) { s.removeProperty(DZ_CUSTOM_TOKENS[i]); }
+    /* The repaired fixed colours are inline too and are NOT in DZ_CUSTOM_TOKENS
+       (no scheme sets them), so they have to be cleared here as well. Without
+       this, switching from a custom palette back to a built-in scheme leaves
+       that palette's repaired status colours behind, and the next repair pass
+       reads its own previous output as the starting value. The identity tokens
+       are already in DZ_CUSTOM_TOKENS because applyCustomColorScheme can set
+       them; clearing them twice is harmless. */
+    for (var j = 0; j < DZ_REPAIR_STATUS.length; j++) {
+        s.removeProperty('--dz-status-' + DZ_REPAIR_STATUS[j] + '-values');
+        s.removeProperty('--dz-toast-severity-' + DZ_REPAIR_STATUS[j]);
+    }
+    for (var k = 0; k < DZ_REPAIR_IDENTITY.length; k++) { s.removeProperty(DZ_REPAIR_IDENTITY[k]); }
 }
 
 // Apply the user's card width settings as --dz-card-* overrides on <html> (consumed by the

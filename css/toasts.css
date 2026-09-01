@@ -68,8 +68,20 @@
    dzToastBuild), so this rule must win the specificity tie: it does, purely
    by appearing later in the cascade, same as the border-left rule it
    replaces. */
-.dz-toast--device-timeout { --dz-toast-severity: rgb(var(--dz-status-timeout-values)); }
-.dz-toast--device-battery { --dz-toast-severity: rgb(var(--dz-status-lowbat-values)); }
+/* The tile is the severity mixed 15% into --dz-menu-bg, which is a DIFFERENT
+   surface from the card the status colour is solved against, so it gets its own
+   repaired value when one exists (src/js/scheme.js repairFixedColors). One
+   value cannot serve both: measured, impossible in 473 of 1032 card/navbar
+   combinations, because the tile background contains 15% of the colour itself.
+   The fallback is the card value, which is what a pre-JS paint and every
+   already-passing scheme use. */
+.dz-toast--device-timeout {
+    --dz-toast-severity: var(--dz-toast-severity-timeout, rgb(var(--dz-status-timeout-values)));
+}
+
+.dz-toast--device-battery {
+    --dz-toast-severity: var(--dz-toast-severity-lowbat, rgb(var(--dz-status-lowbat-values)));
+}
 
 /* The severity tile: a 34px square on the leading edge (owner decision
    2026-08-31), background a mix of the severity colour into the PANEL,
