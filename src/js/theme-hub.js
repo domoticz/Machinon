@@ -850,11 +850,28 @@ function dzHubShowGroup(groupId) {
     hub.querySelectorAll(".dz-hub-section").forEach(function (s) {
         s.style.display = s.getAttribute("data-group") === groupId ? "" : "none";
     });
+    var activeTab = null;
     hub.querySelectorAll(".dz-hub-tab").forEach(function (it) {
         var on = it.getAttribute("data-group") === groupId;
         it.classList.toggle("is-active", on);
         it.setAttribute("aria-selected", on ? "true" : "false");
+        if (on) activeTab = it;
     });
+    /* The strip scrolls sideways when the tabs do not fit (.dz-hub-tabs,
+       overflow-x:auto). Measured at 390px: 1037px of tabs in 306px, so six of
+       the nine are off-screen. Without this, a deep link like #/Theme/colors
+       loads the right panel while the strip stays at scrollLeft 0 with GENERAL
+       underlined and the real tab 460px away - the row shows the wrong answer,
+       which is worse than showing none.
+
+       inline:"nearest" moves it the minimum distance rather than centring, so
+       tabs that are already visible do not jump. block:"nearest" is the part
+       that matters: without it the browser also scrolls the PAGE vertically to
+       bring the strip into view, yanking the user away from the panel they
+       just opened. */
+    if (activeTab && typeof activeTab.scrollIntoView === "function") {
+        activeTab.scrollIntoView({ inline: "nearest", block: "nearest" });
+    }
 }
 
 /* A hub built BEFORE the routes settled (dzMaybeReopenHub's debounced reopen is

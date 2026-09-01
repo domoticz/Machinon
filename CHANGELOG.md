@@ -4,6 +4,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+- On a phone, the Theme Hub's row of tabs now scrolls to show the tab you are actually on. Opening a link straight to one of the later tabs used to leave the row parked at the start with the wrong tab underlined.
 - If "Reset theme to defaults" only partly works, the theme now says so instead of looking like nothing happened. An administrator resets two sets of settings at once, the shared ones and their own; if one of the two failed, the page used to keep showing the old settings even though the other had already been reset. It now refreshes and tells you to press Reset again to finish.
 - On older Domoticz versions, a user without administrator rights no longer sees a Theme Hub that looks editable but silently throws every change away. The settings are shown locked, with a line explaining that the account cannot change them on this Domoticz version.
 - Themes you build yourself now get readable status and energy colours. The warning glow on a card, the icon beside the device name and the energy icons on the dashboard were fixed colours picked for the schemes that ship, so on a colour scheme of your own they could end up almost invisible against your card. They are now checked against your actual colours and adjusted only when they would not read. The schemes that ship with the theme are unchanged.
