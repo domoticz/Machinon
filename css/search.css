@@ -88,27 +88,6 @@
     }
 }
 
-.msg {
-    background-color: var(--dz-widget-bg);
-    font-weight: var(--dz-weight-semibold);
-    color: var(--dz-body-text);
-    border-radius: 5px;
-    box-shadow: var(--dz-elev-overlay);
-    z-index: 99;
-    display: block;
-    position: absolute;
-    top: 30px;
-    height: flex;
-    padding: 8px;
-    right: 200px;
-    overflow: hidden;
-    width: flex;
-}
-
-.msg span {
-    color: var(--secondary-text-color);
-}
-
 input[type="number"] {
     width: 40px;
 }

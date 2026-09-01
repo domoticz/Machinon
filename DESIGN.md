@@ -755,7 +755,7 @@ overrides each one to a deepened alpha (see Dark Underlay below).
 | 1 | card | `--dz-elev-card` | `0 1px 4px rgba(0,0,0,0.25)` | Device cards, DataTables, log console, page-content containers |
 | 2 | popup | `--dz-elev-popup` | `0 2px 6px rgba(0,0,0,0.28)` | Navbar inner and dropdown menus (nav, sidemenu, settings), Highcharts export menu, card tooltips, mobile item cards, mobile search input |
 | 3 | button | `--dz-btn-shadow` | see [Buttons](#buttons) Token Table | Resting shadow for every filled button; the value lives in the Buttons section's token table, referenced here rather than duplicated, along with the hover/pressed/focus-ring variants |
-| 4 | overlay | `--dz-elev-overlay` | `0 3px 10px rgba(0,0,0,0.30)` | Card options flyout, setpoint popup, search message toast, toast surface (`#dz-toast-stack`) |
+| 4 | overlay | `--dz-elev-overlay` | `0 3px 10px rgba(0,0,0,0.30)` | Card options flyout, setpoint popup, RGBW popup, theme wizard panel, toast surface (`#dz-toast-stack`) |
 | 5 | drag | `--dz-elev-drag` | `0 6px 14px rgba(0,0,0,0.35)` | Drag ghost during card reorder |
 
 The values above follow a crisp-tight direction: small offsets, tight blur, alpha carrying the
@@ -2467,7 +2467,6 @@ mobile-polish layout rule key off 979px, and dialogs/search key off 767px - see
 
 - Hamburger menu replaces horizontal navbar (max-width: 979px)
 - Search input collapses to icon, expands on focus with blue background pill (max-width: 767px)
-- Message toast repositions to left edge
 - Settings buttons become fixed bottom bar
 - Dialog content tables switch to `table-layout: fixed` with word-wrap (max-width: 767px)
 - Edit-form tables (`.table-details`, sub-device picker) stack label above field, inputs full-width (releases core's inline 356px/250px widths and the theme's 250px input cap; < 768px)

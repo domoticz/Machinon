@@ -1106,12 +1106,6 @@ select.ui-corner-all option:hover {
     font-weight: var(--dz-weight-semibold);
 }
 
-@media (max-width: 767px) {
-    .msg {
-        left: 20px;
-    }
-}
-
 #copyright {
     background: var(--dz-nav-bg);
     opacity: 0.6;

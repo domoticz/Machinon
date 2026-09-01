@@ -3,9 +3,6 @@
 /* The toast surface. Design language taken from the theme's existing floating
    surfaces (card options flyout css/cards.css, setpoint popup css/setpoint.css,
    RGBW popup, wizard panel): --dz-elev-overlay, a surface token, no scrim.
-   DESIGN.md's elevation table cited a "search message toast" (.msg in
-   css/search.css) as the level-4 example; that rule is dead and is not a
-   reference - see the 2026-08-31 todo.md entry.
    Severity is a SQUARE TILE on the leading edge, not a border rail: six
    treatments were mocked on the rig (owner decision 2026-08-31) and the tile
    won over a header strip because the strip mostly restated the title and its
