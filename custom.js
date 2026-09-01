@@ -213,6 +213,15 @@ function dzOpenThemeLegacyPage(templateUrl) {
 }
 
 function dzRegisterThemeRoutes(routesModule) {
+    /* Test hook (same convention as __dzForceNoApi / __dzForceNoRoutes): throw
+       from inside the hook, which is the one failure the containment above
+       exists for. __dzForceNoRoutes covers the CLEAN off path; this covers the
+       path where the hook breaks mid-flight, inside core's own
+       angular.module() call, where an uncontained throw takes core's router
+       down with it and leaves the user a blank Domoticz rather than a Domoticz
+       missing two pages. Without a way to force it, that property can only be
+       checked by hand. */
+    if (window.__dzThrowInRouteHook) { throw new Error("__dzThrowInRouteHook (test hook)"); }
     routesModule.config(["$routeProvider", function ($routeProvider) {
         $routeProvider
             /* No permission key on purpose: the hub opens at every rights level
