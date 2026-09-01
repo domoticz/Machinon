@@ -583,9 +583,25 @@ function dzHubConfirm(message, onConfirm) {
    settings untouched. Reset every native row this identity can reach instead
    (house row when admin, personal row when perUser; ThemeSettingsSetDefault/
    Set are gated the same way server-side, WebServerCmds.cpp
-   Cmd_ThemeSettingsSetDefault/Set), then clear the cache and reload only once
-   every attempted reset actually succeeded (fail closed: a partial failure,
-   already warned by dzApiFail, must not also claim a clean reset). */
+   Cmd_ThemeSettingsSetDefault/Set).
+
+   THREE OUTCOMES, not two. An admin on a per-user instance resets TWO rows,
+   so "some succeeded" is a real state and it used to be handled as failure:
+   the old code returned without clearing the cache or reloading, on the
+   reasoning that a partial failure must not claim a clean reset. Correct about
+   the server, wrong about the screen. The row that DID reset is gone
+   server-side and irreversible, while the page kept showing the pre-reset
+   values and the cache kept holding them, so the user was told "could not be
+   saved", saw nothing change, and reasonably concluded nothing had. Their next
+   cold load then lost half their settings with no explanation.
+
+   So: all succeeded -> clear and reload (a clean reset). NONE succeeded ->
+   leave everything alone, dzApiFail has already warned, and a reload would be
+   a pointless page flash on top of an error. SOME succeeded -> clear and
+   reload anyway, because the screen must match the server, and say plainly
+   that it was partial and pressing Reset again finishes it. Reset is
+   idempotent (resetting an already-default row is a no-op), so "press it
+   again" is safe advice, not a gamble. */
 function dzHubDoResetTheme() {
     var mode = dzSettingsMode();
     if (!mode.api) {
@@ -597,17 +613,30 @@ function dzHubDoResetTheme() {
     if (mode.perUser) jobs.push(dzApiResetUser());
     if (!jobs.length) { location.reload(); return; } // nothing this identity can reset server-side
     Promise.all(jobs).then(function (results) {
-        if (!results.every(function (r) { return r.ok; })) return; // a failure already warned; keep current state
-        if (typeof Storage !== "undefined") {
-            try { localStorage.removeItem(themeFolder + ".themeSettings"); } catch (e) { /* private mode: nothing cached to clear */ }
+        var ok = results.filter(function (r) { return r.ok; }).length;
+        if (ok === 0) return;   // nothing changed server-side; dzApiFail already warned
+        if (ok < results.length) {
+            /* Deliberately synchronous and blocking: the reload below would
+               otherwise wipe a toast before it could be read. */
+            var msg = "Part of the reset completed. Press Reset again to finish.";
+            if (typeof bootbox === "object" && typeof bootbox.alert === "function") {
+                bootbox.alert(msg, function () { dzHubDoClearCache(); });
+                return;
+            }
+            if (typeof ShowNotify === "function") { ShowNotify(msg, 6000); }
         }
-        location.reload();
+        dzHubDoClearCache();
     });
 }
 
 /* Clear only the browser cache (the old reset dialog's "clear localStorage"
    button): drop the cached theme settings and reload; the server-stored settings
-   are kept, so the reload re-seeds the cache from them. */
+   are kept, so the reload re-seeds the cache from them.
+
+   Also the finishing step of dzHubDoResetTheme above, clean or partial: once
+   rows have been reset server-side, the cached snapshot is the only thing still
+   holding the old values, and the reload re-seeds from whatever the server now
+   has. Same primitive, two callers - do not duplicate it. */
 function dzHubDoClearCache() {
     try {
         if (typeof Storage !== "undefined") { localStorage.removeItem(themeFolder + ".themeSettings"); }
