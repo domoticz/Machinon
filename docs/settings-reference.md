@@ -1,6 +1,6 @@
 # Settings reference
 
-This page explains every one of the 39 settings in the Theme Hub, one entry per setting,
+This page explains all 39 entries in the Theme Hub, one per setting or self-contained section,
 grouped into the same nine tabs as the [Theme Hub](theme-hub.md). Two of those entries, the icon
 library and the About panel, aren't settings in the toggle-or-value sense (see [Theme Hub:
 personal settings versus shared settings](theme-hub.md#personal-settings-versus-shared-settings));
@@ -69,17 +69,16 @@ it appears; turning this on additionally pops up a message for that condition as
 Controls how often the same device may pop up its warning message again: **Once per visit**
 shows it again after you reload the page; **Once a day** (the default) waits 24 hours before
 repeating it; **Only when it changes** stays quiet until the problem clears and then comes back.
-However you set this, a problem that clears and then comes back always warns again right away,
-and the warning icon next to the device name is shown regardless of this setting. The quiet
-period is remembered by the browser you're using, so a warning you've already seen on your
-computer can still show up once on your phone.
+The warning icon next to the device name is shown regardless of this setting. The quiet period
+is remembered by the browser you're using, so a warning you've already seen on your computer can
+still show up once on your phone.
 
 ### Center popup dialogs
 <!-- key: center_popups -->
 
 Forces every popup dialog, including plain message and confirmation popups, to a fixed position
-centered in the browser window, instead of wherever Domoticz would otherwise place it (often
-near where you clicked, and for a few dialogs, partly off the top of the screen).
+centered in the browser window, instead of wherever Domoticz would otherwise place it: often
+near where you clicked, and for one kind of dialog, entirely above the top of the screen.
 
 ### Machinon color picker popup
 <!-- key: rgbw_popup -->
@@ -154,9 +153,9 @@ The five settings below only affect the **classic** Domoticz dashboard, the grid
 that predates Domoticz's newer drag-and-drop dashboard. Current Domoticz installations default
 to the drag-and-drop dashboard, so on a fresh install these five settings have no visible effect
 at all until you switch back: open **My Profile** (from the **Other** menu, or your username menu
-on an admin login) and turn off **Use dynamic dashboard**. Confirmed against the running test
-instance: with the dynamic dashboard on, none of these five settings changes anything visible;
-switching to the classic dashboard makes all five apply exactly as described below.
+on an admin login) and turn off **Use dynamic dashboard**. With the dynamic dashboard on, none
+of these five settings changes anything visible; switching to the classic dashboard makes all
+five apply exactly as described below.
 
 ### Last-seen line on dashboard cards
 <!-- key: dashboard_show_last_update -->
@@ -187,9 +186,9 @@ Camera previews on the dashboard is also on.
 <!-- key: dashboard_camera_section -->
 
 When on, groups every enabled camera into its own "Cameras" section at the top of the dashboard.
-When off, each camera's preview instead replaces that device's own status text wherever the
-device already appears on the dashboard. Only takes effect while Camera previews on the
-dashboard is also on.
+Turned off, it's designed to show each camera's preview in place of that device's own status
+text wherever it already appears on the dashboard, instead of a dedicated section. Only takes
+effect while Camera previews on the dashboard is also on.
 
 ## Device cards
 
@@ -216,8 +215,8 @@ Domoticz's own icon styles you use, picture icons or Font Awesome glyphs.
 <!-- key: switch_instead_of_bigtext_scenes -->
 
 Extends the same slider toggle to Scene and Group cards. Only takes effect while Toggles instead
-of status text is also on: the two ship as one feature, so with the parent off, scene and group
-cards keep showing plain status text instead, nothing breaks either way.
+of status text is also on: with the parent off, scene and group cards keep showing plain status
+text instead.
 
 ### Wind arrow points where the wind goes
 <!-- key: wind_direction -->
@@ -233,8 +232,11 @@ glyph with no directional meaning at all, and this setting has no effect on it.
 ### Device photos instead of icons
 <!-- key: icon_image -->
 
-For an individual device that has a custom photo assigned (a per-device choice made elsewhere,
-not a global one), shows that photo as its card icon instead of the normal on/off icon.
+For an individual device that has a custom photo assigned, shows that photo as its card icon
+instead of the normal on/off icon. Assign one by turning this setting on: an editor for it opens
+right here, where you map a device (by its Idx number, shown on the device's own edit screen) to
+an image file placed in the theme's images folder. It's a per-device choice, not a global one:
+devices with no photo assigned keep their normal icon either way.
 
 ### Card min width
 <!-- key: card_min_width -->
@@ -262,8 +264,9 @@ Dashboard widgets, never on the chart. See [Bar ranges](bar-ranges.md).
 ### Background image
 <!-- key: background_img -->
 
-Sets the image used as the whole UI's page background, painted behind every page. Leave it
-empty for no background image.
+Sets the image used as the whole UI's page background, painted behind every page. Give it a web
+address starting with http (used as given) or the name of an image file placed in the theme's
+images folder. Leave it empty for no background image.
 
 ### Background type
 <!-- key: background_type -->
@@ -274,7 +277,9 @@ Chooses how the background image is displayed: stretched and cropped to fill the
 ### Custom logo
 <!-- key: logo -->
 
-Sets an alternate image to use as the navbar logo, in place of Machinon's default.
+Sets an alternate image to use as the navbar logo, in place of Machinon's default. Give it the
+name of an image file placed in the theme's images folder; unlike the background image, a web
+address here doesn't work.
 
 ### Hide logo
 <!-- key: hide_logo -->

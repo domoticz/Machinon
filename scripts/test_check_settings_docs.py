@@ -49,6 +49,14 @@ def test_table_rows_no_longer_count():
     assert check.documented_keys(md) == []
 
 
+def test_anchor_must_start_the_line():
+    # The regex anchors on ^ under re.M: an anchor comment is only read where
+    # it opens its own line, right after a heading. Mid-line prose that
+    # happens to contain the same comment text must not count.
+    md = "Some prose <!-- key: standby --> continues here.\n"
+    assert check.documented_keys(md) == []
+
+
 def test_compare_reports_both_directions():
     missing, unknown = check.compare(["a", "b"], ["b", "c"])
     assert missing == ["a"]

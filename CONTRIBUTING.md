@@ -64,7 +64,7 @@ the manifest and the reference page two ways: it fails if a manifest key has no 
 anchor in `docs/settings-reference.md`, and it fails if an anchor names a key the manifest no
 longer has.
 
-| Storage key | On-screen label |
+| Key | On-screen label |
 |---|---|
 | `standby` | Screen standby |
 | `standby_after` | Standby after (minutes) |
@@ -103,8 +103,11 @@ longer has.
 | `hide_logo` | Hide logo |
 | `scheme` | Color scheme |
 | `custom_color_scheme` | Custom colors |
-| `iconpacks` | Icon Library |
-| `about` | About Machinon |
+| `iconpacks` * | Icon Library |
+| `about` * | About Machinon |
+
+\* These two rows are the manifest's `key`, not a storage key: their `storageKey` is `null`, so
+they never appear in an exported configuration or a device debug dump.
 
 ### Changelog
 
