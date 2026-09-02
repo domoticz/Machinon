@@ -2267,16 +2267,60 @@ same-property SVG presentation attribute, so most overrides need no `!important`
 exceptions and their verifications live with the rules in `css/floorplan.css`.
 
 **Collapsed chrome.** `rect.popup`/`rect.header` fill from `--dz-widget-bg`, text from
-`--dz-body-text` (name semibold, status semibold and accent-colored). The slider matches the
-card slider's LANGUAGE (flat, accent-filled, unstroked: `--dz-card-slider-track-bg` track,
-`--dz-accent-color` fill) but keeps core's GEOMETRY, because the popup lives in the floorplan's
-scaled SVG user-unit space, not px. Core's black drop-shadow rect is softened to `opacity:
-0.12` to sit within the elevation language. **Constraint.** The header's explicit
-`stroke: none` guarantee and the shadow-softening rationale live with the rules in
-`css/floorplan.css`.
+`--dz-body-text` (name semibold, status semibold and accent-colored). The slider mirrors the
+card slider's actual TOKENS, not just its language: `--dz-card-slider-track-bg` track,
+`rgba(var(--dz-accent-values), 0.5)` fill, solid `--dz-accent-color` handle - the same
+three-layer stack `css/cards.css`'s `.dimslider`/`.ui-slider-range`/`.ui-slider-handle` uses
+(settings-holistic Task 5 follow-ons, 2026-09-02). The handle reads as a distinct control
+riding on top of the translucent fill, the same relationship the card uses, rather than a
+same-color continuation of a solid fill (an earlier pass here kept the fill solid, which was
+revised once the handle got its own rule).
+
+GEOMETRY was reworked after owner feedback that the popup track read "way thicker" than the
+card's and the handle "sits over the last seen text". The two rects' `height`/`y`/`rx`/`ry`
+are overridden via CSS (core's own attributes are `y: 15, height: 10, rx: ry: 5` user units,
+`js/domoticzdevices.js drawDetails`) to `height: 5px; y: 17.5px; rx: 2.5px; ry: 2.5px;`
+(a `px` unit here still resolves as an SVG user unit, not a real CSS pixel, since these are
+SVG geometry properties, not the box-model `height`) - halving the track thickness while
+keeping it centered and a full pill. This override is safe because core's slider-drag
+handler only ever writes `width` on `rect#slider` and `cx` on `circle#sliderhandle` during a
+drag (confirmed live via the running container's served JS); it never touches `y`, `height`,
+`rx`, or `ry`, so nothing here can fight a per-frame drag write. A first attempt used
+UNITLESS values (matching how core's own presentation attributes work) and silently failed
+in both engines - `getComputedStyle` showed no change took effect; switching to explicit
+`px` units made the override apply live in Chromium and Firefox alike, no `!important`
+needed.
+
+The handle keeps core's `r: 10` geometry (a direct `r` CSS override was tried and found NOT
+cross-engine safe: Chromium honors an SVG2 `r` override live, Firefox does not, confirmed via
+`getComputedStyle` in both engines) but is now visually shrunk with
+`transform: scale(0.75); transform-box: fill-box; transform-origin: center;`, which both
+engines DO honor on an SVG shape, and which scales the circle around its own center rather
+than the viewport origin, so it shrinks in place instead of drifting. 0.75 was chosen with
+the new 5-unit track height to land the card's own diameter-to-track-height ratio (roughly
+3x) at the popup's scale. Because the drag handler only ever writes the `cx` ATTRIBUTE, the
+transform composes correctly on top of it through an entire drag (confirmed live, both
+engines: `cx` and `rect#slider`'s `width` stay in lockstep with the mouse throughout, the
+scale never resets or lags).
+
+The shrink substantially reduces, but does not fully eliminate, the vertical overlap with
+`text#lastseen`: measured live (both engines, at rest), the handle's bottom edge still
+extends 0.5px (Chromium) to 1.8px (Firefox) past the last-seen text's top edge, down from
+2.9px/4.2px before this pass. This is a fixed vertical row-spacing gap, not a
+level-dependent one - it measures the same regardless of where the handle sits horizontally
+along the track (confirmed at rest and at a 95% level), so "the handle at far right" was not
+actually the mechanism. Closing it fully would need moving the handle off the track's
+vertical center (a `cy` nudge was found to work, `cy: 17px` clears both engines with margin)
+or moving the last-seen row itself, both of which are design decisions beyond "shrink the
+handle" and were left for a follow-up rather than applied unprompted. **Concern**, see below.
+
+Core's black drop-shadow rect is softened to `opacity: 0.12` to sit within the elevation
+language. **Constraint.** The header's explicit `stroke: none` guarantee, the fill/handle
+rationale, the `r`/`height` cross-engine findings and the residual-overlap measurement all
+live with the rules in `css/floorplan.css`.
 
 **Expanded state (opt-in).** Feature `floorplan_popup_details` (`theme.json` id 44, **default
-off**) reveals core's own popup expander (`image#twisty`), which has shipped hidden and works
+off**) reveals core's own popup expander (`#twisty`), which has shipped hidden and works
 correctly once revealed; with the feature off, the popup keeps its collapsed-only behavior. The
 expanded Log/Notifications action pills are themed on the primary button tokens
 (`--dz-btn-primary-bg`/`--dz-btn-primary-text`). **Constraint.** The feature file loads after
@@ -2284,9 +2328,14 @@ expanded Log/Notifications action pills are themed on the primary button tokens
 `css/floorplan_popup_details.css`); the pills' flat DOM structure and the one required
 `!important` on their labels are documented with the rules in `css/floorplan.css`.
 
-**Remaining core rasters.** The slider knob (`images/handle.png`) and the expander chevron
-(`images/expand16.png`) are core raster PNGs, which CSS cannot recolor the way it recolors an
-SVG shape; replacement art is tracked upstream as issue #6959.
+**No more core rasters.** The slider knob (formerly `images/handle.png`) and the expander
+chevron (formerly `images/expand16.png`) were core raster PNGs CSS could not recolor the way
+it recolors an SVG shape; issue #6959 tracked replacement art for exactly that reason. Core's
+icon rework has since replaced both with themeable markup: the slider knob is the plain
+`circle#sliderhandle` themed above, and the chevron is a `<foreignObject id="twisty">` wrapping
+a Font Awesome glyph (`js/domoticzdevices.js` `makeSVGglyph`), the same element the expanded-state
+rules above already target by id. The chevron's own color is still unthemed (inherits its
+default), which is out of this task's scope.
 
 The surface's invariant, across light/dark x collapsed/expanded x feature off/on: no `url(#...)`
 computed fill and no pure-black stroke may survive anywhere in the popup.
@@ -2495,7 +2544,7 @@ Toggled via `theme.json` features object. Each feature has an `enabled` boolean 
 | Sensor timeout warnings | `warn_timeout` | on | (none) | Toast when a sensor stops reporting. |
 | Low battery warnings | `warn_battery` | on | (none) | Toast when a device reports a low battery. |
 | Dashboard camera section | `dashboard_camera_section` | on | (none) | Renders the camera preview as its own dashboard section. Requires `dashboard_camera`. |
-| Expandable floorplan popups | `floorplan_popup_details` | off | `floorplan_popup_details.css` | Reveals core's floorplan popup expander (`image#twisty`), showing Type, Log, Notifications and the favorite star. Hidden by default since 2019; see [Floorplan Device Popup](#floorplan-device-popup). |
+| Expandable floorplan popups | `floorplan_popup_details` | off | `floorplan_popup_details.css` | Reveals core's floorplan popup expander (`#twisty`), showing Type, Log, Notifications and the favorite star. Hidden by default since 2019; see [Floorplan Device Popup](#floorplan-device-popup). |
 
 ## Animations
 

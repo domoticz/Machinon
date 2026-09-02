@@ -114,32 +114,102 @@ rect.header {
 
 /* Slider (core paints it with gradients + black strokes: rect#sliderback
    fill=url(#SliderImage), rect#slider fill=url(#SliderGradient), both stroked black,
-   www/js/domoticzdevices.js drawDetails). Core's GEOMETRY is kept deliberately: this
-   slider lives in the plan's scaled SVG user-unit space, not px, so matching the card
-   slider's literal 5px track would fight the floorplan zoom. Match the LANGUAGE - flat,
-   accent-filled, unstroked - not the numbers.
+   www/js/domoticzdevices.js drawDetails). Match the card dimmer slider's LANGUAGE AND
+   TOKENS as closely as this surface allows (settings-holistic Task 5 follow-ons,
+   2026-09-02): same track token, same translucent accent fill, same solid-accent handle
+   -- css/cards.css's three-layer stack (dark translucent track,
+   `rgba(var(--dz-accent-values), 0.5)` range, solid-accent circle).
 
-   The stroke half of this needed a different mechanism than fill: this running core
-   builds both rects with an INLINE style attribute, `style="stroke:var(--dz-floorplan-
-   slider-border, black)"`, not a bare presentation attribute. An inline style always
-   outranks any external stylesheet declaration of the same property (unlike a
-   presentation attribute, which loses to any stylesheet rule regardless of specificity),
-   so a plain `stroke: none;` rule here is silently inert -- confirmed live: the computed
-   stroke stayed rgb(0, 0, 0) with that rule in place, because core's var() reference
-   never found the custom property set anywhere and fell through to its literal `black`
-   fallback. Custom properties do not have that inline-wins problem: only the var()
-   *reference* is inline, the property itself is looked up by normal cascade/inheritance,
-   so setting it here on the matched element reaches the same inline style. Scoped to
-   these two ids (not an ancestor) so it does not also reach circle#sliderhandle, which
-   reads the same variable for its own border and is out of this fix's scope. */
+   GEOMETRY (follow-on #3, owner feedback on the iteration #2 screenshots: "the slider
+   bar is way thicker on the floorplan"). Core draws the two rects at
+   `y: Device.elementPadding * 3, height: Device.elementPadding * 2, rx: ry:
+   Device.elementPadding` (15 / 10 / 5 user units, js/domoticzdevices.js drawDetails) --
+   already a full pill (rx already equals half the height) but visibly thicker relative
+   to its own popup than the card's 5px track is relative to its card. `height`, `y`,
+   `rx`, `ry` are safe CSS overrides here specifically BECAUSE core's slider-drag handler
+   (js/domoticzdevices.js, the level-drag function) only ever writes `width` on
+   rect#slider and `cx` on circle#sliderhandle during a drag -- confirmed live via
+   `docker exec ... grep` on the running container's served JS. It never touches `y`,
+   `height`, `rx`, or `ry`, so a CSS override of those four cannot conflict with a
+   per-frame drag write by construction, unlike `width` (never overridden here) or `cx`.
+
+   UNITS ARE LOAD-BEARING: a first attempt used unitless values (`height: 5`, matching
+   how core's own SVG presentation attributes work) and silently failed in BOTH engines --
+   `getComputedStyle` reported the override having no effect, height/y/rx all stayed at
+   core's original attribute values. Switching to explicit `px` units (still resolved as
+   SVG user units, not real CSS pixels, since these are SVG geometry properties) made the
+   override apply live in both Chromium and Firefox, confirmed via `getComputedStyle` and
+   `getBoundingClientRect` on the open popup in each engine. No `!important` needed. `rx`/
+   `ry` are set to exactly half the new `height` so the track stays a full pill at the new
+   size instead of relying on the browser's clamp behavior to fix up a stale radius.
+
+   New height (5, half of core's 10) was chosen together with the handle's `scale(0.75)`
+   below to land the card's own proportion -- handle diameter three times the track
+   height -- at the popup's scale, not to copy the card's literal 5px. */
 .DeviceDetails rect#sliderback {
     fill: var(--dz-card-slider-track-bg);
     --dz-floorplan-slider-border: none;
+    height: 5px;
+    y: 17.5px;
+    rx: 2.5px;
+    ry: 2.5px;
 }
 
 .DeviceDetails rect#slider {
-    fill: var(--dz-accent-color);
+    fill: rgba(var(--dz-accent-values), 0.5);
     --dz-floorplan-slider-border: none;
+    height: 5px;
+    y: 17.5px;
+    rx: 2.5px;
+    ry: 2.5px;
+}
+
+/* Handle (circle#sliderhandle). This rig's core (`domoticz/domoticz:beta`, ahead of the
+   checked-out ../../domoticz/ source tree, which still has an older <image>-based
+   slider) builds it as a plain SVG circle, inline
+   `style="fill:var(--dz-floorplan-slider-handle, #dcdcdc);
+   stroke:var(--dz-floorplan-slider-border, #808080); stroke-width:0.5"`
+   (js/domoticzdevices.js, confirmed live) -- DESIGN.md's older "remaining core rasters"
+   note (the slider knob as `images/handle.png`) predates this and is corrected there.
+   Same custom-property seam the track rules above use for its border, plus its own new
+   fill token, plus the transform-scale geometry below.
+
+   COLOR matches the card dimmer thumb's TOKEN: the card handle (css/cards.css
+   .ui-slider-handle) is a borderless, solid-accent circle, sitting above a
+   semi-transparent accent range on a dark translucent track. rect#slider above carries
+   that same translucent range, so the handle's solid accent reads as a distinct control
+   riding on top of the fill, the same relationship the card uses, rather than a
+   same-color continuation. Unstroked to match the flat, borderless language used
+   everywhere else in this popup.
+
+   GEOMETRY (follow-on #3, owner feedback: "the handle is also quite large and sits over
+   the last seen text"). A direct `r` override was tried first (matching the rect
+   properties' mechanism) and found NOT cross-engine safe: Chromium honors an SVG2 `r`
+   CSS override live, but Firefox does not -- the same declaration left the computed `r`
+   at core's attribute value, unchanged, confirmed via getComputedStyle in both engines.
+   `transform: scale(); transform-box: fill-box; transform-origin: center;` is the
+   cross-engine-safe substitute: both engines honor a CSS transform on an SVG shape, and
+   `transform-box: fill-box` with a centered origin scales the circle around its own
+   geometric center rather than the SVG viewport's origin, so it shrinks in place instead
+   of drifting toward the corner -- confirmed live in both engines (handle stayed
+   centered on cy, cx-tracking confirmed during an actual drag, see the report). Because
+   the drag handler only ever writes the `cx` ATTRIBUTE (never touches `transform`), the
+   two compose correctly: core positions the circle via cx as always, and this scale
+   applies on top of wherever core puts it, so the handle keeps following the drag while
+   staying visually smaller throughout, not just at rest.
+
+   0.75 is not an arbitrary shrink: with the track's new 5-user-unit height above, the
+   handle's unscaled diameter (r: 10 -> 20 user units) at 0.75 scale renders at 15 user
+   units, exactly 3x the new track height -- the card's own diameter-to-track-height
+   ratio ((15-5)/2 = 5px overhang each side on the card; this popup now overhangs by the
+   same one-track-height each side too, not the roughly half-that overhang the
+   unscaled circle had against core's original 10-unit track). */
+.DeviceDetails circle#sliderhandle {
+    --dz-floorplan-slider-handle: var(--dz-accent-color);
+    --dz-floorplan-slider-border: none;
+    transform: scale(0.75);
+    transform-box: fill-box;
+    transform-origin: center;
 }
 
 g text {
