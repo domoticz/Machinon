@@ -138,7 +138,14 @@ function isPlainOnOffSwitch(item) {
         NON_TOGGLE_SWITCH_TYPES.indexOf(device.SwitchType) !== -1) {
         return false;
     }
-    return item.find("#bigtext").siblings("#img").find("img").hasClass("lcursor") &&
+    /* #6995 moved lcursor off the <img> onto the icon wrapper, and glyph
+       mode (IconStyle 1) renders no <img> at all; accept the class on the
+       cell itself or on any descendant, which also matches the pre-#6995
+       markup where it sat on the <img>. */
+    var iconCell = item.find("#bigtext").siblings("#img");
+    var hasLinkCursor = iconCell.hasClass("lcursor") ||
+        iconCell.find(".lcursor").length > 0;
+    return hasLinkCursor &&
         item.find(".dimslider").length === 0 &&
         item.find(".selectorlevels").length === 0 &&
         item.find(".btn-group").length === 0;
