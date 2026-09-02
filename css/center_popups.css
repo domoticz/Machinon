@@ -31,3 +31,28 @@
     transform: translateY(-50%)!important;
     min-width: 200px!important;
 }
+
+/* Bootbox modals: core leaves the dialog near the top of the viewport
+   (measured y 90..203 at 900px). This build's css/bootstrap.css is
+   Bootstrap 2, not 3: .bootbox.modal IS the styled dialog box (background,
+   border-radius, box-shadow, width:560px, the classic left:50%+margin-
+   left:-280px centering hack) and its own position is fixed. The .modal-
+   dialog/.modal-content bootbox.min.js wraps around the content are plain,
+   unstyled pass-through divs with no core CSS at all - centering THEM
+   (position:absolute) pulls the only in-flow content out of .bootbox.modal,
+   collapsing its auto height to a 2px sliver (measured). So the box to
+   center is .bootbox.modal itself: only its vertical offset needs to
+   change, the same translateY(-50%) half-offset as the rule above.
+   Horizontal placement and width are left alone - core already handles
+   both without starving: desktop keeps the fixed 560px box centered by its
+   own left:50%/margin-left:-280px (a fixed width has nothing to shrink-fit
+   against, so left:50% never starves it), and bootstrap-responsive.css's
+   own breakpoints already swap to edge-to-edge gutters (left/right:20px,
+   width:auto, 10px under 480px) below 768px. !important is required: core's
+   .modal.fade.in class (present while a bootbox is showing) carries a more
+   specific top:10% than a plain .bootbox.modal rule would. The overlay's
+   own display stays core's to toggle. */
+.bootbox.modal {
+    top: 50vh!important;
+    transform: translateY(-50%)!important;
+}

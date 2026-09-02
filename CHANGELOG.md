@@ -21,6 +21,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - Low-battery and protected markers are now readable in every colour scheme, with more contrast margin than before. Low-battery also moved from a plain yellow to a warmer amber, so it no longer stands out as the one mismatched colour in the palette.
 - The single "Device warnings" switch is now two: one for sensor-timeout warnings and one for low-battery warnings, so you can keep the one you care about and silence the other. Your existing setting is applied to both, so nothing changes until you change it.
 - New "Repeat device warnings" setting: choose whether a device that already warned you may warn you again on your next visit, once a day (the default), or only once the problem clears and comes back.
+- "Center popup dialogs" now really centers every dialog. The common message and confirmation popups were left near the top of the screen; only the edit-style dialogs were centered. Both kinds now center, and the setting's description finally matches what it does.
 
 ## [2.3.0] - 2026-08-31
 
