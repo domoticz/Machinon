@@ -4,8 +4,10 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-09-02
+
 - Every setting in the Theme Hub had its name and explanation reviewed and rewritten for clarity; what each setting does is unchanged.
-- The brightness slider in the floorplan device popup now matches the look of the card sliders: a slimmer bar and an accent-colored handle instead of the plain grey style it had before.
+- The brightness slider in the floorplan device popup is now themed like the card sliders: no more hard black outline, a slimmer bar and an accent-colored handle in your scheme colours.
 - The brightness/position slider on dimmer and blinds cards is fully rounded again. The filled portion used to cut a square corner into the track's rounded end.
 - The slider-style on/off toggles on switch cards are back. A change in recent Domoticz builds moved the internal marker the theme used to recognise a plain switch, so the "Toggles instead of status text" setting silently stopped producing toggles; the theme now recognises both the old and new markup.
 - On a phone, the Theme Hub's row of tabs now scrolls to show the tab you are actually on. Opening a link straight to one of the later tabs used to leave the row parked at the start with the wrong tab underlined.
@@ -23,9 +25,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - Pop-up messages no longer cover the top menu, and on mobile no longer cover the search field when it is open.
 - Low-battery and protected markers are now readable in every colour scheme, with more contrast margin than before. Low-battery also moved from a plain yellow to a warmer amber, so it no longer stands out as the one mismatched colour in the palette.
 - The single "Device warnings" switch is now two: one for sensor-timeout warnings and one for low-battery warnings, so you can keep the one you care about and silence the other. Your existing setting is applied to both, so nothing changes until you change it.
-- New "Repeat device warnings" setting: choose whether a device that already warned you may warn you again on your next visit, once a day (the default), or only once the problem clears and comes back.
+- New "How often warnings repeat" setting: choose whether a device that already warned you may warn you again on your next visit, once a day (the default), or only once the problem clears and comes back.
 - "Center popup dialogs" now really centers every dialog. The common message and confirmation popups were left near the top of the screen; only the edit-style dialogs were centered. Both kinds now center, and the setting's description finally matches what it does.
-- The brightness slider in the small popup that opens when you click a device on a floorplan no longer draws with a hard black outline; it now follows your color scheme like the rest of the popup.
 - The small expand arrow on floorplan device popups is hidden again by default, and the setting that reveals it works once more; a Domoticz update had changed the arrow's internals so the theme's rules no longer applied.
 - The settings documentation was rewritten in plain language: every Theme Hub setting now has its own short explanation of what you see and what changes, instead of a technical table.
 
