@@ -1,20 +1,25 @@
 /**** ./floorplan_popup_details.css ***/
 /* Feature: floorplan popup details (theme.json "floorplan_popup_details", default OFF).
 
-   Reveals core's popup expander, which css/floorplan.css hides via
-   `image#twisty { display: none }`. Revealing and clicking it works: the popup grows
-   73px -> 101px and shows Type, Log, Notifications and the favourite star, chevron
-   rotating, correct in both schemes. One defect exists in the expanded state: a device
-   whose type string is long enough overflows the popup's right edge (measured 28px past
-   it on a Humidity sensor). This theme hides the type row outright to match the device
-   cards (see css/floorplan.css), and a row that generates no boxes cannot overflow, so
-   the defect is structurally avoided here rather than merely hidden. Everything else in
-   the expanded state is clean across device types. The base hide stays the default: this
+   Reveals core's popup expander, which css/floorplan.css hides via `#twisty { display:
+   none }`. Revealing and clicking it works: the popup grows 73px -> 101px and shows
+   Type, Log, Notifications and the favourite star, chevron rotating, correct in both
+   schemes. One defect exists in the expanded state: a device whose type string is long
+   enough overflows the popup's right edge (measured 28px past it on a Humidity
+   sensor). This theme hides the type row outright to match the device cards (see
+   css/floorplan.css), and a row that generates no boxes cannot overflow, so the defect
+   is structurally avoided here rather than merely hidden. Everything else in the
+   expanded state is clean across device types. The base hide stays the default: this
    is an opt-in reveal, not a replacement default.
 
    feature-loader.js appends this as a <link> at runtime, i.e. after the @import-ed
-   css/floorplan.css, so at equal specificity (0-1-1 on both sides) source order carries it.
-   No !important unless the harness proves otherwise. */
-image#twisty {
+   css/floorplan.css, so at equal specificity source order carries it. No !important
+   unless the harness proves otherwise.
+
+   Selector corrected here (settings-holistic Task 5, 2026-09-02), same as the base hide
+   in css/floorplan.css: core now builds this expander as <foreignObject id="twisty">,
+   not an <image>, so `image#twisty` stopped matching and this reveal rule was dead too
+   -- confirmed live the chevron reveals correctly with the id-only selector. */
+#twisty {
     display: inline;
 }

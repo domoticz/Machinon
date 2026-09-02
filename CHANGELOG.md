@@ -23,6 +23,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - New "Repeat device warnings" setting: choose whether a device that already warned you may warn you again on your next visit, once a day (the default), or only once the problem clears and comes back.
 - "Center popup dialogs" now really centers every dialog. The common message and confirmation popups were left near the top of the screen; only the edit-style dialogs were centered. Both kinds now center, and the setting's description finally matches what it does.
 - The brightness slider in the small popup that opens when you click a device on a floorplan no longer draws with a hard black outline; it now follows your color scheme like the rest of the popup.
+- The small expand arrow on floorplan device popups is hidden again by default, and the setting that reveals it works once more; a Domoticz update had changed the arrow's internals so the theme's rules no longer applied.
 
 ## [2.3.0] - 2026-08-31
 

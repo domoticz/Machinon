@@ -152,7 +152,17 @@ g.selector .level-list .level path {
 }
 
 
-image#twisty {
+/* Hidden by default since 2019 (base hide; css/floorplan_popup_details.css is the
+   opt-in reveal). Selector corrected here (settings-holistic Task 5, 2026-09-02): core
+   used to build this expander as an <image>, but now builds it as
+   <foreignObject id="twisty"> (js/domoticzdevices.js makeSVGglyph, part of a repo-wide
+   icon rework), so `image#twisty` stopped matching anything and the chevron was
+   showing on every floorplan popup regardless of this rule. #twisty is id-only, no tag,
+   so it keeps matching if core's markup shape changes again -- confirmed live the
+   chevron is hidden again with this selector, no !important needed (core sets no
+   competing CSS for this element, only JS-authored presentation attributes that do not
+   include display). */
+#twisty {
     display: none;
 }
 
