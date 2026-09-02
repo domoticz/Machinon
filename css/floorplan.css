@@ -192,7 +192,7 @@ rect.header {
    `transform-box: fill-box` with a centered origin scales the circle around its own
    geometric center rather than the SVG viewport's origin, so it shrinks in place instead
    of drifting toward the corner -- confirmed live in both engines (handle stayed
-   centered on cy, cx-tracking confirmed during an actual drag, see the report). Because
+   centered on cy, cx-tracking confirmed during an actual drag). Because
    the drag handler only ever writes the `cx` ATTRIBUTE (never touches `transform`), the
    two compose correctly: core positions the circle via cx as always, and this scale
    applies on top of wherever core puts it, so the handle keeps following the drag while

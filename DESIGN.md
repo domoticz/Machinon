@@ -2312,7 +2312,8 @@ along the track (confirmed at rest and at a 95% level), so "the handle at far ri
 actually the mechanism. Closing it fully would need moving the handle off the track's
 vertical center (a `cy` nudge was found to work, `cy: 17px` clears both engines with margin)
 or moving the last-seen row itself, both of which are design decisions beyond "shrink the
-handle" and were left for a follow-up rather than applied unprompted. **Concern**, see below.
+handle" and were left for a follow-up rather than applied unprompted. **Gap**, listed under
+[Gaps](#gaps).
 
 Core's black drop-shadow rect is softened to `opacity: 0.12` to sit within the elevation
 language. **Constraint.** The header's explicit `stroke: none` guarantee, the fill/handle
@@ -2544,7 +2545,7 @@ Toggled via `theme.json` features object. Each feature has an `enabled` boolean 
 | Sensor timeout warnings | `warn_timeout` | on | (none) | Toast when a sensor stops reporting. |
 | Low battery warnings | `warn_battery` | on | (none) | Toast when a device reports a low battery. |
 | Dashboard camera section | `dashboard_camera_section` | on | (none) | Renders the camera preview as its own dashboard section. Requires `dashboard_camera`. |
-| Expandable floorplan popups | `floorplan_popup_details` | off | `floorplan_popup_details.css` | Reveals core's floorplan popup expander (`#twisty`), showing Type, Log, Notifications and the favorite star. Hidden by default since 2019; see [Floorplan Device Popup](#floorplan-device-popup). |
+| Expandable floorplan popups | `floorplan_popup_details` | off | `floorplan_popup_details.css` | Reveals core's floorplan popup expander (`#twisty`), showing Log, Notifications and the favorite star. Hidden by default since 2019; see [Floorplan Device Popup](#floorplan-device-popup). |
 
 ## Animations
 
@@ -2680,6 +2681,11 @@ would have to change, not a reason to copy the current behaviour.
   true 1px hairline like the horizontal seams: no CSS selector exists for "first item in a wrapped
   flex row" to collapse it the way `:first-child` collapses the group's true first button. Visually
   marginal (not visible without zooming past ~3x); see [Selector Levels](#selector-levels).
+- The floorplan popup's slider handle still grazes `text#lastseen` by up to 1.8px (Firefox) at
+  rest, down from 4.2px before the current shrink. Closing it fully needs moving the handle off
+  the track's vertical center (a `cy: 17px` nudge clears both engines) or moving the last-seen
+  row itself; both are design decisions beyond the current shrink and left for a follow-up. See
+  `css/floorplan.css`.
 - (Resolved 2026-08-16: the four declared-but-unconsumed tokens flagged here,
   `--dz-btn-danger-bg-alpha`, `--dz-btn-text-shadow` and the `--dz-nav-active-bg`/`-text` pair,
   were removed from `dz-tokens.css` in the dead-token cleanup pass.)

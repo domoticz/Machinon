@@ -59,10 +59,11 @@ Each setting's name in the [settings reference](docs/settings-reference.md) is i
 Theme Hub label. That page never shows the name it's stored under; if you're comparing a backup,
 a support request, or Domoticz's own device debug output against what the Theme Hub shows, use
 the table below, generated from `src/js/theme-manifest.js` in manifest order, to look up the
-label for a storage key or vice versa. `scripts/check-settings-docs.py` keeps this in sync with
-the manifest and the reference page two ways: it fails if a manifest key has no `<!-- key: -->`
-anchor in `docs/settings-reference.md`, and it fails if an anchor names a key the manifest no
-longer has.
+label for a storage key or vice versa. `scripts/check-settings-docs.py` keeps the
+[settings reference](docs/settings-reference.md) complete against the manifest two ways: it
+fails if a manifest key has no `<!-- key: -->` anchor in `docs/settings-reference.md`, and it
+fails if an anchor names a key the manifest no longer has. It does not check this table; update
+the table by hand when a setting is added or renamed.
 
 | Key | On-screen label |
 |---|---|
