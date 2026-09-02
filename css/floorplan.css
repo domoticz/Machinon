@@ -117,15 +117,29 @@ rect.header {
    www/js/domoticzdevices.js drawDetails). Core's GEOMETRY is kept deliberately: this
    slider lives in the plan's scaled SVG user-unit space, not px, so matching the card
    slider's literal 5px track would fight the floorplan zoom. Match the LANGUAGE - flat,
-   accent-filled, unstroked - not the numbers. */
+   accent-filled, unstroked - not the numbers.
+
+   The stroke half of this needed a different mechanism than fill: this running core
+   builds both rects with an INLINE style attribute, `style="stroke:var(--dz-floorplan-
+   slider-border, black)"`, not a bare presentation attribute. An inline style always
+   outranks any external stylesheet declaration of the same property (unlike a
+   presentation attribute, which loses to any stylesheet rule regardless of specificity),
+   so a plain `stroke: none;` rule here is silently inert -- confirmed live: the computed
+   stroke stayed rgb(0, 0, 0) with that rule in place, because core's var() reference
+   never found the custom property set anywhere and fell through to its literal `black`
+   fallback. Custom properties do not have that inline-wins problem: only the var()
+   *reference* is inline, the property itself is looked up by normal cascade/inheritance,
+   so setting it here on the matched element reaches the same inline style. Scoped to
+   these two ids (not an ancestor) so it does not also reach circle#sliderhandle, which
+   reads the same variable for its own border and is out of this fix's scope. */
 .DeviceDetails rect#sliderback {
     fill: var(--dz-card-slider-track-bg);
-    stroke: none;
+    --dz-floorplan-slider-border: none;
 }
 
 .DeviceDetails rect#slider {
     fill: var(--dz-accent-color);
-    stroke: none;
+    --dz-floorplan-slider-border: none;
 }
 
 g text {
