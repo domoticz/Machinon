@@ -2108,7 +2108,15 @@ variable width implied a scale that does not exist.
 ### Dimmer Slider
 
 - Track: `--dz-card-slider-track-bg`, 5px height, `{rounded.sm}` radius
-- Range fill: `rgba(var(--dz-accent-values), 0.5)`
+- Range fill: `rgba(var(--dz-accent-values), 0.5)`, `{rounded.sm}` radius (same token as
+  the track). **Fixed defect (2026-09-02):** jQuery UI's `.ui-slider-range` ships with no
+  rounding of its own and always starts at the track's left edge, so without this radius
+  it painted a hard square corner over the track's rounded left cap the instant the level
+  rose above 0% (and would square off the right cap the same way at 100%, once the range
+  spans the full track). Measured live (both engines, both schemes) before the fix:
+  computed `border-radius: 0px` on the range while the track itself measured 3px; after
+  adding the same token, both caps render rounded at every level. Same fix applied to the
+  mobile card's duplicate rule (`css/dashboard_mobile.css`).
 - Handle: 15px circle, solid `var(--dz-accent-color)`, positioned -5px top
 - Width: `calc(100% - 100px)` (start point fixed relative to the card, so it never crosses the device icon), 55% on wide screens (1200px+)
 - Blinds cards (any card with a second icon cell): track anchored on BOTH edges instead of a fixed width, so it can never overlap the blind icons at any card width. **Constraint.** The anchoring derivation and the Dynamic Dashboard's zeroed-margin variant live with the blinds rules in `css/cards.css`.

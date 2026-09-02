@@ -4,6 +4,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+- The brightness/position slider on dimmer and blinds cards is fully rounded again. The filled portion used to cut a square corner into the track's rounded end.
 - The slider-style on/off toggles on switch cards are back. A change in recent Domoticz builds moved the internal marker the theme used to recognise a plain switch, so the "Toggles instead of status text" setting silently stopped producing toggles; the theme now recognises both the old and new markup.
 - On a phone, the Theme Hub's row of tabs now scrolls to show the tab you are actually on. Opening a link straight to one of the later tabs used to leave the row parked at the start with the wrong tab underlined.
 - If "Reset theme to defaults" only partly works, the theme now says so instead of looking like nothing happened. An administrator resets two sets of settings at once, the shared ones and their own; if one of the two failed, the page used to keep showing the old settings even though the other had already been reset. It now refreshes and tells you to press Reset again to finish.

@@ -1386,11 +1386,21 @@ body table#itemtable tr > .options {
     margin-top: var(--dz-card-slider-align-nudge) !important;
 }
 
+/* border-radius is load-bearing, not decorative: jQuery UI's .ui-slider-range ships
+   with NO rounding of its own (computed border-radius: 0px, measured live in both
+   engines), and it always spans from the track's left edge (left: 0) outward, so
+   without this it paints a hard square corner directly over the pill-shaped track's
+   rounded left cap the moment the level is above 0% -- and would square off the
+   RIGHT cap the same way at 100%, since the range then spans the full track. Same
+   radius token the track itself uses, so the range's own end caps clamp to the same
+   pill shape and its left edge disappears seamlessly into the track's left cap
+   instead of squaring it off. (Card dimmer-slider left-cap fix, 2026-09-02.) */
 #type .dimslider .ui-slider-range,
 .input .dimslider .ui-slider-range,
 .statusNormal .dimslider .ui-slider-range,
 .statusProtected .dimslider .ui-slider-range {
     background: rgba(var(--dz-accent-values), 0.5);
+    border-radius: var(--dz-card-slider-radius);
 }
 
 #type .dimslider .ui-slider-handle,

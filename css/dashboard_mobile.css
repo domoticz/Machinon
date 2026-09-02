@@ -286,8 +286,12 @@ body.dashMobile table.mobileitem .dimslider {
     margin-top: unset !important;
 }
 
+/* Same left-cap fix as css/cards.css's .ui-slider-range (2026-09-02): jQuery UI's
+   range overlay ships unrounded and always starts at the track's left edge, so it
+   squares off the pill track's rounded end without this. Same token as the track. */
 body.dashMobile table.mobileitem .dimslider .ui-slider-range {
     background: rgba(var(--dz-accent-values), 0.5);
+    border-radius: var(--dz-card-slider-radius);
 }
 
 body.dashMobile table.mobileitem .dimslider .ui-slider-handle {
