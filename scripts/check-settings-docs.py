@@ -7,9 +7,11 @@ a user hits and we never see; a row documented here that no longer exists in
 the manifest sends a user looking for a control that is gone. Both directions
 are checked.
 
-The docs format this depends on: every setting is one table row whose FIRST
-cell is the storage key in backticks. That keeps the key greppable and gives
-a reader something to match against an exported configuration.
+The docs format this depends on: every setting is a heading immediately
+followed by an invisible `<!-- key: ... -->` anchor comment naming the key it
+documents. That keeps the key greppable and gives a reader something to match
+against an exported configuration, without putting a storage key on the
+user-facing page itself.
 
 Run: python3 scripts/check-settings-docs.py
 """
@@ -26,9 +28,10 @@ DOCS = ROOT / "docs" / "settings-reference.md"
 # quoted form that only real entries use.
 _MANIFEST_KEY = re.compile(r'^\s+key: "([^"]+)"', re.M)
 
-# First cell of a table row, backticked. The separator row (|---|---|) has no
-# backticks and is skipped naturally.
-_DOC_KEY = re.compile(r"^\|\s*`([^`]+)`\s*\|", re.M)
+# Each setting's heading is followed by an invisible anchor comment naming
+# the key it documents. That keeps the manifest<->docs two-way check alive
+# now that the page is prose, and stays greppable for support work.
+_DOC_KEY = re.compile(r"^<!--\s*key:\s*([^>]+?)\s*-->", re.M)
 
 
 def manifest_keys(js_text):
@@ -37,7 +40,7 @@ def manifest_keys(js_text):
 
 
 def documented_keys(md_text):
-    """Return every key documented as a table row's first cell, in order."""
+    """Return every key documented via an anchor comment, in order."""
     return _DOC_KEY.findall(md_text)
 
 
