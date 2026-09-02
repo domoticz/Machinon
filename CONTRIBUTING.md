@@ -53,6 +53,59 @@ wiring - that no shipped scheme's colours move, and that hand-built and generate
 repaired - so run it by hand if you touch `src/js/scheme.js`, `src/js/color-repair.js` or
 `css/toasts.css`.
 
+### Settings key lookup
+
+Each setting's name in the [settings reference](docs/settings-reference.md) is its on-screen
+Theme Hub label. That page never shows the name it's stored under; if you're comparing a backup,
+a support request, or Domoticz's own device debug output against what the Theme Hub shows, use
+the table below, generated from `src/js/theme-manifest.js` in manifest order, to look up the
+label for a storage key or vice versa. `scripts/check-settings-docs.py` keeps this in sync with
+the manifest and the reference page two ways: it fails if a manifest key has no `<!-- key: -->`
+anchor in `docs/settings-reference.md`, and it fails if an anchor names a key the manifest no
+longer has.
+
+| Storage key | On-screen label |
+|---|---|
+| `standby` | Screen standby |
+| `standby_after` | Standby after (minutes) |
+| `check_update` | Update notice |
+| `warn_timeout` | Sensor timeout warnings |
+| `warn_battery` | Low battery warnings |
+| `warn_repeat` | Repeat device warnings |
+| `center_popups` | Center popup dialogs |
+| `rgbw_popup` | Machinon color picker popup |
+| `footer_text_disabled` | Hide the footer text |
+| `floorplan_popup_details` | Expandable floorplan popups |
+| `custom_settings_menu` | Settings menu as tile grid |
+| `navbar_icons` | Navbar icons |
+| `navbar_icons_text` | Icon-only navbar (hide text) |
+| `custom_page_menu` | Custom menu page |
+| `button_name` | Custom page button name |
+| `custom_url` | Custom page URL |
+| `sidemenu` | Side menu on desktop |
+| `dashboard_show_last_update` | Last-seen line on dashboard cards |
+| `dashboard_columns` | Column layout on wide screens |
+| `dashboard_camera` | Camera previews on the dashboard |
+| `dashboard_camera_refresh` | Camera preview refresh (seconds) |
+| `dashboard_camera_section` | Dedicated cameras section |
+| `time_ago` | Relative times |
+| `fade_off_items` | Dim off devices |
+| `switch_instead_of_bigtext` | Toggles instead of status text |
+| `switch_instead_of_bigtext_scenes` | Also toggles on scene cards |
+| `wind_direction` | Wind arrow points where the wind goes |
+| `icon_image` | Device photos instead of icons |
+| `card_min_width` | Card min width |
+| `card_max_width` | Card max width |
+| `log_plot_bands` | Range bands in log graphs |
+| `background_img` | Background image |
+| `background_type` | Background type |
+| `logo` | Custom logo |
+| `hide_logo` | Hide logo |
+| `scheme` | Color scheme |
+| `custom_color_scheme` | Custom colors |
+| `iconpacks` | Icon Library |
+| `about` | About Machinon |
+
 ### Changelog
 
 Every user-visible change adds a one-line entry under `## [Unreleased]` in `CHANGELOG.md`, in the same commit or pull request as the change itself. Those lines become the next release's notes, so write them for theme users, not developers.

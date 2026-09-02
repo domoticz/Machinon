@@ -24,6 +24,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - "Center popup dialogs" now really centers every dialog. The common message and confirmation popups were left near the top of the screen; only the edit-style dialogs were centered. Both kinds now center, and the setting's description finally matches what it does.
 - The brightness slider in the small popup that opens when you click a device on a floorplan no longer draws with a hard black outline; it now follows your color scheme like the rest of the popup.
 - The small expand arrow on floorplan device popups is hidden again by default, and the setting that reveals it works once more; a Domoticz update had changed the arrow's internals so the theme's rules no longer applied.
+- The settings documentation was rewritten in plain language: every Theme Hub setting now has its own short explanation of what you see and what changes, instead of a technical table.
 
 ## [2.3.0] - 2026-08-31
 
