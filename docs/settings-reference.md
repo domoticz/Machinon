@@ -226,7 +226,7 @@ Domoticz reports the direction wind is coming FROM, and by default points a wind
 that way. Turning this on swaps in Machinon's own mirrored arrow so it instead points at where
 the wind is blowing TO; the compass label next to it (N, SW, and so on) always keeps showing the
 reported origin either way. This only affects the classic picture icons. If Domoticz's own
-Setting > Icon style is set to Font Awesome glyphs instead (see [Icon
+**Setup > Settings > System > Icon style** is set to Font Awesome glyphs instead (see [Icon
 style](icons.md#icon-style-classic-images-or-glyphs)), the wind device shows a plain generic wind
 glyph with no directional meaning at all, and this setting has no effect on it.
 
