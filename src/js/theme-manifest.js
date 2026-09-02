@@ -320,7 +320,9 @@ var THEME_MANIFEST = [
                 description: "Domoticz reports the direction wind comes FROM, and the arrow "
                     + "normally points that way. Turn this on to point it the opposite way, "
                     + "at where the wind is blowing TO. The compass label (N, SW) always "
-                    + "stays the reported one.",
+                    + "stays the reported one. Only affects the classic image icons; with "
+                    + "Settings > Icon style set to glyphs the arrow is core's own and this "
+                    + "setting does nothing.",
                 appliesTo: "Wind device cards", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             },
