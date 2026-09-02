@@ -19,9 +19,9 @@
         "alt_text": "#bdae93",
         "border": "#504945",
         "disabled": "#665c54",
-        "error": "#fb4934",
+        "error": "#ff624d",
         "success": "#b8bb26",
-        "warning": "#fabd2f",
+        "warning": "#fe8019",
         "accent_text": "#1d2021"
     }
 }

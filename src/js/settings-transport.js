@@ -46,7 +46,7 @@ function dzSettingsSnapshot(t) {
             scheme: t.scheme, scheme_base: t.scheme_base,
             user_schemes: dzCloneValue(t.user_schemes), color_scheme: dzCloneValue(t.color_scheme),
             card_min_width: t.card_min_width, card_max_width: t.card_max_width,
-            dashboard_camera_refresh: t.dashboard_camera_refresh
+            dashboard_camera_refresh: t.dashboard_camera_refresh, warn_repeat: t.warn_repeat
         }
     };
 }
@@ -182,6 +182,22 @@ function dzApiFetchLayers() {
 function dzApiLoad() {
     return dzApiFetchLayers().then(function(outcome) {
         if (outcome !== DZ_LOAD_LOADED) return outcome;
+        /* MIGRATION (notification split, #198): a row stored before the split
+           still carries features.notification and no warn_timeout/warn_battery.
+           dzApplySnapshot below only ever writes keys ALREADY present in
+           theme.features, so the migration must run on the snapshot BEFORE
+           it is applied, not after -- by the time theme.features holds the
+           result, dzApplySnapshot has already had its one chance to see
+           warn_timeout/warn_battery in the snap and would silently skip
+           them on a second pass. dzMigrateNotificationSplit is defined in
+           settings-store.js, loaded earlier in custom.js's THEME_MODULES but
+           only ever CALLED here at boot time, well after every module has
+           loaded; guarded anyway, same pattern as reconcileDomoticzSettingsInPlace's
+           migrateRetiredScheme guard, in case that load order ever changes. */
+        if (typeof dzMigrateNotificationSplit === "function") {
+            if (dzApiState.instanceSnap) dzMigrateNotificationSplit(dzApiState.instanceSnap);
+            if (dzApiState.userSnap) dzMigrateNotificationSplit(dzApiState.userSnap);
+        }
         if (dzApiState.instanceSnap) dzApplySnapshot(theme, dzApiState.instanceSnap);
         if (dzApiState.userSnap) dzApplySnapshot(theme, dzSnapshotSubset(dzApiState.userSnap, "user"));
         /* localStorage can throw here (private-browsing quota). The cache is
@@ -543,15 +559,17 @@ function dzThemeSettingsSaveNow(action) {
 
     /* Positional contract: readers index into this array, APPEND ONLY. 0-6
        original; 7/8 scheme + base; 9 saved colour presets; 10/11 card widths;
-       12 camera refresh seconds. Positions 10-12 close the cache-only gap
-       for settings that used to live only in localStorage and never
-       followed the user across browsers. getCustomThemeSettings tolerates
-       short arrays via length guards. */
+       12 camera refresh seconds; 13 device-warning repeat preference (#198).
+       Positions 10-13 close the cache-only gap for settings that used to
+       live only in localStorage and never followed the user across
+       browsers. getCustomThemeSettings tolerates short arrays via length
+       guards. */
     var custom = [
         theme.standby_after, theme.button_name, theme.custom_url,
         theme.logo, theme.icons, theme.background_img, theme.background_type,
         theme.scheme, theme.scheme_base, theme.user_schemes,
-        theme.card_min_width, theme.card_max_width, theme.dashboard_camera_refresh
+        theme.card_min_width, theme.card_max_width, theme.dashboard_camera_refresh,
+        theme.warn_repeat
     ];
 
     /* POST, not GET: the params used to ride the query string, which Domoticz's
@@ -647,6 +665,7 @@ function getCustomThemeSettings(idx) {
         if (c.length > 9 && Array.isArray(c[9])) { theme.user_schemes = c[9]; }
         if (c.length > 11) { if (c[10] !== undefined) theme.card_min_width = c[10]; if (c[11] !== undefined) theme.card_max_width = c[11]; }
         if (c.length > 12 && c[12] !== undefined) theme.dashboard_camera_refresh = c[12];
+        if (c.length > 13 && c[13] !== undefined) theme.warn_repeat = c[13];
     });
 }
 

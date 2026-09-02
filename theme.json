@@ -3,7 +3,7 @@
     "name": "Machinon",
     "description": "Modern Domoticz theme: color schemes, Theme Hub settings, refreshed icons, light and dark",
     "license": "GNU General Public License v3.0",
-    "version":"2.3.0",
+    "version":"2.4.0",
     "author": "EdddieN",
     "homepage": "https://www.github.com/domoticz/Machinon",
     "wiki": "https://www.domoticz.com/wiki/Machinon_Theme",
@@ -17,6 +17,7 @@
     "background_type":"",
     "card_min_width": 320,
     "card_max_width": 500,
+    "warn_repeat": "daily",
     "color_scheme": {
         "background":"",
         "main_color": "",
@@ -112,9 +113,14 @@
             "enabled":false,
             "files": ["sidemenu.css"]
         },
-        "notification": {
-            "id":29,
-            "enabled":true,
+        "warn_timeout": {
+            "id": 46,
+            "enabled": true,
+            "files": []
+        },
+        "warn_battery": {
+            "id": 47,
+            "enabled": true,
             "files": []
         },
         "dashboard_columns": {

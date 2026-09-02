@@ -1,4 +1,29 @@
 var theme = {}, themeName = "", isMobile, lang, themeFolder;
+
+/* Toast bootstrap. index.html loads js/domoticz.js (line 137) and then this
+   file (142) as SYNCHRONOUS scripts, so both toast globals already exist here
+   and can be replaced with no polling and no race. THEME_MODULES below are
+   injected as async=false scripts and run later, so anything raised in that
+   window is BUFFERED as a raw call and drained by src/js/toast-hooks.js. Raw,
+   not interpreted: core's signatures stay knowledge of exactly one file. */
+(function() {
+    var buf = window.__dzToastBuffer = [];
+    function shim(fn) {
+        return function() {
+            var entry = { fn: fn, args: [].slice.call(arguments), cancelled: false, handle: null };
+            buf.push(entry);
+            /* generate_noty's return value is load-bearing in core:
+               $.cachenoty = generate_noty(...) then $.cachenoty.close(). */
+            return { close: function() {
+                entry.cancelled = true;
+                if (entry.handle) entry.handle.close();
+            } };
+        };
+    }
+    window.generate_noty = shim("noty");
+    window.ShowNotify = shim("shownotify");
+})();
+
 isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 var supported_lang = "en fr de sv nl pl";
 // The scheme colour palette now lives solely in the --dz-* tokens (dz-tokens.css / dark.css). The
@@ -9,6 +34,8 @@ var supported_lang = "en fr de sv nl pl";
 /* The theme's always-loaded modules, in load order. Feature-toggled files
    (theme.json "files") are separate and load on demand via the feature loader. */
 var THEME_MODULES = [
+    "src/js/toasts.js",
+    "src/js/toast-hooks.js",
     "src/js/settings-transport.js",
     "src/js/settings-store.js",
     "src/js/feature-loader.js",
@@ -16,6 +43,7 @@ var THEME_MODULES = [
     "src/js/scheme.js",
     "src/js/schemes.js",
     "src/js/color-oklch.js",
+    "src/js/color-repair.js",
     "src/js/scheme-generator.js",
     "src/js/iconpack.js",
     "src/js/search.js",
@@ -159,8 +187,15 @@ function dzSetupGridRouteController() {
            and registers itself only when core's Setup menu is present. Switched
            off, or no menu to harvest, there is no grid to render: say so once
            and hand the user core's own Settings page rather than a blank route. */
-        console.warn("machinon_routes", "grid_builder_absent", "custom_settings_menu did not register a grid; redirecting to #Setup");
-        location.hash = "#Setup";
+        console.warn("machinon_routes", "grid_builder_absent", "custom_settings_menu did not register a grid; redirecting to #/Setup");
+        /* "#/Setup", not the bare "#Setup" core's own menu markup uses. Angular
+           runs with hashPrefix(''), so both reach the page, but the browser
+           records the bare form as its own history entry BEFORE Angular
+           normalises it. Measured: the bare form pushes TWO entries and Back
+           lands on #/Setup again, i.e. the user is stuck on the page they were
+           bounced to; the routed form pushes one and Back returns where they
+           came from. */
+        location.hash = "#/Setup";
     });
 }
 
@@ -178,6 +213,15 @@ function dzOpenThemeLegacyPage(templateUrl) {
 }
 
 function dzRegisterThemeRoutes(routesModule) {
+    /* Test hook (same convention as __dzForceNoApi / __dzForceNoRoutes): throw
+       from inside the hook, which is the one failure the containment above
+       exists for. __dzForceNoRoutes covers the CLEAN off path; this covers the
+       path where the hook breaks mid-flight, inside core's own
+       angular.module() call, where an uncontained throw takes core's router
+       down with it and leaves the user a blank Domoticz rather than a Domoticz
+       missing two pages. Without a way to force it, that property can only be
+       checked by hand. */
+    if (window.__dzThrowInRouteHook) { throw new Error("__dzThrowInRouteHook (test hook)"); }
     routesModule.config(["$routeProvider", function ($routeProvider) {
         $routeProvider
             /* No permission key on purpose: the hub opens at every rights level

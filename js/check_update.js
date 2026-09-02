@@ -35,8 +35,21 @@ function update() {
         .then(function(response) { return response.json(); })
         .then(function(data) {
             if (isNewerVersion(data.version, theme.version)) {
-                var newVersionText = "Machinon version " + data.version + " " + language.is_available + '! <a href="https://github.com/domoticz/Machinon/releases" target="_blank">' + language.click_here + "</a>";
-                generate_noty('success', newVersionText, false);
+                /* dzToast() directly, not generate_noty(): this is one of the
+                   theme's own two toasts, not a core call site, so it is free
+                   to carry a structured action (a real link) instead of the
+                   HTML string generate_noty's adapter would flatten to text.
+                   type is "info", not "success": a new version merely exists,
+                   nothing here succeeded, and the tile design reads a green
+                   checkmark as "something worked". */
+                dzToast({
+                    type: "info",
+                    title: "Machinon version " + data.version + " " + language.is_available + "!",
+                    action: { label: language.click_here, href: "https://github.com/domoticz/Machinon/releases" },
+                    icon: "ion-ios-cloud-download",
+                    timeout: false,
+                    source: "update-check"
+                });
             }
         })
         .catch(function(error) {

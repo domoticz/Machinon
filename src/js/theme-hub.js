@@ -259,6 +259,11 @@ function dzBuildThemeHub(routeHost) {
     if (routeHost) routeHost.appendChild(container);
     else mainView.parentNode.insertBefore(container, mainView.nextSibling);
 
+    /* After the rows exist, before the user can touch them: on stable Domoticz
+       a non-admin cannot write the user variable the settings live in, and the
+       reactive no_identity lock never fires on that path. */
+    dzHubApplyLegacyReadOnlyLock();
+
     // schemes.js renderSchemePicker() resolves its containers with
     // getElementById, which only finds nodes attached to the live document;
     // the colors section's picker mount (dzHubSchemeMount, registered via
@@ -578,9 +583,25 @@ function dzHubConfirm(message, onConfirm) {
    settings untouched. Reset every native row this identity can reach instead
    (house row when admin, personal row when perUser; ThemeSettingsSetDefault/
    Set are gated the same way server-side, WebServerCmds.cpp
-   Cmd_ThemeSettingsSetDefault/Set), then clear the cache and reload only once
-   every attempted reset actually succeeded (fail closed: a partial failure,
-   already warned by dzApiFail, must not also claim a clean reset). */
+   Cmd_ThemeSettingsSetDefault/Set).
+
+   THREE OUTCOMES, not two. An admin on a per-user instance resets TWO rows,
+   so "some succeeded" is a real state and it used to be handled as failure:
+   the old code returned without clearing the cache or reloading, on the
+   reasoning that a partial failure must not claim a clean reset. Correct about
+   the server, wrong about the screen. The row that DID reset is gone
+   server-side and irreversible, while the page kept showing the pre-reset
+   values and the cache kept holding them, so the user was told "could not be
+   saved", saw nothing change, and reasonably concluded nothing had. Their next
+   cold load then lost half their settings with no explanation.
+
+   So: all succeeded -> clear and reload (a clean reset). NONE succeeded ->
+   leave everything alone, dzApiFail has already warned, and a reload would be
+   a pointless page flash on top of an error. SOME succeeded -> clear and
+   reload anyway, because the screen must match the server, and say plainly
+   that it was partial and pressing Reset again finishes it. Reset is
+   idempotent (resetting an already-default row is a no-op), so "press it
+   again" is safe advice, not a gamble. */
 function dzHubDoResetTheme() {
     var mode = dzSettingsMode();
     if (!mode.api) {
@@ -592,17 +613,30 @@ function dzHubDoResetTheme() {
     if (mode.perUser) jobs.push(dzApiResetUser());
     if (!jobs.length) { location.reload(); return; } // nothing this identity can reset server-side
     Promise.all(jobs).then(function (results) {
-        if (!results.every(function (r) { return r.ok; })) return; // a failure already warned; keep current state
-        if (typeof Storage !== "undefined") {
-            try { localStorage.removeItem(themeFolder + ".themeSettings"); } catch (e) { /* private mode: nothing cached to clear */ }
+        var ok = results.filter(function (r) { return r.ok; }).length;
+        if (ok === 0) return;   // nothing changed server-side; dzApiFail already warned
+        if (ok < results.length) {
+            /* Deliberately synchronous and blocking: the reload below would
+               otherwise wipe a toast before it could be read. */
+            var msg = "Part of the reset completed. Press Reset again to finish.";
+            if (typeof bootbox === "object" && typeof bootbox.alert === "function") {
+                bootbox.alert(msg, function () { dzHubDoClearCache(); });
+                return;
+            }
+            if (typeof ShowNotify === "function") { ShowNotify(msg, 6000); }
         }
-        location.reload();
+        dzHubDoClearCache();
     });
 }
 
 /* Clear only the browser cache (the old reset dialog's "clear localStorage"
    button): drop the cached theme settings and reload; the server-stored settings
-   are kept, so the reload re-seeds the cache from them. */
+   are kept, so the reload re-seeds the cache from them.
+
+   Also the finishing step of dzHubDoResetTheme above, clean or partial: once
+   rows have been reset server-side, the cached snapshot is the only thing still
+   holding the old values, and the reload re-seeds from whatever the server now
+   has. Same primitive, two callers - do not duplicate it. */
 function dzHubDoClearCache() {
     try {
         if (typeof Storage !== "undefined") { localStorage.removeItem(themeFolder + ".themeSettings"); }
@@ -816,11 +850,28 @@ function dzHubShowGroup(groupId) {
     hub.querySelectorAll(".dz-hub-section").forEach(function (s) {
         s.style.display = s.getAttribute("data-group") === groupId ? "" : "none";
     });
+    var activeTab = null;
     hub.querySelectorAll(".dz-hub-tab").forEach(function (it) {
         var on = it.getAttribute("data-group") === groupId;
         it.classList.toggle("is-active", on);
         it.setAttribute("aria-selected", on ? "true" : "false");
+        if (on) activeTab = it;
     });
+    /* The strip scrolls sideways when the tabs do not fit (.dz-hub-tabs,
+       overflow-x:auto). Measured at 390px: 1037px of tabs in 306px, so six of
+       the nine are off-screen. Without this, a deep link like #/Theme/colors
+       loads the right panel while the strip stays at scrollLeft 0 with GENERAL
+       underlined and the real tab 460px away - the row shows the wrong answer,
+       which is worse than showing none.
+
+       inline:"nearest" moves it the minimum distance rather than centring, so
+       tabs that are already visible do not jump. block:"nearest" is the part
+       that matters: without it the browser also scrolls the PAGE vertically to
+       bring the strip into view, yanking the user away from the panel they
+       just opened. */
+    if (activeTab && typeof activeTab.scrollIntoView === "function") {
+        activeTab.scrollIntoView({ inline: "nearest", block: "nearest" });
+    }
 }
 
 /* A hub built BEFORE the routes settled (dzMaybeReopenHub's debounced reopen is
@@ -930,7 +981,8 @@ var DZ_HUB_INPUT_META = {
     dashboard_camera_refresh: { min: 1 },
     card_min_width:           { min: 200, max: 800 },
     card_max_width:           { min: 250, max: 1200 },
-    background_type:          { options: [["cover", "Cover"], ["pattern", "Pattern"]] }
+    background_type:          { options: [["cover", "Cover"], ["pattern", "Pattern"]] },
+    warn_repeat:              { options: [["visit", "Once per visit"], ["daily", "Once a day"], ["episode", "Only when it changes"]] }
 };
 
 /* Current stored value for a plain (number/text/select) entry; "" when unset so
@@ -1759,6 +1811,13 @@ function dzHubFailClosed(entry, message) {
 var dzHubNoIdentityLocked = false;
 
 function dzHubApplyNoIdentityLock() {
+    dzHubLockAllRows("This session cannot store settings (application token).");
+}
+
+/* Lock every row and explain why, once. Two callers, and the reason text is the
+   only difference between them: the reactive no_identity case above, and the
+   proactive legacy-mode non-admin case below. */
+function dzHubLockAllRows(reason) {
     if (dzHubNoIdentityLocked) return;
     dzHubNoIdentityLocked = true;
     var hub = document.getElementById(DZ_HUB_ID);
@@ -1772,9 +1831,32 @@ function dzHubApplyNoIdentityLock() {
         var note = document.createElement("p");
         note.id = "dz-hub-no-identity-note";
         note.className = "dz-hub-no-identity-note";
-        note.textContent = "This session cannot store settings (application token).";
+        note.textContent = reason;
         about.insertBefore(note, about.firstChild);
     }
+}
+
+/* PROACTIVE lock for the one case the reactive path above cannot reach.
+
+   Without the ThemeSettings API (stable Domoticz: dzSettingsMode().api false)
+   the theme stores settings in a USER VARIABLE, and Domoticz only lets an admin
+   write one. A non-admin therefore sees a fully editable hub, flips a toggle,
+   watches it apply live (instant-apply changes the page before the save
+   settles), and loses it on the next load.
+
+   The no_identity lock does not catch this: that error comes from
+   Cmd_ThemeSettingsSet, i.e. the API path, and dzHubPersist only inspects
+   dzSettingsMode().noIdentity - which nothing on the legacy write path ever
+   sets. So the hub is not "confusing once then locked", it stays editable and
+   broken for the whole session. Hence a check up front rather than a reaction.
+
+   Deliberately narrow: !api AND !admin. An admin on stable Domoticz writes the
+   user variable fine, and on a core WITH the API a non-admin has a personal
+   layer and is meant to edit. */
+function dzHubApplyLegacyReadOnlyLock() {
+    var mode = dzSettingsMode();
+    if (mode.api || mode.admin) return;
+    dzHubLockAllRows("Your account cannot change theme settings on this Domoticz version. Ask an administrator, or ask them to update Domoticz.");
 }
 
 /* Every hub write funnels through here (instead of calling

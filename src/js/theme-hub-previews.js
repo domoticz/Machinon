@@ -16,9 +16,11 @@
       UI, with no JS re-render. No frozen hex, no external image. These show what
       the setting changes: a device card, a navbar strip, a chart band, etc.
 
-   2. SVG SKETCH FALLBACKS (the non-visualizable settings: standby,
-      check_update, notification): behaviours with no on-screen colour to mirror,
-      so a live token mini would be misleading. Instead an inline, SCHEME-NEUTRAL
+   2. SVG SKETCH FALLBACKS (the non-visualizable settings): behaviours with no
+      on-screen colour to mirror, so a live token mini would be misleading.
+      Which settings those are is NOT restated here - DZ_HUB_PREVIEWS at the
+      foot of this file is the registry, and its `sketch-*` keys are the list.
+      Instead of a mini they get an inline, SCHEME-NEUTRAL
       <svg> schematic (a fixed muted grey that reads on both light and dark
       backgrounds, NOT a --dz-* colour, so it deliberately does not "follow" a
       scheme it has nothing to say about). Purely illustrative.
@@ -296,8 +298,9 @@ function dzSketchUpdate() {
     return s.box;
 }
 
-/* notification -> a bell with a badge dot (the setting surfaces device warnings
-   as navbar/toast notifications). */
+/* warn_timeout / warn_battery -> a bell with a badge dot (both settings surface
+   device warnings as toasts; the previewId sketch-notification is shared by
+   both rows, same as card-width is shared by card_min_width/card_max_width). */
 function dzSketchNotification() {
     var s = dzSketchBox();
     // Bell body + clapper.
