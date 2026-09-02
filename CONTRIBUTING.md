@@ -72,10 +72,10 @@ the table by hand when a setting is added or renamed.
 | `check_update` | Update notice |
 | `warn_timeout` | Sensor timeout warnings |
 | `warn_battery` | Low battery warnings |
-| `warn_repeat` | Repeat device warnings |
+| `warn_repeat` | How often warnings repeat |
 | `center_popups` | Center popup dialogs |
-| `rgbw_popup` | Machinon color picker popup |
-| `footer_text_disabled` | Hide the footer text |
+| `rgbw_popup` | Machinon color picker |
+| `footer_text_disabled` | Hide footer text |
 | `floorplan_popup_details` | Expandable floorplan popups |
 | `custom_settings_menu` | Settings menu as tile grid |
 | `navbar_icons` | Navbar icons |
@@ -93,7 +93,7 @@ the table by hand when a setting is added or renamed.
 | `fade_off_items` | Dim off devices |
 | `switch_instead_of_bigtext` | Toggles instead of status text |
 | `switch_instead_of_bigtext_scenes` | Also toggles on scene cards |
-| `wind_direction` | Wind arrow points where the wind goes |
+| `wind_direction` | Wind arrow direction |
 | `icon_image` | Device photos instead of icons |
 | `card_min_width` | Card min width |
 | `card_max_width` | Card max width |
@@ -104,7 +104,7 @@ the table by hand when a setting is added or renamed.
 | `hide_logo` | Hide logo |
 | `scheme` | Color scheme |
 | `custom_color_scheme` | Custom colors |
-| `iconpacks` * | Icon Library |
+| `iconpacks` * | Icon library |
 | `about` * | About Machinon |
 
 \* These two rows are the manifest's `key`, not a storage key: their `storageKey` is `null`, so

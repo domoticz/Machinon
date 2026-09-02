@@ -63,7 +63,7 @@ turning this on additionally pops up a message for that condition as it happens.
 A device reporting a low battery already shows a small warning icon next to its name everywhere
 it appears; turning this on additionally pops up a message for that condition as it happens.
 
-### Repeat device warnings
+### How often warnings repeat
 <!-- key: warn_repeat -->
 
 Controls how often the same device may pop up its warning message again: **Once per visit**
@@ -80,14 +80,14 @@ Forces every popup dialog, including plain message and confirmation popups, to a
 centered in the browser window, instead of wherever Domoticz would otherwise place it: often
 near where you clicked, and for one kind of dialog, entirely above the top of the screen.
 
-### Machinon color picker popup
+### Machinon color picker
 <!-- key: rgbw_popup -->
 
 Replaces Domoticz's own color picker dialog with a Machinon-styled one for color lights. On by
 default. Turning it off restores the original picker; the change takes effect after the page
 reloads. Lights with a relative dimmer keep the original picker either way.
 
-### Hide the footer text
+### Hide footer text
 <!-- key: footer_text_disabled -->
 
 Hides the copyright line Domoticz prints at the bottom of every page. Nothing else on the page
@@ -218,7 +218,7 @@ Extends the same slider toggle to Scene and Group cards. Only takes effect while
 of status text is also on: with the parent off, scene and group cards keep showing plain status
 text instead.
 
-### Wind arrow points where the wind goes
+### Wind arrow direction
 <!-- key: wind_direction -->
 
 Domoticz reports the direction wind is coming FROM, and by default points a wind device's arrow
@@ -300,7 +300,7 @@ See [Color schemes: building your own colors](color-schemes.md#building-your-own
 
 ## Icons
 
-### Icon Library
+### Icon library
 <!-- key: iconpacks -->
 
 See [Icons](icons.md).
