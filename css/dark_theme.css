@@ -10,6 +10,10 @@
     }
 }
 
-#bigtext {
+/* Gated to the dark base so a load-order or desync bug can never paint the
+   light UI with this file's only non-login rule. The file itself is only
+   loaded while a dark scheme is active (schemes.js setDarkFeature); this
+   selector makes that invariant true even if the load gating ever slips. */
+html[data-dz-scheme="dark"] #bigtext {
     color: var(--dz-body-text) !important;
 }
