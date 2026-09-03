@@ -9,6 +9,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - When several sensors warn at once, the combined message now lists each device on its own line instead of one long comma-separated sentence.
 - The "Apply Settings" button on the Setup pages stays red when you point at it. It used to turn blue with a red outline, which read as a different button.
 - On both dashboards, the "x ago" last-seen line now lines up with the rest of the card instead of stopping short of its right edge. (#211)
+- The camera previews on the dashboard are full size again. In 2.4.0 they collapsed to a thin strip showing little more than the camera name.
 
 ## [2.4.0] - 2026-09-02
 

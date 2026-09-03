@@ -41,22 +41,28 @@
     padding: var(--dz-card-space-xs) var(--dz-card-space-md);
     width: fit-content;
     display: inline-block;
+    /* The row is a card grid (cards.css grids every `table[id^="item"] > tbody
+       > tr`), where a stretched item would make the plate 30px tall with its
+       text at the top; start keeps it at the 24px its text needs. */
+    align-self: start;
 }
 
-/* Shrink-to-fit needs the cell out of table layout: as a <td> it fills the
-   table however short its text, which is why width/display alone left a
-   full-width bar (measured: 330px of a 350px card, against 142px with these).
-   Scoped to #itemtablecam, the table the theme's own js/dashboard_camera.js
-   builds for the Cameras section, because that is the markup that was measured.
-   The other consumer of .with-cam-preview is a real device row (same file, the
-   section-off path, which needs a camera linked to a device); there the plate
-   keeps the cell's natural width, which is still correct, just not hugging. */
+/* CONSTRAINT: the camera row must stay on that card grid. The preview is a
+   background-image set on the row by js/dashboard_camera.js and has no
+   intrinsic height, so the grid's row template is the only thing giving it one
+   (140px at 1600, 124px at 390). Take the row out of the grid - display: block,
+   a float, absolute positioning - and the preview collapses to the 36px the
+   name plate occupies.
+   The plate hugs its text via `width: fit-content` above, not via this table
+   width: it measures 142px of a 343px card at `auto` and at the inherited 100%
+   alike. `auto` trims the table box by 2px, which puts the camera card (334px)
+   nearer a device card's row (332px). Scoped to #itemtablecam, the table
+   js/dashboard_camera.js builds for the Cameras section; the other
+   .with-cam-preview consumer is a real device row (the section-off path, a
+   camera linked to a device), which is not this table and keeps the cell's
+   natural width. */
 #holder .row .item table#itemtablecam {
     width: auto;
-}
-
-#holder .row .item table#itemtablecam > tbody > tr.with-cam-preview {
-    display: block;
 }
 
 #holder .row .item table[id^="item"] > tbody > tr.with-cam-preview td:not(#name) {
