@@ -15,6 +15,8 @@ language = {
   toasts: {
     sensors_timed_out: "{count} sensors timed out",
     devices_low_on_battery: "{count} devices low on battery",
-    devices: "{count} devices"
+    devices: "{count} devices",
+    update_available: "Machinon version {version} is available!",
+    update_action: "Click here to download"
   }
 };
