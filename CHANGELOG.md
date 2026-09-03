@@ -8,6 +8,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - The About tab now describes the built-in icon library correctly instead of calling it an "icon pack installer".
 - When several sensors warn at once, the combined message now lists each device on its own line instead of one long comma-separated sentence.
 - The "Apply Settings" button on the Setup pages stays red when you point at it. It used to turn blue with a red outline, which read as a different button.
+- On the Dynamic Dashboard, the "x ago" last-seen line now lines up with the reading above it instead of stopping short of the card's right edge. (#211)
 
 ## [2.4.0] - 2026-09-02
 
