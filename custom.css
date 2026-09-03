@@ -643,7 +643,7 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
         overflow: hidden !important;
     }
 
-    .ui-dialog .ui-dialog-content,
+    .ui-dialog:not(:has(.MediaRemote)) .ui-dialog-content,
     .ui-dialog:has(.dd-container) .ui-dialog-content {
         flex: 1 1 auto !important;
         min-height: 0 !important;
@@ -653,6 +653,17 @@ div#hardwarecontent,div#cameracontent,div#devicecontent,div#logcontent {
         max-height: none !important;
         overflow-y: auto !important;
         overflow-x: hidden !important;
+    }
+
+    /* The media remote dialogs are the exception to that height release: their
+       only child (core's .MediaRemote svg) is position: absolute and adds no
+       in-flow height, so a released pane measures 0 and the dialog paints as
+       its title bar alone. They keep the inline height jQuery UI computes from
+       the artwork's ratio, and the svg fills it as core intends. */
+    .ui-dialog:has(.MediaRemote) .ui-dialog-content {
+        flex: 0 0 auto !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
     }
 
     .ui-dialog .ui-dialog-titlebar,

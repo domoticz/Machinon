@@ -10,6 +10,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - The "Apply Settings" button on the Setup pages stays red when you point at it. It used to turn blue with a red outline, which read as a different button.
 - On both dashboards, the "x ago" last-seen line now lines up with the rest of the card instead of stopping short of its right edge. (#211)
 - The camera previews on the dashboard are full size again. In 2.4.0 they collapsed to a thin strip showing little more than the camera name.
+- The media remote popup (Kodi, Logitech Media Server, HEOS) opens at full size on a phone again instead of collapsing to just its title bar. (#192)
+- With "Center popup dialogs" turned on, the media remote popup no longer opens as a 200px sliver with the remote cut off. (#192)
 
 ## [2.4.0] - 2026-09-02
 
