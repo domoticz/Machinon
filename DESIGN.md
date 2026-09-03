@@ -1774,7 +1774,7 @@ comments in `dz-tokens.css`.
 | `--dz-card-tooltip-pad` | 6px 10px | Tooltip padding |
 | `--dz-card-value-line-height` | 24px | `#bigtext` line-height. DERIVED: the measured glyph box of `--dz-text-lg` in Inter (16->19, 18->22, 20->24, 22->26); a line-height below the font size makes the text overrun its own line box. Re-derive whenever the value size changes |
 | `--dz-card-bar-height` | 4px | Bar-ranges gauge height |
-| `--dz-card-lastupdate-pad-right` | 50px | `#lastupdate` right padding (wider than the 20px family below - verified, not a typo) |
+| `--dz-card-lastupdate-pad-right` | 50px | `#lastupdate` right padding on the device pages, where the strip it reserves holds the card's Log/Timers controls (wider than the 20px family below - verified, not a typo). Both dashboards render no such controls and drop to `--dz-card-space-2xl`, the edge `#status` already uses: `#dashcontent` in `dashboard_show_last_update.css`, the widget cards in `dynamic-dashboard.css` (issue #211) |
 | `--dz-card-meta-line-height` | 14px | `#type`/`#lastupdate` line-height; see Text Hierarchy |
 | `--dz-card-status-max-height` | 60px | `#status` scroll cap |
 | `--dz-card-scrollbar-size` | 4px | `#status` scrollbar width/height |
