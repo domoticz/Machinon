@@ -1039,10 +1039,16 @@ body table#itemtable tr > .options {
 }
 
 /* Core's favorite star stays out of this menu (the theme renders its own
-   star in the card corner, td.favorite). Core used ng-show until upstream
-   fdab5e10c switched the spans to ng-if; match both so either markup stays
-   hidden. */
+   star in the card corner, td.favorite). Core's markup for it has changed
+   twice: ng-show spans became ng-if spans (upstream fdab5e10c), and the
+   icon rework (upstream 466d7f8fb, PR #6995) replaced the img with bare
+   <i class="fa-... fa-star"> elements on the temperature and weather
+   widgets. The one attribute stable across all three generations is the
+   ng-click action (makeFavorite/MakeFavorite, matched without the first
+   letter, same anchor devices.js uses), so that selector is the load-
+   bearing one; the older shapes stay listed for pre-rework cores. */
 .options > img,
+.options > [ng-click*="akeFavorite("],
 .options > span[ng-show*="Favorite"],
 .options > span[ng-if*="Favorite"],
 .options > img[ng-show*="Favorite"],

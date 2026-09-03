@@ -4,6 +4,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+- On the Temperature and Weather pages, the favorite star no longer appears inside a card's 3-dot menu, and the star in the card corner actually adds or removes the device from the dashboard again. A change in recent Domoticz builds had altered the star's internals on those two pages, so the theme missed it in the menu and the corner star silently stopped working. (#213)
+
 ## [2.5.0] - 2026-09-03
 
 - The Theme Hub, its settings and all theme notifications now follow the Domoticz language.
