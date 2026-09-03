@@ -13,7 +13,7 @@ var ICONPACK = { state: [], busy: false, tab: "blue" };
    cleared before the post-action refresh re-renders the buttons. */
 function packOpStarts() {
     if (ICONPACK.busy) {
-        generate_noty("warning", "Another icon operation is still running", 3000);
+        generate_noty("warning", dzT("toasts.icon_busy"), 3000);
         return false;
     }
     ICONPACK.busy = true;
@@ -111,7 +111,7 @@ function refreshIconPack() {
         renderIconPackGrid();
     }).catch(function(e) {
         var grid = document.getElementById("iconpackGrid");
-        if (grid) { grid.textContent = "Icon library not found in this theme install (" + e.message + ")."; }
+        if (grid) { grid.textContent = dzT("hub.iconlib.load_failed", { error: e.message }); }
     });
 }
 
@@ -144,7 +144,7 @@ function renderIconPackGrid() {
     }
     grid.textContent = "";
     shown.forEach(function(ic) { grid.appendChild(buildIconPackCard(ic)); });
-    if (!shown.length) { grid.textContent = "No icons match the search."; }
+    if (!shown.length) { grid.textContent = dzT("hub.iconlib.no_match"); }
 }
 
 function buildIconPackCard(ic) {
@@ -178,7 +178,7 @@ function buildIconPackCard(ic) {
     if (ic.idx !== null) {
         var chip = document.createElement("span");
         chip.className = "iconpack-chip";
-        chip.textContent = "Installed";
+        chip.textContent = dzT("hub.iconlib.installed_chip");
         card.appendChild(chip);
     }
 
@@ -199,18 +199,18 @@ function iconPackButton(kind, ic) {
     if (kind === "add" || kind === "add-disabled") {
         btn.className = "iconpack-add";
         img.src = "images/add.png";
-        btn.title = kind === "add-disabled" ? "Installed and up to date" : "Install";
+        btn.title = kind === "add-disabled" ? dzT("hub.iconlib.installed_current") : dzT("hub.iconlib.install");
         if (kind === "add-disabled") { btn.disabled = true; }
         else { btn.addEventListener("click", function() { installPackIcon(ic); }); }
     } else if (kind === "refresh") {
         btn.className = "iconpack-add";
         img.src = "images/machinon/refresh.png";
-        btn.title = "Update available: reinstall";
+        btn.title = dzT("hub.iconlib.update_available");
         btn.addEventListener("click", function() { installPackIcon(ic); });
     } else {
         btn.className = "iconpack-remove";
         img.src = "images/remove.png";
-        btn.title = kind === "remove-disabled" ? "Not installed" : "Remove";
+        btn.title = kind === "remove-disabled" ? dzT("hub.iconlib.not_installed") : dzT("hub.iconlib.remove");
         if (kind === "remove-disabled") { btn.disabled = true; }
         else { btn.addEventListener("click", function() { removePackIcon(ic); }); }
     }
@@ -284,8 +284,8 @@ function uploadPackZip(base) {
 function installPackIcon(ic) {
     if (!packOpStarts()) return;
     return uploadPackZip(ic.base)
-        .then(function() { generate_noty("success", ic.name + " installed", 3000); })
-        .catch(function(e) { generate_noty("error", ic.name + ": " + e.message, 6000); })
+        .then(function() { generate_noty("success", dzT("toasts.icon_installed", { name: ic.name }), 3000); })
+        .catch(function(e) { generate_noty("error", dzT("toasts.icon_install_failed", { name: ic.name, error: e.message }), 6000); })
         .then(packOpEnds);
 }
 
@@ -311,13 +311,13 @@ function removePackIcon(ic) {
                 if (!ok) return;
                 if (!packOpStarts()) return;
                 fetchPackJson("json.htm?type=command&param=deletecustomicon&idx=" + ic.idx)
-                    .then(function() { generate_noty("success", ic.name + " removed", 3000); })
-                    .catch(function() { generate_noty("error", "Could not remove " + ic.name, 6000); })
+                    .then(function() { generate_noty("success", dzT("toasts.icon_removed", { name: ic.name }), 3000); })
+                    .catch(function() { generate_noty("error", dzT("toasts.icon_remove_failed", { name: ic.name }), 6000); })
                     .then(packOpEnds);
             }
         });
     })
-    .catch(function() { generate_noty("error", "Could not check which devices use " + ic.name, 6000); });
+    .catch(function() { generate_noty("error", dzT("toasts.icon_usage_check_failed", { name: ic.name }), 6000); });
 }
 
 /* Sequential on purpose: each upload is a SQLite write plus blob extraction;
@@ -329,8 +329,8 @@ function installAllPackIcons() {
     var current = pool.length - todo.length;
     if (!todo.length) {
         generate_noty("success", pool.length === activeTabIcons().length
-            ? "All " + pool.length + " pack icons are installed and current"
-            : "All " + pool.length + " shown pack icons are installed and current", 3000);
+            ? dzT("toasts.icons_all_current", { count: pool.length })
+            : dzT("toasts.icons_all_shown_current", { count: pool.length }), 3000);
         ICONPACK.busy = false;
         return;
     }
@@ -338,15 +338,15 @@ function installAllPackIcons() {
     var chain = Promise.resolve();
     todo.forEach(function(ic, i) {
         chain = chain.then(function() {
-            generate_noty("information", "Installing " + (i + 1) + "/" + todo.length + ": " + ic.name, 1000);
+            generate_noty("information", dzT("toasts.icons_installing", { n: i + 1, total: todo.length, name: ic.name }), 1000);
             return uploadPackZip(ic.base)
                 .then(function() { if (ic.idx === null) { added++; } else { updated++; } })
                 .catch(function(e) { failures.push(ic.name + " (" + e.message + ")"); });
         });
     });
     chain.then(function() {
-        var msg = added + " installed, " + updated + " updated, " + current + " already current";
-        if (failures.length) { generate_noty("error", msg + "; failed: " + failures.join(", "), 8000); }
+        var msg = dzT("toasts.icons_summary", { added: added, updated: updated, current: current });
+        if (failures.length) { generate_noty("error", dzT("toasts.icons_summary_failed", { summary: msg, failures: failures.join(", ") }), 8000); }
         else { generate_noty("success", msg, 5000); }
         packOpEnds();
     });

@@ -188,6 +188,16 @@ language = {
         description: "Theme version, description, credits, links, and maintenance actions"
       }
     },
+    iconlib: {
+      load_failed: "Icon library not found in this theme install ({error}).",
+      no_match: "No icons match the search.",
+      installed_chip: "Installed",
+      install: "Install",
+      installed_current: "Installed and up to date",
+      update_available: "Update available: reinstall",
+      not_installed: "Not installed",
+      remove: "Remove"
+    },
     appliesTo: {
       whole_ui: "Whole UI",
       navbar_badge: "Navbar badge",
@@ -349,6 +359,19 @@ language = {
     name_pipe: "A theme name cannot contain the | character.",
     wizard_name_first: "Give your theme a name first.",
     wizard_unreadable: "That combination could not be made readable. Please report this.",
-    wizard_created: "“{name}” created."
+    wizard_created: "“{name}” created.",
+    icon_busy: "Another icon operation is still running",
+    icon_installed: "{name} installed",
+    icon_install_failed: "{name}: {error}",
+    icon_removed: "{name} removed",
+    icon_remove_failed: "Could not remove {name}",
+    icon_usage_check_failed: "Could not check which devices use {name}",
+    icons_all_current: "All {count} pack icons are installed and current",
+    icons_all_shown_current: "All {count} shown pack icons are installed and current",
+    icons_installing: "Installing {n}/{total}: {name}",
+    icons_summary: "{added} installed, {updated} updated, {current} already current",
+    icons_summary_failed: "{summary}; failed: {failures}",
+    save_failed: "Theme settings could not be saved ({error})",
+    save_failed_local: "Theme settings could not be saved to Domoticz; kept in this browser only."
   }
 };
