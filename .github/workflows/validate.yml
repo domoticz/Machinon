@@ -39,7 +39,7 @@ jobs:
         run: python3 -m pytest scripts/test_measure_icon_contrast.py -q
 
       - name: Scheme generator maths and contrast floors
-        run: node --test scripts/test-color-oklch.mjs scripts/test-color-repair.mjs scripts/test-scheme-generator.mjs scripts/test-scheme-pairs.mjs scripts/test-toast-policy.mjs
+        run: node --test scripts/test-color-oklch.mjs scripts/test-color-repair.mjs scripts/test-scheme-generator.mjs scripts/test-scheme-pairs.mjs scripts/test-toast-policy.mjs scripts/test-i18n.mjs scripts/test-check-lang-parity.mjs
 
       - name: Icon and status-glow colours clear the contrast floor on every scheme
         run: python3 scripts/measure-icon-contrast.py --check

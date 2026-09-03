@@ -37,6 +37,7 @@ scripts/check-buttons.sh
 scripts/check-shadows.sh
 scripts/check-menus.sh
 scripts/check-tokens.sh
+node scripts/check-lang-parity.mjs
 
 echo "== flatten @import chain"
 scripts/build-dist.sh

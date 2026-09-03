@@ -1,7 +1,8 @@
-// Dutch. Machine-translated from the English template (lang/machinon.en.js);
-// corrections welcome via pull request. The English file defines the key set.
-// Register: this file uses je-form; core Domoticz nl uses u-form. Which one
-// Machinon settles on is pending the maintainer's review.
+// Dutch. Translated from the English template (lang/machinon.en.js) and
+// reviewed by the maintainer; corrections welcome via pull request. The
+// English file defines the key set.
+// Register: je-form, by maintainer decision (core Domoticz nl uses u-form;
+// this theme deliberately does not follow it there).
 language = {
   common: {
     and: "en",
