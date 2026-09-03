@@ -334,25 +334,18 @@ function dzBuildHubAbout() {
     var about = document.createElement("section");
     about.id = DZ_HUB_ABOUT_ID;
     about.className = "dz-hub-about";
-    about.setAttribute("aria-label", "About this theme");
+    about.setAttribute("aria-label", dzT("hub.about.aria"));
 
     var title = document.createElement("h2");
     title.className = "dz-hub-about-title";
     // Matches the legacy "Machinon theme V.<version>" heading of the deleted
     // Theme tab, version live from theme.json via dzHubVersionLabel.
-    title.textContent = "Machinon theme V." + dzHubVersionLabel();
+    title.textContent = dzT("hub.about.title", { version: dzHubVersionLabel() });
     about.appendChild(title);
 
     var desc = document.createElement("p");
     desc.className = "dz-hub-about-desc";
-    desc.textContent = "Machinon ships a built-in icon library of more than 250 icons "
-        + "to browse and install from, written straight into the Domoticz device "
-        + "database, so every installed icon is "
-        + "available from any device's own icon picker, not just this theme's cards. "
-        + "This settings hub applies every change live with instant previews, offers "
-        + "light and dark color schemes plus a custom palette with automatic contrast "
-        + "checking, and the theme itself is fully responsive with a mobile layout "
-        + "that fits phone viewports.";
+    desc.textContent = dzT("hub.about.description");
     about.appendChild(desc);
 
     // Contributions / credits, restored verbatim from the published
@@ -367,11 +360,11 @@ function dzBuildHubAbout() {
     credits.className = "dz-hub-about-credits";
     var creditsHeading = document.createElement("h3");
     creditsHeading.className = "dz-hub-about-credits-title";
-    creditsHeading.textContent = "Contributions";
+    creditsHeading.textContent = dzT("hub.about.contributions");
     credits.appendChild(creditsHeading);
     [
-        { role: "Design", people: [["EdddieN", "https://github.com/EdddieN"]] },
-        { role: "Code", people: [
+        { role: dzT("hub.about.role_design"), people: [["EdddieN", "https://github.com/EdddieN"]] },
+        { role: dzT("hub.about.role_code"), people: [
             ["davidlb", "https://github.com/davidlb"],
             ["DewGew", "https://github.com/DewGew"],
             ["landaisbenj", "https://github.com/landaisbenj"],
@@ -397,10 +390,10 @@ function dzBuildHubAbout() {
     // dead "undefined" anchor.
     var links = document.createElement("p");
     links.className = "dz-hub-about-links";
-    if (theme.homepage) links.appendChild(dzHubExternalLink(theme.homepage, "GitHub repository"));
+    if (theme.homepage) links.appendChild(dzHubExternalLink(theme.homepage, dzT("hub.about.link_repo")));
     if (theme.wiki) {
         if (links.childNodes.length) links.appendChild(document.createTextNode(" "));
-        links.appendChild(dzHubExternalLink(theme.wiki, "Wiki"));
+        links.appendChild(dzHubExternalLink(theme.wiki, dzT("hub.about.link_wiki")));
     }
     if (links.childNodes.length) about.appendChild(links);
 
@@ -408,7 +401,7 @@ function dzBuildHubAbout() {
     // a visible, clickable "Icons by Icons8" linking icons8.com.
     var credit = document.createElement("p");
     credit.className = "dz-hub-about-credit";
-    credit.appendChild(dzHubExternalLink("https://icons8.com/", "Icons by Icons8"));
+    credit.appendChild(dzHubExternalLink("https://icons8.com/", dzT("hub.about.icons8_credit")));
     about.appendChild(credit);
 
     return about;
@@ -437,14 +430,12 @@ function dzBuildShortAbout() {
 
     var title = document.createElement("div");
     title.className = "dz-hub-short-about-title";
-    title.textContent = "Machinon theme V." + dzHubVersionLabel();
+    title.textContent = dzT("hub.about.title", { version: dzHubVersionLabel() });
     box.appendChild(title);
 
     var desc = document.createElement("p");
     desc.className = "dz-hub-short-about-desc";
-    desc.textContent = "A modern Domoticz theme with color schemes, Theme Hub settings, "
-        + "refreshed icons, and light and dark variants. See the About tab for "
-        + "details and maintenance.";
+    desc.textContent = dzT("hub.about.short_description");
     box.appendChild(desc);
     return box;
 }
@@ -476,31 +467,31 @@ function dzBuildMaintenanceBlock() {
     var block = document.createElement("section");
     block.id = "dz-hub-maintenance";
     block.className = "dz-hub-maintenance";
-    block.setAttribute("aria-label", "Theme maintenance");
+    block.setAttribute("aria-label", dzT("hub.maintenance.aria"));
 
     var title = document.createElement("h3");
     title.className = "dz-hub-maintenance-title";
-    title.textContent = "Maintenance";
+    title.textContent = dzT("hub.maintenance.title");
     block.appendChild(title);
 
     var note = document.createElement("p");
     note.className = "dz-hub-maintenance-note";
-    note.textContent = "Each action asks for confirmation first.";
+    note.textContent = dzT("hub.maintenance.note");
     block.appendChild(note);
 
     var actions = document.createElement("div");
     actions.className = "dz-hub-maintenance-actions";
     actions.appendChild(dzHubMaintenanceButton(
-        "dz-hub-reset-theme", "Reset theme to defaults",
-        "Reset all theme settings to their defaults? This deletes the stored theme settings and reloads the page.",
+        "dz-hub-reset-theme", dzT("hub.maintenance.reset_theme"),
+        dzT("hub.maintenance.reset_theme_confirm"),
         dzHubDoResetTheme));
     actions.appendChild(dzHubMaintenanceButton(
-        "dz-hub-clear-cache", "Clear cached settings",
-        "Clear this browser's cached theme settings and reload? Your settings saved on the server are kept.",
+        "dz-hub-clear-cache", dzT("hub.maintenance.clear_cache"),
+        dzT("hub.maintenance.clear_cache_confirm"),
         dzHubDoClearCache));
     actions.appendChild(dzHubMaintenanceButton(
-        "dz-hub-reset-colors", "Reset colours to the selected scheme",
-        "Reset the custom colours to the selected scheme's default palette?",
+        "dz-hub-reset-colors", dzT("hub.maintenance.reset_colors"),
+        dzT("hub.maintenance.reset_colors_confirm"),
         dzHubDoResetColors));
 
     /* ThemeSettings migration: promote + scoped resets, additive to the three
@@ -517,17 +508,17 @@ function dzBuildMaintenanceBlock() {
         if (mode.admin && mode.perUser) {
             actions.appendChild(dzHubActionButton(
                 "dz-hub-promote", "btn btn-primary dz-hub-promote-btn",
-                "Save my current preferences as house defaults", dzHubPromote));
+                dzT("hub.maintenance.promote"), dzHubPromote));
         }
         if (mode.perUser) {
             actions.appendChild(dzHubActionButton(
                 "dz-hub-reset-mine", "btn btn-danger dz-hub-reset-mine-btn",
-                "Reset my personal settings", dzHubResetMine));
+                dzT("hub.maintenance.reset_mine"), dzHubResetMine));
         }
         if (mode.admin) {
             actions.appendChild(dzHubActionButton(
                 "dz-hub-reset-house", "btn btn-danger dz-hub-reset-house-btn",
-                "Reset the house defaults", dzHubResetHouse));
+                dzT("hub.maintenance.reset_house"), dzHubResetHouse));
         }
     }
     block.appendChild(actions);
@@ -619,7 +610,7 @@ function dzHubDoResetTheme() {
         if (ok < results.length) {
             /* Deliberately synchronous and blocking: the reload below would
                otherwise wipe a toast before it could be read. */
-            var msg = "Part of the reset completed. Press Reset again to finish.";
+            var msg = dzT("hub.maintenance.reset_partial");
             if (typeof bootbox === "object" && typeof bootbox.alert === "function") {
                 bootbox.alert(msg, function () { dzHubDoClearCache(); });
                 return;
@@ -671,10 +662,10 @@ function dzHubDoResetColors() {
    window.confirm, never fires without a confirmation). */
 function dzHubPromote() {
     dzHubConfirm(
-        "Copy your current personal settings over the house defaults? Your own settings stay yours; this changes what new and reset users get.",
+        dzT("hub.maintenance.promote_confirm"),
         function () {
             dzApiPromote().then(function (r) {
-                if (r.ok && typeof ShowNotify === "function") ShowNotify("House defaults updated", 3000);
+                if (r.ok && typeof ShowNotify === "function") ShowNotify(dzT("hub.maintenance.promote_done"), 3000);
             });
         }
     );
@@ -682,7 +673,7 @@ function dzHubPromote() {
 
 function dzHubResetMine() {
     dzHubConfirm(
-        "Reset your personal theme settings? You fall back to the house defaults.",
+        dzT("hub.maintenance.reset_mine_confirm"),
         function () {
             dzApiResetUser().then(function (r) { if (r.ok) location.reload(); });
         }
@@ -691,7 +682,7 @@ function dzHubResetMine() {
 
 function dzHubResetHouse() {
     dzHubConfirm(
-        "Reset the HOUSE defaults to factory values? Personal settings of users are untouched.",
+        dzT("hub.maintenance.reset_house_confirm"),
         function () {
             dzApiResetHouse().then(function (r) { if (r.ok) location.reload(); });
         }
@@ -715,8 +706,7 @@ function dzHubBuildImageEditor() {
 
     var help = document.createElement("p");
     help.className = "dz-hub-image-help";
-    help.textContent = "Map a device (by Idx) to an image file in the theme's images folder. "
-        + "Works with light devices shown with a bulb icon.";
+    help.textContent = dzT("hub.imageEditor.help");
     editor.appendChild(help);
 
     var list = document.createElement("div");
@@ -729,17 +719,17 @@ function dzHubBuildImageEditor() {
     idxInput.type = "number";
     idxInput.min = "1";
     idxInput.className = "dz-hub-image-idx";
-    idxInput.setAttribute("aria-label", "Device Idx");
-    idxInput.placeholder = "Idx";
+    idxInput.setAttribute("aria-label", dzT("hub.imageEditor.idx_aria"));
+    idxInput.placeholder = dzT("hub.imageEditor.idx_placeholder");
     var imgInput = document.createElement("input");
     imgInput.type = "text";
     imgInput.className = "dz-hub-image-img";
-    imgInput.setAttribute("aria-label", "Image file name");
+    imgInput.setAttribute("aria-label", dzT("hub.imageEditor.img_aria"));
     imgInput.placeholder = "image.png";
     var addBtn = document.createElement("button");
     addBtn.type = "button";
     addBtn.className = "btn btn-primary dz-hub-image-add-btn"; // house Filled-primary family (css/buttons.css)
-    addBtn.textContent = "Add";
+    addBtn.textContent = dzT("hub.imageEditor.add");
     addBtn.addEventListener("click", function () {
         var idx = idxInput.value.trim();
         var img = imgInput.value.trim();
@@ -768,7 +758,7 @@ function dzHubRenderImageList(list) {
     if (!icons.length) {
         var empty = document.createElement("p");
         empty.className = "dz-hub-image-empty";
-        empty.textContent = "No device images yet.";
+        empty.textContent = dzT("hub.imageEditor.empty");
         list.appendChild(empty);
         return;
     }
@@ -778,7 +768,7 @@ function dzHubRenderImageList(list) {
 
         var idxCell = document.createElement("span");
         idxCell.className = "dz-hub-image-cell";
-        idxCell.textContent = "Idx " + m.idx;
+        idxCell.textContent = dzT("hub.imageEditor.idx_cell", { idx: m.idx });
 
         var imgCell = document.createElement("span");
         imgCell.className = "dz-hub-image-cell dz-hub-image-name";
@@ -787,8 +777,8 @@ function dzHubRenderImageList(list) {
         var rm = document.createElement("button");
         rm.type = "button";
         rm.className = "btn btn-danger dz-hub-image-remove"; // house Filled-danger family (css/buttons.css)
-        rm.textContent = "Remove";
-        rm.setAttribute("aria-label", "Remove image for device " + m.idx);
+        rm.textContent = dzT("hub.imageEditor.remove");
+        rm.setAttribute("aria-label", dzT("hub.imageEditor.remove_aria", { idx: m.idx }));
         rm.addEventListener("click", function () { dzHubImageRemove(i); dzHubRenderImageList(list); });
 
         row.appendChild(idxCell);

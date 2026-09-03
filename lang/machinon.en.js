@@ -214,6 +214,57 @@ language = {
         daily: "Once a day",
         episode: "Only when it changes"
       }
+    },
+    about: {
+      aria: "About this theme",
+      title: "Machinon theme V.{version}",
+      short_description: "A modern Domoticz theme with color schemes, Theme Hub settings, "
+        + "refreshed icons, and light and dark variants. See the About tab for "
+        + "details and maintenance.",
+      description: "Machinon ships a built-in icon library of more than 250 icons "
+        + "to browse and install from, written straight into the Domoticz device "
+        + "database, so every installed icon is "
+        + "available from any device's own icon picker, not just this theme's cards. "
+        + "This settings hub applies every change live with instant previews, offers "
+        + "light and dark color schemes plus a custom palette with automatic contrast "
+        + "checking, and the theme itself is fully responsive with a mobile layout "
+        + "that fits phone viewports.",
+      contributions: "Contributions",
+      role_design: "Design",
+      role_code: "Code",
+      link_repo: "GitHub repository",
+      link_wiki: "Wiki",
+      icons8_credit: "Icons by Icons8"
+    },
+    maintenance: {
+      aria: "Theme maintenance",
+      title: "Maintenance",
+      note: "Each action asks for confirmation first.",
+      reset_theme: "Reset theme to defaults",
+      reset_theme_confirm: "Reset all theme settings to their defaults? This deletes the stored theme settings and reloads the page.",
+      clear_cache: "Clear cached settings",
+      clear_cache_confirm: "Clear this browser's cached theme settings and reload? Your settings saved on the server are kept.",
+      reset_colors: "Reset colours to the selected scheme",
+      reset_colors_confirm: "Reset the custom colours to the selected scheme's default palette?",
+      promote: "Save my current preferences as house defaults",
+      promote_confirm: "Copy your current personal settings over the house defaults? Your own settings stay yours; this changes what new and reset users get.",
+      promote_done: "House defaults updated",
+      reset_mine: "Reset my personal settings",
+      reset_mine_confirm: "Reset your personal theme settings? You fall back to the house defaults.",
+      reset_house: "Reset the house defaults",
+      reset_house_confirm: "Reset the HOUSE defaults to factory values? Personal settings of users are untouched.",
+      reset_partial: "Part of the reset completed. Press Reset again to finish."
+    },
+    imageEditor: {
+      help: "Map a device (by Idx) to an image file in the theme's images folder. Works with light devices shown with a bulb icon.",
+      idx_aria: "Device Idx",
+      idx_placeholder: "Idx",
+      img_aria: "Image file name",
+      add: "Add",
+      empty: "No device images yet.",
+      idx_cell: "Idx {idx}",
+      remove: "Remove",
+      remove_aria: "Remove image for device {idx}"
     }
   },
   toasts: {
