@@ -5,8 +5,6 @@
 // this theme deliberately does not follow it there).
 language = {
   common: {
-    and: "en",
-    more: "meer",
     close: "Sluiten"
   },
   header: {
@@ -313,6 +311,7 @@ language = {
       preset_name_prompt: "Naam van de voorinstelling",
       light: "Licht",
       dark: "Donker",
+      pair_label: "{name} {variant}",
       wcag_what_preset: "Voorinstelling \"{name}\" opgeslagen, maar die",
       wcag_what_custom: "Het eigen kleurenschema",
       wcag_body: "tekst op achtergrond {ratio}:1 (WCAG AA vereist 4.5)",
@@ -337,8 +336,6 @@ language = {
       tint_toggle: "De grijstinten met een andere kleur tinten",
       accent_label: "Hoofdkleur",
       surface_label: "Grijstint",
-      light: "Licht",
-      dark: "Donker",
       drift_label: "Je kleur is aangepast zodat hij leesbaar blijft:",
       saved_lead: "Opgeslagen als twee schema's, “{name} Licht” en “{name} Donker”.",
       preview: {
@@ -346,7 +343,10 @@ language = {
         status: "21,4 °C · 47%",
         value: "Aan",
         device2: "Achterdeur",
-        status2: "Niet beschikbaar"
+        status2: "Niet beschikbaar",
+        err: "Fout",
+        ok: "Ok",
+        warn: "Waar"
       },
       looks: {
         crisp: { label: "Strak", description: "Witte kaarten op een grijze pagina, met zichtbare randen" },
@@ -362,6 +362,7 @@ language = {
     sensors_timed_out: "{count} sensoren hebben een time-out",
     devices_low_on_battery: "{count} apparaten met lage batterij",
     devices: "{count} apparaten",
+    and_more: "en nog {count}",
     update_available: "Machinon versie {version} is beschikbaar!",
     update_action: "Klik hier om te downloaden",
     wcag_fails: "{what} haalt het WCAG-contrast niet: {failures}",

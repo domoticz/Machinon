@@ -361,6 +361,18 @@ fetch('json.htm?type=command&param=getsettings', {
             var enTable = language;
             return loadThemeScripts(["lang/machinon." + lang + ".js"]).then(function () {
                 language = dzDeepMerge(enTable, language);
+            }).catch(function () {
+                /* The overlay is a nice-to-have on top of the English table
+                   that already loaded above: a network hiccup or a bad CDN
+                   response on the translation file must not take the whole
+                   theme down with it. Log and keep going in English rather
+                   than rejecting this Promise.all member (which would sink
+                   the boot sequence's outer Promise.all and stop init_theme
+                   from ever running). The en+i18n.js load just above stays
+                   fatal, same as every other THEME_MODULES entry: the theme
+                   cannot run without dzT or dzDeepMerge either. */
+                console.warn("machinon_i18n", "overlay_load_failed", lang);
+                language = enTable;
             });
         }),
         loadThemeScripts(THEME_MODULES),

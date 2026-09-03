@@ -2,7 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { flattenKeys, interpolationTokens, compareTables,
          scanDzTLiterals, manifestRequiredKeys, appliesToRequiredKeys,
-         inputMetaOptionsRequiredKeys } from "./check-lang-parity.mjs";
+         inputMetaOptionsRequiredKeys, swatchesRequiredKeys,
+         looksRequiredKeys } from "./check-lang-parity.mjs";
 
 test("extra key in a translation is an error", () => {
     const r = compareTables({ a: "x" }, { a: "y", b: "z" }, "de");
@@ -69,6 +70,48 @@ test("DZ_HUB_INPUT_META option values demand hub.options.<key>.<value> keys in e
 
 test("DZ_HUB_INPUT_META extraction returns no keys when the block is absent", () => {
     assert.deepEqual(inputMetaOptionsRequiredKeys("no such block here"), []);
+});
+
+test("DZ_COLOR_SCHEME_FIELDS field names demand hub.schemes.swatches.<field> keys in en", () => {
+    const text = [
+        "var DZ_COLOR_SCHEME_FIELDS = [",
+        '    { suffix: "bg", field: "background" },',
+        '    { suffix: "navbar", field: "navbar" },',
+        '    { suffix: "text", field: "main_text" }',
+        "];"
+    ].join("\n");
+    assert.deepEqual(swatchesRequiredKeys(text), [
+        "hub.schemes.swatches.background",
+        "hub.schemes.swatches.navbar",
+        "hub.schemes.swatches.main_text"
+    ]);
+});
+
+test("swatches extraction returns no keys when the block is absent", () => {
+    assert.deepEqual(swatchesRequiredKeys("no such block here"), []);
+});
+
+test("DZ_LOOKS keys demand hub.wizard.looks.<key>.label/.description keys in en", () => {
+    const text = [
+        "var DZ_LOOKS = {",
+        "    crisp: {",
+        "        anchor: 0.24, danchor: 0.90, nC: 0.002",
+        "    },",
+        "    soft: {",
+        "        anchor: 0.32, danchor: 0.84, nC: 0.022",
+        "    }",
+        "};"
+    ].join("\n");
+    assert.deepEqual(looksRequiredKeys(text), [
+        "hub.wizard.looks.crisp.label",
+        "hub.wizard.looks.crisp.description",
+        "hub.wizard.looks.soft.label",
+        "hub.wizard.looks.soft.description"
+    ]);
+});
+
+test("looks extraction returns no keys when the block is absent", () => {
+    assert.deepEqual(looksRequiredKeys("no such block here"), []);
 });
 
 test("flatten and tokens helpers", () => {

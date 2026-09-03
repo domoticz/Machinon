@@ -2,8 +2,6 @@
 // corrections welcome via pull request. The English file defines the key set.
 language = {
   common: {
-    and: "und",
-    more: "weitere",
     close: "Schließen"
   },
   header: {
@@ -310,6 +308,7 @@ language = {
       preset_name_prompt: "Name der Voreinstellung",
       light: "Hell",
       dark: "Dunkel",
+      pair_label: "{name} {variant}",
       wcag_what_preset: "Voreinstellung \"{name}\" gespeichert, aber sie",
       wcag_what_custom: "Das eigene Farbschema",
       wcag_body: "Text auf Hintergrund {ratio}:1 (WCAG AA erfordert 4.5)",
@@ -334,8 +333,6 @@ language = {
       tint_toggle: "Die Grautöne mit einer anderen Farbe einfärben",
       accent_label: "Hauptfarbe",
       surface_label: "Grauton",
-      light: "Hell",
-      dark: "Dunkel",
       drift_label: "Deine Farbe wurde angepasst, damit sie lesbar bleibt:",
       saved_lead: "Als zwei Schemata gespeichert, „{name} Hell“ und „{name} Dunkel“.",
       preview: {
@@ -343,7 +340,10 @@ language = {
         status: "21,4 °C · 47%",
         value: "Ein",
         device2: "Hintertür",
-        status2: "Nicht verfügbar"
+        status2: "Nicht verfügbar",
+        err: "Fehl",
+        ok: "Ok",
+        warn: "Warn"
       },
       looks: {
         crisp: { label: "Klar", description: "Weiße Karten auf grauer Seite, mit sichtbaren Kanten" },
@@ -359,6 +359,7 @@ language = {
     sensors_timed_out: "{count} Sensoren mit Zeitüberschreitung",
     devices_low_on_battery: "{count} Geräte mit schwacher Batterie",
     devices: "{count} Geräte",
+    and_more: "und {count} weitere",
     update_available: "Machinon-Version {version} ist verfügbar!",
     update_action: "Zum Herunterladen hier klicken",
     wcag_fails: "{what} besteht die WCAG-Kontrastprüfung nicht: {failures}",

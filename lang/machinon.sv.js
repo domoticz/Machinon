@@ -2,8 +2,6 @@
 // corrections welcome via pull request. The English file defines the key set.
 language = {
   common: {
-    and: "och",
-    more: "till",
     close: "Stäng"
   },
   header: {
@@ -310,6 +308,7 @@ language = {
       preset_name_prompt: "Namn på förinställningen",
       light: "Ljus",
       dark: "Mörk",
+      pair_label: "{name} {variant}",
       wcag_what_preset: "Förinställningen \"{name}\" sparades, men den",
       wcag_what_custom: "Det egna färgschemat",
       wcag_body: "text mot bakgrund {ratio}:1 (WCAG AA kräver 4.5)",
@@ -334,8 +333,6 @@ language = {
       tint_toggle: "Tona gråtonerna med en annan färg",
       accent_label: "Huvudfärg",
       surface_label: "Gråton",
-      light: "Ljus",
-      dark: "Mörk",
       drift_label: "Din färg justerades för att förbli läsbar:",
       saved_lead: "Sparat som två scheman, ”{name} Ljus” och ”{name} Mörk”.",
       preview: {
@@ -343,7 +340,10 @@ language = {
         status: "21,4 °C · 47%",
         value: "På",
         device2: "Bakdörr",
-        status2: "Otillgänglig"
+        status2: "Otillgänglig",
+        err: "Fel",
+        ok: "Ok",
+        warn: "Varn"
       },
       looks: {
         crisp: { label: "Skarp", description: "Vita kort på en grå sida, med kanter som syns" },
@@ -359,6 +359,7 @@ language = {
     sensors_timed_out: "{count} sensorer har nått tidsgränsen",
     devices_low_on_battery: "{count} enheter har lågt batteri",
     devices: "{count} enheter",
+    and_more: "och {count} till",
     update_available: "Machinon version {version} är tillgänglig!",
     update_action: "Klicka här för att ladda ner",
     wcag_fails: "{what} klarar inte WCAG-kontrasten: {failures}",

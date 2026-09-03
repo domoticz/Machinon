@@ -2,8 +2,6 @@
 // corrections welcome via pull request. The English file defines the key set.
 language = {
   common: {
-    and: "et",
-    more: "autres",
     close: "Fermer"
   },
   header: {
@@ -310,6 +308,7 @@ language = {
       preset_name_prompt: "Nom du préréglage",
       light: "Clair",
       dark: "Sombre",
+      pair_label: "{name} {variant}",
       wcag_what_preset: "Préréglage \"{name}\" enregistré, mais il",
       wcag_what_custom: "Le schéma de couleurs personnalisé",
       wcag_body: "texte sur fond {ratio}:1 (WCAG AA exige 4.5)",
@@ -334,8 +333,6 @@ language = {
       tint_toggle: "Teinter les gris avec une autre couleur",
       accent_label: "Couleur principale",
       surface_label: "Teinte des gris",
-      light: "Clair",
-      dark: "Sombre",
       drift_label: "Votre couleur a été ajustée pour rester lisible:",
       saved_lead: "Enregistré en deux schémas, « {name} Clair » et « {name} Sombre ».",
       preview: {
@@ -343,7 +340,10 @@ language = {
         status: "21,4 °C · 47%",
         value: "On",
         device2: "Porte arrière",
-        status2: "Indisponible"
+        status2: "Indisponible",
+        err: "Err",
+        ok: "Ok",
+        warn: "Att"
       },
       looks: {
         crisp: { label: "Net", description: "Des cartes blanches sur une page grise, avec des bords visibles" },
@@ -359,6 +359,7 @@ language = {
     sensors_timed_out: "{count} capteurs ont expiré",
     devices_low_on_battery: "{count} dispositifs à batterie faible",
     devices: "{count} dispositifs",
+    and_more: "et {count} de plus",
     update_available: "La version {version} de Machinon est disponible !",
     update_action: "Cliquez ici pour télécharger",
     wcag_fails: "{what} échoue au contraste WCAG: {failures}",

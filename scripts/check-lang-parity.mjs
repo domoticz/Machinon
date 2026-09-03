@@ -24,15 +24,16 @@
  *     failure as a hand-typed dzT() path);
  *   - every option value in theme-hub.js's DZ_HUB_INPUT_META has its display
  *     label in English (hub.options.<storageKey>.<value>: a select control
- *     resolves each option's label the same way).
+ *     resolves each option's label the same way);
+ *   - every colour-scheme swatch field has its display label in English
+ *     (hub.schemes.swatches.<field>: extracted from schemes.js's
+ *     DZ_COLOR_SCHEME_FIELDS table);
+ *   - every scheme-generator "look" has its label and description in English
+ *     (hub.wizard.looks.<look>.label / .description: extracted from
+ *     scheme-generator.js's DZ_LOOKS table).
  *
- * Dynamic key families NOT enforced here, and why: hub.schemes.swatches.<field>
- * (schemes.js's suffix/field table mixes CSS wiring with the i18n slug in a
- * shape this file's anchored-regex style cannot pull apart safely) and
- * hub.wizard.looks.<look> (DZ_LOOK_ORDER in scheme-generator.js is a bare
- * three-element array with no anchoring context to extract against). Both are
- * small, rarely-changed tables; a missing key there still only degrades to
- * the English fallback, so they are reviewed by hand rather than guarded.
+ * All dynamic key families the theme's JS defines are enforced above: none
+ * are reviewed by hand only.
  *
  * A key missing from a translation is not an error: it reports (falls back
  * to English, which is a real string, not a broken page) rather than fails.
@@ -49,6 +50,8 @@ const LANG_DIR = path.join(ROOT, "lang");
 const EN_FILE = path.join(LANG_DIR, "machinon.en.js");
 const MANIFEST_FILE = path.join(ROOT, "src", "js", "theme-manifest.js");
 const THEME_HUB_FILE = path.join(ROOT, "src", "js", "theme-hub.js");
+const SCHEMES_FILE = path.join(ROOT, "src", "js", "schemes.js");
+const SCHEME_GENERATOR_FILE = path.join(ROOT, "src", "js", "scheme-generator.js");
 
 // Vendored third-party scripts: never call dzT and are not ours to scan.
 const VENDORED_JS = new Set(["moment.js", "livestamp.js"]);
@@ -202,10 +205,57 @@ export function inputMetaOptionsRequiredKeys(text) {
         const optionsMatch = m[2].match(/options:\s*\[([^\]]*)\]/);
         if (!optionsMatch) continue;
         const valueRe = /"([^"]+)"/g;
-        let vm;
-        while ((vm = valueRe.exec(optionsMatch[1])) !== null) {
-            required.push(`hub.options.${storageKey}.${vm[1]}`);
+        let optMatch;
+        while ((optMatch = valueRe.exec(optionsMatch[1])) !== null) {
+            required.push(`hub.options.${storageKey}.${optMatch[1]}`);
         }
+    }
+    return required;
+}
+
+/**
+ * English paths every colour-scheme swatch requires: hub.schemes.swatches.<field>
+ * (schemes.js's card-swatch rendering resolves each field's display label
+ * through dzT the same way). Extracted from the literal
+ * `var DZ_COLOR_SCHEME_FIELDS = [ ... ];` array in src/js/schemes.js: each
+ * `{ suffix: "...", field: "..." }` entry contributes its `field` value.
+ * Anchored on the array literal itself, not on any surrounding prose, so a
+ * comment mentioning "field:" elsewhere in the file cannot false-match.
+ * Returns [] if the block itself cannot be found, so a refactor of
+ * DZ_COLOR_SCHEME_FIELDS fails loud (0 keys checked is visible in the
+ * summary count) rather than silently.
+ */
+export function swatchesRequiredKeys(text) {
+    const required = [];
+    const blockMatch = text.match(/var DZ_COLOR_SCHEME_FIELDS = \[([\s\S]*?)\n\];/);
+    if (!blockMatch) return required;
+    const fieldRe = /field:\s*"([^"]+)"/g;
+    let m;
+    while ((m = fieldRe.exec(blockMatch[1])) !== null) {
+        required.push(`hub.schemes.swatches.${m[1]}`);
+    }
+    return required;
+}
+
+/**
+ * English paths every generator "look" requires: hub.wizard.looks.<key>.label
+ * and .description (dzWizardStepLook resolves both through dzT the same way).
+ * Extracted from the literal `var DZ_LOOKS = { ... };` object in
+ * src/js/scheme-generator.js: each top-level `<key>: { ... }` entry
+ * (line-anchored, same style as inputMetaOptionsRequiredKeys) contributes its
+ * key. Returns [] if the block itself cannot be found, so a refactor of
+ * DZ_LOOKS fails loud (0 keys checked is visible in the summary count)
+ * rather than silently.
+ */
+export function looksRequiredKeys(text) {
+    const required = [];
+    const blockMatch = text.match(/var DZ_LOOKS = \{([\s\S]*?)\n\};/);
+    if (!blockMatch) return required;
+    const entryRe = /^\s{4}(\w+):\s*\{/gm;
+    let m;
+    while ((m = entryRe.exec(blockMatch[1])) !== null) {
+        required.push(`hub.wizard.looks.${m[1]}.label`);
+        required.push(`hub.wizard.looks.${m[1]}.description`);
     }
     return required;
 }
@@ -282,6 +332,22 @@ export function main() {
         }
     }
 
+    const schemesText = readFileSync(SCHEMES_FILE, "utf8");
+    const swatchesRequired = swatchesRequiredKeys(schemesText);
+    for (const key of swatchesRequired) {
+        if (!enKeySet.has(key)) {
+            errors.push(`schemes.js: requires "${key}", missing from lang/machinon.en.js`);
+        }
+    }
+
+    const schemeGeneratorText = readFileSync(SCHEME_GENERATOR_FILE, "utf8");
+    const looksRequired = looksRequiredKeys(schemeGeneratorText);
+    for (const key of looksRequired) {
+        if (!enKeySet.has(key)) {
+            errors.push(`scheme-generator.js: requires "${key}", missing from lang/machinon.en.js`);
+        }
+    }
+
     for (const lang of Object.keys(missingByLang)) {
         const count = missingByLang[lang];
         if (count > 0) {
@@ -301,7 +367,8 @@ export function main() {
     console.log(
         `check-lang-parity: OK (${enKeySet.size} English keys, ${langFiles.length} translations, `
         + `${scanned.length} JS files scanned, ${required.length} manifest keys, `
-        + `${appliesToRequired.length} appliesTo keys, ${optionsRequired.length} option keys checked)`
+        + `${appliesToRequired.length} appliesTo keys, ${optionsRequired.length} option keys, `
+        + `${swatchesRequired.length} swatch keys, ${looksRequired.length} look keys checked)`
     );
     return 0;
 }

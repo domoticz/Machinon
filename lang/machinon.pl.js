@@ -2,8 +2,6 @@
 // corrections welcome via pull request. The English file defines the key set.
 language = {
   common: {
-    and: "i",
-    more: "więcej",
     close: "Zamknij"
   },
   header: {
@@ -310,6 +308,7 @@ language = {
       preset_name_prompt: "Nazwa zestawu",
       light: "Jasny",
       dark: "Ciemny",
+      pair_label: "{name} {variant}",
       wcag_what_preset: "Zestaw \"{name}\" zapisany, ale",
       wcag_what_custom: "Własny schemat kolorów",
       wcag_body: "tekst na tle {ratio}:1 (WCAG AA wymaga 4.5)",
@@ -334,8 +333,6 @@ language = {
       tint_toggle: "Zabarw szarości innym kolorem",
       accent_label: "Kolor główny",
       surface_label: "Odcień szarości",
-      light: "Jasny",
-      dark: "Ciemny",
       drift_label: "Twój kolor został dostosowany, aby pozostał czytelny:",
       saved_lead: "Zapisano jako dwa schematy, „{name} Jasny” i „{name} Ciemny”.",
       preview: {
@@ -343,7 +340,10 @@ language = {
         status: "21,4 °C · 47%",
         value: "Wł.",
         device2: "Tylne drzwi",
-        status2: "Niedostępne"
+        status2: "Niedostępne",
+        err: "Błąd",
+        ok: "Ok",
+        warn: "Uwaga"
       },
       looks: {
         crisp: { label: "Wyrazisty", description: "Białe karty na szarej stronie, z widocznymi krawędziami" },
@@ -359,6 +359,7 @@ language = {
     sensors_timed_out: "{count} czujników przekroczyło limit czasu",
     devices_low_on_battery: "{count} urządzeń ma niski poziom baterii",
     devices: "{count} urządzeń",
+    and_more: "i jeszcze {count}",
     update_available: "Dostępna jest wersja {version} motywu Machinon!",
     update_action: "Kliknij tutaj, aby pobrać",
     wcag_fails: "{what} nie spełnia wymagań kontrastu WCAG: {failures}",

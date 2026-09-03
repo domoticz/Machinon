@@ -4,8 +4,6 @@
 // to this file's string at runtime (custom.js merges English underneath).
 language = {
   common: {
-    and: "and",
-    more: "more",
     close: "Close"
   },
   header: {
@@ -312,6 +310,7 @@ language = {
       preset_name_prompt: "Preset name",
       light: "Light",
       dark: "Dark",
+      pair_label: "{name} {variant}",
       wcag_what_preset: "Preset \"{name}\" saved, but it",
       wcag_what_custom: "The custom colour scheme",
       wcag_body: "text on background {ratio}:1 (WCAG AA needs 4.5)",
@@ -336,8 +335,6 @@ language = {
       tint_toggle: "Tint the greys with a different colour",
       accent_label: "Main colour",
       surface_label: "Grey tint",
-      light: "Light",
-      dark: "Dark",
       drift_label: "Your colour was adjusted to stay readable:",
       saved_lead: "Saved as two schemes, “{name} Light” and “{name} Dark”.",
       preview: {
@@ -345,7 +342,10 @@ language = {
         status: "21.4 °C · 47%",
         value: "On",
         device2: "Back Door",
-        status2: "Unavailable"
+        status2: "Unavailable",
+        err: "Err",
+        ok: "Ok",
+        warn: "Warn"
       },
       looks: {
         crisp: { label: "Crisp", description: "White cards on a grey page, with edges you can see" },
@@ -361,6 +361,7 @@ language = {
     sensors_timed_out: "{count} sensors timed out",
     devices_low_on_battery: "{count} devices low on battery",
     devices: "{count} devices",
+    and_more: "and {count} more",
     update_available: "Machinon version {version} is available!",
     update_action: "Click here to download",
     wcag_fails: "{what} fails WCAG contrast: {failures}",

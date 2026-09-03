@@ -145,10 +145,11 @@ function dzToastSummary(names, total) {
     if (rest > 0) {
         /* Localised, like every other group title in this file (see devices.js's
            groupTitle functions). dzT degrades safely when `language` is
-           undefined, which is what the old typeof guard was for. */
-        var and = dzT("common.and");
-        var more = dzT("common.more");
-        lines.push(and + " " + rest + " " + more);
+           undefined, which is what the old typeof guard was for. One
+           composed key, not "and"/"more" glued around a bare number: a
+           translation needs to reorder around {count} in languages where
+           the word order differs from English. */
+        lines.push(dzT("toasts.and_more", { count: rest }));
     }
     return lines;
 }

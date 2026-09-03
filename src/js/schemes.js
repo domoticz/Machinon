@@ -487,7 +487,12 @@ function renderSchemePicker() {
            each other; legacy unpaired presets keep their bare name and slug. */
         (theme.user_schemes || []).forEach(function(p) {
             var slug = p.variant ? "user:" + p.name + "|" + p.variant : "user:" + p.name;
-            var label = p.variant ? p.name + " " + (p.variant === "dark" ? dzT("hub.schemes.dark") : dzT("hub.schemes.light")) : p.name;
+            var label = p.variant
+                ? dzT("hub.schemes.pair_label", {
+                    name: p.name,
+                    variant: p.variant === "dark" ? dzT("hub.schemes.dark") : dzT("hub.schemes.light")
+                })
+                : p.name;
             cards.push({ slug: slug, name: label, pair: p.pair, variant: p.variant,
                          presetName: p.name, deletable: true, colors: p.colors || {} });
         });

@@ -167,11 +167,11 @@ function dzWizardMockup(colors, label) {
     btn.style.background = colors.main_color;
     btn.style.color = colors.accent_text;
     btn.textContent = dzT("hub.wizard.apply");
-    [["error", "Err"], ["success", "Ok"], ["warning", "Warn"]].forEach(function (pair) {
+    [["error", "hub.wizard.preview.err"], ["success", "hub.wizard.preview.ok"], ["warning", "hub.wizard.preview.warn"]].forEach(function (pair) {
         var chip = dzWizardEl("span", "dz-wizard-mock-chip", row);
         chip.style.color = colors[pair[0]];
         chip.style.borderColor = colors[pair[0]];
-        chip.textContent = pair[1];
+        chip.textContent = dzT(pair[1]);
     });
 
     if (label) {
@@ -210,8 +210,8 @@ function dzWizardCurrentPair() {
 
 function dzWizardPreviewRow(host, pair) {
     var row = dzWizardEl("div", "dz-wizard-previews", host);
-    row.appendChild(dzWizardMockup(pair.light, dzT("hub.wizard.light")));
-    row.appendChild(dzWizardMockup(pair.dark, dzT("hub.wizard.dark")));
+    row.appendChild(dzWizardMockup(pair.light, dzT("hub.schemes.light")));
+    row.appendChild(dzWizardMockup(pair.dark, dzT("hub.schemes.dark")));
 }
 
 /* Repaint the step-1 preview miniatures in place, WITHOUT touching the
@@ -233,8 +233,8 @@ function dzWizardRefreshPreviews(host) {
     if (!row) { return; }
     row.textContent = "";
     var pair = dzWizardCurrentPair();
-    row.appendChild(dzWizardMockup(pair.light, dzT("hub.wizard.light")));
-    row.appendChild(dzWizardMockup(pair.dark, dzT("hub.wizard.dark")));
+    row.appendChild(dzWizardMockup(pair.light, dzT("hub.schemes.light")));
+    row.appendChild(dzWizardMockup(pair.dark, dzT("hub.schemes.dark")));
 }
 
 function dzWizardStepColours(host) {
@@ -320,7 +320,7 @@ function dzWizardAccentDrift(host, pair) {
     if (!lightDrift && !darkDrift) { return; }
     var wrap = dzWizardEl("div", "dz-wizard-drift", host);
     dzWizardEl("span", "dz-wizard-drift-label", wrap).textContent = dzT("hub.wizard.drift_label");
-    [[dzT("hub.wizard.light"), pair.light.main_color], [dzT("hub.wizard.dark"), pair.dark.main_color]].forEach(function (row) {
+    [[dzT("hub.schemes.light"), pair.light.main_color], [dzT("hub.schemes.dark"), pair.dark.main_color]].forEach(function (row) {
         var line = dzWizardEl("span", "dz-wizard-drift-row", wrap);
         var from = dzWizardEl("span", "dz-wizard-drift-chip", line);
         from.style.background = DZ_WIZARD.accent;
