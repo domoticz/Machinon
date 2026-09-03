@@ -351,7 +351,31 @@ fetch('json.htm?type=command&param=getsettings', {
 
     /* Load required script files (plus DOM ready) and then init the theme */
     Promise.all([
-        loadThemeScripts(THEME_MODULES.concat(["lang/machinon." + lang + ".js"])),
+        /* Language: English is always the base table; a non-English selection
+           loads on top and dzDeepMerge (src/js/i18n.js) folds it over the
+           English table, so every key missing from a translation falls back
+           per-key to English. i18n.js loads first in this chain; script tags
+           load with async=false, so it executes before the merge runs. */
+        loadThemeScripts(["src/js/i18n.js", "lang/machinon.en.js"]).then(function () {
+            if (lang === "en") return;
+            var enTable = language;
+            return loadThemeScripts(["lang/machinon." + lang + ".js"]).then(function () {
+                language = dzDeepMerge(enTable, language);
+            }).catch(function () {
+                /* The overlay is a nice-to-have on top of the English table
+                   that already loaded above: a network hiccup or a bad CDN
+                   response on the translation file must not take the whole
+                   theme down with it. Log and keep going in English rather
+                   than rejecting this Promise.all member (which would sink
+                   the boot sequence's outer Promise.all and stop init_theme
+                   from ever running). The en+i18n.js load just above stays
+                   fatal, same as every other THEME_MODULES entry: the theme
+                   cannot run without dzT or dzDeepMerge either. */
+                console.warn("machinon_i18n", "overlay_load_failed", lang);
+                language = enTable;
+            });
+        }),
+        loadThemeScripts(THEME_MODULES),
         new Promise(function(resolve) { $(resolve); })
     ]).then(function() {
         moment.locale(lang);
@@ -416,7 +440,7 @@ function init_theme() {
 
         $(".navbar").append('<div class="menu-toggle"><div></div></div>')
         var navBarInner = $(".navbar-inner"), navBarToggle = $(".menu-toggle");
-        $(".menu-toggle").prop("title", language.mainmenu);
+        $(".menu-toggle").prop("title", dzT("header.mainmenu"));
         navBarToggle.click(function() {
             navBarInner.toggleClass("slide");
         });

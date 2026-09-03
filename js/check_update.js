@@ -44,8 +44,8 @@ function update() {
                    checkmark as "something worked". */
                 dzToast({
                     type: "info",
-                    title: "Machinon version " + data.version + " " + language.is_available + "!",
-                    action: { label: language.click_here, href: "https://github.com/domoticz/Machinon/releases" },
+                    title: dzT("toasts.update_available", { version: data.version }),
+                    action: { label: dzT("toasts.update_action"), href: "https://github.com/domoticz/Machinon/releases" },
                     icon: "ion-ios-cloud-download",
                     timeout: false,
                     source: "update-check"

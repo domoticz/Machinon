@@ -379,7 +379,7 @@ function dzApiFail(d) {
     var err = (d && d.error) || "unknown";
     if (err === "no_identity") dzApiState.noIdentity = true;
     console.warn("machinon_themesettings", "write_failed", "error=" + err, (d && d.message) || "");
-    if (typeof ShowNotify === "function") ShowNotify("Theme settings could not be saved (" + err + ")", 4000);
+    if (typeof ShowNotify === "function") ShowNotify(dzT("toasts.save_failed", { error: err }), 4000);
     return { ok: false, error: err };
 }
 
@@ -589,7 +589,7 @@ function dzThemeSettingsSaveNow(action) {
         body.set("vvalue", value);
         function notifyFailed() {
             if (typeof generate_noty === "function") {
-                generate_noty("error", "Theme settings could not be saved to Domoticz; kept in this browser only.", 6000);
+                generate_noty("error", dzT("toasts.save_failed_local"), 6000);
             }
         }
         return fetch("json.htm", { method: "POST", credentials: "include", body: body })

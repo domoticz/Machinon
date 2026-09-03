@@ -3,9 +3,10 @@
    This module owns no behavior; it only describes what exists. The hub
    reads THEME_MANIFEST to build groups/rows/previews, calls the existing
    appliers on change (settings-store.js), and persists through the
-   settings-transport.js seam. Every entry below is the single source of
-   truth for its label/description/appliesTo/status; there is no separate
-   external table to keep in sync.
+   settings-transport.js seam. Every entry below owns structure (keys,
+   controls, storage, previews, parents); lang/machinon.en.js owns the
+   prose (group heading, entry label/description, appliesTo tag), keyed by
+   group id and entry key.
 
    Scope classification: every entry with a storageKey is tagged "user" or
    "house" so the per-user overlay knows which keys it may ever write. The
@@ -20,7 +21,6 @@
                 ("about" is the last tab: a hosted-custom section carrying the
                 expansive About + the theme maintenance actions; its short
                 summary also renders on General.)
-       label:   display heading for the group.
        entries: [ entry, ... ]
      }
      entry = {
@@ -39,21 +39,19 @@
                          "custom" = hosted section rendered by its own
                          existing UI (scheme picker, color swatches, icon
                          icon library), not a single input.
-       label:            short display name.
-       description:      one-sentence description of the setting's effect,
-                         verbatim from the settings editorial pass. Every
-                         entry carries its own dedicated description text;
-                         a parent/child pair (the five pairs below) or a
-                         bundled pair that is NOT a parent/child cascade
-                         (logo/hide_logo, background_img/background_type,
-                         card_min_width/card_max_width) each states its own
-                         effect, and a child additionally names the parent
-                         it depends on, rather than reusing one sentence for
-                         both entries.
-       appliesTo:        the rationalization table's "Applies to" tag.
+       appliesTo:        a lower-snake slug for the rationalization table's
+                         "Applies to" tag; the display string lives in
+                         lang/machinon.en.js under hub.appliesTo.<slug>.
                          Inherited verbatim by child/bundled entries from
                          their parent row (the table gives one tag per row,
-                         covering the whole bundle).
+                         covering the whole bundle). label/description are
+                         NOT properties here: they live in
+                         lang/machinon.en.js under
+                         hub.settings.<entry.key>.{label,description} (a
+                         parent/child pair or a bundled non-cascading pair
+                         each keeps its own dedicated description text
+                         there, a child additionally naming the parent it
+                         depends on).
        previewId:        id the preview registry (src/js/theme-hub-previews.js,
                          DZ_HUB_PREVIEWS) looks up to build this row's mini, or
                          null for a row that has no meaningful preview (the row
@@ -127,305 +125,220 @@
 var THEME_MANIFEST = [
     {
         id: "general",
-        label: "General",
         entries: [
             {
                 key: "standby", storageKey: "standby", control: "toggle",
-                label: "Screen standby",
-                description: "After a period of inactivity, the whole page fades to a dark clock screen; any tap or click brings it back.",
-                appliesTo: "Whole UI", previewId: "sketch-standby", parent: null,
+                appliesTo: "whole_ui", previewId: "sketch-standby", parent: null,
                 reloadOnDisable: true, status: "keep", scope: "user"
             },
             {
                 key: "standby_after", storageKey: "standby_after", control: "number",
-                label: "Standby after (minutes)",
-                description: "Sets how many minutes of inactivity trigger screen standby. Only applies while Screen standby is also on.",
-                appliesTo: "Whole UI", previewId: null, parent: "standby",
+                appliesTo: "whole_ui", previewId: null, parent: "standby",
                 reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "check_update", storageKey: "check_update", control: "toggle",
-                label: "Update notice",
-                description: "Checks GitHub for a newer version of the theme and shows a notice if one exists. Separate from Domoticz's own app-update check.",
-                appliesTo: "Navbar badge", previewId: "sketch-update", parent: null,
+                appliesTo: "navbar_badge", previewId: "sketch-update", parent: null,
                 reloadOnDisable: true, status: "keep", scope: "user"
             },
             {
                 key: "warn_timeout", storageKey: "warn_timeout", control: "toggle",
-                label: "Sensor timeout warnings",
-                description: "Pops up a message when a sensor stops reporting. The warning icon next to the device name appears either way.",
-                appliesTo: "Toasts", previewId: "sketch-notification", parent: null,
+                appliesTo: "toasts", previewId: "sketch-notification", parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "warn_battery", storageKey: "warn_battery", control: "toggle",
-                label: "Low battery warnings",
-                description: "Pops up a message when a device reports a low battery. The warning icon next to the device name appears either way.",
-                appliesTo: "Toasts", previewId: "sketch-notification", parent: null,
+                appliesTo: "toasts", previewId: "sketch-notification", parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "warn_repeat", storageKey: "warn_repeat", control: "select",
-                label: "How often warnings repeat",
-                description: "How often the same device may warn you again: once per visit, once a day, or only when the problem clears and comes back. The warning icon next to the device name appears either way.",
-                appliesTo: "Toasts", previewId: null, parent: null,
+                appliesTo: "toasts", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "center_popups", storageKey: "center_popups", control: "toggle",
-                label: "Center popup dialogs",
-                description: "Forces every popup dialog to a fixed centered position, instead of wherever Domoticz would otherwise place it.",
-                appliesTo: "All dialogs", previewId: "dialog-center", parent: null,
+                appliesTo: "all_dialogs", previewId: "dialog-center", parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "rgbw_popup", storageKey: "rgbw_popup", control: "toggle",
-                label: "Machinon color picker",
-                description: "Replaces Domoticz's own color picker with a Machinon-styled one for color lights.",
-                appliesTo: "Color light devices", previewId: "sketch-rgbw-popup", parent: null,
+                appliesTo: "color_light_devices", previewId: "sketch-rgbw-popup", parent: null,
                 reloadOnDisable: true, status: "keep", scope: "user"
             },
             {
                 key: "footer_text_disabled", storageKey: "footer_text_disabled", control: "toggle",
-                label: "Hide footer text",
-                description: "Hides the copyright line Domoticz prints at the bottom of every page.",
-                appliesTo: "Page footer", previewId: null, parent: null,
+                appliesTo: "page_footer", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "floorplan_popup_details", storageKey: "floorplan_popup_details", control: "toggle",
-                label: "Expandable floorplan popups",
-                description: "Restores the expand arrow on floorplan device popups (hidden by default), revealing Log and Notifications shortcuts.",
-                appliesTo: "Floorplan", previewId: "sketch-floorplan-details", parent: null,
+                appliesTo: "floorplan", previewId: "sketch-floorplan-details", parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             }
         ]
     },
     {
         id: "menus",
-        label: "Menus and navbar",
         entries: [
             {
                 key: "custom_settings_menu", storageKey: "custom_settings_menu", control: "toggle",
-                label: "Settings menu as tile grid",
-                description: "Replaces the Setup dropdown with a full-page grid of icon tiles, one per settings page.",
-                appliesTo: "Setup menu", previewId: "menu-tilegrid", parent: null,
+                appliesTo: "setup_menu", previewId: "menu-tilegrid", parent: null,
                 reloadOnDisable: true, status: "keep", scope: "user"
             },
             {
                 key: "navbar_icons", storageKey: "navbar_icons", control: "toggle",
-                label: "Navbar icons",
-                description: "Shows the small icon next to each navbar item's label. Hidden by default.",
-                appliesTo: "Navbar", previewId: "navbar-strip", parent: null,
+                appliesTo: "navbar", previewId: "navbar-strip", parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "navbar_icons_text", storageKey: "navbar_icons_text", control: "toggle",
-                label: "Icon-only navbar (hide text)",
-                description: "Hides each navbar item's text, leaving just its icon. Only applies while Navbar icons is also on.",
-                appliesTo: "Navbar", previewId: null, parent: "navbar_icons",
+                appliesTo: "navbar", previewId: null, parent: "navbar_icons",
                 reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "custom_page_menu", storageKey: "custom_page_menu", control: "toggle",
-                label: "Custom menu page",
-                description: "Adds an extra navbar item that loads a web page of your choosing in place of the usual Domoticz page.",
-                appliesTo: "Navbar + new page", previewId: null, parent: null,
+                appliesTo: "navbar_new_page", previewId: null, parent: null,
                 reloadOnDisable: true, status: "keep", scope: "house"
             },
             {
                 key: "button_name", storageKey: "button_name", control: "text",
-                label: "Custom page button name",
-                description: "Sets the label text on the custom menu page's navbar button. Only applies while Custom menu page is also on.",
-                appliesTo: "Navbar + new page", previewId: null, parent: "custom_page_menu",
+                appliesTo: "navbar_new_page", previewId: null, parent: "custom_page_menu",
                 reloadOnDisable: false, status: "keep", scope: "house"
             },
             {
                 key: "custom_url", storageKey: "custom_url", control: "text",
-                label: "Custom page URL",
-                description: "Sets the address the custom menu page loads. Only applies while Custom menu page is also on.",
-                appliesTo: "Navbar + new page", previewId: null, parent: "custom_page_menu",
+                appliesTo: "navbar_new_page", previewId: null, parent: "custom_page_menu",
                 reloadOnDisable: false, status: "keep", scope: "house"
             },
             {
                 key: "sidemenu", storageKey: "sidemenu", control: "toggle",
-                label: "Side menu on desktop",
-                description: "Switches desktop screens to the same collapsible side menu phones already use, replacing the horizontal navbar across the top.",
-                appliesTo: "Desktop layout", previewId: null, parent: null,
+                appliesTo: "desktop_layout", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             }
         ]
     },
     {
         id: "dashboard",
-        label: "Dashboard",
         entries: [
             {
                 key: "dashboard_show_last_update", storageKey: "dashboard_show_last_update", control: "toggle",
-                label: "Last-seen line on dashboard cards",
-                description: "Shows each device's last-updated time as a small line on its dashboard card.",
-                appliesTo: "Classic dashboard", previewId: "card-lastseen", parent: null,
+                appliesTo: "classic_dashboard", previewId: "card-lastseen", parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "dashboard_columns", storageKey: "dashboard_columns", control: "toggle",
-                label: "Column layout on wide screens",
-                description: "On screens 1200px and wider, arranges dashboard sections into side-by-side columns instead of stacking them full width.",
-                appliesTo: "Classic dashboard", previewId: "dash-columns", parent: null,
+                appliesTo: "classic_dashboard", previewId: "dash-columns", parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "dashboard_camera", storageKey: "dashboard_camera", control: "toggle",
-                label: "Camera previews on the dashboard",
-                description: "Adds live camera thumbnails to the dashboard, refreshed on an interval. Its own two settings below control where they appear and how often they refresh.",
-                appliesTo: "Classic dashboard", previewId: null, parent: null,
+                appliesTo: "classic_dashboard", previewId: null, parent: null,
                 reloadOnDisable: true, status: "keep", scope: "house"
             },
             {
                 key: "dashboard_camera_refresh", storageKey: "dashboard_camera_refresh", control: "number",
-                label: "Camera preview refresh (seconds)",
-                description: "Sets how many seconds pass between refreshes of each camera thumbnail. Only applies while Camera previews on the dashboard is also on.",
-                appliesTo: "Classic dashboard", previewId: null, parent: "dashboard_camera",
+                appliesTo: "classic_dashboard", previewId: null, parent: "dashboard_camera",
                 reloadOnDisable: false, status: "keep", scope: "house"
             },
             {
                 key: "dashboard_camera_section", storageKey: "dashboard_camera_section", control: "toggle",
-                label: "Dedicated cameras section",
-                description: "Groups every camera into its own \"Cameras\" section at the top of the dashboard; off, each camera's preview appears in place of that device's status text wherever it appears. Only applies while Camera previews on the dashboard is also on.",
-                appliesTo: "Classic dashboard", previewId: null, parent: "dashboard_camera",
+                appliesTo: "classic_dashboard", previewId: null, parent: "dashboard_camera",
                 reloadOnDisable: false, status: "keep", scope: "house"
             }
         ]
     },
     {
         id: "cards",
-        label: "Device cards",
         entries: [
             {
                 key: "time_ago", storageKey: "time_ago", control: "toggle",
-                label: "Relative times",
-                description: "Shows a device's last-updated time as a relative phrase like \"5 minutes ago\" instead of the raw date and time.",
-                appliesTo: "All device pages", previewId: null, parent: null,
+                appliesTo: "all_device_pages", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "fade_off_items", storageKey: "fade_off_items", control: "toggle",
-                label: "Dim off devices", description: "Dim cards of devices that are off",
-                appliesTo: "All device pages", previewId: "card-dim", parent: null,
+                appliesTo: "all_device_pages", previewId: "card-dim", parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "switch_instead_of_bigtext", storageKey: "switch_instead_of_bigtext", control: "toggle",
-                label: "Toggles instead of status text",
-                description: "Replaces the plain On/Off status text on a simple switch's card with a slider you can flip directly, without opening the device.",
-                appliesTo: "Device + scene cards", previewId: "card-toggle", parent: null,
+                appliesTo: "device_scene_cards", previewId: "card-toggle", parent: null,
                 reloadOnDisable: true, status: "keep", scope: "user"
             },
             {
                 key: "switch_instead_of_bigtext_scenes", storageKey: "switch_instead_of_bigtext_scenes", control: "toggle",
-                label: "Also toggles on scene cards",
-                description: "Extends the same slider toggle to Scene and Group cards. Only applies while Toggles instead of status text is also on.",
-                appliesTo: "Device + scene cards", previewId: null, parent: "switch_instead_of_bigtext",
+                appliesTo: "device_scene_cards", previewId: null, parent: "switch_instead_of_bigtext",
                 reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "wind_direction", storageKey: "wind_direction", control: "toggle",
-                label: "Wind arrow direction",
-                description: "Domoticz reports the direction wind comes FROM, and the arrow "
-                    + "normally points that way. Turn this on to point it the opposite way, "
-                    + "at where the wind is blowing TO. The compass label (N, SW) always "
-                    + "stays the reported one. Only affects the classic picture icons; with "
-                    + "Settings > Icon style set to glyphs the arrow is core's own and this "
-                    + "setting does nothing.",
-                appliesTo: "Wind device cards", previewId: null, parent: null,
+                appliesTo: "wind_device_cards", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "icon_image", storageKey: "icon_image", control: "toggle",
-                label: "Device photos instead of icons",
-                description: "Shows a custom photo as a device's card icon instead of its normal on/off icon. Set per device with the editor this reveals.",
-                appliesTo: "Device cards", previewId: null, parent: null,
+                appliesTo: "device_cards", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "card_min_width", storageKey: "card_min_width", control: "number",
-                label: "Card min width",
-                description: "Sets the narrowest a device card is allowed to shrink to, in pixels, before the grid wraps to fewer columns.",
-                appliesTo: "All card grids", previewId: "card-width", parent: null,
+                appliesTo: "all_card_grids", previewId: "card-width", parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "card_max_width", storageKey: "card_max_width", control: "number",
-                label: "Card max width",
-                description: "Sets the widest a device card is allowed to stretch to, in pixels, when there's spare room in the row.",
-                appliesTo: "All card grids", previewId: "card-width", parent: null,
+                appliesTo: "all_card_grids", previewId: "card-width", parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             }
         ]
     },
     {
         id: "charts",
-        label: "Charts and log",
         entries: [
             {
                 key: "log_plot_bands", storageKey: "log_plot_bands", control: "toggle",
-                label: "Range bands in log graphs",
-                description: "Draws the colored threshold bands from a device's Bar Ranges dialog onto its Log page chart, where Domoticz itself never draws them.",
-                appliesTo: "Device log charts", previewId: "chart-bands", parent: null,
+                appliesTo: "device_log_charts", previewId: "chart-bands", parent: null,
                 reloadOnDisable: true, status: "keep", scope: "user"
             }
         ]
     },
     {
         id: "background",
-        label: "Background and branding",
         entries: [
             {
                 key: "background_img", storageKey: "background_img", control: "text",
-                label: "Background image",
-                description: "Sets the image used as the page background. Give it a web address or the name of an image file in the theme's images folder; leave it empty for no background image.",
-                appliesTo: "Whole UI", previewId: null, parent: null,
+                appliesTo: "whole_ui", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "background_type", storageKey: "background_type", control: "select",
-                label: "Background type",
-                description: "Chooses how the background image is displayed: stretched to fill the screen (cover), or tiled at its original size as a pattern.",
-                appliesTo: "Whole UI", previewId: null, parent: null,
+                appliesTo: "whole_ui", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "logo", storageKey: "logo", control: "text",
-                label: "Custom logo",
-                description: "Sets an alternate image to use as the navbar logo, in place of Machinon's default. Give it the name of an image file in the theme's images folder.",
-                appliesTo: "Navbar", previewId: null, parent: null,
+                appliesTo: "navbar", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep", scope: "house"
             },
             {
                 key: "hide_logo", storageKey: "hide_logo", control: "toggle",
-                label: "Hide logo",
-                description: "Hides the navbar logo image entirely, leaving that space empty.",
-                appliesTo: "Navbar", previewId: null, parent: null,
+                appliesTo: "navbar", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep", scope: "house"
             }
         ]
     },
     {
         id: "colors",
-        label: "Colors and schemes",
         entries: [
             {
                 key: "scheme", storageKey: "scheme", control: "custom",
-                label: "Color scheme",
-                description: "Sets the theme's overall color scheme: a light or dark base, with named color palettes.",
-                appliesTo: "Whole UI", previewId: null, parent: null,
+                appliesTo: "whole_ui", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             },
             {
                 key: "custom_color_scheme", storageKey: "custom_color_scheme", control: "custom",
-                label: "Custom colors",
-                description: "Builds your own color scheme by picking 7 individual colors.",
-                appliesTo: "Whole UI", previewId: null, parent: null,
+                appliesTo: "whole_ui", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             }
             /* dark_theme has NO standalone toggle row here on purpose. It is a
@@ -440,7 +353,6 @@ var THEME_MANIFEST = [
     },
     {
         id: "iconpacks",
-        label: "Icons",
         /* Admin-only: installing a pack writes to the instance, which a
            non-admin session cannot do, so the whole group (tab AND section) is
            omitted from the hub for them rather than shown and left to fail.
@@ -448,14 +360,13 @@ var THEME_MANIFEST = [
            dropped rather than locked, and for the deep-link fallback. This is
            the only group carrying the flag today, but it is a flag rather than
            an id check so a second one costs one line here.
-           theme-manifest.js's own contract only requires id/label/entries[] per
+           theme-manifest.js's own contract only requires id/entries[] per
            group, so the extra property is inert to it. */
         adminOnly: true,
         entries: [
             {
                 key: "iconpacks", storageKey: null, control: "custom",
-                label: "Icon library", description: "Browse the icon library and install just the icons you want onto individual devices.",
-                appliesTo: "Device icons", previewId: null, parent: null,
+                appliesTo: "device_icons", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep", scope: null
             }
         ]
@@ -469,12 +380,10 @@ var THEME_MANIFEST = [
            Kept out of the coverage check the same way iconpacks is (null
            storageKey, control:"custom"). */
         id: "about",
-        label: "About",
         entries: [
             {
                 key: "about", storageKey: null, control: "custom",
-                label: "About Machinon", description: "Theme version, description, credits, links, and maintenance actions",
-                appliesTo: "Theme", previewId: null, parent: null,
+                appliesTo: "theme", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep", scope: null
             }
         ]
