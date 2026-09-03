@@ -45,21 +45,18 @@ var DZ_SEMANTIC_HUES = { error: 27.0, success: 145.0, warning: 75.0 };
    pick, and disabled is a de-emphasis colour with one right answer. */
 var DZ_LOOKS = {
     crisp: {
-        label: "Crisp", description: "White cards on a grey page, with edges you can see",
         anchor: 0.24, danchor: 0.90, nC: 0.002,
         light: [0.930, 0.945, 1.000], dark: [0.130, 0.200, 0.280],
         body: 8.0, alt: 5.0, acc: 4.5, semC: [0.08, 0.16],
         hardBorder: true, borderRatio: 2.4
     },
     soft: {
-        label: "Soft", description: "Tinted greys, cards barely off the page, whisper borders",
         anchor: 0.32, danchor: 0.84, nC: 0.022,
         light: [0.960, 0.985, 0.998], dark: [0.205, 0.240, 0.270],
         body: 7.0, alt: 4.6, acc: 4.5, semC: [0.08, 0.16],
         borderOffset: 0.055
     },
     deep: {
-        label: "Deep", description: "A rich tinted page with cards floating above it",
         anchor: 0.34, danchor: 0.82, nC: 0.055,
         light: [0.855, 0.900, 0.965], dark: [0.020, 0.070, 0.180],
         body: 7.0, alt: 4.6, acc: 5.5, semC: [0.10, 0.20],

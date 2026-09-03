@@ -224,15 +224,15 @@ function schemeContrastFailures(cs) {
     var fails = [];
     if (cs.main_text && cs.background) {
         var body = contrastRatio(cs.main_text, cs.background);
-        if (body < 4.5) { fails.push("text on background " + body.toFixed(1) + ":1 (WCAG AA needs 4.5)"); }
+        if (body < 4.5) { fails.push(dzT("hub.schemes.wcag_body", { ratio: body.toFixed(1) })); }
     }
     if (cs.alt_text && cs.background) {
         var alt = contrastRatio(cs.alt_text, cs.background);
-        if (alt < 4.5) { fails.push("secondary text " + alt.toFixed(1) + ":1 (WCAG AA needs 4.5)"); }
+        if (alt < 4.5) { fails.push(dzT("hub.schemes.wcag_alt", { ratio: alt.toFixed(1) })); }
     }
     if (cs.main_color) {
         var onAcc = contrastRatio(cs.accent_text || "#ffffff", cs.main_color);
-        if (onAcc < 3.0) { fails.push("text on accent " + onAcc.toFixed(1) + ":1 (needs 3.0)"); }
+        if (onAcc < 3.0) { fails.push(dzT("hub.schemes.wcag_accent", { ratio: onAcc.toFixed(1) })); }
     }
     return fails;
 }
@@ -285,7 +285,7 @@ function saveCurrentColorsAsScheme(name) {
     cacheThemeSettings();
     persistSchemeChoice();
     renderSchemePicker();
-    warnIfContrastFails(theme.color_scheme, 'Preset "' + name + '" saved, but it');
+    warnIfContrastFails(theme.color_scheme, dzT("hub.schemes.wcag_what_preset", { name: name }));
 }
 
 /* Deleting one half of a generated pair deletes both: the two cards are one
@@ -487,7 +487,7 @@ function renderSchemePicker() {
            each other; legacy unpaired presets keep their bare name and slug. */
         (theme.user_schemes || []).forEach(function(p) {
             var slug = p.variant ? "user:" + p.name + "|" + p.variant : "user:" + p.name;
-            var label = p.variant ? p.name + " " + (p.variant === "dark" ? "Dark" : "Light") : p.name;
+            var label = p.variant ? p.name + " " + (p.variant === "dark" ? dzT("hub.schemes.dark") : dzT("hub.schemes.light")) : p.name;
             cards.push({ slug: slug, name: label, pair: p.pair, variant: p.variant,
                          presetName: p.name, deletable: true, colors: p.colors || {} });
         });

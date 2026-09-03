@@ -16,6 +16,7 @@ language = {
   hub: {
     loading: "Loading..",
     house_managed: "House setting, managed by an admin",
+    house_badge: "house",
     reload_note: "Takes effect after reload",
     reload_now: "Reload now",
     groups: {
@@ -288,17 +289,38 @@ language = {
       },
       delete_preset: "Delete preset",
       wheel_aria: "Pick {label} with a colour wheel",
-      save_preset: "Save as preset"
+      hex_aria: "{label} hex value",
+      save_preset: "Save as preset",
+      preset_name_prompt: "Preset name",
+      light: "Light",
+      dark: "Dark",
+      wcag_what_preset: "Preset \"{name}\" saved, but it",
+      wcag_what_custom: "The custom colour scheme",
+      wcag_body: "text on background {ratio}:1 (WCAG AA needs 4.5)",
+      wcag_alt: "secondary text {ratio}:1 (WCAG AA needs 4.5)",
+      wcag_accent: "text on accent {ratio}:1 (needs 3.0)"
     },
     wizard: {
       aria: "Create a theme",
       title: "Create a theme",
       cancel: "Cancel",
       back: "Back",
+      next: "Next",
       apply: "Apply",
+      save_theme: "Save theme",
+      steps: {
+        colours: "Colours",
+        look: "Look",
+        name: "Name"
+      },
       name_label: "Theme name",
       name_placeholder: "My theme",
       tint_toggle: "Tint the greys with a different colour",
+      accent_label: "Main colour",
+      surface_label: "Grey tint",
+      light: "Light",
+      dark: "Dark",
+      drift_label: "Your colour was adjusted to stay readable:",
       saved_lead: "Saved as two schemes, “{name} Light” and “{name} Dark”.",
       preview: {
         device: "Living Room",

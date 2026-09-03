@@ -82,7 +82,7 @@ function dzWizardRender() {
     close.addEventListener("click", dzCloseThemeWizard);
 
     var steps = dzWizardEl("div", "dz-wizard-steps", head);
-    ["Colours", "Look", "Name"].forEach(function (label, i) {
+    [dzT("hub.wizard.steps.colours"), dzT("hub.wizard.steps.look"), dzT("hub.wizard.steps.name")].forEach(function (label, i) {
         var stepEl = dzWizardEl("span", "dz-wizard-step", steps);
         if (i + 1 === DZ_WIZARD.step) {
             stepEl.className += " is-current";
@@ -113,7 +113,7 @@ function dzWizardRender() {
     }
     var next = dzWizardEl("button", "btn btn-primary dz-wizard-next", foot); // Filled primary
     next.type = "button";
-    next.textContent = DZ_WIZARD.step === 3 ? "Save theme" : "Next";
+    next.textContent = DZ_WIZARD.step === 3 ? dzT("hub.wizard.save_theme") : dzT("hub.wizard.next");
     next.addEventListener("click", function () {
         if (DZ_WIZARD.step < 3) { DZ_WIZARD.step += 1; dzWizardRender(); }
         else { dzWizardSave(); }
@@ -210,8 +210,8 @@ function dzWizardCurrentPair() {
 
 function dzWizardPreviewRow(host, pair) {
     var row = dzWizardEl("div", "dz-wizard-previews", host);
-    row.appendChild(dzWizardMockup(pair.light, "Light"));
-    row.appendChild(dzWizardMockup(pair.dark, "Dark"));
+    row.appendChild(dzWizardMockup(pair.light, dzT("hub.wizard.light")));
+    row.appendChild(dzWizardMockup(pair.dark, dzT("hub.wizard.dark")));
 }
 
 /* Repaint the step-1 preview miniatures in place, WITHOUT touching the
@@ -233,8 +233,8 @@ function dzWizardRefreshPreviews(host) {
     if (!row) { return; }
     row.textContent = "";
     var pair = dzWizardCurrentPair();
-    row.appendChild(dzWizardMockup(pair.light, "Light"));
-    row.appendChild(dzWizardMockup(pair.dark, "Dark"));
+    row.appendChild(dzWizardMockup(pair.light, dzT("hub.wizard.light")));
+    row.appendChild(dzWizardMockup(pair.dark, dzT("hub.wizard.dark")));
 }
 
 function dzWizardStepColours(host) {
@@ -248,7 +248,7 @@ function dzWizardStepColours(host) {
     /* Both swatches update ONLY the preview row, not dzWizardRender() - see
        the comment on dzWizardRefreshPreviews for why a full re-render here
        would fight the native colour picker mid-drag. */
-    swatches.appendChild(dzWizardSwatch("Main colour", DZ_WIZARD.accent, function (value) {
+    swatches.appendChild(dzWizardSwatch(dzT("hub.wizard.accent_label"), DZ_WIZARD.accent, function (value) {
         /* DZ_WIZARD can go null between this callback being wired and it
            firing: pressing Escape while dragging the wheel closes the
            dialog (dzCloseThemeWizard nulls DZ_WIZARD) but the drag's
@@ -261,7 +261,7 @@ function dzWizardStepColours(host) {
         dzWizardRefreshPreviews(host);
     }, swatches));
     if (DZ_WIZARD.surface !== null) {
-        swatches.appendChild(dzWizardSwatch("Grey tint", DZ_WIZARD.surface, function (value) {
+        swatches.appendChild(dzWizardSwatch(dzT("hub.wizard.surface_label"), DZ_WIZARD.surface, function (value) {
             if (!DZ_WIZARD) { return; } // see the same guard above
             DZ_WIZARD.surface = value;
             dzWizardRefreshPreviews(host);
@@ -319,9 +319,8 @@ function dzWizardAccentDrift(host, pair) {
     var darkDrift = pair.dark.main_color.toUpperCase() !== DZ_WIZARD.accent.toUpperCase();
     if (!lightDrift && !darkDrift) { return; }
     var wrap = dzWizardEl("div", "dz-wizard-drift", host);
-    dzWizardEl("span", "dz-wizard-drift-label", wrap).textContent =
-        "Your colour was adjusted to stay readable:";
-    [["Light", pair.light.main_color], ["Dark", pair.dark.main_color]].forEach(function (row) {
+    dzWizardEl("span", "dz-wizard-drift-label", wrap).textContent = dzT("hub.wizard.drift_label");
+    [[dzT("hub.wizard.light"), pair.light.main_color], [dzT("hub.wizard.dark"), pair.dark.main_color]].forEach(function (row) {
         var line = dzWizardEl("span", "dz-wizard-drift-row", wrap);
         var from = dzWizardEl("span", "dz-wizard-drift-chip", line);
         from.style.background = DZ_WIZARD.accent;

@@ -1360,7 +1360,7 @@ function dzColorFieldOpen(field) {
     hex.className = "dz-color-field-hex";
     hex.maxLength = 7;
     hex.autocomplete = "off";
-    hex.setAttribute("aria-label", field.label + " hex value");
+    hex.setAttribute("aria-label", dzT("hub.schemes.hex_aria", { label: field.label }));
     readout.appendChild(swatch);
     readout.appendChild(hex);
     panel.appendChild(readout);
@@ -1509,7 +1509,7 @@ function dzHubCustomColorsMount(entry) {
     saveBtn.textContent = dzT("hub.schemes.save_preset");
     saveBtn.addEventListener("click", function () {
         if (typeof bootbox === "undefined" || typeof saveCurrentColorsAsScheme !== "function") return;
-        bootbox.prompt("Preset name", function (name) {
+        bootbox.prompt(dzT("hub.schemes.preset_name_prompt"), function (name) {
             if (name) { saveCurrentColorsAsScheme(name); } // schemes.js: persists + re-renders every registered picker mount
         });
     });
@@ -1538,7 +1538,7 @@ function dzHubBuildColorSwatch(field, anchor) {
         dzHubPersist();
         // schemes.js warnIfContrastFails: the same WCAG gate the deleted
         // legacy Save handler ran, preserved.
-        warnIfContrastFails(theme.color_scheme, "The custom colour scheme");
+        warnIfContrastFails(theme.color_scheme, dzT("hub.schemes.wcag_what_custom"));
     }, {
         inputId: DZ_HUB_COLOR_INPUT_PREFIX + field.suffix,
         dataColorKey: field.suffix,
@@ -1640,7 +1640,7 @@ function dzRenderHubRow(entry) {
         var houseChip = document.createElement("span");
         houseChip.className = "dz-hub-chip-house";
         houseChip.title = dzT("hub.house_managed");
-        houseChip.textContent = "house";
+        houseChip.textContent = dzT("hub.house_badge");
         labelLine.appendChild(houseChip);
         if (!dzSettingsMode().admin) {
             row.classList.add("dz-hub-row-locked");
