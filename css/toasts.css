@@ -144,6 +144,17 @@
     margin-top: var(--dz-card-space-2xs);
 }
 
+/* A merged device-warning toast (src/js/toasts.js dzToastRenderBodyLines)
+   renders one device per line as plain block-level divs, not a comma-joined
+   sentence or a <ul>: device names contain dashes and brackets, which makes
+   a comma an ambiguous separator, and a list would carry a bullet glyph this
+   surface never uses elsewhere. Block layout alone gives the line break; the
+   small top margin on every line after the first keeps a five-line list
+   readable instead of stacking flush against itself. */
+.dz-toast-body-line + .dz-toast-body-line {
+    margin-top: var(--dz-card-space-2xs);
+}
+
 .dz-toast-action-row {
     margin-top: var(--dz-card-space-xs);
 }

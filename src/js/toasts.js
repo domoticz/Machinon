@@ -22,7 +22,7 @@ var DZ_TOAST_ERROR_MS = 6000;
 var DZ_TOAST_GROUP_CAP_MS = 8000;
 var DZ_TOAST_COALESCE_MS = 1200;
 var DZ_TOAST_LOG_MAX = 50;
-var DZ_TOAST_NAME_CAP = 3;
+var DZ_TOAST_NAME_CAP = 5;
 
 /* Default glyph by severity, used when an event carries no explicit ev.icon.
    Ionicons is loaded unconditionally (custom.css imports css/ionicons.min.css),
@@ -132,17 +132,26 @@ function dzWarnPrune(store, now) {
     });
 }
 
+/* Returns one LINE per device, never a comma-joined sentence: device names
+   come from hardware and plugins and freely contain dashes, brackets and
+   other punctuation ("Woonkamer - Screen Links [kWh]"), which makes a comma
+   an ambiguous separator. Capped at DZ_TOAST_NAME_CAP names; anything past
+   that collapses into one trailing "and N more" line instead of growing the
+   toast without bound. */
 function dzToastSummary(names, total) {
     var shown = names.slice(0, DZ_TOAST_NAME_CAP);
     var rest = total - shown.length;
-    if (rest <= 0) return shown.join(", ");
-    /* Localised, like every other group title in this file (see devices.js's
-       groupTitle functions). Guarded the same way the close button's aria-label
-       guards $.t: this keeps dzToastSummary callable from the node:vm policy
-       test, which loads no lang file. */
-    var and = (typeof language !== "undefined" && language.toast_and) || "and";
-    var more = (typeof language !== "undefined" && language.toast_more) || "more";
-    return shown.join(", ") + " " + and + " " + rest + " " + more;
+    var lines = shown.slice();
+    if (rest > 0) {
+        /* Localised, like every other group title in this file (see devices.js's
+           groupTitle functions). Guarded the same way the close button's aria-label
+           guards $.t: this keeps dzToastSummary callable from the node:vm policy
+           test, which loads no lang file. */
+        var and = (typeof language !== "undefined" && language.toast_and) || "and";
+        var more = (typeof language !== "undefined" && language.toast_more) || "more";
+        lines.push(and + " " + rest + " " + more);
+    }
+    return lines;
 }
 
 /* Grouping may only ever RAISE a short deadline to the cap. It never shortens a
@@ -192,6 +201,22 @@ function dzToastLine(cls, text) {
     el.className = cls;
     el.appendChild(document.createTextNode(text));
     return el;
+}
+
+/* Renders a merged-toast body as one line per device, replacing whatever the
+   container currently holds. Text nodes only, same as dzToastLine and for
+   the same reason: device names are untrusted (hardware, plugins), so each
+   line is its own escaped text node rather than a comma-joined string or,
+   worse, innerHTML with a <br> separator. Plain <div>s give the line break
+   for free via block layout, with no list markup and so no bullet glyph.
+   container.textContent = "" also clears any existing child elements, not
+   just text, so this is safe to call on a body div that already holds
+   lines from a previous merge. */
+function dzToastRenderBodyLines(container, lines) {
+    container.textContent = "";
+    lines.forEach(function(line) {
+        container.appendChild(dzToastLine("dz-toast-body-line", line));
+    });
 }
 
 /* Accepts an href ONLY when it parses as an absolute http or https URL.
@@ -248,7 +273,19 @@ function dzToastBuild(ev) {
     var content = document.createElement("div");
     content.className = "dz-toast-content";
     content.appendChild(dzToastLine("dz-toast-title", ev.title || ""));
-    if (ev.body) content.appendChild(dzToastLine("dz-toast-body", ev.body));
+    /* ev.bodyLines is set instead of ev.body once a device-warning group has
+       merged past one device (dzToastQueueMerge, below): a queued entry
+       carries no DOM until dzToastDrain shows it, so the line-per-device
+       body has to be expressible on the plain event object, not only built
+       against a live element the way dzToastMerge builds it. */
+    if (ev.bodyLines && ev.bodyLines.length) {
+        var body = document.createElement("div");
+        body.className = "dz-toast-body";
+        dzToastRenderBodyLines(body, ev.bodyLines);
+        content.appendChild(body);
+    } else if (ev.body) {
+        content.appendChild(dzToastLine("dz-toast-body", ev.body));
+    }
     if (ev.action) content.appendChild(dzToastBuildAction(ev.action));
     el.appendChild(content);
 
@@ -359,10 +396,11 @@ function dzToastMerge(rec, ev) {
     var body = rec.el.querySelector(".dz-toast-body");
     title.textContent = ev.groupTitle ? ev.groupTitle(rec.total) : rec.total + " devices";
     if (!body) {
-        body = dzToastLine("dz-toast-body", "");
+        body = document.createElement("div");
+        body.className = "dz-toast-body";
         rec.el.querySelector(".dz-toast-content").appendChild(body);
     }
-    body.textContent = dzToastSummary(rec.names, rec.total);
+    dzToastRenderBodyLines(body, dzToastSummary(rec.names, rec.total));
     /* One-way extension only. See dzToastDeadline. Stop/start the timer, not
        pause/resume: a merge recomputing the deadline must never flip
        rec.paused, or it would silently resume a toast the user is currently
@@ -387,7 +425,11 @@ function dzToastQueueMerge(entry, ev) {
     if (ev.deviceName) entry.names.push(ev.deviceName);
     entry.total += 1;
     entry.ev.title = ev.groupTitle ? ev.groupTitle(entry.total) : entry.total + " devices";
-    entry.ev.body = dzToastSummary(entry.names, entry.total);
+    /* bodyLines, not body: see the comment on ev.bodyLines in dzToastBuild.
+       The single-device body string this entry queued with is now stale and
+       must not coexist with the line list dzToastBuild would otherwise skip. */
+    entry.ev.bodyLines = dzToastSummary(entry.names, entry.total);
+    delete entry.ev.body;
     if (!entry.extended) {
         var want = dzToastDeadline(entry.ev.timeout, true);
         if (want !== false) {

@@ -2082,6 +2082,14 @@ Glyph, an explicit per-event `icon` overriding a severity default:
 "Living Room Humidity"), not the device name first. Core's own messages, which have no subject to
 split out, keep the message as the title.
 
+**Merged body (multi-device).** When several same-group warnings coalesce (dzToastMerge /
+dzToastQueueMerge, `src/js/toasts.js`), the body renders one device per line, not a
+comma-joined sentence: device names come from hardware and plugins and freely contain dashes
+and brackets ("Woonkamer - Screen Links [kWh]"), which makes a comma an ambiguous separator.
+Plain block-level `.dz-toast-body-line` divs give the line break, never a `<ul>`, so the list
+carries no bullet glyph. Capped at `DZ_TOAST_NAME_CAP` (5) devices; anything past that
+collapses into one trailing "and N more" line instead of growing the toast without bound.
+
 **Placement.** `--dz-toast-top` clears the fixed HEADER chrome, not any individual toast's own
 height (a taller toast cannot change it): desktop `128px` (navbar bottom `118px` +
 `--dz-card-space-lg`); mobile `35px` (collapsed `.menu-toggle` bottom `25px` + the same 10px).

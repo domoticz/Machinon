@@ -4,6 +4,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+- When several sensors warn at once, the combined message now lists each device on its own line instead of one long comma-separated sentence.
+
 ## [2.4.0] - 2026-09-02
 
 - Every setting in the Theme Hub had its name and explanation reviewed and rewritten for clarity; what each setting does is unchanged.

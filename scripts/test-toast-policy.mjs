@@ -160,12 +160,20 @@ test("a null key is never suppressed", () => {
     assert.equal(dz.dzToastShouldSuppress(s, null), false);
 });
 
-test("the group summary names up to three devices then counts the rest", () => {
-    assert.equal(dz.dzToastSummary(["Hall"], 1), "Hall");
-    assert.equal(dz.dzToastSummary(["Hall", "Garage"], 2), "Hall, Garage");
-    assert.equal(dz.dzToastSummary(["Hall", "Garage", "Attic"], 3), "Hall, Garage, Attic");
-    assert.equal(dz.dzToastSummary(["Hall", "Garage", "Attic"], 7),
-                 "Hall, Garage, Attic and 4 more");
+test("the group summary is one line per device, up to five, then an 'and N more' line", () => {
+    // One line per device, never a comma-joined sentence: device names carry
+    // dashes and brackets ("Woonkamer - Screen Links [kWh]"), which makes a
+    // comma an ambiguous separator.
+    assert.deepEqual(dz.dzToastSummary(["Hall"], 1), ["Hall"]);
+    assert.deepEqual(dz.dzToastSummary(["Hall", "Garage"], 2), ["Hall", "Garage"]);
+    assert.deepEqual(
+        dz.dzToastSummary(["Hall", "Garage", "Attic", "Loft", "Shed"], 5),
+        ["Hall", "Garage", "Attic", "Loft", "Shed"]
+    );
+    assert.deepEqual(
+        dz.dzToastSummary(["Hall", "Garage", "Attic", "Loft", "Shed"], 8),
+        ["Hall", "Garage", "Attic", "Loft", "Shed", "and 3 more"]
+    );
 });
 
 test("a grouped deadline extends once to the cap and never past it", () => {
@@ -328,6 +336,13 @@ test("a queued group leader keeps coalescing later arrivals instead of fanning o
     assert.equal(shown.group, "device-warning-timeout");
     assert.equal(shown.total, 12, "every merged arrival survived the queue, not just the first");
     assert.equal(shown.el.querySelector(".dz-toast-title").textContent, groupTitle(12));
+
+    // The body renders one device per line (capped at five), never a
+    // comma-joined sentence, even for a leader that merged entirely while
+    // still queued (dzToastQueueMerge, not dzToastMerge).
+    const body = shown.el.querySelector(".dz-toast-body");
+    const lines = body.children.map((c) => c.textContent);
+    assert.deepEqual(lines, ["Hall", "Garage", "Attic", "Shed", "Loft", "and 7 more"]);
 });
 
 test("pausing a coalescing toast survives a group merge; the timer stays off until real resume", () => {
