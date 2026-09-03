@@ -7,10 +7,9 @@
 #       declares (DESIGN.md > Buttons > States: color-mix(<bg> 90%, black) off
 #       the SAME --dz-btn-*-bg token). Rule (a)'s token-only test cannot see
 #       this: var(--dz-btn-primary-bg) on a danger button is a perfectly good
-#       token, just the wrong one. Scanned repo-wide, because button rules
-#       live outside css/buttons.css too - the case that prompted this rule
-#       (the Setup "Apply Settings" pill turning accent-blue under the
-#       pointer, 2026-09-03) sat in css/nav.css, outside rule (a) entirely.
+#       token, just the wrong one. Scanned repo-wide, because button rules live
+#       outside css/buttons.css too (the Setup "Apply Settings" pill is styled
+#       in css/nav.css, which rule (a) never reads).
 # See DESIGN.md Buttons and the 2026-07-17 button redesign spec.
 # Exit 0 clean, 1 violations.
 set -u

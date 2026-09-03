@@ -42,16 +42,13 @@
     white-space: nowrap;
 }
 
-/* Same right edge as the Dynamic Dashboard's timestamp (issue #211, extended to
-   this surface): the 50px cards.css reserves on #lastupdate clears the classic
-   device pages' bottom-right Log/Timers buttons, and a dashboard card renders no
-   .timers_log cell at all (measured at 1600: all three probe points 10/25/40px in
-   from the card edge hit the timestamp cell itself, and every one of the 26 cards
-   with last-seen on stopped its ink at 55px while #status stopped at 25px and
-   #bigtext at 30px). #dashcontent scopes this to the three dashboard views that
-   use that container; the device pages keep the reservation they need.
-   Replaces a dead `right: 20px; bottom: 15px` pair here: this cell is a grid item
-   and has been position: static since the card grid landed, so both were inert. */
+/* Dashboard cards render no .timers_log cell, so the 50px cards.css reserves on
+   #lastupdate for the device pages' Log/Timers controls is empty space here;
+   20px puts the timestamp ink at 25px, the edge #status already uses. Scoped to
+   #dashcontent, which core uses for the dashboard views only, so the device
+   pages keep the reservation they need.
+   Geometry only: this cell is a grid item with position: static, so offsets
+   (right/bottom) do nothing to it. */
 #dashcontent #lastupdate {
     padding-right: var(--dz-card-space-2xl);
 }

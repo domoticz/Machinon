@@ -1039,17 +1039,17 @@ it unchanged; a hover that leaves the fill alone is legal, since it inherits the
 cannot see this class of defect, because the wrong token is still a token. The scope is every tracked
 `*.css` except the token-definition files (`dz-tokens.css`, `dark.css`) and vendored
 `css/ionicons.min.css`, derived from git rather than a glob so a new stylesheet cannot dodge it;
-button rules live outside `css/buttons.css` (the Setup "Apply Settings" pill is in `css/nav.css`),
-and that is exactly where the rule was earned. A rule tagged `dz-btn-exempt` is skipped whole.
+button rules live outside `css/buttons.css` too, the Setup "Apply Settings" pill being one.
+A rule tagged `dz-btn-exempt` is skipped whole.
 
 Both gate `scripts/build-release.sh` (run in CI by `validate.yml`) alongside `check-typography.sh`: a
 release cannot ship with a raw radius/shadow/padding value in `css/buttons.css`, or with a filled
 button that changes family under the pointer.
 
 **Constraint.** Rule (b) reads the theme's own CSS text, so it cannot see a hover state that core's
-stylesheets repaint at higher specificity. The same 2026-09-03 defect also had core's
-`css/style.css` painting a red border on that button's hover, which no static scan of this repo
-could have caught; only a computed rest-vs-hover measurement against a running Domoticz can.
+stylesheets repaint at higher specificity: `css/style.css` styles the "Apply Settings" hover border
+itself, for instance. Catching that class of defect needs a computed rest-vs-hover measurement
+against a running Domoticz, not a static scan of this repo.
 
 ### Bootstrap 2 Constraint
 

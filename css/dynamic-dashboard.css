@@ -154,13 +154,11 @@
 }
 
 /* Keep the last-seen row inside the card instead of overflowing the bottom edge.
-   padding-right drops to the card's own 20px right edge, off the 50px
-   cards.css reserves: that reservation clears the classic device pages'
-   bottom-right Log/Timers buttons (measured at 1600 on #/LightSwitches and
-   #/Temperature, where that strip hit-tests to td.timers_log and a.btnsmall),
-   and a Dynamic Dashboard widget renders neither cell. Here the 30px surplus
-   was empty, leaving the timestamp 51px inside a card whose #bigtext and
-   #status ink both stop at 20px (issue #211). */
+   padding-right is the card's own 20px right edge, not the 50px cards.css sets:
+   that 50px reserves the strip the device pages' bottom-right Log/Timers
+   controls occupy (td.timers_log, a.btnsmall), and a widget card renders
+   neither cell, so 20px puts the timestamp on the same edge as #bigtext and
+   #status. */
 .dd-widget-body .item table[id^="item"] > tbody > tr td#lastupdate {
     overflow: hidden;
     white-space: nowrap;

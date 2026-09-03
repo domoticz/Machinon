@@ -232,10 +232,10 @@ a.btnstyle {
     background-color: color-mix(in srgb, var(--dz-btn-primary-bg) 90%, black) !important;
 }
 
-/* Split off .btn-primary:hover, which it used to share: .btn-info rests on
-   --dz-btn-info-bg, so mixing its hover from --dz-btn-primary-bg left the
-   variant hovering out of its own family. Inert while both tokens alias
-   --dz-accent-color, wrong the moment info diverges from primary. */
+/* Its own rule, not shared with .btn-primary:hover: .btn-info rests on
+   --dz-btn-info-bg and its hover has to mix from that same token. The two
+   tokens both alias --dz-accent-color today, so the difference only shows if
+   info ever diverges from primary. */
 .btn-info:hover {
     background-color: color-mix(in srgb, var(--dz-btn-info-bg) 90%, black) !important;
 }
