@@ -360,7 +360,7 @@ var THEME_MANIFEST = [
            dropped rather than locked, and for the deep-link fallback. This is
            the only group carrying the flag today, but it is a flag rather than
            an id check so a second one costs one line here.
-           theme-manifest.js's own contract only requires id/label/entries[] per
+           theme-manifest.js's own contract only requires id/entries[] per
            group, so the extra property is inert to it. */
         adminOnly: true,
         entries: [

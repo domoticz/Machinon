@@ -1802,7 +1802,7 @@ function dzHubFailClosed(entry, message) {
 var dzHubNoIdentityLocked = false;
 
 function dzHubApplyNoIdentityLock() {
-    dzHubLockAllRows("This session cannot store settings (application token).");
+    dzHubLockAllRows(dzT("hub.locked_token"));
 }
 
 /* Lock every row and explain why, once. Two callers, and the reason text is the
@@ -1847,7 +1847,7 @@ function dzHubLockAllRows(reason) {
 function dzHubApplyLegacyReadOnlyLock() {
     var mode = dzSettingsMode();
     if (mode.api || mode.admin) return;
-    dzHubLockAllRows("Your account cannot change theme settings on this Domoticz version. Ask an administrator, or ask them to update Domoticz.");
+    dzHubLockAllRows(dzT("hub.locked_version"));
 }
 
 /* Every hub write funnels through here (instead of calling
@@ -1878,7 +1878,7 @@ function dzApplyHubSetting(entry, value) {
     if (entry.control === "toggle") {
         // FAIL CLOSED: a toggle whose feature object is absent has no applier path.
         if (!theme.features || !Object.prototype.hasOwnProperty.call(theme.features, key)) {
-            dzHubFailClosed(entry, "Setting unavailable (no feature backing).");
+            dzHubFailClosed(entry, dzT("hub.no_backing"));
             return;
         }
         var feature = theme.features[key];

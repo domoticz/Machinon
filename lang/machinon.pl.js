@@ -17,6 +17,9 @@ language = {
     house_badge: "dom",
     reload_note: "Działa po ponownym wczytaniu",
     reload_now: "Wczytaj ponownie",
+    locked_token: "Ta sesja nie może zapisywać ustawień (token aplikacji).",
+    locked_version: "Twoje konto nie może zmieniać ustawień motywu w tej wersji Domoticz. Poproś administratora lub poproś go o aktualizację Domoticz.",
+    no_backing: "Ustawienie niedostępne (brak powiązanej funkcji).",
     groups: {
       // "Generalne" matches core Domoticz pl; do not "fix" it to "Ogolne"/"Ogolny".
       general: "Generalne",
@@ -196,6 +199,8 @@ language = {
       update_available: "Dostępna aktualizacja: zainstaluj ponownie",
       not_installed: "Niezainstalowana",
       remove: "Usuń",
+      remove_confirm_used: "Usunąć „{name}”? Używana przez: {users}. Te urządzenia wrócą do domyślnej ikony.",
+      remove_confirm: "Usunąć „{name}” z bazy ikon?",
       counter: "{count} z {total} zainstalowanych",
       install_all: "Zainstaluj / zaktualizuj wszystkie",
       install_shown: "Zainstaluj / zaktualizuj wyświetlone ({count})"

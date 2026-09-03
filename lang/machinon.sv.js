@@ -17,6 +17,9 @@ language = {
     house_badge: "hus",
     reload_note: "Träder i kraft efter omladdning",
     reload_now: "Ladda om nu",
+    locked_token: "Den här sessionen kan inte spara inställningar (applikationstoken).",
+    locked_version: "Ditt konto kan inte ändra temainställningar i den här versionen av Domoticz. Fråga en administratör, eller be dem uppdatera Domoticz.",
+    no_backing: "Inställningen är inte tillgänglig (ingen tillhörande funktion).",
     groups: {
       // "Generella" matches core Domoticz sv; do not "fix" it to "Allmänt".
       general: "Generella",
@@ -196,6 +199,8 @@ language = {
       update_available: "Uppdatering tillgänglig: installera om",
       not_installed: "Inte installerad",
       remove: "Ta bort",
+      remove_confirm_used: "Ta bort ”{name}”? Används av: {users}. De här enheterna återgår till sin standardikon.",
+      remove_confirm: "Ta bort ”{name}” från ikondatabasen?",
       counter: "{count} av {total} installerade",
       install_all: "Installera / uppdatera alla",
       install_shown: "Installera / uppdatera visade ({count})"

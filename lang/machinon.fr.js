@@ -17,6 +17,9 @@ language = {
     house_badge: "maison",
     reload_note: "Prend effet après rechargement",
     reload_now: "Recharger maintenant",
+    locked_token: "Cette session ne peut pas enregistrer les réglages (jeton d'application).",
+    locked_version: "Votre compte ne peut pas modifier les réglages de thème sur cette version de Domoticz. Demandez à un administrateur, ou demandez-lui de mettre à jour Domoticz.",
+    no_backing: "Réglage indisponible (aucune fonctionnalité associée).",
     groups: {
       general: "Général",
       menus: "Menus et barre de navigation",
@@ -195,6 +198,8 @@ language = {
       update_available: "Mise à jour disponible: réinstaller",
       not_installed: "Non installée",
       remove: "Supprimer",
+      remove_confirm_used: "Supprimer « {name} » ? Utilisée par: {users}. Ces dispositifs reviendront à leur icône par défaut.",
+      remove_confirm: "Supprimer « {name} » de la base de données des icônes ?",
       counter: "{count} sur {total} installées",
       install_all: "Tout installer / mettre à jour",
       install_shown: "Installer / mettre à jour les icônes affichées ({count})"

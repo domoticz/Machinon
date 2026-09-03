@@ -20,6 +20,9 @@ language = {
     house_badge: "huis",
     reload_note: "Wordt actief na opnieuw laden",
     reload_now: "Nu opnieuw laden",
+    locked_token: "Deze sessie kan geen instellingen opslaan (applicatietoken).",
+    locked_version: "Je account kan de thema-instellingen in deze Domoticz-versie niet wijzigen. Vraag het een beheerder, of vraag hen om Domoticz bij te werken.",
+    no_backing: "Instelling niet beschikbaar (geen bijbehorende functie).",
     groups: {
       general: "Algemeen",
       menus: "Menu's en navigatiebalk",
@@ -198,6 +201,8 @@ language = {
       update_available: "Update beschikbaar: opnieuw installeren",
       not_installed: "Niet geïnstalleerd",
       remove: "Verwijderen",
+      remove_confirm_used: "“{name}” verwijderen? Gebruikt door: {users}. Deze apparaten krijgen hun standaardicoon terug.",
+      remove_confirm: "“{name}” uit de iconendatabase verwijderen?",
       counter: "{count} van {total} geïnstalleerd",
       install_all: "Alles installeren / bijwerken",
       install_shown: "Getoonde installeren / bijwerken ({count})"

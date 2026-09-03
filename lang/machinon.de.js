@@ -17,6 +17,9 @@ language = {
     house_badge: "Haus",
     reload_note: "Wirkt nach dem Neuladen",
     reload_now: "Jetzt neu laden",
+    locked_token: "Diese Sitzung kann keine Einstellungen speichern (Anwendungstoken).",
+    locked_version: "Dein Konto kann die Design-Einstellungen in dieser Domoticz-Version nicht ändern. Frage einen Administrator oder bitte ihn, Domoticz zu aktualisieren.",
+    no_backing: "Einstellung nicht verfügbar (keine zugehörige Funktion).",
     groups: {
       general: "Allgemein",
       menus: "Menüs und Navigationsleiste",
@@ -195,6 +198,8 @@ language = {
       update_available: "Update verfügbar: neu installieren",
       not_installed: "Nicht installiert",
       remove: "Entfernen",
+      remove_confirm_used: "„{name}“ entfernen? Verwendet von: {users}. Diese Geräte erhalten wieder ihr Standardsymbol.",
+      remove_confirm: "„{name}“ aus der Symboldatenbank entfernen?",
       counter: "{count} von {total} installiert",
       install_all: "Alle installieren / aktualisieren",
       install_shown: "Angezeigte installieren / aktualisieren ({count})"

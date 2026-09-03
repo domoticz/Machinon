@@ -19,6 +19,9 @@ language = {
     house_badge: "house",
     reload_note: "Takes effect after reload",
     reload_now: "Reload now",
+    locked_token: "This session cannot store settings (application token).",
+    locked_version: "Your account cannot change theme settings on this Domoticz version. Ask an administrator, or ask them to update Domoticz.",
+    no_backing: "Setting unavailable (no feature backing).",
     groups: {
       general: "General",
       menus: "Menus and navbar",
@@ -197,6 +200,8 @@ language = {
       update_available: "Update available: reinstall",
       not_installed: "Not installed",
       remove: "Remove",
+      remove_confirm_used: "Remove \"{name}\"? Used by: {users}. These devices will revert to their default icon.",
+      remove_confirm: "Remove \"{name}\" from the icon database?",
       counter: "{count} of {total} installed",
       install_all: "Install / update all",
       install_shown: "Install / update shown ({count})"

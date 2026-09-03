@@ -301,9 +301,8 @@ function devicesUsingPackIcon(idx) {
 function removePackIcon(ic) {
     devicesUsingPackIcon(ic.idx).then(function(users) {
         var msg = users.length
-            ? 'Remove "' + ic.name + '"? Used by: ' + users.join(", ")
-                + ". These devices will revert to their default icon."
-            : 'Remove "' + ic.name + '" from the icon database?';
+            ? dzT("hub.iconlib.remove_confirm_used", { name: ic.name, users: users.join(", ") })
+            : dzT("hub.iconlib.remove_confirm", { name: ic.name });
         bootbox.confirm({
             /* device names are user data: text only, never markup */
             message: $("<div>").text(msg),
