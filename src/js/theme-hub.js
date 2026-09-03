@@ -1069,7 +1069,7 @@ function dzHubIconPacksMount(entry) {
 
     var container = document.createElement("section");
     container.id = "iconpack";
-    container.textContent = "Loading..";
+    container.textContent = dzT("hub.loading");
     mount.appendChild(container);
 
     return mount;
@@ -1103,7 +1103,7 @@ function dzHubSchemeMount(entry) {
     var createBtn = document.createElement("button");
     createBtn.type = "button";
     createBtn.className = "btn btn-primary dz-hub-wizard-btn";
-    createBtn.textContent = "Create a theme";
+    createBtn.textContent = dzT("hub.wizard.title");
     createBtn.addEventListener("click", function () {
         if (typeof dzOpenThemeWizard === "function") { dzOpenThemeWizard(); }
     });
@@ -1252,7 +1252,7 @@ function dzBuildColorField(label, value, onChange, opts) {
     wheelBtn.type = "button";
     wheelBtn.className = "dz-color-field-wheel-btn";
     wheelBtn.disabled = !!opts.disabled;
-    wheelBtn.setAttribute("aria-label", "Pick " + label + " with a colour wheel");
+    wheelBtn.setAttribute("aria-label", dzT("hub.schemes.wheel_aria", { label: label }));
     var icon = document.createElement("i");
     icon.className = "icon ion-md-color-palette";
     wheelBtn.appendChild(icon);
@@ -1333,7 +1333,7 @@ function dzColorFieldOpen(field) {
     var close = document.createElement("button");
     close.type = "button";
     close.className = "dz-color-field-disclosure-close";
-    close.setAttribute("aria-label", "Close");
+    close.setAttribute("aria-label", dzT("common.close"));
     var closeIcon = document.createElement("i");
     closeIcon.className = "icon ion-md-close";
     close.appendChild(closeIcon);
@@ -1506,7 +1506,7 @@ function dzHubCustomColorsMount(entry) {
     var saveBtn = document.createElement("button");
     saveBtn.type = "button";
     saveBtn.className = "btn btn-primary dz-hub-swatch-save-btn"; // house Filled-primary family (css/buttons.css); identity class kept for harnesses
-    saveBtn.textContent = "Save as preset";
+    saveBtn.textContent = dzT("hub.schemes.save_preset");
     saveBtn.addEventListener("click", function () {
         if (typeof bootbox === "undefined" || typeof saveCurrentColorsAsScheme !== "function") return;
         bootbox.prompt("Preset name", function (name) {
@@ -1528,7 +1528,7 @@ function dzHubCustomColorsMount(entry) {
    dzHubCustomColorsMount) the wheel/hex panel is inserted after when opened. */
 function dzHubBuildColorSwatch(field, anchor) {
     var current = (theme.color_scheme && theme.color_scheme[field.field]) || "#000000";
-    var built = dzBuildColorField(field.label, current, function (hex) {
+    var built = dzBuildColorField(dzT("hub.schemes.swatches." + field.field), current, function (hex) {
         theme.color_scheme = theme.color_scheme || {};
         theme.color_scheme[field.field] = hex;
         // scheme.js applyCustomColorScheme: the same setProperty applier a
@@ -1639,7 +1639,7 @@ function dzRenderHubRow(entry) {
     if (entry.scope === "house" && dzSettingsMode().perUser) {
         var houseChip = document.createElement("span");
         houseChip.className = "dz-hub-chip-house";
-        houseChip.title = "House setting, managed by an admin";
+        houseChip.title = dzT("hub.house_managed");
         houseChip.textContent = "house";
         labelLine.appendChild(houseChip);
         if (!dzSettingsMode().admin) {
@@ -1739,11 +1739,11 @@ function dzHubBuildReloadNote(entry) {
     note.hidden = true;
     var span = document.createElement("span");
     span.className = "dz-hub-reload-text";
-    span.textContent = "Takes effect after reload";
+    span.textContent = dzT("hub.reload_note");
     var btn = document.createElement("button");
     btn.type = "button";
     btn.className = "btn btn-primary dz-hub-reload-btn"; // house Filled-primary family (css/buttons.css); identity class kept for harnesses
-    btn.textContent = "Reload now";
+    btn.textContent = dzT("hub.reload_now");
     btn.addEventListener("click", dzHubReloadIntoHub);
     note.appendChild(span);
     note.appendChild(btn);

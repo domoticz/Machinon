@@ -240,7 +240,7 @@ function schemeContrastFailures(cs) {
 function warnIfContrastFails(cs, what) {
     var fails = schemeContrastFailures(cs);
     if (fails.length && typeof generate_noty === "function") {
-        generate_noty('warning', what + " fails WCAG contrast: " + fails.join("; "), 8000);
+        generate_noty('warning', dzT("toasts.wcag_fails", { what: what, failures: fails.join("; ") }), 8000);
     }
     return fails;
 }
@@ -258,7 +258,7 @@ function warnIfContrastFails(cs, what) {
    fine. */
 function dzSchemeNameError(name) {
     if ((name || "").indexOf("|") !== -1) {
-        return "A theme name cannot contain the | character.";
+        return dzT("toasts.name_pipe");
     }
     return null;
 }
@@ -417,19 +417,21 @@ function setDarkFeature(enabled) {
     if (!enabled && was) { unloadThemeFeatureFiles("dark_theme"); }
 }
 
-/* Suffix -> color_scheme field + display label, in swatch order (Background,
-   Menu, Item, Main, Text, Secondary Text, Disabled): surfaces from page to
-   card, then the accent, then text, then state. The source the hub's
-   custom-colour swatches render from (theme-hub.js dzHubCustomColorsMount /
-   dzHubSyncSchemeSwatches). */
+/* Suffix -> color_scheme field, in swatch order (Background, Menu, Item,
+   Main, Text, Secondary Text, Disabled): surfaces from page to card, then
+   the accent, then text, then state. The source the hub's custom-colour
+   swatches render from (theme-hub.js dzHubCustomColorsMount /
+   dzHubSyncSchemeSwatches); the display label for each field is
+   dzT("hub.schemes.swatches." + field), field being this table's own
+   `field` value, not a separate label column. */
 var DZ_COLOR_SCHEME_FIELDS = [
-    { suffix: "bg", field: "background", label: "Background" },
-    { suffix: "navbar", field: "navbar", label: "Menu" },
-    { suffix: "item", field: "item", label: "Item" },
-    { suffix: "main_color", field: "main_color", label: "Main" },
-    { suffix: "text", field: "main_text", label: "Text" },
-    { suffix: "alt_text", field: "alt_text", label: "Secondary Text" },
-    { suffix: "disabled", field: "disabled", label: "Disabled" }
+    { suffix: "bg", field: "background" },
+    { suffix: "navbar", field: "navbar" },
+    { suffix: "item", field: "item" },
+    { suffix: "main_color", field: "main_color" },
+    { suffix: "text", field: "main_text" },
+    { suffix: "alt_text", field: "alt_text" },
+    { suffix: "disabled", field: "disabled" }
 ];
 
 /* Scheme-picker card mount points, registered by their hosts via
@@ -474,8 +476,8 @@ function renderSchemePicker() {
            same reason dzFindPairMate has no caller yet either. Both landed
            together on purpose, not as an oversight. */
         var cards = [
-            { slug: "light", name: "Machinon Light", pair: "machinon", desc: "The default look: clean blue on white", colors: { background: "#f4f8fc", navbar: "#e9f2fb", item: "#ffffff", main_color: "#396d9e", main_text: "#1b2b3a", alt_text: "#3e5568", disabled: "#8ca0b3" } },
-            { slug: "dark", name: "Machinon Dark", pair: "machinon", desc: "The default look: blue glowing on navy", colors: { background: "#0f1620", navbar: "#0a0f16", item: "#18202b", main_color: "#98ccfd", main_text: "#dce6f0", alt_text: "#9db2c6", disabled: "#5e7183" } }
+            { slug: "light", name: dzT("hub.schemes.builtin.light.name"), pair: "machinon", desc: dzT("hub.schemes.builtin.light.desc"), colors: { background: "#f4f8fc", navbar: "#e9f2fb", item: "#ffffff", main_color: "#396d9e", main_text: "#1b2b3a", alt_text: "#3e5568", disabled: "#8ca0b3" } },
+            { slug: "dark", name: dzT("hub.schemes.builtin.dark.name"), pair: "machinon", desc: dzT("hub.schemes.builtin.dark.desc"), colors: { background: "#0f1620", navbar: "#0a0f16", item: "#18202b", main_color: "#98ccfd", main_text: "#dce6f0", alt_text: "#9db2c6", disabled: "#5e7183" } }
         ];
         Object.keys(schemes).forEach(function(slug) {
             var s = schemes[slug];
@@ -491,7 +493,7 @@ function renderSchemePicker() {
         });
         /* colors: null = the Custom card, resolved to the user's live
            colours at render time below. */
-        cards.push({ slug: "custom", name: "Custom", desc: "Your own seven colours", colors: null });
+        cards.push({ slug: "custom", name: dzT("hub.schemes.builtin.custom.name"), desc: dzT("hub.schemes.builtin.custom.desc"), colors: null });
 
         // Build fresh DOM per container (a node cannot have two parents); the
         // `cards` data above is computed once and shared read-only across them.
@@ -528,7 +530,7 @@ function renderSchemePicker() {
                     var del = document.createElement("span");
                     del.className = "scheme-delete";
                     del.textContent = "×";
-                    del.title = "Delete preset";
+                    del.title = dzT("hub.schemes.delete_preset");
                     del.addEventListener("click", function(e) {
                         e.stopPropagation();
                         deleteUserScheme(card.presetName || card.name, card.variant);

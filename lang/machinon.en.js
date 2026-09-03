@@ -5,7 +5,8 @@
 language = {
   common: {
     and: "and",
-    more: "more"
+    more: "more",
+    close: "Close"
   },
   header: {
     mainmenu: "Main menu",
@@ -13,6 +14,10 @@ language = {
     search_placeholder: "Name, Desc, Idx, Status"
   },
   hub: {
+    loading: "Loading..",
+    house_managed: "House setting, managed by an admin",
+    reload_note: "Takes effect after reload",
+    reload_now: "Reload now",
     groups: {
       general: "General",
       menus: "Menus and navbar",
@@ -265,6 +270,51 @@ language = {
       idx_cell: "Idx {idx}",
       remove: "Remove",
       remove_aria: "Remove image for device {idx}"
+    },
+    schemes: {
+      swatches: {
+        background: "Background",
+        navbar: "Menu",
+        item: "Item",
+        main_color: "Main",
+        main_text: "Text",
+        alt_text: "Secondary Text",
+        disabled: "Disabled"
+      },
+      builtin: {
+        light: { name: "Machinon Light", desc: "The default look: clean blue on white" },
+        dark: { name: "Machinon Dark", desc: "The default look: blue glowing on navy" },
+        custom: { name: "Custom", desc: "Your own seven colours" }
+      },
+      delete_preset: "Delete preset",
+      wheel_aria: "Pick {label} with a colour wheel",
+      save_preset: "Save as preset"
+    },
+    wizard: {
+      aria: "Create a theme",
+      title: "Create a theme",
+      cancel: "Cancel",
+      back: "Back",
+      apply: "Apply",
+      name_label: "Theme name",
+      name_placeholder: "My theme",
+      tint_toggle: "Tint the greys with a different colour",
+      saved_lead: "Saved as two schemes, “{name} Light” and “{name} Dark”.",
+      preview: {
+        device: "Living Room",
+        status: "21.4 °C · 47%",
+        value: "On",
+        device2: "Back Door",
+        status2: "Unavailable"
+      },
+      looks: {
+        crisp: { label: "Crisp", description: "White cards on a grey page, with edges you can see" },
+        soft: { label: "Soft", description: "Tinted greys, cards barely off the page, whisper borders" },
+        deep: { label: "Deep", description: "A rich tinted page with cards floating above it" }
+      },
+      lead_colours: "Pick your main colour. Everything else is calculated from it and checked for contrast.",
+      hint_colours: "Only the hue is used, not the exact shade.",
+      lead_look: "Pick a look. Each one is your colour, arranged differently."
     }
   },
   toasts: {
@@ -272,6 +322,11 @@ language = {
     devices_low_on_battery: "{count} devices low on battery",
     devices: "{count} devices",
     update_available: "Machinon version {version} is available!",
-    update_action: "Click here to download"
+    update_action: "Click here to download",
+    wcag_fails: "{what} fails WCAG contrast: {failures}",
+    name_pipe: "A theme name cannot contain the | character.",
+    wizard_name_first: "Give your theme a name first.",
+    wizard_unreadable: "That combination could not be made readable. Please report this.",
+    wizard_created: "“{name}” created."
   }
 };
