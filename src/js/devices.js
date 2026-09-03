@@ -498,7 +498,7 @@ function setAllDevicesIconsStatus() {
         keyPrefix: "timeout",
         group: "device-timeout",
         title: $.t("Sensor Timeout"),
-        groupTitle: function(c) { return c + " " + language.sensors_timed_out; }
+        groupTitle: function(c) { return dzT("toasts.sensors_timed_out", { count: c }); }
     });
 
     /* toastIcon deliberately DIFFERS from the card's icon (owner decision
@@ -519,7 +519,7 @@ function setAllDevicesIconsStatus() {
         keyPrefix: "battery",
         group: "device-battery",
         title: $.t("Battery Level") + " " + $.t("Low"),
-        groupTitle: function(c) { return c + " " + language.devices_low_on_battery; }
+        groupTitle: function(c) { return dzT("toasts.devices_low_on_battery", { count: c }); }
     });
 }
 

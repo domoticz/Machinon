@@ -13,7 +13,7 @@ function loadThemeGlobals(files) {
     return ctx;
 }
 
-const dz = loadThemeGlobals(["src/js/toasts.js"]);
+const dz = loadThemeGlobals(["src/js/i18n.js", "lang/machinon.en.js", "src/js/toasts.js"]);
 
 /* ---- Minimal fake DOM + fake clock, for the coalescing/pause tests below ----
 
@@ -136,7 +136,9 @@ function loadToastRuntime() {
         document: dom, window: { innerWidth: 1024 },
         Date: clock.Date, setTimeout: clock.setTimeout, clearTimeout: clock.clearTimeout
     });
-    vm.runInContext(readFileSync("src/js/toasts.js", "utf8"), ctx, { filename: "src/js/toasts.js" });
+    ["src/js/i18n.js", "lang/machinon.en.js", "src/js/toasts.js"].forEach(function (f) {
+        vm.runInContext(readFileSync(f, "utf8"), ctx, { filename: f });
+    });
     return { dz: ctx, clock };
 }
 

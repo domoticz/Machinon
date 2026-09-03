@@ -144,11 +144,10 @@ function dzToastSummary(names, total) {
     var lines = shown.slice();
     if (rest > 0) {
         /* Localised, like every other group title in this file (see devices.js's
-           groupTitle functions). Guarded the same way the close button's aria-label
-           guards $.t: this keeps dzToastSummary callable from the node:vm policy
-           test, which loads no lang file. */
-        var and = (typeof language !== "undefined" && language.toast_and) || "and";
-        var more = (typeof language !== "undefined" && language.toast_more) || "more";
+           groupTitle functions). dzT degrades safely when `language` is
+           undefined, which is what the old typeof guard was for. */
+        var and = dzT("common.and");
+        var more = dzT("common.more");
         lines.push(and + " " + rest + " " + more);
     }
     return lines;
@@ -424,7 +423,7 @@ function dzToastMerge(rec, ev) {
 function dzToastQueueMerge(entry, ev) {
     if (ev.deviceName) entry.names.push(ev.deviceName);
     entry.total += 1;
-    entry.ev.title = ev.groupTitle ? ev.groupTitle(entry.total) : entry.total + " devices";
+    entry.ev.title = ev.groupTitle ? ev.groupTitle(entry.total) : dzT("toasts.devices", { count: entry.total });
     /* bodyLines, not body: see the comment on ev.bodyLines in dzToastBuild.
        The single-device body string this entry queued with is now stale and
        must not coexist with the line list dzToastBuild would otherwise skip. */

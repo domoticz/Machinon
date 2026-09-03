@@ -351,7 +351,19 @@ fetch('json.htm?type=command&param=getsettings', {
 
     /* Load required script files (plus DOM ready) and then init the theme */
     Promise.all([
-        loadThemeScripts(THEME_MODULES.concat(["lang/machinon." + lang + ".js"])),
+        /* Language: English is always the base table; a non-English selection
+           loads on top and dzDeepMerge (src/js/i18n.js) folds it over the
+           English table, so every key missing from a translation falls back
+           per-key to English. i18n.js loads first in this chain; script tags
+           load with async=false, so it executes before the merge runs. */
+        loadThemeScripts(["src/js/i18n.js", "lang/machinon.en.js"]).then(function () {
+            if (lang === "en") return;
+            var enTable = language;
+            return loadThemeScripts(["lang/machinon." + lang + ".js"]).then(function () {
+                language = dzDeepMerge(enTable, language);
+            });
+        }),
+        loadThemeScripts(THEME_MODULES),
         new Promise(function(resolve) { $(resolve); })
     ]).then(function() {
         moment.locale(lang);
@@ -416,7 +428,7 @@ function init_theme() {
 
         $(".navbar").append('<div class="menu-toggle"><div></div></div>')
         var navBarInner = $(".navbar-inner"), navBarToggle = $(".menu-toggle");
-        $(".menu-toggle").prop("title", language.mainmenu);
+        $(".menu-toggle").prop("title", dzT("header.mainmenu"));
         navBarToggle.click(function() {
             navBarInner.toggleClass("slide");
         });
