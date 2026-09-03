@@ -594,6 +594,23 @@
     --dz-modal-text:          var(--dz-body-text);
     --dz-modal-header-bg:     var(--dz-modal-bg);
 
+    /* MEDIA REMOTE contract - Domoticz 2026.3 only. core's css/remote.css and the three remote
+       svgs in its index.html read these six (domoticz/domoticz#6983). Core's stock values live in
+       www/css/variables.css, which Machinon never loads, and these six are read WITHOUT a
+       var() fallback, so leaving them undeclared paints the whole remote black: measured on the
+       rig, .remoteshadow, .remotesymbolfill and .remotesymbolstroke all compute rgb(0,0,0) here
+       against rgb(57,58,57) on the default theme, across all three remotes and both engines.
+       Derived from the dialog's own surface and text so a wizard or hand-built scheme gets a
+       readable remote without touching these: the key faces are a two-stop recess of the modal
+       surface, the symbols are the --dz-body-text on --dz-modal-bg pair every card already uses,
+       and hover replaces core's fixed #289fe3 with the theme accent. */
+    --dz-remote-face-start:   color-mix(in srgb, var(--dz-modal-bg) 92%, var(--dz-body-text));
+    --dz-remote-face-end:     color-mix(in srgb, var(--dz-modal-bg) 80%, var(--dz-body-text));
+    --dz-remote-edge:         color-mix(in srgb, var(--dz-modal-bg) 55%, var(--dz-body-text));
+    --dz-remote-symbol:       var(--dz-body-text);
+    --dz-remote-hover:        var(--dz-accent-color);
+    --dz-remote-disabled:     var(--dz-status-disabled);
+
     /* ICON GLYPH contract - Domoticz 2026.3 only. The icon rework (PR #6995) painted every
        Font Awesome glyph family with a literal hex; domoticz/domoticz#7009 got those moved onto
        `var(--dz-icon-*, <literal>)` / `var(--dz-batt-*, <literal>)` in 48e52d56e. Core declares
