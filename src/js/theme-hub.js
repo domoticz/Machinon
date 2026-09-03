@@ -231,7 +231,7 @@ function dzBuildThemeHub(routeHost) {
         item.className = "dz-hub-tab";
         item.setAttribute("data-group", group.id);
         item.setAttribute("role", "tab");
-        item.textContent = group.label;
+        item.textContent = dzT("hub.groups." + group.id);
         item.addEventListener("click", function () { dzHubShowGroup(group.id); });
         tabs.appendChild(item);
 
@@ -240,7 +240,7 @@ function dzBuildThemeHub(routeHost) {
         section.setAttribute("data-group", group.id);
         var h = document.createElement("h2");
         h.className = "dz-hub-section-title";
-        h.textContent = group.label;
+        h.textContent = dzT("hub.groups." + group.id);
         section.appendChild(h);
         // General tab carries a SHORT about intro; the full About is its own
         // tab (the "about" group below).
@@ -973,17 +973,19 @@ var DZ_HUB_APPLIERS = {
     navbar_icons_text: applyNavbarIconsText // page.js applyNavbarIconsText -> .navbar.notext
 };
 
-/* Number min/max and select options, carried over verbatim from the deleted
-   legacy Theme tab's form so the hub inputs keep the same bounds. Appliers
-   still clamp (scheme.js applyCardWidths), so these are UX hints, not the
-   safety net. */
+/* Number min/max and select option VALUES, carried over verbatim from the
+   deleted legacy Theme tab's form so the hub inputs keep the same bounds.
+   Appliers still clamp (scheme.js applyCardWidths), so these are UX hints,
+   not the safety net. Option display labels are NOT here: they live in
+   lang/machinon.en.js under hub.options.<storageKey>.<value>, resolved by
+   dzHubBuildControl via dzT. */
 var DZ_HUB_INPUT_META = {
     standby_after:            { min: 1 },
     dashboard_camera_refresh: { min: 1 },
     card_min_width:           { min: 200, max: 800 },
     card_max_width:           { min: 250, max: 1200 },
-    background_type:          { options: [["cover", "Cover"], ["pattern", "Pattern"]] },
-    warn_repeat:              { options: [["visit", "Once per visit"], ["daily", "Once a day"], ["episode", "Only when it changes"]] }
+    background_type:          { options: ["cover", "pattern"] },
+    warn_repeat:              { options: ["visit", "daily", "episode"] }
 };
 
 /* Current stored value for a plain (number/text/select) entry; "" when unset so
@@ -1026,10 +1028,10 @@ function dzHubCustomHeader(entry) {
     var frag = document.createDocumentFragment();
     var label = document.createElement("div");
     label.className = "dz-hub-label";
-    label.textContent = entry.label;
+    label.textContent = dzT("hub.settings." + entry.key + ".label");
     var desc = document.createElement("p");
     desc.className = "dz-hub-desc";
-    desc.textContent = entry.description;
+    desc.textContent = dzT("hub.settings." + entry.key + ".description");
     frag.appendChild(label);
     frag.appendChild(desc);
     return frag;
@@ -1627,13 +1629,13 @@ function dzRenderHubRow(entry) {
     labelLine.className = "dz-hub-label-line";
     var label = document.createElement("label");
     label.className = "dz-hub-label";
-    label.textContent = entry.label;
+    label.textContent = dzT("hub.settings." + entry.key + ".label");
     if (control && control.id) label.setAttribute("for", control.id);
     labelLine.appendChild(label);
     if (entry.appliesTo) {
         var tag = document.createElement("span");
         tag.className = "dz-hub-tag";
-        tag.textContent = entry.appliesTo;
+        tag.textContent = dzT("hub.appliesTo." + entry.appliesTo);
         labelLine.appendChild(tag);
     }
     // House-scope indicator (ThemeSettings migration): a per-user session sees
@@ -1656,12 +1658,10 @@ function dzRenderHubRow(entry) {
         }
     }
     textCell.appendChild(labelLine);
-    if (entry.description) {
-        var desc = document.createElement("p");
-        desc.className = "dz-hub-desc";
-        desc.textContent = entry.description;
-        textCell.appendChild(desc);
-    }
+    var desc = document.createElement("p");
+    desc.className = "dz-hub-desc";
+    desc.textContent = dzT("hub.settings." + entry.key + ".description");
+    textCell.appendChild(desc);
     if (entry.reloadOnDisable) textCell.appendChild(dzHubBuildReloadNote(entry));
 
     var preview = document.createElement("div");
@@ -1711,10 +1711,10 @@ function dzHubBuildControl(entry) {
         el.value = dzHubCurrentValue(entry);
     } else if (entry.control === "select") {
         el = document.createElement("select");
-        (meta.options || []).forEach(function (o) {
+        (meta.options || []).forEach(function (value) {
             var opt = document.createElement("option");
-            opt.value = o[0];
-            opt.textContent = o[1];
+            opt.value = value;
+            opt.textContent = dzT("hub.options." + entry.storageKey + "." + value);
             el.appendChild(opt);
         });
         el.value = dzHubCurrentValue(entry);
