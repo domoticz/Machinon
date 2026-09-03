@@ -4,6 +4,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+- The About tab now describes the built-in icon library correctly instead of calling it an "icon pack installer".
 - When several sensors warn at once, the combined message now lists each device on its own line instead of one long comma-separated sentence.
 
 ## [2.4.0] - 2026-09-02

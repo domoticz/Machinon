@@ -313,10 +313,10 @@ function dzHubVersionLabel() {
    free-tier attribution the theme is obliged to show: a visible, clickable
    "Icons by Icons8" -> https://icons8.com/.
 
-   The description order is deliberate: the icon-pack INSTALLER first (it
-   writes packs straight into the Domoticz device database, so a pack is
+   The description order is deliberate: the icon LIBRARY first (its installs
+   write straight into the Domoticz device database, so an installed icon is
    usable from every device's own icon picker, not just this theme's cards;
-   the installer's tabs, css/iconpack.css, are its UI, not the headline), then
+   the library's tabs, css/iconpack.css, are its UI, not the headline), then
    this live settings hub (instant apply, live previews), then the scheme
    system (light/dark schemes plus custom colours with WCAG contrast
    checking), with the responsive/mobile-viewport work last as supporting
@@ -345,8 +345,9 @@ function dzBuildHubAbout() {
 
     var desc = document.createElement("p");
     desc.className = "dz-hub-about-desc";
-    desc.textContent = "Machinon ships a built-in icon pack installer that writes packs "
-        + "straight into the Domoticz device database, so every installed pack is "
+    desc.textContent = "Machinon ships a built-in icon library of more than 250 icons "
+        + "to browse and install from, written straight into the Domoticz device "
+        + "database, so every installed icon is "
         + "available from any device's own icon picker, not just this theme's cards. "
         + "This settings hub applies every change live with instant previews, offers "
         + "light and dark color schemes plus a custom palette with automatic contrast "
