@@ -497,9 +497,16 @@ div.menu-toggle.scrolled {
     font-weight: var(--dz-weight-semibold);
 }
 
+/* Filled-family hover (DESIGN.md > Buttons > States), keyed off the same
+   danger token as the rest state; it used to read --dz-btn-primary-bg, left
+   over from the pre-rewrite all-blue button, so the pill turned blue under the
+   pointer. border-color is re-asserted because core's own hover rule
+   (css/style.css, same selector, #a02622) outranks the transparent border on
+   the base rule above and painted a red ring. */
 .sub-tabs .sub-tabs-apply:hover,
 .sub-tabs > li > a.sub-tabs-apply:hover {
-    background: var(--dz-btn-primary-bg) !important;
+    background: color-mix(in srgb, var(--dz-btn-danger-bg) 90%, black) !important;
+    border-color: transparent;
     color: var(--dz-btn-primary-text) !important;
     box-shadow: var(--dz-btn-shadow-hover);
 }
