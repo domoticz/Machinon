@@ -135,12 +135,12 @@ function renderIconPackGrid() {
     var shown = visiblePackIcons();
     var installedCount = tabIcons.filter(function(ic) { return ic.idx !== null; }).length;
     document.getElementById("iconpackCounter").textContent =
-        installedCount + " of " + tabIcons.length + " installed";
+        dzT("hub.iconlib.counter", { count: installedCount, total: tabIcons.length });
     var allBtn = document.getElementById("iconpackInstallAll");
     if (allBtn) {
         allBtn.textContent = shown.length === tabIcons.length
-            ? "Install / update all"
-            : "Install / update shown (" + shown.length + ")";
+            ? dzT("hub.iconlib.install_all")
+            : dzT("hub.iconlib.install_shown", { count: shown.length });
     }
     grid.textContent = "";
     shown.forEach(function(ic) { grid.appendChild(buildIconPackCard(ic)); });

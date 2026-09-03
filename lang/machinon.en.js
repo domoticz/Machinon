@@ -196,7 +196,10 @@ language = {
       installed_current: "Installed and up to date",
       update_available: "Update available: reinstall",
       not_installed: "Not installed",
-      remove: "Remove"
+      remove: "Remove",
+      counter: "{count} of {total} installed",
+      install_all: "Install / update all",
+      install_shown: "Install / update shown ({count})"
     },
     appliesTo: {
       whole_ui: "Whole UI",
