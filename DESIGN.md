@@ -1026,11 +1026,30 @@ file-format break for no behavioral gain. This is one token of a larger shared f
 
 ### The Button Contract (enforcement)
 
-`scripts/check-buttons.sh` (static, scoped to `css/buttons.css` only) checks that every
-`border-radius`, `box-shadow`, and `padding` declaration in that one file resolves through a
-`var(--dz-btn-*)` token (or is `0`/`none`); a line tagged `dz-btn-exempt` with its own justification
-comment is skipped. It gates `scripts/build-release.sh` (run in CI by `validate.yml`) alongside
-`check-typography.sh`: a release cannot ship with a raw radius/shadow/padding value in that file.
+`scripts/check-buttons.sh` (static) enforces two rules with deliberately different scopes.
+
+**(a) Token-only properties, `css/buttons.css` only.** Every `border-radius`, `box-shadow`, and
+`padding` declaration in that one file resolves through a `var(--dz-btn-*)` token (or is
+`0`/`none`); a line tagged `dz-btn-exempt` with its own justification comment is skipped.
+
+**(b) Filled hover stays in family, repo-wide.** For every selector that declares a resting fill of
+`var(--dz-btn-{primary,danger,info,warning,success}-bg)`, a `:hover` rule that repaints the fill must
+mix from that same token (`color-mix(in srgb, <that token> 90%, black)`, per States above) or repeat
+it unchanged; a hover that leaves the fill alone is legal, since it inherits the rest state. Rule (a)
+cannot see this class of defect, because the wrong token is still a token. The scope is every tracked
+`*.css` except the token-definition files (`dz-tokens.css`, `dark.css`) and vendored
+`css/ionicons.min.css`, derived from git rather than a glob so a new stylesheet cannot dodge it;
+button rules live outside `css/buttons.css` (the Setup "Apply Settings" pill is in `css/nav.css`),
+and that is exactly where the rule was earned. A rule tagged `dz-btn-exempt` is skipped whole.
+
+Both gate `scripts/build-release.sh` (run in CI by `validate.yml`) alongside `check-typography.sh`: a
+release cannot ship with a raw radius/shadow/padding value in `css/buttons.css`, or with a filled
+button that changes family under the pointer.
+
+**Constraint.** Rule (b) reads the theme's own CSS text, so it cannot see a hover state that core's
+stylesheets repaint at higher specificity. The same 2026-09-03 defect also had core's
+`css/style.css` painting a red border on that button's hover, which no static scan of this repo
+could have caught; only a computed rest-vs-hover measurement against a running Domoticz can.
 
 ### Bootstrap 2 Constraint
 

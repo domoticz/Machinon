@@ -228,9 +228,16 @@ a.btnstyle {
     padding: var(--dz-btn-pad-md);
 }
 
-.btn-primary:hover,
-.btn-info:hover {
+.btn-primary:hover {
     background-color: color-mix(in srgb, var(--dz-btn-primary-bg) 90%, black) !important;
+}
+
+/* Split off .btn-primary:hover, which it used to share: .btn-info rests on
+   --dz-btn-info-bg, so mixing its hover from --dz-btn-primary-bg left the
+   variant hovering out of its own family. Inert while both tokens alias
+   --dz-accent-color, wrong the moment info diverges from primary. */
+.btn-info:hover {
+    background-color: color-mix(in srgb, var(--dz-btn-info-bg) 90%, black) !important;
 }
 
 .btn-success {
