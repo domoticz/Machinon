@@ -18,12 +18,13 @@ language = {
     reload_note: "Działa po ponownym wczytaniu",
     reload_now: "Wczytaj ponownie",
     groups: {
+      // "Generalne" matches core Domoticz pl; do not "fix" it to "Ogolne"/"Ogolny".
       general: "Generalne",
       menus: "Menu i pasek nawigacji",
       dashboard: "Pulpit",
       cards: "Karty urządzeń",
       charts: "Wykresy i logi",
-      background: "Tło i marka",
+      background: "Tło i logo",
       colors: "Kolory i schematy",
       iconpacks: "Ikony",
       about: "O motywie"
@@ -39,7 +40,7 @@ language = {
       },
       check_update: {
         label: "Powiadomienie o aktualizacji",
-        description: "Sprawdza w serwisie GitHub, czy jest nowsza wersja motywu, i wyświetla powiadomienie, jeśli taka istnieje. Niezależne od własnego sprawdzania aktualizacji przez Domoticza."
+        description: "Sprawdza w serwisie GitHub, czy jest nowsza wersja motywu, i wyświetla powiadomienie, jeśli taka istnieje. Działa niezależnie od sprawdzania aktualizacji aplikacji przez samego Domoticza."
       },
       warn_timeout: {
         label: "Ostrzeżenia o przekroczeniu limitu czasu czujnika",
@@ -58,8 +59,8 @@ language = {
         description: "Wymusza stałą, wyśrodkowaną pozycję każdego okna wyskakującego, zamiast miejsca, w którym umieściłby je Domoticz."
       },
       rgbw_popup: {
-        label: "Wybór kolorów Machinon",
-        description: "Zastępuje własny wybór kolorów Domoticza wersją w stylu Machinon dla kolorowych świateł."
+        label: "Próbnik kolorów Machinon",
+        description: "Zastępuje wbudowany próbnik kolorów Domoticza próbnikiem w stylu Machinon dla kolorowych świateł."
       },
       footer_text_disabled: {
         label: "Ukryj tekst stopki",
@@ -98,7 +99,7 @@ language = {
         description: "Przełącza ekrany komputerowe na to samo zwijane menu boczne, którego używają już telefony, zamiast poziomego paska nawigacji u góry."
       },
       dashboard_show_last_update: {
-        label: "Wiersz ostatniego kontaktu na kartach pulpitu",
+        label: "Wiersz Ostatnio widziany na kartach pulpitu",
         description: "Wyświetla czas ostatniej aktualizacji każdego urządzenia jako mały wiersz na jego karcie pulpitu."
       },
       dashboard_columns: {
@@ -135,7 +136,7 @@ language = {
       },
       wind_direction: {
         label: "Kierunek strzałki wiatru",
-        description: "Domoticz podaje kierunek, Z którego wieje wiatr, i strzałka normalnie wskazuje właśnie ten kierunek. Włącz tę opcję, aby wskazywała w przeciwną stronę, czyli DOKĄD wieje wiatr. Etykieta kompasu (N, SW) zawsze pozostaje tą zgłoszoną. Dotyczy tylko klasycznych ikon obrazkowych; gdy w Ustawieniach > Styl ikon wybrano glify, strzałka pochodzi z samego Domoticza i to ustawienie nic nie zmienia."
+        description: "Domoticz podaje kierunek, Z którego wieje wiatr, i strzałka normalnie wskazuje właśnie ten kierunek. Włącz tę opcję, aby wskazywała w przeciwną stronę, czyli DOKĄD wieje wiatr. Etykieta kompasu (N, SW) zawsze pozostaje tą zgłoszoną. Dotyczy tylko klasycznych ikon obrazkowych; gdy w Settings > Icon style wybrano glify, strzałka pochodzi z samego Domoticza i to ustawienie nic nie zmienia."
       },
       icon_image: {
         label: "Zdjęcia urządzeń zamiast ikon",
@@ -201,8 +202,8 @@ language = {
     },
     appliesTo: {
       whole_ui: "Cały interfejs",
-      navbar_badge: "Plakietka na pasku nawigacji",
-      toasts: "Komunikaty",
+      navbar_badge: "Znacznik na pasku nawigacji",
+      toasts: "Komunikaty wyskakujące",
       all_dialogs: "Wszystkie okna",
       color_light_devices: "Kolorowe światła",
       page_footer: "Stopka strony",
@@ -263,13 +264,13 @@ language = {
       reset_colors: "Przywróć kolory wybranego schematu",
       reset_colors_confirm: "Przywrócić własne kolory do domyślnej palety wybranego schematu?",
       promote: "Zapisz moje bieżące preferencje jako domyślne dla domu",
-      promote_confirm: "Skopiować Twoje bieżące ustawienia osobiste na ustawienia domyślne dla domu? Twoje własne ustawienia pozostaną Twoje; zmienia się to, co otrzymują nowi i zresetowani użytkownicy.",
+      promote_confirm: "Skopiować Twoje bieżące ustawienia osobiste na ustawienia domyślne dla domu? Twoje własne ustawienia pozostaną Twoje; zmienia się to, co otrzymują nowi użytkownicy oraz użytkownicy po zresetowaniu.",
       promote_done: "Zaktualizowano ustawienia domyślne dla domu",
       reset_mine: "Zresetuj moje ustawienia osobiste",
       reset_mine_confirm: "Zresetować Twoje osobiste ustawienia motywu? Wrócisz do ustawień domyślnych dla domu.",
       reset_house: "Zresetuj ustawienia domyślne dla domu",
       reset_house_confirm: "Przywrócić ustawienia domyślne DLA DOMU do wartości fabrycznych? Osobiste ustawienia użytkowników pozostaną nienaruszone.",
-      reset_partial: "Część resetu została wykonana. Naciśnij Resetuj ponownie, aby dokończyć."
+      reset_partial: "Część przywracania została wykonana. Naciśnij ponownie Przywróć domyślne ustawienia motywu, aby dokończyć."
     },
     imageEditor: {
       help: "Przypisuje urządzenie (po Idx) do pliku graficznego w folderze images motywu. Działa ze światłami wyświetlanymi z ikoną żarówki.",
@@ -345,7 +346,7 @@ language = {
         deep: { label: "Głęboki", description: "Mocno zabarwiona strona z kartami unoszącymi się nad nią" }
       },
       lead_colours: "Wybierz swój kolor główny. Cała reszta jest z niego wyliczana i sprawdzana pod kątem kontrastu.",
-      hint_colours: "Używany jest tylko odcień, a nie dokładny kolor.",
+      hint_colours: "Używana jest tylko barwa, a nie dokładny odcień.",
       lead_look: "Wybierz wygląd. Każdy z nich to Twój kolor, tylko inaczej rozłożony."
     }
   },

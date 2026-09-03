@@ -31,7 +31,7 @@ language = {
     settings: {
       standby: {
         label: "Bildschirm-Standby",
-        description: "Nach einer Zeit ohne Aktivität blendet die ganze Seite zu einer dunklen Uhranzeige ab; jeder Tipp oder Klick holt sie zurück."
+        description: "Nach einer Zeit ohne Aktivität blendet die ganze Seite zu einer dunklen Uhranzeige ab; jede Berührung und jeder Klick holt sie zurück."
       },
       standby_after: {
         label: "Standby nach (Minuten)",
@@ -51,7 +51,7 @@ language = {
       },
       warn_repeat: {
         label: "Wie oft Warnungen wiederholt werden",
-        description: "Wie oft dasselbe Gerät erneut warnen darf: einmal pro Besuch, einmal am Tag oder nur, wenn das Problem verschwindet und wiederkommt. Das Warnsymbol neben dem Gerätenamen erscheint ohnehin."
+        description: "Wie oft dasselbe Gerät dich erneut warnen darf: einmal pro Besuch, einmal am Tag oder nur, wenn das Problem verschwindet und wiederkommt. Das Warnsymbol neben dem Gerätenamen erscheint ohnehin."
       },
       center_popups: {
         label: "Popup-Dialoge zentrieren",
@@ -79,11 +79,11 @@ language = {
       },
       navbar_icons_text: {
         label: "Nur Symbole in der Navigationsleiste (Text ausblenden)",
-        description: "Blendet den Text jedes Eintrags der Navigationsleiste aus, sodass nur das Symbol bleibt. Gilt nur, solange auch Symbole in der Navigationsleiste eingeschaltet ist."
+        description: "Blendet den Text jedes Eintrags der Navigationsleiste aus, sodass nur das Symbol bleibt. Gilt nur, solange auch die Option Symbole in der Navigationsleiste eingeschaltet ist."
       },
       custom_page_menu: {
         label: "Eigene Menüseite",
-        description: "Fügt der Navigationsleiste einen zusätzlichen Eintrag hinzu, der anstelle der üblichen Domoticz-Seite eine Webseite Ihrer Wahl lädt."
+        description: "Fügt der Navigationsleiste einen zusätzlichen Eintrag hinzu, der anstelle der üblichen Domoticz-Seite eine Webseite deiner Wahl lädt."
       },
       button_name: {
         label: "Beschriftung der eigenen Seite",
@@ -115,7 +115,7 @@ language = {
       },
       dashboard_camera_section: {
         label: "Eigener Kameraabschnitt",
-        description: "Fasst alle Kameras in einem eigenen Abschnitt \"Kameras\" oben in der Übersicht zusammen; ausgeschaltet erscheint die Vorschau jeder Kamera überall dort, wo sonst der Statustext dieses Geräts steht. Gilt nur, solange auch Kameravorschau in der Übersicht eingeschaltet ist."
+        description: "Fasst alle Kameras in einem eigenen Abschnitt \"Kameras\" oben in der Übersicht zusammen; ist sie ausgeschaltet, erscheint die Vorschau jeder Kamera überall dort, wo sonst der Statustext dieses Geräts steht. Gilt nur, solange auch Kameravorschau in der Übersicht eingeschaltet ist."
       },
       time_ago: {
         label: "Relative Zeitangaben",
@@ -127,15 +127,15 @@ language = {
       },
       switch_instead_of_bigtext: {
         label: "Schalter statt Statustext",
-        description: "Ersetzt den einfachen Ein/Aus-Statustext auf der Karte eines einfachen Schalters durch einen Regler, den Sie direkt umlegen können, ohne das Gerät zu öffnen."
+        description: "Ersetzt den einfachen Ein/Aus-Statustext auf der Karte eines einfachen Schalters durch einen Regler, den du direkt umlegen kannst, ohne das Gerät zu öffnen."
       },
       switch_instead_of_bigtext_scenes: {
         label: "Schalter auch auf Szenariokarten",
-        description: "Erweitert denselben Schieberegler auf Szenario- und Gruppenkarten. Gilt nur, solange auch Schalter statt Statustext eingeschaltet ist."
+        description: "Erweitert denselben Schieberegler auf Szenario- und Gruppenkarten. Gilt nur, solange auch die Option Schalter statt Statustext eingeschaltet ist."
       },
       wind_direction: {
         label: "Richtung des Windpfeils",
-        description: "Domoticz meldet die Richtung, AUS der der Wind kommt, und der Pfeil zeigt normalerweise dorthin. Schalten Sie dies ein, damit er in die Gegenrichtung zeigt, also dorthin, WOHIN der Wind weht. Die Kompassangabe (N, SW) bleibt immer die gemeldete. Betrifft nur die klassischen Bildsymbole; steht unter Einstellungen > Symbolstil die Option Glyphen, stammt der Pfeil aus Domoticz selbst und diese Einstellung bewirkt nichts."
+        description: "Domoticz meldet die Richtung, AUS der der Wind kommt, und der Pfeil zeigt normalerweise dorthin. Schalte dies ein, damit er in die Gegenrichtung zeigt, also dorthin, WOHIN der Wind weht. Die Kompassangabe (N, SW) bleibt immer die gemeldete. Betrifft nur die klassischen Bildsymbole; steht Settings > Icon style auf Glyphen, stammt der Pfeil aus Domoticz selbst und diese Einstellung bewirkt nichts."
       },
       icon_image: {
         label: "Gerätefotos statt Symbole",
@@ -143,7 +143,7 @@ language = {
       },
       card_min_width: {
         label: "Minimale Kartenbreite",
-        description: "Legt in Pixeln fest, wie schmal eine Gerätekarte höchstens werden darf, bevor das Raster auf weniger Spalten umbricht."
+        description: "Legt in Pixeln fest, wie schmal eine Gerätekarte werden darf, bevor das Raster auf weniger Spalten umbricht."
       },
       card_max_width: {
         label: "Maximale Kartenbreite",
@@ -155,7 +155,7 @@ language = {
       },
       background_img: {
         label: "Hintergrundbild",
-        description: "Legt das Bild fest, das als Seitenhintergrund dient. Geben Sie eine Webadresse oder den Namen einer Bilddatei im images-Ordner des Designs an; lassen Sie das Feld leer für keinen Hintergrund."
+        description: "Legt das Bild fest, das als Seitenhintergrund dient. Gib eine Webadresse oder den Namen einer Bilddatei im images-Ordner des Designs an; lass das Feld leer für keinen Hintergrund."
       },
       background_type: {
         label: "Hintergrundart",
@@ -163,7 +163,7 @@ language = {
       },
       logo: {
         label: "Eigenes Logo",
-        description: "Legt ein anderes Bild als Logo der Navigationsleiste fest, anstelle des Standardlogos von Machinon. Geben Sie den Namen einer Bilddatei im images-Ordner des Designs an."
+        description: "Legt ein anderes Bild als Logo der Navigationsleiste fest, anstelle des Standardlogos von Machinon. Gib den Namen einer Bilddatei im images-Ordner des Designs an."
       },
       hide_logo: {
         label: "Logo ausblenden",
@@ -175,11 +175,11 @@ language = {
       },
       custom_color_scheme: {
         label: "Eigene Farben",
-        description: "Erstellt Ihr eigenes Farbschema, indem Sie 7 einzelne Farben wählen."
+        description: "Erstellt dein eigenes Farbschema, indem du 7 einzelne Farben wählst."
       },
       iconpacks: {
         label: "Symbolbibliothek",
-        description: "Durchsuchen Sie die Symbolbibliothek und installieren Sie genau die Symbole, die Sie möchten, auf einzelnen Geräten."
+        description: "Durchsuche die Symbolbibliothek und installiere genau die Symbole, die du möchtest, auf einzelnen Geräten."
       },
       about: {
         label: "Über Machinon",
@@ -237,9 +237,9 @@ language = {
       title: "Machinon-Design V.{version}",
       short_description: "Ein modernes Domoticz-Design mit Farbschemata, Theme-Hub-Einstellungen, "
         + "aufgefrischten Symbolen sowie hellen und dunklen Varianten. Details und Wartung "
-        + "finden Sie im Reiter Über.",
+        + "findest du im Reiter Über.",
       description: "Machinon bringt eine eingebaute Symbolbibliothek mit mehr als 250 Symbolen "
-        + "mit, die Sie durchsuchen und von der aus Sie installieren; die Symbole werden direkt "
+        + "mit, die du durchsuchen und aus der du installieren kannst; die Symbole werden direkt "
         + "in die Domoticz-Gerätedatenbank geschrieben, sodass jedes installierte Symbol in der "
         + "Symbolauswahl jedes Geräts verfügbar ist und nicht nur auf den Karten dieses Designs. "
         + "Dieser Einstellungs-Hub übernimmt jede Änderung sofort mit Live-Vorschau, bietet helle "
@@ -260,17 +260,17 @@ language = {
       reset_theme: "Design auf Standardwerte zurücksetzen",
       reset_theme_confirm: "Alle Design-Einstellungen auf ihre Standardwerte zurücksetzen? Dies löscht die gespeicherten Design-Einstellungen und lädt die Seite neu.",
       clear_cache: "Zwischengespeicherte Einstellungen löschen",
-      clear_cache_confirm: "Die in diesem Browser zwischengespeicherten Design-Einstellungen löschen und neu laden? Ihre auf dem Server gespeicherten Einstellungen bleiben erhalten.",
+      clear_cache_confirm: "Die in diesem Browser zwischengespeicherten Design-Einstellungen löschen und neu laden? Deine auf dem Server gespeicherten Einstellungen bleiben erhalten.",
       reset_colors: "Farben auf das gewählte Schema zurücksetzen",
       reset_colors_confirm: "Die eigenen Farben auf die Standardpalette des gewählten Schemas zurücksetzen?",
       promote: "Meine aktuellen Einstellungen als Haus-Standard speichern",
-      promote_confirm: "Ihre aktuellen persönlichen Einstellungen über die Haus-Standardwerte kopieren? Ihre eigenen Einstellungen bleiben Ihre; dies ändert, was neue und zurückgesetzte Benutzer erhalten.",
+      promote_confirm: "Deine aktuellen persönlichen Einstellungen über die Haus-Standardwerte kopieren? Deine eigenen Einstellungen bleiben deine; dies ändert, was neue Benutzer und Benutzer nach einem Zurücksetzen erhalten.",
       promote_done: "Haus-Standardwerte aktualisiert",
       reset_mine: "Meine persönlichen Einstellungen zurücksetzen",
-      reset_mine_confirm: "Ihre persönlichen Design-Einstellungen zurücksetzen? Sie fallen auf die Haus-Standardwerte zurück.",
+      reset_mine_confirm: "Deine persönlichen Design-Einstellungen zurücksetzen? Du fällst auf die Haus-Standardwerte zurück.",
       reset_house: "Haus-Standardwerte zurücksetzen",
       reset_house_confirm: "Die HAUS-Standardwerte auf die Werkseinstellungen zurücksetzen? Die persönlichen Einstellungen der Benutzer bleiben unberührt.",
-      reset_partial: "Ein Teil der Zurücksetzung ist erfolgt. Drücken Sie erneut auf Zurücksetzen, um sie abzuschließen."
+      reset_partial: "Ein Teil der Zurücksetzung ist erfolgt. Drücke erneut auf Zurücksetzen, um sie abzuschließen."
     },
     imageEditor: {
       help: "Ordnet einem Gerät (über die Idx) eine Bilddatei im images-Ordner des Designs zu. Funktioniert mit Lichtgeräten, die mit einem Glühbirnensymbol angezeigt werden.",
@@ -288,7 +288,7 @@ language = {
         background: "Hintergrund",
         navbar: "Menü",
         item: "Element",
-        main_color: "Haupt",
+        main_color: "Hauptfarbe",
         main_text: "Text",
         alt_text: "Sekundärtext",
         disabled: "Deaktiviert"
@@ -296,7 +296,7 @@ language = {
       builtin: {
         light: { name: "Machinon Hell", desc: "Das Standardaussehen: klares Blau auf Weiß" },
         dark: { name: "Machinon Dunkel", desc: "Das Standardaussehen: leuchtendes Blau auf Marineblau" },
-        custom: { name: "Benutzerdefiniert", desc: "Ihre eigenen sieben Farben" }
+        custom: { name: "Benutzerdefiniert", desc: "Deine eigenen sieben Farben" }
       },
       delete_preset: "Voreinstellung löschen",
       wheel_aria: "{label} mit einem Farbkreis wählen",
@@ -307,9 +307,9 @@ language = {
       dark: "Dunkel",
       wcag_what_preset: "Voreinstellung \"{name}\" gespeichert, aber sie",
       wcag_what_custom: "Das eigene Farbschema",
-      wcag_body: "Text auf Hintergrund {ratio}:1 (WCAG AA braucht 4.5)",
-      wcag_alt: "Sekundärtext {ratio}:1 (WCAG AA braucht 4.5)",
-      wcag_accent: "Text auf Akzentfarbe {ratio}:1 (braucht 3.0)"
+      wcag_body: "Text auf Hintergrund {ratio}:1 (WCAG AA erfordert 4.5)",
+      wcag_alt: "Sekundärtext {ratio}:1 (WCAG AA erfordert 4.5)",
+      wcag_accent: "Text auf Akzentfarbe {ratio}:1 (erfordert 3.0)"
     },
     wizard: {
       aria: "Ein Design erstellen",
@@ -331,7 +331,7 @@ language = {
       surface_label: "Grauton",
       light: "Hell",
       dark: "Dunkel",
-      drift_label: "Ihre Farbe wurde angepasst, damit sie lesbar bleibt:",
+      drift_label: "Deine Farbe wurde angepasst, damit sie lesbar bleibt:",
       saved_lead: "Als zwei Schemata gespeichert, „{name} Hell“ und „{name} Dunkel“.",
       preview: {
         device: "Wohnzimmer",
@@ -345,9 +345,9 @@ language = {
         soft: { label: "Weich", description: "Getönte Grautöne, Karten kaum von der Seite abgehoben, zarte Ränder" },
         deep: { label: "Tief", description: "Eine satt getönte Seite mit darüber schwebenden Karten" }
       },
-      lead_colours: "Wählen Sie Ihre Hauptfarbe. Alles andere wird daraus berechnet und auf Kontrast geprüft.",
+      lead_colours: "Wähle deine Hauptfarbe. Alles andere wird daraus berechnet und auf Kontrast geprüft.",
       hint_colours: "Verwendet wird nur der Farbton, nicht der genaue Farbwert.",
-      lead_look: "Wählen Sie ein Aussehen. Jedes ist Ihre Farbe, nur anders angeordnet."
+      lead_look: "Wähle ein Aussehen. Jedes ist deine Farbe, nur anders angeordnet."
     }
   },
   toasts: {
@@ -358,8 +358,8 @@ language = {
     update_action: "Zum Herunterladen hier klicken",
     wcag_fails: "{what} besteht die WCAG-Kontrastprüfung nicht: {failures}",
     name_pipe: "Ein Designname darf das Zeichen | nicht enthalten.",
-    wizard_name_first: "Geben Sie Ihrem Design zuerst einen Namen.",
-    wizard_unreadable: "Diese Kombination konnte nicht lesbar gemacht werden. Bitte melden Sie das.",
+    wizard_name_first: "Gib deinem Design zuerst einen Namen.",
+    wizard_unreadable: "Diese Kombination konnte nicht lesbar gemacht werden. Bitte melde das.",
     wizard_created: "„{name}“ erstellt.",
     icon_busy: "Ein anderer Symbolvorgang läuft noch",
     icon_installed: "{name} installiert",

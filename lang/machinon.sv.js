@@ -9,7 +9,7 @@ language = {
   header: {
     mainmenu: "Huvudmeny",
     type_to_search: "Skriv för att söka",
-    search_placeholder: "Namn, Besk, Idx, Status"
+    search_placeholder: "Namn, Beskr., Idx, Status"
   },
   hub: {
     loading: "Laddar..",
@@ -18,6 +18,7 @@ language = {
     reload_note: "Träder i kraft efter omladdning",
     reload_now: "Ladda om nu",
     groups: {
+      // "Generella" matches core Domoticz sv; do not "fix" it to "Allmänt".
       general: "Generella",
       menus: "Menyer och navigeringsfält",
       dashboard: "Skrivbord",
@@ -38,8 +39,8 @@ language = {
         description: "Anger hur många minuters inaktivitet som utlöser skärmvila. Gäller bara så länge Skärmvila också är på."
       },
       check_update: {
-        label: "Uppdateringsavisering",
-        description: "Kontrollerar på GitHub om det finns en nyare version av temat och visar en avisering om det gör det. Skilt från Domoticz egen kontroll av appuppdateringar."
+        label: "Uppdateringsmeddelande",
+        description: "Kontrollerar på GitHub om det finns en nyare version av temat och visar ett meddelande om det gör det. Skilt från Domoticz egen kontroll av appuppdateringar."
       },
       warn_timeout: {
         label: "Varningar vid sensortidsgräns",
@@ -115,7 +116,7 @@ language = {
       },
       dashboard_camera_section: {
         label: "Egen kamerasektion",
-        description: "Samlar alla kameror i en egen sektion \"Kameror\" högst upp på skrivbordet; avstängd visas varje kameras förhandsvisning i stället för enhetens statustext, överallt där den förekommer. Gäller bara så länge Kameraförhandsvisningar på skrivbordet också är på."
+        description: "Samlar alla kameror i en egen sektion \"Kameror\" högst upp på skrivbordet; när den är avstängd visas varje kameras förhandsvisning i stället för enhetens statustext, överallt där den förekommer. Gäller bara så länge Kameraförhandsvisningar på skrivbordet också är på."
       },
       time_ago: {
         label: "Relativa tider",
@@ -135,7 +136,7 @@ language = {
       },
       wind_direction: {
         label: "Vindpilens riktning",
-        description: "Domoticz rapporterar den riktning vinden kommer IFRÅN, och pilen pekar normalt åt det hållet. Slå på detta för att låta den peka åt motsatt håll, mot dit vinden blåser. Kompassetiketten (N, SV) förblir alltid den rapporterade. Påverkar bara de klassiska bildikonerna; med Inställningar > Ikonstil satt till glyfer kommer pilen från Domoticz själv och den här inställningen gör ingenting."
+        description: "Domoticz rapporterar den riktning vinden kommer IFRÅN, och pilen pekar normalt åt det hållet. Slå på detta för att låta den peka åt motsatt håll, mot dit vinden blåser. Kompassetiketten (N, SV) förblir alltid den rapporterade. Påverkar bara de klassiska bildikonerna; med Settings > Icon style satt till glyfer kommer pilen från Domoticz själv och den här inställningen gör ingenting."
       },
       icon_image: {
         label: "Enhetsfoton i stället för ikoner",
@@ -143,11 +144,11 @@ language = {
       },
       card_min_width: {
         label: "Minsta kortbredd",
-        description: "Anger i bildpunkter hur smalt ett enhetskort får krympa innan rutnätet bryter till färre kolumner."
+        description: "Anger i pixlar hur smalt ett enhetskort får krympa innan rutnätet bryter till färre kolumner."
       },
       card_max_width: {
         label: "Största kortbredd",
-        description: "Anger i bildpunkter hur brett ett enhetskort får sträcka sig när det finns plats över i raden."
+        description: "Anger i pixlar hur brett ett enhetskort får sträcka sig när det finns plats över i raden."
       },
       log_plot_bands: {
         label: "Intervallband i loggdiagram",
@@ -245,7 +246,7 @@ language = {
         + "ändring direkt med omedelbar förhandsvisning, erbjuder ljusa och mörka färgscheman "
         + "plus en egen palett med automatisk kontrastkontroll, och temat självt är helt "
         + "responsivt med en mobil layout som får plats på telefonskärmar.",
-      contributions: "Bidrag",
+      contributions: "Medverkande",
       role_design: "Formgivning",
       role_code: "Kod",
       link_repo: "GitHub-arkiv",
@@ -263,7 +264,7 @@ language = {
       reset_colors: "Återställ färgerna till det valda schemat",
       reset_colors_confirm: "Återställa de egna färgerna till det valda schemats standardpalett?",
       promote: "Spara mina nuvarande inställningar som husets standard",
-      promote_confirm: "Kopiera dina nuvarande personliga inställningar över husets standardvärden? Dina egna inställningar förblir dina; detta ändrar vad nya och återställda användare får.",
+      promote_confirm: "Kopiera dina nuvarande personliga inställningar över husets standardvärden? Dina egna inställningar förblir dina; detta ändrar vad nya användare och användare efter en återställning får.",
       promote_done: "Husets standardvärden uppdaterade",
       reset_mine: "Återställ mina personliga inställningar",
       reset_mine_confirm: "Återställa dina personliga temainställningar? Du faller tillbaka på husets standardvärden.",
@@ -287,7 +288,7 @@ language = {
         background: "Bakgrund",
         navbar: "Meny",
         item: "Objekt",
-        main_color: "Huvud",
+        main_color: "Huvudfärg",
         main_text: "Text",
         alt_text: "Sekundär text",
         disabled: "Inaktiverad"
@@ -316,7 +317,7 @@ language = {
       cancel: "Avbryt",
       back: "Tillbaka",
       next: "Nästa",
-      apply: "Tillämpa",
+      apply: "Verkställ",
       save_theme: "Spara temat",
       steps: {
         colours: "Färger",

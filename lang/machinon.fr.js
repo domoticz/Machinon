@@ -35,14 +35,14 @@ language = {
       },
       standby_after: {
         label: "Mise en veille après (minutes)",
-        description: "Définit le nombre de minutes d'inactivité qui déclenchent la mise en veille de l'écran. Ne s'applique que si Mise en veille de l'écran est également activée."
+        description: "Définit le nombre de minutes d'inactivité qui déclenchent la mise en veille de l'écran. Ne s'applique que si l'option « Mise en veille de l'écran » est également activée."
       },
       check_update: {
         label: "Avis de mise à jour",
         description: "Vérifie sur GitHub s'il existe une version plus récente du thème et affiche un avis le cas échéant. Indépendant de la vérification de mise à jour propre à Domoticz."
       },
       warn_timeout: {
-        label: "Alertes de capteur expiré",
+        label: "Alertes de capteur sans réponse",
         description: "Affiche un message lorsqu'un capteur cesse de transmettre. L'icône d'avertissement à côté du nom du dispositif apparaît dans tous les cas."
       },
       warn_battery: {
@@ -79,7 +79,7 @@ language = {
       },
       navbar_icons_text: {
         label: "Barre de navigation en icônes seules (masquer le texte)",
-        description: "Masque le texte de chaque élément de la barre de navigation, ne laissant que son icône. Ne s'applique que si Icônes de la barre de navigation sont également activées."
+        description: "Masque le texte de chaque élément de la barre de navigation, ne laissant que son icône. Ne s'applique que si l'option « Icônes de la barre de navigation » est également activée."
       },
       custom_page_menu: {
         label: "Page de menu personnalisée",
@@ -87,11 +87,11 @@ language = {
       },
       button_name: {
         label: "Nom du bouton de la page personnalisée",
-        description: "Définit le texte du libellé sur le bouton de la page de menu personnalisée dans la barre de navigation. Ne s'applique que si Page de menu personnalisée est également activée."
+        description: "Définit le texte du libellé sur le bouton de la page de menu personnalisée dans la barre de navigation. Ne s'applique que si l'option « Page de menu personnalisée » est également activée."
       },
       custom_url: {
         label: "URL de la page personnalisée",
-        description: "Définit l'adresse que charge la page de menu personnalisée. Ne s'applique que si Page de menu personnalisée est également activée."
+        description: "Définit l'adresse que charge la page de menu personnalisée. Ne s'applique que si l'option « Page de menu personnalisée » est également activée."
       },
       sidemenu: {
         label: "Menu latéral sur ordinateur",
@@ -111,14 +111,14 @@ language = {
       },
       dashboard_camera_refresh: {
         label: "Actualisation des aperçus de caméra (secondes)",
-        description: "Définit le nombre de secondes entre deux actualisations de chaque vignette de caméra. Ne s'applique que si Aperçus de caméra sur l'accueil sont également activés."
+        description: "Définit le nombre de secondes entre deux actualisations de chaque vignette de caméra. Ne s'applique que si l'option « Aperçus de caméra sur l'accueil » est également activée."
       },
       dashboard_camera_section: {
         label: "Section caméras dédiée",
-        description: "Regroupe toutes les caméras dans leur propre section \"Caméras\" en haut de l'accueil; désactivé, l'aperçu de chaque caméra apparaît à la place du texte d'état de ce dispositif partout où il figure. Ne s'applique que si Aperçus de caméra sur l'accueil sont également activés."
+        description: "Regroupe toutes les caméras dans leur propre section \"Caméras\" en haut de l'accueil; lorsqu'elle est désactivée, l'aperçu de chaque caméra apparaît à la place du texte d'état de ce dispositif partout où il figure. Ne s'applique que si l'option « Aperçus de caméra sur l'accueil » est également activée."
       },
       time_ago: {
-        label: "Heures relatives",
+        label: "Temps relatifs",
         description: "Affiche l'heure de dernière mise à jour d'un dispositif sous forme d'une expression relative comme \"il y a 5 minutes\" au lieu de la date et de l'heure brutes."
       },
       fade_off_items: {
@@ -131,11 +131,11 @@ language = {
       },
       switch_instead_of_bigtext_scenes: {
         label: "Interrupteurs aussi sur les cartes de scénario",
-        description: "Étend le même curseur aux cartes Scénario et Groupe. Ne s'applique que si Interrupteurs au lieu du texte d'état sont également activés."
+        description: "Étend le même curseur aux cartes Scénario et Groupe. Ne s'applique que si l'option « Interrupteurs au lieu du texte d'état » est également activée."
       },
       wind_direction: {
         label: "Sens de la flèche du vent",
-        description: "Domoticz indique la direction D'OÙ vient le vent, et la flèche pointe normalement dans ce sens. Activez ceci pour la faire pointer dans le sens opposé, VERS où le vent souffle. Le libellé de la boussole (N, SO) reste toujours celui qui est rapporté. N'affecte que les icônes images classiques; avec Paramètres > Style d'icône réglé sur glyphes, la flèche est celle de Domoticz et ce réglage ne fait rien."
+        description: "Domoticz indique la direction D'OÙ vient le vent, et la flèche pointe normalement dans ce sens. Activez ceci pour la faire pointer dans le sens opposé, VERS où le vent souffle. Le libellé de la boussole (N, SO) reste toujours celui qui est rapporté. N'affecte que les icônes images classiques; avec Settings > Icon style réglé sur les glyphes, la flèche est celle de Domoticz et ce réglage ne fait rien."
       },
       icon_image: {
         label: "Photos de dispositif au lieu des icônes",
@@ -203,7 +203,7 @@ language = {
       whole_ui: "Toute l'interface",
       navbar_badge: "Badge de la barre de navigation",
       toasts: "Messages contextuels",
-      all_dialogs: "Toutes les fenêtres",
+      all_dialogs: "Toutes les boîtes de dialogue",
       color_light_devices: "Lumières colorées",
       page_footer: "Pied de page",
       floorplan: "Plans",
@@ -264,7 +264,7 @@ language = {
       reset_colors: "Réinitialiser les couleurs au schéma sélectionné",
       reset_colors_confirm: "Réinitialiser les couleurs personnalisées à la palette par défaut du schéma sélectionné ?",
       promote: "Enregistrer mes préférences actuelles comme valeurs par défaut de la maison",
-      promote_confirm: "Copier vos réglages personnels actuels par-dessus les valeurs par défaut de la maison ? Vos propres réglages restent les vôtres; cela change ce que reçoivent les utilisateurs nouveaux et réinitialisés.",
+      promote_confirm: "Copier vos réglages personnels actuels par-dessus les valeurs par défaut de la maison ? Vos propres réglages restent les vôtres; cela change ce que reçoivent les nouveaux utilisateurs et les utilisateurs après une réinitialisation.",
       promote_done: "Valeurs par défaut de la maison mises à jour",
       reset_mine: "Réinitialiser mes réglages personnels",
       reset_mine_confirm: "Réinitialiser vos réglages de thème personnels ? Vous revenez aux valeurs par défaut de la maison.",
@@ -345,7 +345,7 @@ language = {
         soft: { label: "Doux", description: "Des gris teintés, des cartes à peine détachées de la page, des bordures discrètes" },
         deep: { label: "Profond", description: "Une page richement teintée avec des cartes qui flottent au-dessus" }
       },
-      lead_colours: "Choisissez votre couleur principale. Tout le reste en est calculé et vérifié pour le contraste.",
+      lead_colours: "Choisissez votre couleur principale. Tout le reste en est calculé, puis vérifié pour le contraste.",
       hint_colours: "Seule la teinte est utilisée, pas la nuance exacte.",
       lead_look: "Choisissez un aspect. Chacun est votre couleur, disposée différemment."
     }

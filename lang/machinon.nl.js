@@ -1,5 +1,7 @@
 // Dutch. Machine-translated from the English template (lang/machinon.en.js);
 // corrections welcome via pull request. The English file defines the key set.
+// Register: this file uses je-form; core Domoticz nl uses u-form. Which one
+// Machinon settles on is pending the maintainer's review.
 language = {
   common: {
     and: "en",
@@ -9,13 +11,13 @@ language = {
   header: {
     mainmenu: "Hoofdmenu",
     type_to_search: "Typ om te zoeken",
-    search_placeholder: "Naam, Oms, Idx, Status"
+    search_placeholder: "Naam, Omschr., Idx, Status"
   },
   hub: {
     loading: "Laden..",
-    house_managed: "Huisinstelling, beheerd door een beheerder",
+    house_managed: "Instelling voor het hele huis, beheerd door een beheerder",
     house_badge: "huis",
-    reload_note: "Werkt na opnieuw laden",
+    reload_note: "Wordt actief na opnieuw laden",
     reload_now: "Nu opnieuw laden",
     groups: {
       general: "Algemeen",
@@ -35,7 +37,7 @@ language = {
       },
       standby_after: {
         label: "Standby na (minuten)",
-        description: "Bepaalt na hoeveel minuten zonder activiteit de schermstandby begint. Werkt alleen als Schermstandby ook aan staat."
+        description: "Bepaalt na hoeveel minuten zonder activiteit de schermstandby begint. Werkt alleen als de instelling Schermstandby ook aan staat."
       },
       check_update: {
         label: "Updatemelding",
@@ -79,7 +81,7 @@ language = {
       },
       navbar_icons_text: {
         label: "Alleen iconen in de navigatiebalk (tekst verbergen)",
-        description: "Verbergt de tekst van elk item in de navigatiebalk, zodat alleen het icoon overblijft. Werkt alleen als Iconen in de navigatiebalk ook aan staat."
+        description: "Verbergt de tekst van elk item in de navigatiebalk, zodat alleen het icoon overblijft. Werkt alleen als de instelling Iconen in de navigatiebalk ook aan staat."
       },
       custom_page_menu: {
         label: "Eigen menupagina",
@@ -87,11 +89,11 @@ language = {
       },
       button_name: {
         label: "Knopnaam van de eigen pagina",
-        description: "Bepaalt de labeltekst op de navigatiebalkknop van de eigen menupagina. Werkt alleen als Eigen menupagina ook aan staat."
+        description: "Bepaalt de labeltekst op de navigatiebalkknop van de eigen menupagina. Werkt alleen als de instelling Eigen menupagina ook aan staat."
       },
       custom_url: {
         label: "URL van de eigen pagina",
-        description: "Bepaalt het adres dat de eigen menupagina laadt. Werkt alleen als Eigen menupagina ook aan staat."
+        description: "Bepaalt het adres dat de eigen menupagina laadt. Werkt alleen als de instelling Eigen menupagina ook aan staat."
       },
       sidemenu: {
         label: "Zijmenu op desktop",
@@ -111,11 +113,11 @@ language = {
       },
       dashboard_camera_refresh: {
         label: "Verversing van cameravoorbeeld (seconden)",
-        description: "Bepaalt hoeveel seconden er tussen twee verversingen van elke cameraminiatuur zitten. Werkt alleen als Cameravoorbeelden op het dashboard ook aan staat."
+        description: "Bepaalt hoeveel seconden er tussen twee verversingen van elke cameraminiatuur zitten. Werkt alleen als de instelling Cameravoorbeelden op het dashboard ook aan staat."
       },
       dashboard_camera_section: {
         label: "Aparte camerasectie",
-        description: "Groepeert alle camera's in een eigen sectie \"Camera's\" bovenaan het dashboard; uit verschijnt het voorbeeld van elke camera op de plek van de statustekst van dat apparaat, overal waar het staat. Werkt alleen als Cameravoorbeelden op het dashboard ook aan staat."
+        description: "Groepeert alle camera's in een eigen sectie \"Camera's\" bovenaan het dashboard; staat deze uit, dan verschijnt het voorbeeld van elke camera op de plek van de statustekst van dat apparaat, overal waar het staat. Werkt alleen als de instelling Cameravoorbeelden op het dashboard ook aan staat."
       },
       time_ago: {
         label: "Relatieve tijden",
@@ -131,11 +133,11 @@ language = {
       },
       switch_instead_of_bigtext_scenes: {
         label: "Ook schakelaars op scenekaarten",
-        description: "Breidt hetzelfde schuifje uit naar Scene- en Groepkaarten. Werkt alleen als Schakelaars in plaats van statustekst ook aan staat."
+        description: "Breidt hetzelfde schuifje uit naar Scene- en Groepkaarten. Werkt alleen als de instelling Schakelaars in plaats van statustekst ook aan staat."
       },
       wind_direction: {
         label: "Richting van de windpijl",
-        description: "Domoticz meldt de richting WAARUIT de wind komt, en de pijl wijst normaal die kant op. Zet dit aan om hem de andere kant op te laten wijzen, naar WAARHEEN de wind waait. Het kompaslabel (N, ZW) blijft altijd de gemelde richting. Heeft alleen effect op de klassieke afbeeldingsiconen; staat Instellingen > Icoonstijl op glyphs, dan is de pijl van Domoticz zelf en doet deze instelling niets."
+        description: "Domoticz meldt de richting WAARUIT de wind komt, en de pijl wijst normaal die kant op. Zet dit aan om hem de andere kant op te laten wijzen, naar WAARHEEN de wind waait. Het kompaslabel (N, ZW) blijft altijd de gemelde richting. Heeft alleen effect op de klassieke afbeeldingsiconen; staat Settings > Icon style op glyphs, dan is de pijl van Domoticz zelf en doet deze instelling niets."
       },
       icon_image: {
         label: "Apparaatfoto's in plaats van iconen",
@@ -264,13 +266,13 @@ language = {
       reset_colors: "Kleuren terugzetten naar het gekozen schema",
       reset_colors_confirm: "De eigen kleuren terugzetten naar het standaardpalet van het gekozen schema?",
       promote: "Mijn huidige voorkeuren opslaan als huisstandaard",
-      promote_confirm: "Je huidige persoonlijke instellingen over de huisstandaard kopiëren? Je eigen instellingen blijven van jou; dit verandert wat nieuwe gebruikers en gebruikers na een reset krijgen.",
+      promote_confirm: "Je huidige persoonlijke instellingen over de huisstandaard kopiëren? Je eigen instellingen blijven van jou; dit verandert wat nieuwe gebruikers en gebruikers na het terugzetten krijgen.",
       promote_done: "Huisstandaard bijgewerkt",
-      reset_mine: "Mijn persoonlijke instellingen resetten",
-      reset_mine_confirm: "Je persoonlijke thema-instellingen resetten? Je valt terug op de huisstandaard.",
-      reset_house: "De huisstandaard resetten",
+      reset_mine: "Mijn persoonlijke instellingen terugzetten",
+      reset_mine_confirm: "Je persoonlijke thema-instellingen terugzetten? Je valt terug op de huisstandaard.",
+      reset_house: "De huisstandaard terugzetten",
       reset_house_confirm: "De HUISstandaard terugzetten naar de fabriekswaarden? De persoonlijke instellingen van gebruikers blijven ongemoeid.",
-      reset_partial: "Een deel van de reset is voltooid. Druk nogmaals op Reset om hem af te maken."
+      reset_partial: "Een deel van het terugzetten is voltooid. Druk nogmaals op Thema terugzetten naar standaardwaarden om het af te maken."
     },
     imageEditor: {
       help: "Koppelt een apparaat (via Idx) aan een afbeeldingsbestand in de images-map van het thema. Werkt met lampen die met een lampicoon worden getoond.",
@@ -342,7 +344,7 @@ language = {
       },
       looks: {
         crisp: { label: "Strak", description: "Witte kaarten op een grijze pagina, met zichtbare randen" },
-        soft: { label: "Zacht", description: "Getinte grijstinten, kaarten die nauwelijks van de pagina komen, zachte randen" },
+        soft: { label: "Zacht", description: "Getinte grijstinten, kaarten die nauwelijks van de pagina afsteken, zachte randen" },
         deep: { label: "Diep", description: "Een rijk getinte pagina met kaarten die erboven zweven" }
       },
       lead_colours: "Kies je hoofdkleur. Al het andere wordt daaruit berekend en op contrast gecontroleerd.",
