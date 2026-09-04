@@ -1,7 +1,7 @@
 # Dev-only tooling, pinned exactly (supply-chain rule). Dependabot bumps
 # these with a 7-day cooldown; see .github/dependabot.yml.
 pytest==9.1.1
-zensical==0.0.56
+zensical==0.0.57
 # Reports how much oxipng could still shave off the committed art
 # (scripts/check-png-optimized.py). Advisory only, never shipped.
 pyoxipng==9.1.1
