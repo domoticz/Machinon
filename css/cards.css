@@ -1357,6 +1357,12 @@ body table#itemtable tr > .options {
     box-shadow: none;
     height: var(--dz-card-slider-height);
     right: var(--dz-card-slider-right);
+    /* The width !important is what makes core's resizeSliders (dzLightWidget.js)
+       inert here: it writes an inline pixel width whenever a card is re-shown.
+       If this ever becomes a plain declaration, src/js/device-filter.js must
+       fire dz:livesearch:show on every card it re-shows or dimmer tracks come
+       back the wrong width on the Dynamic Dashboard. dz-search-contract.js C10
+       guards this. */
     width: calc(100% - var(--dz-card-slider-inset)) !important;
     /* Vertical only - margin-top on an absolutely-positioned box with top:auto shifts its
        STATIC position, so this moves the track onto the same line as the toggles and

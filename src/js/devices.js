@@ -850,6 +850,11 @@ function setDeviceOpacity(idx, status, $trs) {
    Registered once by the bootstrap (custom.js) as soon as Angular is up. */
 function initDeviceLiveUpdates($scope) {
     $scope.$on('device_update', function (event, data) {
+        /* Core reapplies its own filter on the pages it owns (its controllers
+           call RefreshLiveSearch after each re-render). Only the Dynamic
+           Dashboard needs the theme to do it, and this is a no-op when no
+           dashboard filter is active. */
+        dzReapplyDeviceFilter();
         if (data.Type === "Light/Switch") {
             setDeviceOpacity(data.idx, data.Status);
             if (theme.features.icon_image.enabled === true) {

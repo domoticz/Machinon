@@ -290,3 +290,10 @@ input[type="radio"]:checked::before {
     width: auto;
     font-variant-numeric: tabular-nums;
 }
+
+/* Set by src/js/device-filter.js on the Dynamic Dashboard, the one surface
+   core's own search engine cannot filter without leaving blank grid cells
+   behind. */
+.dz-filtered-out {
+    display: none !important;
+}

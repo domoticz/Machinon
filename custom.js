@@ -46,6 +46,7 @@ var THEME_MODULES = [
     "src/js/color-repair.js",
     "src/js/scheme-generator.js",
     "src/js/iconpack.js",
+    "src/js/device-filter.js",
     "src/js/search.js",
     "src/js/page.js",
     "src/js/theme-hub-previews.js",
@@ -425,6 +426,7 @@ function init_theme() {
         armSelectorWrapCornerRetag();
         setLogo();
         setSearch();
+        dzWireDashboardSearch();
         setDevicesNativeSelectorForMobile();
         patchSelectMenuCollision();
         $(document).ajaxSuccess(ajaxSuccessCallback);
