@@ -9,6 +9,13 @@
    classic dashboard (#dashcontent.devicesList) and every other page core owns
    need none of this, so this file must stay out of their way.
 
+   Hiding .itemBlock here removes that blank box visually (no border, no
+   background, no content), but the .dd-widget-cell grid slot around it still
+   occupies its space: grid-stack positions cells with fixed x/y coordinates,
+   not document flow, and a bare CSS display:none on a child does not make it
+   reflow or compact the layout. A filtered Dash2 still has gaps where hidden
+   cards used to sit; only the visible blank-card artifact is fixed.
+
    .dd-grid is the one container class exclusive to the Dynamic Dashboard; no
    other route renders it. Anchoring dzFilterCards() on it, rather than on a
    route name, is what keeps every function below inert wherever core already
@@ -108,11 +115,30 @@ function dzDashboardSearchPredicate(query) {
 
 function dzWireDashboardSearch() {
     $(document).on("keyup change", "#searchInput", function () {
-        /* dzFilterCards() is empty on every page but the Dynamic Dashboard,
-           which makes this a no-op wherever core already owns the search. */
-        if (!dzFilterCards().length) { return; }
         var value = this.value;
-        if (!value) { dzClearDeviceFilter(); return; }
+        if (!value) {
+            /* Always runs, even off Dash2: this is the only place
+               dzActiveFilter ever gets cleared, and it must not survive
+               past its own query. Gating this behind dzFilterCards().length
+               (as the narrowing branch below does) would leave a stale
+               predicate armed whenever the user clears the box on a
+               DIFFERENT page after core persisted a Dash2 query there --
+               core's own restore is a no-op for an empty stored query, so
+               nothing would ever re-fire this handler on returning to
+               Dash2, and the next live device_update would apply the stale
+               predicate and hide cards behind an input showing nothing.
+               dzClearDeviceFilter()'s own DOM loop already iterates an
+               empty array on every non-Dash2 surface, so calling it
+               unconditionally costs nothing there. */
+            dzClearDeviceFilter();
+            return;
+        }
+        /* Narrowing stays Dash2-only: dzFilterCards() is empty on every
+           other page, so arming a predicate there would have nothing to
+           run against until the user is back on Dash2 anyway, and core's
+           own restore re-fires this same handler with the persisted,
+           non-empty value once they arrive. */
+        if (!dzFilterCards().length) { return; }
         dzApplyDeviceFilter(dzDashboardSearchPredicate(value), { kind: "search", label: value });
     });
 }
