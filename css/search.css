@@ -37,13 +37,15 @@
     position: relative;
     display: inline-flex;
     align-items: center;
-    /* The magnifier's line box (#search i above), so the field keeps the box
-       height the header was laid out around whichever affordance is showing. */
+    /* Both affordances are out of flow (they are positioned against this box
+       below), so the only child left to size the field is the 17px input.
+       This holds it at the 30px the header is laid out around, the magnifier's
+       line box in #search i above. */
     min-height: 30px;
     /* The field owns its own edge, in both states: this underline on the
        header, the pill's full border on a phone. It cannot sit on the input,
        because the affordances now sit INSIDE the field and the magnifier's
-       23px mark is taller than the input's 18px text box, so an underline
+       23px mark is taller than the input's 17px text box, so an underline
        drawn at the input's bottom is a line through the glyph. */
     border-bottom: 1px solid var(--dz-accent-text);
 }
@@ -268,7 +270,6 @@ input[type="radio"]:checked::before {
     flex-direction: row-reverse;
     align-items: center;
     gap: var(--dz-card-space-sm);
-    line-height: 1;
     cursor: pointer;
 }
 

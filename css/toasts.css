@@ -216,11 +216,15 @@
 
     /* Owner-found defect, 2026-08-31: a REAL tap on #search (not a
        programmatic .focus(), which does not expand it) grows the pill from
-       31px to 41px tall and drops #searchInput to y 50..91. The collapsed
-       35px toast top only clears the COLLAPSED pill (bottom 36px); expanded,
-       elementFromPoint() at the input's centre resolved to the toast's own
-       DIV.dz-toast-body in both Chromium and Firefox - a 39px overlap
-       (input bottom 91 vs toast top 35, toast bottom 89), not a near miss.
+       31px to 41px tall and drops it to y 50..91. The box that occupies
+       those coordinates is .dz-search-field, the wrapper css/search.css
+       transforms into the pill; #searchInput sits at y 62..79 INSIDE it, so
+       measuring the input is not how this value is derived and gives 79.
+       The collapsed 35px toast top only clears the COLLAPSED pill (bottom
+       35px); expanded, elementFromPoint() at the pill's centre resolved to
+       the toast's own DIV.dz-toast-body in both Chromium and Firefox - a
+       39px overlap (pill bottom 91 vs toast top 35, toast bottom 89), not a
+       near miss.
        A static constant cannot fix this: 35px is still correct while the
        pill is collapsed (the common case, and the value the desktop
        measurement above shares its derivation with), and pushing every
@@ -228,13 +232,14 @@
        space the rest of the time. :has() is the only mechanism that can
        express "only when the pill is actually open" without JS: it re-runs
        automatically on focus/blur, which a plain --dz-toast-top constant
-       cannot. Do not simplify this back into one number.
-       101 = measured expanded input bottom (91) + --dz-card-space-lg (10px),
-       the same gap the base 35px value budgets. Re-measured 2026-08-31 with
-       the CSS applied, both engines identical: collapsed stays 35, expanded
-       moves to 101 (input bottom 91, 10px clear), and elementFromPoint() at
-       the input centre now returns the page's own element (Chromium) or the
-       INPUT itself (Firefox) - never the toast. */
+       cannot. #search:focus-within still selects it with the input nested a
+       level deeper. Do not simplify this back into one number.
+       101 = measured expanded .dz-search-field bottom (91) +
+       --dz-card-space-lg (10px), the same gap the base 35px value budgets.
+       Both engines identical: collapsed stays 35, expanded moves to 101
+       (pill bottom 91, 10px clear, toast top 101 and bottom 155), and
+       elementFromPoint() at the pill's centre returns the INPUT in Chromium
+       and Firefox alike - never the toast. */
     body:has(#search:focus-within) #dz-toast-stack { top: 101px; }
 }
 
