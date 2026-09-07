@@ -31,7 +31,17 @@
    this file because there is no container it could operate on. */
 
 var DZ_FILTER_HIDDEN = "dz-filtered-out";
+
+/* The armed predicate itself, or null. It takes a card's search TEXT, not the
+   card: the DOM read that produces that text is cached per query (see
+   dzCardSearchText), and a predicate that reached into the element again would
+   put the cost straight back. */
 var dzActiveFilter = null;
+
+/* Bumped once per armed query. Cards carry the generation their cached text was
+   read under, so a new query re-reads every card exactly once and the live
+   device_update path re-reads nothing. */
+var dzFilterGeneration = 0;
 
 function dzFilterCards() {
     var root = document.querySelector(".dd-grid");
@@ -39,8 +49,28 @@ function dzFilterCards() {
     return Array.prototype.slice.call(root.querySelectorAll(".itemBlock"));
 }
 
-function dzApplyDeviceFilter(predicate, meta) {
-    dzActiveFilter = { predicate: predicate, meta: meta || {} };
+/* Core's data-search sits on a td INSIDE the card, so reading it per card costs
+   a descendant query plus an attribute read, and dzReapplyDeviceFilter runs on
+   every device_update (measured: 546 in a 10-second window against 228 devices).
+   Paying it there scaled the cost with the card count on exactly the
+   configuration where a filter is active: measured on a 42-card dashboard, 100
+   reapplies cost 4300 element queries reading the text per card against 100
+   caching it. The text is therefore read once per card per query and cached on
+   the element. Re-reading it on a later device_update would not change what the
+   user sees anyway: core's own engine re-evaluates a query on keystrokes only,
+   never on a value arriving. */
+function dzCardSearchText(card) {
+    if (card.dzSearchGeneration !== dzFilterGeneration) {
+        var nameEl = card.querySelector("td#name");
+        card.dzSearchText = ((nameEl && (nameEl.getAttribute("data-search") || nameEl.textContent)) || "").toLowerCase();
+        card.dzSearchGeneration = dzFilterGeneration;
+    }
+    return card.dzSearchText;
+}
+
+function dzApplyDeviceFilter(predicate) {
+    dzActiveFilter = predicate;
+    dzFilterGeneration++;
     dzReapplyDeviceFilter();
 }
 
@@ -60,27 +90,28 @@ function dzClearDeviceFilter() {
            directly on the element, and this only runs once per keystroke, not
            on the device_update path dzReapplyDeviceFilter serves. */
         card.style.removeProperty("display");
-        if (wasHidden && window.jQuery) {
+        if (wasHidden) {
             /* Same re-show contract as dzReapplyDeviceFilter below: a card
                that was actually hidden gets the event core's dzLightWidget
                listens for, a card that was never hidden does not. */
-            window.jQuery(card).trigger("dz:livesearch:show");
+            $(card).trigger("dz:livesearch:show");
         }
     });
 }
 
 function dzReapplyDeviceFilter() {
     /* Runs on every live device_update, so it stays classList-only: no
-       getBoundingClientRect, no inline style writes, and nothing at all when
-       no filter is active (setDeviceOptions alone has been measured at 500+
-       calls in a 10-second window on a busy dashboard). */
+       getBoundingClientRect, no inline style writes, no per-card DOM reads
+       (dzCardSearchText above), and nothing at all when no filter is active
+       (setDeviceOptions alone has been measured at 500+ calls in a 10-second
+       window on a busy dashboard). */
     if (!dzActiveFilter) { return; }
-    var predicate = dzActiveFilter.predicate;
+    var predicate = dzActiveFilter;
     dzFilterCards().forEach(function (card) {
-        var show = predicate(card);
+        var show = predicate(dzCardSearchText(card));
         var wasHidden = card.classList.contains(DZ_FILTER_HIDDEN);
         card.classList.toggle(DZ_FILTER_HIDDEN, !show);
-        if (show && wasHidden && window.jQuery) {
+        if (show && wasHidden) {
             /* Only on an actual hidden-to-shown transition, not on every card
                that already happened to be visible: this runs on every
                device_update, so re-triggering core's dzLightWidget (which
@@ -92,7 +123,7 @@ function dzReapplyDeviceFilter() {
                width core's resizeSliders would otherwise write; fired anyway
                so a future removal of that !important does not silently
                reintroduce mis-sized sliders here. */
-            window.jQuery(card).trigger("dz:livesearch:show");
+            $(card).trigger("dz:livesearch:show");
         }
     });
 }
@@ -102,10 +133,8 @@ function dzReapplyDeviceFilter() {
    the Dynamic Dashboard as on every page core filters itself. */
 function dzDashboardSearchPredicate(query) {
     var terms = String(query || "").toLowerCase().split(/[\s,]+/).filter(Boolean);
-    return function (card) {
+    return function (text) {
         if (!terms.length) { return true; }
-        var nameEl = card.querySelector("td#name");
-        var text = ((nameEl && (nameEl.getAttribute("data-search") || nameEl.textContent)) || "").toLowerCase();
         for (var i = 0; i < terms.length; i++) {
             if (text.indexOf(terms[i]) === -1) { return false; }
         }
@@ -139,6 +168,6 @@ function dzWireDashboardSearch() {
            own restore re-fires this same handler with the persisted,
            non-empty value once they arrive. */
         if (!dzFilterCards().length) { return; }
-        dzApplyDeviceFilter(dzDashboardSearchPredicate(value), { kind: "search", label: value });
+        dzApplyDeviceFilter(dzDashboardSearchPredicate(value));
     });
 }

@@ -89,24 +89,53 @@ function setSearch() {
     $("#search").click(function () {
         $("#searchInput").focus();
     });
+    /* Domoticz runs TWO matching engines off this one input, and clearing it has
+       to reach both. WatchLiveSearch (js/domoticz.js) binds with jQuery and
+       filters every page core owns. The classic dashboard is filtered instead by
+       Angular, through filterDevices, fed by NATIVE capture-phase listeners that
+       DashboardDesktopController registers on document. A jQuery .trigger() only
+       walks jQuery's own handler queues and dispatches nothing to the DOM, so it
+       is the one path that cannot reach the capture listeners: clearing that way
+       empties the box while the classic dashboard stays filtered, with no way
+       back short of typing and deleting a character.
+
+       A real dispatched event reaches all three consumers in one go: core's
+       jQuery handler (jQuery binds through addEventListener), core's capture
+       listeners, and the theme's own delegated handler in src/js/device-filter.js.
+       It also re-enters the native listeners on this input, syncLiveSearchSiblings
+       included, so the siblings need no separate call. bubbles is required for the
+       delegated handler; the capture listeners would fire either way. */
+    function clearSearch() {
+        input.value = "";
+        input.dispatchEvent(new Event("keyup", { bubbles: true }));
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
     /* Same hazard as syncLiveSearchSiblings above, on the same element: a
        jQuery-bound handler here would be stripped by WatchLiveSearch's
        argument-less .off() moments after being attached, silently killing
-       Enter and Escape. Native addEventListener survives it. The Escape
-       clear still goes through jQuery's val().trigger("change") because
-       core's own matching handler is jQuery-bound and that is the only path
-       that reaches it; syncLiveSearchSiblings is called explicitly right
-       after because that trigger is a pure jQuery simulation, not a native
-       dispatch, so it never reaches this input's own native listeners. */
+       Enter and Escape. Native addEventListener survives it. The dispatch in
+       clearSearch re-enters this handler with no keyCode at all, which matches
+       neither branch, so there is no recursion to guard against. */
     input.addEventListener("keyup", function (event) {
         if (event.keyCode === 13) {
             input.blur();
         }
         if (event.keyCode === 27) {
-            $(input).val("").trigger("change");
-            syncLiveSearchSiblings.call(input);
+            clearSearch();
         }
     });
+
+    /* The clear glyph needs its own native listener for the same reason: core
+       binds one on .jsTbResultsClose,.jsTbResults, but it clears with
+       $('.jsLiveSearch').val('').trigger('change'), the jQuery-simulated path
+       that never reaches the classic dashboard's capture listeners. Core's
+       binding cannot be corrected from here, so the theme adds the real
+       dispatch alongside it; clearing an already-empty box twice is inert.
+       Native again, because WatchLiveSearch calls .off() with no arguments on
+       these elements too. Bound on the wrapper so a click on the glyph inside
+       it counts. */
+    results.addEventListener("click", clearSearch);
 
     /* Core calls WatchLiveSearch once at app.js boot, before this box exists,
        so bind it again now that it does. The call is .off().on(), so binding

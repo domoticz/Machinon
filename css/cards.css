@@ -101,9 +101,17 @@
 div.bannercontent .row.divider:has(.item):before,
 div.bannercontent .row.divider:has(.item):after,
 div.bannercontent .row:not(.divider):has(.item):before,
-div.bannercontent .row:not(.divider):has(.item):after,
-div.clearfix {
+div.bannercontent .row:not(.divider):has(.item):after {
     display: none;
+}
+
+/* Bootstrap float clears have no job in a grid, where they would occupy real tracks.
+   !important because core's live search re-shows them with jQuery .show(), which writes
+   an inline display:block: the Temperature and Weather containers hold eight of these,
+   and without the override every cleared query leaves eight empty cells wedged between
+   the cards (measured: the container grew from 1348px to 1795px tall). */
+div.clearfix {
+    display: none !important;
 }
 
 /* Column count derives from the container and --dz-card-min-width, not from viewport
@@ -138,21 +146,30 @@ div.bannercontent .row > .item {
         max-width: 100% !important;
     }
 
-    #holder .row .span4 table[id^="item"] > tbody > tr,
-    #holder .row .item.span4 table[id^="item"] > tbody > tr {
+    #holder :is(.row, .divider) .span4 table[id^="item"] > tbody > tr,
+    #holder :is(.row, .divider) .item.span4 table[id^="item"] > tbody > tr {
         row-gap: var(--dz-card-space-2xs) !important;
     }
 }
 
-#holder .row dzweatherwidget,
-#holder .row dztemperaturewidget,
-#holder .row .span4,
-#holder .row .tile,
-#holder .row .item,
-#holder .row .item section,
-#holder .row .item table[id^="item"],
-#holder .row .item table[id^="item"] > tbody,
-#holder .row .item table[id^="item"] > tbody > tr {
+/* :is(.row, .divider) rather than a plain .row anchor throughout the card rules
+   below. Core's live search (WatchLiveSearch in js/domoticz.js) does an UNSCOPED
+   $('.divider').removeClass('row') for the duration of every non-empty query, and
+   the Temperature and Weather card containers are <div id="tempwidgets|weatherwidgets"
+   class="row divider">. A .row-only anchor therefore stops matching mid-query and the
+   cards lose their surface, border, radius and grid rows exactly while the user is
+   looking at the matches. .divider is the half core never touches, and it is a class
+   like .row, so the alternation keeps these selectors at their original specificity;
+   the only .divider elements in the document that hold cards are those two containers. */
+#holder :is(.row, .divider) dzweatherwidget,
+#holder :is(.row, .divider) dztemperaturewidget,
+#holder :is(.row, .divider) .span4,
+#holder :is(.row, .divider) .tile,
+#holder :is(.row, .divider) .item,
+#holder :is(.row, .divider) .item section,
+#holder :is(.row, .divider) .item table[id^="item"],
+#holder :is(.row, .divider) .item table[id^="item"] > tbody,
+#holder :is(.row, .divider) .item table[id^="item"] > tbody > tr {
     position: relative;
     display: block;
 	margin-left: var(--dz-card-space-2xs);
@@ -162,10 +179,20 @@ div.bannercontent .row > .item {
 }
 
 /* Override upstream flex with grid for Temperature/Weather tabs (match Switches layout).
-   Same auto-fill contract as the .row grids above; see the note there. */
+   Same auto-fill contract as the .row grids above; see the note there.
+
+   display, padding and margin are restated here, on the id, because the .row.divider
+   grid rule above cannot hold this container on its own: core's live search strips
+   .row off it for the duration of a query (see the :is(.row, .divider) note above) AND
+   writes an inline display:inline on it, restoring display:block on clear. An id
+   selector survives the class edit, and only !important outranks core's inline value,
+   so without both the grid collapses to a 0x0 inline box during a query and to a
+   Bootstrap float layout after it, until the next route change. */
 #tempwidgets,
 #weatherwidgets {
-    display: grid;
+    display: grid !important;
+    padding: var(--dz-card-space-sm) 0;
+    margin: 0 !important;
     grid-template-columns: repeat(auto-fill, minmax(min(var(--dz-card-min-width), 100%), 1fr));
     justify-content: center;
     gap: var(--dz-card-space-xl);
@@ -180,7 +207,7 @@ div.bannercontent .row > .item {
     width: 100%;
 }
 
-#holder .row .item table[id^="item"] > tbody > tr,
+#holder :is(.row, .divider) .item table[id^="item"] > tbody > tr,
 .dd-widget-body .item table[id^="item"] > tbody > tr,
 .rectangle-8,
 .rectangle-8-dropdown,
@@ -197,7 +224,7 @@ div.bannercontent .row > .item {
    ring so the resting shadow is never dropped. (The restate-then-add pattern still applies
    where the ring is a raw literal instead of the composed token, e.g. the status-ring
    hovers in css/device-status.css.) */
-#holder .row .item table[id^="item"] > tbody > tr:hover,
+#holder :is(.row, .divider) .item table[id^="item"] > tbody > tr:hover,
 .rectangle-8:hover,
 .rectangle-8-dropdown:hover,
 #settings .row-fluid > div:hover {
@@ -248,13 +275,13 @@ div.bannercontent .row > .item {
     transition: background-color 0.15s ease;
 }
 
-#holder .row .item table[id^="item"] > tbody > tr,
+#holder :is(.row, .divider) .item table[id^="item"] > tbody > tr,
 .dd-widget-body .item.itemBlock table[id^="item"] > tbody > tr {
     display: grid;
 }
 
-#holder .row .span4 table[id^="item"] > tbody > tr,
-#holder .row .item.span4 table[id^="item"] > tbody > tr,
+#holder :is(.row, .divider) .span4 table[id^="item"] > tbody > tr,
+#holder :is(.row, .divider) .item.span4 table[id^="item"] > tbody > tr,
 .dd-widget-body .item.itemBlock table[id^="item"] > tbody > tr {
     grid-template-rows: auto minmax(var(--dz-card-row-status-min),1fr) minmax(0,var(--dz-card-row-lastupdate-h));
     grid-template-columns: var(--dz-card-col-icon) var(--dz-card-col-icon2) minmax(0,1fr) minmax(0, auto) minmax(0, auto) var(--dz-card-col-trailing);
@@ -270,10 +297,10 @@ div.bannercontent .row > .item {
     'favorite lastupdate lastupdate lastupdate tools tools';
 }
 
-#holder .row .span4 table[id="itemtabledoubleicon"] > tbody > tr,
-#holder .row .span4 table[id="itemtablesmalldoubleicon"] > tbody > tr,
-#holder .row .item.span4 table[id="itemtabledoubleicon"] > tbody > tr,
-#holder .row .item.span4 table[id="itemtablesmalldoubleicon"] > tbody > tr,
+#holder :is(.row, .divider) .span4 table[id="itemtabledoubleicon"] > tbody > tr,
+#holder :is(.row, .divider) .span4 table[id="itemtablesmalldoubleicon"] > tbody > tr,
+#holder :is(.row, .divider) .item.span4 table[id="itemtabledoubleicon"] > tbody > tr,
+#holder :is(.row, .divider) .item.span4 table[id="itemtablesmalldoubleicon"] > tbody > tr,
 .dd-widget-body .item.itemBlock table[id="itemtabledoubleicon"] > tbody > tr,
 .dd-widget-body .item.itemBlock table[id="itemtablesmalldoubleicon"] > tbody > tr {
     grid-template-columns: var(--dz-card-col-icon) var(--dz-card-col-icon) minmax(0,1fr) minmax(0, auto) minmax(0, auto) var(--dz-card-col-trailing);
@@ -282,10 +309,10 @@ div.bannercontent .row > .item {
     'favorite lastupdate lastupdate lastupdate tools tools';
 }
 
-#holder .row .span4 table[id="itemtabletrippleicon"] > tbody > tr,
-#holder .row .span4 table[id="itemtablesmalltrippleicon"] > tbody > tr,
-#holder .row .item.span4 table[id="itemtabletrippleicon"] > tbody > tr,
-#holder .row .item.span4 table[id="itemtablesmalltrippleicon"] > tbody > tr,
+#holder :is(.row, .divider) .span4 table[id="itemtabletrippleicon"] > tbody > tr,
+#holder :is(.row, .divider) .span4 table[id="itemtablesmalltrippleicon"] > tbody > tr,
+#holder :is(.row, .divider) .item.span4 table[id="itemtabletrippleicon"] > tbody > tr,
+#holder :is(.row, .divider) .item.span4 table[id="itemtablesmalltrippleicon"] > tbody > tr,
 .dd-widget-body .item.itemBlock table[id="itemtabletrippleicon"] > tbody > tr,
 .dd-widget-body .item.itemBlock table[id="itemtablesmalltrippleicon"] > tbody > tr {
     grid-template-areas: 'name name name bigtext bigtext options'
