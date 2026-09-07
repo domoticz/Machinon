@@ -8,8 +8,9 @@
 /* Search */
 /* Colours are tokenised (were #fff for the old accent-gradient bar): the header
    is now the flat --dz-nav-bg surface, so the search reads on it in every scheme,
-   dark text on the light bar, light text on the dark one. The mobile expand popup
-   below keeps its own #fff border (it sits on an accent background). */
+   dark text on the light bar, light text on the dark one. The phone's expanded
+   pill sits BELOW that header on a widget surface, so its own contents switch to
+   --dz-body-text there. */
 #search {
     float: right;
     margin-top: 5px;
@@ -25,9 +26,54 @@
     line-height: 30px;
 }
 
+/* The field is the input together with the affordances that act on it, as one
+   box. Two things follow from the grouping, and both are the point of it: the
+   count and the clear glyph are placed against the FIELD's right edge, inside
+   its visual bounds, instead of floating beside it; and on a phone this
+   wrapper is the single element the expand transform below is applied to, so
+   its children ride into the expanded pill with it. Positioned as siblings of
+   a transformed input they could not follow it at all. */
+.dz-search-field {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    /* The magnifier's line box (#search i above), so the field keeps the box
+       height the header was laid out around whichever affordance is showing. */
+    min-height: 30px;
+    /* The field owns its own edge, in both states: this underline on the
+       header, the pill's full border on a phone. It cannot sit on the input,
+       because the affordances now sit INSIDE the field and the magnifier's
+       23px mark is taller than the input's 18px text box, so an underline
+       drawn at the input's bottom is a line through the glyph. */
+    border-bottom: 1px solid var(--dz-accent-text);
+}
+
+/* Both affordances share one slot at the field's right edge - the magnifier
+   while the box is empty, the count and clear once a query is running - so the
+   mark does not move when core swaps them, in either expand state. */
+#search :is(.jsTbSearch, .jsTbResults) {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
 #searchInput {
     color: var(--dz-accent-text);
-    border-color: var(--dz-accent-text);
+    /* The field draws the edge; see .dz-search-field above. */
+    border: 0;
+    box-sizing: border-box;
+    /* Lifts the 250px cap the generic input[type=text] rule below sets for
+       form fields; this one has to hold its text plus the affordance slot. */
+    max-width: none;
+    width: 278px;
+    /* Reserves the affordance slot so typed text and the caret can never run
+       under it. 60px: core truncates the count to four characters
+       (_tbPadCount slices to the last four), so the widest the group can get
+       is four tabular digits plus the gap and the glyph, measured at 53px,
+       with the rest as clear space. The width above is then the reserve plus
+       the 218px of text the field carried before it had one. */
+    padding-right: 60px;
 }
 
 #searchInput::placeholder {
@@ -44,27 +90,77 @@
 }
 
 @media (max-width: 767px) {
+    /* Collapsed, the input is a zero-width sliver and the field shrinks to the
+       affordance slot alone, which leaves the count sitting in the header. That
+       is deliberate: with the field invisible, the count is the only thing
+       telling the user a filter is active and the page is showing a subset, so
+       it must survive the collapse. The reserve goes with the text it was
+       reserving room for; kept, it would hold the field open as a 60px stub
+       with a visible underline in the header. */
     #searchInput {
         width: 0;
+        padding-right: 0;
         margin-right: 10px;
+    }
+
+    /* Collapsed there is no text to underline, and the field is only as wide as
+       the margin above, so the edge would render as a stray 10px dash beside
+       the count. The expanded rule below restores it as the pill's border. */
+    .dz-search-field {
+        border-bottom: 0;
+    }
+
+    /* Expanded, the WHOLE field translates into a pill below the header, so the
+       count and clear travel inside it and stay attached to the text they act
+       on. The chrome lives on the field rather than the input for the same
+       reason: one transformed element, no second copy of these offsets to keep
+       in step. A neutral widget surface so the pill stands out from the accent
+       header (an accent pill would blend into it); accent border + popup
+       shadow. */
+    #search:hover .dz-search-field,
+    #search:active .dz-search-field,
+    #search:focus .dz-search-field {
+        width: calc(100% - 60px);
+        /* The pill is sized by its content, not by the header slot the
+           collapsed field holds open; see the toast note on the input below. */
+        min-height: 0;
+        transform: translate(30px, 45px);
+        background: var(--dz-widget-bg);
+        box-shadow: var(--dz-elev-popup);
+        border-radius: 20px;
+        border: 2px solid var(--dz-accent-color);
+        padding: 10px;
+        z-index: 5;
     }
 
     #search:hover #searchInput,
     #search:active #searchInput,
     #search:focus #searchInput {
-        width: calc(100% - 60px);
-        max-width: unset;
-        transform: translate(30px, 45px);
-        /* A neutral widget-surface field so it stands out from the accent header
-           (an accent pill would blend into it); accent border + popup shadow. */
-        background: var(--dz-widget-bg);
+        width: 100%;
+        /* The collapsed rule's margin is what holds the affordance slot open
+           in the header; expanded, it would only stop the input short of the
+           pill's own inner edge. */
+        margin-right: 0;
+        padding-right: 60px;
         color: var(--dz-body-text);
-        box-shadow: var(--dz-elev-popup);
-        border-radius: 20px;
-        border: 2px solid var(--dz-accent-color);
-        padding: 10px;
-        position: relative;
-        z-index: 5;
+        /* The pill's own border is the field's edge here, so the input drops
+           the underline it carries everywhere else. Dropping it is also what
+           keeps the expanded pill exactly 41px tall, which css/toasts.css
+           measures against: its `body:has(#search:focus-within)` rule offsets
+           the toast stack to 101px, the expanded input's bottom plus a 10px
+           clear. Changing this box's height silently moves toasts onto it. */
+        border: 0;
+    }
+
+    /* Inside the pill the affordances read on the widget surface, not on the
+       accent header they inherit from #search, and they sit at the input's own
+       right edge: `right: 0` resolves against the field's padding box, which
+       here would put them hard against the 2px border. */
+    #search:hover :is(.jsTbSearch, .jsTbResults),
+    #search:active :is(.jsTbSearch, .jsTbResults),
+    #search:focus :is(.jsTbSearch, .jsTbResults) {
+        right: var(--dz-card-space-lg);
+        color: var(--dz-body-text);
     }
 
     #search:hover #searchInput::placeholder,
@@ -78,13 +174,6 @@
         #search:not(.readonly):active,
         #search:not(.readonly):focus {
         width: 100%;
-    }
-
-    #search:not(.readonly):hover i,
-        #search:not(.readonly):active i,
-        #search:not(.readonly):focus  i {
-        position: absolute;
-        right: 10px;
     }
 }
 
@@ -147,3 +236,56 @@ input[type="radio"]:checked::before {
     border-radius: 100%;
 }
 
+/* Core's result count and the button that clears it. _tbDisplayResults swaps
+   .jsTbSearch (the magnifier, while the box is empty) for .jsTbResults (the
+   count plus the clear glyph, while a query is running) and writes the number
+   into .jsTbResultsCount. Core binds the clearing click on the whole
+   .jsTbResults span, so the pair is one button and must read as one control.
+
+   Every rule below is scoped through #search because core's own style.css
+   loads after the theme and sizes .tbResultsCount for its topbar (9px Courier
+   in a fixed 22px slot); a bare class selector here would lose that tie.
+
+   There is deliberately no resting `display: none`. Core hides the group
+   itself, synchronously, in the _tbDisplayResults(false, 0) that
+   WatchLiveSearch() runs at the end of setSearch(), before this element can
+   paint. Declaring the hidden state here would be worse than redundant:
+   jQuery's showHide() leaves a stylesheet display in charge only while the
+   element is not display:none in the cascade; otherwise .show() writes the
+   tag's own default display (inline, for a span) as an inline style, and the
+   flex layout below would never apply again. */
+#search .jsTbResults {
+    /* row-reverse paints core's [glyph, count] markup as [count, glyph], which
+       settles two things at once. The glyph takes the outer edge, the one slot
+       the magnifier also occupies, so the mark does not move as a query starts;
+       and core's _tbPadCount left-pad lands where it costs nothing. That pad
+       fills the count out to a fixed four characters with &nbsp;, which is not
+       collapsible whitespace, so in markup order it would sit between glyph and
+       number as a gap whose width changes with the digit count. On this side of
+       the number it falls outside the pairing, and the number always meets the
+       glyph at the same distance. */
+    display: inline-flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: var(--dz-card-space-sm);
+    line-height: 1;
+    cursor: pointer;
+}
+
+/* One step below the magnifier's --dz-icon-size-lg. This is the secondary
+   affordance next to the count it belongs to rather than the box's main mark,
+   and -md is the theme's header-button tier (card options, css/cards.css). */
+#search .jsTbResultsClose {
+    font-size: var(--dz-icon-size-md);
+}
+
+/* The count carries the answer, so it reads at the body base: the same size as
+   the query the user typed into the input beside it. The family and width undo
+   core's fixed monospace topbar slot, and tabular-nums keeps the number from
+   reflowing as the match count changes under typing. */
+#search .jsTbResultsCount {
+    font-family: var(--dz-font-family);
+    font-size: var(--dz-text-sm);
+    width: auto;
+    font-variant-numeric: tabular-nums;
+}

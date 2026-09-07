@@ -40,9 +40,20 @@ function setSearch() {
     input.placeholder = dzT("header.search_placeholder");
     input.title = dzT("header.type_to_search");
 
-    search.appendChild(input);
-    search.appendChild(icon);
-    search.appendChild(results);
+    /* The input and the affordances that act on it are one box, not three
+       siblings. On a phone the collapsed box expands into a pill positioned
+       below the header, and css/search.css makes that pill by translating this
+       wrapper: as its children the count and the clear glyph ride inside the
+       pill for free. Positioned as siblings of a transformed input they could
+       not follow it at all, and the only CSS-only alternative is to repeat the
+       same translate on the affordance group and keep the two values in
+       lockstep by hand forever. */
+    var field = document.createElement("div");
+    field.className = "dz-search-field";
+    field.appendChild(input);
+    field.appendChild(icon);
+    field.appendChild(results);
+    search.appendChild(field);
 
     var logo = document.querySelector(".container-logo");
     if (logo) { logo.appendChild(search); }
