@@ -9,7 +9,8 @@ language = {
   header: {
     mainmenu: "Main menu",
     type_to_search: "Type to search",
-    search_placeholder: "Name, Desc, Idx, Status"
+    search_placeholder: "Name, Desc, Idx, Status",
+    clear_search: "Clear search results"
   },
   hub: {
     loading: "Loading..",

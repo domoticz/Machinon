@@ -850,7 +850,6 @@ function setDeviceOpacity(idx, status, $trs) {
    Registered once by the bootstrap (custom.js) as soon as Angular is up. */
 function initDeviceLiveUpdates($scope) {
     $scope.$on('device_update', function (event, data) {
-        searchFunction();
         if (data.Type === "Light/Switch") {
             setDeviceOpacity(data.idx, data.Status);
             if (theme.features.icon_image.enabled === true) {
