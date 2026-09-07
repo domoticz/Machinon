@@ -44,7 +44,10 @@ function whenElementRenders(key, selector, fn) {
 function locationHashChanged() {
     setPageTitle();
     $(".current_page_item:not(:first)").removeClass("current_page_item");
-    $("#searchInput").val("");
+    /* The query is NOT cleared here: core persists it in
+       myglobals.LastSearchFilter and ScheduleLiveSearchRestore reapplies it
+       once the input and the page container both exist. Clearing here would
+       race that restore and discard the filter on every navigation. */
 
     if (location.hash == "#/Dashboard" && !isMobile || location.hash == "#/LightSwitches" || location.hash == "#/Scenes" || location.hash == "#/Temperature" || location.hash == "#/Weather" || location.hash == "#/Utility") {
         $("#search").removeClass("readonly");
