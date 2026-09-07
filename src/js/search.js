@@ -78,12 +78,22 @@ function setSearch() {
     $("#search").click(function () {
         $("#searchInput").focus();
     });
-    $("#searchInput").keyup(function (event) {
+    /* Same hazard as syncLiveSearchSiblings above, on the same element: a
+       jQuery-bound handler here would be stripped by WatchLiveSearch's
+       argument-less .off() moments after being attached, silently killing
+       Enter and Escape. Native addEventListener survives it. The Escape
+       clear still goes through jQuery's val().trigger("change") because
+       core's own matching handler is jQuery-bound and that is the only path
+       that reaches it; syncLiveSearchSiblings is called explicitly right
+       after because that trigger is a pure jQuery simulation, not a native
+       dispatch, so it never reaches this input's own native listeners. */
+    input.addEventListener("keyup", function (event) {
         if (event.keyCode === 13) {
-            $("#searchInput").blur();
+            input.blur();
         }
         if (event.keyCode === 27) {
-            $("#searchInput").val("").trigger("change");
+            $(input).val("").trigger("change");
+            syncLiveSearchSiblings.call(input);
         }
     });
 
