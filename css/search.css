@@ -297,3 +297,12 @@ input[type="radio"]:checked::before {
 .dz-filtered-out {
     display: none !important;
 }
+
+/* The same file's mark on a camera card, and on the whole #dashCameras section
+   once no camera matches. Separate from .dz-filtered-out because it applies on
+   a surface core filters itself, where only the camera markup is the theme's to
+   hide. !important because the card rules in css/cards.css set display on
+   #holder-prefixed selectors that a bare class cannot outrank. */
+.dz-camera-filtered-out {
+    display: none !important;
+}

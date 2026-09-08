@@ -98,10 +98,8 @@
    as a direct child, #tempwidgets/#weatherwidgets have it two levels down inside
    <dztemperaturewidget>/<dzweatherwidget>, and :has() with no combinator catches
    both. */
-div.bannercontent .row.divider:has(.item):before,
-div.bannercontent .row.divider:has(.item):after,
-div.bannercontent .row:not(.divider):has(.item):before,
-div.bannercontent .row:not(.divider):has(.item):after {
+div.bannercontent :is(.row, .divider):has(.item):before,
+div.bannercontent :is(.row, .divider):has(.item):after {
     display: none;
 }
 
@@ -122,12 +120,23 @@ div.clearfix {
    (measured: 800px viewport fell from 2 columns to 1). The min() guard lets cards shrink
    on viewports narrower than the min width. Browsers without :has() support never match
    this selector, so .row/.row.divider falls back to plain Bootstrap float layout: no
-   card grid, no auto-fill columns, but still functional. */
-div.bannercontent .row.divider:has(.item),
-div.bannercontent .row:not(.divider):has(.item) {
+   card grid, no auto-fill columns, but still functional.
+
+   :is(.row, .divider), not .row, and display with !important, because core's live
+   search (WatchLiveSearch in js/domoticz.js) rewrites every card container that
+   carries .divider on each keystroke: it strips .row off them for the duration of a
+   non-empty query and writes an inline display (inline while querying, block on
+   clear) that outranks any stylesheet value without !important. Three containers in
+   the theme are of that shape - <div id="tempwidgets|weatherwidgets" class="row
+   divider"> in views/temperature.html and views/weather.html, and the camera row
+   js/dashboard_camera.js injects into #dashCameras - and a rule keyed on .row or on a
+   list of ids would leave each of them, and any container added later, collapsed to a
+   0-height box behind cards that still look present. Matching the shape rather than
+   the identity is what keeps that from recurring. */
+div.bannercontent :is(.row, .divider):has(.item) {
     padding: var(--dz-card-space-sm) 0;
     margin: 0 !important;
-    display: grid;
+    display: grid !important;
     grid-template-columns: repeat(auto-fill, minmax(min(var(--dz-card-min-width), 100%), 1fr));
     justify-content: center;
     gap: var(--dz-card-space-xl);
@@ -135,7 +144,7 @@ div.bannercontent .row:not(.divider):has(.item) {
     align-items: stretch;
 }
 
-div.bannercontent .row > .item {
+div.bannercontent :is(.row, .divider) > .item {
     max-width: var(--dz-card-max-width);
     justify-self: center;
     width: 100%;
@@ -160,7 +169,8 @@ div.bannercontent .row > .item {
    cards lose their surface, border, radius and grid rows exactly while the user is
    looking at the matches. .divider is the half core never touches, and it is a class
    like .row, so the alternation keeps these selectors at their original specificity;
-   the only .divider elements in the document that hold cards are those two containers. */
+   the only .divider elements in the document that hold cards are those two containers
+   and the camera row in #dashCameras (js/dashboard_camera.js). */
 #holder :is(.row, .divider) dzweatherwidget,
 #holder :is(.row, .divider) dztemperaturewidget,
 #holder :is(.row, .divider) .span4,
@@ -178,28 +188,10 @@ div.bannercontent .row > .item {
     height: 100%;
 }
 
-/* Override upstream flex with grid for Temperature/Weather tabs (match Switches layout).
-   Same auto-fill contract as the .row grids above; see the note there.
-
-   display, padding and margin are restated here, on the id, because the .row.divider
-   grid rule above cannot hold this container on its own: core's live search strips
-   .row off it for the duration of a query (see the :is(.row, .divider) note above) AND
-   writes an inline display:inline on it, restoring display:block on clear. An id
-   selector survives the class edit, and only !important outranks core's inline value,
-   so without both the grid collapses to a 0x0 inline box during a query and to a
-   Bootstrap float layout after it, until the next route change. */
-#tempwidgets,
-#weatherwidgets {
-    display: grid !important;
-    padding: var(--dz-card-space-sm) 0;
-    margin: 0 !important;
-    grid-template-columns: repeat(auto-fill, minmax(min(var(--dz-card-min-width), 100%), 1fr));
-    justify-content: center;
-    gap: var(--dz-card-space-xl);
-    justify-items: stretch;
-    align-items: stretch;
-}
-
+/* The Temperature and Weather containers hold their cards in
+   <dztemperaturewidget>/<dzweatherwidget> elements rather than in a bare .item, so the
+   card cap above (which is keyed on .item) does not reach them; the grid itself comes
+   from the shared :is(.row, .divider):has(.item) rule. */
 #tempwidgets > *,
 #weatherwidgets > * {
     max-width: var(--dz-card-max-width);

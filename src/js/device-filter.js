@@ -28,9 +28,20 @@
    no shared ancestor closer than the grid itself), so unlike the classic
    dashboard's <section class="dashCategory"> there is nothing here a filter
    could collapse when a group empties out; no section-hiding step exists in
-   this file because there is no container it could operate on. */
+   this file because there is no container it could operate on.
+
+   The camera cards on the CLASSIC dashboard are the second surface here, and
+   they are here for a different reason: core's engine reaches every card it
+   can recognise, and a camera is markup core has never seen (see
+   dzFilterCameras below). Everything else on that surface stays core's. */
 
 var DZ_FILTER_HIDDEN = "dz-filtered-out";
+
+/* A class of its own, not DZ_FILTER_HIDDEN: cameras are hidden on a surface
+   core filters itself, and the two marks have to stay tellable apart so
+   "the theme never marks a device card on the classic dashboard" stays a
+   thing that can be asserted. */
+var DZ_CAMERA_HIDDEN = "dz-camera-filtered-out";
 
 /* The armed predicate itself, or null. It takes a card's search TEXT, not the
    card: the DOM read that produces that text is cached per query (see
@@ -76,7 +87,8 @@ function dzApplyDeviceFilter(predicate) {
 
 function dzClearDeviceFilter() {
     dzActiveFilter = null;
-    dzFilterCards().forEach(function (card) {
+    var cards = dzFilterCards();
+    cards.forEach(function (card) {
         var wasHidden = card.classList.contains(DZ_FILTER_HIDDEN) || card.style.display === "none";
         card.classList.remove(DZ_FILTER_HIDDEN);
         /* #searchInput carries core's .jsLiveSearch class too, so WatchLiveSearch
@@ -97,6 +109,22 @@ function dzClearDeviceFilter() {
             $(card).trigger("dz:livesearch:show");
         }
     });
+    if (!cards.length) { return; }
+
+    /* Dash2 only, and a correction rather than a race. Core paints the result
+       badge from $('.liveSearchShown').length and strips that class only inside
+       the branch it gates on $('.devicesList').hasClass('devicesListFiltered');
+       Dash2 renders no .devicesList, so on this surface the class outlives every
+       clear, and the badge keeps counting the cards of a query that is no longer
+       in the box. Stripping the class is what core's own restore branch would
+       have done, and it keeps the NEXT query's count honest; the repaint is
+       needed on top of it because core's handler is bound directly on the input
+       while this one is delegated on document, so the stale number is already on
+       screen by the time this runs. _tbDisplayResults is a global in
+       js/domoticz.js and takes the same arguments core passes for an empty
+       query. */
+    $(".liveSearchShown").removeClass("liveSearchShown");
+    if (typeof _tbDisplayResults === "function") { _tbDisplayResults(false, 0); }
 }
 
 function dzReapplyDeviceFilter() {
@@ -142,9 +170,51 @@ function dzDashboardSearchPredicate(query) {
     };
 }
 
+/* Camera cards are the theme's own markup: js/dashboard_camera.js injects
+   <section id="dashCameras"> onto the classic dashboard, with a .movable card
+   per enabled camera. They carry neither .itemBlock nor a data-search
+   attribute, the two things core's WatchLiveSearch matches on, so core's
+   engine filters the devices around them and leaves every camera on screen.
+   Handing the job back to core by adding .itemBlock would make them HARDER to
+   hide, not easier: views/dashboard_desktop.html carries an inline
+   "#dashcontent .itemBlock { display: block !important }" rule so that core's
+   jQuery hiding cannot fight Angular's ng-repeat on that surface, and it would
+   outrank any hiding of a camera too. The theme owns the markup, so the theme
+   filters it.
+
+   A camera exposes nothing but its name, and the devices beside it are
+   filtered by DashboardDesktopController's filterDevices
+   (app/dashboard/DashboardDesktopController.js), which tests the WHOLE query
+   against each field with indexOf, as one phrase rather than as independent
+   terms. Matching the name the same way is what keeps one query meaning one
+   thing on one page. (dzDashboardSearchPredicate above splits into terms
+   instead because the Dynamic Dashboard is the surface core's own
+   WatchLiveSearch would otherwise match, and that engine splits.) */
+function dzFilterCameras(query) {
+    var section = document.getElementById("dashCameras");
+    if (!section) { return; }
+    var phrase = String(query || "").toLowerCase();
+    var showAll = phrase.trim() === "";
+    var shown = 0;
+    Array.prototype.forEach.call(section.querySelectorAll(".movable"), function (card) {
+        var nameEl = card.querySelector("td#name");
+        var name = ((nameEl && nameEl.textContent) || "").toLowerCase();
+        var show = showAll || name.indexOf(phrase) !== -1;
+        card.classList.toggle(DZ_CAMERA_HIDDEN, !show);
+        if (show) { shown++; }
+    });
+    /* The heading belongs to the section, not to the row of cards, so hiding
+       the cards alone leaves a "Cameras:" label standing over nothing. */
+    section.classList.toggle(DZ_CAMERA_HIDDEN, shown === 0);
+}
+
 function dzWireDashboardSearch() {
     $(document).on("keyup change", "#searchInput", function () {
         var value = this.value;
+        /* Always, on every surface: the camera section only exists on the
+           classic dashboard and dzFilterCameras is a no-op everywhere else,
+           and the clear path below must reach it as well as the query path. */
+        dzFilterCameras(value);
         if (!value) {
             /* Always runs, even off Dash2: this is the only place
                dzActiveFilter ever gets cleared, and it must not survive
