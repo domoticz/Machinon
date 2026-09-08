@@ -135,4 +135,43 @@
            mobile "smushed" overhang. */
         border-bottom: 0;
     }
+
+    /* Fix round 1 (owner-reported, real phone): css/search.css's own
+       #search:not(.readonly):hover/:active/:focus sets #search to a literal
+       width:100% when the pill expands. That assumed #search owned the
+       WHOLE float row; now that the badge is a permanent float:right
+       sibling reserving its own slot AT ALL TIMES (the [hidden] rule above
+       is visibility:hidden, not display:none, precisely so #search's
+       COLLAPSED position never depends on the badge's problem-having
+       state), a literal 100% no longer fits beside that reserved slot and
+       #search wraps to a second line - which orphans core's own
+       #topBar/#tbFiltRooms/#tbTimeSun (a completely separate #main-view
+       subtree: the wrap does not push them down, it collapses #topBar's
+       own width to 0, taking the room selector and the sun/up/down row
+       with it, both measured live and screenshotted in the attribution
+       report). The badge's reserved footprint is CONSTANT whether it is
+       [hidden] or not (that constancy is the whole point of the
+       space-preserving design), so a fixed subtraction fixes both states
+       in one rule: var(--dz-card-space-lg) (10px, the badge's own
+       margin-right, the same edge-clearance rhythm cited on the base rule)
+       plus var(--dz-icon-size-md) (24px) - not semantically "a header
+       button icon" here, reused only because its value happens to match
+       the badge's own measured rendered width (the ion-ios-warning glyph's
+       box at --dz-icon-size-lg, the same "measured glyph box, not a direct
+       token" derivation dz-tokens.css documents for other anchor pixels).
+       Equal-or-greater specificity to the rule it overrides
+       (#search:not(.readonly):hover etc., 1 id + 2 classes-worth of
+       pseudo-selectors) plus source order (custom.css imports this file
+       after css/search.css) settles the cascade without !important.
+       Verified live (Playwright, iPhone 13 emulation, badge hidden AND
+       visible): #search's own top stays 5 (never wraps), and
+       #topBar/#tbFiltRooms/#tbTimeSun keep their collapsed-state widths
+       and positions once the pill expands - the desktop rule two lines
+       above is untouched, so the P6 stability check stays green there
+       unconditionally; this rule only ever applies below 768px. */
+    #search:not(.readonly):hover,
+    #search:not(.readonly):active,
+    #search:not(.readonly):focus {
+        width: calc(100% - var(--dz-card-space-lg) - var(--dz-icon-size-md));
+    }
 }
