@@ -4,6 +4,26 @@
   see the @import block in custom.css.
 */
 
+/* Local, component-scoped custom property, not a dz-tokens.css design
+   token: the MEASURED rendered width of #dz-problem-badge's own icon glyph
+   box (the ion-ios-warning character at --dz-icon-size-lg, Playwright
+   getBoundingClientRect, 1280x900 and 390x844, both schemes). Used only to
+   let the mobile fix below (css/problems.css's own #search override)
+   subtract the badge's real footprint without hardcoding a bare pixel
+   literal or borrowing a same-valued but semantically unrelated token (an
+   earlier version of this fix reused var(--dz-icon-size-md), which only
+   coincidentally matches this glyph's box; nothing ties its value to this
+   badge, so a future change to --dz-icon-size-md would have silently
+   reintroduced the mobile wrap regression - see the git history for the
+   incident this replaces). Declared on :root, matching every dz-tokens.css
+   token's own scope, because #search - the rule that consumes it - is a
+   SIBLING of the badge, not a descendant, so it needs to inherit from a
+   shared ancestor. Re-measure and update this value if #dz-problem-badge's
+   own icon element, font, or font-size ever changes. */
+:root {
+    --dz-problem-badge-reserved-width: 24px;
+}
+
 /* dzProblemsBadgeEl() inserts this button into .container-logo BEFORE
    #search (see the comment there), so as the FIRST float:right child it is
    the OUTERMOST control in the header - search sits inward of it, per the
@@ -154,12 +174,10 @@
        space-preserving design), so a fixed subtraction fixes both states
        in one rule: var(--dz-card-space-lg) (10px, the badge's own
        margin-right, the same edge-clearance rhythm cited on the base rule)
-       plus var(--dz-icon-size-md) (24px) - not semantically "a header
-       button icon" here, reused only because its value happens to match
-       the badge's own measured rendered width (the ion-ios-warning glyph's
-       box at --dz-icon-size-lg, the same "measured glyph box, not a direct
-       token" derivation dz-tokens.css documents for other anchor pixels).
-       Equal-or-greater specificity to the rule it overrides
+       plus var(--dz-problem-badge-reserved-width) (see the top of this
+       file - the badge's own measured icon-glyph width, named for exactly
+       this purpose so nothing else's value drift can silently reopen this
+       regression). Equal-or-greater specificity to the rule it overrides
        (#search:not(.readonly):hover etc., 1 id + 2 classes-worth of
        pseudo-selectors) plus source order (custom.css imports this file
        after css/search.css) settles the cascade without !important.
@@ -172,6 +190,6 @@
     #search:not(.readonly):hover,
     #search:not(.readonly):active,
     #search:not(.readonly):focus {
-        width: calc(100% - var(--dz-card-space-lg) - var(--dz-icon-size-md));
+        width: calc(100% - var(--dz-card-space-lg) - var(--dz-problem-badge-reserved-width));
     }
 }
