@@ -10,7 +10,11 @@
     <p id="dz-problems-intro"></p>
     <div id="dz-problems-state" hidden></div>
     <table id="dz-problems-table" hidden>
-        <thead><tr><th id="dz-problems-th-name"></th><th id="dz-problems-th-what"></th><th id="dz-problems-th-seen"></th></tr></thead>
+        <!-- Leading th intentionally empty: it heads the icon column
+             (src/js/problems.js), which is decorative and aria-hidden per
+             row, same as core's own icon-only columns (e.g. the Devices
+             table's state-icon column, app/devices/Devices.js: title ''). -->
+        <thead><tr><th></th><th id="dz-problems-th-name"></th><th id="dz-problems-th-what"></th><th id="dz-problems-th-seen"></th></tr></thead>
         <tbody></tbody>
     </table>
 </div>

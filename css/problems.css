@@ -263,6 +263,58 @@
     outline: none;
 }
 
-.dz-problems-row--link:focus-visible td:first-child {
+/* nth-child(2), not :first-child: the icon column added below is the
+   structural first cell, and a 3px inset marker on its own narrow,
+   centered 1%-width box would read as a stray sliver next to the glyph
+   rather than a row marker. The name cell (second child) is where this
+   marker reads correctly, same as originally designed. */
+.dz-problems-row--link:focus-visible td:nth-child(2) {
     box-shadow: inset 3px 0 0 var(--dz-accent-color);
+}
+
+/* Leading icon column (owner addition): one glyph per row, matching the
+   WARNING TOAST's own iconography exactly (dzWarnPass's toastIcon values in
+   src/js/devices.js: ion-ios-wifi for timeout, ion-md-battery-full for
+   battery - deliberately not the card's own glyphs, see that file's
+   comment on why battery differs there), so this page speaks the same
+   visual language as the warnings that led to it.
+
+   Column sized to content and centered, matching the icon-column alignment
+   policy documented in css/tables.css (numeric/datetime -> right,
+   icon -> center, both header and data). No vertical padding change: the
+   shared td padding above already centers a 16px glyph inside a 45px-ish
+   row.
+
+   Color is the theme's own status token, rgb(var(--dz-status-timeout-values))
+   / rgb(var(--dz-status-lowbat-values)) (dz-tokens.css) - the SAME value the
+   card's own warning-text glyph uses (css/device-status.css) and the value
+   the toast's own glyph falls back to (css/toasts.css:
+   var(--dz-toast-severity-timeout, rgb(var(--dz-status-timeout-values)))).
+   Deliberately NOT the toast's repaired --dz-toast-severity-* override:
+   css/toasts.css's own comment documents that repair as solved specifically
+   for contrast against the toast TILE's 15%-into-menu-bg background, a
+   different surface than this table row, so reusing it here would carry a
+   correction meant for someone else's background.
+
+   Sized --dz-icon-size-sm (16px, "inline/tab ionicons" - dz-tokens.css):
+   a plain inline glyph in a table cell, not the toast's own dedicated 34px
+   severity tile. */
+#dz-problems-table thead th:first-child,
+#dz-problems-table tbody td:first-child {
+    text-align: center;
+    width: 1%;
+    white-space: nowrap;
+}
+
+.dz-problems-icon {
+    font-size: var(--dz-icon-size-sm);
+    line-height: 1;
+}
+
+.dz-problems-icon--timeout {
+    color: rgb(var(--dz-status-timeout-values));
+}
+
+.dz-problems-icon--battery {
+    color: rgb(var(--dz-status-lowbat-values));
 }

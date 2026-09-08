@@ -234,6 +234,23 @@ function dzProblemsRenderRows(rows) {
     dzProblemsResolveRoutes(function (map) {
         rows.forEach(function (row) {
             var tr = document.createElement("tr");
+            /* Leading icon column: the SAME glyph the warning toast for this
+               kind uses (dzWarnPass's toastIcon in src/js/devices.js), not
+               the card's own glyph (battery deliberately differs there per
+               the owner decision recorded on that call), so the page speaks
+               the same visual language as the warnings that led here.
+               aria-hidden: purely decorative, redundant with the "what" text
+               cell a few lines down ("Timed out" / "Battery N%" already says
+               it in words), same as the toast's own icon
+               (src/js/toasts.js). */
+            var iconCell = document.createElement("td");
+            var icon = document.createElement("i");
+            icon.className = row.kind === "battery"
+                ? "ion-md-battery-full dz-problems-icon dz-problems-icon--battery"
+                : "ion-ios-wifi dz-problems-icon dz-problems-icon--timeout";
+            icon.setAttribute("aria-hidden", "true");
+            iconCell.appendChild(icon);
+            tr.appendChild(iconCell);
             var nameCell = document.createElement("td");
             nameCell.textContent = row.name;
             tr.appendChild(nameCell);
