@@ -4,7 +4,7 @@
     background-color: #313131 !important;
 }
 
-.standby .row {
+.standby :is(.row, .divider) {
     opacity: 0.4;
 }
 

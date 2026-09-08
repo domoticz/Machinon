@@ -13,8 +13,14 @@ section.compact h2 {
     display: none;
 }
 
+/* The third selector is the same container mid-query: core's live search strips
+   .row off every .divider while a query runs, and the camera row in a compact
+   section is <div class="row divider">. Spelled out rather than folded into
+   :is(.row, .divider) so the selector keeps the specificity the two above it
+   have always had. */
 section.compact .row.divider,
-section.compact .row:not(.divider) {
+section.compact .row:not(.divider),
+section.compact .divider:not(.row) {
     display: grid;
     grid-template-columns: repeat(auto-fill, var(--dz-card-compact-width));
     grid-auto-flow: row dense;
@@ -117,8 +123,8 @@ section.compact .row:not(.divider) {
     font-size: var(--dz-text-value);
 }
 
-#holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr,
-#holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr {
+#holder #dashcontent :is(.row, .divider) .span3 .item table[id^="item"] > tbody > tr,
+#holder #dashcontent :is(.row, .divider) .item.span3 table[id^="item"] > tbody > tr {
     grid-template-rows: var(--dz-card-compact-row-heights);
     grid-template-columns: var(--dz-card-compact-col-widths);
     grid-gap: var(--dz-card-space-2xs);
@@ -130,8 +136,8 @@ section.compact .row:not(.divider) {
     overflow: hidden;
 }
 
-#holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr td#bigtext,
-#holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr td#bigtext {
+#holder #dashcontent :is(.row, .divider) .span3 .item table[id^="item"] > tbody > tr td#bigtext,
+#holder #dashcontent :is(.row, .divider) .item.span3 table[id^="item"] > tbody > tr td#bigtext {
     grid-area: bigtext;
     font-size: var(--dz-text-value);
     font-weight: var(--dz-weight-semibold);
@@ -141,8 +147,8 @@ section.compact .row:not(.divider) {
     color: var(--dz-accent-color);
 }
 
-#holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr td#status,
-#holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr td#status {
+#holder #dashcontent :is(.row, .divider) .span3 .item table[id^="item"] > tbody > tr td#status,
+#holder #dashcontent :is(.row, .divider) .item.span3 table[id^="item"] > tbody > tr td#status {
     display:none;
 }
 
@@ -151,8 +157,8 @@ section.compact .row:not(.divider) {
    (no buttons, and the :has(td.input) rule below hides the value too).
    Give the button-carrying td#status the same treatment the scroll-column
    rules were designed for: visible, in the value's grid slot. */
-#holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr td#status:has(.btn-group),
-#holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr td#status:has(.btn-group) {
+#holder #dashcontent :is(.row, .divider) .span3 .item table[id^="item"] > tbody > tr td#status:has(.btn-group),
+#holder #dashcontent :is(.row, .divider) .item.span3 table[id^="item"] > tbody > tr td#status:has(.btn-group) {
     display: block;
     grid-area: bigtext;
     align-self: center;
@@ -160,8 +166,8 @@ section.compact .row:not(.divider) {
     overflow: auto;
 }
 
-#holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr td#lastupdate,
-#holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr td#lastupdate {
+#holder #dashcontent :is(.row, .divider) .span3 .item table[id^="item"] > tbody > tr td#lastupdate,
+#holder #dashcontent :is(.row, .divider) .item.span3 table[id^="item"] > tbody > tr td#lastupdate {
     grid-area: lastupdate;
     padding: 0 var(--dz-card-space-md) var(--dz-card-space-2xs) 0;
     text-align: right;
@@ -171,27 +177,27 @@ section.compact .row:not(.divider) {
     max-height: unset;
 }
 
-#holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr td.input,
-#holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr td.input {
+#holder #dashcontent :is(.row, .divider) .span3 .item table[id^="item"] > tbody > tr td.input,
+#holder #dashcontent :is(.row, .divider) .item.span3 table[id^="item"] > tbody > tr td.input {
     grid-area: bigtext;
     align-self: center;
 }
 
-#holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr:has(td.input) td#bigtext,
-#holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr:has(td.input) td#bigtext {
+#holder #dashcontent :is(.row, .divider) .span3 .item table[id^="item"] > tbody > tr:has(td.input) td#bigtext,
+#holder #dashcontent :is(.row, .divider) .item.span3 table[id^="item"] > tbody > tr:has(td.input) td#bigtext {
     display: none;
 }
 
-#holder #dashcontent .row .span3 .item table[id="itemtablesmalltrippleicon"] > tbody > tr,
-#holder #dashcontent .row .item.span3 table[id="itemtablesmalltrippleicon"] > tbody > tr {
+#holder #dashcontent :is(.row, .divider) .span3 .item table[id="itemtablesmalltrippleicon"] > tbody > tr,
+#holder #dashcontent :is(.row, .divider) .item.span3 table[id="itemtablesmalltrippleicon"] > tbody > tr {
     grid-template-columns: var(--dz-card-compact-col-widths-triple);
     grid-template-areas: 'name name name'
     'img img2 img3'
     'lastupdate lastupdate lastupdate';
 }
 
-#holder #dashcontent .row .span3 .item table[id="itemtablesmalltrippleicon"] > tbody > tr td#bigtext,
-#holder #dashcontent .row .item.span3 table[id="itemtablesmalltrippleicon"] > tbody > tr td#bigtext {
+#holder #dashcontent :is(.row, .divider) .span3 .item table[id="itemtablesmalltrippleicon"] > tbody > tr td#bigtext,
+#holder #dashcontent :is(.row, .divider) .item.span3 table[id="itemtablesmalltrippleicon"] > tbody > tr td#bigtext {
     display: none !important;
 }
 

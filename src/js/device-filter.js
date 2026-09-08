@@ -206,6 +206,20 @@ function dzFilterCameras(query) {
     /* The heading belongs to the section, not to the row of cards, so hiding
        the cards alone leaves a "Cameras:" label standing over nothing. */
     section.classList.toggle(DZ_CAMERA_HIDDEN, shown === 0);
+
+    if (showAll) { return; }
+    /* The badge has to describe what the user can SEE. Core paints it from
+       $('.liveSearchShown').length, a class it only ever puts on .itemBlock
+       cards, so a query that matches a camera and no device paints "0" over a
+       camera card that is plainly on screen. Adding the visible cameras to
+       core's own count is the whole correction; the arguments mirror core's
+       (_tbDisplayResults(count || query.length, count) in js/domoticz.js), so a
+       query that matches nothing still shows the affordance with a zero rather
+       than reverting to the idle search icon. This runs after core's own
+       handler for the same reason the clear path does: core binds directly on
+       the input, the theme's handler is delegated on document. */
+    var count = $(".liveSearchShown").length + shown;
+    if (typeof _tbDisplayResults === "function") { _tbDisplayResults(count || phrase.length, count); }
 }
 
 function dzWireDashboardSearch() {

@@ -1,6 +1,6 @@
 /**** ./dashboard_show_last_update.css ***/
 /* Shows last Seen on dashboard */
-#holder #dashcontent .row .item table[id^="item"] > tbody > tr {
+#holder #dashcontent :is(.row, .divider) .item table[id^="item"] > tbody > tr {
     grid-template-rows: 40px minmax(58px,1fr) 20px !important;
 }
 
@@ -28,8 +28,8 @@
     }
 }
 
-#holder #dashcontent .row .span3 .item table[id^="item"] > tbody > tr,
-#holder #dashcontent .row .item.span3 table[id^="item"] > tbody > tr {
+#holder #dashcontent :is(.row, .divider) .span3 .item table[id^="item"] > tbody > tr,
+#holder #dashcontent :is(.row, .divider) .item.span3 table[id^="item"] > tbody > tr {
     grid-template-rows: 20px 58px 20px !important;
 }
 

@@ -1,5 +1,15 @@
 /**** ./dashboard_camera.css ***/
-#holder .row .item table[id^="item"] > tbody > tr.with-cam-preview {
+/* :is(.row, .divider) throughout, never a bare .row: the camera row is
+   <div class="row divider"> and core's live search does an unscoped
+   $('.divider').removeClass('row') for the duration of every non-empty query
+   (WatchLiveSearch, js/domoticz.js). A .row anchor therefore stops matching the
+   camera card exactly while a query is on screen, which is precisely when a
+   matching camera is being looked at: the preview loses background-size: cover
+   and paints its blob at natural size tiled from the top left, and the name
+   plate loses the backing this file exists to give it, which is the unbounded
+   contrast defect the comment below describes. .divider is the half core never
+   touches, and the alternation keeps each selector's specificity unchanged. */
+#holder :is(.row, .divider) .item table[id^="item"] > tbody > tr.with-cam-preview {
     background-size: cover;
     background-position: center;
     cursor: zoom-in;
@@ -23,7 +33,7 @@
    theme because it is read from that theme's own tokens rather than written
    here. 85% rather than opaque: the surface still dominates, so the contrast
    stays inside a knowable band, while a hint of the picture shows through. */
-#holder .row .item table[id^="item"] > tbody > tr.with-cam-preview > #name {
+#holder :is(.row, .divider) .item table[id^="item"] > tbody > tr.with-cam-preview > #name {
     /* !important, and only on background: css/cards.css's general card-name rule
        (`.item #name, div.item.statusNormal td#name, ...`) forces
        `background: transparent !important` to neutralise core's status-coloured
@@ -61,10 +71,10 @@
    .with-cam-preview consumer is a real device row (the section-off path, a
    camera linked to a device), which is not this table and keeps the cell's
    natural width. */
-#holder .row .item table#itemtablecam {
+#holder :is(.row, .divider) .item table#itemtablecam {
     width: auto;
 }
 
-#holder .row .item table[id^="item"] > tbody > tr.with-cam-preview td:not(#name) {
+#holder :is(.row, .divider) .item table[id^="item"] > tbody > tr.with-cam-preview td:not(#name) {
     display: none;
 }

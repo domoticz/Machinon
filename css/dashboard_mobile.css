@@ -10,9 +10,19 @@ body.dashMobile .navbar-fixed-top {
     margin-right: -10px;
 }
 
-body.dashMobile section.dashCategory div.row.divider:first-of-type,
-body.dashMobile section.dashCategory div.row:not(.divider):first-of-type {
-    display: none;
+/* The mobile dashboard paints its own card language (table.mobileitem), so the
+   desktop card row a section opens with has no place here.
+
+   :is(.row, .divider) and !important, both because the live element behind this
+   rule is the camera row js/dashboard_camera.js injects, and core's live search
+   fights over exactly that element: WatchLiveSearch (js/domoticz.js) strips .row
+   off every .divider for the duration of a query, which alone would stop a
+   .row-keyed selector from matching mid-query, and writes an inline display on
+   it, which outranks any stylesheet value that is not !important. css/cards.css
+   grids the same element with !important for that second reason; a deliberate
+   hide of it has to be able to outrank both, which this does on specificity. */
+body.dashMobile section.dashCategory div:is(.row, .divider):first-of-type {
+    display: none !important;
 }
 
 /* Give the section room to PAINT the card shadow it was clipping.

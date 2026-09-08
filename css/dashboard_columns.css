@@ -17,8 +17,15 @@
         height: 50px;
     }
 
+    /* The third selector is the same container mid-query: core's live search
+       strips .row off every .divider while a query runs, and the camera row is
+       <div class="row divider">. Without it the column template stops applying
+       to that row and the dashboard re-flows under the user's typing. Spelled
+       out rather than folded into :is(.row, .divider) so the selector keeps its
+       original specificity. */
     #dashcontent > section:not(.compact) > div.row.divider,
-    #dashcontent > section:not(.compact) > div.row:not(.divider) {
+    #dashcontent > section:not(.compact) > div.row:not(.divider),
+    #dashcontent > section:not(.compact) > div.divider:not(.row) {
         grid-template-columns: minmax(0, 500px) !important;
         justify-content: center;
     }

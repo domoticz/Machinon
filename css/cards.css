@@ -316,8 +316,8 @@ div.bannercontent :is(.row, .divider) > .item {
 	background: none !important;
 }
 
-#holder #dashcontent .row .span4 .item table[id^="item"] > tbody > tr,
-#holder #dashcontent .row .item.span4 table[id^="item"] > tbody > tr {
+#holder #dashcontent :is(.row, .divider) .span4 .item table[id^="item"] > tbody > tr,
+#holder #dashcontent :is(.row, .divider) .item.span4 table[id^="item"] > tbody > tr {
     grid-template-rows: var(--dz-card-row-name-h-dash) minmax(var(--dz-card-row-status-min),1fr) 0;
     overflow: hidden;
 }
