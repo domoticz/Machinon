@@ -1,0 +1,138 @@
+/*
+  problems.css - header warning badge for the house-wide problem list
+  (src/js/problems.js). One of the feature files split out of custom.css -
+  see the @import block in custom.css.
+*/
+
+/* dzProblemsBadgeEl() inserts this button into .container-logo BEFORE
+   #search (see the comment there), so as the FIRST float:right child it is
+   the OUTERMOST control in the header - search sits inward of it, per the
+   owner's placement call: the badge only exists when there is a problem, so
+   putting it outermost keeps search's own position identical whether the
+   badge is showing or not (nothing between search and the header's edge
+   ever moves it). The row stays visible below 768px (unlike .navbar-inner,
+   which the sidemenu overlay replaces), so the badge is reachable at every
+   viewport, same as search itself.
+
+   Sizing mirrors #search exactly (css/search.css): margin-top: 5px plus the
+   icon's own 30px line-height accounts for the row's full 40px height, the
+   same 5px top/bottom split search already uses. The icon takes
+   --dz-icon-size-lg (30px, "search icon, dialog close glyphs" per
+   dz-tokens.css) and --dz-accent-text so it reads on the accent bar exactly
+   like the magnifier beside it; the two are one visual family. */
+#dz-problem-badge {
+    position: relative;
+    float: right;
+    margin-top: 5px;
+    /* Outer edge clearance: the SAME var(--dz-card-space-lg) (10px) #search
+       itself uses for its own margin-right (css/search.css) - now that the
+       badge, not search, sits flush against the container's right edge,
+       the header's one existing edge-clearance rhythm carries over to
+       whichever control is outermost. */
+    margin-right: var(--dz-card-space-lg);
+    /* No margin-left of its own: two adjacent floats' facing margins add,
+       so search's own existing margin-right (css/search.css, var(--dz-card-
+       space-lg), unchanged) already opens a full 10px between the two once
+       the badge sits outward of search instead of the other way round.
+       Measured live (Playwright, 1280x900 and 390x844) both before and
+       after this reorder: with the OLD order (badge inward of search)
+       #search's own magnifier glyph (.jsTbSearch, absolutely positioned at
+       `right: 0` INSIDE the field) overhung 13px past the mobile-collapsed
+       field's own LEFT edge, straight into the badge - the actual cause of
+       "smushed". Swapping the order moves that overhang to search's far
+       side, away from the badge entirely (the glyph's right edge stays
+       flush with the field's own right edge, 0 overhang toward whatever
+       sits outward of it), so the reorder alone fixes the mobile
+       encroachment; the pre-existing 10px margin then reads as genuine,
+       uncontested daylight on both breakpoints (confirmed: 10px of clear
+       space, searchIcon's edge to the badge's own edge, at both 1280x900
+       and 390x844 - no fixture overlaps either icon's box at either
+       width). */
+    /* Owner gate: an underline copied from .dz-search-field's own resting
+       border-bottom (css/search.css) was tried and rejected ("do we need
+       that underline on the alert?"); the icon and its count pill read as
+       an affordance on their own once outermost with real separation
+       (round-2 fix), no extra frame needed. Kept as a TRANSPARENT 1px
+       border rather than removed outright, so the badge's box height stays
+       byte-identical to round 2's measured, search-matched 31px (a real
+       border, painted or not, still occupies its 1px in layout) - the
+       vertical alignment this rule's own header comment measured against
+       #search does not drift just because the ink is gone. */
+    border-bottom: 1px solid transparent;
+    background: transparent;
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0;
+    cursor: pointer;
+}
+
+/* Space-preserving hide, not the UA [hidden]{display:none} default: the
+   badge only exists in the DOM's problem-having sense some of the time, but
+   removing it from the float flow would shift #search into the space it
+   vacates - exactly the header-stability the owner's placement call is
+   for. display:block matches the "used" value float already forces on this
+   element (a float is always blockified per spec), so this changes nothing
+   about layout participation, only paints nothing: visibility:hidden keeps
+   the box (and its reserved margins) in place while making it invisible
+   and non-hit-testable, so a real click can't reach it either. Needs the id
+   to outrank the UA rule's bare attribute specificity, same reasoning
+   #dz-set-chip[hidden] already documents for the opposite direction. */
+#dz-problem-badge[hidden] {
+    display: block;
+    visibility: hidden;
+}
+
+#dz-problem-badge i {
+    font-size: var(--dz-icon-size-lg);
+    line-height: 30px;
+    color: var(--dz-accent-text);
+}
+
+/* The count reads as an overlay notification badge on the icon's corner,
+   not as inline text beside it - it is the one number on this bar that
+   means "look now", so it gets its own tinted pill rather than blending
+   into the header's on-accent text colour like the search results count
+   does. var(--dz-status-danger) (--dz-accent-red, already the theme's
+   "something needs attention" fill - see the low-battery/timeout glow
+   tokens) plus var(--dz-btn-primary-text), the same background/text pairing
+   every .btn-danger uses (css/buttons.css), so the pairing is already
+   contrast-checked as a unit; only its background changed from a button
+   surface to a small pill. Size and full rounding borrow
+   var(--dz-mobile-card-name-badge-size) (18px), the theme's one existing
+   round numeric-badge dimension (css/dashboard_mobile.css's row-arrow
+   badge) - reused here for its diameter, not its original row-arrow
+   context, because no dedicated "notification badge" token exists yet.
+   Corner offset reuses var(--dz-card-space-xs) (3px) as a fresh measurement
+   (Playwright, 1280x900 and 390x844, both schemes): a larger -6px try
+   first poked 1px above the 40px header row and 1px into the neighbouring
+   icon's box; -3px clears both at every width and scheme checked. */
+.dz-problem-count {
+    position: absolute;
+    top: calc(-1 * var(--dz-card-space-xs));
+    right: calc(-1 * var(--dz-card-space-xs));
+    min-width: var(--dz-mobile-card-name-badge-size);
+    height: var(--dz-mobile-card-name-badge-size);
+    line-height: var(--dz-mobile-card-name-badge-size);
+    padding: 0 var(--dz-card-space-xs);
+    border-radius: var(--dz-mobile-card-name-badge-size);
+    background: var(--dz-status-danger);
+    color: var(--dz-btn-primary-text);
+    font-size: var(--dz-text-micro);
+    text-align: center;
+    box-sizing: border-box;
+}
+
+@media (max-width: 767px) {
+    #dz-problem-badge {
+        /* #search's own field drops its border-bottom entirely when
+           collapsed (css/search.css: "there is no text to underline"),
+           shrinking its box from 31px to 30px - dropping the badge's
+           transparent spacer here keeps the two controls' heights matched
+           on mobile too, the same as the desktop rule matches search's
+           31px. No margin override needed here: see the base rule's
+           margin-right comment - the reorder itself is what fixed the
+           mobile "smushed" overhang. */
+        border-bottom: 0;
+    }
+}

@@ -387,5 +387,19 @@ language = {
     icons_summary_failed: "{summary}; failed: {failures}",
     save_failed: "Theme settings could not be saved ({error})",
     save_failed_local: "Theme settings could not be saved to Domoticz; kept in this browser only."
+  },
+  problems: {
+    badge_title: "Devices with problems",
+    title: "Problems",
+    intro: "Devices that are timed out or low on battery right now.",
+    timeout: "Timed out",
+    battery: "Battery {level}%",
+    last_seen: "Last seen",
+    th_name: "Device",
+    th_what: "Problem",
+    th_seen: "Last seen",
+    empty: "No problems. Every device is reporting and no battery is low.",
+    error: "Could not load the device list. Domoticz did not answer.",
+    show_device: "Show this device"
   }
 };

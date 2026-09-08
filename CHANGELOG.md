@@ -12,6 +12,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - The camera previews on the classic dashboard are searched too now. Typing part of a camera's name keeps that camera on screen and hides the others; a search that matches no camera hides the Cameras section altogether, instead of leaving every camera sitting above a filtered dashboard. (#215)
 - On the Dynamic Dashboard, clearing the search now also clears the match count in the search box. It used to keep showing the number the last search found. (#215)
 - Device warning toasts (sensor timeout, battery low) gain a "Show these devices" button that filters the page to just the affected devices; a chip above the page clears the view again
+- A warning badge in the header shows how many devices are timed out or low on battery, and opens the new Problems page
 
 ## [2.5.0] - 2026-09-03
 
