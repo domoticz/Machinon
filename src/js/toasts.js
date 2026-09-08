@@ -287,6 +287,18 @@ function dzToastBuild(ev) {
         content.appendChild(dzToastLine("dz-toast-body", ev.body));
     }
     if (ev.action) content.appendChild(dzToastBuildAction(ev.action));
+    /* Only a device warning ever carries a resolvable card idx (ev.deviceIdx,
+       set by dzWarnPass via dzCardIdx), so only this source gets the button
+       at all: every other toast (core's ~600 call sites, the theme's own)
+       would render a button that could never do anything. */
+    if (ev.source === "device-warning") {
+        var show = document.createElement("button");
+        show.type = "button";
+        show.className = "dz-toast-show-devices";
+        show.hidden = true; /* enabled by dzToastSyncShowDevices when idxs exist */
+        show.appendChild(document.createTextNode(dzT("toasts.show_devices")));
+        content.appendChild(show);
+    }
     el.appendChild(content);
 
     var close = document.createElement("button");
@@ -297,6 +309,25 @@ function dzToastBuild(ev) {
     close.appendChild(document.createTextNode("×"));
     el.appendChild(close);
     return { el: el, closeBtn: close };
+}
+
+/* Label carried as data, never scraped from the rendered title node
+   (MERGED-19): the title is built from the same rec fields, so reading it
+   back would just be a slower, more fragile way to reach what is already
+   sitting on rec. */
+function dzToastFilterLabel(rec) {
+    if (rec.total > 1 && rec.ev.groupTitle) return rec.ev.groupTitle(rec.total);
+    return rec.names[0] || rec.ev.title || "";
+}
+
+/* Reveals or hides the filter button as rec.idxs changes shape. A group
+   leader can show up with no resolvable idx and gain one later, either on a
+   live merge (dzToastMerge) or during the queued carry-over (dzToastDrain,
+   which runs after dzToastShow already built the button hidden); both paths
+   call this so the button never lags what a click would actually do. */
+function dzToastSyncShowDevices(rec) {
+    var btn = rec.el && rec.el.querySelector(".dz-toast-show-devices");
+    if (btn) btn.hidden = !rec.idxs.length;
 }
 
 function dzToastRemove(rec) {
@@ -361,7 +392,9 @@ function dzToastShow(ev) {
     var rec = {
         el: built.el, group: ev.group || null, names: ev.deviceName ? [ev.deviceName] : [],
         total: ev.deviceName ? 1 : 0, base: ev.timeout, removed: false, timer: null,
-        remaining: ev.timeout, startedAt: 0, paused: false, ev: ev
+        remaining: ev.timeout, startedAt: 0, paused: false, ev: ev,
+        idxs: ev.deviceIdx ? [String(ev.deviceIdx)] : [],
+        hash: (typeof location !== "undefined" ? location.hash : "")
     };
     built.closeBtn.addEventListener("click", function(e) {
         e.stopPropagation();
@@ -371,6 +404,30 @@ function dzToastShow(ev) {
     built.el.addEventListener("mouseleave", function() { dzToastResume(rec); });
     built.el.addEventListener("focusin", function() { dzToastPause(rec); });
     built.el.addEventListener("focusout", function() { dzToastResume(rec); });
+
+    /* The explicit filter affordance for device warnings. A button, not a
+       clickable toast root: the toast already contains a real close button
+       and can contain action links, and ARIA forbids interactive controls
+       nested inside a button role. Bound unconditionally and gated by
+       rec.idxs at click time, because a group leader without a resolvable
+       idx can GAIN members on merge (dzToastSyncShowDevices flips
+       visibility then). The hash check makes a click after navigation a
+       plain dismiss: the members are cards of the page the toast was
+       raised on, and arming them elsewhere would blank the new page. */
+    var showBtn = rec.el.querySelector(".dz-toast-show-devices");
+    if (showBtn) {
+        showBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            if (rec.idxs.length && location.hash === rec.hash &&
+                typeof dzApplySetFilter === "function") {
+                var members = {};
+                rec.idxs.forEach(function (idx) { members["d:" + idx] = true; });
+                dzApplySetFilter(members, dzToastFilterLabel(rec));
+            }
+            dzToastRemove(rec);
+        });
+    }
+    dzToastSyncShowDevices(rec);
 
     /* Set here, not in dzToast: a toast that waited in the queue is shown by
        dzToastDrain, and a createdAt assigned only on the dzToast path would be
@@ -391,6 +448,8 @@ function dzToastShow(ev) {
    one. Twelve stale devices become one toast, not twelve serialised over 48s. */
 function dzToastMerge(rec, ev) {
     if (ev.deviceName) rec.names.push(ev.deviceName);
+    if (ev.deviceIdx) rec.idxs.push(String(ev.deviceIdx));
+    dzToastSyncShowDevices(rec);
     rec.total += 1;
     var title = rec.el.querySelector(".dz-toast-title");
     var body = rec.el.querySelector(".dz-toast-body");
@@ -423,6 +482,7 @@ function dzToastMerge(rec, ev) {
    event per arrival. */
 function dzToastQueueMerge(entry, ev) {
     if (ev.deviceName) entry.names.push(ev.deviceName);
+    if (ev.deviceIdx) entry.idxs.push(String(ev.deviceIdx));
     entry.total += 1;
     entry.ev.title = ev.groupTitle ? ev.groupTitle(entry.total) : dzT("toasts.devices", { count: entry.total });
     /* bodyLines, not body: see the comment on ev.bodyLines in dzToastBuild.
@@ -447,6 +507,7 @@ function dzToastQueuePush(ev) {
     var entry = {
         ev: ev, queued: true, removed: false, createdAt: Date.now(),
         names: ev.deviceName ? [ev.deviceName] : [], total: ev.deviceName ? 1 : 0,
+        idxs: ev.deviceIdx ? [String(ev.deviceIdx)] : [],
         extended: false
     };
     dzToastQueue.push(entry);
@@ -477,6 +538,11 @@ function dzToastDrain() {
         if (entry.total) {
             rec.total = entry.total;
             rec.names = entry.names.slice();
+            /* dzToastShow (above) already built the button against entry.ev's
+               own single idx; a re-sync here is what shows it for a leader
+               that only gained a resolvable idx through a queued merge. */
+            rec.idxs = entry.idxs.slice();
+            dzToastSyncShowDevices(rec);
         }
         if (entry.extended) rec.extended = true;
     }

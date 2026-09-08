@@ -92,7 +92,19 @@ function makeFakeDom() {
             },
             setAttribute(name, value) { el._attrs[name] = value; },
             getAttribute(name) { return el._attrs[name]; },
-            addEventListener() { /* driven directly via dz.dzToastPause/Resume in tests */ },
+            _listeners: {},
+            /* Real registration/dispatch for click (the button tests below
+               drive the close and show-devices buttons this way); hover and
+               focus are still driven directly via dz.dzToastPause/Resume in
+               the older tests rather than dispatched, since this fake DOM
+               has no pointer or focus model to dispatch them from. */
+            addEventListener(type, fn) {
+                (el._listeners[type] = el._listeners[type] || []).push(fn);
+            },
+            click() {
+                var evt = { stopPropagation() {} };
+                (el._listeners.click || []).slice().forEach((fn) => fn(evt));
+            },
             querySelector(selector) { return queryDescendant(el, selector); }
         };
         Object.defineProperty(el, "className", {
@@ -125,21 +137,38 @@ function makeFakeDom() {
     };
 }
 
+/* A spy standing in for the real dzApplySetFilter (src/js/set-filter.js),
+   which the click handler under test never loads: recording calls is enough
+   to assert what the toast tried to arm, without pulling in the whole
+   set-filter module and its own DOM surface. */
+function makeSpy() {
+    const calls = [];
+    function spy() { calls.push(Array.prototype.slice.call(arguments)); }
+    spy.calls = calls;
+    return spy;
+}
+
 /* A fresh vm context (document/window/clock included) per call, so each test
    gets isolated dzToastVisible/dzToastQueue/dzToastGroups singletons rather
-   than leaking state between tests. */
-function loadToastRuntime() {
+   than leaking state between tests. `location` and `dzApplySetFilter` back
+   the show-devices button's click handler (src/js/toasts.js dzToastShow);
+   `location` is a plain mutable object so a test can simulate navigation by
+   changing its `.hash` after the toast was raised. */
+function loadToastRuntime(overrides) {
     const clock = makeFakeClock();
     const dom = makeFakeDom();
+    const location = (overrides && overrides.location) || { hash: "" };
+    const applySetFilter = overrides && overrides.dzApplySetFilter;
     const ctx = vm.createContext({
         Math, console, JSON,
         document: dom, window: { innerWidth: 1024 },
-        Date: clock.Date, setTimeout: clock.setTimeout, clearTimeout: clock.clearTimeout
+        Date: clock.Date, setTimeout: clock.setTimeout, clearTimeout: clock.clearTimeout,
+        location: location, dzApplySetFilter: applySetFilter
     });
     ["src/js/i18n.js", "lang/machinon.en.js", "src/js/toasts.js"].forEach(function (f) {
         vm.runInContext(readFileSync(f, "utf8"), ctx, { filename: f });
     });
-    return { dz: ctx, clock };
+    return { dz: ctx, clock, location };
 }
 
 test("a key warns once, then is suppressed until it is cleared", () => {
@@ -380,4 +409,157 @@ test("pausing a coalescing toast survives a group merge; the timer stays off unt
     d.dzToastResume(rec); // what mouseleave/focusout call
     assert.ok(rec.timer, "resuming after the merge starts a timer");
     assert.equal(rec.paused, false);
+});
+
+/* ---- The show-devices button (Task 3): idx collection and the click seam ---- */
+
+function groupTitleTimeout(n) { return n + " sensors timed out"; }
+
+test("device-warning toast collects idxs across live merges", () => {
+    const rt = loadToastRuntime();
+    const d = rt.dz;
+    d.dzToast({
+        type: "warning", title: "Hall timed out", deviceName: "Hall", deviceIdx: "5",
+        source: "device-warning", group: "device-warning-timeout",
+        groupTitle: groupTitleTimeout, timeout: 6000
+    });
+    d.dzToast({
+        type: "warning", title: "Garage timed out", deviceName: "Garage", deviceIdx: "9",
+        source: "device-warning", group: "device-warning-timeout",
+        groupTitle: groupTitleTimeout, timeout: 6000
+    });
+    const rec = d.dzToastVisible[0];
+    // Array.from re-homes the array in this file's own realm: rec.idxs is an
+    // array literal evaluated inside toasts.js's own vm context, and
+    // assert's strict deepEqual treats that as a different constructor from
+    // a literal written here, even with identical contents.
+    assert.deepEqual(Array.from(rec.idxs), ["5", "9"]);
+});
+
+test("queued group leader collects idxs and carries them into show", () => {
+    const rt = loadToastRuntime();
+    const d = rt.dz;
+
+    // Fill the stack so the group leader below has nowhere to render
+    // immediately and must queue (same setup as the coalescing test above).
+    for (let i = 0; i < 4; i++) {
+        d.dzToast({ type: "info", title: "core message " + i, timeout: 4000 });
+    }
+    d.dzToast({
+        type: "warning", title: "Hall timed out", deviceName: "Hall", deviceIdx: "5",
+        source: "device-warning", group: "device-warning-timeout",
+        groupTitle: groupTitleTimeout, timeout: 6000
+    });
+    assert.equal(d.dzToastQueue.length, 1, "the group leader queues, stack is full");
+
+    // A second arrival merges into the still-queued leader.
+    d.dzToast({
+        type: "warning", title: "Garage timed out", deviceName: "Garage", deviceIdx: "9",
+        source: "device-warning", group: "device-warning-timeout",
+        groupTitle: groupTitleTimeout, timeout: 6000
+    });
+    assert.equal(d.dzToastQueue.length, 1, "still one queued entry, the arrival merged into it");
+
+    // Free a slot and let the exit animation run, which drains the queue.
+    d.dzToastRemove(d.dzToastVisible[0]);
+    rt.clock.advance(320);
+
+    const shown = d.dzToastVisible[d.dzToastVisible.length - 1];
+    assert.equal(shown.group, "device-warning-timeout");
+    assert.deepEqual(Array.from(shown.idxs), ["5", "9"], "both idxs survived the queue path");
+    // MERGED-12: dzToastShow ran before the carry-over and would otherwise
+    // have left the button hidden against entry.ev's own single idx.
+    const btn = shown.el.querySelector(".dz-toast-show-devices");
+    assert.equal(btn.hidden, false, "the button is enabled after the carry-over");
+});
+
+test("toast without deviceIdx renders no show-devices button", () => {
+    const rt = loadToastRuntime();
+    const d = rt.dz;
+    // A plain core toast: no ev.source at all, so dzToastBuild never appends
+    // the button element, not merely hides it.
+    d.dzToast({ type: "info", title: "Something happened", timeout: 4000 });
+    const rec = d.dzToastVisible[0];
+    assert.equal(rec.el.querySelector(".dz-toast-show-devices"), null);
+});
+
+test("show-devices click arms the set filter with the rec's own label and removes the toast", () => {
+    const spy = makeSpy();
+    const rt = loadToastRuntime({ location: { hash: "#/LightSwitches" }, dzApplySetFilter: spy });
+    const d = rt.dz;
+    d.dzToast({
+        type: "warning", title: "Hall timed out", deviceName: "Hall", deviceIdx: "5",
+        source: "device-warning", group: "device-warning-timeout",
+        groupTitle: groupTitleTimeout, timeout: 6000
+    });
+    d.dzToast({
+        type: "warning", title: "Garage timed out", deviceName: "Garage", deviceIdx: "9",
+        source: "device-warning", group: "device-warning-timeout",
+        groupTitle: groupTitleTimeout, timeout: 6000
+    });
+    const rec = d.dzToastVisible[0];
+    const btn = rec.el.querySelector(".dz-toast-show-devices");
+    btn.click();
+
+    assert.equal(spy.calls.length, 1);
+    // Object.assign re-homes the members object in this file's own realm;
+    // see the Array.from comment above for why a raw deepEqual fails here.
+    assert.deepEqual(Object.assign({}, spy.calls[0][0]), { "d:5": true, "d:9": true });
+    assert.equal(spy.calls[0][1], groupTitleTimeout(2));
+    assert.equal(rec.removed, true, "the toast is dismissed after arming the filter");
+});
+
+test("merge-gained idxs enable a button that was hidden at show time", () => {
+    const rt = loadToastRuntime();
+    const d = rt.dz;
+    // The leader carries no deviceIdx (dzCardIdx found no resolvable idx for
+    // it), so the button exists but starts hidden.
+    d.dzToast({
+        type: "warning", title: "Hall timed out", source: "device-warning",
+        group: "device-warning-timeout", groupTitle: groupTitleTimeout, timeout: 6000
+    });
+    const rec = d.dzToastVisible[0];
+    const btn = rec.el.querySelector(".dz-toast-show-devices");
+    assert.equal(btn.hidden, true, "no idx yet, button starts hidden");
+
+    d.dzToast({
+        type: "warning", title: "Garage timed out", deviceName: "Garage", deviceIdx: "9",
+        source: "device-warning", group: "device-warning-timeout",
+        groupTitle: groupTitleTimeout, timeout: 6000
+    });
+    assert.equal(btn.hidden, false, "a merge that gains an idx must reveal the button (MERGED-12)");
+});
+
+test("show-devices click after navigation dismisses without filtering", () => {
+    const spy = makeSpy();
+    const rt = loadToastRuntime({ location: { hash: "#/LightSwitches" }, dzApplySetFilter: spy });
+    const d = rt.dz;
+    d.dzToast({
+        type: "warning", title: "Hall timed out", deviceName: "Hall", deviceIdx: "5",
+        source: "device-warning", group: "device-warning-timeout",
+        groupTitle: groupTitleTimeout, timeout: 6000
+    });
+    const rec = d.dzToastVisible[0];
+
+    rt.location.hash = "#/Utility"; // the user navigated away while the toast sat on screen
+    rec.el.querySelector(".dz-toast-show-devices").click();
+
+    assert.equal(spy.calls.length, 0, "a click after navigation must never arm the filter (MERGED-6)");
+    assert.equal(rec.removed, true, "it still degrades to a plain dismiss");
+});
+
+test("close button click does not arm the filter", () => {
+    const spy = makeSpy();
+    const rt = loadToastRuntime({ location: { hash: "#/LightSwitches" }, dzApplySetFilter: spy });
+    const d = rt.dz;
+    d.dzToast({
+        type: "warning", title: "Hall timed out", deviceName: "Hall", deviceIdx: "5",
+        source: "device-warning", group: "device-warning-timeout",
+        groupTitle: groupTitleTimeout, timeout: 6000
+    });
+    const rec = d.dzToastVisible[0];
+    rec.el.querySelector(".dz-toast-close").click();
+
+    assert.equal(spy.calls.length, 0, "the close button must never reach the filter (stopPropagation contract)");
+    assert.equal(rec.removed, true);
 });

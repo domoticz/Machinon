@@ -366,6 +366,7 @@ language = {
     devices_low_on_battery: "{count} devices low on battery",
     devices: "{count} devices",
     and_more: "and {count} more",
+    show_devices: "Show these devices",
     update_available: "Machinon version {version} is available!",
     update_action: "Click here to download",
     wcag_fails: "{what} fails WCAG contrast: {failures}",

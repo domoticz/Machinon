@@ -177,6 +177,34 @@
     font-weight: var(--dz-weight-semibold);
 }
 
+/* The device-warning filter button (src/js/toasts.js dzToastBuild), styled to
+   read as the same kind of affordance as .dz-toast-action above rather than a
+   boxed control competing with the close button: same weight and colour as
+   the action link, underlined only on hover/focus so the toast body stays
+   quiet at rest. No font-family reset needed - core's own normalize already
+   makes every button/input inherit the page font, unlike a browser default.
+   block + its own top margin stands in for .dz-toast-action-row because this
+   button has no sibling to share a row with. `hidden` (not display:none in
+   CSS) is the runtime toggle, set from JS via dzToastSyncShowDevices, so no
+   selector is needed here to hide it. */
+.dz-toast-show-devices {
+    display: block;
+    margin-top: var(--dz-card-space-xs);
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: var(--dz-text-toast-body);
+    font-weight: var(--dz-weight-semibold);
+    color: inherit;
+    cursor: pointer;
+    text-align: left;
+}
+
+.dz-toast-show-devices:hover,
+.dz-toast-show-devices:focus-visible {
+    text-decoration: underline;
+}
+
 .dz-toast-close {
     position: absolute;
     top: var(--dz-card-space-sm);
