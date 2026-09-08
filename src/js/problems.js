@@ -187,6 +187,87 @@ function dzProblemsRefresh() {
     });
 }
 
+/* Route-entry render: fetch, then hand the rows to the same renderer the
+   poll tick uses. Forcing a fresh fingerprint makes a visit always repaint. */
+function dzProblemsRenderPage() {
+    dzProblemsRenderedPrint = null;
+    dzProblemsFetch(function (err, rows) {
+        dzProblemsRenderRows(err ? null : rows);
+    });
+}
+
+var dzProblemsRenderedPrint = null;
+
+/* rows === null means "the fetch failed" (error state); [] means an honestly
+   empty house. Every element is re-resolved here and null-guarded: this also
+   runs from the poll tick's callback, which can land after the user left the
+   route and ng-view destroyed the template (jQuery 3 would rethrow an
+   uncaught TypeError otherwise). */
+function dzProblemsRenderRows(rows) {
+    var table = document.getElementById("dz-problems-table");
+    var state = document.getElementById("dz-problems-state");
+    var title = document.getElementById("dz-problems-title");
+    if (!table || !state || !title) return;
+    var tbody = table.querySelector("tbody");
+    title.textContent = dzT("problems.title");
+    document.getElementById("dz-problems-intro").textContent = dzT("problems.intro");
+    document.getElementById("dz-problems-th-name").textContent = dzT("problems.th_name");
+    document.getElementById("dz-problems-th-what").textContent = dzT("problems.th_what");
+    document.getElementById("dz-problems-th-seen").textContent = dzT("problems.th_seen");
+    if (rows === null) {
+        state.textContent = dzT("problems.error");
+        state.hidden = false; table.hidden = true;
+        dzProblemsRenderedPrint = null;
+        return;
+    }
+    if (!rows.length) {
+        state.textContent = dzT("problems.empty");
+        state.hidden = false; table.hidden = true;
+        dzProblemsRenderedPrint = "";
+        return;
+    }
+    var print = dzProblemsFingerprint(rows);
+    if (print === dzProblemsRenderedPrint) return; /* quiet tick: no DOM churn, no focus loss */
+    dzProblemsRenderedPrint = print;
+    state.hidden = true; table.hidden = false;
+    tbody.textContent = "";
+    dzProblemsResolveRoutes(function (map) {
+        rows.forEach(function (row) {
+            var tr = document.createElement("tr");
+            var nameCell = document.createElement("td");
+            nameCell.textContent = row.name;
+            tr.appendChild(nameCell);
+            var whatCell = document.createElement("td");
+            whatCell.textContent = row.kind === "battery"
+                ? dzT("problems.battery", { level: row.battery })
+                : dzT("problems.timeout");
+            tr.appendChild(whatCell);
+            var seenCell = document.createElement("td");
+            /* Core shows LastUpdate in 24h everywhere (it renders the raw
+               "YYYY-MM-DD HH:mm:ss" API value as-is), and the owner fixed 24h
+               for this theme too, so LT's locale-dependent 12h variant (e.g.
+               "9:12 AM" under en) is deliberately not used here; "L" still
+               follows the locale's own date order. Seconds are dropped, same
+               as the rest of the theme's last-seen displays. */
+            seenCell.textContent = moment(row.lastUpdate, ["YYYY-MM-DD HH:mm:ss", "L LT"]).format("L HH:mm");
+            tr.appendChild(seenCell);
+            var route = dzProblemsRoute(map, row.idx);
+            if (route) {
+                tr.classList.add("dz-problems-row--link");
+                tr.tabIndex = 0;
+                tr.title = dzT("problems.show_device");
+                tr.addEventListener("click", function () {
+                    var members = {};
+                    members["d:" + row.idx] = true;
+                    dzNavigateAndFilter(route, members, row.name);
+                });
+                tr.addEventListener("keydown", function (e) { if (e.key === "Enter") tr.click(); });
+            }
+            tbody.appendChild(tr);
+        });
+    });
+}
+
 function dzProblemsInit() {
     if (dzProblemsInitArmed) return;
     dzProblemsInitArmed = true;

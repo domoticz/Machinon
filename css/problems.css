@@ -193,3 +193,76 @@
         width: calc(100% - var(--dz-card-space-lg) - var(--dz-problem-badge-reserved-width));
     }
 }
+
+/* #/Problems page (dzProblemsRenderRows): a plain <table>, not a DataTable
+   instance, so it takes the shared table tokens directly instead of the
+   vendor wrapper/pager markup css/tables.css themes. Sizes from the
+   DESIGN.md type scale, same convention as css/iconpack.css's
+   .iconpack-intro. */
+#dz-problems-intro {
+    font-size: var(--dz-text-xs);
+    max-width: 640px;
+}
+
+/* Error/empty message (dzT("problems.error") / dzT("problems.empty")):
+   same muted tone as the DataTables auxiliary text
+   (.dataTables_wrapper .dataTables_info, css/tables.css). */
+#dz-problems-state {
+    font-size: var(--dz-text-sm);
+    color: var(--dz-table-control-text);
+    padding: var(--dz-card-space-lg) 0;
+}
+
+#dz-problems-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: var(--dz-elev-card);
+}
+
+#dz-problems-table thead th {
+    background: var(--dz-table-header-bg);
+    color: var(--dz-table-header-text);
+    text-align: left;
+    padding: var(--dz-table-header-pad);
+    font-size: var(--dz-text-sm);
+}
+
+#dz-problems-table tbody td {
+    padding: var(--dz-table-cell-pad);
+    color: var(--dz-table-row-text);
+    font-size: var(--dz-text-sm);
+    border-bottom: 1px solid var(--dz-table-border);
+}
+
+#dz-problems-table tbody tr:nth-child(odd) td {
+    background: var(--dz-table-row-odd-bg);
+}
+
+#dz-problems-table tbody tr:nth-child(even) td {
+    background: var(--dz-table-row-even-bg);
+}
+
+/* Row hover/focus lives on .dz-problems-row--link only (set in
+   src/js/problems.js when dzProblemsResolveRoutes resolved a route for that
+   device): a row with no resolved route carries no click handler, so it
+   must not look clickable either. Marker mirrors the DataTables
+   row_selected treatment in css/tables.css (tint + accent left-border on
+   the first cell) rather than inventing a new affordance. */
+.dz-problems-row--link {
+    cursor: pointer;
+}
+
+.dz-problems-row--link:hover td,
+.dz-problems-row--link:focus-visible td {
+    background: var(--dz-table-row-hover-bg);
+}
+
+.dz-problems-row--link:focus-visible {
+    outline: none;
+}
+
+.dz-problems-row--link:focus-visible td:first-child {
+    box-shadow: inset 3px 0 0 var(--dz-accent-color);
+}

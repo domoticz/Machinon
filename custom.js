@@ -109,6 +109,7 @@ window.dzRoutesActive = false;
 
 var DZ_HUB_TEMPLATE = "styles/default/templates/dz-theme-hub.html";
 var DZ_GRID_TEMPLATE = "styles/default/templates/dz-setup-grid.html";
+var DZ_PROBLEMS_TEMPLATE = "styles/default/templates/dz-problems.html";
 /* Templates are requested under styles/default/ on purpose: core rewrites
    /styles/default/<path> to the ACTIVE theme folder per file when the file
    exists there (cWebem.cpp), which is how a theme ships its own templates. */
@@ -182,6 +183,14 @@ function dzHubRouteController() {
     });
 }
 
+function dzProblemsRouteController() {
+    return dzRoutedController("dz-problems", "problems", function () {
+        if (typeof dzProblemsRenderPage === "function") dzProblemsRenderPage();
+    }, function () {
+        console.warn("machinon_routes", "problems_not_ready", "theme init never completed; #/Problems left empty");
+    });
+}
+
 function dzSetupGridRouteController() {
     return dzRoutedController("dz-setup-grid-host", "settingsGrid", function (host) {
         window.dzBuildSettingsGrid(host);
@@ -212,6 +221,18 @@ function dzOpenThemeLegacyPage(templateUrl) {
         if (typeof dzOpenThemeHub === "function") dzOpenThemeHub();
         return;
     }
+    if (templateUrl === DZ_PROBLEMS_TEMPLATE) {
+        /* No legacy entry exists for this page (it has no Setup-menu-click
+           precursor like the hub/grid do), so the only safe move is off the
+           dead URL: the header badge keeps pointing here every tick, and
+           leaving the user parked on a route that will never render would
+           make the badge a dead end. The routed "#/Dashboard" form, not the
+           bare "#Dashboard": see the routed "#/Setup" form above for why
+           (the bare form pushes an extra history entry). */
+        console.warn("machinon_routes", "problems_template_absent", "route template did not load: " + templateUrl + "; redirecting to #/Dashboard");
+        location.hash = "#/Dashboard";
+        return;
+    }
     if (window.jQuery) window.jQuery("#appnavbar li[has-permission='Admin']").click();
 }
 
@@ -232,14 +253,18 @@ function dzRegisterThemeRoutes(routesModule) {
                core's $routeChangeStart enforces for us (app.js). */
             .when("/Theme", { templateUrl: DZ_HUB_TEMPLATE, controller: dzHubRouteController() })
             .when("/Theme/:tab", { templateUrl: DZ_HUB_TEMPLATE, controller: dzHubRouteController() })
-            .when("/SetupMenu", { templateUrl: DZ_GRID_TEMPLATE, permission: "Admin", controller: dzSetupGridRouteController() });
+            .when("/SetupMenu", { templateUrl: DZ_GRID_TEMPLATE, permission: "Admin", controller: dzSetupGridRouteController() })
+            /* No permission key: read-only, and its data is scoped
+               server-side the same way #/Theme's own comment already
+               explains for that route. */
+            .when("/Problems", { templateUrl: DZ_PROBLEMS_TEMPLATE, controller: dzProblemsRouteController() });
         window.dzRoutesActive = true;
     }]);
 
     /* Core has no $routeChangeError handler, so a template that fails to load
        (404, offline, a theme folder that lost templates/) would leave the URL on
        the theme path with the PREVIOUS page still rendered, silently, and with
-       the legacy path already switched off. Catch it for the theme's own two
+       the legacy path already switched off. Catch it for the theme's own three
        templates only: warn once, turn the routes back off (they cannot render
        without their templates) and open the page the legacy way, so the user
        still gets it. */
@@ -247,7 +272,7 @@ function dzRegisterThemeRoutes(routesModule) {
         $rootScope.$on("$routeChangeError", function (event, current) {
             var route = current && current.$$route;
             var templateUrl = route && route.templateUrl;
-            if (templateUrl !== DZ_HUB_TEMPLATE && templateUrl !== DZ_GRID_TEMPLATE) return;
+            if (templateUrl !== DZ_HUB_TEMPLATE && templateUrl !== DZ_GRID_TEMPLATE && templateUrl !== DZ_PROBLEMS_TEMPLATE) return;
             console.warn("machinon_routes", "template_absent", "route template did not load: " + templateUrl + "; falling back to the legacy open");
             window.dzRoutesActive = false;
             dzOpenThemeLegacyPage(templateUrl);

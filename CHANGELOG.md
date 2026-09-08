@@ -13,6 +13,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - On the Dynamic Dashboard, clearing the search now also clears the match count in the search box. It used to keep showing the number the last search found. (#215)
 - Device warning toasts (sensor timeout, battery low) gain a "Show these devices" button that filters the page to just the affected devices; a chip above the page clears the view again
 - A warning badge in the header shows how many devices are timed out or low on battery, and opens the new Problems page
+- New Problems page listing every device that is timed out or low on battery, with a click-through that shows the device on its own page
 
 ## [2.5.0] - 2026-09-03
 
