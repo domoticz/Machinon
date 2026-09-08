@@ -358,6 +358,9 @@ language = {
       lead_look: "Pick a look. Each one is your colour, arranged differently."
     }
   },
+  setfilter: {
+    clear: "Show all devices again"
+  },
   toasts: {
     sensors_timed_out: "{count} sensors timed out",
     devices_low_on_battery: "{count} devices low on battery",

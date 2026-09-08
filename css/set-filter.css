@@ -1,0 +1,16 @@
+/* Hiding for the set-filter primitive (src/js/set-filter.js). The second
+   selector exists for the classic dashboard: core's views/dashboard_desktop.html
+   ships an inline-stylesheet "#dashcontent .itemBlock { display: block
+   !important }" (so its jQuery hiding cannot fight ng-repeat), which a bare
+   class rule loses to. Both rules here are !important and the #dashcontent one
+   out-specifies core's (1-3-1 against 1-1-0), so it wins regardless of load
+   order; html:root is the recorded pattern for out-cascading core CSS that
+   loads after the theme. */
+html:root .itemBlock.dz-set-filtered-out,
+html:root #dashcontent .itemBlock.dz-set-filtered-out {
+    display: none !important;
+}
+
+/* Chip visuals land in Task 2 (measured against shipped siblings, owner
+   gated). Until then the chip only exists when armed and unstyled is
+   acceptable on the rig. */

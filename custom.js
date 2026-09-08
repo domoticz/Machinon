@@ -53,6 +53,7 @@ var THEME_MODULES = [
     "src/js/theme-hub.js",
     "src/js/color-wheel.js",
     "src/js/theme-wizard.js",
+    "src/js/set-filter.js",
     "src/js/devices.js",
     "src/js/card-drag-handle.js",
     "src/js/floorplan-stage.js",

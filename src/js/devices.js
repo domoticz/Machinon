@@ -416,6 +416,7 @@ function dzRunDevicePass(stage) {
     });
     if (stage === "visible") {
         setAllDevicesIconsStatus();
+        dzSetFilterOnRender();
     } else {
         retagSelectorWrapCorners();
     }
@@ -484,7 +485,7 @@ function setAllDevicesIconsStatus() {
         }
     });
 
-    /* Core's GetItemBackgroundStatus (app/app.js:853) makes these mutually
+    /* Core's GetItemBackgroundStatus (app/app.js:921) makes these mutually
        exclusive: HaveTimeout beats BatteryLevel <= 10, so a timed-out device
        never also reports low battery. Two independent toggles all the same,
        because they are two different things to be told about. */
