@@ -66,6 +66,8 @@ It works with current Domoticz beta and stable releases.
 
   ![Machinon dashboard, dark scheme](docs/screenshots/dashboard-dark.png)
 
+- **Problem alerts**: a bell icon in the header shows how many devices are currently timed out or low on battery, and disappears the moment none are. Click it, or open the Problems page, for the full list, each row showing an icon for the problem and when the device was last seen. A warning about one of these devices also offers a "Show these devices" button, which filters the page down to just them; a small tag appears near the top of the page so you can clear the filter and see everything again.
+
 - **Fast loading**: releases are packaged so the theme loads quickly, especially on slower connections.
 
 <details>
