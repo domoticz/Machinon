@@ -7,7 +7,8 @@ language = {
   header: {
     mainmenu: "Menu główne",
     type_to_search: "Wpisz, aby wyszukać",
-    search_placeholder: "Nazwa, Opis, Idx, Status"
+    search_placeholder: "Nazwa, Opis, Idx, Status",
+    clear_search: "Wyczyść wyniki wyszukiwania"
   },
   hub: {
     loading: "Wczytywanie..",
