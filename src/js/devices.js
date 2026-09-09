@@ -920,8 +920,6 @@ function initDeviceLiveUpdates($scope) {
                 setTimeout(function() { tr.removeClass("update-pulse"); }, 800);
             }
         }, 10);
-    }, function errorCallback(response) {
-        console.error("Cannot connect to websocket");
     });
 
     $scope.$on('scene_update', function (event, data) {
@@ -931,8 +929,6 @@ function initDeviceLiveUpdates($scope) {
         let lastupd = moment(data.LastUpdate, ["YYYY-MM-DD HH:mm:ss", "L LT"]).format();
         setDeviceLastUpdate(data.idx, lastupd);
         setDeviceOpacity(data.idx, data.Status);
-    }, function errorCallback(response) {
-        console.error("Cannot connect to websocket");
     });
 }
 
