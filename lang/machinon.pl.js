@@ -356,11 +356,15 @@ language = {
       lead_look: "Wybierz wygląd. Każdy z nich to Twój kolor, tylko inaczej rozłożony."
     }
   },
+  setfilter: {
+    clear: "Pokaż ponownie wszystkie urządzenia"
+  },
   toasts: {
     sensors_timed_out: "{count} czujników przekroczyło limit czasu",
     devices_low_on_battery: "{count} urządzeń ma niski poziom baterii",
     devices: "{count} urządzeń",
     and_more: "i jeszcze {count}",
+    show_devices: "Pokaż te urządzenia",
     update_available: "Dostępna jest wersja {version} motywu Machinon!",
     update_action: "Kliknij tutaj, aby pobrać",
     wcag_fails: "{what} nie spełnia wymagań kontrastu WCAG: {failures}",
@@ -381,5 +385,18 @@ language = {
     icons_summary_failed: "{summary}; nieudane: {failures}",
     save_failed: "Nie udało się zapisać ustawień motywu ({error})",
     save_failed_local: "Nie udało się zapisać ustawień motywu w Domoticzu; zostały zachowane tylko w tej przeglądarce."
+  },
+  problems: {
+    badge_title: "Urządzenia z problemem",
+    title: "Urządzenia z problemami",
+    intro: "Urządzenia, które właśnie przekroczyły limit czasu lub mają niski poziom baterii.",
+    timeout: "Przekroczony limit czasu",
+    battery: "Bateria {level}%",
+    th_name: "Urządzenie",
+    th_what: "Problem",
+    th_seen: "Ostatnio widziany",
+    empty: "Brak problemów. Wszystkie urządzenia raportują i żadne nie ma niskiego poziomu baterii.",
+    error: "Nie udało się wczytać listy urządzeń. Domoticz nie odpowiedział.",
+    show_device: "Pokaż to urządzenie"
   }
 };

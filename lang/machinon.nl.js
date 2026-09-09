@@ -359,11 +359,15 @@ language = {
       lead_look: "Kies een stijl. Elke stijl is jouw kleur, anders gerangschikt."
     }
   },
+  setfilter: {
+    clear: "Alle apparaten weer tonen"
+  },
   toasts: {
     sensors_timed_out: "{count} sensoren hebben een time-out",
     devices_low_on_battery: "{count} apparaten met lage batterij",
     devices: "{count} apparaten",
     and_more: "en nog {count}",
+    show_devices: "Deze apparaten tonen",
     update_available: "Machinon versie {version} is beschikbaar!",
     update_action: "Klik hier om te downloaden",
     wcag_fails: "{what} haalt het WCAG-contrast niet: {failures}",
@@ -384,5 +388,18 @@ language = {
     icons_summary_failed: "{summary}; mislukt: {failures}",
     save_failed: "Thema-instellingen konden niet worden opgeslagen ({error})",
     save_failed_local: "Thema-instellingen konden niet in Domoticz worden opgeslagen; ze blijven alleen in deze browser."
+  },
+  problems: {
+    badge_title: "Apparaten met problemen",
+    title: "Probleemapparaten",
+    intro: "Apparaten die nu een time-out hebben of een lage batterij melden.",
+    timeout: "Time-out",
+    battery: "Batterij {level}%",
+    th_name: "Apparaat",
+    th_what: "Probleem",
+    th_seen: "Laatst gezien",
+    empty: "Geen problemen. Elk apparaat meldt zich en geen enkele batterij is laag.",
+    error: "De apparatenlijst kon niet worden geladen. Domoticz heeft niet gereageerd.",
+    show_device: "Dit apparaat tonen"
   }
 };

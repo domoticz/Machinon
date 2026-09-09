@@ -165,6 +165,40 @@ function dzSetChipShow(label) {
     /* textContent, never HTML: the label carries device names (user data). */
     chip.querySelector(".dz-set-chip-label").textContent = label;
     chip.hidden = false;
+    dzSetChipPosition(chip);
+}
+
+/* Desktop header height is not a constant css/set-filter.css can bake in:
+   it changes with the navbar_icons theme feature (icons on the menu tabs
+   grow .navbar-fixed-top from 92px to 118px, measured live on the rig,
+   2026-09-10) and has already drifted once between releases on top of
+   that. Two earlier fixed-offset attempts on mobile (35px, then 118px, see
+   that media query's own history comment) were wrong on a real device for
+   exactly this reason: a static number cannot track content whose height
+   this file does not control. This does the same job the mobile fix does
+   by removing the dependency, but desktop's chip is top-anchored by design
+   (unlike mobile's bottom anchor, an input-adjacent bottom sheet would
+   fight the virtual keyboard there), so the fix here is to read the live
+   fact instead of guessing it: measure .navbar-fixed-top's actual bottom
+   edge at the moment the chip arms, and position from that. Runs once per
+   dzApplySetFilter call (an arming event), not per render pass or on a
+   timer, so the cost is one layout read per filter, not per card update.
+
+   Mobile is untouched on purpose: css/set-filter.css's bottom anchor there
+   depends on nothing above the chip, so it never needs measuring, and an
+   inline style always outranks an external stylesheet rule regardless of
+   specificity - setting one there would silently break the bottom anchor
+   the same media query relies on. matchMedia mirrors that query's own
+   breakpoint exactly rather than duplicating the number as a JS literal. */
+function dzSetChipPosition(chip) {
+    if (window.matchMedia && window.matchMedia("(max-width: 767px)").matches) {
+        chip.style.top = ""; // defers to css/set-filter.css's bottom anchor
+        return;
+    }
+    var header = document.querySelector(".navbar-fixed-top");
+    if (!header) return; // CSS's own top:102px is the no-JS / no-header fallback
+    var gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--dz-card-space-lg")) || 10;
+    chip.style.top = (header.getBoundingClientRect().bottom + gap) + "px";
 }
 
 function dzSetChipHide() {
