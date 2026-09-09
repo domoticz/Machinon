@@ -12,11 +12,11 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - The camera previews on the classic dashboard are searched too now. Typing part of a camera's name keeps that camera on screen and hides the others; a search that matches no camera hides the Cameras section altogether, instead of leaving every camera sitting above a filtered dashboard. (#215)
 - On the Dynamic Dashboard, clearing the search now also clears the match count in the search box. It used to keep showing the number the last search found. (#215)
 - Device warning toasts (sensor timeout, battery low) gain a "Show these devices" button that filters the page to just the affected devices; a chip above the page clears the view again
-- A warning badge in the header shows how many devices are timed out or low on battery, and opens the new Problems page
-- New Problems page listing every device that is timed out or low on battery, with a click-through that shows the device on its own page
+- A warning badge in the header shows how many devices are timed out or low on battery, and opens the new Problem Devices page
+- New Problem Devices page listing every device that is timed out or low on battery, with a click-through that shows the device on its own page
 - Problem rows now carry the same warning icons as the toasts
-- The search box now shows as disabled on pages it cannot search, including the new Problems page, even when the page is opened directly
-- The Settings menu gains a Problems tile, so the Problems page stays reachable even when the header badge is hidden because everything is healthy
+- The search box now shows as disabled on pages it cannot search, including the new Problem Devices page, even when the page is opened directly
+- The Settings menu gains a Problem Devices tile, so the Problem Devices page stays reachable even when the header badge is hidden because everything is healthy
 
 ## [2.5.0] - 2026-09-03
 

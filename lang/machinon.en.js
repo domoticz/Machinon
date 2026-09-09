@@ -390,7 +390,7 @@ language = {
   },
   problems: {
     badge_title: "Devices with problems",
-    title: "Problems",
+    title: "Problem Devices",
     intro: "Devices that are timed out or low on battery right now.",
     timeout: "Timed out",
     battery: "Battery {level}%",

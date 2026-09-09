@@ -53,7 +53,7 @@ function locationHashChanged() {
        init_theme calls locationHashChanged() before setSearch() builds the
        box (loadSettings().then -> $(document).ready(...), locationHashChanged
        then setSearch, in that order), so a direct page load straight into a
-       non-whitelisted route (e.g. #/Problems) used to find no #search here,
+       non-whitelisted route (e.g. #/ProblemDevices) used to find no #search here,
        silently no-op, and then get a freshly built box with no readonly
        class at all - the mobile pill expanded where it should not, and only
        a LATER hashchange (navigating away and back) ever corrected it.

@@ -1,4 +1,4 @@
-/* House-wide problem list: badge + #/Problems page, both fed by ONE reduction
+/* House-wide problem list: badge + #/ProblemDevices page, both fed by ONE reduction
    of ONE query per tick (dzProblemsRefresh fetches once and fans the same
    rows out to both consumers, so they cannot diverge within a tick). The
    query is the getdevices call core itself uses, so the result is scoped
@@ -145,7 +145,7 @@ function dzProblemsBadgeEl() {
     var count = document.createElement("span");
     count.className = "dz-problem-count";
     badge.appendChild(count);
-    badge.addEventListener("click", function () { location.hash = "#/Problems"; });
+    badge.addEventListener("click", function () { location.hash = "#/ProblemDevices"; });
     /* Inserted BEFORE #search, not appended: float:right stacks its FIRST
        DOM child flush against the container's right edge and later
        siblings to its left, so DOM order is what puts the badge outermost
@@ -181,7 +181,7 @@ function dzProblemsRefresh() {
             }
         }
         if (typeof dzProblemsRenderRows === "function" &&
-            location.hash.indexOf("#/Problems") === 0) {
+            location.hash.indexOf("#/ProblemDevices") === 0) {
             dzProblemsRenderRows(err ? null : rows);
         }
     });

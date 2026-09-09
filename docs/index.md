@@ -28,7 +28,7 @@ detail.
 - **Mobile-ready**: dashboards, menus, and dialogs adapt to small screens instead of just
   shrinking the desktop layout.
 - **Problem alerts**: a bell icon in the header counts the devices that are timed out or low
-  on battery, and disappears once none are. Click it, or open the Problems page, for the full
+  on battery, and disappears once none are. Click it, or open the Problem Devices page, for the full
   list, each row showing an icon for the problem and when the device was last seen.
 - **Fast to load**: releases ship as a single flattened stylesheet.
 

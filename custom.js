@@ -187,7 +187,7 @@ function dzProblemsRouteController() {
     return dzRoutedController("dz-problems", "problems", function () {
         if (typeof dzProblemsRenderPage === "function") dzProblemsRenderPage();
     }, function () {
-        console.warn("machinon_routes", "problems_not_ready", "theme init never completed; #/Problems left empty");
+        console.warn("machinon_routes", "problems_not_ready", "theme init never completed; #/ProblemDevices left empty");
     });
 }
 
@@ -256,8 +256,13 @@ function dzRegisterThemeRoutes(routesModule) {
             .when("/SetupMenu", { templateUrl: DZ_GRID_TEMPLATE, permission: "Admin", controller: dzSetupGridRouteController() })
             /* No permission key: read-only, and its data is scoped
                server-side the same way #/Theme's own comment already
-               explains for that route. */
-            .when("/Problems", { templateUrl: DZ_PROBLEMS_TEMPLATE, controller: dzProblemsRouteController() });
+               explains for that route. Route /ProblemDevices serves
+               templates/dz-problems.html: the template filename, the
+               problems.* i18n namespace and every dzProblems* identifier
+               predate the "Problem Devices" display name and stay as they
+               are (internal identifiers, not user-visible; renaming them
+               would only churn the diff). */
+            .when("/ProblemDevices", { templateUrl: DZ_PROBLEMS_TEMPLATE, controller: dzProblemsRouteController() });
         window.dzRoutesActive = true;
     }]);
 
