@@ -159,6 +159,8 @@ nav:
       - Color schemes: color-schemes.md
       - Icons: icons.md
       - Bar ranges: bar-ranges.md
+      - Finding devices: finding-devices.md
+      - Problem devices: problem-devices.md
       - Mobile layouts: mobile.md
   - Settings reference: settings-reference.md
   - Troubleshooting and FAQ: troubleshooting-and-faq.md

@@ -66,7 +66,11 @@ It works with current Domoticz beta and stable releases.
 
   ![Machinon dashboard, dark scheme](docs/screenshots/dashboard-dark.png)
 
-- **Problem alerts**: a warning icon in the header shows how many devices are currently timed out or low on battery, and disappears the moment none are. Click it, open the Problem Devices page, or use the Settings menu's Problem Devices tile, for the full list, each row showing an icon for the problem and when the device was last seen. A warning about one of these devices also offers a "Show these devices" button, which filters the page down to just them; a small tag appears near the top of the page so you can clear the filter and see everything again.
+- **Search that finds things**: type in the header's search box and the page narrows as you type. It matches a device's name, description, number, type, or the hardware it comes from, so searching for a type such as "blind" pulls every blind onto one screen. Several words count in any order, and what you typed follows you from page to page instead of being cleared on every navigation. See [Finding devices](https://domoticz.github.io/Machinon/docs/finding-devices/) in the manual.
+
+  ![The Switches page filtered to eight blinds by a search for "blind"](docs/screenshots/search.png)
+
+- **Problem alerts**: a warning icon in the header shows how many devices are currently timed out or low on battery, and disappears the moment none are. Click it, or open Problem Devices from the Setup menu, for the full list, each row showing an icon for the problem and when the device was last seen. A warning about one of these devices also offers a "Show these devices" button, which filters the page down to just them; a small tag appears near the top of the page so you can clear the filter and see everything again.
 
   ![Two device warning notifications, one for a sensor timeout and one for a low battery](docs/screenshots/warning-toasts.png)
 
