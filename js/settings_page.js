@@ -15,9 +15,42 @@ if (mSettings.length > 0) {
     // instead would freeze the grid to whatever was in the markup at load.
     mSettings.children("ul").hide();
 
+    // Problems tile: #/Problems is a theme-registered Angular route
+    // (src/js/problems.js, custom.js), not one of core's own Setup-dropdown items, so core's
+    // menu markup carries no entry for it and harvestMenu() below would never surface one on
+    // its own. Seed a synthetic <li> into the same hidden ul instead, mirroring the Theme
+    // hub's own insertion (src/js/theme-hub.js dzBuildHubMenuLi/dzInsertHubMenuEntry): an
+    // <a href> holding an icon and a label span, so the grid keeps harvesting every tile from
+    // the one ul. This gives the page a reachable entry point even when the header badge is
+    // hidden at zero (everything healthy). Unlike Theme, #/Problems has no fallback
+    // (unrouted) build path, so a bare href is enough; no onclick dance is needed. Guarded by
+    // id so re-running this file (feature toggle off/on) never duplicates the entry.
+    if (!document.getElementById("dzSetupMenuProblems")) {
+        // No data-i18n on the label span (unlike Theme's "Theme", which happens to already be
+        // a real core dictionary entry): "problems.title" is a theme-only dzT() key core's own
+        // i18n() knows nothing about, and $("#machinoSettings").i18n() below still overwrites
+        // a data-i18n'd element with the raw, untranslated key text when the key is not
+        // found -- it does not leave unmatched text alone. Resolving via dzT() up front and
+        // carrying no data-i18n attribute keeps that call from ever touching this label.
+        const problemsLabel = (typeof dzT === "function") ? dzT("problems.title") : "Problems";
+        const problemsLink = $("<a>", { href: "#/Problems" });
+        $("<img>", { src: "images/settings/problems.png" }).appendTo(problemsLink);
+        problemsLink.append(" ");
+        $("<span>", { text: problemsLabel }).appendTo(problemsLink);
+        const problemsLi = $("<li>", { id: "dzSetupMenuProblems" }).append(problemsLink);
+        // Owner placement (2026-09-08): the tile sits directly after Theme. Queried by
+        // the Theme entry's documented href contract, not theme-hub.js's internal id
+        // constant, to keep the two files decoupled; a placement nicety, not a
+        // correctness requirement, so a missing Theme entry (feature off) still gets
+        // Problems appended rather than dropped.
+        const themeLi = mSettings.children("ul").find("a[href='#/Theme']").first().closest("li");
+        if (themeLi.length) themeLi.after(problemsLi); else problemsLi.appendTo(mSettings.children("ul"));
+    }
+
     // Tile icons for the pages the theme skins, keyed by menu href. A page not listed here
     // (new upstream, or renamed) still gets a tile, with the default icon.
     const TILE_ICONS = {
+        "#/Problems": "problems.png",
         "#Hardware": "hardware.png",
         "#Devices": "devices.png",
         "#Setup": "setup.png",
@@ -45,6 +78,9 @@ if (mSettings.length > 0) {
         // Theme hub (src/js/theme-hub.js): the hub menu <li> carries an href
         // ("#/Theme") but buildTile below keys the tile on onclick instead (its
         // href is Angular-routed, not in TILE_ICONS), so this keys on the label.
+        // "Theme" is also a real core dictionary entry, which is what lets this
+        // label safely ride $("#machinoSettings").i18n() below; a theme-only key
+        // would not (see the Problems tile's TILE_ICONS entry and comment above).
         "Theme": "paint-palette.png"
     };
     const DEFAULT_ICON = "setup.png";
