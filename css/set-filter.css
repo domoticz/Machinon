@@ -13,8 +13,11 @@ html:root #dashcontent .itemBlock.dz-set-filtered-out {
 
 /* Chip: the set-filter's visible armed state, built by dzSetChipEl()
    (src/js/set-filter.js) and appended to document.body, never to #main-view -
-   fixed and centered below the header so it reads over every page family
-   without widening a grid track or shifting a card on any of them.
+   fixed and centered so it reads over every page family without widening a
+   grid track or shifting a card on any of them. Desktop anchors it below the
+   header; mobile anchors it to the BOTTOM of the viewport instead (a
+   snackbar idiom) - see the mobile media query below for why top-anchoring
+   does not work there.
 
    Surface and shape trace to the two shipped chip idioms measured on the rig
    (2026-09-08, 1280x900 and 390x844, light and dark identical): Theme Hub's
@@ -46,12 +49,10 @@ html:root #dashcontent .itemBlock.dz-set-filtered-out {
     /* Above ordinary page content; below the navbar (1030) and the toast
        stack (1035) is fine on desktop, where the toast stack is a
        right-anchored 325px column and this chip sits centered, so the two
-       never actually compete for the same pixels. Below 768px the toast
-       stack goes full-width in the same band and CAN paint over this chip -
-       see the KNOWN LIMITATION note on the mobile rule below; not resolved
-       here because the fix that clears the toast collides with real card
-       rows on some routes instead, which is the one placement fault this
-       task is graded against. */
+       never actually compete for the same pixels. Below 768px this chip is
+       bottom-anchored (see the mobile media query) while the toast stack
+       stays top-anchored, so the two no longer share any vertical space to
+       fight over regardless of z-index. */
     z-index: 1020;
     display: inline-flex;
     align-items: center;
@@ -80,29 +81,33 @@ html:root #dashcontent .itemBlock.dz-set-filtered-out {
 }
 
 @media (max-width: 767px) {
+    /* ROUND 3 (owner phone report, 2026-09-09): both prior mobile offsets
+       (35px, then 118px) were TOP-anchored against some measured piece of
+       header/topbar content, and both were wrong on a real device - the
+       first cleared only the collapsed header, not core's #topBar beneath
+       it; the second cleared #topBar's room-combo/clock rows but still
+       landed on Utility's first card, because #topBar's own height (and so
+       the safe top offset) varies by ROUTE (Utility carries no #tbLinks
+       action row, so its first card starts 40px earlier than
+       Temperature's) and, per the owner's own phone, also drifts from this
+       emulation's numbers on top of that. Every top-anchored offset is
+       therefore hostage to page content whose height this file cannot see
+       from a single static number. Bottom-anchoring removes the dependency
+       entirely: nothing below the chip can push it around, so one offset is
+       correct on every route and every device. The cost, accepted: the
+       on-screen keyboard covers a bottom-anchored element on some devices
+       while it is open - fine here, since the chip is informational, not an
+       input, and reappears the moment the keyboard dismisses. */
     #dz-set-chip {
-        /* .menu-toggle bottom edge measured 25px at 390x844, the same
-           collapsed-header chrome css/toasts.css's mobile --dz-toast-top
-           override clears, + --dz-card-space-lg (10px). The header's own
-           navbar-inner is also position:fixed here but translated off-screen
-           at rest, so it is not chrome to clear (see that file's note). */
-        top: 35px;
+        top: auto;
+        /* var(--dz-card-space-lg) (10px), the same clearance rhythm used
+           everywhere else in this file, plus the safe-area inset so a
+           home-indicator bar (iPhone-style gesture devices) never sits
+           under the clear control. env() with a 0px fallback is a no-op on
+           a device/browser with no inset (Android nav-bar devices, desktop
+           browsers under 768px), so this is one rule for both. */
+        bottom: calc(var(--dz-card-space-lg) + env(safe-area-inset-bottom, 0px));
     }
-
-    /* KNOWN LIMITATION, not fixed here: a device-warning toast lands in this
-       exact 35px band (same header to clear) and, below 768px,
-       css/toasts.css runs its stack full-width rather than desktop's
-       right-anchored 325px column, so an active toast paints over this chip
-       (measured live, 390x844: a single 54px toast fully covers it). Pushing
-       the chip below the toast (tried: stack bottom 89px + the usual 10px
-       clearance) was rejected because on routes whose first card sits close
-       to the header - Utility, measured 119px - that offset lands the chip
-       ON that first card row instead, which is the one placement fault this
-       task is graded against; there is only 25px of dead space between the
-       toast's bottom (89px) and Utility's first card, not enough for this
-       chip's 36px height. Fixing the coexistence needs either a shorter
-       mobile chip or coordination with the toast module, both out of this
-       task's visual-only scope. */
 }
 
 .dz-set-chip-label {

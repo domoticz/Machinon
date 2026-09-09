@@ -18,6 +18,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - Problem rows now carry the same warning icons as the toasts
 - The search box now shows as disabled on pages it cannot search, including the new Problem Devices page, even when the page is opened directly
 - The Settings menu gains a Problem Devices tile, so the Problem Devices page stays reachable even when the header badge is hidden because everything is healthy
+- On phones, the small bar that clears a filtered view now sits at the bottom of the screen where it never covers the page header or cards
 
 ## [2.5.0] - 2026-09-03
 
