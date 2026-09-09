@@ -68,6 +68,8 @@ It works with current Domoticz beta and stable releases.
 
 - **Problem alerts**: a warning icon in the header shows how many devices are currently timed out or low on battery, and disappears the moment none are. Click it, open the Problem Devices page, or use the Settings menu's Problem Devices tile, for the full list, each row showing an icon for the problem and when the device was last seen. A warning about one of these devices also offers a "Show these devices" button, which filters the page down to just them; a small tag appears near the top of the page so you can clear the filter and see everything again.
 
+  ![Two device warning notifications, one for a sensor timeout and one for a low battery](docs/screenshots/warning-toasts.png)
+
 - **Fast loading**: releases are packaged so the theme loads quickly, especially on slower connections.
 
 <details>
@@ -88,6 +90,10 @@ The Floorplan page, with live device icons and readings placed on your home's pl
 ![Weather page](docs/screenshots/weather.png)
 
 The Weather page, with wind, rain, pressure, and sun readings.
+
+![Problem Devices page, listing a timed-out sensor and a device with a low battery](docs/screenshots/problem-devices.png)
+
+The Problem Devices page, listing every device that is currently timed out or low on battery.
 
 ![Device graph](docs/screenshots/device-graph.png)
 
