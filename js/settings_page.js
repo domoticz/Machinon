@@ -22,9 +22,16 @@ if (mSettings.length > 0) {
     // hub's own insertion (src/js/theme-hub.js dzBuildHubMenuLi/dzInsertHubMenuEntry): an
     // <a href> holding an icon and a label span, so the grid keeps harvesting every tile from
     // the one ul. This gives the page a reachable entry point even when the header badge is
-    // hidden at zero (everything healthy). Unlike Theme, #/ProblemDevices has no fallback
-    // (unrouted) build path, so a bare href is enough; no onclick dance is needed. Guarded by
-    // id so re-running this file (feature toggle off/on) never duplicates the entry.
+    // hidden at zero (everything healthy). Unlike Theme, #/ProblemDevices has NO fallback
+    // (unrouted) build path at all, so a bare href is NOT enough: the tile is built once,
+    // when the grid is opened, but window.dzRoutesActive can flip back to false at any later
+    // point (custom.js's $routeChangeError handler), leaving an already-rendered tile
+    // pointing at a route that no longer exists. The anchor therefore also carries an
+    // onclick (src/js/problems.js dzOpenProblemDevices, harvested and copied onto the tile
+    // the same way theme-hub.js's onclick takes precedence over href in buildTile below),
+    // which re-checks dzRoutesActive at the moment of the click rather than trusting the
+    // state from when the tile was built. Guarded by id so re-running this file (feature
+    // toggle off/on) never duplicates the entry.
     if (!document.getElementById("dzSetupMenuProblems")) {
         // No data-i18n on the label span (unlike Theme's "Theme", which happens to already be
         // a real core dictionary entry): "problems.title" is a theme-only dzT() key core's own
@@ -33,7 +40,10 @@ if (mSettings.length > 0) {
         // found -- it does not leave unmatched text alone. Resolving via dzT() up front and
         // carrying no data-i18n attribute keeps that call from ever touching this label.
         const problemsLabel = (typeof dzT === "function") ? dzT("problems.title") : "Problem Devices";
-        const problemsLink = $("<a>", { href: "#/ProblemDevices" });
+        // href stays for TILE_ICONS' href-keyed lookup below (tileIcon() reads it
+        // independently of buildTile()'s navigation branch); onclick is what actually
+        // drives the click, taking precedence over the href/data-target path.
+        const problemsLink = $("<a>", { href: "#/ProblemDevices", onclick: "dzOpenProblemDevices()" });
         $("<img>", { src: "images/settings/problems.png" }).appendTo(problemsLink);
         problemsLink.append(" ");
         $("<span>", { text: problemsLabel }).appendTo(problemsLink);

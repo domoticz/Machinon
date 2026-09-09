@@ -264,6 +264,16 @@ function dzRegisterThemeRoutes(routesModule) {
                would only churn the diff). */
             .when("/ProblemDevices", { templateUrl: DZ_PROBLEMS_TEMPLATE, controller: dzProblemsRouteController() });
         window.dzRoutesActive = true;
+        /* The header badge (src/js/problems.js) hides itself whenever this flag
+           reads false, since #/ProblemDevices has no legacy build path: showing
+           it would be a dead entry point. Angular boots asynchronously (RequireJS
+           pulls it in after this file's top-level code runs), so problems.js's
+           own boot-time refresh can fire and read the flag BEFORE this config
+           block ever runs, hiding the badge for up to DZ_PROBLEMS_POLL_MS (the
+           next scheduled tick) on an otherwise completely normal load. Nudging a
+           refresh here, the instant the flag actually turns true, closes that
+           race regardless of which loaded first. */
+        if (typeof dzProblemsRefresh === "function") dzProblemsRefresh();
     }]);
 
     /* Core has no $routeChangeError handler, so a template that fails to load
@@ -280,6 +290,9 @@ function dzRegisterThemeRoutes(routesModule) {
             if (templateUrl !== DZ_HUB_TEMPLATE && templateUrl !== DZ_GRID_TEMPLATE && templateUrl !== DZ_PROBLEMS_TEMPLATE) return;
             console.warn("machinon_routes", "template_absent", "route template did not load: " + templateUrl + "; falling back to the legacy open");
             window.dzRoutesActive = false;
+            // Symmetric nudge: hide the badge immediately rather than leaving it
+            // visible (and its click a dead end) until the next poll tick.
+            if (typeof dzProblemsRefresh === "function") dzProblemsRefresh();
             dzOpenThemeLegacyPage(templateUrl);
         });
     }]);

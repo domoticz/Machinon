@@ -125,6 +125,26 @@ var DZ_PROBLEMS_POLL_MS = 60000; /* a timeout is a slow-moving fact */
 var dzProblemsInitArmed = false; /* re-entrancy guard, same convention as flyoutContainmentArmed */
 var dzProblemsInFlight = false;  /* single-flight: a tick never stacks on a slow server */
 
+/* Shared guarded entry point for BOTH ways into the page: the header badge
+   (below) and the Setup-grid tile (js/settings_page.js, via a literal
+   onclick="dzOpenProblemDevices()" string on its harvested anchor, the same
+   technique theme-hub.js uses for dzOpenThemeHub). #/ProblemDevices has no
+   legacy (unrouted) build path -- unlike /Theme and /SetupMenu, there is no
+   pre-route way to render this page -- so if the theme's routes never
+   activated, or fell back via custom.js's $routeChangeError handler, the
+   route does not exist and navigating there would 404 into core's .otherwise
+   redirect. Checked here, at the moment of the click, rather than when the
+   badge was last shown or the tile was built: dzRoutesActive can flip back to
+   false at any point after boot, and a stale-visible badge or an
+   already-rendered tile would otherwise still send the user to a dead URL. */
+function dzOpenProblemDevices() {
+    if (!window.dzRoutesActive) {
+        console.warn("machinon_problems", "routes_inactive", "theme routes are inactive; #/ProblemDevices has no legacy path, entry point suppressed");
+        return;
+    }
+    location.hash = "#/ProblemDevices";
+}
+
 function dzProblemsBadgeEl() {
     var badge = document.getElementById("dz-problem-badge");
     if (badge) return badge;
@@ -145,7 +165,7 @@ function dzProblemsBadgeEl() {
     var count = document.createElement("span");
     count.className = "dz-problem-count";
     badge.appendChild(count);
-    badge.addEventListener("click", function () { location.hash = "#/ProblemDevices"; });
+    badge.addEventListener("click", dzOpenProblemDevices);
     /* Inserted BEFORE #search, not appended: float:right stacks its FIRST
        DOM child flush against the container's right edge and later
        siblings to its left, so DOM order is what puts the badge outermost
@@ -170,7 +190,12 @@ function dzProblemsRefresh() {
         dzProblemsInFlight = false;
         var badge = dzProblemsBadgeEl();
         if (badge) {
-            if (err || !rows.length) {
+            if (!window.dzRoutesActive) {
+                /* No legacy path exists for this page (see dzOpenProblemDevices above),
+                   so with the theme's routes inactive there is nowhere for the badge to
+                   send a click: showing it would be an entry point to a dead URL. */
+                badge.hidden = true;
+            } else if (err || !rows.length) {
                 /* An errored fetch HIDES the badge rather than showing a stale
                    number: a wrong count is worse than none, and the page
                    carries the visible error state. */
