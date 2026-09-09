@@ -15,6 +15,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - A warning badge in the header shows how many devices are timed out or low on battery, and opens the new Problems page
 - New Problems page listing every device that is timed out or low on battery, with a click-through that shows the device on its own page
 - Problem rows now carry the same warning icons as the toasts
+- The search box now shows as disabled on pages it cannot search, including the new Problems page, even when the page is opened directly
 
 ## [2.5.0] - 2026-09-03
 
