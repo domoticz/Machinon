@@ -394,7 +394,6 @@ language = {
     intro: "Devices that are timed out or low on battery right now.",
     timeout: "Timed out",
     battery: "Battery {level}%",
-    last_seen: "Last seen",
     th_name: "Device",
     th_what: "Problem",
     th_seen: "Last seen",

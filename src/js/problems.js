@@ -14,8 +14,11 @@
    (LightsController, TemperatureController, WeatherController,
    UtilityController), so membership in those responses IS the routing truth,
    and deriving the map from them cannot drift when upstream moves a type.
-   Cached per session: a device changes page only when its type changes, and
-   every Problems-page VISIT refreshes the cache anyway. */
+   Cached, but the cache is cleared on every Problems-page visit
+   (dzProblemsRenderPage), never merely reused across poll ticks: the accepted
+   cost is four filter= queries per visit, and what it buys is that a device
+   whose type moved it to another page since the last visit routes correctly
+   on this one, instead of clicking through to a page it no longer lives on. */
 var DZ_PROBLEM_FILTER_ROUTES = [
     ["light", "#/LightSwitches"],
     ["temp", "#/Temperature"],
@@ -216,6 +219,7 @@ function dzProblemsRefresh() {
    poll tick uses. Forcing a fresh fingerprint makes a visit always repaint. */
 function dzProblemsRenderPage() {
     dzProblemsRenderedPrint = null;
+    dzProblemsRouteCache = null;
     dzProblemsFetch(function (err, rows) {
         dzProblemsRenderRows(err ? null : rows);
     });
@@ -257,6 +261,12 @@ function dzProblemsRenderRows(rows) {
     state.hidden = true; table.hidden = false;
     tbody.textContent = "";
     dzProblemsResolveRoutes(function (map) {
+        /* dzProblemsResolveRoutes is async on a cold cache (four in-flight
+           requests), so a second render (poll tick or another visit) can
+           start and finish while this one is still waiting; without this
+           check both callbacks append rows onto the same tbody, duplicating
+           every row from the earlier render. */
+        if (print !== dzProblemsRenderedPrint) return;
         rows.forEach(function (row) {
             var tr = document.createElement("tr");
             /* Leading icon column: the SAME glyph the warning toast for this
