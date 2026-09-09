@@ -356,11 +356,15 @@ language = {
       lead_look: "Välj ett utseende. Vart och ett är din färg, ordnad på olika sätt."
     }
   },
+  setfilter: {
+    clear: "Visa alla enheter igen"
+  },
   toasts: {
     sensors_timed_out: "{count} sensorer har nått tidsgränsen",
     devices_low_on_battery: "{count} enheter har lågt batteri",
     devices: "{count} enheter",
     and_more: "och {count} till",
+    show_devices: "Visa dessa enheter",
     update_available: "Machinon version {version} är tillgänglig!",
     update_action: "Klicka här för att ladda ner",
     wcag_fails: "{what} klarar inte WCAG-kontrasten: {failures}",
@@ -381,5 +385,18 @@ language = {
     icons_summary_failed: "{summary}; misslyckades: {failures}",
     save_failed: "Temainställningarna kunde inte sparas ({error})",
     save_failed_local: "Temainställningarna kunde inte sparas i Domoticz; de behålls bara i den här webbläsaren."
+  },
+  problems: {
+    badge_title: "Enheter med problem",
+    title: "Problemenheter",
+    intro: "Enheter som just nu har nått tidsgränsen eller har lågt batteri.",
+    timeout: "Tidsgräns nådd",
+    battery: "Batteri {level}%",
+    th_name: "Enhet",
+    th_what: "Problem",
+    th_seen: "Senast sedd",
+    empty: "Inga problem. Alla enheter rapporterar och inget batteri är lågt.",
+    error: "Enhetslistan kunde inte laddas. Domoticz svarade inte.",
+    show_device: "Visa den här enheten"
   }
 };

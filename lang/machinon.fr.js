@@ -356,11 +356,15 @@ language = {
       lead_look: "Choisissez un aspect. Chacun est votre couleur, disposée différemment."
     }
   },
+  setfilter: {
+    clear: "Afficher à nouveau tous les dispositifs"
+  },
   toasts: {
     sensors_timed_out: "{count} capteurs ont expiré",
     devices_low_on_battery: "{count} dispositifs à batterie faible",
     devices: "{count} dispositifs",
     and_more: "et {count} de plus",
+    show_devices: "Afficher ces dispositifs",
     update_available: "La version {version} de Machinon est disponible !",
     update_action: "Cliquez ici pour télécharger",
     wcag_fails: "{what} échoue au contraste WCAG: {failures}",
@@ -381,5 +385,18 @@ language = {
     icons_summary_failed: "{summary}; échecs: {failures}",
     save_failed: "Les réglages du thème n'ont pas pu être enregistrés ({error})",
     save_failed_local: "Les réglages du thème n'ont pas pu être enregistrés dans Domoticz; ils sont conservés uniquement dans ce navigateur."
+  },
+  problems: {
+    badge_title: "Dispositifs ayant des problèmes",
+    title: "Dispositifs à problèmes",
+    intro: "Dispositifs actuellement expirés ou à batterie faible.",
+    timeout: "Expiré",
+    battery: "Batterie {level}%",
+    th_name: "Dispositif",
+    th_what: "Problème",
+    th_seen: "Dernier contact",
+    empty: "Aucun problème. Tous les dispositifs répondent et aucune batterie n'est faible.",
+    error: "La liste des dispositifs n'a pas pu être chargée. Domoticz n'a pas répondu.",
+    show_device: "Afficher ce dispositif"
   }
 };

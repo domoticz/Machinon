@@ -356,11 +356,15 @@ language = {
       lead_look: "Wähle ein Aussehen. Jedes ist deine Farbe, nur anders angeordnet."
     }
   },
+  setfilter: {
+    clear: "Alle Geräte wieder anzeigen"
+  },
   toasts: {
     sensors_timed_out: "{count} Sensoren mit Zeitüberschreitung",
     devices_low_on_battery: "{count} Geräte mit schwacher Batterie",
     devices: "{count} Geräte",
     and_more: "und {count} weitere",
+    show_devices: "Diese Geräte anzeigen",
     update_available: "Machinon-Version {version} ist verfügbar!",
     update_action: "Zum Herunterladen hier klicken",
     wcag_fails: "{what} besteht die WCAG-Kontrastprüfung nicht: {failures}",
@@ -381,5 +385,18 @@ language = {
     icons_summary_failed: "{summary}; fehlgeschlagen: {failures}",
     save_failed: "Design-Einstellungen konnten nicht gespeichert werden ({error})",
     save_failed_local: "Design-Einstellungen konnten nicht in Domoticz gespeichert werden; sie bleiben nur in diesem Browser."
+  },
+  problems: {
+    badge_title: "Geräte mit Problemen",
+    title: "Problemgeräte",
+    intro: "Geräte, die gerade eine Zeitüberschreitung haben oder eine schwache Batterie melden.",
+    timeout: "Zeitüberschreitung",
+    battery: "Batterie {level}%",
+    th_name: "Gerät",
+    th_what: "Problem",
+    th_seen: "Zuletzt gesehen",
+    empty: "Keine Probleme. Jedes Gerät meldet sich und keine Batterie ist schwach.",
+    error: "Die Geräteliste konnte nicht geladen werden. Domoticz hat nicht geantwortet.",
+    show_device: "Dieses Gerät anzeigen"
   }
 };
