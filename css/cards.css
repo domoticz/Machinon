@@ -150,6 +150,26 @@ div.bannercontent :is(.row, .divider) > .item {
     width: 100%;
 }
 
+/* Core's live search (WatchLiveSearch, js/domoticz.js) adds .devicesListFiltered to
+   the page's .devicesList container on the first non-empty keystroke and gives it a
+   margin-left of its own (style.css: -20px, -16px at >=1200px), commented there as
+   mimicking the margin that a paired .divider loses when the same function strips
+   .row off it for the query's duration. That premise never holds in this theme: the
+   rule two blocks up already forces "margin: 0 !important" onto every .row/.divider
+   that :has(.item), unconditionally, so none of them ever carries a margin for core's
+   compensation to replace. Measured live (1280px) on every .devicesList surface this
+   theme has - LightSwitches, Utility, Scenes, Temperature, Weather - the compensating
+   margin is pure surplus: the container gains 16px of width with its right edge
+   pinned in place, and the grid above redistributes that width into every card
+   (measured ~5.3px per column on LightSwitches' 3-column grid), shifting and resizing
+   the whole board on the first keystroke. The classic Dashboard needs no rule here:
+   core's own views/dashboard_desktop.html ships "#dashcontent.devicesListFiltered {
+   margin-left: 0 !important }" already. html:root is the recorded pattern for
+   out-cascading core CSS that loads after the theme. */
+html:root .devicesList.devicesListFiltered {
+    margin-left: 0;
+}
+
 @media (max-width: 767px) {
     .span3 td.input {
         max-width: 100% !important;

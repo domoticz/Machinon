@@ -4,6 +4,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+- Typing in search no longer makes the device cards shift and resize on wide screens
 - On the Temperature and Weather pages, the favorite star no longer appears inside a card's 3-dot menu, and the star in the card corner actually adds or removes the device from the dashboard again. A change in recent Domoticz builds had altered the star's internals on those two pages, so the theme missed it in the menu and the corner star silently stopped working. (#213)
 - Search on the classic dashboard now matches a device's number, hardware name and type as well as its name, the same as every other page. It used to check only the name there, so searching for anything else found nothing on that page. (#215)
 - Search now matches multiple words in any order instead of one exact phrase, so typing "bedroom lamp" finds a device named "Lamp Bedroom". This applies on the Switches, Scenes, Temperature, Utility, Weather and Dynamic Dashboard pages; the classic dashboard is searched by Domoticz itself and still treats what you type as one phrase. (#215)
