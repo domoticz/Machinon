@@ -548,6 +548,39 @@ test("show-devices click after navigation dismisses without filtering", () => {
     assert.equal(rec.removed, true, "it still degrades to a plain dismiss");
 });
 
+test("a queued toast keeps its origin hash and dismisses without filtering after draining onto a new page", () => {
+    const spy = makeSpy();
+    const rt = loadToastRuntime({ location: { hash: "#/LightSwitches" }, dzApplySetFilter: spy });
+    const d = rt.dz;
+
+    // Fill the stack so the warning below has nowhere to render immediately
+    // and must queue while the page is still #/LightSwitches.
+    for (let i = 0; i < 4; i++) {
+        d.dzToast({ type: "info", title: "core message " + i, timeout: 4000 });
+    }
+    d.dzToast({
+        type: "warning", title: "Hall timed out", deviceName: "Hall", deviceIdx: "5",
+        source: "device-warning", group: "device-warning-timeout",
+        groupTitle: groupTitleTimeout, timeout: 6000
+    });
+    assert.equal(d.dzToastQueue.length, 1, "the warning queues, stack is full");
+
+    rt.location.hash = "#/Utility"; // navigated away while the toast was still queued
+
+    // Free a slot and let the exit animation run, which drains the queue and
+    // calls dzToastShow against the now-current (wrong) location.
+    d.dzToastRemove(d.dzToastVisible[0]);
+    rt.clock.advance(320);
+
+    const shown = d.dzToastVisible[d.dzToastVisible.length - 1];
+    assert.equal(shown.group, "device-warning-timeout");
+    shown.el.querySelector(".dz-toast-show-devices").click();
+
+    assert.equal(spy.calls.length, 0,
+        "a toast that queued on one page must not filter the page it happened to drain onto");
+    assert.equal(shown.removed, true, "it still degrades to a plain dismiss");
+});
+
 test("close button click does not arm the filter", () => {
     const spy = makeSpy();
     const rt = loadToastRuntime({ location: { hash: "#/LightSwitches" }, dzApplySetFilter: spy });

@@ -508,6 +508,7 @@ function dzToastQueuePush(ev) {
         ev: ev, queued: true, removed: false, createdAt: Date.now(),
         names: ev.deviceName ? [ev.deviceName] : [], total: ev.deviceName ? 1 : 0,
         idxs: ev.deviceIdx ? [String(ev.deviceIdx)] : [],
+        hash: (typeof location !== "undefined" ? location.hash : ""),
         extended: false
     };
     dzToastQueue.push(entry);
@@ -542,6 +543,12 @@ function dzToastDrain() {
                own single idx; a re-sync here is what shows it for a leader
                that only gained a resolvable idx through a queued merge. */
             rec.idxs = entry.idxs.slice();
+            /* dzToastShow stamped rec.hash from the CURRENT location, but the
+               show-devices members are cards of the page this entry queued
+               on; restore that origin hash so the staleness guard in the
+               click handler still fires after a navigation that happened
+               while this toast was waiting for a slot. */
+            rec.hash = entry.hash;
             dzToastSyncShowDevices(rec);
         }
         if (entry.extended) rec.extended = true;
