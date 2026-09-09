@@ -4,6 +4,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+- Sensor timeout and low battery warnings no longer count or list the same device more than once. A warning could say "4 sensors timed out" for two devices, repeat their names, and keep climbing the longer a page stayed open
+
 ## [2.6.1] - 2026-09-09
 
 - The Problem Devices page, warning buttons and filter bar are now translated in German, French, Dutch, Polish and Swedish

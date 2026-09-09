@@ -596,3 +596,84 @@ test("close button click does not arm the filter", () => {
     assert.equal(spy.calls.length, 0, "the close button must never reach the filter (stopPropagation contract)");
     assert.equal(rec.removed, true);
 });
+
+/* ---- Re-warn defences (2026-09-09) ----
+
+   All three cover the same measured defect: a grouped device warning whose
+   count climbs and whose body lists one device several times. Reproduced on
+   the rig by running the theme's own render pass repeatedly with one device
+   painted as two cards, only one of them carrying the status class; the
+   title went 2 -> 4 -> 5 -> 6 with the session dedupe left EMPTY after every
+   pass, because the re-arm loop cleared the very key the trigger loop had
+   just set. */
+
+test("a device already in a group does not get counted or listed twice on merge", () => {
+    const rt = loadToastRuntime();
+    const d = rt.dz;
+    const ev = {
+        type: "warning", title: "Hall timed out", deviceName: "Hall", deviceIdx: "5",
+        source: "device-warning", group: "device-warning-timeout",
+        groupTitle: groupTitleTimeout, timeout: 6000
+    };
+    d.dzToast(ev);
+    d.dzToast({ ...ev, deviceName: "Garage", deviceIdx: "9", title: "Garage timed out" });
+    /* The re-arrival. Whatever let it past the session dedupe, the toast
+       itself must not tell the user there are three bad sensors when there
+       are two. */
+    d.dzToast(ev);
+    const rec = d.dzToastVisible[0];
+    assert.equal(rec.total, 2, "a repeat of a device already in the group must not raise the count");
+    assert.deepEqual(Array.from(rec.idxs), ["5", "9"]);
+    assert.deepEqual(Array.from(rec.names), ["Hall", "Garage"]);
+    assert.equal(rec.el.querySelector(".dz-toast-title").textContent, "2 sensors timed out");
+});
+
+test("a device warning with no resolvable idx still gets a dedupe key, from its name", () => {
+    /* dzToastShouldSuppress returns false for a null key by design, because
+       core's own keyless toasts must never be deduped. A device warning must
+       therefore never HAND it a null key: a card whose idx will not resolve
+       would otherwise re-warn on every single render pass, forever. */
+    assert.equal(dz.dzWarnKey("timeout", "54", "Timeout Sensor"), "timeout:54");
+    assert.equal(dz.dzWarnKey("timeout", null, "Timeout Sensor"), "timeout:name:Timeout Sensor");
+    assert.equal(dz.dzWarnKey("timeout", "", "Timeout Sensor"), "timeout:name:Timeout Sensor");
+    assert.equal(dz.dzWarnKey("timeout", null, ""), null, "nothing to key on at all stays keyless");
+    assert.equal(dz.dzWarnKey("timeout", null, null), null);
+});
+
+test("the re-arm pass never clears a key that is still warning on the same page", () => {
+    /* The root cause. One device painted as two cards, only one flagged: the
+       trigger loop marks timeout:54 seen, then the clear loop sees the
+       unflagged twin, resolves the SAME idx, and wipes the mark. Next render
+       pass warns it again, and again, and again. */
+    assert.deepEqual(
+        dz.dzWarnClearableKeys(["timeout:54"], ["timeout:54", "timeout:7"]),
+        ["timeout:7"],
+        "a key present in the warned set must survive the clear pass"
+    );
+    assert.deepEqual(dz.dzWarnClearableKeys([], ["timeout:7"]), ["timeout:7"]);
+    assert.deepEqual(dz.dzWarnClearableKeys(["timeout:7"], []), []);
+    assert.deepEqual(dz.dzWarnClearableKeys(["timeout:7"], ["timeout:7"]), []);
+});
+
+test("one device arriving first without an idx and then with one is listed once, and its idx is still collected", () => {
+    /* Reachable in production, not just in a probe: the live device_update
+       handler (src/js/devices.js) calls setAllDevicesIconsStatus() on its own
+       10ms timer, outside dzRunDevicePass's tagging loop, so a freshly
+       re-rendered card can be idx-less on one pass and idx-bearing on the
+       next. The user must not be told there are two bad sensors, and "Show
+       these devices" must still be able to reach the device. */
+    const rt = loadToastRuntime();
+    const d = rt.dz;
+    const base = {
+        type: "warning", title: "Hall timed out", deviceName: "Hall",
+        source: "device-warning", group: "device-warning-timeout",
+        groupTitle: groupTitleTimeout, timeout: 6000
+    };
+    d.dzToast({ ...base, deviceIdx: undefined });
+    d.dzToast({ ...base, deviceName: "Garage", deviceIdx: "9", title: "Garage timed out" });
+    d.dzToast({ ...base, deviceIdx: "5" });
+    const rec = d.dzToastVisible[0];
+    assert.deepEqual(Array.from(rec.names), ["Hall", "Garage"], "one line per device, not per arrival");
+    assert.equal(rec.total, 2);
+    assert.deepEqual(Array.from(rec.idxs), ["9", "5"], "the late idx is adopted so the filter can reach it");
+});

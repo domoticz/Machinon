@@ -581,6 +581,9 @@ function dzWarnPass(cfg) {
     var enabled = !!f && f.enabled === true;
     var mode = theme.warn_repeat || "daily";
     var now = Date.now();
+    /* Every key that WARNED in this pass, so the re-arm loop below can refuse
+       to clear one that is still bad. See dzWarnClearableKeys. */
+    var warnedKeys = [];
 
     $(cfg.selector).each(function() {
         var $card = $(this);
@@ -590,10 +593,15 @@ function dzWarnPass(cfg) {
         }
         if (!enabled) return;
         var idx = dzCardIdx($card);
-        var key = idx ? cfg.keyPrefix + ":" + idx : null;
+        /* Name first: it is the dedupe key's fallback when the idx will not
+           resolve, so it has to exist before dzWarnKey is called. */
+        var name = $card.find("#name").text().trim();
+        var key = dzWarnKey(cfg.keyPrefix, idx, name);
+        if (key) warnedKeys.push(key);
         /* The persisted preference (visit/daily/episode), on top of dzToast's
-           own per-session dedupe below. A key with no idx is never persisted,
-           same rule dzToast already applies to its own session dedupe. */
+           own per-session dedupe below. A key with no idx AND no name is never
+           persisted, same rule dzToast already applies to its own session
+           dedupe. */
         if (key && !dzWarnRepeatAllows(dzWarnStore(), key, mode, now)) return;
         /* Read as plain text, not escaped. dzToast() (src/js/toasts.js) inserts
            both title and body as TEXT NODES via createTextNode, never innerHTML,
@@ -604,7 +612,6 @@ function dzWarnPass(cfg) {
            device named "Kitchen & Hall" would show on screen as
            "Kitchen &amp; Hall". Harness check C9 in dz-toast-surface.js asserts
            the no-innerHTML contract this relies on. */
-        var name = $card.find("#name").text().trim();
         var result = dzToast({
             type: "warning",
             title: cfg.title,
@@ -634,10 +641,12 @@ function dzWarnPass(cfg) {
     /* Re-arm: a device whose card is on this page and NO LONGER carries the
        status class has genuinely recovered, so it may warn again next time.
        Restricted to cards actually present - a device simply absent from this
-       route has not recovered, it is just not rendered. Clears BOTH the
-       session dedupe and the persisted store, in every repeat mode: a
-       condition clearing and coming back is new information and must not
-       wait out the daily timer.
+       route has not recovered, it is just not rendered. A device that still
+       has a FLAGGED card elsewhere on the page has not recovered either, which
+       is why the keys go through dzWarnClearableKeys instead of being cleared
+       card by card. Clears BOTH the session dedupe and the persisted store, in
+       every repeat mode: a condition clearing and coming back is new
+       information and must not wait out the daily timer.
 
        Gated on `enabled`: when this warning type is off, dzWarnPass's trigger
        loop above never runs (it returns before dzToastMarkSeen/dzWarnRecord),
@@ -648,10 +657,17 @@ function dzWarnPass(cfg) {
        dzWarnStore above), so this is a second, cheaper backstop, not the only
        guard against the write storm. */
     if (!enabled) return;
+    var clearedKeys = [];
     $(cfg.cleared).each(function() {
-        var idx = dzCardIdx($(this));
-        if (!idx) return;
-        var key = cfg.keyPrefix + ":" + idx;
+        var $card = $(this);
+        var key = dzWarnKey(cfg.keyPrefix, dzCardIdx($card), $card.find("#name").text().trim());
+        if (key) clearedKeys.push(key);
+    });
+    /* Filtered, not cleared card by card: a device painting two cards where
+       only one carries the status class appears in BOTH loops, and clearing it
+       here would wipe the mark the loop above just set, so it warns again on
+       every render pass for as long as the page is open. */
+    dzWarnClearableKeys(warnedKeys, clearedKeys).forEach(function(key) {
         dzToastClearKey(dzToastState, key);
         try { dzWarnStore().remove(key); } catch (e) { /* best effort */ }
     });

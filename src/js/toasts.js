@@ -109,6 +109,33 @@ function dzWarnRecord(store, key, mode, now) {
     } catch (e) { /* best effort */ }
 }
 
+/* The dedupe key for one device warning. Never null when the caller has
+   EITHER an idx or a name, because dzToastShouldSuppress deliberately treats a
+   null key as "never dedupe" (that rule exists for core's own keyless toasts)
+   and a device warning handed a null key re-warns on every render pass for as
+   long as the page is open. A card whose idx will not resolve still has a
+   name, so it keys on that: two different devices sharing a display name is a
+   far cheaper failure than one device warning forever. */
+function dzWarnKey(prefix, idx, name) {
+    if (idx) return prefix + ":" + idx;
+    if (name) return prefix + ":name:" + name;
+    return null;
+}
+
+/* Which keys the re-arm pass may actually clear: those NOT still warning on
+   the same page. One device can paint more than one card (the classic
+   dashboard renders a device in every section it belongs to), and only one of
+   them need carry the status class. Clearing per unflagged card then wipes the
+   mark the flagged card just set, so the device warns again on the next render
+   pass, and the next, each arrival merging into the live toast and inflating
+   its count. Measured 2026-09-09: the title climbed 2 -> 4 -> 5 -> 6 from ONE
+   device while the seen set stayed empty after every pass. */
+function dzWarnClearableKeys(warnedKeys, clearedKeys) {
+    var warned = {};
+    (warnedKeys || []).forEach(function (k) { if (k) warned[k] = true; });
+    return (clearedKeys || []).filter(function (k) { return k && warned[k] !== true; });
+}
+
 /* Drop entries older than 30 days so the store does not grow forever for a
    house whose devices come and go. */
 function dzWarnPrune(store, now) {
@@ -446,7 +473,40 @@ function dzToastShow(ev) {
 
 /* Merge a same-group arrival into the live toast instead of stacking a second
    one. Twelve stale devices become one toast, not twelve serialised over 48s. */
+/* Is this arrival a device the group already carries? Either identifier is
+   enough, and the name has to count: the live device_update handler
+   (src/js/devices.js) runs the warning pass on its own timer, outside
+   dzRunDevicePass's data-idx tagging loop, so ONE device can arrive idx-less
+   on one pass and idx-bearing on the next, under two different keys, and
+   matching on idx alone would list it twice.
+
+   The cost is that two genuinely different devices sharing a display name
+   collapse to one line. That is the better failure: the toast exists to tell a
+   human which devices are bad, and two identical names tell them nothing they
+   could act on differently, whereas "4 sensors timed out" for two devices is
+   the defect this whole guard exists to stop. Their idxs are still both
+   collected, so "Show these devices" reaches every one of them. */
+function dzToastGroupHas(rec, ev) {
+    if (ev.deviceIdx && rec.idxs.indexOf(String(ev.deviceIdx)) !== -1) return true;
+    if (ev.deviceName && rec.names.indexOf(ev.deviceName) !== -1) return true;
+    return false;
+}
+
+/* A device already listed can still bring an idx the group has not got yet
+   (the idx-less-then-idx-bearing case above). Take it, so the filter button
+   can reach the device, without touching the count or the body. */
+function dzToastAdoptIdx(rec, ev) {
+    if (!ev.deviceIdx) return;
+    var idx = String(ev.deviceIdx);
+    if (rec.idxs.indexOf(idx) === -1) rec.idxs.push(idx);
+}
+
 function dzToastMerge(rec, ev) {
+    if (dzToastGroupHas(rec, ev)) {
+        dzToastAdoptIdx(rec, ev);
+        dzToastSyncShowDevices(rec);
+        return;
+    }
     if (ev.deviceName) rec.names.push(ev.deviceName);
     if (ev.deviceIdx) rec.idxs.push(String(ev.deviceIdx));
     dzToastSyncShowDevices(rec);
@@ -481,6 +541,7 @@ function dzToastMerge(rec, ev) {
    what lets a group survive queueing instead of fanning out into one queued
    event per arrival. */
 function dzToastQueueMerge(entry, ev) {
+    if (dzToastGroupHas(entry, ev)) { dzToastAdoptIdx(entry, ev); return; }
     if (ev.deviceName) entry.names.push(ev.deviceName);
     if (ev.deviceIdx) entry.idxs.push(String(ev.deviceIdx));
     entry.total += 1;
