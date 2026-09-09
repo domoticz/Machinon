@@ -122,8 +122,11 @@ function dzWarnKey(prefix, idx, name) {
     return null;
 }
 
-/* Which keys the re-arm pass may actually clear: those NOT still warning on
-   the same page. One device can paint more than one card (the classic
+/* Which keys the re-arm pass may actually clear: those NOT still flagged on
+   the same page. dzWarnPass applies this rule inline rather than calling this
+   function, to avoid materialising two arrays per warn type per render pass;
+   this is the rule's executable statement and what the tests assert against,
+   so the two must not drift. One device can paint more than one card (the classic
    dashboard renders a device in every section it belongs to), and only one of
    them need carry the status class. Clearing per unflagged card then wipes the
    mark the flagged card just set, so the device warns again on the next render
@@ -418,6 +421,7 @@ function dzToastShow(ev) {
     var built = dzToastBuild(ev);
     var rec = {
         el: built.el, group: ev.group || null, names: ev.deviceName ? [ev.deviceName] : [],
+        members: dzToastMembers(ev),
         total: ev.deviceName ? 1 : 0, base: ev.timeout, removed: false, timer: null,
         remaining: ev.timeout, startedAt: 0, paused: false, ev: ev,
         idxs: ev.deviceIdx ? [String(ev.deviceIdx)] : [],
@@ -473,40 +477,67 @@ function dzToastShow(ev) {
 
 /* Merge a same-group arrival into the live toast instead of stacking a second
    one. Twelve stale devices become one toast, not twelve serialised over 48s. */
-/* Is this arrival a device the group already carries? Either identifier is
-   enough, and the name has to count: the live device_update handler
-   (src/js/devices.js) runs the warning pass on its own timer, outside
-   dzRunDevicePass's data-idx tagging loop, so ONE device can arrive idx-less
-   on one pass and idx-bearing on the next, under two different keys, and
-   matching on idx alone would list it twice.
+/* One entry per DEVICE in the group, carrying both identifiers, because
+   neither alone is sufficient. Matching on idx alone lists one device twice:
+   the live device_update handler (src/js/devices.js) runs the warning pass on
+   its own timer, outside dzRunDevicePass's data-idx tagging loop, so a freshly
+   rendered card can arrive idx-less on one pass and idx-bearing on the next.
+   Matching on NAME alone collapses two real devices: Domoticz does not enforce
+   unique names, and an alert surface that reports one failure when two sensors
+   died is failing in the direction that costs the user something. It would
+   also contradict the badge and the Problem Devices page on the same screen,
+   which key on idx (src/js/problems.js).
 
-   The cost is that two genuinely different devices sharing a display name
-   collapse to one line. That is the better failure: the toast exists to tell a
-   human which devices are bad, and two identical names tell them nothing they
-   could act on differently, whereas "4 sensors timed out" for two devices is
-   the defect this whole guard exists to stop. Their idxs are still both
-   collected, so "Show these devices" reaches every one of them. */
-function dzToastGroupHas(rec, ev) {
-    if (ev.deviceIdx && rec.idxs.indexOf(String(ev.deviceIdx)) !== -1) return true;
-    if (ev.deviceName && rec.names.indexOf(ev.deviceName) !== -1) return true;
-    return false;
+   So: the same idx is the same device; the same NAME is the same device only
+   when at least one side has no idx to disagree with. */
+function dzToastMember(ev) {
+    return {
+        name: ev.deviceName || null,
+        idx: ev.deviceIdx ? String(ev.deviceIdx) : null
+    };
+}
+
+function dzToastMembers(ev) {
+    return (ev.deviceName || ev.deviceIdx) ? [dzToastMember(ev)] : [];
+}
+
+function dzToastMemberIndex(rec, ev) {
+    var idx = ev.deviceIdx ? String(ev.deviceIdx) : null;
+    var members = rec.members || [];
+    for (var i = 0; i < members.length; i++) {
+        var m = members[i];
+        if (idx && m.idx === idx) return i;
+        if (ev.deviceName && m.name === ev.deviceName && (!idx || !m.idx)) return i;
+    }
+    return -1;
 }
 
 /* A device already listed can still bring an idx the group has not got yet
-   (the idx-less-then-idx-bearing case above). Take it, so the filter button
-   can reach the device, without touching the count or the body. */
-function dzToastAdoptIdx(rec, ev) {
+   (the idx-less-then-idx-bearing case above). Take it, so "Show these devices"
+   reaches the device, without touching the count or the body. */
+function dzToastAdoptIdx(rec, member, ev) {
     if (!ev.deviceIdx) return;
     var idx = String(ev.deviceIdx);
+    if (member && !member.idx) member.idx = idx;
     if (rec.idxs.indexOf(idx) === -1) rec.idxs.push(idx);
 }
 
+/* Returns true when the arrival was already in the group, i.e. nothing was
+   rendered. The caller needs that: dzWarnPass gates its persisted "last shown"
+   stamp on the result, and a warning the user never saw must not burn the
+   quiet period. */
 function dzToastMerge(rec, ev) {
-    if (dzToastGroupHas(rec, ev)) {
-        dzToastAdoptIdx(rec, ev);
+    var at = dzToastMemberIndex(rec, ev);
+    if (at !== -1) {
+        dzToastAdoptIdx(rec, rec.members[at], ev);
         dzToastSyncShowDevices(rec);
-        return;
+        /* Deliberately returns before the deadline extension below: a repeat of
+           a device already listed is not new information, so it must not hold
+           the toast open. A toast can therefore expire while repeats are still
+           arriving, which is the intended behaviour, not an oversight. */
+        return true;
     }
+    if (ev.deviceName || ev.deviceIdx) rec.members.push(dzToastMember(ev));
     if (ev.deviceName) rec.names.push(ev.deviceName);
     if (ev.deviceIdx) rec.idxs.push(String(ev.deviceIdx));
     dzToastSyncShowDevices(rec);
@@ -531,6 +562,7 @@ function dzToastMerge(rec, ev) {
         rec.remaining = want;
         dzToastStartTimer(rec);
     }
+    return false;
 }
 
 /* Same idea as dzToastMerge, but for a group leader that is still sitting in
@@ -541,7 +573,12 @@ function dzToastMerge(rec, ev) {
    what lets a group survive queueing instead of fanning out into one queued
    event per arrival. */
 function dzToastQueueMerge(entry, ev) {
-    if (dzToastGroupHas(entry, ev)) { dzToastAdoptIdx(entry, ev); return; }
+    var at = dzToastMemberIndex(entry, ev);
+    if (at !== -1) {
+        dzToastAdoptIdx(entry, entry.members[at], ev);
+        return true;
+    }
+    if (ev.deviceName || ev.deviceIdx) entry.members.push(dzToastMember(ev));
     if (ev.deviceName) entry.names.push(ev.deviceName);
     if (ev.deviceIdx) entry.idxs.push(String(ev.deviceIdx));
     entry.total += 1;
@@ -569,6 +606,7 @@ function dzToastQueuePush(ev) {
         ev: ev, queued: true, removed: false, createdAt: Date.now(),
         names: ev.deviceName ? [ev.deviceName] : [], total: ev.deviceName ? 1 : 0,
         idxs: ev.deviceIdx ? [String(ev.deviceIdx)] : [],
+        members: dzToastMembers(ev),
         hash: (typeof location !== "undefined" ? location.hash : ""),
         extended: false
     };
@@ -604,6 +642,7 @@ function dzToastDrain() {
                own single idx; a re-sync here is what shows it for a leader
                that only gained a resolvable idx through a queued merge. */
             rec.idxs = entry.idxs.slice();
+            rec.members = entry.members.slice();
             /* dzToastShow stamped rec.hash from the CURRENT location, but the
                show-devices members are cards of the page this entry queued
                on; restore that origin hash so the staleness guard in the
@@ -635,12 +674,16 @@ function dzToast(ev) {
        below is the same regardless of which one it finds. */
     var live = ev.group ? dzToastGroups[ev.group] : null;
     if (live && !live.removed && (Date.now() - live.createdAt) <= DZ_TOAST_COALESCE_MS) {
+        /* shown stays true for core's ~600 keyless call sites, whose contract
+           is "the event was registered". `duplicate` is the narrower fact the
+           device-warning caller needs: nothing was rendered, so nothing should
+           be recorded as delivered. */
         if (live.queued) {
-            dzToastQueueMerge(live, ev);
-            return { close: function() { dzToastCancelQueued(live); }, shown: true };
+            var dupQ = dzToastQueueMerge(live, ev);
+            return { close: function() { dzToastCancelQueued(live); }, shown: true, duplicate: dupQ };
         }
-        dzToastMerge(live, ev);
-        return { close: function() { dzToastRemove(live); }, shown: true };
+        var dup = dzToastMerge(live, ev);
+        return { close: function() { dzToastRemove(live); }, shown: true, duplicate: dup };
     }
 
     if (dzToastVisible.length >= dzToastMaxVisible()) {

@@ -470,9 +470,20 @@ function setAllDevicesFeatures() {
    id, so this branch is not known to ever fire on this codebase, but
    floorplan and mobile card markup were not confirmed, so it stays rather
    than being deleted on a partial survey. */
+/* Three resolution paths, in cost order. tr[data-idx] is the theme's own tag,
+   written by dzEnhanceDeviceCard's "visible" stage, so it is absent on a card
+   that has rendered but not yet been through a pass. td#name[data-idx] is
+   CORE's own attribute, present in its dashboard, weather and temperature
+   templates from first paint, which is what makes a fresh card resolvable
+   before the observer flush tags it: without it, the live device_update
+   handler runs the warning pass over untagged cards and the dedupe key falls
+   back to the device NAME, giving one device two identities. Digit-guarded
+   because the attribute is "{{device.idx}}" until Angular interpolates it. */
 function dzCardIdx($card) {
     var tr = $card.find("tr[data-idx]").attr("data-idx");
     if (tr) return tr;
+    var core = $card.find("#name[data-idx]").attr("data-idx");
+    if (core && /^\d+$/.test(core)) return core;
     var t = $card.find("table[id^='itemtable']").attr("id");
     var m = t && t.match(/(\d+)/);
     return m ? m[1] : null;
@@ -581,9 +592,13 @@ function dzWarnPass(cfg) {
     var enabled = !!f && f.enabled === true;
     var mode = theme.warn_repeat || "daily";
     var now = Date.now();
-    /* Every key that WARNED in this pass, so the re-arm loop below can refuse
-       to clear one that is still bad. See dzWarnClearableKeys. */
-    var warnedKeys = [];
+    /* Every key whose card still carries the status class in this pass, whether
+       or not a toast was emitted for it. NOT "keys that warned": the push below
+       sits deliberately ABOVE the dzWarnRepeatAllows guard, because a device
+       suppressed by the daily or episode timer is still bad and its mark must
+       survive the re-arm loop. Moving the push under that guard reinstates the
+       original defect in every mode except `visit`. */
+    var flaggedKeys = [];
 
     $(cfg.selector).each(function() {
         var $card = $(this);
@@ -593,11 +608,14 @@ function dzWarnPass(cfg) {
         }
         if (!enabled) return;
         var idx = dzCardIdx($card);
-        /* Name first: it is the dedupe key's fallback when the idx will not
-           resolve, so it has to exist before dzWarnKey is called. */
-        var name = $card.find("#name").text().trim();
-        var key = dzWarnKey(cfg.keyPrefix, idx, name);
-        if (key) warnedKeys.push(key);
+        /* Read the name ONLY when it is about to be used as the key, i.e. when
+           the idx did not resolve. Reading it for every card cost a scoped
+           querySelectorAll plus a subtree text serialisation per card per warn
+           type per pass, on a pass driven 1:1 off device_update, and the value
+           was discarded every time the idx resolved. */
+        var key = idx ? cfg.keyPrefix + ":" + idx
+                      : dzWarnKey(cfg.keyPrefix, idx, $card.find("#name").text().trim());
+        if (key) flaggedKeys.push(key);
         /* The persisted preference (visit/daily/episode), on top of dzToast's
            own per-session dedupe below. A key with no idx AND no name is never
            persisted, same rule dzToast already applies to its own session
@@ -612,6 +630,7 @@ function dzWarnPass(cfg) {
            device named "Kitchen & Hall" would show on screen as
            "Kitchen &amp; Hall". Harness check C9 in dz-toast-surface.js asserts
            the no-innerHTML contract this relies on. */
+        var name = $card.find("#name").text().trim();
         var result = dzToast({
             type: "warning",
             title: cfg.title,
@@ -635,7 +654,20 @@ function dzWarnPass(cfg) {
            "last allowed" instead of "last shown", so a tab left open past
            the dedupe window silently re-records without the user ever
            seeing the warning again. */
-        if (key && result.shown) dzWarnRecord(dzWarnStore(), key, mode, now);
+        /* Three conditions, each load-bearing. `shown` is dzToast's own session
+           dedupe. `duplicate` means the group already held this device and
+           nothing was rendered, so recording it would persist "last shown" for
+           a warning the user never saw, which in episode mode blocks the key
+           indefinitely. `idx` keeps NAME-shaped keys out of localStorage
+           entirely: a name is not a stable identity, two devices can share one,
+           and a persisted name key can neither be cleared by the re-arm loop
+           (which prefers the idx form) nor aged out before the 30-day prune.
+           The cost is that an idx-less warning can repeat once after a reload
+           in daily or episode mode, because nothing recorded it. For an alert
+           surface that is the correct direction to fail. */
+        if (key && idx && result.shown && !result.duplicate) {
+            dzWarnRecord(dzWarnStore(), key, mode, now);
+        }
     });
 
     /* Re-arm: a device whose card is on this page and NO LONGER carries the
@@ -657,17 +689,21 @@ function dzWarnPass(cfg) {
        dzWarnStore above), so this is a second, cheaper backstop, not the only
        guard against the write storm. */
     if (!enabled) return;
-    var clearedKeys = [];
+    /* Tested inline against the flagged set rather than collected and filtered:
+       a device painting two cards where only one carries the status class
+       appears in BOTH loops, and clearing it here would wipe the mark the loop
+       above just set, so it would warn again on every render pass for as long
+       as the page is open. dzWarnClearableKeys states the same rule as a pure
+       function and is what the tests assert against; this is its inline form,
+       which avoids materialising two arrays per warn type per pass. */
+    var flagged = {};
+    flaggedKeys.forEach(function(key) { flagged[key] = true; });
     $(cfg.cleared).each(function() {
         var $card = $(this);
-        var key = dzWarnKey(cfg.keyPrefix, dzCardIdx($card), $card.find("#name").text().trim());
-        if (key) clearedKeys.push(key);
-    });
-    /* Filtered, not cleared card by card: a device painting two cards where
-       only one carries the status class appears in BOTH loops, and clearing it
-       here would wipe the mark the loop above just set, so it warns again on
-       every render pass for as long as the page is open. */
-    dzWarnClearableKeys(warnedKeys, clearedKeys).forEach(function(key) {
+        var idx = dzCardIdx($card);
+        var key = idx ? cfg.keyPrefix + ":" + idx
+                      : dzWarnKey(cfg.keyPrefix, idx, $card.find("#name").text().trim());
+        if (!key || flagged[key] === true) return;
         dzToastClearKey(dzToastState, key);
         try { dzWarnStore().remove(key); } catch (e) { /* best effort */ }
     });

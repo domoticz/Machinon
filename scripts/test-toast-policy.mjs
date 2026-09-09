@@ -612,15 +612,15 @@ test("a device already in a group does not get counted or listed twice on merge"
     const d = rt.dz;
     const ev = {
         type: "warning", title: "Hall timed out", deviceName: "Hall", deviceIdx: "5",
-        source: "device-warning", group: "device-warning-timeout",
+        key: "timeout:5", source: "device-warning", group: "device-warning-timeout",
         groupTitle: groupTitleTimeout, timeout: 6000
     };
     d.dzToast(ev);
-    d.dzToast({ ...ev, deviceName: "Garage", deviceIdx: "9", title: "Garage timed out" });
-    /* The re-arrival. Whatever let it past the session dedupe, the toast
-       itself must not tell the user there are three bad sensors when there
-       are two. */
-    d.dzToast(ev);
+    d.dzToast({ ...ev, deviceName: "Garage", deviceIdx: "9", key: "timeout:9", title: "Garage timed out" });
+    /* The re-arrival, under a DIFFERENT key form so the session dedupe does not
+       swallow it first: keys are how dzWarnPass actually calls dzToast, and a
+       keyless event would bypass the layer this test claims to exercise. */
+    d.dzToast({ ...ev, deviceIdx: undefined, key: "timeout:name:Hall" });
     const rec = d.dzToastVisible[0];
     assert.equal(rec.total, 2, "a repeat of a device already in the group must not raise the count");
     assert.deepEqual(Array.from(rec.idxs), ["5", "9"]);
@@ -669,11 +669,56 @@ test("one device arriving first without an idx and then with one is listed once,
         source: "device-warning", group: "device-warning-timeout",
         groupTitle: groupTitleTimeout, timeout: 6000
     };
-    d.dzToast({ ...base, deviceIdx: undefined });
-    d.dzToast({ ...base, deviceName: "Garage", deviceIdx: "9", title: "Garage timed out" });
-    d.dzToast({ ...base, deviceIdx: "5" });
+    d.dzToast({ ...base, deviceIdx: undefined, key: "timeout:name:Hall" });
+    d.dzToast({ ...base, deviceName: "Garage", deviceIdx: "9", key: "timeout:9", title: "Garage timed out" });
+    d.dzToast({ ...base, deviceIdx: "5", key: "timeout:5" });
     const rec = d.dzToastVisible[0];
     assert.deepEqual(Array.from(rec.names), ["Hall", "Garage"], "one line per device, not per arrival");
     assert.equal(rec.total, 2);
     assert.deepEqual(Array.from(rec.idxs), ["9", "5"], "the late idx is adopted so the filter can reach it");
+});
+
+/* ---- Post-review corrections (2026-09-09, adversarial review ledger) ---- */
+
+test("two distinct devices sharing a display name are counted and titled as two", () => {
+    /* The name match shipped in the first cut treated a shared display name as
+       the same device, so two failed sensors were announced as one and the
+       group title never fired. Domoticz does not enforce unique names, and the
+       badge and Problem Devices page (problems.js, keyed on idx) report the
+       true number on the same screen, so the toast contradicted them. */
+    const rt = loadToastRuntime();
+    const d = rt.dz;
+    const base = {
+        type: "warning", title: "Front Door timed out", deviceName: "Front Door",
+        source: "device-warning", group: "device-warning-timeout",
+        groupTitle: groupTitleTimeout, timeout: 6000
+    };
+    d.dzToast({ ...base, deviceIdx: "5", key: "timeout:5" });
+    d.dzToast({ ...base, deviceIdx: "9", key: "timeout:9" });
+    const rec = d.dzToastVisible[0];
+    assert.equal(rec.total, 2, "two devices that both failed must count as two");
+    assert.deepEqual(Array.from(rec.idxs), ["5", "9"]);
+    assert.equal(rec.el.querySelector(".dz-toast-title").textContent, "2 sensors timed out");
+});
+
+test("a swallowed duplicate reports itself as one, so the caller does not record it as shown", () => {
+    /* dzWarnPass gates its persisted "last shown" stamp on result.shown. A
+       merge that renders nothing must not burn the daily quiet period or, in
+       episode mode, block the key indefinitely for a warning nobody saw. */
+    const rt = loadToastRuntime();
+    const d = rt.dz;
+    const ev = {
+        type: "warning", title: "Hall timed out", deviceName: "Hall", deviceIdx: "5",
+        key: "timeout:5", source: "device-warning", group: "device-warning-timeout",
+        groupTitle: groupTitleTimeout, timeout: 6000
+    };
+    const first = d.dzToast(ev);
+    assert.equal(first.shown, true);
+    assert.ok(!first.duplicate, "the first arrival for a device is not a duplicate");
+    /* Same device, different key form, so the session dedupe does not swallow
+       it before the merge sees it (the idx-less-then-idx-bearing case). */
+    const again = d.dzToast({ ...ev, deviceIdx: undefined, key: "timeout:name:Hall" });
+    assert.equal(again.duplicate, true, "a merge that renders nothing must say so");
+    const rec = d.dzToastVisible[0];
+    assert.equal(rec.total, 1);
 });
