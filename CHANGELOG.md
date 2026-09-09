@@ -4,6 +4,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+## [2.6.1] - 2026-09-09
+
 - The Problem Devices page, warning buttons and filter bar are now translated in German, French, Dutch, Polish and Swedish
 - The bar that clears a filtered view now positions itself correctly when Menu images is turned on
 
