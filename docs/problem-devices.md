@@ -14,7 +14,10 @@ A device is listed when either of these is true:
 
 - **It has timed out.** Domoticz has not heard from it for longer than the sensor timeout, which
   is a Domoticz setting rather than a theme one and defaults to 60 minutes.
-- **Its battery is at 10% or below.**
+- **Its battery is at 10% or below.** Unlike the timeout, this 10% is fixed by Domoticz and
+  cannot be changed. In particular it is not the **Battery Low Level** setting on the Domoticz
+  settings page: that one is switched off by default and only controls Domoticz's own email and
+  push notifications, so raising it does not change when a device turns up here.
 
 Two kinds of device are never listed. A device that does not report a battery at all is not
 treated as having an empty one, and a device whose hardware you have disabled in Domoticz is
