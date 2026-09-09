@@ -40,11 +40,17 @@ html:root #dashcontent .itemBlock.dz-set-filtered-out {
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
-    /* .navbar-fixed-top bottom edge measured 92px at 1280x900 (checked on
-       Dashboard, LightSwitches and Utility - identical), + --dz-card-space-lg
-       (10px): the same header-clearance derivation css/toasts.css uses for
-       --dz-toast-top, applied fresh rather than reused because the header's
-       own height has since drifted from that file's last-recorded figure. */
+    /* NO-JS FALLBACK ONLY. src/js/set-filter.js's dzSetChipPosition() measures
+       .navbar-fixed-top's live bottom edge and overwrites this with an inline
+       style every time the chip arms, because that edge is not a constant:
+       it is 92px with the navbar_icons theme feature off, 118px with it on
+       (icons on the menu tabs grow the bar), both measured live on the rig,
+       2026-09-10 - a fixed-offset chip landed on top of the icon-enabled menu
+       bar in production, the third time a static offset here lost to a
+       header height this file cannot see (mobile hit the same wall twice
+       before switching to a bottom anchor - see that media query's history
+       comment). This value (92 + --dz-card-space-lg) only paints if that
+       script fails to run at all. */
     top: 102px;
     /* Above ordinary page content; below the navbar (1030) and the toast
        stack (1035) is fine on desktop, where the toast stack is a
