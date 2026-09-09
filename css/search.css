@@ -112,27 +112,61 @@
         border-bottom: 0;
     }
 
-    /* Expanded, the WHOLE field translates into a pill below the header, so the
+    /* Expanded, the WHOLE field becomes a fixed pill below the header, so the
        count and clear travel inside it and stay attached to the text they act
        on. The chrome lives on the field rather than the input for the same
-       reason: one transformed element, no second copy of these offsets to keep
-       in step. A neutral widget surface so the pill stands out from the accent
-       header (an accent pill would blend into it); accent border + popup
-       shadow. */
+       reason: one repositioned element, no second copy of these offsets to
+       keep in step. A neutral widget surface so the pill stands out from the
+       accent header (an accent pill would blend into it); accent border +
+       popup shadow.
+
+       position:fixed, not the old width-grow-plus-translate: measured live,
+       390x844, growing this box's real width AND HEIGHT while it stayed in
+       NORMAL FLOW (float:right #search, position:relative field) reflowed
+       the page. #search itself grew from 10x30 to 341x46 - its mobile-only
+       #search:not(.readonly):hover width:100% rule below, plus this field's
+       own height growth (30px to 41px) - and because .navbar-fixed-top is
+       position:static below 768px (no fixed header left to contain it,
+       css/toasts.css's own --dz-toast-top override notes the same fact) with
+       .container-logo's fixed 40px height never clearing that float, the
+       still-active float's footprint reached all the way down into core's
+       own #topBar content: #tbFiltRooms/#tbTimeSun collapsed toward 0 width
+       and the first card shifted up 57px, matching the reported "jumps the
+       device list". position:fixed removes this box from flow entirely, so
+       none of that can happen regardless of the exact chain above - nothing
+       below a fixed-positioned box can ever be pushed by it. left/right
+       insets (not width:calc, meaningless once "100%" resolves against the
+       viewport instead of #search) reuse the same var(--dz-card-space-xl)
+       margin css/toasts.css's own mobile bottom sheet uses for a full-width
+       fixed overlay in this breakpoint - the same idiom, not a new one.
+       Deliberately overlays #topBar's room-combo/clock rows rather than
+       clearing them too: unlike the set-filter chip (a PERSISTENT state that
+       must coexist with the page), this pill is a transient, focused
+       overlay, gone the moment the user looks away - the same trade-off
+       every full-width mobile search affordance makes. */
     #search:hover .dz-search-field,
     #search:active .dz-search-field,
     #search:focus .dz-search-field {
-        width: calc(100% - 60px);
+        position: fixed;
+        top: 50px; /* .container-logo bottom (40px, measured) + --dz-card-space-lg (10px) */
+        left: var(--dz-card-space-xl);
+        right: var(--dz-card-space-xl);
+        width: auto;
         /* The pill is sized by its content, not by the header slot the
            collapsed field holds open; see the toast note on the input below. */
         min-height: 0;
-        transform: translate(30px, 45px);
         background: var(--dz-widget-bg);
         box-shadow: var(--dz-elev-popup);
         border-radius: 20px;
         border: 2px solid var(--dz-accent-color);
         padding: 10px;
-        z-index: 5;
+        /* Above the toast stack (1035): the pill is the surface the user is
+           actively typing into, so it wins the rare moment the two would
+           otherwise coincide, the same priority toasts.css already assumes
+           for this pill (its body:has(#search:focus-within) rule moves the
+           TOAST out of the pill's way, never the reverse). Below dialogs
+           (bootstrap/bootbox start at 1040; jQuery UI at 9998+). */
+        z-index: 1036;
     }
 
     #search:hover #searchInput,
