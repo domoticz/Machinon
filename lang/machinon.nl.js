@@ -10,7 +10,8 @@ language = {
   header: {
     mainmenu: "Hoofdmenu",
     type_to_search: "Typ om te zoeken",
-    search_placeholder: "Naam, Omschr., Idx, Status"
+    search_placeholder: "Naam, Omschr., Idx, Status",
+    clear_search: "Zoekresultaten wissen"
   },
   hub: {
     loading: "Laden..",

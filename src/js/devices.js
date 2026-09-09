@@ -416,6 +416,7 @@ function dzRunDevicePass(stage) {
     });
     if (stage === "visible") {
         setAllDevicesIconsStatus();
+        dzSetFilterOnRender();
     } else {
         retagSelectorWrapCorners();
     }
@@ -484,7 +485,7 @@ function setAllDevicesIconsStatus() {
         }
     });
 
-    /* Core's GetItemBackgroundStatus (app/app.js:853) makes these mutually
+    /* Core's GetItemBackgroundStatus (app/app.js:921) makes these mutually
        exclusive: HaveTimeout beats BatteryLevel <= 10, so a timed-out device
        never also reports low battery. Two independent toggles all the same,
        because they are two different things to be told about. */
@@ -706,15 +707,18 @@ function setDeviceOptions(idx, $trs) {
                 var currentScope = angular.element(itemEl).scope();
                 var currentDevice = currentScope?.device || currentScope?.ctrl?.device || currentScope?.item;
                 var currentlyFav = currentDevice ? currentDevice.Favorite !== 0 : false;
-                /* Find core's favorite toggle img by its ng-click action, which is
-                   stable across markups: upstream fdab5e10c changed the wrapping
-                   spans from ng-show to ng-if, so presentation attributes cannot be
-                   relied on. With ng-if only the current state's img is in the DOM.
-                   Matched without the first letter: light widgets call
+                /* Find core's favorite toggle by its ng-click action, which is the
+                   only thing stable across markups: upstream fdab5e10c changed the
+                   wrapping spans from ng-show to ng-if, and the icon rework
+                   (upstream 466d7f8fb, PR #6995) replaced the img with a bare
+                   <i class="fa-... fa-star"> on the temperature and weather
+                   widgets, so neither the tag nor presentation attributes can be
+                   relied on. With ng-if only the current state's element is in the
+                   DOM. Matched without the first letter: light widgets call
                    makeFavorite(n), weather/temperature call MakeFavorite(n). */
                 var clickTarget = currentlyFav
-                    ? rows.find('.options img[ng-click*="akeFavorite(0)"]')
-                    : rows.find('.options img[ng-click*="akeFavorite(1)"]');
+                    ? rows.find('.options [ng-click*="akeFavorite(0)"]')
+                    : rows.find('.options [ng-click*="akeFavorite(1)"]');
                 if (!clickTarget.length) { return; }
                 clickTarget.click();
                 /* Update star icon after toggle (only when the toggle really fired,
@@ -847,7 +851,11 @@ function setDeviceOpacity(idx, status, $trs) {
    Registered once by the bootstrap (custom.js) as soon as Angular is up. */
 function initDeviceLiveUpdates($scope) {
     $scope.$on('device_update', function (event, data) {
-        searchFunction();
+        /* Core reapplies its own filter on the pages it owns (its controllers
+           call RefreshLiveSearch after each re-render). Only the Dynamic
+           Dashboard needs the theme to do it, and this is a no-op when no
+           dashboard filter is active. */
+        dzReapplyDeviceFilter();
         if (data.Type === "Light/Switch") {
             setDeviceOpacity(data.idx, data.Status);
             if (theme.features.icon_image.enabled === true) {

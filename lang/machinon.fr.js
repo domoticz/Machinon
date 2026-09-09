@@ -7,7 +7,8 @@ language = {
   header: {
     mainmenu: "Menu principal",
     type_to_search: "Tapez pour rechercher",
-    search_placeholder: "Nom, Desc, Idx, Etat"
+    search_placeholder: "Nom, Desc, Idx, Etat",
+    clear_search: "Effacer les résultats de recherche"
   },
   hub: {
     loading: "Chargement..",

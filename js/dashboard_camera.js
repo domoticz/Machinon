@@ -46,6 +46,15 @@ function cameraPreview(section) {
                         });
                     }
                     $("#dashCameras").i18n();
+                    /* The section is injected asynchronously, so it can arrive
+                       after a query has already been restored into the search
+                       box (core persists the query across navigation). Applying
+                       the current query here is what keeps a freshly injected
+                       camera row from being the one part of the dashboard the
+                       active query does not hold on. */
+                    if (typeof dzFilterCameras === "function") {
+                        dzFilterCameras($("#searchInput").val() || "");
+                    }
                 })
                 .catch(function(error) {
                     console.log("Machinon - camera list fetch failed:", error);

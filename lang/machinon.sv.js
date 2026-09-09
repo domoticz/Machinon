@@ -7,7 +7,8 @@ language = {
   header: {
     mainmenu: "Huvudmeny",
     type_to_search: "Skriv för att söka",
-    search_placeholder: "Namn, Beskr., Idx, Status"
+    search_placeholder: "Namn, Beskr., Idx, Status",
+    clear_search: "Rensa sökresultat"
   },
   hub: {
     loading: "Laddar..",

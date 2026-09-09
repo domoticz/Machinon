@@ -1,93 +1,146 @@
-/* The navbar search box: injected into the logo container, filters device
-   cards live, and hides dashboard sections that end up empty. */
+/* The navbar search box. Domoticz owns the matching: core's WatchLiveSearch
+   binds with $('.jsLiveSearch'), a class selector, and its controllers drive
+   that class after every re-render (RefreshLiveSearch in LightsController,
+   UtilityController, ScenesController, TemperatureController). Carrying the
+   class is therefore enough to get core's multi-term matching over its own
+   data-search attribute, its result count, and its restore across navigation.
+
+   This box exists because core hides its own on the Dashboard; the theme
+   offers search on every page. The dashboard surfaces core's engine cannot
+   see are handled by src/js/device-filter.js. */
 
 function setSearch() {
     var search = document.createElement("div");
     search.id = "search";
 
+    /* Core's own count and clear affordances, keyed by the classes its
+       _tbDisplayResults drives ($('.jsTbSearch') / $('.jsTbResults') /
+       $('.jsTbResultsCount'), all class selectors). Placing them here means
+       the count renders next to THIS box rather than in core's topbar, which
+       the theme does not use. */
+    var icon = document.createElement("i");
+    icon.className = "ion-md-search jsTbSearch";
+
+    var results = document.createElement("span");
+    results.className = "tbIcon jsTbResults dz-search-results";
+    results.title = dzT("header.clear_search");
+    var clear = document.createElement("i");
+    clear.className = "ion-md-close jsTbResultsClose";
+    var count = document.createElement("span");
+    count.className = "tbResultsCount jsTbResultsCount";
+    results.appendChild(clear);
+    results.appendChild(count);
+
     var input = document.createElement("input");
     input.type = "text";
     input.id = "searchInput";
+    /* The class IS the adoption: core binds every element carrying it. */
+    input.className = "jsLiveSearch";
     input.autocomplete = "off";
     input.placeholder = dzT("header.search_placeholder");
     input.title = dzT("header.type_to_search");
-    input.addEventListener("keyup", searchFunction);
-    search.appendChild(input);
 
-    var icon = document.createElement("i");
-    icon.className = "ion-md-search";
-    search.appendChild(icon);
+    /* The input and the affordances that act on it are one box, not three
+       siblings. On a phone the collapsed box expands into a pill positioned
+       below the header, and css/search.css makes that pill by translating this
+       wrapper: as its children the count and the clear glyph ride inside the
+       pill for free. Positioned as siblings of a transformed input they could
+       not follow it at all, and the only CSS-only alternative is to repeat the
+       same translate on the affordance group and keep the two values in
+       lockstep by hand forever. */
+    var field = document.createElement("div");
+    field.className = "dz-search-field";
+    field.appendChild(input);
+    field.appendChild(icon);
+    field.appendChild(results);
+    search.appendChild(field);
 
     var logo = document.querySelector(".container-logo");
     if (logo) { logo.appendChild(search); }
-    window.addEventListener("keydown",function (e) {
+
+    /* On core pages our box is the SECOND .jsLiveSearch: core's topbar
+       carries one too. RefreshLiveSearch triggers change on all of them and
+       each handler reads its own value, so an empty sibling would clear the
+       filter depending on iteration order. Keeping them equal makes the
+       outcome order-independent.
+
+       Native addEventListener, not jQuery's .on(): core calls WatchLiveSearch
+       again on every route that owns a search box (ScenesController, app.js,
+       and inc_topbar.html's inline script on every topbar include), and each
+       call does $('.jsLiveSearch').off() with no arguments, which strips
+       every jQuery-bound handler on elements carrying the class, no matter
+       when it was bound. A native listener is invisible to that .off() and
+       survives every later re-render. Bound to keyup and change, matching
+       what WatchLiveSearch itself listens for and what real typing plus the
+       test harness's dispatchEvent calls actually fire. */
+    function syncLiveSearchSiblings() {
+        var v = this.value;
+        $(".jsLiveSearch").not(this).each(function () { this.value = v; });
+    }
+    input.addEventListener("keyup", syncLiveSearchSiblings);
+    input.addEventListener("change", syncLiveSearchSiblings);
+
+    window.addEventListener("keydown", function (e) {
         if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70)) {
             $("#searchInput").focus();
             e.preventDefault();
         }
-    })
-    $("#search").click(function() {
+    });
+    $("#search").click(function () {
         $("#searchInput").focus();
     });
-    $("#searchInput").keyup(function(event) {
+    /* Domoticz runs TWO matching engines off this one input, and clearing it has
+       to reach both. WatchLiveSearch (js/domoticz.js) binds with jQuery and
+       filters every page core owns. The classic dashboard is filtered instead by
+       Angular, through filterDevices, fed by NATIVE capture-phase listeners that
+       DashboardDesktopController registers on document. A jQuery .trigger() only
+       walks jQuery's own handler queues and dispatches nothing to the DOM, so it
+       is the one path that cannot reach the capture listeners: clearing that way
+       empties the box while the classic dashboard stays filtered, with no way
+       back short of typing and deleting a character.
+
+       A real dispatched event reaches all three consumers in one go: core's
+       jQuery handler (jQuery binds through addEventListener), core's capture
+       listeners, and the theme's own delegated handler in src/js/device-filter.js.
+       It also re-enters the native listeners on this input, syncLiveSearchSiblings
+       included, so the siblings need no separate call. bubbles is required for the
+       delegated handler; the capture listeners would fire either way. */
+    function clearSearch() {
+        input.value = "";
+        input.dispatchEvent(new Event("keyup", { bubbles: true }));
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
+    /* Same hazard as syncLiveSearchSiblings above, on the same element: a
+       jQuery-bound handler here would be stripped by WatchLiveSearch's
+       argument-less .off() moments after being attached, silently killing
+       Enter and Escape. Native addEventListener survives it. The dispatch in
+       clearSearch re-enters this handler with no keyCode at all, which matches
+       neither branch, so there is no recursion to guard against. */
+    input.addEventListener("keyup", function (event) {
         if (event.keyCode === 13) {
-            $("#searchInput").blur();
+            input.blur();
         }
         if (event.keyCode === 27) {
-            $("#searchInput").val("");
-            $("#searchInput").keyup();
+            clearSearch();
         }
     });
 
-}
+    /* The clear glyph needs its own native listener for the same reason: core
+       binds one on .jsTbResultsClose,.jsTbResults, but it clears with
+       $('.jsLiveSearch').val('').trigger('change'), the jQuery-simulated path
+       that never reaches the classic dashboard's capture listeners. Core's
+       binding cannot be corrected from here, so the theme adds the real
+       dispatch alongside it; clearing an already-empty box twice is inert.
+       Native again, because WatchLiveSearch calls .off() with no arguments on
+       these elements too. Bound on the wrapper so a click on the glyph inside
+       it counts. */
+    results.addEventListener("click", clearSearch);
 
-function searchFunction() {
-    var value = $("#searchInput").val().toLowerCase();
-    $("div .item").each(function() {
-        var element = $(this);
-        if ($("#dashcontent").length || $("#weatherwidgets").length || $("#tempwidgets").length) {
-            element = $(this).parent();
-        }
-		if ($("#dashcontent").length){
-			var visibility = $(this).find("#name").html().toLowerCase().indexOf(value) > -1;
-			element.toggle(visibility);
-		}else{
-			var visibility = $(this).find("#name").attr('data-search').toLowerCase().indexOf(value) > -1;
-			element.toggle(visibility);
-		}
-    });
-    /* Scoped like the section reveal below, and for the same reason: this
-       runs on every live device_update push via searchFunction, on EVERY
-       page. An unscoped div.row.divider would re-show hidden rows anywhere
-       in the document; the only rows search itself ever hides live in the
-       three search surfaces (weather/temp rows via element.toggle on the
-       parent, classic dashboard rows via removeEmptySectionDashboard). */
-    $("#weatherwidgets div.row.divider, #tempwidgets div.row.divider, #dashcontent div.row").show();
-    // Scoped to #dashcontent: this undoes whatever removeEmptySectionDashboard
-    // hid on the PREVIOUS keyup, before recomputing below, so it only ever
-    // needs the same container that function already scopes to. An unscoped
-    // $("section").show() would hit EVERY <section> in the document,
-    // including the theme hub's .dz-hub-section group panels (also
-    // <section> elements) whenever this ran for ANY reason on ANY page --
-    // and initDeviceLiveUpdates (devices.js) calls searchFunction() on every
-    // live device_update push, not just on a real keystroke. With the hub
-    // open, that would blow away dzHubShowGroup's per-group display:none on
-    // every background device update, showing all groups at once until the
-    // user clicked a tab again. #dashcontent is the only container search
-    // ever needs this reveal step for: weatherwidgets/tempwidgets (the other
-    // two search surfaces referenced above) use <div class="row divider">,
-    // not <section>, so they were never part of what this line was for.
-    $("#dashcontent section").show();
-    if (value.length) {
-        removeEmptySectionDashboard();
+    /* Core calls WatchLiveSearch once at app.js boot, before this box exists,
+       so bind it again now that it does. The call is .off().on(), so binding
+       twice is safe. */
+    if (typeof WatchLiveSearch === "function") {
+        WatchLiveSearch();
     }
-}
-
-function removeEmptySectionDashboard() {
-    $("#dashcontent section").each(function() {
-        $(this).show();
-        if (!$(this).children("div.row").children(":visible").length) {
-            $(this).hide();
-        }
-    });
 }

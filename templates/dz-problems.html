@@ -1,0 +1,20 @@
+<!-- Routed template for #/ProblemDevices (route table at the top of custom.js).
+     Requested as styles/default/templates/dz-problems.html and served from
+     this theme's folder by core's active-theme rewrite.
+
+     A static shell only: every dynamic node is built by
+     src/js/problems.js (dzProblemsRenderRows), which is the one renderer
+     both the route entry and the poll tick use. -->
+<div id="dz-problems" class="container">
+    <h2 id="dz-problems-title"></h2>
+    <p id="dz-problems-intro"></p>
+    <div id="dz-problems-state" hidden></div>
+    <table id="dz-problems-table" hidden>
+        <!-- Leading th intentionally empty: it heads the icon column
+             (src/js/problems.js), which is decorative and aria-hidden per
+             row, same as core's own icon-only columns (e.g. the Devices
+             table's state-icon column, app/devices/Devices.js: title ''). -->
+        <thead><tr><th></th><th id="dz-problems-th-name"></th><th id="dz-problems-th-what"></th><th id="dz-problems-th-seen"></th></tr></thead>
+        <tbody></tbody>
+    </table>
+</div>

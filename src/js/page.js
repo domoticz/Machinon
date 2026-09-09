@@ -44,13 +44,31 @@ function whenElementRenders(key, selector, fn) {
 function locationHashChanged() {
     setPageTitle();
     $(".current_page_item:not(:first)").removeClass("current_page_item");
-    $("#searchInput").val("");
+    /* The query is NOT cleared here: core persists it in
+       myglobals.LastSearchFilter and ScheduleLiveSearchRestore reapplies it
+       once the input and the page container both exist. Clearing here would
+       race that restore and discard the filter on every navigation. */
 
-    if (location.hash == "#/Dashboard" && !isMobile || location.hash == "#/LightSwitches" || location.hash == "#/Scenes" || location.hash == "#/Temperature" || location.hash == "#/Weather" || location.hash == "#/Utility") {
-        $("#search").removeClass("readonly");
-    } else {
-        $("#search").addClass("readonly");
-    }
+    /* #search does not exist yet on the very first call: custom.js's
+       init_theme calls locationHashChanged() before setSearch() builds the
+       box (loadSettings().then -> $(document).ready(...), locationHashChanged
+       then setSearch, in that order), so a direct page load straight into a
+       non-whitelisted route (e.g. #/ProblemDevices) used to find no #search here,
+       silently no-op, and then get a freshly built box with no readonly
+       class at all - the mobile pill expanded where it should not, and only
+       a LATER hashchange (navigating away and back) ever corrected it.
+       whenElementRenders (this file, above) defers to the moment #search
+       actually exists - immediately, on every hashchange after boot, since
+       it already does by then - and the condition is read fresh inside the
+       callback rather than closed over a stale value, so a hash change that
+       lands while the very first call is still waiting is not raced. */
+    whenElementRenders("search-readonly", "#search", function() {
+        if (location.hash == "#/Dashboard" && !isMobile || location.hash == "#/LightSwitches" || location.hash == "#/Scenes" || location.hash == "#/Temperature" || location.hash == "#/Weather" || location.hash == "#/Utility") {
+            $("#search").removeClass("readonly");
+        } else {
+            $("#search").addClass("readonly");
+        }
+    });
     if ((location.hash == "#/Dashboard") && theme.features.dashboard_camera.enabled) {
         if (typeof cameraPreview === "function")
             theme.features.dashboard_camera_section && cameraPreview(theme.features.dashboard_camera_section.enabled);

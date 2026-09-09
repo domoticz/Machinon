@@ -9,7 +9,8 @@ language = {
   header: {
     mainmenu: "Main menu",
     type_to_search: "Type to search",
-    search_placeholder: "Name, Desc, Idx, Status"
+    search_placeholder: "Name, Desc, Idx, Status",
+    clear_search: "Clear search results"
   },
   hub: {
     loading: "Loading..",
@@ -357,11 +358,15 @@ language = {
       lead_look: "Pick a look. Each one is your colour, arranged differently."
     }
   },
+  setfilter: {
+    clear: "Show all devices again"
+  },
   toasts: {
     sensors_timed_out: "{count} sensors timed out",
     devices_low_on_battery: "{count} devices low on battery",
     devices: "{count} devices",
     and_more: "and {count} more",
+    show_devices: "Show these devices",
     update_available: "Machinon version {version} is available!",
     update_action: "Click here to download",
     wcag_fails: "{what} fails WCAG contrast: {failures}",
@@ -382,5 +387,18 @@ language = {
     icons_summary_failed: "{summary}; failed: {failures}",
     save_failed: "Theme settings could not be saved ({error})",
     save_failed_local: "Theme settings could not be saved to Domoticz; kept in this browser only."
+  },
+  problems: {
+    badge_title: "Devices with problems",
+    title: "Problem Devices",
+    intro: "Devices that are timed out or low on battery right now.",
+    timeout: "Timed out",
+    battery: "Battery {level}%",
+    th_name: "Device",
+    th_what: "Problem",
+    th_seen: "Last seen",
+    empty: "No problems. Every device is reporting and no battery is low.",
+    error: "Could not load the device list. Domoticz did not answer.",
+    show_device: "Show this device"
   }
 };
