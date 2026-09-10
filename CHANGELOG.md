@@ -4,6 +4,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+- New **Diagnostic logging** setting in the Theme Hub, off by default. Switch it on, reproduce a problem, then press **Copy diagnostics** below it to get something you can paste straight into a bug report. Everything stays in your browser, nothing is sent anywhere, and your device names are left out so it is safe to post publicly
 - Sensor timeout and low battery warnings no longer count or list the same device more than once. A warning could say "4 sensors timed out" for two devices, repeat their names, and keep climbing the longer a page stayed open
 
 ## [2.6.1] - 2026-09-09

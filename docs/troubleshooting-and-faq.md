@@ -89,3 +89,30 @@ shared settings](theme-hub.md#personal-settings-versus-shared-settings). In shor
 installation without separate logins, there's only one copy of every setting, so any change
 affects everyone; with separate logins, only settings marked shared (with a small "house" label)
 spread to other users, and only an admin account can change them.
+
+## Reporting a problem
+
+If none of the above fixes it, a bug report is the next step, and there is one thing you can do
+that makes it far easier to diagnose.
+
+1. Open the Theme Hub (**Setup**, then **Theme**) and switch on **Diagnostic logging**.
+2. Make the problem happen again.
+3. Press **Copy diagnostics**, which sits just underneath that setting and becomes available once
+   the setting is on.
+4. Paste the result into your bug report.
+
+The order matters. With the setting off nothing is being recorded, so a report filed without it can
+describe your setup but not what led up to the problem. Everything is recorded in your browser only,
+nothing is sent anywhere, and it is all gone as soon as you reload the page.
+
+The copied text leaves out your device names, so it is safe to post publicly. It does include your
+Machinon and Domoticz versions and which theme features you have switched on, because that is what
+makes a report diagnosable.
+
+If your Domoticz is reached over plain `http://` on your home network, the browser will not let a
+page write to your clipboard. The text then appears in a box below the button instead, already
+selected, so you can copy it by hand. That is normal and not a fault.
+
+If you would rather read your own devices by name, open your browser's console and run
+`machinonDiagNames()`. That output includes device names, so it is for you rather than for a public
+issue; use **Copy diagnostics** for anything you post.
