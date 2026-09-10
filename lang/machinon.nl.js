@@ -58,6 +58,10 @@ language = {
         label: "Hoe vaak waarschuwingen zich herhalen",
         description: "Hoe vaak hetzelfde apparaat je opnieuw mag waarschuwen: eens per bezoek, eens per dag, of alleen wanneer het probleem verdwijnt en terugkomt. Het waarschuwingsicoon naast de apparaatnaam verschijnt hoe dan ook."
       },
+      diagnostic_logging: {
+        label: "Diagnostische logging",
+        description: "Legt extra details vast over wat het thema doet, zodat je die aan een bugmelding kunt toevoegen. Alles blijft in je browser en er wordt niets verstuurd. Je kunt dit gerust uit laten staan."
+      },
       center_popups: {
         label: "Pop-upvensters centreren",
         description: "Dwingt elk pop-upvenster naar een vaste gecentreerde positie, in plaats van waar Domoticz het anders zou plaatsen."

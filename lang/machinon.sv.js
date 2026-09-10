@@ -56,6 +56,10 @@ language = {
         label: "Hur ofta varningar upprepas",
         description: "Hur ofta samma enhet får varna dig igen: en gång per besök, en gång om dagen, eller bara när problemet försvinner och kommer tillbaka. Varningsikonen bredvid enhetsnamnet visas ändå."
       },
+      diagnostic_logging: {
+        label: "Diagnostikloggning",
+        description: "Registrerar extra detaljer om vad temat gor, sa att du kan bifoga dem till en felrapport. Allt stannar i din webblasare och ingenting skickas. Kan lugnt lamnas avstangt."
+      },
       center_popups: {
         label: "Centrera popup-dialoger",
         description: "Tvingar varje popup-dialog till en fast centrerad position i stället för där Domoticz annars skulle placera den."

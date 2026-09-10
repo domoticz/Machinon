@@ -57,6 +57,10 @@ language = {
         label: "How often warnings repeat",
         description: "How often the same device may warn you again: once per visit, once a day, or only when the problem clears and comes back. The warning icon next to the device name appears either way."
       },
+      diagnostic_logging: {
+        label: "Diagnostic logging",
+        description: "Records extra detail about what the theme is doing, so you can attach it to a bug report. Everything stays in your browser and nothing is sent anywhere. Safe to leave off."
+      },
       center_popups: {
         label: "Center popup dialogs",
         description: "Forces every popup dialog to a fixed centered position, instead of wherever Domoticz would otherwise place it."

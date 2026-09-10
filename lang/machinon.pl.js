@@ -56,6 +56,10 @@ language = {
         label: "Jak często powtarzają się ostrzeżenia",
         description: "Jak często to samo urządzenie może ostrzec Cię ponownie: raz na wizytę, raz dziennie lub tylko wtedy, gdy problem znika i wraca. Ikona ostrzeżenia obok nazwy urządzenia pojawia się i tak."
       },
+      diagnostic_logging: {
+        label: "Rejestrowanie diagnostyczne",
+        description: "Zapisuje dodatkowe szczegoly o tym, co robi motyw, aby mozna je bylo dolaczyc do zgloszenia bledu. Wszystko pozostaje w przegladarce i nic nie jest wysylane. Mozna spokojnie zostawic wylaczone."
+      },
       center_popups: {
         label: "Wyśrodkuj okna wyskakujące",
         description: "Wymusza stałą, wyśrodkowaną pozycję każdego okna wyskakującego, zamiast miejsca, w którym umieściłby je Domoticz."

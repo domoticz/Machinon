@@ -73,6 +73,27 @@ The warning icon next to the device name is shown regardless of this setting. Th
 is remembered by the browser you're using, so a warning you've already seen on your computer can
 still show up once on your phone.
 
+### Diagnostic logging
+<!-- key: diagnostic_logging -->
+
+Off by default. When you turn it on, the theme records extra detail about what it is doing so you
+can attach it to a bug report: which pages rendered, which devices were flagged as timed out or low
+on battery, which warnings were shown or suppressed, and what the filters and settings did.
+
+Everything stays in your browser. Nothing is sent anywhere, nothing is written to Domoticz, and the
+record is kept in memory only, so it is gone as soon as you reload the page.
+
+Turn it on, reproduce the problem, then press **Copy diagnostics** just below this setting and paste
+the result into your bug report. That order matters: with the setting off, nothing was being
+recorded, so a report filed without it still describes your setup but cannot show what led up to the
+problem.
+
+The copied text deliberately leaves out your device names, so it is safe to paste into a public
+issue. It does include your Domoticz version, your theme version and which theme features you have
+switched on, because that is what makes a report diagnosable. If you would rather read your own
+devices by name, run `machinonDiagNames()` in the browser console instead; that output is for you,
+not for a public issue.
+
 ### Center popup dialogs
 <!-- key: center_popups -->
 

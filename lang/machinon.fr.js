@@ -55,6 +55,10 @@ language = {
         label: "Fréquence de répétition des alertes",
         description: "À quelle fréquence un même dispositif peut vous alerter de nouveau: une fois par visite, une fois par jour, ou seulement lorsque le problème disparaît puis revient. L'icône d'avertissement à côté du nom du dispositif apparaît dans tous les cas."
       },
+      diagnostic_logging: {
+        label: "Journal de diagnostic",
+        description: "Enregistre des details supplementaires sur ce que fait le theme, afin de les joindre a un rapport de bogue. Tout reste dans votre navigateur et rien n'est envoye. Vous pouvez le laisser desactive sans probleme."
+      },
       center_popups: {
         label: "Centrer les fenêtres contextuelles",
         description: "Force chaque fenêtre contextuelle à une position centrée fixe, au lieu de l'endroit où Domoticz la placerait autrement."

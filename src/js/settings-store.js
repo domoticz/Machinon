@@ -124,6 +124,13 @@ function loadSettings() {
             if (theme.features && !theme.features.warn_battery) {
                 theme.features.warn_battery = { id: 47, enabled: true, files: [] };
             }
+            /* Without this, a cached theme object written before diagnostics
+               shipped leaves theme.features.diagnostic_logging undefined on
+               every existing install's first warm load, and any gate read that
+               is not written defensively is a TypeError. */
+            if (theme.features && !theme.features.diagnostic_logging) {
+                theme.features.diagnostic_logging = { id: 48, enabled: false, files: [] };
+            }
             if (!theme.warn_repeat) {
                 theme.warn_repeat = "daily";
             }
@@ -369,6 +376,7 @@ function applyThemeDeltaInPlace(before) {
     setLogo();
     applyBackground();
     applyNavbarIconsText();
+    dzDiagRefreshGate();
 }
 
 function resetTheme() {

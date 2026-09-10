@@ -55,6 +55,10 @@ language = {
         label: "Wie oft Warnungen wiederholt werden",
         description: "Wie oft dasselbe Gerät dich erneut warnen darf: einmal pro Besuch, einmal am Tag oder nur, wenn das Problem verschwindet und wiederkommt. Das Warnsymbol neben dem Gerätenamen erscheint ohnehin."
       },
+      diagnostic_logging: {
+        label: "Diagnoseprotokoll",
+        description: "Zeichnet zusatzliche Details daruber auf, was das Theme tut, damit Sie sie einem Fehlerbericht beilegen konnen. Alles bleibt in Ihrem Browser, es wird nichts gesendet. Kann bedenkenlos ausgeschaltet bleiben."
+      },
       center_popups: {
         label: "Popup-Dialoge zentrieren",
         description: "Zwingt jeden Popup-Dialog an eine feste zentrierte Position, statt dorthin, wo Domoticz ihn sonst platzieren würde."

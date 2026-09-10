@@ -382,3 +382,46 @@ function machinonDiagText() {
         window.dzLog = dzLog;
     } catch (e) { /* best effort */ }
 })();
+
+/* Recompute the cached gate from the theme setting and the per-browser
+   override, OR'd. Called at three points and no others: this file's own load,
+   the settings-apply path in src/js/settings-store.js, and a storage event for
+   the override. Never at a dzLog call site, because those run per card inside a
+   render pass driven off every websocket update, and a synchronous storage read
+   there would be orders of magnitude past the one boolean test the design
+   budgets for.
+
+   Read defensively: a cached theme object written before diagnostics shipped has
+   no diagnostic_logging key at all until the seeding block in loadSettings runs,
+   and this can be called before it. */
+function dzDiagRefreshGate() {
+    var on = false;
+    try {
+        on = !!(typeof theme !== "undefined" && theme && theme.features &&
+                theme.features.diagnostic_logging &&
+                theme.features.diagnostic_logging.enabled === true);
+    } catch (e) { /* best effort */ }
+    if (!on) {
+        /* Per-browser override. Settings are house-wide today, so without this
+           one person debugging switches console noise on for every user of the
+           install. */
+        try {
+            if (typeof localStorage !== "undefined" && typeof themeFolder !== "undefined") {
+                on = localStorage.getItem(themeFolder + ".diag") === "on";
+            }
+        } catch (e) { /* private mode, disabled storage: stay off */ }
+    }
+    return dzDiagSetEnabled(on);
+}
+
+(function() {
+    try {
+        if (typeof window === "undefined") return;
+        window.addEventListener("storage", function(ev) {
+            if (ev && typeof ev.key === "string" && ev.key.indexOf(".diag") !== -1) {
+                dzDiagRefreshGate();
+            }
+        });
+        dzDiagRefreshGate();
+    } catch (e) { /* best effort */ }
+})();

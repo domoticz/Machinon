@@ -123,6 +123,11 @@
             "enabled": true,
             "files": []
         },
+        "diagnostic_logging": {
+            "id": 48,
+            "enabled": false,
+            "files": []
+        },
         "dashboard_columns": {
             "id":30,
             "enabled":false,

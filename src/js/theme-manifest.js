@@ -156,6 +156,16 @@ var THEME_MANIFEST = [
                 appliesTo: "toasts", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             },
+            /* Gates BOTH the console output and the in-memory recorder in
+               src/js/diag.js, and ships off. files:[] so it applies live, which
+               is only true because dzDiagRefreshGate() runs on the settings
+               apply path: the gate is a cached boolean, never a storage read at
+               call time, since the seams that read it run per card. */
+            {
+                key: "diagnostic_logging", storageKey: "diagnostic_logging", control: "toggle",
+                appliesTo: "whole_ui", previewId: null, parent: null,
+                reloadOnDisable: false, status: "keep", scope: "user"
+            },
             {
                 key: "center_popups", storageKey: "center_popups", control: "toggle",
                 appliesTo: "all_dialogs", previewId: "dialog-center", parent: null,
