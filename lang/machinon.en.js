@@ -61,6 +61,10 @@ language = {
         label: "Diagnostic logging",
         description: "Records extra detail about what the theme is doing, so you can attach it to a bug report. Everything stays in your browser and nothing is sent anywhere. Safe to leave off."
       },
+      diagnostics_copy: {
+        label: "Copy diagnostics",
+        description: "Copies what the theme has recorded, ready to paste into a bug report. Your device names are left out, so it is safe to post publicly."
+      },
       center_popups: {
         label: "Center popup dialogs",
         description: "Forces every popup dialog to a fixed centered position, instead of wherever Domoticz would otherwise place it."
@@ -262,6 +266,12 @@ language = {
       link_repo: "GitHub repository",
       link_wiki: "Wiki",
       icons8_credit: "Icons by Icons8"
+    },
+    diag: {
+      copy: "Copy diagnostics",
+      copied: "Copied. Paste it into your bug report.",
+      fallback: "Copy failed, so the text is below. Select it and copy it manually.",
+      hint: "Turn on Diagnostic logging above, reproduce the problem, then press this."
     },
     maintenance: {
       aria: "Theme maintenance",

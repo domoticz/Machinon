@@ -60,6 +60,10 @@ language = {
         label: "Rejestrowanie diagnostyczne",
         description: "Zapisuje dodatkowe szczegoly o tym, co robi motyw, aby mozna je bylo dolaczyc do zgloszenia bledu. Wszystko pozostaje w przegladarce i nic nie jest wysylane. Mozna spokojnie zostawic wylaczone."
       },
+      diagnostics_copy: {
+        label: "Kopiuj diagnostyke",
+        description: "Kopiuje to, co zarejestrowal motyw, gotowe do wklejenia w zgloszeniu bledu. Nazwy Twoich urzadzen sa pomijane, wiec mozna to bezpiecznie opublikowac."
+      },
       center_popups: {
         label: "Wyśrodkuj okna wyskakujące",
         description: "Wymusza stałą, wyśrodkowaną pozycję każdego okna wyskakującego, zamiast miejsca, w którym umieściłby je Domoticz."
@@ -260,6 +264,12 @@ language = {
       link_repo: "Repozytorium GitHub",
       link_wiki: "Wiki",
       icons8_credit: "Ikony od Icons8"
+    },
+    diag: {
+      copy: "Kopiuj diagnostyke",
+      copied: "Skopiowano. Wklej to do zgloszenia bledu.",
+      fallback: "Kopiowanie nie powiodlo sie, tekst jest ponizej. Zaznacz go i skopiuj recznie.",
+      hint: "Wlacz powyzej Rejestrowanie diagnostyczne, odtworz problem, a nastepnie nacisnij tutaj."
     },
     maintenance: {
       aria: "Konserwacja motywu",

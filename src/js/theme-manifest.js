@@ -166,6 +166,15 @@ var THEME_MANIFEST = [
                 appliesTo: "whole_ui", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             },
+            /* The Copy diagnostics action, deliberately adjacent to the setting
+               rather than in About: the documented flow is switch it on,
+               reproduce, press the button, and splitting that across two tabs
+               costs more on a phone than the tidier grouping is worth. */
+            {
+                key: "diagnostics_copy", storageKey: null, control: "custom",
+                appliesTo: "whole_ui", previewId: null, parent: null,
+                reloadOnDisable: false, status: "keep", scope: null
+            },
             {
                 key: "center_popups", storageKey: "center_popups", control: "toggle",
                 appliesTo: "all_dialogs", previewId: "dialog-center", parent: null,

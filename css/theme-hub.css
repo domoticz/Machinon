@@ -912,3 +912,42 @@
 .dz-hub-image-remove {
     flex: 0 0 auto;
 }
+
+/* Copy diagnostics: an action, not a setting with a value, so it follows the
+   maintenance block's shape rather than the three-column row grid. */
+.dz-hub-diag {
+    margin-top: 8px; /* future --dz-gap token site (spacing project) */
+    padding-top: 8px; /* future --dz-gap token site (spacing project) */
+    border-top: 1px solid var(--dz-input-border);
+    min-width: 0;
+}
+
+.dz-hub-diag .dz-hub-desc {
+    margin: 4px 0 8px; /* future --dz-gap token site (spacing project) */
+}
+
+/* The clipboard fallback, which is the COMMON path rather than the edge case:
+   a Domoticz reached over plain http on a LAN is not a secure context, so the
+   clipboard API is simply absent there and the text has to be selectable by
+   hand. Monospace because it is JSON someone is about to paste into an issue. */
+/* The class sets display, so it outranks the [hidden] attribute's UA rule on
+   specificity and the box would paint even while hidden is set. Measured: the
+   textarea rendered empty under the button on first open. */
+.dz-hub-diag-fallback[hidden] {
+    display: none;
+}
+
+.dz-hub-diag-fallback {
+    display: block;
+    width: 100%;
+    margin-top: 8px; /* future --dz-gap token site (spacing project) */
+    padding: 8px; /* future --dz-gap token site (spacing project) */
+    font-family: var(--dz-font-mono);
+    font-size: var(--dz-text-xs);
+    line-height: 1.45;
+    color: var(--dz-body-text);
+    background: var(--dz-input-bg);
+    border: 1px solid var(--dz-input-border);
+    border-radius: var(--dz-radius-sm);
+    resize: vertical;
+}

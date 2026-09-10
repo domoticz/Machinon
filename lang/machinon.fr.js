@@ -59,6 +59,10 @@ language = {
         label: "Journal de diagnostic",
         description: "Enregistre des details supplementaires sur ce que fait le theme, afin de les joindre a un rapport de bogue. Tout reste dans votre navigateur et rien n'est envoye. Vous pouvez le laisser desactive sans probleme."
       },
+      diagnostics_copy: {
+        label: "Copier le diagnostic",
+        description: "Copie ce que le theme a enregistre, pret a coller dans un rapport de bogue. Les noms de vos appareils sont exclus, vous pouvez donc le publier sans risque."
+      },
       center_popups: {
         label: "Centrer les fenêtres contextuelles",
         description: "Force chaque fenêtre contextuelle à une position centrée fixe, au lieu de l'endroit où Domoticz la placerait autrement."
@@ -260,6 +264,12 @@ language = {
       link_repo: "Dépôt GitHub",
       link_wiki: "Wiki",
       icons8_credit: "Icônes par Icons8"
+    },
+    diag: {
+      copy: "Copier le diagnostic",
+      copied: "Copie. Collez-le dans votre rapport de bogue.",
+      fallback: "La copie a echoue, le texte est ci-dessous. Selectionnez-le et copiez-le manuellement.",
+      hint: "Activez le journal de diagnostic ci-dessus, reproduisez le probleme, puis appuyez ici."
     },
     maintenance: {
       aria: "Maintenance du thème",

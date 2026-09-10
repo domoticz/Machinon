@@ -94,6 +94,18 @@ switched on, because that is what makes a report diagnosable. If you would rathe
 devices by name, run `machinonDiagNames()` in the browser console instead; that output is for you,
 not for a public issue.
 
+### Copy diagnostics
+<!-- key: diagnostics_copy -->
+
+Not a setting but a button, directly under **Diagnostic logging**. It copies what the theme has
+recorded so you can paste it straight into a bug report.
+
+If your Domoticz is reached over plain `http://` on your home network, the browser does not allow a
+page to write to the clipboard. In that case the text appears in a box below the button instead,
+already selected, so you can copy it by hand. That is normal and not a fault.
+
+Your device names are left out, so the copied text is safe to post publicly.
+
 ### Center popup dialogs
 <!-- key: center_popups -->
 
