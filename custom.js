@@ -272,23 +272,35 @@ function dzRegisterThemeRoutes(routesModule) {
        checked by hand. */
     if (window.__dzThrowInRouteHook) { throw new Error("__dzThrowInRouteHook (test hook)"); }
     routesModule.config(["$routeProvider", function ($routeProvider) {
-        $routeProvider
-            /* No permission key on purpose: the hub opens at every rights level
-               and right-sizes its own content. #/SetupMenu is admin-only, which
-               core's $routeChangeStart enforces for us (app.js). */
-            .when("/Theme", { templateUrl: DZ_HUB_TEMPLATE, controller: dzHubRouteController() })
-            .when("/Theme/:tab", { templateUrl: DZ_HUB_TEMPLATE, controller: dzHubRouteController() })
-            .when("/SetupMenu", { templateUrl: DZ_GRID_TEMPLATE, permission: "Admin", controller: dzSetupGridRouteController() })
-            /* No permission key: read-only, and its data is scoped
-               server-side the same way #/Theme's own comment already
-               explains for that route. Route /ProblemDevices serves
-               templates/dz-problems.html: the template filename, the
-               problems.* i18n namespace and every dzProblems* identifier
-               predate the "Problem Devices" display name and stay as they
-               are (internal identifiers, not user-visible; renaming them
-               would only churn the diff). */
-            .when("/ProblemDevices", { templateUrl: DZ_PROBLEMS_TEMPLATE, controller: dzProblemsRouteController() });
+        var registered = 0;
+        function when(path, def) { registered += 1; $routeProvider.when(path, def); }
+        /* No permission key on purpose: the hub opens at every rights level
+           and right-sizes its own content. #/SetupMenu is admin-only, which
+           core's $routeChangeStart enforces for us (app.js). */
+        when("/Theme", { templateUrl: DZ_HUB_TEMPLATE, controller: dzHubRouteController() });
+        when("/Theme/:tab", { templateUrl: DZ_HUB_TEMPLATE, controller: dzHubRouteController() });
+        when("/SetupMenu", { templateUrl: DZ_GRID_TEMPLATE, permission: "Admin", controller: dzSetupGridRouteController() });
+        /* No permission key: read-only, and its data is scoped
+           server-side the same way #/Theme's own comment already
+           explains for that route. Route /ProblemDevices serves
+           templates/dz-problems.html: the template filename, the
+           problems.* i18n namespace and every dzProblems* identifier
+           predate the "Problem Devices" display name and stay as they
+           are (internal identifiers, not user-visible; renaming them
+           would only churn the diff). */
+        when("/ProblemDevices", { templateUrl: DZ_PROBLEMS_TEMPLATE, controller: dzProblemsRouteController() });
         window.dzRoutesActive = true;
+        /* Diagnostics: which routes this theme actually got, and whether the
+           flag that every entry point reads turned true. A report of "the Theme
+           Hub link does nothing" is answered by this one line, and the answer is
+           not otherwise visible from a screenshot. Guarded with typeof because
+           this runs inside core's own angular.module() call, before any theme
+           module has loaded: an undefined global here is a ReferenceError in
+           core's bootstrap, i.e. a blank Domoticz rather than a missing log
+           line. The kernel shim in this file's own head is what receives it. */
+        if (typeof dzLog === "function") {
+            dzLog("routes", "registered", { routes: registered, active: window.dzRoutesActive });
+        }
         /* The header badge (src/js/problems.js) hides itself whenever this flag
            reads false, since #/ProblemDevices has no legacy build path: showing
            it would be a dead entry point. Angular boots asynchronously (RequireJS
@@ -315,6 +327,9 @@ function dzRegisterThemeRoutes(routesModule) {
             if (templateUrl !== DZ_HUB_TEMPLATE && templateUrl !== DZ_GRID_TEMPLATE && templateUrl !== DZ_PROBLEMS_TEMPLATE) return;
             console.warn("machinon_routes", "template_absent", "route template did not load: " + templateUrl + "; falling back to the legacy open");
             window.dzRoutesActive = false;
+            if (typeof dzLog === "function") {
+                dzLog("routes", "refused", { routes: 0, active: false, reason: "template_absent" });
+            }
             // Symmetric nudge: hide the badge immediately rather than leaving it
             // visible (and its click a dead end) until the next poll tick.
             if (typeof dzProblemsRefresh === "function") dzProblemsRefresh();
@@ -337,6 +352,11 @@ function dzWrapAngularModule(ng, realModule) {
                 dzRegisterThemeRoutes(m);
             } catch (e) {
                 console.warn("machinon_routes", "hook_error", "route registration failed; theme pages stay on the legacy path", String(e));
+                /* Same guard as the successful path above, and for the same
+                   reason: this catch block is inside core's angular.module(). */
+                if (typeof dzLog === "function") {
+                    dzLog("routes", "refused", { routes: 0, active: false, reason: "hook_error" });
+                }
             }
         }
         return m;
