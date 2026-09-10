@@ -242,11 +242,21 @@ function dzMigrateNotificationSplit(snap) {
    reconcileDomoticzSettingsInPlace (below) is its only caller, reached from
    custom.js's boot chain. */
 function checkUserVariableThemeSettings() {
+    /* Timed across the SETTLE, not around the call: both transports are
+       asynchronous and neither rejects on failure, so the duration of the
+       synchronous part measures nothing and "it returned" is not an outcome.
+       The probe is inside the window on purpose: a core that has to be asked
+       whether it supports the API is part of what a slow boot cost. */
+    var startedAt = dzSettingsClock();
     return dzProbeThemeSettingsAPI().then(function(capable) {
-        if (!capable) return checkUserVariableThemeSettingsLegacy();
+        if (!capable) return checkUserVariableThemeSettingsLegacy(startedAt);
         return dzApiLoad().then(function(outcome) {
+            dzSettingsLogLoad("native", outcome, startedAt);
             if (outcome === DZ_LOAD_EMPTY) return dzSeedFromLegacyIfPossible();
             return undefined; /* LOADED: dzApiLoad already merged onto theme and cached. FAILED: fail closed, no writes. */
+        }, function(e) {
+            dzSettingsLogLoad("native", "rejected", startedAt);
+            throw e;
         });
     });
 }
@@ -263,9 +273,11 @@ function checkUserVariableThemeSettings() {
    Fail closed: dzThemeSettingsLoad returns a tri-state so a transient failure
    (DZ_LOAD_FAILED) leaves the theme object exactly as it painted and writes
    NOTHING; only a real success-but-empty (DZ_LOAD_EMPTY) seeds. */
-function checkUserVariableThemeSettingsLegacy() {
+function checkUserVariableThemeSettingsLegacy(startedAt) {
+    if (typeof startedAt !== "number") startedAt = dzSettingsClock();
     var defaults = dzSettingsSnapshot(theme);
     return dzThemeSettingsLoad().then(function(outcome) {
+        dzSettingsLogLoad("legacy", outcome, startedAt);
         if (outcome === DZ_LOAD_LOADED) {
             var stored = dzSettingsSnapshot(theme); /* dzThemeSettingsLoad already merged the vars into theme; snapshot captures them */
             dzApplySnapshot(theme, dzMigrateNotificationSplit(dzMergeSettingsLayers(defaults, stored, null)));
@@ -288,8 +300,19 @@ function checkUserVariableThemeSettingsLegacy() {
    still needs it to pick the right uservariable command, but the native API
    upserts unconditionally, so dzApiSaveSettings ignores it. */
 function storeUserVariableThemeSettings(action) {
-    if (dzApiState.capable === true) return dzApiSaveSettings();
-    return dzThemeSettingsSave(action);
+    var startedAt = dzSettingsClock();
+    var transport = (dzApiState.capable === true) ? "native" : "legacy";
+    var save = (transport === "native") ? dzApiSaveSettings() : dzThemeSettingsSave(action);
+    /* The resolved value is passed through untouched, and a rejection is
+       re-thrown after it is recorded: a diagnostic that swallowed a failed save
+       would turn the one thing worth knowing into a silent success. */
+    return save.then(function(res) {
+        dzSettingsLogSave(transport, res, startedAt);
+        return res;
+    }, function(e) {
+        dzSettingsLogSave(transport, { ok: false, error: "rejected" }, startedAt);
+        throw e;
+    });
 }
 
 /* Fingerprint of only the settings that drive visible state. The in-place

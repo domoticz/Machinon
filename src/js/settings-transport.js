@@ -392,6 +392,94 @@ function dzApiFail(d) {
     return { ok: false, error: err };
 }
 
+/* ---- Diagnostics seam ----
+
+   Settings are the state every other symptom is read against: a scheme that
+   "reset itself", a feature that "will not stay on" and a Theme Hub that saves
+   nothing are all the same question, which is whether the transport loaded and
+   whether it wrote. Both halves are ASYNCHRONOUS and neither rejects on
+   failure (dzApiPost resolves an ERR object so one unreachable write cannot
+   wedge the write chain), so the outcome has to be read off the settled value,
+   never inferred from "it did not throw", and the duration has to be measured
+   across the settle, not around the call.
+
+   These two are called once per boot and once per save, so they are not guarded
+   at the call site the way the render-pass seams are: the payload costs nothing
+   at that rate, and dzLog holds a line recorded before the setting itself has
+   loaded rather than dropping it, which is the whole point of instrumenting the
+   load. */
+/* One typeof guard for the clock, rather than one at each call site: diag.js
+   loads first in custom.js's THEME_MODULES, but a theme file must not stop
+   working because of a load-order change it cannot see. */
+function dzSettingsClock() {
+    return (typeof dzDiagNow === "function") ? dzDiagNow() : 0;
+}
+
+function dzSettingsLoadLayer() {
+    if (dzApiState.instanceSnap && dzApiState.userSnap) return "instance+user";
+    if (dzApiState.instanceSnap) return "instance";
+    if (dzApiState.userSnap) return "user";
+    return "none";
+}
+
+/* Which layers a save is about to write, as dzApiSaveSettings decides it. */
+function dzSettingsSaveLayer() {
+    if (!dzApiState.perUser) return "instance";
+    return dzIsAdmin() ? "user+instance" : "user";
+}
+
+/* How many settings this save actually changes relative to what the instance
+   layer already holds. null when there is no stored layer to compare against
+   (a first-ever save), which the caller reports as an absent field rather than
+   as a zero: "nothing changed" and "nothing to compare" are different answers
+   and a reader cannot tell them apart from a 0. Only ever called under the
+   gate: it is a JSON compare per setting, which is free at one save per human
+   action and pointless work otherwise. */
+function dzSettingsChangedKeys(current, stored) {
+    if (!current || !stored) return null;
+    var changed = 0;
+    ["features", "values"].forEach(function(part) {
+        var mine = current[part] || {};
+        var theirs = stored[part] || {};
+        Object.keys(mine).forEach(function(k) {
+            if (JSON.stringify(mine[k]) !== JSON.stringify(theirs[k])) changed += 1;
+        });
+    });
+    return changed;
+}
+
+function dzSettingsLogLoad(transport, outcome, startedAt) {
+    if (typeof dzLog !== "function") return;
+    try {
+        dzLog("settings", "load", {
+            outcome: String(outcome),
+            transport: transport,
+            layer: (transport === "native") ? dzSettingsLoadLayer()
+                                            : (outcome === DZ_LOAD_LOADED ? "uservars" : "none"),
+            duration_ms: Math.round(dzDiagNow() - startedAt)
+        });
+    } catch (e) { /* diagnostics never throw into the boot chain */ }
+}
+
+function dzSettingsLogSave(transport, res, startedAt) {
+    if (typeof dzLog !== "function") return;
+    try {
+        var entry = {
+            /* Read off the settled value: an ERR arrives as a resolved object,
+               so "the promise kept its word" says nothing about the write. */
+            outcome: (res && res.ok === false) ? ("error:" + (res.error || "unknown")) : "ok",
+            transport: transport,
+            layer: (transport === "native") ? dzSettingsSaveLayer() : "uservars",
+            duration_ms: Math.round(dzDiagNow() - startedAt)
+        };
+        if (transport === "native" && typeof dzLogOn !== "undefined" && dzLogOn) {
+            var changed = dzSettingsChangedKeys(dzSettingsSnapshot(theme), dzApiState.instanceSnap);
+            if (changed !== null) entry.keys_changed = changed;
+        }
+        dzLog("settings", "save", entry);
+    } catch (e) { /* diagnostics never throw into the save path */ }
+}
+
 /* dzDefaultsSnap (settings-store.js) is populated on a cold boot only: the
    warm-boot branch of loadSettings paints from the localStorage cache and
    never re-fetches theme.json, so on a warm boot it stays null for the
