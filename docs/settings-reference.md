@@ -88,10 +88,13 @@ below this setting and becomes available once you switch this on. That order mat
 setting off nothing is recorded, so there is nothing to hand over.
 
 The copied text deliberately leaves out your device names, so it is safe to paste into a public
-issue. It does include your Domoticz version, your theme version and which theme features you have
-switched on, because that is what makes a report diagnosable. If you would rather read your own
-devices by name, run `machinonDiagNames()` in the browser console instead; that output is for you,
-not for a public issue.
+issue. It does include your Domoticz version, your theme version, your colour scheme, your window
+size, which browser you are using, whether you are signed in as an administrator, and which theme
+features you have switched on, because that is what makes a report diagnosable. For a problem with
+how the page looks it also measures your zoom and text size, whether the theme's icon font loaded,
+how wide your device cards actually are, and whether anything is spilling off the edge of the
+window. If you would rather read your own devices by name, run `machinonDiagNames()` in the browser
+console instead; that output is for you, not for a public issue.
 
 ### Copy diagnostics
 <!-- key: diagnostics_copy -->

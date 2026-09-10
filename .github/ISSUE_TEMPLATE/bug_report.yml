@@ -85,9 +85,10 @@ body:
         In the Theme Hub, switch on **Diagnostic logging**, make the problem happen again, then
         press **Copy diagnostics** just below that setting and paste the result here.
 
-        It contains your Machinon and Domoticz versions, which theme features you have switched on,
-        and what the theme recorded while the problem happened. It leaves out your device names, so
-        it is safe to post publicly.
+        It contains your Machinon and Domoticz versions, your colour scheme, your browser, your
+        window size, which theme features you have switched on, a few measurements of the page
+        layout, and what the theme recorded while the problem happened. It leaves out your device
+        names, so it is safe to post publicly.
 
         If your Domoticz runs on plain http on your home network, the browser will not let the page
         copy for you and the text appears in a box instead. Select it and copy it by hand; that is
