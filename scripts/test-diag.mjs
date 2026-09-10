@@ -338,3 +338,67 @@ test("a genuine change still appends rather than folding into an older match", (
     assert.equal(ring.length, 3, "a different card count is a new fact about the house");
     assert.equal(ring[2].cards, 12);
 });
+
+/* ---- The kernel buffer ----
+
+   Entries recorded before this file loads (route registration, which happens
+   inside core's Angular bootstrap) exist only in the custom.js buffer. The
+   gate is computed twice: once here at load, when the stored setting has not
+   arrived and every install therefore looks like the default, and again once
+   the settings settle. Only the second one knows enough to throw the buffer
+   away. Measured on the rig: with the first one discarding it, the routes line
+   was absent for every user who had not set the per-browser override, i.e. for
+   the ordinary way the feature is switched on. */
+
+test("a gate computed before the settings arrive holds the buffer rather than dropping it", () => {
+    const d = loadDiag();
+    d.dzDiagAdoptBuffer([["routes", "registered", { routes: 4, active: true }]]);
+    d.dzDiagSetEnabled(false);            // diag.js's own load-time read: nothing settled yet
+    d.dzDiagSetEnabled(true, true);       // the settings arrive, and the setting is on
+    const ring = d.machinonDiag({ quiet: true }).history.entries.routes;
+    assert.equal(ring.length, 1, "the buffered entry survived the unresolved gate");
+    assert.equal(ring[0].routes, 4);
+});
+
+test("a settled gate that reads off does drop the buffer", () => {
+    /* The other half, and the reason this is not simply "never discard": on an
+       install that leaves the setting off, which is the default, nothing that
+       was recorded before the answer arrived may be retained. */
+    const d = loadDiag();
+    d.dzDiagAdoptBuffer([["routes", "registered", { routes: 4, active: true }]]);
+    d.dzDiagSetEnabled(false, true);
+    d.dzDiagSetEnabled(true, true);
+    const history = d.machinonDiag({ quiet: true }).history;
+    assert.deepEqual(Object.keys(history.entries), [], "nothing buffered before an off answer is kept");
+});
+
+test("a line recorded before the gate is answered is held, not lost", () => {
+    /* The settings load reports its own outcome, and a load that FAILS is the
+       case a reader most needs, yet it is also the case where the setting never
+       arrives to switch the recorder on in time. Holding is what makes that
+       line reachable at all. */
+    const d = loadDiag();
+    d.dzLog("settings", "load", { outcome: "failed", transport: "native", layer: "none" });
+    d.dzDiagSetEnabled(true, true);
+    const ring = d.machinonDiag({ quiet: true }).history.entries.settings;
+    assert.equal(ring.length, 1);
+    assert.equal(ring[0].outcome, "failed");
+});
+
+test("once the answer is off, nothing is held any more", () => {
+    const d = loadDiag();
+    d.dzDiagSetEnabled(false, true);
+    d.dzLog("settings", "load", { outcome: "loaded", transport: "native", layer: "instance" });
+    d.dzDiagSetEnabled(true, true);
+    assert.deepEqual(Object.keys(d.machinonDiag({ quiet: true }).history.entries), [],
+        "an install that declined does not accumulate a backlog for a later yes");
+});
+
+test("the hold is bounded, so an install whose settings never arrive cannot grow one", () => {
+    const d = loadDiag();
+    for (let i = 0; i < 200; i++) d.dzLog("settings", "load", { outcome: "failed", n: i });
+    d.dzDiagSetEnabled(true, true);
+    const ring = d.machinonDiag({ quiet: true }).history.entries.settings;
+    assert.ok(ring.length <= 10, `held entries collapse into the seam's own ring (${ring.length})`);
+    assert.equal(d.machinonDiag({ quiet: true }).live.recorder.appends <= 50, true);
+});

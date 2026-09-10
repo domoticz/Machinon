@@ -31,7 +31,11 @@ var dzDefaultsSnap = null;
    only those two points the setting persisted across a reload while dzLogOn
    stayed false, i.e. the feature was on and silent. */
 function cacheThemeSettings() {
-    if (typeof dzDiagRefreshGate === "function") { dzDiagRefreshGate(); }
+    /* settled: every path that reaches here has the stored settings in hand, so
+       this is the call that may discard the kernel buffer when the answer turns
+       out to be off. diag.js's own load-time call cannot: it runs before the
+       settings arrive and would throw away entries recorded before it loaded. */
+    if (typeof dzDiagRefreshGate === "function") { dzDiagRefreshGate(true); }
     localStorage.setItem(themeFolder + ".themeSettings", JSON.stringify(theme));
 }
 
@@ -389,7 +393,7 @@ function applyThemeDeltaInPlace(before) {
     setLogo();
     applyBackground();
     applyNavbarIconsText();
-    dzDiagRefreshGate();
+    dzDiagRefreshGate(true);
 }
 
 function resetTheme() {

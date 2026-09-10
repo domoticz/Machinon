@@ -70,9 +70,15 @@ var DZ_DIAG_IDENTITY = {
        `key` must not travel here anyway: a device warning's key embeds the
        device NAME whenever the card's idx does not resolve. */
     toast: ["event", "outcome", "group", "source"],
-    set_filter: ["event", "members", "route"],
-    settings: ["event", "outcome", "layer"],
-    routes: ["event", "routes", "active"],
+    /* cards_matched is in the identity, unlike every count on the seams
+       above it: it is a fact about the page, not a measurement of the pass, and
+       a filter that matches nothing on the first render and everything on the
+       second would otherwise be recorded once, as the state that was wrong. It
+       is stable while a page sits still, so a burst of render passes still
+       coalesces to one entry. */
+    set_filter: ["event", "members", "cards_matched", "route"],
+    settings: ["event", "outcome", "transport", "layer"],
+    routes: ["event", "routes", "active", "reason"],
     filter: ["event", "query_len", "cards_in", "cards_out", "route"],
     problems: ["event", "rows", "badge", "outcome"]
 };
@@ -257,7 +263,17 @@ function dzDiagKeyShape(keys) {
 var dzLogOn = false;
 var dzDiagState = dzDiagNewState();
 var dzDiagCollectors = {};
-var dzDiagStartedAt = (typeof performance !== "undefined" && performance.now) ? performance.now() : 0;
+/* One monotonic clock for the whole feature. performance.now() is coarsened
+   (100us in Chromium outside a cross-origin-isolated context, which a LAN HTTP
+   install is not; 1ms in Firefox), which is why the sub-millisecond render pass
+   records no duration at all, but it is the right clock for the seams that
+   measure a network round trip. Date.now() is the fallback only, and it can
+   step backwards. */
+function dzDiagNow() {
+    return (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+}
+
+var dzDiagStartedAt = dzDiagNow();
 
 /* Entries the custom.js kernel buffered before this file loaded. Held, not
    recorded: the Diagnostic logging setting has not resolved at kernel time, so
@@ -265,18 +281,49 @@ var dzDiagStartedAt = (typeof performance !== "undefined" && performance.now) ? 
    out to be off, which is the default. */
 var dzDiagPending = null;
 
+/* Same cap the custom.js kernel applies to its own buffer, and for the same
+   reason: this is data retained on an install that has not consented yet, so it
+   is bounded by construction rather than by how long a boot takes. */
+var DZ_DIAG_PENDING_CAP = 50;
+
+/* False until a caller that can actually READ the Diagnostic logging setting
+   has refreshed the gate. Until then "off" means "not answered yet", not "no",
+   and that distinction decides whether an early entry is held or dropped. */
+var dzDiagSettled = false;
+
 function dzDiagAdoptBuffer(buf) {
     if (Array.isArray(buf) && buf.length) { dzDiagPending = buf; }
 }
 
-function dzDiagSetEnabled(on) {
+function dzDiagHold(seam, event, fields) {
+    if (!dzDiagPending) { dzDiagPending = []; }
+    if (dzDiagPending.length < DZ_DIAG_PENDING_CAP) { dzDiagPending.push([seam, event, fields]); }
+}
+
+/* `settled` says whether the caller knows the Diagnostic logging setting's real
+   value, and it decides the fate of the buffer, not of the gate. Both this
+   file's own load and the storage listener run BEFORE the stored settings
+   arrive, so they see the default (off) and would otherwise throw the kernel
+   buffer away seconds before the setting that wanted it resolves. That is not
+   hypothetical and not a corner: route registration happens inside core's
+   Angular bootstrap and exists ONLY as a buffered entry, so on the ordinary
+   path (setting on, no per-browser override) the routes line was being
+   discarded every time. Held entries are bounded by the kernel's own 50-entry
+   cap, so retaining them across an unresolved gate costs nothing measurable and
+   an install that never settles simply never records them. */
+function dzDiagSetEnabled(on, settled) {
     dzLogOn = on === true;
-    var pending = dzDiagPending;
-    dzDiagPending = null;
-    if (dzLogOn && pending) {
-        for (var i = 0; i < pending.length; i++) {
-            try { dzLog(pending[i][0], pending[i][1], pending[i][2]); } catch (e) { /* best effort */ }
+    if (settled === true) { dzDiagSettled = true; }
+    if (dzLogOn) {
+        var pending = dzDiagPending;
+        dzDiagPending = null;
+        if (pending) {
+            for (var i = 0; i < pending.length; i++) {
+                try { dzLog(pending[i][0], pending[i][1], pending[i][2]); } catch (e) { /* best effort */ }
+            }
         }
+    } else if (settled === true) {
+        dzDiagPending = null;
     }
     return dzLogOn;
 }
@@ -287,7 +334,18 @@ function dzDiagSetEnabled(on) {
    arguments eagerly and would otherwise build the payload before this function
    could decline it. */
 function dzLog(seam, event, fields) {
-    if (!dzLogOn) return false;
+    if (!dzLogOn) {
+        /* The boot-time seams (route registration, the settings load itself)
+           fire before the setting that governs them can be read, so an
+           unanswered gate holds rather than drops: the same rule the kernel
+           buffer follows, continued past this file's load. A settled "off"
+           drops here as it does there. Hot seams never reach this branch: they
+           guard on dzLogOn at the call site because their payload is built
+           eagerly, and they repeat often enough that losing the first few
+           costs nothing. */
+        if (!dzDiagSettled) { dzDiagHold(seam, event, fields); }
+        return false;
+    }
     try {
         var entry = fields && typeof fields === "object" ? fields : {};
         entry.event = event;
@@ -358,8 +416,7 @@ function dzDiagSnapshot(opts) {
         appends: dzDiagState.appends,
         coalesced: dzDiagState.coalesced,
         evicted: dzDiagState.evicted,
-        page_open_ms: Math.round(((typeof performance !== "undefined" && performance.now)
-            ? performance.now() : 0) - dzDiagStartedAt)
+        page_open_ms: Math.round(dzDiagNow() - dzDiagStartedAt)
     };
     return snap;
 }
@@ -417,7 +474,7 @@ function machinonDiagText() {
    Read defensively: a cached theme object written before diagnostics shipped has
    no diagnostic_logging key at all until the seeding block in loadSettings runs,
    and this can be called before it. */
-function dzDiagRefreshGate() {
+function dzDiagRefreshGate(settled) {
     var on = false;
     try {
         on = !!(typeof theme !== "undefined" && theme && theme.features &&
@@ -434,7 +491,7 @@ function dzDiagRefreshGate() {
             }
         } catch (e) { /* private mode, disabled storage: stay off */ }
     }
-    return dzDiagSetEnabled(on);
+    return dzDiagSetEnabled(on, settled);
 }
 
 (function() {
