@@ -163,6 +163,14 @@ var DZ_DIAG_SCHEMA = {
     problems: { badge: "number", rows: "number", outcome: "string" },
     filter: { members: "number", label_len: "number", chip: "boolean" },
     mode: { admin: "boolean", per_user: "boolean", no_identity: "boolean", transport: "string" },
+    /* Facts that decide layout plus violations of the theme's own invariants.
+       No element text, no ids: violations name an element by tag and class. */
+    layout: { dpr: "number", visual_scale: "number", chrome_px: "number", root_font_px: "number",
+              body_font_px: "number", forced_colors: "boolean", prefers_contrast: "boolean",
+              reduced_motion: "boolean", fonts: "string", icon_font: "boolean",
+              card_bounds: "string", cards_painted: "number", card_width: "string",
+              width_buckets: "number", gutter_px: "number", header_px: "number",
+              foreign_css: "number", violations: "string[]" },
     recorder: { state: "string", appends: "number", coalesced: "number", evicted: "number", page_open_ms: "number" }
 };
 

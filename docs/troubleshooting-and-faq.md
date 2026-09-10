@@ -111,6 +111,12 @@ whether you are signed in as an administrator, and which theme features you have
 because that is what makes a report diagnosable. It records the browser by name and version only
 (for example `firefox/128`), not the long identification string browsers normally send.
 
+For a problem with how the page looks, it also measures a few things a screenshot cannot show:
+your zoom and text size, whether the theme's icon font loaded, how wide your device cards actually
+are, and whether anything is spilling off the edge of the window. Those measurements describe the
+page, never its contents: where something is wrong, it is named by the kind of element it is, not
+by the device it belongs to.
+
 If your Domoticz is reached over plain `http://` on your home network, the browser will not let a
 page write to your clipboard. The text then appears in a box below the button instead, already
 selected, so you can copy it by hand. That is normal and not a fault.

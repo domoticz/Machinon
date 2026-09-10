@@ -547,3 +547,19 @@ test("storage that throws leaves the gate working and off", () => {
     assert.equal(d.dzLogOn, false);
     assert.equal(d.dzDiagRefreshGate(true), false);
 });
+
+test("the layout section admits its fields and drops element text", () => {
+    /* The violations array is the one field here that carries free text, so the
+       schema keeps it to strings and the collector keeps those to tag+class. */
+    const clean = dz.dzDiagSanitize("layout", {
+        dpr: 2.75, visual_scale: 1, chrome_px: 0, root_font_px: 16, body_font_px: 14,
+        forced_colors: false, prefers_contrast: false, reduced_motion: false,
+        fonts: "loaded", icon_font: true, card_bounds: "320-500", cards_painted: 26,
+        card_width: "412-412 (median 412)", width_buckets: 1, gutter_px: 0, header_px: 92,
+        foreign_css: 0, violations: ["h_overflow: 808px, widest div.dz-probe-wide to 2248px"],
+        worst_element_text: "Living room lamp"
+    });
+    assert.equal(clean.value.violations.length, 1);
+    assert.equal(clean.value.dpr, 2.75);
+    assert.deepEqual(Array.from(clean.dropped), ["worst_element_text"]);
+});
