@@ -33,13 +33,13 @@ jobs:
         run: python3 -m pytest scripts/test_strip_comments.py -q
 
       - name: Site and docs unit tests
-        run: python3 -m pytest scripts/test_gen_site_tokens.py scripts/test_check_site.py scripts/test_check_contrast.py scripts/test_check_settings_docs.py scripts/test_check_png_optimized.py -q
+        run: python3 -m pytest scripts/test_gen_site_tokens.py scripts/test_check_site.py scripts/test_check_contrast.py scripts/test_check_settings_docs.py scripts/test_check_png_optimized.py scripts/test_check_console_calls.py scripts/test_check_global_collisions.py -q
 
       - name: Icon and status-glow contrast unit tests
         run: python3 -m pytest scripts/test_measure_icon_contrast.py -q
 
       - name: Node unit tests (scheme maths, contrast floors, i18n, filters, settings transport)
-        run: node --test scripts/test-color-oklch.mjs scripts/test-color-repair.mjs scripts/test-scheme-generator.mjs scripts/test-scheme-pairs.mjs scripts/test-toast-policy.mjs scripts/test-diag.mjs scripts/test-i18n.mjs scripts/test-check-lang-parity.mjs scripts/test-set-filter.mjs scripts/test-problems-reduce.mjs scripts/test-problems-routes.mjs scripts/test-settings-transport.mjs
+        run: node --test scripts/test-color-oklch.mjs scripts/test-color-repair.mjs scripts/test-scheme-generator.mjs scripts/test-scheme-pairs.mjs scripts/test-toast-policy.mjs scripts/test-diag.mjs scripts/test-i18n.mjs scripts/test-check-lang-parity.mjs scripts/test-set-filter.mjs scripts/test-problems-reduce.mjs scripts/test-problems-routes.mjs scripts/test-settings-transport.mjs scripts/test-layout-facts.mjs
 
       - name: Icon and status-glow colours clear the contrast floor on every scheme
         run: python3 scripts/measure-icon-contrast.py --check
@@ -53,8 +53,14 @@ jobs:
       - name: Landing page contrast holds WCAG AA in every scheme
         run: python3 scripts/check-contrast.py
 
-      - name: Settings reference covers the manifest
-        run: python3 scripts/check-settings-docs.py
+      - name: Settings reference covers the manifest, and console output stays rationed
+        run: |
+          python3 scripts/check-settings-docs.py
+          # Fails only when the count goes ABOVE its baseline, never when it
+          # drops: new output belongs in dzLog (src/js/diag.js), and removing a
+          # call must not turn a check red. Folded into this step rather than
+          # given its own, since the work is 0.05s and a step is not.
+          python3 scripts/check-console-calls.py --check
 
       # scripts/check-png-optimized.py itself runs in .github/workflows/
       # png-optimized.yml, not here: a full oxipng-level-6 scan over every
