@@ -1,0 +1,384 @@
+/* diag.js - the diagnostics recorder and the state snapshot.
+
+   WHY THIS EXISTS. Defects in this theme are reported from a house nobody
+   working on the repo can log into: a phone screenshot and a recollection,
+   against a rig that frequently cannot reproduce the state that caused it. On
+   2026-09-09 a grouped warning toast reported "4 sensors timed out" for two
+   devices; the root cause was found and fixed, but which production cards put a
+   device into the triggering state was never identified, because the state had
+   to be induced by hand. This module turns a symptom into evidence.
+
+   TOP-LEVEL CODE MUST NOT TOUCH document OR window. The kernel half of this
+   feature runs before Angular exists (see the buffer in custom.js), and
+   scripts/test-diag.mjs runs this file in a vm context with neither global, so
+   a load-time reach for either is both a bug and a test failure.
+
+   BEST-EFFORT, ALWAYS. Nothing in here may throw into its caller. The warning
+   pass is reached from setAllDevicesIconsStatus() inside the device_update
+   handler's own setTimeout tail (src/js/devices.js), which has no containment
+   at all, so a throw there is an uncaught error at the websocket update rate
+   AND kills the update-pulse repaint that follows it in the same timer. Every
+   other cross-module boundary in this theme is explicitly best-effort; an
+   always-loaded diagnostic must not be the exception. Design detail lives in
+   docs/superpowers/specs/2026-09-09-diagnostics-design.md (local only). */
+
+/* Per-seam ring caps, not one shared ring. The render pass fires roughly ten
+   times a second under a websocket burst, and setAllDevicesIconsStatus is
+   called once per device_update with no coalescing (measured elsewhere in this
+   repo at 546 updates in 10 seconds against 228 devices). A single shared FIFO
+   would therefore be flushed by the fastest seam before the reader reached the
+   Copy diagnostics button, evicting exactly the warn and toast rows the
+   recorder exists to keep. Sizes are per seam so that cannot happen. */
+var DZ_DIAG_CAPS = {
+    device_pass: 20,
+    warn_pass: 30,
+    toast: 20,
+    set_filter: 10,
+    settings: 10,
+    routes: 5,
+    filter: 10,
+    problems: 10
+};
+var DZ_DIAG_DEFAULT_CAP = 10;
+
+function dzDiagCap(seam) {
+    return Object.prototype.hasOwnProperty.call(DZ_DIAG_CAPS, seam)
+        ? DZ_DIAG_CAPS[seam] : DZ_DIAG_DEFAULT_CAP;
+}
+
+/* Which fields decide "this is the same entry as the last one". An explicit
+   allowlist per seam, and EVERY clock- or counter-derived field is excluded on
+   purpose: duration_ms, the relative timestamp, and the pass counter all change
+   by construction on every invocation, so including any of them makes the
+   coalescing rule vacuously true and turns the ring into a per-invocation
+   sample of whatever runs most often. That was the single worst defect in the
+   first draft of this design and two independent reviews caught it. Anything
+   added here must be a discrete fact about the house, never a measurement. */
+var DZ_DIAG_IDENTITY = {
+    device_pass: ["event", "stage", "cards", "flagged", "unresolved_idx", "route"],
+    warn_pass: ["event", "condition", "enabled", "flagged", "warned", "cleared", "suppressed", "route"],
+    toast: ["event", "outcome", "group", "total"],
+    set_filter: ["event", "members", "route"],
+    settings: ["event", "outcome", "layer"],
+    routes: ["event", "routes", "active"],
+    filter: ["event", "query_len", "cards_in", "cards_out", "route"],
+    problems: ["event", "rows", "badge", "outcome"]
+};
+
+/* A seam with no declared identity degrades to "every entry is distinct"
+   rather than throwing or silently coalescing unrelated rows: a new seam that
+   records too much is a nuisance, one that records nothing is a lie. */
+var dzDiagIdentitySeq = 0;
+
+function dzDiagIdentity(seam, entry) {
+    var fields = DZ_DIAG_IDENTITY[seam];
+    if (!fields) return "unkeyed:" + (++dzDiagIdentitySeq);
+    var out = [];
+    for (var i = 0; i < fields.length; i++) {
+        var v = entry && Object.prototype.hasOwnProperty.call(entry, fields[i]) ? entry[fields[i]] : null;
+        out.push(fields[i] + "=" + String(v));
+    }
+    return out.join("|");
+}
+
+function dzDiagNewState() {
+    return { rings: {}, appends: 0, coalesced: 0, evicted: 0, failures: 0 };
+}
+
+/* Returns "appended", "coalesced" or "failed", and never throws. The identity
+   is computed from the candidate BEFORE it is stored, and compared against the
+   identity already carried by the newest entry, so a house sitting still
+   allocates one small string rather than a whole candidate entry. */
+function dzDiagAppend(state, seam, entry) {
+    try {
+        if (!state || !entry || typeof entry !== "object") { return "failed"; }
+        var key = String(seam || "unknown");
+        var ring = state.rings[key] || (state.rings[key] = []);
+        var id = dzDiagIdentity(key, entry);
+        var last = ring.length ? ring[ring.length - 1] : null;
+        if (last && last.__id === id) {
+            state.coalesced += 1;
+            last.__seen = (last.__seen || 1) + 1;
+            return "coalesced";
+        }
+        entry.__id = id;
+        ring.push(entry);
+        state.appends += 1;
+        var cap = dzDiagCap(key);
+        while (ring.length > cap) { ring.shift(); state.evicted += 1; }
+        return "appended";
+    } catch (e) {
+        if (state) { state.failures = (state.failures || 0) + 1; }
+        return "failed";
+    }
+}
+
+/* ---- Output schema ----
+
+   Redaction is an OUTPUT-side property, enforced here, not a promise about what
+   the collectors hand over. The first draft asserted "the ring never holds a
+   device name" and was wrong: warn keys carry one whenever a card's idx does
+   not resolve, and that is precisely the population the snapshot reports on.
+   An allowlist cannot be wrong in that direction.
+
+   Unknown keys are stripped and their NAMES reported, never their values, so a
+   field added without extending this schema shows up in the artifact as a
+   question rather than as a silent leak or a silent hole. */
+var DZ_DIAG_SCHEMA = {
+    build: { theme_version: "string", theme_folder: "string", domoticz_version: "string" },
+    view: { route: "string", width: "number", height: "number", phone: "boolean", scheme: "string", base: "string" },
+    features: { enabled: "string[]" },
+    cards: { total: "number", flagged_timeout: "number", flagged_battery: "number", unresolved_idx: "number" },
+    warnings: { keys_idx: "number", keys_named: "number", repeat_mode: "string", store_ages: "object" },
+    toasts: { visible: "number", queued: "number", groups: "string[]" },
+    problems: { badge: "number", rows: "number", outcome: "string" },
+    filter: { members: "number", label_len: "number", chip: "boolean" },
+    recorder: { state: "string", appends: "number", coalesced: "number", evicted: "number", page_open_ms: "number" }
+};
+
+function dzDiagTypeOk(value, want) {
+    if (want === "string") return typeof value === "string";
+    if (want === "number") return typeof value === "number" && isFinite(value);
+    if (want === "boolean") return typeof value === "boolean";
+    if (want === "string[]") {
+        if (!Array.isArray(value)) return false;
+        for (var i = 0; i < value.length; i++) { if (typeof value[i] !== "string") return false; }
+        return true;
+    }
+    if (want === "object") return !!value && typeof value === "object" && !Array.isArray(value);
+    return false;
+}
+
+function dzDiagSanitize(section, obj) {
+    var allowed = DZ_DIAG_SCHEMA[section] || {};
+    var value = {};
+    var dropped = [];
+    try {
+        Object.keys(obj || {}).forEach(function(k) {
+            if (Object.prototype.hasOwnProperty.call(allowed, k) && dzDiagTypeOk(obj[k], allowed[k])) {
+                value[k] = obj[k];
+            } else {
+                dropped.push(k);
+            }
+        });
+    } catch (e) { /* best effort: a collector that returns something exotic
+                     contributes nothing rather than aborting the snapshot */ }
+    return { value: value, dropped: dropped };
+}
+
+/* Route carries user data: core registers /Custom/:custompage, so the live hash
+   on a custom page is a name the user chose, and the recorder attaches a route
+   to most lines. Reduced to an allowlisted stem plus parameter arity. Unknown
+   stems collapse rather than passing through, because a route core adds later
+   is exactly the case nobody will remember to review. */
+var DZ_DIAG_ROUTES = [
+    "Dashboard", "LightSwitches", "Scenes", "Temperature", "Weather", "Utility",
+    "Floorplans", "ProblemDevices", "Theme", "SetupMenu", "Custom", "Devices",
+    "Hardware", "Log", "Users", "Events", "Setup", "Energy", "Cam"
+];
+
+function dzDiagRoute(hash) {
+    try {
+        var raw = String(hash || "").replace(/^#\/?/, "");
+        if (!raw) return "#/";
+        var parts = raw.split("/");
+        if (DZ_DIAG_ROUTES.indexOf(parts[0]) === -1) return "#/:unknown";
+        var out = ["#", parts[0]];
+        var n = 0;
+        for (var i = 1; i < parts.length; i++) {
+            /* A path segment that is not itself a known stem is a parameter,
+               and a parameter is user data or a device idx; either way it is
+               reported by position, not by value. */
+            if (DZ_DIAG_ROUTES.indexOf(parts[i]) !== -1) { out.push(parts[i]); }
+            else { n += 1; out.push(":" + n); }
+        }
+        return out.join("/");
+    } catch (e) { return "#/:unknown"; }
+}
+
+/* Warn keys are counted by shape, never exported. dzWarnKey (src/js/toasts.js)
+   returns prefix:idx when a card's idx resolves and prefix:name:NAME when it
+   does not. The 2026-09-09 fix teaching dzCardIdx to read core's own
+   td#name[data-idx] makes that fallback rare, but rare is not never, and this
+   guarantee must not rest on another module's key format. */
+function dzDiagKeyShape(keys) {
+    var out = { keys_idx: 0, keys_named: 0 };
+    try {
+        (keys || []).forEach(function(k) {
+            if (typeof k !== "string") return;
+            if (k.indexOf(":name:") !== -1) { out.keys_named += 1; }
+            else { out.keys_idx += 1; }
+        });
+    } catch (e) { /* best effort */ }
+    return out;
+}
+
+/* ---- The gate ----
+
+   Both dzLog and the recorder are gated by the one Theme Hub setting
+   ("Diagnostic logging"), OFF by default (owner decision, 2026-09-10). An
+   earlier draft kept the recorder always on so it would catch a defect's first
+   occurrence, but an always-on household activity record with no operator
+   control is not a default to impose on every install: a wall panel is reachable
+   by people who never agreed to it. The cost accepted is that a reporter who has
+   not enabled it must turn it on and reproduce; what it keeps is the thing that
+   motivated the recorder, which is that the evidence survives the navigation to
+   the Copy diagnostics button.
+
+   dzLogOn is a CACHED boolean, never a storage read at call time: the seams that
+   call it run per card inside a render pass driven off every websocket update,
+   so a synchronous localStorage read per call would be orders of magnitude past
+   the one boolean test this is supposed to cost. It is recomputed only at module
+   load, from dzDiagRefreshGate() on the settings-apply path, and from a storage
+   event for the per-browser override. */
+var dzLogOn = false;
+var dzDiagState = dzDiagNewState();
+var dzDiagCollectors = {};
+var dzDiagStartedAt = (typeof performance !== "undefined" && performance.now) ? performance.now() : 0;
+
+/* Entries the custom.js kernel buffered before this file loaded. Held, not
+   recorded: the Diagnostic logging setting has not resolved at kernel time, so
+   admitting them early would retain data on an install where the setting turns
+   out to be off, which is the default. */
+var dzDiagPending = null;
+
+function dzDiagAdoptBuffer(buf) {
+    if (Array.isArray(buf) && buf.length) { dzDiagPending = buf; }
+}
+
+function dzDiagSetEnabled(on) {
+    dzLogOn = on === true;
+    var pending = dzDiagPending;
+    dzDiagPending = null;
+    if (dzLogOn && pending) {
+        for (var i = 0; i < pending.length; i++) {
+            try { dzLog(pending[i][0], pending[i][1], pending[i][2]); } catch (e) { /* best effort */ }
+        }
+    }
+    return dzLogOn;
+}
+
+/* The one entry point the seams call. Structured: a fixed namespace and event,
+   with varying data in fields, never an interpolated sentence. Hot call sites
+   still guard with `if (dzLogOn)` themselves, because JavaScript evaluates
+   arguments eagerly and would otherwise build the payload before this function
+   could decline it. */
+function dzLog(seam, event, fields) {
+    if (!dzLogOn) return false;
+    try {
+        var entry = fields && typeof fields === "object" ? fields : {};
+        entry.event = event;
+        dzDiagAppend(dzDiagState, seam, entry);
+        if (typeof console !== "undefined" && console.debug) {
+            console.debug("machinon_" + seam, event, entry);
+        }
+        return true;
+    } catch (e) {
+        dzDiagState.failures = (dzDiagState.failures || 0) + 1;
+        return false;
+    }
+}
+
+/* Each module registers the contributor for state it already owns. `opts.names`
+   is passed through so a collector can offer a richer local-reading form; the
+   schema still decides what survives, so a collector cannot widen the redacted
+   output by mistake. */
+function dzDiagRegister(section, collect) {
+    if (typeof collect === "function") { dzDiagCollectors[section] = collect; }
+}
+
+function dzDiagCollect(opts) {
+    var live = {};
+    var dropped = [];
+    Object.keys(dzDiagCollectors).forEach(function(section) {
+        try {
+            var raw = dzDiagCollectors[section](opts) || {};
+            if (raw.route) { raw.route = dzDiagRoute(raw.route); }
+            if (opts && opts.names) {
+                live[section] = raw;
+                return;
+            }
+            var clean = dzDiagSanitize(section, raw);
+            live[section] = clean.value;
+            clean.dropped.forEach(function(k) { dropped.push(section + "." + k); });
+        } catch (e) {
+            /* One section's collector failing must not cost the rest of the
+               snapshot: a broken collector is itself a thing worth reporting. */
+            live[section] = { error: String(e && e.message ? e.message : e) };
+        }
+    });
+    if (dropped.length) { live._dropped = dropped; }
+    return live;
+}
+
+/* Deep-copied on the way out. Devtools reads a logged object lazily, when the
+   reader expands it, so handing back the live rings would show a buffer that has
+   already turned over by the time anyone looks. */
+function dzDiagHistory() {
+    if (!dzLogOn) { return { recorder: "off" }; }
+    var out = { recorder: "on", appends: dzDiagState.appends, coalesced: dzDiagState.coalesced,
+                evicted: dzDiagState.evicted, entries: {} };
+    Object.keys(dzDiagState.rings).forEach(function(seam) {
+        out.entries[seam] = dzDiagState.rings[seam].map(function(e) {
+            var copy = {};
+            Object.keys(e).forEach(function(k) { if (k !== "__id") { copy[k] = e[k]; } });
+            return copy;
+        });
+    });
+    return out;
+}
+
+function dzDiagSnapshot(opts) {
+    var snap = { live: dzDiagCollect(opts), history: dzDiagHistory() };
+    snap.live.recorder = {
+        state: dzLogOn ? "on" : "off",
+        appends: dzDiagState.appends,
+        coalesced: dzDiagState.coalesced,
+        evicted: dzDiagState.evicted,
+        page_open_ms: Math.round(((typeof performance !== "undefined" && performance.now)
+            ? performance.now() : 0) - dzDiagStartedAt)
+    };
+    return snap;
+}
+
+/* NOT dz-prefixed, deliberately and only here. These two are the only symbols
+   printed in the manual and typed by hand, and core owns real browser globals in
+   the dz namespace (window.dzEasterEggs, window.dzOpenBarPopup), so a future
+   collision would break the one command a user runs manually and would surface
+   as a bug report rather than a build failure. The theme's other dz* names stay
+   as they are; a collision canary guards those. */
+function machinonDiag(opts) {
+    var snap = dzDiagSnapshot({ names: false, quiet: opts && opts.quiet });
+    if (!(opts && opts.quiet) && typeof console !== "undefined" && console.log) {
+        console.log("Machinon diagnostics", snap);
+    }
+    return snap;
+}
+
+/* Device names included, for reading your own house. Never called by the Copy
+   diagnostics button and never part of the reporting flow: the manual names
+   both and says which one belongs in a bug report. */
+function machinonDiagNames(opts) {
+    var snap = dzDiagSnapshot({ names: true, quiet: opts && opts.quiet });
+    if (!(opts && opts.quiet) && typeof console !== "undefined" && console.log) {
+        console.log("Machinon diagnostics (with device names, not for public issues)", snap);
+    }
+    return snap;
+}
+
+function machinonDiagText() {
+    try { return JSON.stringify(machinonDiag({ quiet: true }), null, 2); }
+    catch (e) { return "{}"; }
+}
+
+/* Take over from the kernel shim in custom.js. Guarded because this file also
+   runs in a vm context with no window (scripts/test-diag.mjs), which is what
+   proves it touches no DOM at load time. */
+(function() {
+    try {
+        if (typeof window === "undefined") return;
+        dzDiagAdoptBuffer(window.__dzDiagBuffer);
+        window.__dzDiagBuffer = null;
+        window.dzLog = dzLog;
+    } catch (e) { /* best effort */ }
+})();

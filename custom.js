@@ -24,6 +24,28 @@ var theme = {}, themeName = "", isMobile, lang, themeFolder;
     window.ShowNotify = shim("shownotify");
 })();
 
+/* Diagnostics bootstrap. Same shape and the same reason as the toast buffer
+   above: this file, and the Angular config callbacks it installs below, run
+   BEFORE any THEME_MODULE, so a seam calling dzLog in that window would hit an
+   undefined global. Inside an Angular .config() callback that is not a missing
+   log line, it is a ReferenceError in core's module bootstrap, which costs the
+   user a blank Domoticz rather than a Domoticz missing two theme pages.
+
+   Buffered raw and drained by src/js/diag.js, and bounded because the
+   Diagnostic logging setting has not loaded yet at this point: if it turns out
+   to be off, which is the default, the buffer is discarded and nothing was ever
+   retained. Call sites here still guard with typeof, the same way the
+   dzProblemsRefresh call below does; this exists so that a guard that is missed
+   degrades to a lost line rather than to a broken page. */
+(function() {
+    var buf = window.__dzDiagBuffer = [];
+    window.dzLogOn = false;
+    window.dzLog = function(seam, event, fields) {
+        if (buf.length < 50) { buf.push([seam, event, fields]); }
+        return false;
+    };
+})();
+
 isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 var supported_lang = "en fr de sv nl pl";
 // The scheme colour palette now lives solely in the --dz-* tokens (dz-tokens.css / dark.css). The
@@ -34,6 +56,9 @@ var supported_lang = "en fr de sv nl pl";
 /* The theme's always-loaded modules, in load order. Feature-toggled files
    (theme.json "files") are separate and load on demand via the feature loader. */
 var THEME_MODULES = [
+    /* diag.js first: every module below it may call dzLog at load time, and the
+       kernel buffer above only covers the window before THEME_MODULES run. */
+    "src/js/diag.js",
     "src/js/toasts.js",
     "src/js/toast-hooks.js",
     "src/js/settings-transport.js",
