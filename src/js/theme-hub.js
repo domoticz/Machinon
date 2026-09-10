@@ -999,8 +999,12 @@ function dzRenderGroupRows(section, group) {
         section.appendChild(row);
     });
     group.entries.forEach(function (entry) {
-        if (!entry.parent || entry.control === "custom") return;
-        var childRow = dzRenderHubRow(entry);
+        if (!entry.parent) return;
+        /* A control:"custom" entry with a parent nests like any other dependent
+           row: it renders its own body but still lives in the parent's
+           .dz-hub-children rail, and still answers to the disable sync, which
+           finds rows by .dz-hub-row[data-setting]. */
+        var childRow = entry.control === "custom" ? dzHubCustomMount(entry) : dzRenderHubRow(entry);
         var parentRow = byKey[entry.parent];
         if (!parentRow) { section.appendChild(childRow); return; } // fail open: orphan child stays visible
         var kids = parentRow.querySelector(".dz-hub-children") || parentRow;
@@ -1047,11 +1051,91 @@ function dzHubCustomPlaceholder(entry) {
    same deal); any other control:"custom" entry still gets the generic
    placeholder above. */
 function dzHubCustomMount(entry) {
+    if (entry.key === "diagnostics_copy") return dzHubDiagCopyMount(entry);
     if (entry.key === "scheme") return dzHubSchemeMount(entry);
     if (entry.key === "custom_color_scheme") return dzHubCustomColorsMount(entry);
     if (entry.key === "iconpacks") return dzHubIconPacksMount(entry);
     if (entry.key === "about") return dzHubAboutMount(entry);
     return dzHubCustomPlaceholder(entry);
+}
+
+/* Copy diagnostics: the primary way this feature is used, because a console
+   function is unreachable on the phone the reports actually come from. Firefox
+   for Android has no on-device console, so machinonDiag() is the developer
+   convenience and this button is the user path.
+
+   The clipboard write is guarded by its REJECTION, not by a presence check.
+   navigator.clipboard exists on plenty of origins where writeText still rejects
+   with NotAllowedError (document not focused, permission denied), so a presence
+   check passes and the button then reports success for a copy that never
+   happened, which is exactly the silent failure this button must not have. The
+   API is also genuinely absent on a plain-HTTP LAN install, so the textarea
+   fallback is the common path rather than the edge case.
+
+   The fallback writes textarea.value, never innerHTML: with names included the
+   text carries plugin- and hardware-supplied device names, and this is a
+   first-of-its-kind surface in the theme, so it does not inherit the toast
+   surface's text-node contract. */
+function dzHubDiagCopyMount(entry) {
+    /* Not a .dz-hub-row: that is a three-column control/text/preview grid for a
+       setting with a value, and this is an action. Follows the maintenance
+       block's shape instead, which is the house idiom for a button plus its
+       explanation. */
+    var mount = document.createElement("div");
+    /* dz-hub-row + data-setting so dzHubSyncChildren can find and disable it
+       when its parent toggle is off; dz-hub-row-child so it does not draw its
+       own closing line inside the parent's group; dz-hub-diag to lay the body
+       out as a block rather than the row grid's control/text/preview columns. */
+    mount.className = "dz-hub-row dz-hub-row-child dz-hub-diag";
+    mount.setAttribute("data-setting", "diagnostics_copy");
+    mount.id = "dz-hub-diagnostics-copy";
+
+    var label = document.createElement("div");
+    label.className = "dz-hub-label";
+    label.textContent = dzT("hub.settings.diagnostics_copy.label");
+    mount.appendChild(label);
+
+    var hint = document.createElement("p");
+    hint.className = "dz-hub-desc";
+    hint.textContent = dzT("hub.diag.hint");
+    mount.appendChild(hint);
+
+    var status = document.createElement("p");
+    status.className = "dz-hub-desc dz-hub-diag-status";
+    status.setAttribute("role", "status");
+
+    var area = document.createElement("textarea");
+    area.className = "dz-hub-diag-fallback";
+    area.readOnly = true;
+    area.hidden = true;
+    area.rows = 6;
+
+    function showFallback(text) {
+        area.value = text;
+        area.hidden = false;
+        status.textContent = dzT("hub.diag.fallback");
+        try { area.focus(); area.select(); } catch (e) { /* best effort */ }
+    }
+
+    var btn = dzHubActionButton("dz-hub-diag-copy", "btn btn-primary dz-hub-diag-copy-btn",
+        dzT("hub.diag.copy"), function() {
+            var text;
+            try { text = machinonDiagText(); }
+            catch (e) { status.textContent = String(e && e.message ? e.message : e); return; }
+            area.hidden = true;
+            if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(function() {
+                    status.textContent = dzT("hub.diag.copied");
+                }, function() { showFallback(text); });
+                return;
+            }
+            showFallback(text);
+        });
+
+    mount.appendChild(btn);
+    mount.appendChild(status);
+    mount.appendChild(area);
+    return mount;
 }
 
 /* Mounts the icon-pack installer (src/js/iconpack.js) into the icon-packs
@@ -1894,7 +1978,13 @@ function dzApplyHubSetting(entry, value) {
             if (entry.reloadOnDisable) dzHubToggleReloadNote(entry, false);
             // log_plot_bands re-reads its enabled flag (loaded JS cannot be unloaded).
             if (key === "log_plot_bands" && typeof dzApplyLogPlotBands === "function") dzApplyLogPlotBands();
+            // The diagnostics gate is a CACHED boolean, so flipping the toggle
+            // has to recompute it here: the settings-apply path in
+            // settings-store.js only runs for a stored profile arriving, not
+            // for a switch the user just flicked.
+            if (key === "diagnostic_logging" && typeof dzDiagRefreshGate === "function") dzDiagRefreshGate();
         } else if (!now && was) {
+            if (key === "diagnostic_logging" && typeof dzDiagRefreshGate === "function") dzDiagRefreshGate();
             if (hasJs) {
                 // reloadOnDisable: an executed script cannot be un-run.
                 // Do NOT pretend it applied; disclose reload.

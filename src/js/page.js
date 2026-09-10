@@ -318,3 +318,170 @@ function setCustomIconsPage() {
 function ajaxSuccessCallback() {
     setPageTitle();
 }
+
+/* ---- Layout facts, for the diagnostics artifact ----
+
+   WHY THIS EXISTS. Most reports against this theme are about how a page LOOKS,
+   and an artifact cannot see that. It does not need to: the reporter sends a
+   screenshot, and a screenshot is good evidence of appearance. What a screenshot
+   cannot carry is the environment that DECIDED the layout, and that is where
+   these reports stall. Issue #188 was "squashed in Chrome, correct in Firefox";
+   #200 was popups opening off-screen; a floorplan report had to have its
+   overflow measured by hand before it could be answered at all. Zoom, device
+   pixel ratio, a browser minimum font size, a webfont that failed to load and
+   Windows high-contrast mode all rewrite a layout while leaving it looking
+   deliberate.
+
+   So this reports two things: facts that decide layout, and violations of
+   invariants the theme's own CSS is supposed to hold, measured against the live
+   tokens rather than against numbers copied out of a stylesheet.
+
+   It runs ONLY when a snapshot is taken, never on a render pass, never on a
+   timer, and holds nothing. Measured at 6-9ms on a full dashboard, of which the
+   overflow culprit search is most of it, and that only runs when there IS an
+   overflow. Nothing here observes, so a page nobody asks about pays nothing. */
+
+/* Elements are named by tag and class, never by id or text: an id can carry a
+   device idx (itemtable54) and text carries device names, and this artifact is
+   meant to be safe to paste into a public issue. The class is what a maintainer
+   needs anyway, since that is what the CSS is written against. */
+function dzLayoutDescribe(el) {
+    try {
+        if (!el || !el.tagName) return "unknown";
+        var cls = (el.className && el.className.toString ? el.className.toString() : "").trim();
+        var parts = cls ? cls.split(/\s+/).slice(0, 3) : [];
+        return el.tagName.toLowerCase() + (parts.length ? "." + parts.join(".") : "");
+    } catch (e) { return "unknown"; }
+}
+
+/* Card widths reduced to the three numbers that diagnose a grid: the range, the
+   median, and how many DISTINCT widths there are. A grid whose cards disagree by
+   more than rounding is the "squashed cards" report, and the bucket count says
+   so in one number without listing every card. */
+function dzLayoutWidths(widths) {
+    var sorted = (widths || []).slice().sort(function(a, b) { return a - b; });
+    if (!sorted.length) return { cards_painted: 0, card_width: "none", width_buckets: 0, narrowest: null };
+    var buckets = {};
+    sorted.forEach(function(w) { buckets[Math.round(w / 4) * 4] = true; });
+    return {
+        cards_painted: sorted.length,
+        card_width: sorted[0] + "-" + sorted[sorted.length - 1] +
+                    " (median " + sorted[Math.floor(sorted.length / 2)] + ")",
+        width_buckets: Object.keys(buckets).length,
+        narrowest: sorted[0]
+    };
+}
+
+function dzLayoutFacts() {
+    var de = document.documentElement;
+    var vv = window.visualViewport;
+    var cs = getComputedStyle(de);
+    var out = {};
+
+    out.dpr = window.devicePixelRatio || 1;
+    /* A phone's browser chrome is not part of innerHeight, and an emulated
+       viewport has none at all, which is why a 100vh defect passes every
+       headless check and fails on a real phone. The two disagreeing is the
+       fact worth carrying. */
+    out.visual_scale = vv ? Math.round(vv.scale * 100) / 100 : 1;
+    out.chrome_px = vv ? Math.round(window.innerHeight - vv.height) : 0;
+    /* Browser zoom and a per-user minimum font size both silently rewrite every
+       layout the CSS assumes, and neither is visible in a screenshot. */
+    out.root_font_px = parseFloat(cs.fontSize) || 0;
+    out.body_font_px = parseFloat(getComputedStyle(document.body).fontSize) || 0;
+
+    try {
+        out.forced_colors = window.matchMedia("(forced-colors: active)").matches;
+        out.prefers_contrast = window.matchMedia("(prefers-contrast: more)").matches;
+        out.reduced_motion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    } catch (e) { /* older engines: leave the three absent rather than guessed */ }
+
+    /* A webfont that did not load moves every alignment in the theme, and the
+       page still looks deliberate, just wrong. */
+    try {
+        out.fonts = document.fonts ? String(document.fonts.status) : "unknown";
+        out.icon_font = document.fonts ? document.fonts.check("16px Ionicons") : false;
+    } catch (e) { out.fonts = "error"; }
+
+    /* Read from the live tokens, not from theme.json: what is measured is then
+       what is PAINTED, which is the whole point of measuring at all. */
+    var cardMin = parseFloat(cs.getPropertyValue("--dz-card-min-width")) || 0;
+    var cardMax = parseFloat(cs.getPropertyValue("--dz-card-max-width")) || 0;
+    out.card_bounds = cardMin + "-" + cardMax;
+
+    var widths = [];
+    Array.prototype.slice.call(document.querySelectorAll("#main-view .itemBlock")).forEach(function(card) {
+        var w = card.getBoundingClientRect().width;
+        if (w > 0) widths.push(Math.round(w));
+    });
+    var summary = dzLayoutWidths(widths);
+    out.cards_painted = summary.cards_painted;
+    out.card_width = summary.card_width;
+    out.width_buckets = summary.width_buckets;
+
+    out.gutter_px = window.innerWidth - de.clientWidth;
+    var header = document.querySelector(".navbar-fixed-top");
+    out.header_px = header ? Math.round(header.getBoundingClientRect().height) : 0;
+
+    /* A user stylesheet or an extension rewriting the page is invisible to
+       everyone except the reporter, and explains an otherwise impossible
+       screenshot. Counted, never named: the name is the user's business. */
+    var foreign = 0;
+    try {
+        Array.prototype.slice.call(document.styleSheets).forEach(function(sheet) {
+            var href = sheet.href || "";
+            if (href && href.indexOf(location.origin) !== 0) foreign += 1;
+        });
+    } catch (e) { /* cross-origin sheet: not ours to count */ }
+    out.foreign_css = foreign;
+
+    out.violations = dzLayoutViolations(out, cardMin);
+    return out;
+}
+
+/* Invariants the theme's own CSS is supposed to hold. Each one is a thing a
+   maintainer would otherwise have to ask the reporter to measure. */
+function dzLayoutViolations(facts, cardMin) {
+    var bad = [];
+    try {
+        /* Two pixels of slack: a card can round below its minimum through
+           fractional grid maths without anything being wrong. */
+        var summary = { narrowest: null };
+        if (facts.cards_painted) {
+            summary.narrowest = parseInt(String(facts.card_width).split("-")[0], 10);
+        }
+        if (cardMin && summary.narrowest && summary.narrowest < cardMin - 2) {
+            bad.push("card_below_min: " + summary.narrowest + "px against --dz-card-min-width " + cardMin + "px");
+        }
+
+        var se = document.scrollingElement || document.documentElement;
+        if (se.scrollWidth > se.clientWidth + 1) {
+            /* The culprit search is the expensive half of this collector, so it
+               runs only once an overflow is known to exist. */
+            var worst = null, edge = se.clientWidth;
+            Array.prototype.slice.call(document.querySelectorAll("#main-view *")).forEach(function(el) {
+                var r = el.getBoundingClientRect();
+                if (r.width > 0 && r.right > edge + 1) { edge = r.right; worst = el; }
+            });
+            bad.push("h_overflow: " + (se.scrollWidth - se.clientWidth) + "px, widest " +
+                     dzLayoutDescribe(worst) + " to " + Math.round(edge) + "px");
+        }
+
+        /* Anything floating that paints outside the window, which is the shape
+           of the floorplan popup report (#200). */
+        Array.prototype.slice.call(document.querySelectorAll(
+            ".dz-toast, #dz-set-chip, .ui-dialog, .dz-floorplan-popup, .dz-popup")).forEach(function(el) {
+            var r = el.getBoundingClientRect();
+            if (!r.width || getComputedStyle(el).display === "none") return;
+            if (r.left < -1 || r.right > window.innerWidth + 1 || r.top < -1) {
+                bad.push("offscreen: " + dzLayoutDescribe(el) + " at " + Math.round(r.left) + "," +
+                         Math.round(r.top) + " " + Math.round(r.width) + "x" + Math.round(r.height));
+            }
+        });
+    } catch (e) { bad.push("measure_failed: " + ((e && e.message) || e)); }
+    return bad;
+}
+
+if (typeof dzDiagRegister === "function") {
+    dzDiagRegister("layout", function() { return dzLayoutFacts(); });
+}

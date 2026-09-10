@@ -330,3 +330,20 @@ function dzProblemsInit() {
     });
     if (typeof dzRouteMilestone === "function") dzRouteMilestone("problems");
 }
+
+
+/* Diagnostics contributor: the house-wide view, which is a different scope from
+   the page-scoped card counts and must be labelled as such when read. The badge
+   count lives only as text in the DOM, so it is read from there rather than
+   duplicated into a global nobody else needs. */
+if (typeof dzDiagRegister === "function") {
+    dzDiagRegister("problems", function() {
+        var badge = document.querySelector("#dz-problem-badge .dz-problem-count");
+        var rows = document.querySelectorAll("#dz-problems-table tbody tr").length;
+        return {
+            badge: badge ? (parseInt(badge.textContent, 10) || 0) : 0,
+            rows: rows,
+            outcome: (typeof dzRoutesActive !== "undefined" && dzRoutesActive) ? "routes_active" : "routes_inactive"
+        };
+    });
+}

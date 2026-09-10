@@ -156,6 +156,25 @@ var THEME_MANIFEST = [
                 appliesTo: "toasts", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
             },
+            /* Gates BOTH the console output and the in-memory recorder in
+               src/js/diag.js, and ships off. files:[] so it applies live, which
+               is only true because dzDiagRefreshGate() runs on the settings
+               apply path: the gate is a cached boolean, never a storage read at
+               call time, since the seams that read it run per card. */
+            {
+                key: "diagnostic_logging", storageKey: "diagnostic_logging", control: "toggle",
+                appliesTo: "whole_ui", previewId: null, parent: null,
+                reloadOnDisable: false, status: "keep", scope: "user"
+            },
+            /* The Copy diagnostics action, deliberately adjacent to the setting
+               rather than in About: the documented flow is switch it on,
+               reproduce, press the button, and splitting that across two tabs
+               costs more on a phone than the tidier grouping is worth. */
+            {
+                key: "diagnostics_copy", storageKey: null, control: "custom",
+                appliesTo: "whole_ui", previewId: null, parent: "diagnostic_logging",
+                reloadOnDisable: false, status: "keep", scope: null
+            },
             {
                 key: "center_popups", storageKey: "center_popups", control: "toggle",
                 appliesTo: "all_dialogs", previewId: "dialog-center", parent: null,

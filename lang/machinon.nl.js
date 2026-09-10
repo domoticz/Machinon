@@ -58,6 +58,14 @@ language = {
         label: "Hoe vaak waarschuwingen zich herhalen",
         description: "Hoe vaak hetzelfde apparaat je opnieuw mag waarschuwen: eens per bezoek, eens per dag, of alleen wanneer het probleem verdwijnt en terugkomt. Het waarschuwingsicoon naast de apparaatnaam verschijnt hoe dan ook."
       },
+      diagnostic_logging: {
+        label: "Diagnostische logging",
+        description: "Legt extra details vast over wat het thema doet, zodat je die aan een bugmelding kunt toevoegen. Alles blijft in je browser en er wordt niets verstuurd. Je kunt dit gerust uit laten staan."
+      },
+      diagnostics_copy: {
+        label: "Diagnose kopieren",
+        description: "Kopieert wat het thema heeft vastgelegd, klaar om in een bugmelding te plakken. Je apparaatnamen blijven weg, dus je kunt dit veilig openbaar plaatsen."
+      },
       center_popups: {
         label: "Pop-upvensters centreren",
         description: "Dwingt elk pop-upvenster naar een vaste gecentreerde positie, in plaats van waar Domoticz het anders zou plaatsen."
@@ -259,6 +267,12 @@ language = {
       link_repo: "GitHub-repository",
       link_wiki: "Wiki",
       icons8_credit: "Iconen van Icons8"
+    },
+    diag: {
+      copy: "Diagnose kopieren",
+      copied: "Gekopieerd. Plak het in je bugmelding.",
+      fallback: "Kopieren is mislukt, de tekst staat hieronder. Selecteer en kopieer die handmatig.",
+      hint: "Reproduceer het probleem en druk dan hierop."
     },
     maintenance: {
       aria: "Thema-onderhoud",

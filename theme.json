@@ -3,7 +3,7 @@
     "name": "Machinon",
     "description": "Modern Domoticz theme: color schemes, Theme Hub settings, refreshed icons, light and dark",
     "license": "GNU General Public License v3.0",
-    "version":"2.6.1",
+    "version":"2.6.2",
     "author": "EdddieN",
     "homepage": "https://www.github.com/domoticz/Machinon",
     "wiki": "https://www.domoticz.com/wiki/Machinon_Theme",
@@ -121,6 +121,11 @@
         "warn_battery": {
             "id": 47,
             "enabled": true,
+            "files": []
+        },
+        "diagnostic_logging": {
+            "id": 48,
+            "enabled": false,
             "files": []
         },
         "dashboard_columns": {

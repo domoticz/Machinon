@@ -18,7 +18,24 @@ var dzDefaultsSnap = null;
 /* The theme object's localStorage cache. Plain functions instead of the old
    Storage.prototype monkey-patch: no global prototype pollution, and every
    caller stores the same thing, so the key/value pair lives here once. */
+/* Every path that finishes settling the theme object ends here: warm boot from
+   the cache, cold boot from theme.json, the native ThemeSettings load and the
+   legacy uservariable load all call it. That makes it the one place guaranteed
+   to be reached once theme.features is final, which is why the diagnostics gate
+   is recomputed from it.
+
+   The gate cannot be left to diag.js's own load-time read: modules load before
+   settings arrive, so that read always sees the defaults. Nor to
+   applyThemeDeltaInPlace, which returns early when nothing changed, so a page
+   whose stored settings simply match would never refresh at all. Measured: with
+   only those two points the setting persisted across a reload while dzLogOn
+   stayed false, i.e. the feature was on and silent. */
 function cacheThemeSettings() {
+    /* settled: every path that reaches here has the stored settings in hand, so
+       this is the call that may discard the kernel buffer when the answer turns
+       out to be off. diag.js's own load-time call cannot: it runs before the
+       settings arrive and would throw away entries recorded before it loaded. */
+    if (typeof dzDiagRefreshGate === "function") { dzDiagRefreshGate(true); }
     localStorage.setItem(themeFolder + ".themeSettings", JSON.stringify(theme));
 }
 
@@ -124,6 +141,13 @@ function loadSettings() {
             if (theme.features && !theme.features.warn_battery) {
                 theme.features.warn_battery = { id: 47, enabled: true, files: [] };
             }
+            /* Without this, a cached theme object written before diagnostics
+               shipped leaves theme.features.diagnostic_logging undefined on
+               every existing install's first warm load, and any gate read that
+               is not written defensively is a TypeError. */
+            if (theme.features && !theme.features.diagnostic_logging) {
+                theme.features.diagnostic_logging = { id: 48, enabled: false, files: [] };
+            }
             if (!theme.warn_repeat) {
                 theme.warn_repeat = "daily";
             }
@@ -218,11 +242,21 @@ function dzMigrateNotificationSplit(snap) {
    reconcileDomoticzSettingsInPlace (below) is its only caller, reached from
    custom.js's boot chain. */
 function checkUserVariableThemeSettings() {
+    /* Timed across the SETTLE, not around the call: both transports are
+       asynchronous and neither rejects on failure, so the duration of the
+       synchronous part measures nothing and "it returned" is not an outcome.
+       The probe is inside the window on purpose: a core that has to be asked
+       whether it supports the API is part of what a slow boot cost. */
+    var startedAt = dzSettingsClock();
     return dzProbeThemeSettingsAPI().then(function(capable) {
-        if (!capable) return checkUserVariableThemeSettingsLegacy();
+        if (!capable) return checkUserVariableThemeSettingsLegacy(startedAt);
         return dzApiLoad().then(function(outcome) {
+            dzSettingsLogLoad("native", outcome, startedAt);
             if (outcome === DZ_LOAD_EMPTY) return dzSeedFromLegacyIfPossible();
             return undefined; /* LOADED: dzApiLoad already merged onto theme and cached. FAILED: fail closed, no writes. */
+        }, function(e) {
+            dzSettingsLogLoad("native", "rejected", startedAt);
+            throw e;
         });
     });
 }
@@ -239,9 +273,11 @@ function checkUserVariableThemeSettings() {
    Fail closed: dzThemeSettingsLoad returns a tri-state so a transient failure
    (DZ_LOAD_FAILED) leaves the theme object exactly as it painted and writes
    NOTHING; only a real success-but-empty (DZ_LOAD_EMPTY) seeds. */
-function checkUserVariableThemeSettingsLegacy() {
+function checkUserVariableThemeSettingsLegacy(startedAt) {
+    if (typeof startedAt !== "number") startedAt = dzSettingsClock();
     var defaults = dzSettingsSnapshot(theme);
     return dzThemeSettingsLoad().then(function(outcome) {
+        dzSettingsLogLoad("legacy", outcome, startedAt);
         if (outcome === DZ_LOAD_LOADED) {
             var stored = dzSettingsSnapshot(theme); /* dzThemeSettingsLoad already merged the vars into theme; snapshot captures them */
             dzApplySnapshot(theme, dzMigrateNotificationSplit(dzMergeSettingsLayers(defaults, stored, null)));
@@ -264,8 +300,19 @@ function checkUserVariableThemeSettingsLegacy() {
    still needs it to pick the right uservariable command, but the native API
    upserts unconditionally, so dzApiSaveSettings ignores it. */
 function storeUserVariableThemeSettings(action) {
-    if (dzApiState.capable === true) return dzApiSaveSettings();
-    return dzThemeSettingsSave(action);
+    var startedAt = dzSettingsClock();
+    var transport = (dzApiState.capable === true) ? "native" : "legacy";
+    var save = (transport === "native") ? dzApiSaveSettings() : dzThemeSettingsSave(action);
+    /* The resolved value is passed through untouched, and a rejection is
+       re-thrown after it is recorded: a diagnostic that swallowed a failed save
+       would turn the one thing worth knowing into a silent success. */
+    return save.then(function(res) {
+        dzSettingsLogSave(transport, res, startedAt);
+        return res;
+    }, function(e) {
+        dzSettingsLogSave(transport, { ok: false, error: "rejected" }, startedAt);
+        throw e;
+    });
 }
 
 /* Fingerprint of only the settings that drive visible state. The in-place
@@ -369,6 +416,7 @@ function applyThemeDeltaInPlace(before) {
     setLogo();
     applyBackground();
     applyNavbarIconsText();
+    dzDiagRefreshGate(true);
 }
 
 function resetTheme() {
@@ -401,5 +449,49 @@ function resetTheme() {
         }
         $.get("json.htm?type=command&param=addlogmessage&message=" + themeFolder + " theme reset to defaults");
         location.reload();
+    });
+}
+
+
+/* Diagnostics contributors for the install's own identity. Registered here
+   because this module owns the theme object every one of them reads.
+
+   The build group is an explicit field-by-field projection, never a copied API
+   response: core's getversion returns SystemName and DomoticzUpdateURL to an
+   admin session, and an internal hostname has no business in a public issue. */
+if (typeof dzDiagRegister === "function") {
+    dzDiagRegister("build", function() {
+        return {
+            theme_version: (theme && theme.version) || "unknown",
+            theme_folder: themeFolder || "unknown",
+            domoticz_version: (typeof dzApiState !== "undefined" && dzApiState.domoticzVersion) || "unknown"
+        };
+    });
+
+    dzDiagRegister("view", function() {
+        return {
+            route: (typeof location !== "undefined" ? location.hash : ""),
+            width: window.innerWidth,
+            height: window.innerHeight,
+            phone: !!isMobile,
+            scheme: (window.theme && theme.scheme) || "unknown",
+            base: (document.documentElement.getAttribute("data-theme")) || "light",
+            /* Derived, never the raw user-agent string: see dzDiagEngine. */
+            engine: (typeof dzDiagEngine === "function" && typeof navigator !== "undefined")
+                ? dzDiagEngine(navigator.userAgent) : "unknown"
+        };
+    });
+
+    /* Keys only, never the objects: their siblings in theme.json carry
+       user-supplied values (custom_url, logo, background_img) that would put
+       internal URLs and local paths into a pasted report. */
+    dzDiagRegister("features", function() {
+        var on = [];
+        try {
+            Object.keys((theme && theme.features) || {}).forEach(function(k) {
+                if (theme.features[k] && theme.features[k].enabled === true) { on.push(k); }
+            });
+        } catch (e) { /* best effort */ }
+        return { enabled: on };
     });
 }

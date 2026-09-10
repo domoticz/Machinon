@@ -55,6 +55,14 @@ language = {
         label: "Wie oft Warnungen wiederholt werden",
         description: "Wie oft dasselbe Gerät dich erneut warnen darf: einmal pro Besuch, einmal am Tag oder nur, wenn das Problem verschwindet und wiederkommt. Das Warnsymbol neben dem Gerätenamen erscheint ohnehin."
       },
+      diagnostic_logging: {
+        label: "Diagnoseprotokoll",
+        description: "Zeichnet zusatzliche Details daruber auf, was das Theme tut, damit Sie sie einem Fehlerbericht beilegen konnen. Alles bleibt in Ihrem Browser, es wird nichts gesendet. Kann bedenkenlos ausgeschaltet bleiben."
+      },
+      diagnostics_copy: {
+        label: "Diagnose kopieren",
+        description: "Kopiert, was das Theme aufgezeichnet hat, bereit zum Einfugen in einen Fehlerbericht. Ihre Geratenamen bleiben aussen vor, es kann also gefahrlos offentlich gepostet werden."
+      },
       center_popups: {
         label: "Popup-Dialoge zentrieren",
         description: "Zwingt jeden Popup-Dialog an eine feste zentrierte Position, statt dorthin, wo Domoticz ihn sonst platzieren würde."
@@ -256,6 +264,12 @@ language = {
       link_repo: "GitHub-Repository",
       link_wiki: "Wiki",
       icons8_credit: "Symbole von Icons8"
+    },
+    diag: {
+      copy: "Diagnose kopieren",
+      copied: "Kopiert. Fugen Sie es in Ihren Fehlerbericht ein.",
+      fallback: "Kopieren fehlgeschlagen, der Text steht unten. Bitte manuell markieren und kopieren.",
+      hint: "Reproduzieren Sie das Problem und drucken Sie dann hier."
     },
     maintenance: {
       aria: "Design-Wartung",
