@@ -392,6 +392,28 @@ function dzApiFail(d) {
     return { ok: false, error: err };
 }
 
+/* Diagnostics contributor: what this session is ALLOWED to do, which decides
+   what it can even be shown. Issue #202 was a non-admin being offered the icon
+   pack installer, an admin-only action, and no artifact field would have said
+   so. Rights and transport also explain a whole class of "it does not save":
+   a read-only user, a session with no identity, and a core without the
+   ThemeSettings API each fail differently and look identical from a screenshot.
+
+   Booleans and a transport name only. The username is deliberately absent: a
+   name is not a right, and this artifact is meant to be safe to post. */
+if (typeof dzDiagRegister === "function") {
+    dzDiagRegister("mode", function() {
+        var mode = dzSettingsMode();
+        return {
+            admin: mode.admin === true,
+            per_user: mode.perUser === true,
+            no_identity: mode.noIdentity === true,
+            transport: dzApiState.capable === true ? "native"
+                     : (dzApiState.capable === false ? "legacy" : "unresolved")
+        };
+    });
+}
+
 /* ---- Diagnostics seam ----
 
    Settings are the state every other symptom is read against: a scheme that

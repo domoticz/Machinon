@@ -106,8 +106,10 @@ describe your setup but not what led up to the problem. Everything is recorded i
 nothing is sent anywhere, and it is all gone as soon as you reload the page.
 
 The copied text leaves out your device names, so it is safe to post publicly. It does include your
-Machinon and Domoticz versions and which theme features you have switched on, because that is what
-makes a report diagnosable.
+Machinon and Domoticz versions, your colour scheme, your window size, which browser you are using,
+whether you are signed in as an administrator, and which theme features you have switched on,
+because that is what makes a report diagnosable. It records the browser by name and version only
+(for example `firefox/128`), not the long identification string browsers normally send.
 
 If your Domoticz is reached over plain `http://` on your home network, the browser will not let a
 page write to your clipboard. The text then appears in a box below the button instead, already

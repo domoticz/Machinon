@@ -155,13 +155,14 @@ function dzDiagAppend(state, seam, entry) {
    question rather than as a silent leak or a silent hole. */
 var DZ_DIAG_SCHEMA = {
     build: { theme_version: "string", theme_folder: "string", domoticz_version: "string" },
-    view: { route: "string", width: "number", height: "number", phone: "boolean", scheme: "string", base: "string" },
+    view: { route: "string", width: "number", height: "number", phone: "boolean", scheme: "string", base: "string", engine: "string" },
     features: { enabled: "string[]" },
     cards: { total: "number", flagged_timeout: "number", flagged_battery: "number", unresolved_idx: "number" },
     warnings: { keys_idx: "number", keys_named: "number", repeat_mode: "string", store_ages: "object" },
     toasts: { visible: "number", queued: "number", groups: "string[]" },
     problems: { badge: "number", rows: "number", outcome: "string" },
     filter: { members: "number", label_len: "number", chip: "boolean" },
+    mode: { admin: "boolean", per_user: "boolean", no_identity: "boolean", transport: "string" },
     recorder: { state: "string", appends: "number", coalesced: "number", evicted: "number", page_open_ms: "number" }
 };
 
@@ -223,6 +224,37 @@ function dzDiagRoute(hash) {
         }
         return out.join("/");
     } catch (e) { return "#/:unknown"; }
+}
+
+/* Which renderer produced this report, derived rather than pasted. The raw
+   user-agent string is a fingerprint and mostly noise, and this artifact is
+   meant to be safe to post publicly; what a layout report actually needs is the
+   engine and its major version. Issue #188 ("squashed in Chrome, correct in
+   Firefox") is the shape of report this answers, and its Browser field had been
+   filled in as "Chrome" with no version at all.
+
+   ORDER IS THE CONTRACT, not a style choice: every Chromium user agent also
+   claims Safari, and Edge claims Chrome on top of that, so the most specific
+   pattern must be tried first. An unrecognised agent collapses to "other" and
+   is never echoed back, which is the one failure that would matter here. */
+var DZ_DIAG_ENGINES = [
+    ["edge", /Edg(?:e|A|iOS)?\/(\d+)/],
+    ["opera", /OPR\/(\d+)/],
+    ["samsung", /SamsungBrowser\/(\d+)/],
+    ["firefox", /Firefox\/(\d+)?/],
+    ["chrome", /Chrome\/(\d+)/],
+    ["safari", /Version\/(\d+)[.\d]* Safari/]
+];
+
+function dzDiagEngine(ua) {
+    try {
+        if (typeof ua !== "string" || !ua) return "unknown";
+        for (var i = 0; i < DZ_DIAG_ENGINES.length; i++) {
+            var m = ua.match(DZ_DIAG_ENGINES[i][1]);
+            if (m) { return DZ_DIAG_ENGINES[i][0] + (m[1] ? "/" + m[1] : ""); }
+        }
+        return "other";
+    } catch (e) { return "unknown"; }
 }
 
 /* Warn keys are counted by shape, never exported. dzWarnKey (src/js/toasts.js)

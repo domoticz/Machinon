@@ -402,3 +402,55 @@ test("the hold is bounded, so an install whose settings never arrive cannot grow
     assert.ok(ring.length <= 10, `held entries collapse into the seam's own ring (${ring.length})`);
     assert.equal(d.machinonDiag({ quiet: true }).live.recorder.appends <= 50, true);
 });
+
+/* ---- Browser engine ----
+
+   Issue #188 was "squashed in Chrome, correct in Firefox", and the template's
+   own Browser field had been answered "Chrome". A derived engine name settles
+   which renderer produced the report without pasting a full user-agent string,
+   which is a fingerprint and mostly noise. */
+
+test("the engine is derived from the user agent, not pasted from it", () => {
+    const chrome = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
+    assert.equal(dz.dzDiagEngine(chrome), "chrome/141");
+    assert.equal(dz.dzDiagEngine("Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0"), "firefox/128");
+});
+
+test("Edge and Safari are not reported as the engines they impersonate", () => {
+    /* Every Chromium UA claims Safari, and Edge claims Chrome as well, so the
+       order the patterns are tried in IS the contract. */
+    const edge = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0";
+    const safari = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15";
+    assert.equal(dz.dzDiagEngine(edge), "edge/141");
+    assert.equal(dz.dzDiagEngine(safari), "safari/18");
+});
+
+test("an unrecognised or absent user agent is reported as unknown, never echoed", () => {
+    /* The failure that must not happen: falling back to the raw string, which
+       would put a full fingerprint into an artifact meant for a public issue. */
+    assert.equal(dz.dzDiagEngine("SomeInternalKiosk/3 (secret-build-1234)"), "other");
+    assert.equal(dz.dzDiagEngine(""), "unknown");
+    assert.equal(dz.dzDiagEngine(null), "unknown");
+    assert.equal(dz.dzDiagEngine("Firefox/not-a-number"), "firefox");
+});
+
+test("the schema admits the mode section and drops anything it does not name", () => {
+    /* Rights and transport decide what a user can even do, which is what issue
+       #202 turned on: a non-admin was shown a control only an admin can use. */
+    const clean = dz.dzDiagSanitize("mode", {
+        admin: true, per_user: false, no_identity: false, transport: "native", username: "martijn"
+    });
+    assert.deepEqual(Object.keys(clean.value).sort(), ["admin", "no_identity", "per_user", "transport"]);
+    assert.deepEqual(Array.from(clean.dropped), ["username"],
+        "a name is not a right, and must not ride along in a public artifact");
+});
+
+test("the view section admits the engine and still refuses a raw user agent", () => {
+    const clean = dz.dzDiagSanitize("view", {
+        route: "#/Dashboard", width: 1440, height: 900, phone: false,
+        scheme: "light", base: "light", engine: "firefox/128",
+        userAgent: "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0"
+    });
+    assert.equal(clean.value.engine, "firefox/128");
+    assert.deepEqual(Array.from(clean.dropped), ["userAgent"]);
+});

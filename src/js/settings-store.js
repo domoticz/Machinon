@@ -475,7 +475,10 @@ if (typeof dzDiagRegister === "function") {
             height: window.innerHeight,
             phone: !!isMobile,
             scheme: (window.theme && theme.scheme) || "unknown",
-            base: (document.documentElement.getAttribute("data-theme")) || "light"
+            base: (document.documentElement.getAttribute("data-theme")) || "light",
+            /* Derived, never the raw user-agent string: see dzDiagEngine. */
+            engine: (typeof dzDiagEngine === "function" && typeof navigator !== "undefined")
+                ? dzDiagEngine(navigator.userAgent) : "unknown"
         };
     });
 
