@@ -915,10 +915,11 @@
 
 /* Copy diagnostics: an action, not a setting with a value, so it follows the
    maintenance block's shape rather than the three-column row grid. */
+/* Lays out as a block, not the row grid's control/text/preview columns: this
+   is an action, and it carries no border of its own because a dependent row
+   inside the parent's rail is closed by the parent's line, not by its own. */
 .dz-hub-diag {
-    margin-top: 8px; /* future --dz-gap token site (spacing project) */
-    padding-top: 8px; /* future --dz-gap token site (spacing project) */
-    border-top: 1px solid var(--dz-input-border);
+    display: block;
     min-width: 0;
 }
 

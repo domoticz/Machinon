@@ -269,7 +269,7 @@ language = {
       copy: "Diagnose kopieren",
       copied: "Kopiert. Fugen Sie es in Ihren Fehlerbericht ein.",
       fallback: "Kopieren fehlgeschlagen, der Text steht unten. Bitte manuell markieren und kopieren.",
-      hint: "Schalten Sie oben das Diagnoseprotokoll ein, reproduzieren Sie das Problem und drucken Sie dann hier."
+      hint: "Reproduzieren Sie das Problem und drucken Sie dann hier."
     },
     maintenance: {
       aria: "Design-Wartung",

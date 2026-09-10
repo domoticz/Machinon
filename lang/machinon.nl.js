@@ -272,7 +272,7 @@ language = {
       copy: "Diagnose kopieren",
       copied: "Gekopieerd. Plak het in je bugmelding.",
       fallback: "Kopieren is mislukt, de tekst staat hieronder. Selecteer en kopieer die handmatig.",
-      hint: "Zet hierboven Diagnostische logging aan, reproduceer het probleem en druk dan hierop."
+      hint: "Reproduceer het probleem en druk dan hierop."
     },
     maintenance: {
       aria: "Thema-onderhoud",

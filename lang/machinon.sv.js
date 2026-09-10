@@ -269,7 +269,7 @@ language = {
       copy: "Kopiera diagnostik",
       copied: "Kopierat. Klistra in det i din felrapport.",
       fallback: "Kopieringen misslyckades, texten finns nedan. Markera och kopiera den manuellt.",
-      hint: "Sla pa Diagnostikloggning ovan, aterskapa problemet och tryck sedan har."
+      hint: "Aterskapa problemet och tryck sedan har."
     },
     maintenance: {
       aria: "Temaunderhåll",

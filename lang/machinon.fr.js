@@ -269,7 +269,7 @@ language = {
       copy: "Copier le diagnostic",
       copied: "Copie. Collez-le dans votre rapport de bogue.",
       fallback: "La copie a echoue, le texte est ci-dessous. Selectionnez-le et copiez-le manuellement.",
-      hint: "Activez le journal de diagnostic ci-dessus, reproduisez le probleme, puis appuyez ici."
+      hint: "Reproduisez le probleme, puis appuyez ici."
     },
     maintenance: {
       aria: "Maintenance du thème",

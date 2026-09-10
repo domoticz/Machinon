@@ -83,10 +83,9 @@ on battery, which warnings were shown or suppressed, and what the filters and se
 Everything stays in your browser. Nothing is sent anywhere, nothing is written to Domoticz, and the
 record is kept in memory only, so it is gone as soon as you reload the page.
 
-Turn it on, reproduce the problem, then press **Copy diagnostics** just below this setting and paste
-the result into your bug report. That order matters: with the setting off, nothing was being
-recorded, so a report filed without it still describes your setup but cannot show what led up to the
-problem.
+Turn it on, reproduce the problem, then press **Copy diagnostics**, which appears indented just
+below this setting and becomes available once you switch this on. That order matters: with the
+setting off nothing is recorded, so there is nothing to hand over.
 
 The copied text deliberately leaves out your device names, so it is safe to paste into a public
 issue. It does include your Domoticz version, your theme version and which theme features you have
@@ -97,8 +96,10 @@ not for a public issue.
 ### Copy diagnostics
 <!-- key: diagnostics_copy -->
 
-Not a setting but a button, directly under **Diagnostic logging**. It copies what the theme has
-recorded so you can paste it straight into a bug report.
+Not a setting but a button, nested under **Diagnostic logging** because it belongs to it. It copies
+what the theme has recorded so you can paste it straight into a bug report, and it stays greyed out
+until Diagnostic logging is switched on, since with the setting off there is nothing recorded to
+copy.
 
 If your Domoticz is reached over plain `http://` on your home network, the browser does not allow a
 page to write to the clipboard. In that case the text appears in a box below the button instead,

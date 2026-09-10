@@ -271,7 +271,7 @@ language = {
       copy: "Copy diagnostics",
       copied: "Copied. Paste it into your bug report.",
       fallback: "Copy failed, so the text is below. Select it and copy it manually.",
-      hint: "Turn on Diagnostic logging above, reproduce the problem, then press this."
+      hint: "Reproduce the problem, then press this."
     },
     maintenance: {
       aria: "Theme maintenance",

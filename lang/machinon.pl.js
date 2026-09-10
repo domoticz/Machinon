@@ -269,7 +269,7 @@ language = {
       copy: "Kopiuj diagnostyke",
       copied: "Skopiowano. Wklej to do zgloszenia bledu.",
       fallback: "Kopiowanie nie powiodlo sie, tekst jest ponizej. Zaznacz go i skopiuj recznie.",
-      hint: "Wlacz powyzej Rejestrowanie diagnostyczne, odtworz problem, a nastepnie nacisnij tutaj."
+      hint: "Odtworz problem, a nastepnie nacisnij tutaj."
     },
     maintenance: {
       aria: "Konserwacja motywu",

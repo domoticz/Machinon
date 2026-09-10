@@ -172,7 +172,7 @@ var THEME_MANIFEST = [
                costs more on a phone than the tidier grouping is worth. */
             {
                 key: "diagnostics_copy", storageKey: null, control: "custom",
-                appliesTo: "whole_ui", previewId: null, parent: null,
+                appliesTo: "whole_ui", previewId: null, parent: "diagnostic_logging",
                 reloadOnDisable: false, status: "keep", scope: null
             },
             {

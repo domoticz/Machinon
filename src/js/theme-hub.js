@@ -999,8 +999,12 @@ function dzRenderGroupRows(section, group) {
         section.appendChild(row);
     });
     group.entries.forEach(function (entry) {
-        if (!entry.parent || entry.control === "custom") return;
-        var childRow = dzRenderHubRow(entry);
+        if (!entry.parent) return;
+        /* A control:"custom" entry with a parent nests like any other dependent
+           row: it renders its own body but still lives in the parent's
+           .dz-hub-children rail, and still answers to the disable sync, which
+           finds rows by .dz-hub-row[data-setting]. */
+        var childRow = entry.control === "custom" ? dzHubCustomMount(entry) : dzRenderHubRow(entry);
         var parentRow = byKey[entry.parent];
         if (!parentRow) { section.appendChild(childRow); return; } // fail open: orphan child stays visible
         var kids = parentRow.querySelector(".dz-hub-children") || parentRow;
@@ -1078,7 +1082,12 @@ function dzHubDiagCopyMount(entry) {
        block's shape instead, which is the house idiom for a button plus its
        explanation. */
     var mount = document.createElement("div");
-    mount.className = "dz-hub-diag";
+    /* dz-hub-row + data-setting so dzHubSyncChildren can find and disable it
+       when its parent toggle is off; dz-hub-row-child so it does not draw its
+       own closing line inside the parent's group; dz-hub-diag to lay the body
+       out as a block rather than the row grid's control/text/preview columns. */
+    mount.className = "dz-hub-row dz-hub-row-child dz-hub-diag";
+    mount.setAttribute("data-setting", "diagnostics_copy");
     mount.id = "dz-hub-diagnostics-copy";
 
     var label = document.createElement("div");
@@ -1969,7 +1978,13 @@ function dzApplyHubSetting(entry, value) {
             if (entry.reloadOnDisable) dzHubToggleReloadNote(entry, false);
             // log_plot_bands re-reads its enabled flag (loaded JS cannot be unloaded).
             if (key === "log_plot_bands" && typeof dzApplyLogPlotBands === "function") dzApplyLogPlotBands();
+            // The diagnostics gate is a CACHED boolean, so flipping the toggle
+            // has to recompute it here: the settings-apply path in
+            // settings-store.js only runs for a stored profile arriving, not
+            // for a switch the user just flicked.
+            if (key === "diagnostic_logging" && typeof dzDiagRefreshGate === "function") dzDiagRefreshGate();
         } else if (!now && was) {
+            if (key === "diagnostic_logging" && typeof dzDiagRefreshGate === "function") dzDiagRefreshGate();
             if (hasJs) {
                 // reloadOnDisable: an executed script cannot be un-run.
                 // Do NOT pretend it applied; disclose reload.
