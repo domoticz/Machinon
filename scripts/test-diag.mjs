@@ -225,3 +225,70 @@ test("the kernel buffer is drained when the setting turns out to be on, and drop
     off.dzDiagSetEnabled(false);
     assert.equal(off.dzDiagState.appends, 0, "nothing buffered before the gate resolved is retained when it is off");
 });
+
+/* ---- The warn_pass seam's contract ----
+
+   dzWarnPass lives in devices.js and needs a DOM, so the seam itself is covered
+   by a rig harness. What is testable here is the shape it must emit, and the
+   two rules that shape has to obey. */
+
+test("a warn_pass entry coalesces while the house is unchanged and separates when it is not", () => {
+    /* The entry that would have made the 2026-09-09 defect self-evident:
+       `warned` and `cleared` naming the same key in one pass is the whole bug
+       in one line. It must survive a quiet house without filling the ring. */
+    const d = loadDiag();
+    d.dzDiagSetEnabled(true);
+    const steady = { condition: "statusTimeout", enabled: true, flagged: 1, warned: 1, cleared: 0,
+                     suppressed: 0, route: "#/Dashboard", keys_idx: 1, keys_named: 0 };
+    d.dzLog("warn_timeout", "pass_complete", { ...steady });
+    d.dzLog("warn_timeout", "pass_complete", { ...steady });
+    d.dzLog("warn_timeout", "pass_complete", { ...steady, cleared: 1 });
+    const ring = d.machinonDiag({ quiet: true }).history.entries.warn_timeout;
+    assert.equal(ring.length, 2, "three passes, one change, two entries");
+    assert.equal(ring[1].cleared, 1);
+});
+
+test("a warn_pass entry carries no device name, only key counts", () => {
+    const d = loadDiag();
+    d.dzDiagSetEnabled(true);
+    const shape = d.dzDiagKeyShape(["timeout:54", "timeout:name:Anna Bedroom Window"]);
+    d.dzLog("warn_timeout", "pass_complete", {
+        condition: "timeout", enabled: true, flagged: 2,
+        keys_idx: shape.keys_idx, keys_named: shape.keys_named
+    });
+    const json = JSON.stringify(d.machinonDiag({ quiet: true }));
+    assert.ok(!json.includes("Anna"), "the seam records key SHAPE, never the keys themselves");
+    assert.ok(json.includes('"keys_named":1'), "but it does say one key had to fall back to a name");
+});
+
+test("a disabled warn type records that it was not measured, not a zero", () => {
+    /* dzWarnPass returns early when the feature is off, so warned, cleared,
+       suppressed and the key counts are never computed. Recording them as 0
+       would tell a reader "nothing cleared" when the truth is "not measured",
+       and computing them anyway would mean a document-wide DOM sweep on every
+       pass for a user who asked for less. */
+    const d = loadDiag();
+    d.dzDiagSetEnabled(true);
+    d.dzLog("warn_battery", "pass_complete", { condition: "battery", enabled: false, flagged: 3 });
+    const e = d.machinonDiag({ quiet: true }).history.entries.warn_battery[0];
+    assert.equal(e.enabled, false);
+    assert.equal(e.flagged, 3, "the flagged count is free even when the feature is off");
+    assert.equal(e.warned, undefined, "and the fields that were never computed are absent, not zero");
+    assert.equal(e.cleared, undefined);
+});
+
+test("two warn conditions do not share a ring, or neither ever coalesces", () => {
+    /* The rig caught this: setAllDevicesIconsStatus runs the timeout pass and
+       the battery pass back to back, so in one ring their entries alternate,
+       every entry differs from the one before it by `condition`, and the
+       coalescing rule can never fire for either. They are two streams. */
+    const d = loadDiag();
+    d.dzDiagSetEnabled(true);
+    for (let i = 0; i < 6; i++) {
+        d.dzLog("warn_timeout", "pass_complete", { condition: "timeout", enabled: true, flagged: 1, warned: 0, cleared: 0, suppressed: 0 });
+        d.dzLog("warn_battery", "pass_complete", { condition: "battery", enabled: true, flagged: 0, warned: 0, cleared: 0, suppressed: 0 });
+    }
+    const h = d.machinonDiag({ quiet: true }).history.entries;
+    assert.equal(h.warn_timeout.length, 1, "six identical timeout passes are one entry");
+    assert.equal(h.warn_battery.length, 1, "and the battery stream is independent of it");
+});

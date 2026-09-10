@@ -31,7 +31,8 @@
    recorder exists to keep. Sizes are per seam so that cannot happen. */
 var DZ_DIAG_CAPS = {
     device_pass: 20,
-    warn_pass: 30,
+    warn_timeout: 30,
+    warn_battery: 30,
     toast: 20,
     set_filter: 10,
     settings: 10,
@@ -56,7 +57,12 @@ function dzDiagCap(seam) {
    added here must be a discrete fact about the house, never a measurement. */
 var DZ_DIAG_IDENTITY = {
     device_pass: ["event", "stage", "cards", "flagged", "unresolved_idx", "route"],
-    warn_pass: ["event", "condition", "enabled", "flagged", "warned", "cleared", "suppressed", "route"],
+    /* One stream per condition, not one "warn_pass" stream: setAllDevicesIconsStatus
+       runs both passes back to back, so sharing a ring makes every entry differ
+       from the one before it by `condition` alone and coalescing can never fire.
+       Measured on the rig before this was split. */
+    warn_timeout: ["event", "condition", "enabled", "flagged", "warned", "cleared", "suppressed", "route"],
+    warn_battery: ["event", "condition", "enabled", "flagged", "warned", "cleared", "suppressed", "route"],
     toast: ["event", "outcome", "group", "total"],
     set_filter: ["event", "members", "route"],
     settings: ["event", "outcome", "layer"],

@@ -592,6 +592,13 @@ function dzWarnPass(cfg) {
     var enabled = !!f && f.enabled === true;
     var mode = theme.warn_repeat || "daily";
     var now = Date.now();
+    /* Diagnostics counters. Every one is a byproduct of a loop that already
+       runs, which is the rule: the recorder may never add a DOM query of its
+       own. `flagged` counts the cards the trigger loop visits, so it is free
+       even when the feature is off, because the icon prepend above the enabled
+       check visits them anyway. */
+    var dzFlagged = 0, dzWarned = 0, dzSuppressed = 0, dzCleared = 0;
+
     /* Every key whose card still carries the status class in this pass, whether
        or not a toast was emitted for it. NOT "keys that warned": the push below
        sits deliberately ABOVE the dzWarnRepeatAllows guard, because a device
@@ -606,6 +613,7 @@ function dzWarnPass(cfg) {
             $card.find("#name").prepend("<i class='" + cfg.icon + " blink warning-text' title='" +
                 $.t(cfg.iconTitle) + "'></i>&nbsp;");
         }
+        dzFlagged += 1;
         if (!enabled) return;
         var idx = dzCardIdx($card);
         /* Read the name ONLY when it is about to be used as the key, i.e. when
@@ -620,7 +628,7 @@ function dzWarnPass(cfg) {
            own per-session dedupe below. A key with no idx AND no name is never
            persisted, same rule dzToast already applies to its own session
            dedupe. */
-        if (key && !dzWarnRepeatAllows(dzWarnStore(), key, mode, now)) return;
+        if (key && !dzWarnRepeatAllows(dzWarnStore(), key, mode, now)) { dzSuppressed += 1; return; }
         /* Read as plain text, not escaped. dzToast() (src/js/toasts.js) inserts
            both title and body as TEXT NODES via createTextNode, never innerHTML,
            so there is no markup context here for a device name to inject into.
@@ -665,6 +673,7 @@ function dzWarnPass(cfg) {
            The cost is that an idx-less warning can repeat once after a reload
            in daily or episode mode, because nothing recorded it. For an alert
            surface that is the correct direction to fail. */
+        if (result.shown && !result.duplicate) { dzWarned += 1; }
         if (key && idx && result.shown && !result.duplicate) {
             dzWarnRecord(dzWarnStore(), key, mode, now);
         }
@@ -688,7 +697,12 @@ function dzWarnPass(cfg) {
        itself is also a no-op unless the key was actually present (see
        dzWarnStore above), so this is a second, cheaper backstop, not the only
        guard against the write storm. */
-    if (!enabled) return;
+    if (!enabled) {
+        /* Still reported, so a reader can tell a warning type that is switched
+           off from one that had nothing to say. */
+        dzWarnPassLog(cfg, enabled, dzFlagged, 0, 0, 0, null);
+        return;
+    }
     /* Tested inline against the flagged set rather than collected and filtered:
        a device painting two cards where only one carries the status class
        appears in BOTH loops, and clearing it here would wipe the mark the loop
@@ -704,9 +718,50 @@ function dzWarnPass(cfg) {
         var key = idx ? cfg.keyPrefix + ":" + idx
                       : dzWarnKey(cfg.keyPrefix, idx, $card.find("#name").text().trim());
         if (!key || flagged[key] === true) return;
+        /* Counted only when something was actually there to clear. Counting
+           every healthy card instead reports the page size on every pass, which
+           coalesces fine but signals nothing; what a reader needs to know is how
+           many devices genuinely re-armed. */
+        if (dzToastState && dzToastState.seen && dzToastState.seen[key] === true) { dzCleared += 1; }
         dzToastClearKey(dzToastState, key);
         try { dzWarnStore().remove(key); } catch (e) { /* best effort */ }
     });
+    dzWarnPassLog(cfg, enabled, dzFlagged, dzWarned, dzSuppressed, dzCleared, flaggedKeys);
+}
+
+/* One summary per pass per condition, never one per card. This is the entry
+   that would have made the 2026-09-09 warning defect self-evident: `warned` and
+   `cleared` naming the same key in a single pass was the whole bug, and the
+   session dedupe set staying empty afterwards was its signature.
+
+   Fields the pass did not compute are ABSENT, not zero. When a warning type is
+   switched off, dzWarnPass returns before the trigger body and before the
+   cleared query entirely, so reporting zeros would tell a reader "nothing
+   cleared" when the truth is "not measured", and computing them anyway would
+   mean a document-wide sweep on every pass for a user who asked for less.
+
+   Keys are recorded by SHAPE, never exported: dzWarnKey embeds the device name
+   whenever a card's idx does not resolve, and this artifact is meant to be
+   pasteable into a public issue. */
+function dzWarnPassLog(cfg, enabled, flaggedCount, warned, suppressed, cleared, keys) {
+    if (!dzLogOn) return;
+    try {
+        var entry = {
+            condition: cfg.keyPrefix,
+            enabled: enabled,
+            flagged: flaggedCount,
+            route: (typeof location !== "undefined" ? location.hash : "")
+        };
+        if (enabled) {
+            entry.warned = warned;
+            entry.suppressed = suppressed;
+            entry.cleared = cleared;
+            var shape = dzDiagKeyShape(keys);
+            entry.keys_idx = shape.keys_idx;
+            entry.keys_named = shape.keys_named;
+        }
+        dzLog("warn_" + cfg.keyPrefix, "pass_complete", entry);
+    } catch (e) { /* diagnostics never throw into the pass they instrument */ }
 }
 
 /* Shared row resolution for the per-card helpers. $trs: the card's own tr
