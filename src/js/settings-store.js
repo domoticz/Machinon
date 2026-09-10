@@ -18,7 +18,20 @@ var dzDefaultsSnap = null;
 /* The theme object's localStorage cache. Plain functions instead of the old
    Storage.prototype monkey-patch: no global prototype pollution, and every
    caller stores the same thing, so the key/value pair lives here once. */
+/* Every path that finishes settling the theme object ends here: warm boot from
+   the cache, cold boot from theme.json, the native ThemeSettings load and the
+   legacy uservariable load all call it. That makes it the one place guaranteed
+   to be reached once theme.features is final, which is why the diagnostics gate
+   is recomputed from it.
+
+   The gate cannot be left to diag.js's own load-time read: modules load before
+   settings arrive, so that read always sees the defaults. Nor to
+   applyThemeDeltaInPlace, which returns early when nothing changed, so a page
+   whose stored settings simply match would never refresh at all. Measured: with
+   only those two points the setting persisted across a reload while dzLogOn
+   stayed false, i.e. the feature was on and silent. */
 function cacheThemeSettings() {
+    if (typeof dzDiagRefreshGate === "function") { dzDiagRefreshGate(); }
     localStorage.setItem(themeFolder + ".themeSettings", JSON.stringify(theme));
 }
 

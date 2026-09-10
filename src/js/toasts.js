@@ -662,7 +662,10 @@ function dzToast(ev) {
     if (ev.timeout === undefined) {
         ev.timeout = ev.type === "error" ? DZ_TOAST_ERROR_MS : DZ_TOAST_BASE_MS;
     }
-    if (dzToastShouldSuppress(dzToastState, ev.key)) return { close: function() {}, shown: false };
+    if (dzToastShouldSuppress(dzToastState, ev.key)) {
+        dzToastLogDecision(ev, "suppressed", 0);
+        return { close: function() {}, shown: false };
+    }
     dzToastMarkSeen(dzToastState, ev.key);
     dzToastPushLog(dzToastState, {
         t: Date.now(), type: ev.type, title: ev.title, body: ev.body,
@@ -680,9 +683,11 @@ function dzToast(ev) {
            be recorded as delivered. */
         if (live.queued) {
             var dupQ = dzToastQueueMerge(live, ev);
+            dzToastLogDecision(ev, dupQ ? "duplicate" : "merged_queued", live.total);
             return { close: function() { dzToastCancelQueued(live); }, shown: true, duplicate: dupQ };
         }
         var dup = dzToastMerge(live, ev);
+        dzToastLogDecision(ev, dup ? "duplicate" : "merged", live.total);
         return { close: function() { dzToastRemove(live); }, shown: true, duplicate: dup };
     }
 
@@ -693,10 +698,28 @@ function dzToast(ev) {
            waits for a slot instead of fanning out into a dozen serialised
            ones. */
         var entry = dzToastQueuePush(ev);
+        dzToastLogDecision(ev, "queued", entry.total);
         return { close: function() { dzToastCancelQueued(entry); }, shown: true };
     }
     var rec = dzToastShow(ev);
+    dzToastLogDecision(ev, "shown", rec.total);
     return { close: function() { dzToastRemove(rec); }, shown: true };
+}
+
+/* What the toast layer decided, and nothing about which device it concerned.
+   Guarded at the call site rather than inside, because dzToast is the sink for
+   core's several hundred notification call sites as well as the theme's own. */
+function dzToastLogDecision(ev, outcome, total) {
+    if (typeof dzLogOn === "undefined" || !dzLogOn) return;
+    try {
+        dzLog("toast", "decision", {
+            outcome: outcome,
+            group: ev.group || "none",
+            source: ev.source || "core",
+            type: ev.type || "info",
+            total: total || 0
+        });
+    } catch (e) { /* diagnostics never throw into the toast path */ }
 }
 
 function dzToastLog() { return dzToastState.log.slice(); }

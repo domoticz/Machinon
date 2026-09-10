@@ -63,7 +63,13 @@ var DZ_DIAG_IDENTITY = {
        Measured on the rig before this was split. */
     warn_timeout: ["event", "condition", "enabled", "flagged", "warned", "cleared", "suppressed", "route"],
     warn_battery: ["event", "condition", "enabled", "flagged", "warned", "cleared", "suppressed", "route"],
-    toast: ["event", "outcome", "group", "total"],
+    /* Deliberately excludes `key` and `total`: this seam fires per ARRIVAL, so
+       including anything that varies per device turns a storm of N devices into
+       N entries that evict every other seam's rows. Without them, N arrivals
+       coalesce into one entry seen N times, which is the fact worth keeping.
+       `key` must not travel here anyway: a device warning's key embeds the
+       device NAME whenever the card's idx does not resolve. */
+    toast: ["event", "outcome", "group", "source"],
     set_filter: ["event", "members", "route"],
     settings: ["event", "outcome", "layer"],
     routes: ["event", "routes", "active"],

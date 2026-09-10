@@ -7,8 +7,13 @@ import vm from "node:vm";
    scripts declaring globals with var/function, so run the SHIPPING file in a vm
    context and read the globals back. The context has no `document`, which also
    proves the module does not touch the DOM at load time. */
+/* dzLogOn/dzLog stand in for src/js/diag.js, which these contexts do not load:
+   toasts.js calls the diagnostics seam, and without the stub that call is a
+   ReferenceError and every test in this file fails. Recording rather than
+   no-op, so the seam's own behaviour can be asserted (see the seam test at the
+   end of this file). */
 function loadThemeGlobals(files) {
-    const ctx = vm.createContext({ Math, console, JSON });
+    const ctx = vm.createContext({ Math, console, JSON, dzLogOn: false, dzLog: function() {} });
     for (const f of files) vm.runInContext(readFileSync(f, "utf8"), ctx, { filename: f });
     return ctx;
 }
@@ -159,16 +164,21 @@ function loadToastRuntime(overrides) {
     const dom = makeFakeDom();
     const location = (overrides && overrides.location) || { hash: "" };
     const applySetFilter = overrides && overrides.dzApplySetFilter;
+    const diagCalls = [];
     const ctx = vm.createContext({
         Math, console, JSON,
         document: dom, window: { innerWidth: 1024 },
         Date: clock.Date, setTimeout: clock.setTimeout, clearTimeout: clock.clearTimeout,
-        location: location, dzApplySetFilter: applySetFilter
+        location: location, dzApplySetFilter: applySetFilter,
+        /* See loadThemeGlobals above. On by default here so the seam is
+           exercised rather than skipped in the runtime tests. */
+        dzLogOn: true,
+        dzLog: function(seam, event, fields) { diagCalls.push({ seam, event, fields }); }
     });
     ["src/js/i18n.js", "lang/machinon.en.js", "src/js/toasts.js"].forEach(function (f) {
         vm.runInContext(readFileSync(f, "utf8"), ctx, { filename: f });
     });
-    return { dz: ctx, clock, location };
+    return { dz: ctx, clock, location, diagCalls };
 }
 
 test("a key warns once, then is suppressed until it is cleared", () => {
@@ -721,4 +731,42 @@ test("a swallowed duplicate reports itself as one, so the caller does not record
     assert.equal(again.duplicate, true, "a merge that renders nothing must say so");
     const rec = d.dzToastVisible[0];
     assert.equal(rec.total, 1);
+});
+
+test("a toast records its decision without recording which device it was about", () => {
+    /* The seam is per arrival by nature, so its identity deliberately excludes
+       `key` and `total`: a storm of N devices then coalesces into one entry seen
+       N times instead of N entries evicting everything else in the ring. And a
+       device warning's key embeds the device NAME whenever the card's idx does
+       not resolve, so it must not travel to the recorder at all. */
+    const rt = loadToastRuntime();
+    const d = rt.dz;
+    const ev = {
+        type: "warning", title: "Hall timed out", deviceName: "Hall", deviceIdx: "5",
+        key: "timeout:name:Hall", source: "device-warning", group: "device-warning-timeout",
+        groupTitle: groupTitleTimeout, timeout: 6000
+    };
+    d.dzToast(ev);
+    const call = rt.diagCalls.find((c) => c.seam === "toast");
+    assert.ok(call, "the seam fired");
+    assert.equal(call.fields.outcome, "shown");
+    assert.equal(call.fields.group, "device-warning-timeout");
+    assert.equal(call.fields.source, "device-warning");
+    const json = JSON.stringify(rt.diagCalls);
+    assert.ok(!json.includes("Hall"), "neither the device name nor its name-shaped key is recorded");
+});
+
+test("a suppressed toast is recorded as suppressed, not as silence", () => {
+    const rt = loadToastRuntime();
+    const d = rt.dz;
+    const ev = {
+        type: "warning", title: "Hall timed out", deviceName: "Hall", deviceIdx: "5",
+        key: "timeout:5", source: "device-warning", group: "device-warning-timeout",
+        groupTitle: groupTitleTimeout, timeout: 6000
+    };
+    d.dzToast(ev);
+    d.dzToast(ev);
+    const outcomes = rt.diagCalls.filter((c) => c.seam === "toast").map((c) => c.fields.outcome);
+    assert.deepEqual(outcomes, ["shown", "suppressed"],
+        "the second arrival is a fact about the dedupe, not a missing line");
 });
