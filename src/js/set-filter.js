@@ -81,6 +81,7 @@ function dzApplySetFilter(members, label) {
     dzSetFilter = { members: members || {}, label: label || "" };
     dzReapplySetFilter();
     dzSetChipShow(dzSetFilter.label);
+    dzSetFilterLog("armed");
 }
 
 /* Two-phase on purpose (MERGED-9): the dz:livesearch:show handler is core's
@@ -91,6 +92,10 @@ function dzApplySetFilter(members, label) {
    page's widgets are being destroyed and unbind on $destroy, so there is
    nobody to notify and nothing to pay for. */
 function dzClearSetFilter(silent) {
+    /* Read the size before disarming: reporting the state this function leaves
+       behind would record every clear as "0 members", which is the one number
+       that says nothing about what was just taken off the page. */
+    var was = dzSetFilterMembers();
     dzSetFilter = null;
     var hidden = Array.prototype.slice.call(document.getElementsByClassName(DZ_SET_HIDDEN));
     hidden.forEach(function (card) { card.classList.remove(DZ_SET_HIDDEN); });
@@ -98,6 +103,7 @@ function dzClearSetFilter(silent) {
         hidden.forEach(function (card) { $(card).trigger("dz:livesearch:show"); });
     }
     dzSetChipHide();
+    dzSetFilterLog("cleared", null, was);
 }
 
 function dzReapplySetFilter() {
@@ -110,13 +116,52 @@ function dzReapplySetFilter() {
        class anyway, and single-path wiring matches dzReapplyDeviceFilter. */
     if (!dzSetFilter) return;
     var members = dzSetFilter.members;
+    /* Counted unconditionally: it is one increment inside a loop that already
+       runs, the same trade dzRunDevicePass's card counters make, and it is the
+       only place the number exists at all. At arm time no render has happened,
+       so there is nothing to count; that is why the count is reported here and
+       not on the `armed` line. */
+    var matched = 0;
     dzSetFilterCards().forEach(function (card) {
         var key = dzSetCardKey(card);
         var show = !!(key && members[key]);
+        if (show) matched += 1;
         var wasHidden = card.classList.contains(DZ_SET_HIDDEN);
         card.classList.toggle(DZ_SET_HIDDEN, !show);
         if (show && wasHidden) $(card).trigger("dz:livesearch:show");
     });
+    dzSetFilterLog("reapplied", matched);
+}
+
+function dzSetFilterMembers() {
+    return (dzSetFilter && dzSetFilter.members) ? Object.keys(dzSetFilter.members).length : 0;
+}
+
+/* Diagnostics seam. The armed set is the state that explains a page where the
+   wrong cards are visible, and `reapplied` is the half that says whether the
+   filter reached the page at all: a set with members and a reapply matching
+   zero cards is the measured shape of the mobile-UA dashboard defect.
+
+   Primitives only across this boundary, and the payload is built inside the
+   early return: `reapplied` runs from the render pass (dzRunDevicePass's
+   visible stage), which fires on every device_update burst, and JavaScript
+   evaluates arguments eagerly, so an object literal at that call site would be
+   allocated on every pass whatever the gate says.
+
+   The chip LABEL never travels. It carries a device name by construction:
+   problems.js passes the failing device's name as the label, and arriving from
+   the Problem Devices page is the most likely route to filing a report. The
+   registered collector redacts it the same way. */
+function dzSetFilterLog(event, cardsMatched, membersOverride) {
+    if (typeof dzLogOn === "undefined" || !dzLogOn) return;
+    try {
+        var entry = {
+            members: (typeof membersOverride === "number") ? membersOverride : dzSetFilterMembers(),
+            route: (typeof location !== "undefined" ? location.hash : "")
+        };
+        if (typeof cardsMatched === "number") entry.cards_matched = cardsMatched;
+        dzLog("set_filter", event, entry);
+    } catch (e) { /* diagnostics never throw into the filter they instrument */ }
 }
 
 /* Called from dzRunDevicePass's visible stage (src/js/devices.js), i.e. after
