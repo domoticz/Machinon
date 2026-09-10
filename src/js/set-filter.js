@@ -222,3 +222,21 @@ if (typeof window !== "undefined") {
         }
     });
 }
+
+
+/* Diagnostics contributor. `label` is deliberately NOT exported: it carries a
+   device name by construction, because problems.js passes the failing device's
+   name as the chip label, and arriving from the Problem Devices page is the most
+   likely route to filing a report. Its LENGTH is the diagnosable part. */
+if (typeof dzDiagRegister === "function") {
+    dzDiagRegister("filter", function(opts) {
+        var f = dzSetFilter;
+        var out = {
+            members: f && f.members ? Object.keys(f.members).length : 0,
+            label_len: f && f.label ? f.label.length : 0,
+            chip: !!document.getElementById("dz-set-chip")
+        };
+        if (opts && opts.names && f) { out.label = f.label || ""; }
+        return out;
+    });
+}

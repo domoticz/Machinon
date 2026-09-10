@@ -140,7 +140,16 @@ function dzProbeThemeSettingsAPI() {
     if (dzApiState.capable !== null) return Promise.resolve(dzApiState.capable);
     return fetch("json.htm?type=command&param=getversion", { credentials: "include" })
         .then(function(r) { return r.json(); })
-        .then(function(d) { dzApiState.capable = d && d.ThemeSettingsAPI === 1; return dzApiState.capable; })
+        .then(function(d) {
+            dzApiState.capable = d && d.ThemeSettingsAPI === 1;
+            /* Kept because this is the only place the theme ever asks for it,
+               and the diagnostics snapshot needs it to be diagnosable. ONE
+               field, read by name: the same response carries SystemName and
+               DomoticzUpdateURL for an admin session, and an internal hostname
+               has no business in a pasted bug report. */
+            if (d && typeof d.version === "string") { dzApiState.domoticzVersion = d.version; }
+            return dzApiState.capable;
+        })
         .catch(function() { dzApiState.capable = false; return false; });
 }
 

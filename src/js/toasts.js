@@ -733,3 +733,21 @@ function dzToastInstallKeyboard() {
     });
 }
 if (typeof document !== "undefined") dzToastInstallKeyboard();
+
+
+/* Diagnostics contributor: what the toast layer is holding right now. Registered
+   here because this module owns dzToastVisible/dzToastQueue and nothing else
+   should be reading them. */
+if (typeof dzDiagRegister === "function") {
+    dzDiagRegister("toasts", function(opts) {
+        var out = {
+            visible: dzToastVisible.length,
+            queued: dzToastQueue.length,
+            groups: dzToastVisible.map(function(r) { return r.group || "none"; })
+        };
+        if (opts && opts.names) {
+            out.names = dzToastVisible.map(function(r) { return (r.names || []).join(", "); });
+        }
+        return out;
+    });
+}

@@ -411,3 +411,44 @@ function resetTheme() {
         location.reload();
     });
 }
+
+
+/* Diagnostics contributors for the install's own identity. Registered here
+   because this module owns the theme object every one of them reads.
+
+   The build group is an explicit field-by-field projection, never a copied API
+   response: core's getversion returns SystemName and DomoticzUpdateURL to an
+   admin session, and an internal hostname has no business in a public issue. */
+if (typeof dzDiagRegister === "function") {
+    dzDiagRegister("build", function() {
+        return {
+            theme_version: (theme && theme.version) || "unknown",
+            theme_folder: themeFolder || "unknown",
+            domoticz_version: (typeof dzApiState !== "undefined" && dzApiState.domoticzVersion) || "unknown"
+        };
+    });
+
+    dzDiagRegister("view", function() {
+        return {
+            route: (typeof location !== "undefined" ? location.hash : ""),
+            width: window.innerWidth,
+            height: window.innerHeight,
+            phone: !!isMobile,
+            scheme: (window.theme && theme.scheme) || "unknown",
+            base: (document.documentElement.getAttribute("data-theme")) || "light"
+        };
+    });
+
+    /* Keys only, never the objects: their siblings in theme.json carry
+       user-supplied values (custom_url, logo, background_img) that would put
+       internal URLs and local paths into a pasted report. */
+    dzDiagRegister("features", function() {
+        var on = [];
+        try {
+            Object.keys((theme && theme.features) || {}).forEach(function(k) {
+                if (theme.features[k] && theme.features[k].enabled === true) { on.push(k); }
+            });
+        } catch (e) { /* best effort */ }
+        return { enabled: on };
+    });
+}

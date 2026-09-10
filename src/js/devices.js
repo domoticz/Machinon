@@ -1148,3 +1148,55 @@ function initDeviceObserver() {
     });
 }
 
+
+
+/* Diagnostics contributors. Registered here, next to the state they describe,
+   rather than read out of this module by diag.js: a snapshot that reaches into
+   six modules' private globals breaks silently on the next rename in any of
+   them, with no test signal.
+
+   These run on demand, once, when a human asks for a snapshot, so unlike the
+   recorder they MAY query the DOM. The rule they still keep is the redaction
+   one: counts and idxs by default, names only when explicitly asked. */
+if (typeof dzDiagRegister === "function") {
+    dzDiagRegister("cards", function(opts) {
+        var out = {
+            total: $("#main-view .item").length,
+            flagged_timeout: $("#main-view .item.statusTimeout").length,
+            flagged_battery: $("#main-view .item.statusLowBattery").length,
+            unresolved_idx: 0
+        };
+        var named = [];
+        $("#main-view .item.statusTimeout, #main-view .item.statusLowBattery").each(function() {
+            var $card = $(this);
+            if (!dzCardIdx($card)) { out.unresolved_idx += 1; }
+            if (opts && opts.names) { named.push($card.find("#name").text().trim()); }
+        });
+        if (opts && opts.names) { out.flagged_names = named; }
+        return out;
+    });
+
+    dzDiagRegister("warnings", function() {
+        var seen = (typeof dzToastState !== "undefined" && dzToastState && dzToastState.seen)
+            ? Object.keys(dzToastState.seen) : [];
+        var shape = dzDiagKeyShape(seen);
+        var out = { keys_idx: shape.keys_idx, keys_named: shape.keys_named,
+                    repeat_mode: (typeof theme !== "undefined" && theme.warn_repeat) || "daily" };
+        /* Ages bucketed rather than per-key timestamps: the store is a 30-day
+           record of which devices failed and when, which is a retention surface
+           and not the current state a reader is asking about. Read through the
+           store's own accessor, which is guarded, and never triggers its prune. */
+        try {
+            var now = Date.now(), ages = { under_1h: 0, under_1d: 0, under_7d: 0, older: 0 };
+            dzWarnStore().keys().forEach(function(k) {
+                var age = now - (dzWarnStore().get(k) || now);
+                if (age < 3600000) ages.under_1h += 1;
+                else if (age < 86400000) ages.under_1d += 1;
+                else if (age < 604800000) ages.under_7d += 1;
+                else ages.older += 1;
+            });
+            out.store_ages = ages;
+        } catch (e) { /* unusable storage: the rest of the group still reports */ }
+        return out;
+    });
+}
