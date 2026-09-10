@@ -516,13 +516,34 @@ function dzDiagRefreshGate(settled) {
     if (!on) {
         /* Per-browser override. Settings are house-wide today, so without this
            one person debugging switches console noise on for every user of the
-           install. */
+           install. Hand-set, and it lives in its own key: the remembered answer
+           below must never be able to delete a switch a person set themselves. */
         try {
             if (typeof localStorage !== "undefined" && typeof themeFolder !== "undefined") {
                 on = localStorage.getItem(themeFolder + ".diag") === "on";
             }
         } catch (e) { /* private mode, disabled storage: stay off */ }
     }
+    /* The last SETTLED answer, remembered here and trusted only while the real
+       one is still unknown.
+
+       Without it the feature had a hole exactly where it was needed most:
+       measured on the rig, a blocked settings load left the recorder off for an
+       ordinary user, because the setting that gates it is the thing that failed
+       to load, and the failed load then cached defaults so the following visit
+       read it as off too. "My theme reset itself" is precisely the report whose
+       history matters, and it was always empty.
+
+       Trusted ONLY while `settled` is false. Once the real answer arrives it
+       decides, and is written back, so a user who switches diagnostics off is
+       not kept recording by a yes this browser remembers from last week. */
+    try {
+        if (typeof localStorage !== "undefined" && typeof themeFolder !== "undefined") {
+            var key = themeFolder + ".diag.last";
+            if (settled === true) { localStorage.setItem(key, on ? "on" : "off"); }
+            else if (!on) { on = localStorage.getItem(key) === "on"; }
+        }
+    } catch (e) { /* private mode, disabled storage: fall through unremembered */ }
     return dzDiagSetEnabled(on, settled);
 }
 

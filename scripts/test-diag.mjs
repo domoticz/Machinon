@@ -454,3 +454,96 @@ test("the view section admits the engine and still refuses a raw user agent", ()
     assert.equal(clean.value.engine, "firefox/128");
     assert.deepEqual(Array.from(clean.dropped), ["userAgent"]);
 });
+
+/* ---- Remembering the answer across a failed settings load ----
+
+   Measured 2026-09-10 on the rig: with the settings load blocked, an ordinary
+   user's recorder never came on, because the setting that gates it is the thing
+   that failed to load. Worse, the failed load caches defaults, so the next
+   visit read it as off too. "My theme reset itself" is exactly the report where
+   the history matters most, and it was always empty.
+
+   The gate therefore remembers the last SETTLED answer in its own key, separate
+   from the hand-set override so that clearing one never clears the other, and
+   trusts it only while the real answer is still unknown. */
+
+function fakeStorage(initial) {
+    const data = Object.assign({}, initial);
+    return {
+        data,
+        getItem: (k) => (Object.prototype.hasOwnProperty.call(data, k) ? data[k] : null),
+        setItem: (k, v) => { data[k] = String(v); },
+        removeItem: (k) => { delete data[k]; }
+    };
+}
+
+function loadDiagWithStorage(storage, themeObj) {
+    const ctx = vm.createContext({
+        Math, console, JSON, performance: { now: () => 0 },
+        localStorage: storage, themeFolder: "machinon", theme: themeObj || { features: {} }
+    });
+    vm.runInContext(readFileSync("src/js/diag.js", "utf8"), ctx, { filename: "src/js/diag.js" });
+    return ctx;
+}
+
+const ON = { features: { diagnostic_logging: { enabled: true } } };
+const OFF = { features: { diagnostic_logging: { enabled: false } } };
+
+test("a settled answer is remembered, and it is what carries a boot whose settings never arrive", () => {
+    const store = fakeStorage();
+    loadDiagWithStorage(store, ON).dzDiagRefreshGate(true);
+    assert.equal(store.data["machinon.diag.last"], "on", "the answer was remembered");
+
+    /* Next page load: the settings request fails, so the theme paints defaults
+       and the setting reads false all the way through. dzDiagRefreshGate() with
+       no argument is what this file's own load-time block calls in a browser;
+       the vm context has no window, deliberately, so it is called by hand. */
+    const next = loadDiagWithStorage(store, OFF);
+    next.dzDiagRefreshGate();
+    assert.equal(next.dzLogOn, true, "the recorder runs on the last known answer while none has arrived");
+});
+
+test("a settled off both switches the recorder off and forgets the yes", () => {
+    const store = fakeStorage({ "machinon.diag.last": "on" });
+    const d = loadDiagWithStorage(store, OFF);
+    d.dzDiagRefreshGate();
+    assert.equal(d.dzLogOn, true, "still on: nothing has settled yet on this load");
+    d.dzDiagRefreshGate(true);
+    assert.equal(d.dzLogOn, false);
+    assert.equal(store.data["machinon.diag.last"], "off",
+        "a remembered yes must not outlive the user switching it off");
+});
+
+test("the remembered answer is not consulted once the real one has arrived", () => {
+    /* The failure this stops: a stale yes keeping the recorder on for a user
+       who has since switched it off on another browser. */
+    const store = fakeStorage({ "machinon.diag.last": "on" });
+    const d = loadDiagWithStorage(store, OFF);
+    d.dzDiagRefreshGate(true);
+    d.dzDiagRefreshGate(true);
+    assert.equal(d.dzLogOn, false);
+});
+
+test("the hand-set override and the remembered answer are separate keys", () => {
+    /* They are different things: one is a person debugging this browser, the
+       other is this theme's cache of a house-wide setting. Writing the cache
+       into the override key would mean a settled off silently deleted a switch
+       the user set by hand. */
+    const store = fakeStorage({ "machinon.diag": "on" });
+    const d = loadDiagWithStorage(store, OFF);
+    d.dzDiagRefreshGate();
+    d.dzDiagRefreshGate(true);
+    assert.equal(d.dzLogOn, true, "the hand-set override still wins over a settled off");
+    assert.equal(store.data["machinon.diag"], "on", "and survives untouched");
+});
+
+test("storage that throws leaves the gate working and off", () => {
+    const hostile = {
+        getItem: () => { throw new Error("private mode"); },
+        setItem: () => { throw new Error("private mode"); },
+        removeItem: () => { throw new Error("private mode"); }
+    };
+    const d = loadDiagWithStorage(hostile, OFF);
+    assert.equal(d.dzLogOn, false);
+    assert.equal(d.dzDiagRefreshGate(true), false);
+});
