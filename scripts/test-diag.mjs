@@ -292,3 +292,19 @@ test("two warn conditions do not share a ring, or neither ever coalesces", () =>
     assert.equal(h.warn_timeout.length, 1, "six identical timeout passes are one entry");
     assert.equal(h.warn_battery.length, 1, "and the battery stream is independent of it");
 });
+
+test("a device_pass entry reports the unresolved-idx count, which should read zero", () => {
+    /* Kept deliberately after the fix that made dzCardIdx resolve from core's
+       own td#name[data-idx]: post-fix this reads 0 on every page, which makes
+       it a cheap regression canary rather than dead weight. A non-zero value
+       means cards are reaching the warning pass without an idx, which is the
+       precondition for the whole dual-identity family of defects. */
+    const d = loadDiag();
+    d.dzDiagSetEnabled(true);
+    d.dzLog("device_pass", "pass_complete", { stage: "visible", cards: 138, unresolved_idx: 0, route: "#/LightSwitches" });
+    d.dzLog("device_pass", "pass_complete", { stage: "visible", cards: 138, unresolved_idx: 0, route: "#/LightSwitches" });
+    d.dzLog("device_pass", "pass_complete", { stage: "visible", cards: 138, unresolved_idx: 2, route: "#/LightSwitches" });
+    const ring = d.machinonDiag({ quiet: true }).history.entries.device_pass;
+    assert.equal(ring.length, 2, "a steady page is one entry however often it repaints");
+    assert.equal(ring[1].unresolved_idx, 2, "and a card losing its idx is a new entry, not a coalesced one");
+});

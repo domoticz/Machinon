@@ -327,6 +327,8 @@ function dzEnhanceDeviceCard($item, stage) {
             idx = idx.replace(/^\D+/g, "");
         }
     }
+    dzPassCards += 1;
+    if (typeof idx === "undefined" || idx === "") { dzPassUnresolvedIdx += 1; }
     var $trs = $item.find("tr");
 
     if (stage === "visible") {
@@ -410,10 +412,31 @@ function dzEnhanceDeviceCard($item, stage) {
    AFTER that loop, not before or interleaved with it, or idx resolution
    silently falls through to the itemtable fallback (or fails outright) for
    cards not yet tagged. */
+/* Per-pass counters, filled by dzEnhanceDeviceCard as it goes. Both are
+   byproducts of work that already happens: the enhancement resolves every
+   card's idx at its top whatever this records, so counting the ones that came
+   back empty costs an increment and no DOM access. dzEnhanceDeviceCard has
+   exactly one caller, the loop below, so the counters cannot drift. */
+var dzPassCards = 0, dzPassUnresolvedIdx = 0;
+
 function dzRunDevicePass(stage) {
+    dzPassCards = 0;
+    dzPassUnresolvedIdx = 0;
     $("#main-view .item").each(function() {
         dzEnhanceDeviceCard($(this), stage);
     });
+    if (dzLogOn) {
+        /* No duration_ms: performance.now() is clamped to 100us in Chromium
+           outside a cross-origin-isolated context, which a LAN HTTP install is
+           not, and to 1ms in Firefox, so a sub-millisecond pass would record a
+           constant 0 or 1 and diagnose nothing while defeating coalescing. */
+        dzLog("device_pass", "pass_complete", {
+            stage: stage,
+            cards: dzPassCards,
+            unresolved_idx: dzPassUnresolvedIdx,
+            route: (typeof location !== "undefined" ? location.hash : "")
+        });
+    }
     if (stage === "visible") {
         setAllDevicesIconsStatus();
         dzSetFilterOnRender();
