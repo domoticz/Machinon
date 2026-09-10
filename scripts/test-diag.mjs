@@ -308,3 +308,33 @@ test("a device_pass entry reports the unresolved-idx count, which should read ze
     assert.equal(ring.length, 2, "a steady page is one entry however often it repaints");
     assert.equal(ring[1].unresolved_idx, 2, "and a card losing its idx is a new entry, not a coalesced one");
 });
+
+test("alternating entries coalesce against their own kind, not just the previous row", () => {
+    /* Bit three times now: warn timeout/battery run back to back, and the device
+       pass runs visible then deferred, so consecutive entries always differ by
+       one discriminator and a compare-with-the-last-row rule can never fire.
+       Splitting the seam by hand each time is whack-a-mole; the ring coalesces
+       against the most recent entry with a MATCHING identity instead, which
+       removes the whole class. Bounded by the seam's cap, so it stays cheap. */
+    const d = loadDiag();
+    d.dzDiagSetEnabled(true);
+    for (let i = 0; i < 10; i++) {
+        d.dzLog("device_pass", "pass_complete", { stage: "visible", cards: 138, unresolved_idx: 0 });
+        d.dzLog("device_pass", "pass_complete", { stage: "deferred", cards: 138, unresolved_idx: 0 });
+    }
+    const ring = d.machinonDiag({ quiet: true }).history.entries.device_pass;
+    assert.equal(ring.length, 2, "twenty alternating passes are two entries, not twenty");
+    assert.deepEqual(Array.from(ring.map((e) => e.stage)), ["visible", "deferred"]);
+    assert.equal(ring[0].__seen, 10, "and each carries how many times it was seen");
+});
+
+test("a genuine change still appends rather than folding into an older match", () => {
+    const d = loadDiag();
+    d.dzDiagSetEnabled(true);
+    d.dzLog("device_pass", "pass_complete", { stage: "visible", cards: 138, unresolved_idx: 0 });
+    d.dzLog("device_pass", "pass_complete", { stage: "deferred", cards: 138, unresolved_idx: 0 });
+    d.dzLog("device_pass", "pass_complete", { stage: "visible", cards: 12, unresolved_idx: 0 });
+    const ring = d.machinonDiag({ quiet: true }).history.entries.device_pass;
+    assert.equal(ring.length, 3, "a different card count is a new fact about the house");
+    assert.equal(ring[2].cards, 12);
+});

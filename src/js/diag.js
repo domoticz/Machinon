@@ -101,10 +101,21 @@ function dzDiagAppend(state, seam, entry) {
         var key = String(seam || "unknown");
         var ring = state.rings[key] || (state.rings[key] = []);
         var id = dzDiagIdentity(key, entry);
-        var last = ring.length ? ring[ring.length - 1] : null;
-        if (last && last.__id === id) {
+        /* Matched against the most recent entry with the SAME identity anywhere
+           in this ring, not merely against the last row. Seams routinely
+           alternate: the warning pass runs timeout then battery back to back,
+           and the device pass runs visible then deferred, so a compare with the
+           previous row alone can never fire and the ring fills with near
+           duplicates. This was found three separate times on the live rig
+           before the rule was generalised. Bounded by the seam's cap, so it is
+           at most a few dozen string compares. What it gives up is the exact
+           interleaving of two alternating states, which no defect this exists
+           to catch depends on: the signal is what a single entry says, plus how
+           often it was seen. */
+        for (var i = ring.length - 1; i >= 0; i--) {
+            if (ring[i].__id !== id) continue;
             state.coalesced += 1;
-            last.__seen = (last.__seen || 1) + 1;
+            ring[i].__seen = (ring[i].__seen || 1) + 1;
             return "coalesced";
         }
         entry.__id = id;
