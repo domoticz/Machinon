@@ -4,6 +4,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+## [2.6.3] - 2026-10-03
+
 - On a phone, one tap on the search icon now puts you straight into the search field, ready to type. It used to need a second tap inside the field before the keyboard came up
 - The dimmed search icon on pages with nothing to search, such as Problem Devices, no longer opens an empty search field when tapped. F3 and Ctrl+F on those pages now open your browser's own find bar
 - On a phone, tapping the search result count now opens the search field with your search in it, and tapping the X inside clears it. Before, neither tap did anything, so a search could not be cleared or changed on a phone
