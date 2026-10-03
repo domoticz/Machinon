@@ -11,7 +11,7 @@ function cameraPreview(section) {
 
     if (section === true) {
         if ($("#dashCameras").length == 0) {
-            fetch("json.htm?type=command&param=getcameras", { credentials: 'include' })
+            fetch("json.htm?type=command&param=getcameras", { credentials: 'include', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
                 .then(function(response) { return response.json(); })
                 .then(function(data) {
                     var compact = $("section.compact").length > 0;
