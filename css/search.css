@@ -83,12 +83,36 @@
     opacity: 0.5;
 }
 
+/* Routes with nothing to search (src/js/page.js sets the class). Dimming alone
+   is not enough: the phone's pill expands on :hover/:active, and a touch screen
+   keeps :hover on the last tapped element, so a dimmed box would still open an
+   empty pill. Taking it out of hit-testing makes it inert on every input. */
 #search.readonly {
     opacity: 0.3;
+    pointer-events: none;
 }
 
 #search.readonly #searchInput {
     display: none;
+}
+
+/* Core keeps a query across routes and re-applies it on the next searchable
+   page, so a readonly route can inherit one with its count still showing: a
+   stale number from the last page, or core's "0" from a page whose cards it
+   cannot see. Readonly shows the bare magnifier instead. The count is hidden
+   by visibility, not display: core swaps the two with jQuery .show()/.hide(),
+   and a stylesheet display:none on .jsTbResults would make .show() write an
+   inline `display: inline` that outlives this class and breaks the count's
+   flex layout (see the .jsTbResults rule below). The magnifier's !important
+   is the safe direction of the same mechanism: it only ever keeps the
+   computed display visible, so .show() never writes one, and core's own
+   inline value is back in charge the moment the class goes. */
+#search.readonly .jsTbResults {
+    visibility: hidden;
+}
+
+#search.readonly .jsTbSearch {
+    display: inline-block !important;
 }
 
 @media (max-width: 767px) {
@@ -146,7 +170,7 @@
        every full-width mobile search affordance makes. */
     #search:hover .dz-search-field,
     #search:active .dz-search-field,
-    #search:focus .dz-search-field {
+    #search:focus-within .dz-search-field {
         position: fixed;
         top: 50px; /* .container-logo bottom (40px, measured) + --dz-card-space-lg (10px) */
         left: var(--dz-card-space-xl);
@@ -171,7 +195,7 @@
 
     #search:hover #searchInput,
     #search:active #searchInput,
-    #search:focus #searchInput {
+    #search:focus-within #searchInput {
         width: 100%;
         /* The collapsed rule's margin is what holds the affordance slot open
            in the header; expanded, it would only stop the input short of the
@@ -194,21 +218,21 @@
        here would put them hard against the 2px border. */
     #search:hover :is(.jsTbSearch, .jsTbResults),
     #search:active :is(.jsTbSearch, .jsTbResults),
-    #search:focus :is(.jsTbSearch, .jsTbResults) {
+    #search:focus-within :is(.jsTbSearch, .jsTbResults) {
         right: var(--dz-card-space-lg);
         color: var(--dz-body-text);
     }
 
     #search:hover #searchInput::placeholder,
     #search:active #searchInput::placeholder,
-    #search:focus #searchInput::placeholder {
+    #search:focus-within #searchInput::placeholder {
         color: var(--dz-body-text);
         opacity: .6;
     }
 
     #search:not(.readonly):hover,
         #search:not(.readonly):active,
-        #search:not(.readonly):focus {
+        #search:not(.readonly):focus-within {
         width: 100%;
     }
 }

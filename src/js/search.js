@@ -80,14 +80,42 @@ function setSearch() {
     input.addEventListener("keyup", syncLiveSearchSiblings);
     input.addEventListener("change", syncLiveSearchSiblings);
 
+    /* On a route with nothing to search the browser's own find is the better
+       answer to F3 / Ctrl+F, so the shortcut is only taken where the box works. */
     window.addEventListener("keydown", function (e) {
-        if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70)) {
-            $("#searchInput").focus();
+        if ((e.key === "F3" || (e.ctrlKey && (e.key === "f" || e.key === "F"))) && !search.classList.contains("readonly")) {
+            input.focus();
             e.preventDefault();
         }
     });
-    $("#search").click(function () {
-        $("#searchInput").focus();
+    search.addEventListener("click", function () {
+        input.focus();
+    });
+    /* A tap cannot rely on the click above. On a phone, touchstart puts #search
+       in :hover/:active, css/search.css then moves the field into the fixed pill
+       below the header, and the click the browser synthesizes afterwards is
+       hit-tested at the finger's position, where the icon no longer is: it lands
+       on .container-logo and the input never gets focus, so the user has to tap
+       a second time inside the pill. touchend still targets the element the
+       touch started on, so focusing there works, and it counts as a user gesture,
+       which mobile browsers require before raising the keyboard. preventDefault
+       drops the stray synthesized click.
+
+       The count that replaces the magnifier while a query is active has the
+       same problem, and its click listener below never fires on a tap either.
+       Collapsed, a tap on it opens the pill with the query in place, so the
+       user can refine it or reach the clear glyph; inside the open pill nothing
+       moves, but the synthesized mousedown would blur the input and collapse
+       the pill before the click, so a tap on the glyph clears here and keeps
+       the field focused for the next query. Taps on the input itself are left
+       to the browser for native caret placement. */
+    search.addEventListener("touchend", function (e) {
+        if (e.target === input) { return; }
+        e.preventDefault();
+        if (e.target.closest(".jsTbResults") && document.activeElement === input) {
+            clearSearch();
+        }
+        input.focus();
     });
     /* Domoticz runs TWO matching engines off this one input, and clearing it has
        to reach both. WatchLiveSearch (js/domoticz.js) binds with jQuery and
@@ -115,13 +143,13 @@ function setSearch() {
        jQuery-bound handler here would be stripped by WatchLiveSearch's
        argument-less .off() moments after being attached, silently killing
        Enter and Escape. Native addEventListener survives it. The dispatch in
-       clearSearch re-enters this handler with no keyCode at all, which matches
+       clearSearch re-enters this handler with no key at all, which matches
        neither branch, so there is no recursion to guard against. */
     input.addEventListener("keyup", function (event) {
-        if (event.keyCode === 13) {
+        if (event.key === "Enter") {
             input.blur();
         }
-        if (event.keyCode === 27) {
+        if (event.key === "Escape") {
             clearSearch();
         }
     });

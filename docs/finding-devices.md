@@ -18,7 +18,7 @@ The search box works on the pages that show devices as cards:
 - **Utility**
 
 On every other page there is nothing to filter, so the box dims and the typing area disappears,
-leaving just the magnifier. That includes the Floorplan page, the Theme Hub, the Domoticz setup
+leaving just the magnifier, which does nothing when clicked or tapped. That includes the Floorplan page, the Theme Hub, the Domoticz setup
 pages, and [Problem devices](problem-devices.md), which is a list rather than a page of cards.
 
 ## What a search matches
@@ -62,9 +62,9 @@ weather station that shows up under both Temperature and Weather counts as two.
 You can clear a search in three ways: click the count or the **×**, press Escape while the
 box has focus, or simply delete what you typed.
 
-Two shortcuts save reaching for the mouse: F3 or Ctrl+F anywhere on the page jumps
-straight into the search box, and Enter closes the on-screen keyboard on a touch device
-without clearing what you typed.
+Two shortcuts save reaching for the mouse: F3 or Ctrl+F anywhere on a searchable page jumps
+straight into the search box (on other pages they open your browser's own find bar), and Enter
+closes the on-screen keyboard on a touch device without clearing what you typed.
 
 ## The search stays as you move around
 
@@ -74,8 +74,10 @@ devices across several pages is the common case, and having to retype the room o
 the old, slower behaviour.
 
 The flip side is that a page can look emptier than it should because a search you forgot about
-is still running. If devices are missing, check the search box first. The count beside it is
-always visible when a search is active, including on a phone, precisely so you can spot this.
+is still running. If devices are missing, check the search box first. On every searchable page
+the count beside it stays visible while a search is active, including on a phone, precisely so
+you can spot this. Pages with nothing to search show only the dimmed magnifier; the search picks
+up again on the next page that has one.
 
 ## Cameras on the dashboard
 
@@ -86,7 +88,10 @@ section disappears rather than sitting empty above a filtered dashboard.
 ## On a phone
 
 The box collapses to a magnifier in the header to save space, and expands into a floating field
-when you tap it. See [Mobile layouts](mobile.md) for how the header behaves on small screens.
+when you tap it, with the keyboard already up so you can start typing straight away. Once you
+have searched, the magnifier turns into the number of matches: tap that number to reopen the
+field with your search in it, then tap the X to clear it. See [Mobile layouts](mobile.md) for
+how the header behaves on small screens.
 
 One difference worth knowing: the **Dashboard** is not searchable on a phone, because the phone
 dashboard is a different, compact layout rather than the card grid the search filters. Switches,

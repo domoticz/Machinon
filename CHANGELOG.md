@@ -4,6 +4,11 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+- On a phone, one tap on the search icon now puts you straight into the search field, ready to type. It used to need a second tap inside the field before the keyboard came up
+- The dimmed search icon on pages with nothing to search, such as Problem Devices, no longer opens an empty search field when tapped. F3 and Ctrl+F on those pages now open your browser's own find bar
+- On a phone, tapping the search result count now opens the search field with your search in it, and tapping the X inside clears it. Before, neither tap did anything, so a search could not be cleared or changed on a phone
+- Pages with nothing to search no longer show a leftover result count from the previous page, just the dimmed search icon
+
 ## [2.6.2] - 2026-09-10
 
 - New **Diagnostic logging** setting in the Theme Hub, off by default. Switch it on, reproduce a problem, then press **Copy diagnostics** below it to get something you can paste straight into a bug report. Everything stays in your browser, nothing is sent anywhere, and your device names are left out so it is safe to post publicly

@@ -2112,8 +2112,8 @@ collapses into one trailing "and N more" line instead of growing the toast witho
 **Placement.** `--dz-toast-top` clears the fixed HEADER chrome, not any individual toast's own
 height (a taller toast cannot change it): desktop `128px` (navbar bottom `118px` +
 `--dz-card-space-lg`); mobile `35px` (collapsed `.menu-toggle` bottom `25px` + the same 10px).
-**Constraint.** A REAL tap on the mobile search pill (not a programmatic `.focus()`, which does
-not expand it) grows it and drops the input to y 50..91, past the collapsed 35px offset - an
+**Constraint.** A tap on the mobile search pill (or a programmatic `.focus()`: the pill is held open
+by `#search:focus-within`) grows it and drops the input to y 50..91, past the collapsed 35px offset - an
 owner-found occlusion defect, `elementFromPoint()` at the input's centre resolving to the toast
 itself. Fixed with `body:has(#search:focus-within) #dz-toast-stack { top: 101px; }` (measured
 input bottom 91 + the same 10px gap). A static offset cannot express this: the pill is expanded or
