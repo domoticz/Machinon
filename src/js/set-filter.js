@@ -179,7 +179,7 @@ function dzNavigateAndFilter(route, members, label) {
         return;
     }
     dzSetFilterPending = { hash: route, members: members, label: label };
-    location.hash = route;
+    dzThemeNavigate(route);
 }
 
 /* ---- Chip: the visible armed state ---- */

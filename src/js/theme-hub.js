@@ -911,7 +911,7 @@ function dzHubHasGroup(id) {
    custom.js init_theme) is left intact. */
 function dzOpenThemeHub() {
     if (window.dzRoutesActive) {
-        location.hash = "#/Theme";
+        dzThemeNavigate("#/Theme");
         return;
     }
     var hub = dzBuildThemeHub();

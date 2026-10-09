@@ -129,8 +129,7 @@ function isPlainOnOffSwitch(item) {
        presence is core's own "this device switches" vocabulary -- the same one
        NON_TOGGLE_SWITCH_TYPES already mirrors. A blocklist keyed on SwitchType
        cannot reject a device that has none, and the DOM heuristics below do not
-       either: core marks a text sensor's icon lcursor (it links to the log), so
-       a Text device passed every gate and grew a toggle that hid its own value
+       either: a Text device passed every gate and grew a toggle that hid its own value
        (issue #203, setDeviceSwitch hides #status alongside #bigtext). Sensors,
        meters, scenes and groups all land here. */
     if (typeof device.SwitchType !== "string") return false;

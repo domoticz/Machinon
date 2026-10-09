@@ -93,7 +93,7 @@ function loadThemeScripts(files) {
     return Promise.all(files.map(function(file) {
         return new Promise(function(resolve, reject) {
             var s = document.createElement("script");
-            s.src = "styles/machinon/" + file;
+            s.src = "styles/" + themeFolder + "/" + file;
             s.async = false;
             s.onload = resolve;
             s.onerror = function() { reject(new Error(file + " failed to load")); };
@@ -232,7 +232,7 @@ function dzSetupGridRouteController() {
            lands on #/Setup again, i.e. the user is stuck on the page they were
            bounced to; the routed form pushes one and Back returns where they
            came from. */
-        location.hash = "#/Setup";
+        dzThemeNavigate("#/Setup");
     });
 }
 
@@ -255,7 +255,7 @@ function dzOpenThemeLegacyPage(templateUrl) {
            bare "#Dashboard": see the routed "#/Setup" form above for why
            (the bare form pushes an extra history entry). */
         console.warn("machinon_routes", "problems_template_absent", "route template did not load: " + templateUrl + "; redirecting to #/Dashboard");
-        location.hash = "#/Dashboard";
+        dzThemeNavigate("#/Dashboard");
         return;
     }
     if (window.jQuery) window.jQuery("#appnavbar li[has-permission='Admin']").click();
@@ -341,12 +341,55 @@ function dzRegisterThemeRoutes(routesModule) {
 /* Wrap angular.module so the theme's config block is appended the moment core
    DEFINES 'app.routes' (a definition passes a dependency array; a plain
    angular.module('x') is a getter call and must pass straight through). */
+/* Core's pushState mode (app.js dzHashNavViaPushState: Apple touch devices on
+   plain http, where iOS 27 reloads the page on a fragment navigation) moves
+   every route with history.pushState, and Angular intercepts plain #links too,
+   so no hashchange fires. Every theme page hook listens for hashchange, so this
+   restores exactly one per route change. History traversal still fires a native
+   hashchange, announced by a trusted popstate for the same URL; core's
+   dzNavigateHash dispatches an untrusted one and gets no native hashchange.
+   Dispatched on the next task, outside Angular's digest, like the native event. */
+var dzTraversedTo = null;
+/* Registered at file load, before Angular boots: Angular's own popstate
+   listener handles the change synchronously, so one added later would learn
+   of the traversal only after $locationChangeSuccess has already fired. */
+window.addEventListener("popstate", function (e) {
+    if (e.isTrusted) dzTraversedTo = location.href;
+});
+
+function dzBridgeHashChange($rootScope) {
+    if (window.dzHashNavViaPushState !== true) return;
+    $rootScope.$on("$locationChangeSuccess", function (event, newUrl, oldUrl) {
+        var native = dzTraversedTo === newUrl;
+        dzTraversedTo = null;
+        if (native || newUrl === oldUrl) return;
+        setTimeout(function () {
+            window.dispatchEvent(new HashChangeEvent("hashchange", { oldURL: oldUrl, newURL: newUrl }));
+        }, 0);
+    });
+}
+
+/* Route change from theme code. Core's dzNavigateHash keeps pushState-mode
+   devices off the fragment navigation iOS 27 answers with a full reload; cores
+   before it do not define it. */
+function dzThemeNavigate(hash) {
+    if (typeof dzNavigateHash === "function") dzNavigateHash(hash);
+    else location.hash = hash;
+}
+
 function dzWrapAngularModule(ng, realModule) {
     var wrapped = function (name, deps) {
         var m = realModule.apply(this, arguments);
         /* This runs INSIDE core's angular.module() call, so a throw here would
            abort core's own module definition. Contain it: the theme losing its
            routes is a degradation, breaking the app is not. */
+        if (name === "domoticz" && deps) {
+            try {
+                m.run(["$rootScope", dzBridgeHashChange]);
+            } catch (e) {
+                dzLog("routes", "bridge_failed", { error: String(e) });
+            }
+        }
         if (name === "app.routes" && deps) {
             try {
                 dzRegisterThemeRoutes(m);
@@ -427,18 +470,67 @@ var DZ_ROUTE_HOOK_WAIT_MS = 15000; // Angular boots in ~1-2s; this only catches 
     }, DZ_ROUTE_HOOK_WAIT_MS);
 })();
 
-fetch('json.htm?type=command&param=getsettings', {
-    method: 'GET',
-    headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-    },
-    credentials: 'include'
-}).then(response => {
-    return response.json();
-}).then(data => {
-    lang = (0 <= supported_lang.split(" ").indexOf(data.Language)) ?data.Language : 'en';
-    themeFolder = data.WebTheme;
+function dzBootJson(url) {
+    return fetch(url, { headers: { Accept: 'application/json' }, credentials: 'include' }).then(function(response) {
+        if (!response.ok) throw new Error(url + " answered " + response.status);
+        return response.json();
+    });
+}
+
+function dzBootText(url) {
+    return fetch(url, { cache: 'no-cache', credentials: 'include' }).then(function(response) {
+        return response.ok ? response.text() : null;
+    }).catch(function() { return null; });
+}
+
+/* Last resort for a session that may not read getsettings (admin-only since
+   core f594d8471) on a core whose getconfig does not name the theme. Core
+   serves the ACTIVE theme under styles/default/, so the installed folder whose
+   theme.json is byte-identical to that one is the active folder. A 7-character
+   name is skipped: libwebem rewrites /styles/<any 7 chars>/ (the length of
+   "default") to the active theme, so such a candidate always "matches". */
+function dzProbeThemeFolder() {
+    return Promise.all([
+        dzBootText('styles/default/theme.json'),
+        dzBootJson('json.htm?type=command&param=getthemes')
+    ]).then(function(results) {
+        var active = results[0];
+        var names = (results[1].result || []).map(function(t) { return t.theme; }).filter(function(name) {
+            return name && name.length !== 7;
+        });
+        if (!active) throw new Error("styles/default/theme.json is unreadable");
+        return Promise.all(names.map(function(name) {
+            return dzBootText('styles/' + encodeURIComponent(name) + '/theme.json');
+        })).then(function(texts) {
+            var matches = [];
+            texts.forEach(function(text, i) { if (text === active) matches.push(names[i]); });
+            if (!matches.length) throw new Error("no installed theme matches the active theme.json");
+            if (matches.length > 1) dzLog("boot", "theme_folder_ambiguous", { matches: matches.join(",") });
+            return matches.indexOf("machinon") >= 0 ? "machinon" : matches[0];
+        });
+    });
+}
+
+/* themeFolder is the theme's storage identity (themesettings_get theme=,
+   localStorage keys, uservariable names), so it must be the real folder name,
+   not the styles/default/ alias. Sources in order of preference: getconfig
+   (viewer-level) when the core names the theme there, getsettings (admins, and
+   every session on cores before its admin gate), then the probe. */
+function dzResolveThemeFolder(config) {
+    if (config.WebTheme) return Promise.resolve(config.WebTheme);
+    return dzBootJson('json.htm?type=command&param=getsettings').then(function(settings) {
+        if (!settings.WebTheme) throw new Error("getsettings carries no WebTheme");
+        return settings.WebTheme;
+    }).catch(function() {
+        return dzProbeThemeFolder();
+    });
+}
+
+dzBootJson('json.htm?type=command&param=getconfig').then(function(config) {
+    lang = (0 <= supported_lang.split(" ").indexOf(config.language)) ? config.language : 'en';
+    return dzResolveThemeFolder(config);
+}).then(function(folder) {
+    themeFolder = folder;
 
     /* Load required script files (plus DOM ready) and then init the theme */
     Promise.all([
@@ -473,7 +565,7 @@ fetch('json.htm?type=command&param=getsettings', {
         /* Load livestamp after moment is available (livestamp requires moment at parse time).
            Use fetch+eval instead of $.getScript to avoid RequireJS intercepting
            livestamp's anonymous define() call (causes "Mismatched anonymous define" error). */
-        fetch("styles/machinon/js/livestamp.js").then(function(r) { return r.text(); }).then(function(src) {
+        fetch("styles/" + themeFolder + "/js/livestamp.js").then(function(r) { return r.text(); }).then(function(src) {
             var _define = window.define;
             window.define = undefined;
             try { (0, eval)(src); } finally { window.define = _define; }
