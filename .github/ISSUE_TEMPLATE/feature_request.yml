@@ -1,5 +1,6 @@
 name: Feature request
 description: Suggest an improvement or new capability for the Machinon theme
+type: Feature
 labels: ["enhancement"]
 body:
   - type: textarea

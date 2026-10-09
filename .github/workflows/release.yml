@@ -8,8 +8,13 @@ name: Release
 # theme.json's "version" (kills tag/version drift), and the tag is passed
 # via env, never interpolated into shell text (injection guard).
 #
+# A stable release also rolls the "Next" milestone over to the release
+# (milestones job, scripts/roll-milestone.sh).
+#
 # COPY-PASTE NOTES for other theme authors, the only things to change:
 #   - the zip name prefix (machinon) in the package job
+#   - drop the milestones job unless you took scripts/roll-milestone.sh and
+#     .github/sync-labels.sh
 #   - nothing else if you took scripts/build-release.sh
 on:
   release:
@@ -89,3 +94,30 @@ jobs:
           fi
           git commit -m "dist: $TAG"
           git push origin dist
+
+  milestones:
+    needs: package
+    # Betas count towards the stable release, so only a stable one rolls Next.
+    if: ${{ !github.event.release.prerelease }}
+    runs-on: ubuntu-latest
+    # Its own job so only this step can write issues: renaming milestones, and
+    # moving open issues and pull requests to the fresh "Next".
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Roll the Next milestone over to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          [[ "$TAG" =~ ^v[0-9][0-9.]*$ ]] || { echo "unexpected tag format: $TAG" >&2; exit 1; }
+          scripts/roll-milestone.sh roll "${TAG#v}"

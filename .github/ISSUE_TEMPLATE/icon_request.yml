@@ -1,5 +1,6 @@
 name: Icon request
 description: Request a new or improved device icon for the Machinon icon pack
+type: Feature
 labels: ["icons"]
 body:
   - type: markdown

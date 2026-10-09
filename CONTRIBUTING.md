@@ -14,6 +14,32 @@ Before opening an issue:
 
 Pull requests target the `master` branch.
 
+### Issue types, labels and milestones
+
+Each issue answers three questions, each in its own place:
+
+* **What is it?** Its issue type: Bug, Feature, or Task for maintenance work. The issue forms set it, together with the matching `bug` or `enhancement` label.
+* **What is it about, or waiting on?** Its labels:
+
+  | Label | Meaning |
+  |---|---|
+  | `icons` | About device icons or the icon pack. The icon request form sets it. |
+  | `needs-info` | Waiting on the reporter. The issue may be closed if the details never arrive. |
+  | `needs-domoticz` | Waiting on Domoticz itself: a change or a release of Domoticz. |
+  | `documentation` | The manual, the README or the site. |
+  | `duplicate`, `invalid`, `wontfix` | Why an issue was closed without a change. |
+
+* **When does it ship?** Its milestone:
+
+  | Milestone | Meaning |
+  |---|---|
+  | Next | Planned for the coming release. When that release is published it is renamed to the release's version and closed, and a new Next is opened. |
+  | Later | Accepted, but not planned for a release yet. |
+
+An issue without a milestone has not been triaged yet. Closed milestones record what each release shipped; the [changelog](CHANGELOG.md) describes the changes.
+
+The label list lives in [.github/sync-labels.sh](.github/sync-labels.sh). Change labels there and run the script, rather than editing them on GitHub.
+
 ### Development setup
 
 Clone the full source (Option 4 in the README):
