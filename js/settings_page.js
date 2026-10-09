@@ -238,7 +238,7 @@ if (mSettings.length > 0) {
         if ($(event.target).closest(mSettings.children("ul")).length) return;
         $(".navbar-inner").removeClass("slide");
         if (window.dzRoutesActive) {
-            location.hash = "#/SetupMenu"; // the route builds the grid; one open path
+            dzThemeNavigate("#/SetupMenu"); // the route builds the grid; one open path
             return;
         }
         $("#appnavbar li").removeClass("current_page_item");

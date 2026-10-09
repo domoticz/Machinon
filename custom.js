@@ -232,7 +232,7 @@ function dzSetupGridRouteController() {
            lands on #/Setup again, i.e. the user is stuck on the page they were
            bounced to; the routed form pushes one and Back returns where they
            came from. */
-        location.hash = "#/Setup";
+        dzThemeNavigate("#/Setup");
     });
 }
 
@@ -255,7 +255,7 @@ function dzOpenThemeLegacyPage(templateUrl) {
            bare "#Dashboard": see the routed "#/Setup" form above for why
            (the bare form pushes an extra history entry). */
         console.warn("machinon_routes", "problems_template_absent", "route template did not load: " + templateUrl + "; redirecting to #/Dashboard");
-        location.hash = "#/Dashboard";
+        dzThemeNavigate("#/Dashboard");
         return;
     }
     if (window.jQuery) window.jQuery("#appnavbar li[has-permission='Admin']").click();
@@ -341,12 +341,55 @@ function dzRegisterThemeRoutes(routesModule) {
 /* Wrap angular.module so the theme's config block is appended the moment core
    DEFINES 'app.routes' (a definition passes a dependency array; a plain
    angular.module('x') is a getter call and must pass straight through). */
+/* Core's pushState mode (app.js dzHashNavViaPushState: Apple touch devices on
+   plain http, where iOS 27 reloads the page on a fragment navigation) moves
+   every route with history.pushState, and Angular intercepts plain #links too,
+   so no hashchange fires. Every theme page hook listens for hashchange, so this
+   restores exactly one per route change. History traversal still fires a native
+   hashchange, announced by a trusted popstate for the same URL; core's
+   dzNavigateHash dispatches an untrusted one and gets no native hashchange.
+   Dispatched on the next task, outside Angular's digest, like the native event. */
+var dzTraversedTo = null;
+/* Registered at file load, before Angular boots: Angular's own popstate
+   listener handles the change synchronously, so one added later would learn
+   of the traversal only after $locationChangeSuccess has already fired. */
+window.addEventListener("popstate", function (e) {
+    if (e.isTrusted) dzTraversedTo = location.href;
+});
+
+function dzBridgeHashChange($rootScope) {
+    if (window.dzHashNavViaPushState !== true) return;
+    $rootScope.$on("$locationChangeSuccess", function (event, newUrl, oldUrl) {
+        var native = dzTraversedTo === newUrl;
+        dzTraversedTo = null;
+        if (native || newUrl === oldUrl) return;
+        setTimeout(function () {
+            window.dispatchEvent(new HashChangeEvent("hashchange", { oldURL: oldUrl, newURL: newUrl }));
+        }, 0);
+    });
+}
+
+/* Route change from theme code. Core's dzNavigateHash keeps pushState-mode
+   devices off the fragment navigation iOS 27 answers with a full reload; cores
+   before it do not define it. */
+function dzThemeNavigate(hash) {
+    if (typeof dzNavigateHash === "function") dzNavigateHash(hash);
+    else location.hash = hash;
+}
+
 function dzWrapAngularModule(ng, realModule) {
     var wrapped = function (name, deps) {
         var m = realModule.apply(this, arguments);
         /* This runs INSIDE core's angular.module() call, so a throw here would
            abort core's own module definition. Contain it: the theme losing its
            routes is a degradation, breaking the app is not. */
+        if (name === "domoticz" && deps) {
+            try {
+                m.run(["$rootScope", dzBridgeHashChange]);
+            } catch (e) {
+                dzLog("routes", "bridge_failed", { error: String(e) });
+            }
+        }
         if (name === "app.routes" && deps) {
             try {
                 dzRegisterThemeRoutes(m);

@@ -145,7 +145,7 @@ function dzOpenProblemDevices() {
         console.warn("machinon_problems", "routes_inactive", "theme routes are inactive; #/ProblemDevices has no legacy path, entry point suppressed");
         return;
     }
-    location.hash = "#/ProblemDevices";
+    dzThemeNavigate("#/ProblemDevices");
 }
 
 function dzProblemsBadgeEl() {

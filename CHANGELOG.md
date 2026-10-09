@@ -5,6 +5,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 ## [Unreleased]
 
 - Users without admin rights get the full theme again on Domoticz 2026.4. They were left without a menu on phones and without any of the theme's features (#223)
+- On an iPhone or iPad running the latest Domoticz beta, the theme now keeps up when you move between pages. After tapping a menu item, the search box and other page features could stay set for the page you came from
 
 ## [2.6.3] - 2026-10-03
 
