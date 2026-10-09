@@ -25,7 +25,8 @@ Each issue answers three questions, each in its own place:
   |---|---|
   | `icons` | About device icons or the icon pack. The icon request form sets it. |
   | `needs-info` | Waiting on the reporter. The issue may be closed if the details never arrive. |
-  | `needs-domoticz` | Waiting on Domoticz itself: a change or a release of Domoticz. |
+  | `needs-domoticz` | Waiting on Domoticz itself: a change or a release of Domoticz. Removed once that has happened. |
+  | `from-domoticz` | Caused by a change or defect in Domoticz itself; the theme adapts or works around it. Stays on the issue as a record. |
   | `documentation` | The manual, the README or the site. |
   | `duplicate`, `invalid`, `wontfix` | Why an issue was closed without a change. |
 

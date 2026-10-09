@@ -16,6 +16,11 @@
 # recreates them if missing, so they are listed to survive --prune. The icon request
 # form applies "icons"; GitHub silently drops a form label that does not exist.
 #
+# needs-domoticz is a state, removed once Domoticz has moved; from-domoticz is a
+# permanent record of where a problem came from. An issue can carry both.
+# javascript and php are retired Dependabot labels kept on the pull requests of the
+# pre-v2.0.0 code base; they are listed so --prune never strips that history.
+#
 # The shared labels keep the names and colours of the maintainer's other repositories.
 
 set -euo pipefail
@@ -30,6 +35,7 @@ documentation|0075ca|Improvements or additions to documentation
 icons|c2e0c6|Device icons and the icon pack
 needs-info|fbca04|Waiting on the reporter for details
 needs-domoticz|5319e7|Waiting on Domoticz itself: a change or release of Domoticz
+from-domoticz|d4c5f9|Caused by a change or defect in Domoticz itself; the theme adapts or works around it
 question|d876e3|Further information is requested
 duplicate|cfd3d7|This issue or pull request already exists
 invalid|e4e669|This doesn't seem right
@@ -39,6 +45,8 @@ help wanted|008672|Extra attention is needed
 dependencies|0366d6|Pull requests that update a dependency file
 python|2b67c6|Pull requests that update python code
 github_actions|000000|Pull requests that update GitHub Actions code
+javascript|168700|Historical: Dependabot npm updates from before v2.0.0
+php|45229e|Historical: Dependabot composer updates from before v2.0.0
 EOF
 )"
 
