@@ -4,6 +4,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+- Users without admin rights get the full theme again on Domoticz 2026.4. They were left without a menu on phones and without any of the theme's features (#223)
+
 ## [2.6.3] - 2026-10-03
 
 - On a phone, one tap on the search icon now puts you straight into the search field, ready to type. It used to need a second tap inside the field before the keyboard came up

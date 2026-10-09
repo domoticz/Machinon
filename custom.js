@@ -93,7 +93,7 @@ function loadThemeScripts(files) {
     return Promise.all(files.map(function(file) {
         return new Promise(function(resolve, reject) {
             var s = document.createElement("script");
-            s.src = "styles/machinon/" + file;
+            s.src = "styles/" + themeFolder + "/" + file;
             s.async = false;
             s.onload = resolve;
             s.onerror = function() { reject(new Error(file + " failed to load")); };
@@ -427,18 +427,67 @@ var DZ_ROUTE_HOOK_WAIT_MS = 15000; // Angular boots in ~1-2s; this only catches 
     }, DZ_ROUTE_HOOK_WAIT_MS);
 })();
 
-fetch('json.htm?type=command&param=getsettings', {
-    method: 'GET',
-    headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-    },
-    credentials: 'include'
-}).then(response => {
-    return response.json();
-}).then(data => {
-    lang = (0 <= supported_lang.split(" ").indexOf(data.Language)) ?data.Language : 'en';
-    themeFolder = data.WebTheme;
+function dzBootJson(url) {
+    return fetch(url, { headers: { Accept: 'application/json' }, credentials: 'include' }).then(function(response) {
+        if (!response.ok) throw new Error(url + " answered " + response.status);
+        return response.json();
+    });
+}
+
+function dzBootText(url) {
+    return fetch(url, { cache: 'no-cache', credentials: 'include' }).then(function(response) {
+        return response.ok ? response.text() : null;
+    }).catch(function() { return null; });
+}
+
+/* Last resort for a session that may not read getsettings (admin-only since
+   core f594d8471) on a core whose getconfig does not name the theme. Core
+   serves the ACTIVE theme under styles/default/, so the installed folder whose
+   theme.json is byte-identical to that one is the active folder. A 7-character
+   name is skipped: libwebem rewrites /styles/<any 7 chars>/ (the length of
+   "default") to the active theme, so such a candidate always "matches". */
+function dzProbeThemeFolder() {
+    return Promise.all([
+        dzBootText('styles/default/theme.json'),
+        dzBootJson('json.htm?type=command&param=getthemes')
+    ]).then(function(results) {
+        var active = results[0];
+        var names = (results[1].result || []).map(function(t) { return t.theme; }).filter(function(name) {
+            return name && name.length !== 7;
+        });
+        if (!active) throw new Error("styles/default/theme.json is unreadable");
+        return Promise.all(names.map(function(name) {
+            return dzBootText('styles/' + encodeURIComponent(name) + '/theme.json');
+        })).then(function(texts) {
+            var matches = [];
+            texts.forEach(function(text, i) { if (text === active) matches.push(names[i]); });
+            if (!matches.length) throw new Error("no installed theme matches the active theme.json");
+            if (matches.length > 1) dzLog("boot", "theme_folder_ambiguous", { matches: matches.join(",") });
+            return matches.indexOf("machinon") >= 0 ? "machinon" : matches[0];
+        });
+    });
+}
+
+/* themeFolder is the theme's storage identity (themesettings_get theme=,
+   localStorage keys, uservariable names), so it must be the real folder name,
+   not the styles/default/ alias. Sources in order of preference: getconfig
+   (viewer-level) when the core names the theme there, getsettings (admins, and
+   every session on cores before its admin gate), then the probe. */
+function dzResolveThemeFolder(config) {
+    if (config.WebTheme) return Promise.resolve(config.WebTheme);
+    return dzBootJson('json.htm?type=command&param=getsettings').then(function(settings) {
+        if (!settings.WebTheme) throw new Error("getsettings carries no WebTheme");
+        return settings.WebTheme;
+    }).catch(function() {
+        return dzProbeThemeFolder();
+    });
+}
+
+dzBootJson('json.htm?type=command&param=getconfig').then(function(config) {
+    lang = (0 <= supported_lang.split(" ").indexOf(config.language)) ? config.language : 'en';
+    return dzResolveThemeFolder(config);
+}).then(function(folder) {
+    themeFolder = folder;
 
     /* Load required script files (plus DOM ready) and then init the theme */
     Promise.all([
@@ -473,7 +522,7 @@ fetch('json.htm?type=command&param=getsettings', {
         /* Load livestamp after moment is available (livestamp requires moment at parse time).
            Use fetch+eval instead of $.getScript to avoid RequireJS intercepting
            livestamp's anonymous define() call (causes "Mismatched anonymous define" error). */
-        fetch("styles/machinon/js/livestamp.js").then(function(r) { return r.text(); }).then(function(src) {
+        fetch("styles/" + themeFolder + "/js/livestamp.js").then(function(r) { return r.text(); }).then(function(src) {
             var _define = window.define;
             window.define = undefined;
             try { (0, eval)(src); } finally { window.define = _define; }
