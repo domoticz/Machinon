@@ -4,15 +4,17 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
-- Faster on slower devices and wall tablets: pages no longer jump from a narrow column to full width right after they open, the Theme Hub no longer downloads the whole icon library unless you open its Icons tab, and returning to the Dashboard no longer makes camera previews refresh more often each time
-- Easier to read: the Log page status bar, the Theme Hub setting descriptions and scope tags, and the last reading on a device that stopped reporting, which now stays at full strength while only its icon and name are dimmed. The diagnostics texts in German, French, Polish and Swedish have their accents back (and German "press" no longer says "print"), and the Icon Library page is now translated (#227)
-- A search that matches nothing on the current page now says so, with a button to clear it, instead of leaving the page blank. This includes a search carried over from the previous page (#226)
-- In the Theme Hub, colour schemes can be chosen and deleted with the keyboard, the scheme in use is marked even if you never picked one, the tabs work with the arrow keys, and "Create a theme" keeps keyboard focus inside its window until you close it. The problem badge now tells screen readers what its number counts (#224)
-- Keyboard users can now reach and switch the on/off toggles on device cards, open and close the menu on phones and zoomed-in screens (Enter to open, Escape to close), and read a focused menu link in the light colour schemes. Screen readers announce each toggle with its device name (#224)
-- Pages left open, such as on a wall tablet, use noticeably less processor time: the theme no longer reworks every device card each time the clock in the top bar ticks
-- The custom page button now shows the name you set on a browser's first visit, and a new name shows straight away instead of after a reload (#228)
+## [2.7.0] - 2026-10-11
+
 - Security fix: the custom page button name and address can no longer run code in your browser. The address must now be a web address (http or https) or a page on your Domoticz server; anything else opens a blank page
 - Security fix: a custom logo or device photo name can no longer make your browser send requests to Domoticz. Names must point to a file in the theme's images folder (subfolders are fine); anything else shows the default logo or the device's normal icon
+- Keyboard users can now reach and switch the on/off toggles on device cards, open and close the menu on phones and zoomed-in screens (Enter to open, Escape to close), and read a focused menu link in the light colour schemes. Screen readers announce each toggle with its device name (#224)
+- In the Theme Hub, colour schemes can be chosen and deleted with the keyboard, the scheme in use is marked even if you never picked one, the tabs work with the arrow keys, and "Create a theme" keeps keyboard focus inside its window until you close it. The problem badge now tells screen readers what its number counts (#224)
+- A search that matches nothing on the current page now says so, with a button to clear it, instead of leaving the page blank. This includes a search carried over from the previous page (#226)
+- The custom page button now shows the name you set on a browser's first visit, and a new name shows straight away instead of after a reload (#228)
+- Easier to read: the Log page status bar, the Theme Hub setting descriptions and scope tags, and the last reading on a device that stopped reporting, which now stays at full strength while only its icon and name are dimmed. The diagnostics texts in German, French, Polish and Swedish have their accents back (and German "press" no longer says "print"), and the Icon Library page is now translated (#227)
+- Pages left open, such as on a wall tablet, use noticeably less processor time: the theme no longer reworks every device card each time the clock in the top bar ticks
+- Faster on slower devices and wall tablets: pages no longer jump from a narrow column to full width right after they open, the Theme Hub no longer downloads the whole icon library unless you open its Icons tab, and returning to the Dashboard no longer makes camera previews refresh more often each time
 
 ## [2.6.4] - 2026-10-09
 
