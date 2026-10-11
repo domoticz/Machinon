@@ -26,7 +26,11 @@ function makeFakeJquery() {
         const api = {
             length: nodes.length,
             nodes,
-            text(v) { nodes.forEach((n) => { n.text = String(v); }); return api; },
+            text(v) {
+                if (v === undefined) return nodes.map((n) => n.text || "").join("");
+                nodes.forEach((n) => { n.text = String(v); });
+                return api;
+            },
             attr(k, v) {
                 if (v === undefined) return nodes[0] ? nodes[0].attrs[k] : undefined;
                 nodes.forEach((n) => { n.attrs[k] = String(v); });
@@ -76,12 +80,18 @@ function makeFakeJquery() {
             const attr = /([a-z0-9-]+)="([^"]*)"/gi;
             let a;
             while ((a = attr.exec(m[2]))) node.attrs[a[1].toLowerCase()] = a[2];
+            (node.attrs.class || "").split(/\s+/).filter(Boolean).forEach((c) => node.classes.add(c));
             nodes.push(node);
         }
         return wrap(nodes);
     }
     function $(sel) {
         if (typeof sel === "string" && sel.trim().startsWith("<")) return parse(sel);
+        const desc = typeof sel === "string" && /^#([\w-]+) \.([\w-]+)$/.exec(sel);
+        if (desc) {
+            const roots = $("#" + desc[1]).nodes;
+            return wrap(roots.flatMap((r) => allNodes(r)).filter((n) => n.classes.has(desc[2])));
+        }
         if (typeof sel === "string" && sel.startsWith("#")) {
             const id = sel.slice(1);
             if (byId[id]) return wrap([byId[id]]);
@@ -102,7 +112,7 @@ function runCustomPage(theme) {
         URL, theme, $: fake.$,
         document: { baseURI: "http://192.0.2.10:8080/" }
     });
-    for (const f of ["src/js/url-guards.js", "js/custom_page.js"]) {
+    for (const f of ["src/js/url-guards.js", "src/js/page.js", "js/custom_page.js"]) {
         vm.runInContext(readFileSync(f, "utf8"), ctx, { filename: f });
     }
     const button = fake.findAll(fake.byId.appnavbar, "#customPage")[0];
@@ -110,7 +120,7 @@ function runCustomPage(theme) {
         button.handlers.click.call(button);
         return fake.findAll(fake.byId["main-view"], "iframe")[0];
     }
-    return { fake, button, openPage };
+    return { fake, button, openPage, ctx };
 }
 
 function allNodes(root) {
@@ -156,4 +166,33 @@ test("a custom URL that breaks out of the attribute is not parsed as markup", ()
     const { fake, openPage } = runCustomPage({ button_name: "Home", custom_url: PAYLOAD });
     openPage();
     assert.ok(!fake.parsed.some((m) => m.includes("onerror")), "custom_url reached an HTML parser");
+});
+
+/* The feature file paints the button once, at load, and on a first visit that
+   is before the stored settings arrive; the in-place reconcile and the Theme
+   Hub re-apply settings through idempotent appliers, so the label needs one. */
+test("the label follows theme.button_name when it is re-applied", () => {
+    const { fake, ctx } = runCustomPage({ button_name: "Domoticz", custom_url: "https://example.com/" });
+    ctx.theme.button_name = "My House";
+    ctx.dzApplyCustomPageLabel();
+    const texts = allNodes(fake.byId.appnavbar).map((n) => n.text).filter((t) => t !== null);
+    assert.deepEqual(texts, ["My House"]);
+});
+
+test("re-applying a markup name still renders it as text", () => {
+    const { fake, ctx } = runCustomPage({ button_name: "Domoticz", custom_url: "https://example.com/" });
+    ctx.theme.button_name = PAYLOAD;
+    ctx.dzApplyCustomPageLabel();
+    assert.ok(!fake.parsed.some((m) => m.includes("onerror")), "button_name reached an HTML parser");
+});
+
+/* applyThemeDeltaInPlace (settings-store.js) skips every applier when the
+   fingerprint of what painted equals the fingerprint of the stored settings,
+   so a stored name that differs only in button_name must change it. */
+test("a button_name-only change counts as a settings change", () => {
+    const ctx = vm.createContext({ console, JSON });
+    vm.runInContext(readFileSync("src/js/settings-store.js", "utf8"), ctx, { filename: "src/js/settings-store.js" });
+    const a = ctx.themeSettingsFingerprint({ features: {}, button_name: "Domoticz" });
+    const b = ctx.themeSettingsFingerprint({ features: {}, button_name: "My House" });
+    assert.notEqual(a, b);
 });

@@ -958,6 +958,7 @@ var DZ_HUB_APPLIERS = {
     card_max_width: applyCardWidths,     // "
     logo: setLogo,                       // page.js setLogo -> header.logo img
     hide_logo: setLogo,                  // setLogo() re-applies on the hide_logo toggle (feature with files:[])
+    button_name: dzApplyCustomPageLabel, // page.js dzApplyCustomPageLabel -> #customPage label
     background_img: applyBackground,     // page.js applyBackground -> html background
     background_type: applyBackground,    // "
     navbar_icons_text: applyNavbarIconsText // page.js applyNavbarIconsText -> .navbar.notext

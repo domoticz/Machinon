@@ -15,12 +15,13 @@
            Relying on core's own hide rule would break older Domoticz, which has no
            such rule, and would paint both halves at once: a duplicate icon.
 
-           button_name is a stored value, so it reaches the DOM as text only. No
-           data-i18n either: core's i18next renders a "[html]"-prefixed key with
-           .html() on its .nav pass, which would parse the name as markup. */
-        var label = $('<span class="hidden-phone hidden-tablet">').text(theme.button_name);
-        var link = $('<a class="lcursor"><img src="images/custompage.png" class="dz-nav-img"><i class="fa-solid fa-desktop dz-nav-glyph"></i></a>').append(label);
+           The label is filled by page.js dzApplyCustomPageLabel, which the settings
+           reconcile and the Theme Hub also call. It carries no data-i18n: core's
+           i18next renders a "[html]"-prefixed key with .html() on its .nav pass,
+           which would parse the stored name as markup. */
+        var link = $('<a class="lcursor"><img src="images/custompage.png" class="dz-nav-img"><i class="fa-solid fa-desktop dz-nav-glyph"></i><span class="hidden-phone hidden-tablet dz-custom-page-label"></span></a>');
         customMenu.append('<li class="divider-vertical"></li>', $('<li id="customPage">').append(link));
+        dzApplyCustomPageLabel();
     }
 
     $("#customPage").click(function() {

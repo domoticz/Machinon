@@ -167,9 +167,8 @@ Domoticz's main content area, in place of whatever Domoticz page would normally 
 <!-- key: button_name -->
 
 Sets the label text on the custom menu page's navbar button. Only takes effect while Custom
-menu page is also on. On a browser that has never loaded the page before, the button may briefly
-show the default label until you reload once; after that it always shows your chosen text right
-away.
+menu page is also on. A change shows on the button straight away, no reload needed. On a
+browser's first visit the default label can show for a moment while your settings load.
 
 ### Custom page URL
 <!-- key: custom_url -->

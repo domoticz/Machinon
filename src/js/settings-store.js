@@ -334,7 +334,8 @@ function themeSettingsFingerprint(t) {
         features: feats,
         scheme: t.scheme, scheme_base: t.scheme_base, color_scheme: t.color_scheme,
         card_min_width: t.card_min_width, card_max_width: t.card_max_width,
-        logo: t.logo, background_img: t.background_img, background_type: t.background_type
+        logo: t.logo, background_img: t.background_img, background_type: t.background_type,
+        button_name: t.button_name
     });
 }
 
@@ -414,6 +415,7 @@ function applyThemeDeltaInPlace(before) {
     setColorScheme();
     applyCardWidths();
     setLogo();
+    dzApplyCustomPageLabel();
     applyBackground();
     applyNavbarIconsText();
     dzDiagRefreshGate(true);

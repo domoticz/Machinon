@@ -110,6 +110,16 @@ function removeRowDivider() {
     }
 }
 
+/* Writes theme.button_name into the custom page button; idempotent, so the in-place
+   reconcile and the Theme Hub re-apply it the way they re-apply the logo. The button
+   itself is built once by js/custom_page.js, on a first visit before the stored
+   settings arrive, so without this the defaults' name stays until a reload. A stored
+   value: text only, never markup. No-op while the button does not exist. */
+function dzApplyCustomPageLabel() {
+    var name = theme.button_name;
+    $("#customPage .dz-custom-page-label").text(name == null ? "" : String(name));
+}
+
 // Renders the navbar logo; idempotent, so the settings panel can re-apply it live. The
 // container also hosts the search box (setSearch), so hide_logo hides only the image.
 // theme.logo is user data (settings -> DB): it reaches the DOM through .attr(), never
