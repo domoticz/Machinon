@@ -52,24 +52,39 @@
 .header__icon .lg-mark { fill: var(--dz-accent-text); }
 .header__icon .lg-ring { stroke: var(--dz-accent-color); }
 
-div.menu-toggle {
+button.menu-toggle {
     display: none;
     cursor: pointer;
+    /* A <button>: drop the UA's own button chrome so it paints exactly like
+       the bare element it replaced. */
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    box-sizing: content-box;
     /* 1002: stays exactly one above the flyout panel it opens and closes, which moved to
        1001 to clear core's .dd-topbar (see css/sidemenu.css). This is the X rendered over
        the open panel, so it must never fall behind it. */
     z-index: 1002;
     top: 0;
     left: 10px;
+    /* The box holds the whole glyph: the three bars (4px each, 6px margins)
+       run from y=6 to y=30, so 30px of height plus 5px of bottom padding ends
+       the box at y=35, where the phone toast stack starts (css/toasts.css
+       --dz-toast-top), and the focus ring below sits inside the box instead
+       of cutting through the bottom bar or off the top of the viewport.
+       Fixed-positioned, so the size moves nothing else. */
     width: 25px;
-    height: 25px;
+    height: 30px;
     position: fixed;
-    padding: 0 5px;
+    padding: 0 5px 5px;
 }
 
 .menu-toggle:after,
 .menu-toggle:before,
-.menu-toggle div {
+.menu-toggle span {
     /* dz-menu-exception: hamburger icon bars, not a menu surface, so out of the
        --dz-menu-* family. Closed, the bars sit over the accent header logo row,
        so they take the on-accent token to read on it, and keep it in the scrolled
@@ -89,10 +104,11 @@ div.menu-toggle {
    lifted by a shadow, so scrolling just peels the same hamburger off the bar.
    When the flyout is open the box is dropped (see the .slide rule below) so the
    close X sits on the neutral drawer instead of on this accent box. */
-div.menu-toggle.scrolled {
+button.menu-toggle.scrolled {
     background: var(--dz-accent-color);
     transition: background-color 1s ease;
-    padding: 0 5px 15px 5px;
+    /* 30px box + 10px = the 40px accent box this state has always drawn. */
+    padding: 0 5px 10px 5px;
     border-bottom-left-radius: 6px;
     border-bottom-right-radius: 6px;
     box-shadow: var(--dz-elev-popup);
@@ -122,7 +138,7 @@ div.menu-toggle.scrolled {
     transform: translateY(-8px) rotate(-135deg);
 }
 
-.navbar-inverse .navbar-inner.slide + .menu-toggle div {
+.navbar-inverse .navbar-inner.slide + .menu-toggle span {
     transform: scale(0);
 }
 
@@ -134,8 +150,28 @@ div.menu-toggle.scrolled {
 .navbar-inverse .navbar-inner.slide + .menu-toggle {
     background: transparent;
     box-shadow: none;
-    padding: 0 5px;
+    padding: 0 5px 5px;
     border-radius: 0;
+}
+
+/* Keyboard focus indicator. An outline, not the --dz-btn-focus-ring shadow:
+   closed, the hamburger sits on the accent header, where that 35%-accent ring
+   would not show, and the scrolled box already spends box-shadow on its
+   lift. It takes the bars' own colour, so it reads wherever the bars do:
+   on-accent while closed, body text on the open drawer. */
+button.menu-toggle:focus {
+    outline: none;
+}
+
+button.menu-toggle:focus-visible {
+    outline: 2px solid var(--dz-accent-text);
+    outline-offset: -2px;
+    border-radius: var(--dz-menu-radius);
+}
+
+.navbar-inverse .navbar-inner.slide + button.menu-toggle:focus-visible {
+    outline-color: var(--dz-body-text);
+    border-radius: var(--dz-menu-radius);
 }
 
 .navbar-inverse .navbar-inner {
@@ -358,8 +394,12 @@ div.menu-toggle.scrolled {
    non-important outright), silently dropping the keyboard focus indicator
    on exactly the one item a keyboard user is most likely to already be
    sitting on. */
+/* color: core's bootstrap.css (.navbar-inverse .nav > li > a:focus) paints a
+   focused link white for its dark bar; on Machinon's light bar that is
+   1.13:1 and the focused word vanishes. Same text colour as hover. */
 .navbar-inverse .nav > li > a:focus {
     outline: none;
+    color: var(--dz-body-text);
 }
 
 .navbar-inverse .nav > li > a:focus-visible {

@@ -231,9 +231,9 @@
         /* Overrides dz-tokens.css's desktop --dz-toast-top: the navbar
            collapses to position:static below 767px (no longer a fixed
            element to clear), so the tallest fixed chrome left is the
-           hamburger trigger .menu-toggle. Measured 2026-08-31 at 390x844,
-           light and dark identical: bottom edge 25px, z-index 1002.
-           25 + --dz-card-space-lg (10px) = 35px. The closed mobile flyout
+           hamburger trigger .menu-toggle, z-index 1002: its bars end at
+           y=30 and its box at y=35 (css/nav.css), so the stack starts right
+           below the box, 5px clear of the bars. The closed mobile flyout
            panel (.navbar-inner) is also position:fixed with a taller
            z-index (1001) but sits translated off-screen at rest (measured
            x -562px in a 390px viewport), so it is not top chrome to clear.

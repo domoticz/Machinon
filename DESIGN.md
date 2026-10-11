@@ -2111,7 +2111,8 @@ collapses into one trailing "and N more" line instead of growing the toast witho
 
 **Placement.** `--dz-toast-top` clears the fixed HEADER chrome, not any individual toast's own
 height (a taller toast cannot change it): desktop `128px` (navbar bottom `118px` +
-`--dz-card-space-lg`); mobile `35px` (collapsed `.menu-toggle` bottom `25px` + the same 10px).
+`--dz-card-space-lg`); mobile `35px`, the bottom of the collapsed `.menu-toggle` box (its bars end at
+`30px`, the box at `35px`), so the stack starts 5px clear of the bars.
 **Constraint.** A tap on the mobile search pill (or a programmatic `.focus()`: the pill is held open
 by `#search:focus-within`) grows it and drops the input to y 50..91, past the collapsed 35px offset - an
 owner-found occlusion defect, `elementFromPoint()` at the input's centre resolving to the toast
@@ -2689,8 +2690,11 @@ would have to change, not a reason to copy the current behaviour.
 
 - `:focus-visible` styles now exist for every button family (see Buttons > States) plus a handful
   of specific spots (card device-icon images, the Setup Apply Settings button, `.modal-footer
-  .btn`) and every top-level nav link (`.navbar-inverse .nav > li > a:focus-visible`,
-  `css/nav.css`). The dropdown-menu items themselves (`.navbar .nav .dropdown-menu li a`,
+  .btn`), every top-level nav link (`.navbar-inverse .nav > li > a:focus-visible`,
+  `css/nav.css`), the card on/off toggle (`--dz-btn-focus-ring` on its slider, `css/switch.css`)
+  and the hamburger (`button.menu-toggle:focus-visible`, `css/nav.css`: an inset 2px outline in the
+  bars' own colour with `--dz-menu-radius` corners, because the accent ring would vanish on the
+  accent header it sits on). The dropdown-menu items themselves (`.navbar .nav .dropdown-menu li a`,
   Setup/Other/Custom) still have no visible keyboard-focus ring.
 - Disabled button contrast below WCAG AA: light theme `{colors.light-text-secondary}` on
   `{colors.light-disabled}`, and dark theme `{colors.dark-text-secondary}` on

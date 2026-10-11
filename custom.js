@@ -624,11 +624,52 @@ function init_theme() {
 
         applyBackground();
 
-        $(".navbar").append('<div class="menu-toggle"><div></div></div>')
-        var navBarInner = $(".navbar-inner"), navBarToggle = $(".menu-toggle");
-        $(".menu-toggle").prop("title", dzT("header.mainmenu"));
-        navBarToggle.click(function() {
+        /* A real button: on narrow screens, and at high zoom on a desktop, the
+           hamburger is the only way to the navigation, so it must take focus
+           and say whether the panel is open. The middle bar is a <span>
+           because a button may only hold phrasing content. */
+        var navBarInner = $(".navbar-inner");
+        if (!navBarInner.attr("id")) navBarInner.attr("id", "dz-main-nav");
+        var navBarToggle = $('<button type="button" class="menu-toggle"><span></span></button>').attr({
+            title: dzT("header.mainmenu"),
+            "aria-label": dzT("header.mainmenu"),
+            "aria-controls": navBarInner.attr("id"),
+            "aria-expanded": "false"
+        });
+        $(".navbar").append(navBarToggle);
+        /* The "slide" class is the one source of truth: core and other theme
+           code (custom_page.js, settings_page.js, the Theme Hub) close the panel
+           by removing it, so the button state follows the class, not the click.
+           The folded panel is only translated off-screen, which leaves every
+           link in the tab order; inert takes them out until it opens. Re-synced
+           when the toggle itself appears or disappears (a breakpoint, or the
+           side menu feature's stylesheet arriving), not only on resize. */
+        var syncNavMenuState = function() {
+            var open = navBarInner.hasClass("slide");
+            navBarToggle.attr("aria-expanded", open ? "true" : "false");
+            navBarInner.prop("inert", navBarToggle.is(":visible") && !open);
+        };
+        new MutationObserver(syncNavMenuState).observe(navBarInner[0], { attributes: true, attributeFilter: ["class"] });
+        if (window.ResizeObserver) new ResizeObserver(syncNavMenuState).observe(navBarToggle[0]);
+        $(window).on("resize", syncNavMenuState);
+        syncNavMenuState();
+        navBarToggle.click(function(e) {
             navBarInner.toggleClass("slide");
+            /* Now, not on the observer's microtask: the focus call below
+               would be refused while the panel is still inert. */
+            syncNavMenuState();
+            /* Keyboard activation reports detail 0. The button comes after the
+               panel in document order, so Tab alone would walk away from the
+               menu just opened: move focus to its first entry instead. */
+            if (e.detail === 0 && navBarInner.hasClass("slide")) {
+                navBarInner.find("a[href]:visible").first().trigger("focus");
+            }
+        });
+        $(document).on("keydown", function(e) {
+            if (e.key === "Escape" && navBarInner.hasClass("slide")) {
+                navBarInner.removeClass("slide");
+                navBarToggle.trigger("focus");
+            }
         });
         // Exclude dropdown containers from "tap closes the flyout": each owns its
         // own open/close state and must not also be slammed shut by this blanket
@@ -649,7 +690,7 @@ function init_theme() {
             navBarInner.removeClass("slide");
         });
         $(window).scroll(function() {
-            50 < $(this).scrollTop() ? $("div.menu-toggle").addClass("scrolled") : $("div.menu-toggle").removeClass("scrolled");
+            navBarToggle.toggleClass("scrolled", 50 < $(this).scrollTop());
         });
         applyNavbarIconsText();
 

@@ -16,14 +16,22 @@ function setDeviceSwitch(idx, status) {
             rowStatus = (rowStatus == switchState.off ? switchState.off : switchState.on);
             tr.find(".input").css("margin-top", "20px");
         }
-        var checked = (!rowStatus || rowStatus === switchState.off || rowStatus === 'Off' || rowStatus === switchState.closed || rowStatus === 'Closed')
-            ? "" : "checked";
+        var checked = !(!rowStatus || rowStatus === switchState.off || rowStatus === 'Off' || rowStatus === switchState.closed || rowStatus === 'Closed');
+        /* The checkbox is the toggle's keyboard and screen-reader handle
+           (css/switch.css keeps it focusable), so it carries the device name:
+           a bare switch announces nothing about what it switches. */
+        var name = tr.find("#name").first().text().trim();
 
         /* Check if switch exists --> create or update */
         if (switcher.length == 0) {
             tr.find("#status, #bigtext").hide();
-            var string = '<td class="input"><label class="switch" title=""><input type="checkbox"' + checked + '><span class="slider round"></span></label></td>';
-            tr.append(string);
+            var input = $('<input type="checkbox" role="switch">').prop("checked", checked).attr("aria-label", name);
+            var label = $('<label class="switch" title="">').append(input, '<span class="slider round"></span>');
+            tr.append($('<td class="input">').append(label));
+            /* Space on the focused checkbox arrives here as a click on the
+               input, bubbling to the label; preventDefault keeps the box from
+               flipping on its own, so it only ever mirrors the device state
+               that core reports back. */
             tr.find(".switch").on("click", function(e) {
                 e.preventDefault();
 
@@ -40,7 +48,7 @@ function setDeviceSwitch(idx, status) {
                 }
             });
         } else {
-            switcher.find("input").prop("checked", (checked.length > 0));
+            switcher.find("input").prop("checked", checked).attr("aria-label", name);
         }
     });
 }

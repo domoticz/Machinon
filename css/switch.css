@@ -15,8 +15,20 @@
     height: 15px;
 }
 
+/* Visually hidden, never display:none: the checkbox is the toggle's keyboard
+   and screen-reader handle, and display:none removes it from both. Clipped to
+   nothing rather than stretched over the slider, so the click target stays the
+   slider exactly as before. */
 .switch input {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
 }
 
 /* The slider */
@@ -60,6 +72,6 @@ input:checked + .slider:before {
     background-color: var(--dz-accent-color);
 }
 
-input:focus + .slider {
+input:focus-visible + .slider {
     box-shadow: var(--dz-btn-focus-ring);
 }

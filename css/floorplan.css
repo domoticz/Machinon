@@ -321,7 +321,7 @@ g.selector .level-list .level path {
    own (0,2,0) hover rule the same way.
 
    TREATMENT is the theme's existing floating-navigation language (DESIGN.md >
-   Top Header, css/nav.css "div.menu-toggle.scrolled"): a control that peels off
+   Top Header, css/nav.css "button.menu-toggle.scrolled"): a control that peels off
    the chrome and floats over content becomes an --dz-accent-color box with
    on-accent glyphs, a 6px radius and --dz-elev-popup. Making the box OPAQUE is
    also what actually fixes the contrast: core's ratio depended on whichever
