@@ -1,13 +1,14 @@
-/* Settings persistence seam + per-user readiness primitives. Everything that
-   talks to Domoticz about theme settings lives here; settings-store.js owns
-   the in-memory theme object and the appliers. Store is three uservariables
-   (theme-<folder>-features/-custom/-colors): safe and isolated, cannot clobber
-   core preferences. The native storesettings command is not used for this:
-   it rewrites the whole settings form and blanks absent fields, which this
-   theme never wants for a partial theme-settings write. Per-user readiness:
-   consumers resolve settings through dzMergeSettingsLayers(defaults, stored,
-   perUser); perUser is null until core ships per-user storage, at which point
-   it becomes a third layer here without touching callers. */
+/* Settings persistence seam. Everything that talks to Domoticz about theme
+   settings lives here; settings-store.js owns the in-memory theme object and
+   the appliers. Two transports, chosen per core:
+   - Native ThemeSettings API (core ThemeSettingsAPI: 1): a house-wide instance
+     row (admin-written) and, where core enables it, a personal row per login.
+     dzApiLoad applies the instance row, then the personal row filtered to
+     user-scope keys, so a personal row can never override a house setting.
+   - Legacy, for cores without that API: three uservariables
+     (theme-<folder>-features/-custom/-colors), one shared set.
+   Core's storesettings command is never used: it rewrites the whole settings
+   form and blanks absent fields, which a partial theme write must not do. */
 
 var DZ_SETTINGS_SCHEMA_VERSION = 1;
 

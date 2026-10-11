@@ -590,14 +590,20 @@ function init_theme() {
 
     /* Set $scope variable when angular is available. This is the one polling
        wait kept on purpose: core owns the Angular app, so there is no event a
-       theme can subscribe to before the injector exists. Bounded: clears as
-       soon as Angular has booted. */
+       theme can subscribe to before the injector exists. Clears as soon as
+       Angular has booted, and gives up after 60 s: a page whose Angular never
+       boots is broken in core, and live device updates cannot be wired there
+       anyway, so polling on for the life of the page buys nothing. */
     var $scope = null;
+    var angularPolls = 0;
     var checkAngular = setInterval(function() {
         if (($scope === null) && (typeof angular !== "undefined") && (typeof angular.element(document.body).injector() !== "undefined")) {
             clearInterval(checkAngular);
             $scope = angular.element(document.body).injector().get('$rootScope');
             initDeviceLiveUpdates($scope);
+        } else if (++angularPolls >= 600) {
+            clearInterval(checkAngular);
+            if (typeof dzLog === "function") { dzLog("boot", "angular_absent", { waited_ms: 60000 }); }
         }
     }, 100);
 
@@ -710,22 +716,21 @@ function init_theme() {
             });
         }
 
-        /* Perf-report F3: the defaults (cold) or cache (warm) are now painted and
-           wired above. Merge the Domoticz-stored settings and apply only the delta
-           in place. Runs last so the DOM the appliers touch (navbar, logo header)
-           exists, and replaces the old first-visit setTimeout(location.reload). */
+        /* The defaults (cold) or cache (warm) are painted and wired above. Merge
+           the Domoticz-stored settings and apply only the delta in place, so a
+           first visit is one boot rather than a boot plus a reload. Runs last so
+           the DOM the appliers touch (navbar, logo header) exists. */
         var dzSettingsReconciled = reconcileDomoticzSettingsInPlace();
 
         /* The theme is initialised: settings loaded, THEME_MODULES executed,
            feature files requested. #/Theme waits for this milestone before it
            builds the hub, so a page entered by URL renders with real settings
            instead of defaults. THIS MUST WAIT ON reconcileDomoticzSettingsInPlace
-           SETTLING (bug found in ThemeSettings-migration review): that call
-           resolves checkUserVariableThemeSettings(), which is what actually
-           populates dzApiState.capable/perUser (settings-transport.js
+           SETTLING: that call resolves checkUserVariableThemeSettings(), which is
+           what actually populates dzApiState.capable/perUser (settings-transport.js
            dzProbeThemeSettingsAPI/dzApiLoad, both async fetches). Firing the
-           milestone synchronously right after the unawaited call (as this used
-           to) let a session whose FIRST navigation is directly #/Theme (bookmark,
+           milestone synchronously right after the unawaited call would let a
+           session whose FIRST navigation is directly #/Theme (bookmark,
            deep link, F5 on the hub) build the hub against the pre-settle mode
            default (api:false, perUser:false) -- no chips, no locks, no
            promote/reset buttons, for the rest of the session, since

@@ -17,7 +17,7 @@
    grouping file.
 
    This is a SOURCE-only rule. It does not by itself remove the RTT (the
-   browser still fetches custom.css, then its 26 children, which is
+   browser still fetches custom.css, then every file it imports, which is
    unavoidable once @import exists at all); scripts/build-dist.sh concatenates
    the whole chain into one flat file for release artifacts, which is what
    actually removes the request fan-out for real users. Source stays modular

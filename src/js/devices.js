@@ -46,14 +46,6 @@ function setDevicesNativeSelectorForMobile() {
     });
 }
 
-function setCorrectDashboardLinksforMobile() {
-    if (!isMobile) return;
-    $("table.mobileitem td#name > img").each(function() {
-        var script = $(this).attr("onclick");
-        $(this).wrap('<a onclick="' + script + '"></a>');
-    });
-}
-
 /* Localized switch state labels, shared by every consumer (switch.js and the
    helpers below). Per-tick memo: $.t lookups are cheap but not free at 138
    cards x several calls. Cleared on the next macrotask so late i18n init
@@ -307,7 +299,7 @@ function armSelectorWrapCornerRetag() {
     });
 }
 
-/* Stage-split enhancement (perf work 2026-08-16). "visible" is everything
+/* Stage-split enhancement. "visible" is everything
    the user can see flip at paint time: data-idx tagging, the toggle swap,
    fade-off, custom/wind icons, status warning icons. "deferred" is work
    that is invisible until interacted with or low-urgency: the options
@@ -1117,11 +1109,10 @@ function initDeviceObserver() {
         if (deadlineTimer) { clearTimeout(deadlineTimer); deadlineTimer = null; }
         $("#main-view").children("div.container").removeClass("container").addClass("container-fluid");
         removeRowDivider();
-        setCorrectDashboardLinksforMobile();
         setDevicesNativeSelectorForMobile();
 
         /* Re-apply progressive enhancements if device cards are present.
-           Stage-split (perf work 2026-08-16): the visible stage runs
+           Stage-split: the visible stage runs
            synchronously here (toggle swap, fade, icons -- what the user
            sees at paint time); the deferred stage (options menu, time-ago,
            wrap-corner retag) is coalesced into one idle callback per burst

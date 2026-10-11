@@ -228,7 +228,7 @@ if (mSettings.length > 0) {
         });
 
         $("#machinoSettings").i18n();
-        if (!isAdmin()) $("#machinoSettings").remove();
+        if (!dzIsAdmin()) $("#machinoSettings").remove();
     }
 
     mSettings.click(function (event) {

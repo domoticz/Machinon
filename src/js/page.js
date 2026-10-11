@@ -87,14 +87,6 @@ function setPageTitle() {
     document.title = 'Domoticz - ' + title;
 }
 
-function isAdmin() {
-    if (typeof angular !== "undefined") {
-        var injector = angular.element($("html")).injector();
-        var permissions = injector.get("permissions");
-        return permissions.hasPermission("Admin");
-    } else return false;
-}
-
 function removeRowDivider() {
     if ($("#dashcontent").length) {
         $("#dashcontent > section").each(function() {

@@ -24,8 +24,7 @@
         if (DimmerType && DimmerType === "rel") {
             return orig.apply(this, arguments);
         }
-        /* Title = the clicked card's own name (owner revision 2026-08-18):
-           resolved from the DOM at click time, zero network. No card found
+        /* Title = the clicked card's own name, resolved from the DOM at click time, zero network. No card found
            (e.g. a stubbed/programmatic call) falls back to the Color/White
            label in openPopup. */
         var card = event && event.target && event.target.closest ? event.target.closest(".item") : null;
@@ -81,8 +80,8 @@
         var head = el("div", "mk-rgbw-head", pop);
         var title = el("span", null, head);
         title.id = "mk-rgbw-title";
-        /* Icon-quiet dialog-close (owner revision 2026-08-18, codified as the
-           dialog-close language): a native <button>, not a div-with-role-
+        /* Icon-quiet dialog-close (the codified dialog-close language,
+           DESIGN.md): a native <button>, not a div-with-role-
            and-a-keydown-shim, so Enter/Space activation is free. .ui-close
            stays the legacy cursor-popup close (setpoint, core's own
            rgbw_popup); this popup never uses it. */
