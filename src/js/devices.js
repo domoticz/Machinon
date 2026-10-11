@@ -1062,6 +1062,29 @@ function dzOnDomSettled(callback) {
     domSettledCallbacks.push(callback);
 }
 
+/* Whether a batch of observer records can need a device pass. #holder also
+   holds core's top-bar clock (#jsTbTime, #jsTbSunRise, #jsTbSunSet, rewritten
+   every second by app.js) and the time-ago text in cards; those records only
+   swap text nodes, and a text node cannot add, remove or restyle a card or
+   control. Without this filter both passes run about once a second on every
+   page, for as long as it is open. Any element added or removed, and any
+   class change, counts.
+   Comment nodes count too: Angular's ng-if/ng-repeat anchors are comments. */
+function dzRecordsNeedPass(records) {
+    function onlyText(nodes) {
+        for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].nodeType !== 3) return false;
+        }
+        return true;
+    }
+    for (var r = 0; r < records.length; r++) {
+        var rec = records[r];
+        if (rec.type !== "childList") return true;
+        if (!onlyText(rec.addedNodes) || !onlyText(rec.removedNodes)) return true;
+    }
+    return false;
+}
+
 /* The theme's central re-enhancement pass: one debounced MutationObserver on
    #holder re-applies the progressive enhancements (and the page chrome that
    Angular rerenders wipe) after every digest, then flushes dzOnDomSettled
@@ -1082,7 +1105,8 @@ function initDeviceObserver() {
     var MAX_WAIT_MS = 150;
     var settleTimer = null;
     var deadlineTimer = null;
-    var observer = new MutationObserver(function() {
+    var observer = new MutationObserver(function(records) {
+        if (!dzRecordsNeedPass(records)) return;
         if (settleTimer) clearTimeout(settleTimer);
         settleTimer = setTimeout(flushEnhancements, SETTLE_MS);
         if (deadlineTimer === null) {
