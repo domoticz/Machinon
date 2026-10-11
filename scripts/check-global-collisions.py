@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """Fail when a browser global this theme defines is also defined by Domoticz core.
 
+Every top-level name counts, not only the shared dz/machinon prefix: a generic
+name (update, branch, md) is exactly where a silent clobber lands. The names a
+theme shares with core ON PURPOSE are listed below, with the reason, and only
+those may appear on both sides.
+
 WHY. The theme and core share the `dz` prefix. Core's growth in that prefix is
 almost all in Angular's injector (dzDeviceIcon, dzIconPicker, the widget
 directives), where a DI name cannot collide with a browser global, but core does
@@ -16,9 +21,10 @@ machinonDiagNames) are checked the same way, and matter more: a collision there
 breaks the one command a user runs manually.
 
 WHERE THE CORE SOURCE COMES FROM. A local clone of domoticz/domoticz, by default
-the sibling checkout this theme is developed against. CI has no such clone, so
-this check cannot run there and does not pretend to: without one it reports SKIP
-and exits 0. Run it after updating the clone, and before a release.
+the sibling checkout this theme is developed against. CI checks out core's
+development branch (www/ only) and runs this with --require, as an advisory step:
+core moves on its own, so a red result there may need no theme change at all.
+Without a clone it reports SKIP and exits 0.
 
     python3 scripts/check-global-collisions.py
     python3 scripts/check-global-collisions.py --core ../../domoticz/www
@@ -34,10 +40,22 @@ import sys
 REPO = pathlib.Path(__file__).resolve().parent.parent
 DEFAULT_CORE = REPO.parent.parent / "domoticz" / "www"
 
-# Only the prefixes both sides actually share. A wider net would report the
-# globals every Domoticz theme inherits (theme, themeFolder, isMobile) as
-# collisions, which they are not: those are core's own contract for a theme.
+# The prefix both sides share; used for the report and for the sanity check that
+# the core path really is a Domoticz www folder.
 PREFIX = re.compile(r"^(dz|machinon)", re.IGNORECASE)
+
+# Names both sides may define. A collision outside this set fails.
+SHARED_ON_PURPOSE = {
+    # Core's contract with a theme: core reads them, the theme provides them.
+    "theme": "core's theme contract",
+    "themeFolder": "core's theme contract",
+    "isMobile": "core's theme contract",
+    # Core functions the theme replaces deliberately.
+    "generate_noty": "toasts replace core's noty (src/js/toast-hooks.js)",
+    "ShowNotify": "toasts replace core's notify (src/js/toast-hooks.js)",
+    "HideNotify": "toasts replace core's notify (src/js/toast-hooks.js)",
+    "ShowRGBWPopup": "the theme's colour popup wraps core's (js/rgbw-popup.js)",
+}
 
 THEME_SOURCES = ["custom.js"]
 THEME_DIRS = ["js", "src/js"]
@@ -57,7 +75,7 @@ def globals_in(text):
     """
     found = {m.group(1) for m in DECL.finditer(text)}
     found |= {m.group(1) for m in WINDOW_ASSIGN.finditer(text)}
-    return {name for name in found if PREFIX.match(name)}
+    return found
 
 
 def scan(paths):
@@ -104,13 +122,13 @@ def main():
 
     theme = scan(theme_files(theme_root))
     core = scan(core_files(core_root))
-    if not core:
+    if not any(PREFIX.match(name) for name in core):
         print(f"FAIL: found no dz*/machinon* globals at all under {core_root}; "
               "the path is probably not a Domoticz www folder, so a green result here would mean nothing",
               file=sys.stderr)
         return 1
 
-    clashes = sorted(set(theme) & set(core))
+    clashes = sorted((set(theme) & set(core)) - set(SHARED_ON_PURPOSE))
     if clashes:
         print(f"FAIL: {len(clashes)} global(s) defined by both the theme and Domoticz core:", file=sys.stderr)
         for name in clashes:
@@ -121,8 +139,10 @@ def main():
               "on a real page, so the theme's callers would silently get core's function.", file=sys.stderr)
         return 1
 
-    print(f"OK: {len(theme)} theme global(s) in the dz/machinon prefix, "
-          f"{len(core)} core global(s), no collision ({', '.join(sorted(core))})")
+    prefixed = sorted(name for name in core if PREFIX.match(name))
+    print(f"OK: {len(theme)} theme global(s) checked against {len(core)} core global(s), "
+          f"no collision outside the {len(SHARED_ON_PURPOSE)} shared on purpose "
+          f"(core's dz/machinon ones: {', '.join(prefixed)})")
     return 0
 
 

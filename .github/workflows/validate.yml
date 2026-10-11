@@ -33,7 +33,7 @@ jobs:
         run: python3 -m pytest scripts/test_strip_comments.py -q
 
       - name: Site and docs unit tests
-        run: python3 -m pytest scripts/test_gen_site_tokens.py scripts/test_check_site.py scripts/test_check_contrast.py scripts/test_check_settings_docs.py scripts/test_check_png_optimized.py scripts/test_check_console_calls.py scripts/test_check_global_collisions.py -q
+        run: python3 -m pytest scripts/test_gen_site_tokens.py scripts/test_check_site.py scripts/test_check_contrast.py scripts/test_check_settings_docs.py scripts/test_check_png_optimized.py scripts/test_check_console_calls.py scripts/test_check_global_collisions.py scripts/test_check_important.py -q
 
       - name: Icon and status-glow contrast unit tests
         run: python3 -m pytest scripts/test_measure_icon_contrast.py -q
@@ -61,6 +61,14 @@ jobs:
           # call must not turn a check red. Folded into this step rather than
           # given its own, since the work is 0.05s and a step is not.
           python3 scripts/check-console-calls.py --check
+          # Same ratchet for !important in the theme's own CSS.
+          python3 scripts/check-important.py --check
+
+      - name: Shipped JS parses
+        run: |
+          for f in custom.js js/*.js src/js/*.js lang/*.js; do
+            node --check "$f"
+          done
 
       # scripts/check-png-optimized.py itself runs in .github/workflows/
       # png-optimized.yml, not here: a full oxipng-level-6 scan over every
@@ -130,3 +138,20 @@ jobs:
             echo "dev files leaked into the staging tree" >&2
             exit 1
           fi
+
+      # Advisory: the theme's top-level names against current core. Core's
+      # development branch moves, so a new core global can turn this red
+      # without a theme change; continue-on-error keeps that from blocking an
+      # unrelated push while still showing it on the run.
+      - name: Checkout Domoticz core www (for the global-collision check)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: domoticz/domoticz
+          ref: development
+          path: core
+          sparse-checkout: www
+          persist-credentials: false
+
+      - name: Theme globals do not collide with core's (advisory)
+        continue-on-error: true
+        run: python3 scripts/check-global-collisions.py --core core/www --require

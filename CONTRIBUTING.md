@@ -81,17 +81,19 @@ JS against a recorded baseline: new output belongs in `dzLog(seam, event, fields
 on. `console.warn` stays right for a fail-closed warning a user must see without asking. Removing
 a call never fails the check; it prints the lower number to record in the script instead.
 
-Two checks cannot run in CI:
+One check cannot run in CI:
 
 - `~/docker/domoticz-test/scripts/dz-repair-live.js` needs a running Domoticz with the theme
   bind-mounted. It is the only thing that checks the live colour-scheme wiring - that no shipped
   scheme's colours move, and that hand-built and generated palettes are repaired - so run it by
   hand if you touch `src/js/scheme.js`, `src/js/color-repair.js` or `css/toasts.css`.
-- `python3 scripts/check-global-collisions.py` needs a local clone of Domoticz core, since it
-  compares the browser globals this theme defines against core's own. The theme and core share the
-  `dz` prefix and a collision is silent: the last script to load wins, and the loser's callers get
-  the other one's function. Without a clone the check reports SKIP and exits 0, so run it after
-  updating your core checkout and before a release.
+
+`python3 scripts/check-global-collisions.py` compares every top-level browser global this theme
+defines against Domoticz core's own: a collision is silent (the last script to load wins, and the
+loser's callers get the other one's function). Names the theme shares with core on purpose are
+listed in the script with their reason; any other shared name fails. CI runs it against core's
+development branch as an advisory step, since core can add a global without any theme change.
+Locally it needs a core clone (it reports SKIP without one), so run it after updating yours.
 
 ### Settings key lookup
 

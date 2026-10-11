@@ -111,7 +111,22 @@ def test_a_missing_core_checkout_skips_but_can_be_required(tmp_path):
     ("window.dzThing = 1;", {"dzThing"}),
     ("window.dzThing == 1;", set()),
     ("    var dzThing = 1;", set()),
-    ("var notDzThing = 1;", set()),
+    ("var notDzThing = 1;", {"notDzThing"}),
 ])
 def test_global_extraction(decl, expected):
     assert mod.globals_in(decl) == expected
+
+
+def test_an_unprefixed_shared_name_fails(tmp_path):
+    """A generic name (update, branch, md) is exactly where a silent clobber
+    lands, prefix or not."""
+    theme = theme_tree(tmp_path / "theme", "function update() {}\n")
+    core = core_tree(tmp_path / "core", "function update() {}\nwindow.dzEasterEggs = 1;\n")
+    assert run(theme, core) == 1
+
+
+def test_a_declared_override_of_a_core_function_passes(tmp_path):
+    """generate_noty is replaced on purpose (toast-hooks.js), and listed as such."""
+    theme = theme_tree(tmp_path / "theme", "function generate_noty() {}\n")
+    core = core_tree(tmp_path / "core", "function generate_noty() {}\nwindow.dzEasterEggs = 1;\n")
+    assert run(theme, core) == 0
