@@ -113,8 +113,10 @@ function removeRowDivider() {
 // Renders the navbar logo; idempotent, so the settings panel can re-apply it live. The
 // container also hosts the search box (setSearch), so hide_logo hides only the image.
 // theme.logo is user data (settings -> DB): it reaches the DOM through .attr(), never
-// through string-built markup or a composed <style> element. The old #login:before style
-// injection is gone with the page it targeted (core's views/login.html has no #login).
+// through string-built markup or a composed <style> element, and only as a file name
+// inside images/ (dzThemeImageName); any other value shows the default logo. The old
+// #login:before style injection is gone with the page it targeted (core's
+// views/login.html has no #login).
 function setLogo() {
     if ($("header.logo").length === 0) {
         $('<header class="logo"><div class="container-logo"></div></header>').insertBefore(".navbar-inner");
@@ -123,9 +125,10 @@ function setLogo() {
     var hide = !!(theme.features.hide_logo && theme.features.hide_logo.enabled);
     // Drop whichever logo node is present (img or inline svg); #search stays.
     container.children(".header__icon").remove();
-    if (theme.logo && theme.logo.length) {
+    var logoName = dzThemeImageName(theme.logo);
+    if (logoName) {
         // Custom uploaded logo: an <img>, shown as-is (never recoloured).
-        var img = $('<img class="header__icon">').attr("src", "images/" + theme.logo);
+        var img = $('<img class="header__icon">').attr("src", "images/" + logoName);
         if (hide) img.hide();
         container.prepend(img);
         return;

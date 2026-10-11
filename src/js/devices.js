@@ -874,8 +874,11 @@ function setDeviceCustomIcon(idx, status, $trs) {
 
     var icons = theme.icons;
     for (var i = 0; i < icons.length; i++) {
-        if (icons[i].idx == idx) {
-            rows.find("#img img").attr("src", "images/" + icons[i].img);
+        /* A photo name that would leave images/ is skipped, so the device
+           keeps core's icon (see dzThemeImageName). */
+        var photo = dzThemeImageName(icons[i].img);
+        if (icons[i].idx == idx && photo) {
+            rows.find("#img img").attr("src", "images/" + photo);
             /* Mutually exclusive: the visible stage re-runs this on every
                flush now, so a device that changes state must drop the other
                class or it accumulates both, and custom.css's .user rule

@@ -62,14 +62,18 @@ function dzApplySnapshot(t, snap) {
         }
     }
     if (snap.values) {
-        for (var v in snap.values) {
+        /* Only the keys a snapshot is built from: a stored row is whatever the
+           server holds, and copying any other key would let it replace
+           theme.features (and with it the file paths feature-loader.js
+           loads) or set __proto__. */
+        Object.keys(dzSettingsSnapshot({}).values).forEach(function(v) {
             if (Object.prototype.hasOwnProperty.call(snap.values, v) &&
                 snap.values[v] !== undefined) {
                 /* Clone so the theme object never shares the snapshot's nested
                    references (see dzCloneValue). */
                 t[v] = dzCloneValue(snap.values[v]);
             }
-        }
+        });
     }
 }
 

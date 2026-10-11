@@ -113,3 +113,23 @@ test("a throwing recorder does not take the boot chain or the save with it", () 
     ctx.dzSettingsLogLoad("native", "loaded", 0);
     ctx.dzSettingsLogSave("native", { ok: true }, 0);
 });
+
+/* dzApplySnapshot copies a stored row onto the live theme object. A row is
+   whatever the server holds, so only the value keys dzSettingsSnapshot itself
+   writes may land: anything else (a "features" value that would replace the
+   feature table and its file lists, a "__proto__" key, a stray name) must be
+   ignored rather than copied. */
+test("dzApplySnapshot applies only the value keys a settings snapshot defines", () => {
+    const ctx = loadTransport();
+    const t = vm.runInContext("({ features: { standby: { id: 13, enabled: false, files: ['standby.js'] } } })", ctx);
+    const protoBefore = Object.getPrototypeOf(t);
+    const snap = JSON.parse('{"features":{},"values":{"button_name":"Home",' +
+        '"features":{"standby":{"enabled":true,"files":["../../evil.js"]}},' +
+        '"__proto__":{"polluted":true},"bogus":1}}');
+    ctx.dzApplySnapshot(t, snap);
+    assert.equal(t.button_name, "Home");
+    assert.deepEqual(Array.from(t.features.standby.files), ["standby.js"]);
+    assert.equal(Object.getPrototypeOf(t), protoBefore);
+    assert.equal(t.polluted, undefined);
+    assert.equal(t.bogus, undefined);
+});

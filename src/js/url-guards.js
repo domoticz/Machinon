@@ -16,3 +16,15 @@ function dzValidHttpUrl(href) {
         return null;
     }
 }
+
+/* logo and the per-device photos are file names inside the theme's images
+   folder, used as "images/" + name. Returns the name only when it stays in
+   that folder and adds nothing but a path: no "..", no leading slash, no
+   scheme, query or fragment, and no percent-escape (the URL parser treats
+   "%2e" as "."). Subfolders are fine. Returns null otherwise. */
+function dzThemeImageName(name) {
+    if (typeof name !== "string" || name === "") return null;
+    if (/[?#:%\\]/.test(name) || name.charAt(0) === "/") return null;
+    if (name.split("/").indexOf("..") !== -1) return null;
+    return name;
+}

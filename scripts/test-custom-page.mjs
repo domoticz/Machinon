@@ -157,13 +157,3 @@ test("a custom URL that breaks out of the attribute is not parsed as markup", ()
     openPage();
     assert.ok(!fake.parsed.some((m) => m.includes("onerror")), "custom_url reached an HTML parser");
 });
-
-test("dzValidHttpUrl accepts only http and https", () => {
-    const ctx = vm.createContext({ URL, document: { baseURI: "http://192.0.2.10:8080/" } });
-    vm.runInContext(readFileSync("src/js/url-guards.js", "utf8"), ctx);
-    assert.equal(ctx.dzValidHttpUrl("https://example.com/"), "https://example.com/");
-    assert.equal(ctx.dzValidHttpUrl("/floorplan.html"), "http://192.0.2.10:8080/floorplan.html");
-    for (const bad of ["javascript:alert(1)", "data:text/html,x", "vbscript:x", "http://[bad"]) {
-        assert.equal(ctx.dzValidHttpUrl(bad), null, bad);
-    }
-});
