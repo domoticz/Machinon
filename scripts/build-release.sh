@@ -100,6 +100,34 @@ cp -r --parents \
   NOTICE \
   "$STAGE/"
 
+# JS ships with its comments removed (scripts/strip_comments.py js-ship): the
+# source keeps them for maintainers, users only pay for the code. Line breaks
+# between code are kept (automatic semicolon insertion reads them), so this is
+# not a minifier and needs none. Two proofs per file, either one fails the
+# build: the output parses, and the comment-only diff (strip_comments.py js)
+# of original and shipped is identical, i.e. nothing but comments and
+# whitespace changed. js/livestamp.js is vendored and keeps its license header.
+echo "== strip JS comments"
+STAGE="$STAGE" python3 - <<'PY' || fail "JS comment strip failed (see above)"
+import os, pathlib, subprocess, sys
+sys.path.insert(0, "scripts")
+from strip_comments import ship_js, strip_js
+stage = pathlib.Path(os.environ["STAGE"])
+bad = 0
+for staged in sorted(stage.rglob("*.js")):
+    rel = staged.relative_to(stage).as_posix()
+    if rel == "js/livestamp.js":
+        continue
+    src = pathlib.Path(rel).read_text(encoding="utf-8")
+    out = ship_js(src) + "\n"
+    staged.write_text(out, encoding="utf-8")
+    if strip_js(src) != strip_js(out):
+        print(f"stripping changed code, not just comments, in {rel}", file=sys.stderr); bad += 1
+    if subprocess.run(["node", "--check", str(staged)]).returncode != 0:
+        print(f"stripped {rel} does not parse", file=sys.stderr); bad += 1
+sys.exit(1 if bad else 0)
+PY
+
 # Dist README: what installers see when they clone -b dist or unzip.
 cat > "$STAGE/README.md" <<'EOF'
 # Machinon (built distribution)

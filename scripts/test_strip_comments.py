@@ -25,6 +25,18 @@ def run():
     eq("js", "return /[//]/.test(s);", "return /[//]/.test(s);")
     # HTML: comment goes, whitespace collapses
     eq("html", "<div>\n<!-- gone -->\n<span>x</span></div>", "<div> <span>x</span></div>")
+    # js-ship: what the release build ships. Comments go, but every line break
+    # that separates code stays, because automatic semicolon insertion reads
+    # them: collapsing "return\n1" into "return 1" changes what the code does.
+    eq("js-ship", "function f() {\n    return\n    1;\n}", "function f() {\nreturn\n1;\n}")
+    eq("js-ship", "var a = 1 // note\nvar b = 2", "var a = 1\nvar b = 2")
+    # a block comment holding a line break IS a line terminator for ASI
+    eq("js-ship", "var a = 1 /* one\ntwo */ var b = 2", "var a = 1\nvar b = 2")
+    eq("js-ship", "var a = 1; /* note */ var b = 2;", "var a = 1; var b = 2;")
+    # literals are never touched, multi-line template indentation included
+    eq("js-ship", "var t = `a\n    b // kept`;\n", "var t = `a\n    b // kept`;")
+    eq("js-ship", 'var u = "http://x/*y*/";  // tail', 'var u = "http://x/*y*/";')
+    eq("js-ship", "return /[//]/.test(s);\n\n\n\nx();", "return /[//]/.test(s);\nx();")
     print("OK: all strip_comments self-tests passed")
 
 def test_strip_comments():

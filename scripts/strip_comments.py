@@ -6,7 +6,9 @@ file are both run through this filter; identical output proves the change touche
 only comments and whitespace.
 
 Languages: css (/* */), js (// and /* */, aware of strings, template literals and
-regex literals), html (<!-- -->). Template-literal ${} interiors are preserved
+regex literals), html (<!-- -->), and js-ship: the release build's JS mode, which
+removes the same comments but keeps every line break that separates code (see
+ship_js). Template-literal ${} interiors are preserved
 verbatim (comments inside them are not stripped); acceptable because the theme's
 code is never edited by the pruning passes, only its comments.
 """
@@ -116,6 +118,33 @@ def _consume_regex(text, i):
 
 
 def strip_js(text):
+    return _collapse(_js_segments(text, keep_lines=False))
+
+
+def ship_js(text):
+    """Comments out, code otherwise as written: for shipping, not diffing.
+
+    strip_js collapses every whitespace run to one space, which is fine for
+    comparing two versions but not for running the result: automatic semicolon
+    insertion reads line breaks, so "return\n1" collapsed to "return 1" returns
+    something else. Here a line break between code stays a line break, a block
+    comment that spans lines becomes one (the spec treats it as a line
+    terminator), and only indentation, trailing spaces, blank lines and runs of
+    spaces inside a line go.
+    Literals pass through untouched.
+    """
+    out = []
+    for kind, chunk in _js_segments(text, keep_lines=True):
+        if kind == "code":
+            chunk = re.sub(r"[ \t]+\n", "\n", chunk)
+            chunk = re.sub(r"\n[ \t]+", "\n", chunk)
+            chunk = re.sub(r"\n{2,}", "\n", chunk)
+            chunk = re.sub(r"[ \t]{2,}", " ", chunk)
+        out.append(chunk)
+    return "".join(out).strip()
+
+
+def _js_segments(text, keep_lines):
     segments, i, n = [], 0, len(text)
     code = []
     prev_char, prev_word = "", ""
@@ -142,8 +171,9 @@ def strip_js(text):
             word_open = False
         elif text.startswith("/*", i):
             end = text.find("*/", i + 2)
-            i = n if end < 0 else end + 2
-            code.append(" ")
+            stop = n if end < 0 else end + 2
+            code.append("\n" if keep_lines and "\n" in text[i:stop] else " ")
+            i = stop
             word_open = False
         elif c in "\"'":
             j = _consume_string(text, i, c)
@@ -177,7 +207,7 @@ def strip_js(text):
                     word_open = False
             i += 1
     flush_code()
-    return _collapse(segments)
+    return segments
 
 
 def strip_html(text):
@@ -186,7 +216,7 @@ def strip_html(text):
 
 
 def strip(text, lang):
-    return {"css": strip_css, "js": strip_js, "html": strip_html}[lang](text)
+    return {"css": strip_css, "js": strip_js, "js-ship": ship_js, "html": strip_html}[lang](text)
 
 
 if __name__ == "__main__":
