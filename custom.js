@@ -59,6 +59,7 @@ var THEME_MODULES = [
     /* diag.js first: every module below it may call dzLog at load time, and the
        kernel buffer above only covers the window before THEME_MODULES run. */
     "src/js/diag.js",
+    "src/js/url-guards.js",
     "src/js/toasts.js",
     "src/js/toast-hooks.js",
     "src/js/settings-transport.js",

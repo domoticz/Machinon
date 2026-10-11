@@ -177,6 +177,10 @@ away.
 Sets the address the custom menu page loads. Only takes effect while Custom menu page is also
 on. A change here takes effect the next time you open that page, no reload needed.
 
+Use a web address (`https://...` or `http://...`) or a path on your Domoticz server, such as
+`templates/mypage.html`. Any other kind of address, for example one starting with `javascript:`
+or `data:`, is ignored and the page opens blank.
+
 ### Side menu on desktop
 <!-- key: sidemenu -->
 

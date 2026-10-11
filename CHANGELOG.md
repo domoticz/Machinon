@@ -4,6 +4,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+- Security fix: the custom page button name and address can no longer run code in your browser. The address must now be a web address (http or https) or a page on your Domoticz server; anything else opens a blank page
+
 ## [2.6.4] - 2026-10-09
 
 - Users without admin rights get the full theme again on Domoticz 2026.4. They were left without a menu on phones and without any of the theme's features (#223)

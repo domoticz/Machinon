@@ -18,7 +18,7 @@ function loadThemeGlobals(files) {
     return ctx;
 }
 
-const dz = loadThemeGlobals(["src/js/i18n.js", "lang/machinon.en.js", "src/js/toasts.js"]);
+const dz = loadThemeGlobals(["src/js/i18n.js", "lang/machinon.en.js", "src/js/url-guards.js", "src/js/toasts.js"]);
 
 /* ---- Minimal fake DOM + fake clock, for the coalescing/pause tests below ----
 
@@ -175,7 +175,7 @@ function loadToastRuntime(overrides) {
         dzLogOn: true,
         dzLog: function(seam, event, fields) { diagCalls.push({ seam, event, fields }); }
     });
-    ["src/js/i18n.js", "lang/machinon.en.js", "src/js/toasts.js"].forEach(function (f) {
+    ["src/js/i18n.js", "lang/machinon.en.js", "src/js/url-guards.js", "src/js/toasts.js"].forEach(function (f) {
         vm.runInContext(readFileSync(f, "utf8"), ctx, { filename: f });
     });
     return { dz: ctx, clock, location, diagCalls };

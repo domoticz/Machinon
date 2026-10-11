@@ -249,20 +249,6 @@ function dzToastRenderBodyLines(container, lines) {
     });
 }
 
-/* Accepts an href ONLY when it parses as an absolute http or https URL.
-   The URL constructor (not a regex) does the parsing, so this rejects
-   javascript:, data:, and every other scheme the same way a browser's own
-   scheme allow-list would, without trying to enumerate the deny-list by
-   hand. Returns the normalised href on success, null otherwise. */
-function dzToastValidHttpUrl(href) {
-    try {
-        var u = new URL(String(href), (typeof document !== "undefined" && document.baseURI) || undefined);
-        return (u.protocol === "http:" || u.protocol === "https:") ? u.href : null;
-    } catch (e) {
-        return null;
-    }
-}
-
 /* ev.action is a structured { label, href }, never raw markup: it exists so a
    toast can carry a real link (e.g. the update notice's release page) without
    the body ever being allowed to contain HTML. A rejected href still shows the
@@ -272,7 +258,7 @@ function dzToastBuildAction(action) {
     var row = document.createElement("div");
     row.className = "dz-toast-action-row";
     var label = (action && action.label) || "";
-    var url = action ? dzToastValidHttpUrl(action.href) : null;
+    var url = action ? dzValidHttpUrl(action.href) : null;
     if (url) {
         var a = document.createElement("a");
         a.className = "dz-toast-action";
