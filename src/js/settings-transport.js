@@ -368,7 +368,10 @@ function dzApiLayerSnap(layer) {
    believed there was nothing there". */
 function dzMergeConflict(baseSnap, intendedSnap, freshSnap) {
     if (!freshSnap) return intendedSnap;
-    var out = JSON.parse(JSON.stringify(freshSnap));
+    /* Migrated first: the fresh row may have been written by an older theme in
+       another browser, and the result is stamped with the current version, so a
+       retired key carried over here would never meet the ladder again. */
+    var out = dzMigrateSnapshot(JSON.parse(JSON.stringify(freshSnap)));
     out.schemaVersion = intendedSnap.schemaVersion || DZ_SETTINGS_SCHEMA_VERSION;
     ["features", "values"].forEach(function(part) {
         var intended = intendedSnap[part] || {};

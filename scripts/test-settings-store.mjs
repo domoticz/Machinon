@@ -133,3 +133,47 @@ test("dzMigrateSnapshot: a current row passes through unchanged", () => {
     const before = JSON.stringify(row);
     assert.equal(JSON.stringify(dz.dzMigrateSnapshot(row)), before);
 });
+
+/* Layer merge: later non-null layers win per key, and the result never aliases
+   an input's nested values. Characterisation of today's contract. */
+test("dzMergeSettingsLayers: a later layer wins per key, null layers are skipped", () => {
+    const dz = load();
+    const out = dz.dzMergeSettingsLayers(
+        { features: { a: true, b: true }, values: { x: 1, y: 1 } },
+        { features: { b: false }, values: { y: 2, icons: [{ idx: 1 }] } },
+        null);
+    assert.deepEqual(clone(out.features), { a: true, b: false });
+    assert.equal(out.values.x, 1);
+    assert.equal(out.values.y, 2);
+});
+
+test("dzMergeSettingsLayers: the merged result does not share nested values with an input", () => {
+    const dz = load();
+    const stored = { features: {}, values: { icons: [{ idx: 1 }] } };
+    const out = dz.dzMergeSettingsLayers({ features: {}, values: {} }, stored, null);
+    out.values.icons[0].idx = 99;
+    assert.equal(stored.values.icons[0].idx, 1);
+});
+
+/* Conflict merge: what THIS session changed (intended vs base) lands on top of
+   what the server holds now; everything else keeps the server's value. */
+test("dzMergeConflict: only this session's changes override the fresh server row", () => {
+    const dz = load();
+    const base = { schemaVersion: 2, features: { a: true, b: true }, values: { x: 1, y: 1 } };
+    const intended = { schemaVersion: 2, features: { a: false, b: true }, values: { x: 1, y: 5 } };
+    const fresh = { schemaVersion: 2, features: { a: true, b: false }, values: { x: 7, y: 1 } };
+    const out = dz.dzMergeConflict(base, intended, fresh);
+    assert.deepEqual(clone(out.features), { a: false, b: false }, "a changed here wins; b changed elsewhere is kept");
+    assert.deepEqual(clone(out.values), { x: 7, y: 5 });
+});
+
+test("dzMergeConflict: a fresh row in an older shape is migrated before the merge", () => {
+    const dz = load();
+    const base = { schemaVersion: 2, features: { warn_timeout: true, warn_battery: true }, values: {} };
+    const intended = { schemaVersion: 2, features: { warn_timeout: true, warn_battery: true }, values: { button_name: "x" } };
+    const fresh = { schemaVersion: 1, features: { notification: false }, values: {} };
+    const out = dz.dzMergeConflict(base, intended, fresh);
+    assert.equal("notification" in out.features, false, "a v1 key must not ride into a row stamped v2");
+    assert.equal(out.features.warn_timeout, false);
+    assert.equal(out.values.button_name, "x");
+});
