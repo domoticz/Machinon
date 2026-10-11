@@ -30,8 +30,18 @@ tr.update-pulse {
 .item.statusTimeout tr {
     box-shadow: var(--dz-glow-timeout) !important;
 }
-.item.statusTimeout {
+/* Stale, not unreadable: only the device image and the name dim. The last
+   reading and its "last seen" line stay at full contrast, because that value is
+   what the user needs to judge the device by; dimming the whole card took it to
+   2.12:1 on Machinon Light. The name dims by colour, not opacity, so the pulsing
+   timeout glyph inside it (.warning-text, below) keeps its own colour and blink
+   at full strength. The name selector repeats cards.css's "div.item.statusTimeout
+   td#name" so it wins on order (this file is imported after cards.css). */
+.item.statusTimeout #img {
     opacity: 0.5;
+}
+div.item.statusTimeout td#name {
+    color: color-mix(in srgb, var(--dz-body-text) 50%, transparent);
 }
 
 /* Restate the resting drop shadow before the ring: box-shadow is one property, so listing
