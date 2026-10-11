@@ -9,6 +9,9 @@
   same page.
 - A browser you can hard-refresh (Ctrl+Shift+R), since you'll need to do that once after
   installing or updating the theme.
+- A current browser: Chrome or Edge 111, Firefox 121, Safari 16.2 or newer (all from 2023). The
+  theme uses modern CSS such as `:has()` and `color-mix()`, so an older browser, for example on
+  an old wall tablet, may not show it correctly.
 
 ## Installing Machinon
 
@@ -60,7 +63,7 @@ cd domoticz/www/styles
 git clone https://github.com/domoticz/Machinon.git machinon
 ```
 
-The source loads around 27 separate CSS files rather than one flattened file. That's fine for
+The source loads its CSS as many separate files rather than one flattened file. That's fine for
 development, where you want to edit and reload individual files, but it's slower than the dist
 build for everyday use. To update, run `git pull` inside the `machinon` folder, the same as
 Option 1.
@@ -105,3 +108,30 @@ published branch, so it updates cleanly across the rewrite with no manual step.
 Nothing needs migrating: all of your theme settings live in Domoticz itself, not in the theme
 folder, so a clean reinstall picks them up automatically. See [Theme Hub](theme-hub.md) for how
 that storage works.
+
+## Switching back or removing Machinon
+
+Switching Domoticz to another theme (**Setup** > **Settings** > **System** > **Theme**) leaves
+Machinon's files and settings in place, so switching back later brings your setup back exactly as
+it was.
+
+To remove Machinon completely:
+
+1. While Machinon is still the active theme, open the Theme Hub, go to the **About** tab and use
+   **Reset theme to defaults** under Maintenance. This deletes the theme settings Domoticz stores
+   for your login (and, for an admin, the house-wide defaults), clears the copy cached in this
+   browser, and reloads the page.
+2. Switch Domoticz to another theme.
+3. Delete the `machinon` folder from `domoticz/www/styles/`.
+
+What stays behind:
+
+- **Icons you installed from the Icon Library.** They live in Domoticz's own custom icon set, and
+  devices keep using them under any theme. Remove them from the Icon Library before step 1 (each
+  installed icon has a Remove button), or later under **Setup** > **More options** > **Custom
+  Icons**.
+- **Other users' personal theme settings.** On an installation with separate logins, step 1 only
+  resets the settings of the login that runs it. They do nothing once Machinon is gone.
+- **Small entries in each browser's storage** for your Domoticz address: the cached settings,
+  which devices have already warned you, and the diagnostic logging switch. They are only read by
+  Machinon; clear the site data for your Domoticz address in the browser to remove them.

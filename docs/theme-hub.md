@@ -13,8 +13,8 @@ users only, on both stable and beta Domoticz releases.
 
 If you're logged in as a non-admin user on an installation with separate logins, you won't see
 the Setup menu at all, that's normal Domoticz behavior. Machinon still gives you a way in: look
-for the dropdown that replaces Setup for a non-admin login, labeled **Other** on the current
-Domoticz beta and **Profile** on the 2025.2 stable release. It's the menu a non-admin login sees
+for the dropdown that replaces Setup for a non-admin login, labeled **Other** on Domoticz 2026.1
+and later and **Profile** on older releases. It's the menu a non-admin login sees
 in place of Setup, holding items like Energy Dashboard, My Profile, About and Logout; the Theme
 Hub entry sits there too, directly above Logout. It puts non-admin users on equal footing with
 admins: a non-admin login is never locked out of its own theme settings, just directed to a

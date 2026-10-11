@@ -62,7 +62,7 @@ the browser to see the change.
 
 ### Checks
 
-Before opening a PR, run the guard suite and the build check locally. Install the pinned dev tools first with `pip install -r requirements-dev.txt`. CI runs the same commands on every push, so a clean local run means CI will be clean too:
+Before opening a PR, run the guard suite and the build check locally. Install the pinned dev tools first with `pip install -r requirements-dev.txt`. The commands below are the quick local subset that catches most failures. CI runs more on every push (the node and pytest suites, the contrast, site and settings-docs checks, and the docs build): `.github/workflows/validate.yml` is the complete list, and running its `run:` lines locally is how to be sure CI will be clean.
 
 ```
 scripts/check-typography.sh && scripts/check-buttons.sh && scripts/check-shadows.sh && scripts/check-menus.sh && scripts/check-tokens.sh
