@@ -529,6 +529,9 @@ function dzResolveThemeFolder(config) {
 
 dzBootJson('json.htm?type=command&param=getconfig').then(function(config) {
     lang = (0 <= supported_lang.split(" ").indexOf(config.language)) ? config.language : 'en';
+    /* Core's index.html ships <html> with no lang, so screen readers guess the
+       pronunciation. The UI language is known here, so state it. */
+    document.documentElement.lang = config.language || lang;
     return dzResolveThemeFolder(config);
 }).then(function(folder) {
     themeFolder = folder;

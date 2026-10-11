@@ -13,6 +13,7 @@ language = {
     clear_search: "Clear search results"
   },
   hub: {
+    tabs_label: "Theme settings",
     loading: "Loading..",
     house_managed: "House setting, managed by an admin",
     house_badge: "house",
@@ -319,6 +320,8 @@ language = {
         custom: { name: "Custom", desc: "Your own seven colours" }
       },
       delete_preset: "Delete preset",
+      delete_named: "Delete preset {name}",
+      group_label: "Color scheme",
       wheel_aria: "Pick {label} with a colour wheel",
       hex_aria: "{label} hex value",
       save_preset: "Save as preset",
@@ -404,6 +407,7 @@ language = {
   },
   problems: {
     badge_title: "Devices with problems",
+    badge_label: "Devices with problems: {count}",
     title: "Problem Devices",
     intro: "Devices that are timed out or low on battery right now.",
     timeout: "Timed out",

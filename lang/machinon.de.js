@@ -11,6 +11,7 @@ language = {
     clear_search: "Suchergebnisse löschen"
   },
   hub: {
+    tabs_label: "Theme-Einstellungen",
     loading: "Wird geladen..",
     house_managed: "Haus-Einstellung, von einem Administrator verwaltet",
     house_badge: "Haus",
@@ -317,6 +318,8 @@ language = {
         custom: { name: "Benutzerdefiniert", desc: "Deine eigenen sieben Farben" }
       },
       delete_preset: "Voreinstellung löschen",
+      delete_named: "Voreinstellung {name} löschen",
+      group_label: "Farbschema",
       wheel_aria: "{label} mit einem Farbkreis wählen",
       hex_aria: "Hex-Wert für {label}",
       save_preset: "Als Voreinstellung speichern",
@@ -402,6 +405,7 @@ language = {
   },
   problems: {
     badge_title: "Geräte mit Problemen",
+    badge_label: "Geräte mit Problemen: {count}",
     title: "Problemgeräte",
     intro: "Geräte, die gerade eine Zeitüberschreitung haben oder eine schwache Batterie melden.",
     timeout: "Zeitüberschreitung",

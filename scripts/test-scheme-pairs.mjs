@@ -146,3 +146,17 @@ test("deleting one half of a pair does not leave theme.scheme dangling on the ot
                  "theme.scheme must not be left pointing at the deleted mate's slug");
     assert.deepEqual(dz.theme.user_schemes, [], "both halves of the pair must be removed");
 });
+
+/* The Theme Hub marks the card of the scheme actually in effect. With no
+   explicit pick (theme.scheme unset, the default) that is decided the way
+   scheme.js setColorScheme paints it: custom colours win, then the dark
+   feature, else light. */
+test("dzActiveSchemeSlug names the scheme in effect, picked or not", () => {
+    const run = (t) => { dz.theme = t; return dz.dzActiveSchemeSlug(); };
+    const feats = (custom, dark) => ({ custom_color_scheme: { enabled: custom }, dark_theme: { enabled: dark } });
+    assert.equal(run({ scheme: "nord-dark", features: feats(true, true) }), "nord-dark");
+    assert.equal(run({ features: feats(false, false) }), "light");
+    assert.equal(run({ features: feats(false, true) }), "dark");
+    assert.equal(run({ features: feats(true, false) }), "custom");
+    assert.equal(run({ scheme: "", features: feats(false, true) }), "dark");
+});

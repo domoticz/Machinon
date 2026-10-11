@@ -14,6 +14,7 @@ language = {
     clear_search: "Zoekresultaten wissen"
   },
   hub: {
+    tabs_label: "Thema-instellingen",
     loading: "Laden..",
     house_managed: "Instelling voor het hele huis, beheerd door een beheerder",
     house_badge: "huis",
@@ -320,6 +321,8 @@ language = {
         custom: { name: "Eigen", desc: "Je eigen zeven kleuren" }
       },
       delete_preset: "Voorinstelling verwijderen",
+      delete_named: "Voorinstelling {name} verwijderen",
+      group_label: "Kleurenschema",
       wheel_aria: "{label} kiezen met een kleurenwiel",
       hex_aria: "Hexwaarde van {label}",
       save_preset: "Opslaan als voorinstelling",
@@ -405,6 +408,7 @@ language = {
   },
   problems: {
     badge_title: "Apparaten met problemen",
+    badge_label: "Apparaten met problemen: {count}",
     title: "Probleemapparaten",
     intro: "Apparaten die nu een time-out hebben of een lage batterij melden.",
     timeout: "Time-out",

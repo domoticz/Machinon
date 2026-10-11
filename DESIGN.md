@@ -2426,6 +2426,15 @@ duplicating them: the scheme picker and 7-swatch custom-colour editor (`src/js/s
 the hub is attached to the live document; the reason lives in `src/js/theme-hub.js`
 (`dzBuildThemeHub`).
 
+**Scheme cards, keyboard and state.** Each `.scheme-card` is a plain container; a transparent
+`.scheme-pick` `<button>` stretched over it takes clicks and focus and carries the scheme name and
+`aria-pressed`, so a user scheme's `.scheme-delete` (a button too) is never nested inside another
+control. The card of the scheme IN EFFECT is the selected one even before anyone picks
+(`dzActiveSchemeSlug`). Keyboard focus shows as a solid 2px `--dz-accent-color` outline 3px
+outside the card, not `--dz-btn-focus-ring`: the selected `--dz-ring-accent` would cover or
+swallow that ring on the current card. The Hub tabs follow the tab pattern (one tab stop,
+arrows/Home/End, each tab `aria-controls` its `role=tabpanel` section).
+
 **About and attribution.** The General tab carries a short intro (name, live version, one
 line); the About tab (the last tab) carries the expansive version, a modernized
 description, a Contributions block (Design: EdddieN; Code: davidlb, DewGew, landaisbenj,
@@ -2694,7 +2703,7 @@ would have to change, not a reason to copy the current behaviour.
   `css/nav.css`), the card on/off toggle (`--dz-btn-focus-ring` on its slider, `css/switch.css`)
   and the hamburger (`button.menu-toggle:focus-visible`, `css/nav.css`: an inset 2px outline in the
   bars' own colour with `--dz-menu-radius` corners, because the accent ring would vanish on the
-  accent header it sits on). The dropdown-menu items themselves (`.navbar .nav .dropdown-menu li a`,
+  accent header it sits on) and the Theme Hub scheme cards (see Theme Hub, "Scheme cards"). The dropdown-menu items themselves (`.navbar .nav .dropdown-menu li a`,
   Setup/Other/Custom) still have no visible keyboard-focus ring.
 - Disabled button contrast below WCAG AA: light theme `{colors.light-text-secondary}` on
   `{colors.light-disabled}`, and dark theme `{colors.dark-text-secondary}` on

@@ -325,6 +325,18 @@ function deleteUserScheme(name, variant) {
    the user's own colours (the hub's swatch editor), "user:<name>" a saved preset,
    anything else a built-in preset. Applies live, caches, and persists to
    the Domoticz user variables immediately (see persistSchemeChoice). */
+/* The slug of the scheme in effect, picked or not. theme.scheme is unset until
+   someone picks one, and then the page is painted by the rule scheme.js
+   setColorScheme applies: custom colours win, then the dark feature, else
+   light. The picker marks this card so the default is visibly the default. */
+function dzActiveSchemeSlug() {
+    if (theme.scheme) return theme.scheme;
+    var f = theme.features || {};
+    if (f.custom_color_scheme && f.custom_color_scheme.enabled === true) return "custom";
+    if (f.dark_theme && f.dark_theme.enabled === true) return "dark";
+    return "light";
+}
+
 function applyScheme(slug) {
     if (slug === "light" || slug === "dark") {
         theme.scheme = slug;
@@ -502,12 +514,27 @@ function renderSchemePicker() {
 
         // Build fresh DOM per container (a node cannot have two parents); the
         // `cards` data above is computed once and shared read-only across them.
+        var active = dzActiveSchemeSlug();
         containers.forEach(function(container) {
             container.textContent = "";
-            cards.forEach(function(card) {
+            container.setAttribute("role", "group");
+            container.setAttribute("aria-label", dzT("hub.schemes.group_label"));
+            cards.forEach(function(card, i) {
                 var el = document.createElement("div");
-                el.className = "scheme-card" + (theme.scheme === card.slug ? " selected" : "");
+                el.className = "scheme-card" + (active === card.slug ? " selected" : "");
                 el.setAttribute("data-scheme", card.slug);
+
+                /* The card is a plain container; this transparent button,
+                   stretched over it (css/theme-hub.css), is what takes focus and
+                   clicks. A card that WAS the button could not hold the delete
+                   control below: a button's content is presentational, so a
+                   screen reader could never reach a control nested in it. */
+                var pick = document.createElement("button");
+                pick.type = "button";
+                pick.className = "scheme-pick";
+                pick.setAttribute("aria-label", card.name);
+                pick.setAttribute("aria-pressed", active === card.slug ? "true" : "false");
+                el.appendChild(pick);
 
                 var swatches = document.createElement("div");
                 swatches.className = "swatches";
@@ -527,15 +554,19 @@ function renderSchemePicker() {
                 if (card.desc) {
                     var desc = document.createElement("div");
                     desc.className = "scheme-desc";
+                    desc.id = container.id + "-desc-" + i;
                     desc.textContent = card.desc;
                     el.appendChild(desc);
+                    pick.setAttribute("aria-describedby", desc.id);
                 }
 
                 if (card.deletable) {
-                    var del = document.createElement("span");
+                    var del = document.createElement("button");
+                    del.type = "button";
                     del.className = "scheme-delete";
                     del.textContent = "×";
                     del.title = dzT("hub.schemes.delete_preset");
+                    del.setAttribute("aria-label", dzT("hub.schemes.delete_named", { name: card.name }));
                     del.addEventListener("click", function(e) {
                         e.stopPropagation();
                         deleteUserScheme(card.presetName || card.name, card.variant);
@@ -545,8 +576,12 @@ function renderSchemePicker() {
 
                 el.addEventListener("click", function() {
                     applyScheme(card.slug).then(function() {
-                        container.querySelectorAll(".scheme-card").forEach(function(c) { c.classList.remove("selected"); });
+                        container.querySelectorAll(".scheme-card").forEach(function(c) {
+                            c.classList.remove("selected");
+                            c.querySelector(".scheme-pick").setAttribute("aria-pressed", "false");
+                        });
                         el.classList.add("selected");
+                        pick.setAttribute("aria-pressed", "true");
                         // Keep the hub's own custom-colour swatches (value + enabled
                         // state) in step with the pick. Guarded: schemes.js must not
                         // hard-depend on the hub module.

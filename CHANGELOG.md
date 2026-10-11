@@ -4,6 +4,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+- In the Theme Hub, colour schemes can be chosen and deleted with the keyboard, the scheme in use is marked even if you never picked one, the tabs work with the arrow keys, and "Create a theme" keeps keyboard focus inside its window until you close it. The problem badge now tells screen readers what its number counts (#224)
 - Keyboard users can now reach and switch the on/off toggles on device cards, open and close the menu on phones and zoomed-in screens (Enter to open, Escape to close), and read a focused menu link in the light colour schemes. Screen readers announce each toggle with its device name (#224)
 - Pages left open, such as on a wall tablet, use noticeably less processor time: the theme no longer reworks every device card each time the clock in the top bar ticks
 - The custom page button now shows the name you set on a browser's first visit, and a new name shows straight away instead of after a reload (#228)

@@ -11,6 +11,7 @@ language = {
     clear_search: "Wyczyść wyniki wyszukiwania"
   },
   hub: {
+    tabs_label: "Ustawienia motywu",
     loading: "Wczytywanie..",
     house_managed: "Ustawienie domu, zarządzane przez administratora",
     house_badge: "dom",
@@ -317,6 +318,8 @@ language = {
         custom: { name: "Własny", desc: "Twoich siedem kolorów" }
       },
       delete_preset: "Usuń zestaw",
+      delete_named: "Usuń zestaw {name}",
+      group_label: "Schemat kolorów",
       wheel_aria: "Wybierz {label} za pomocą koła kolorów",
       hex_aria: "Wartość hex dla {label}",
       save_preset: "Zapisz jako zestaw",
@@ -402,6 +405,7 @@ language = {
   },
   problems: {
     badge_title: "Urządzenia z problemem",
+    badge_label: "Urządzenia z problemem: {count}",
     title: "Urządzenia z problemami",
     intro: "Urządzenia, które właśnie przekroczyły limit czasu lub mają niski poziom baterii.",
     timeout: "Przekroczony limit czasu",

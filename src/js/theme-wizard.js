@@ -13,6 +13,9 @@
 
 var DZ_WIZARD_ID = "dz-theme-wizard";
 var DZ_WIZARD = null;
+/* The element that had focus when the wizard opened (the hub's "Create a
+   theme" button), handed focus back on close. */
+var DZ_WIZARD_OPENER = null;
 
 function dzWizardDefaults() {
     return { step: 1, accent: "#3B7DD8", surface: null, look: "soft", name: "" };
@@ -28,6 +31,7 @@ function dzWizardEl(tag, cls, parent) {
 function dzOpenThemeWizard() {
     if (document.getElementById(DZ_WIZARD_ID)) { return; }
     DZ_WIZARD = dzWizardDefaults();
+    DZ_WIZARD_OPENER = document.activeElement;
 
     var scrim = document.getElementById("mk-rgbw-scrim");
     if (!scrim) {
@@ -47,8 +51,26 @@ function dzOpenThemeWizard() {
     dzWizardRender();
 }
 
+/* A modal dialog keeps keyboard focus inside itself: Tab past the last
+   control wraps to the first and Shift+Tab before the first wraps to the last,
+   so nothing behind the scrim can be reached while it is open. */
 function dzWizardKeydown(e) {
-    if (e.key === "Escape") { dzCloseThemeWizard(); }
+    if (e.key === "Escape") { dzCloseThemeWizard(); return; }
+    if (e.key !== "Tab") { return; }
+    var dialog = document.getElementById(DZ_WIZARD_ID);
+    if (!dialog) { return; }
+    var items = dzWizardFocusables(dialog);
+    if (!items.length) { return; }
+    var first = items[0], last = items[items.length - 1];
+    var inside = dialog.contains(document.activeElement);
+    if (e.shiftKey && (document.activeElement === first || !inside)) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && (document.activeElement === last || !inside)) { e.preventDefault(); first.focus(); }
+}
+
+function dzWizardFocusables(dialog) {
+    return Array.prototype.filter.call(
+        dialog.querySelectorAll("button, [href], input, select, textarea, [tabindex]"),
+        function (el) { return !el.disabled && el.tabIndex >= 0 && el.offsetParent !== null; });
 }
 
 function dzCloseThemeWizard() {
@@ -61,6 +83,8 @@ function dzCloseThemeWizard() {
     }
     document.removeEventListener("keydown", dzWizardKeydown);
     DZ_WIZARD = null;
+    if (DZ_WIZARD_OPENER && document.contains(DZ_WIZARD_OPENER)) { DZ_WIZARD_OPENER.focus(); }
+    DZ_WIZARD_OPENER = null;
 }
 
 /* Full re-render per step. The dialog is small and re-rendering keeps step
@@ -118,6 +142,11 @@ function dzWizardRender() {
         if (DZ_WIZARD.step < 3) { DZ_WIZARD.step += 1; dzWizardRender(); }
         else { dzWizardSave(); }
     });
+
+    /* The re-render above removed whatever had focus (the button that changed
+       step, or nothing yet on open), so place it again: on the dialog's first
+       control, the close button, as the colour popup does. */
+    if (!dialog.contains(document.activeElement)) { close.focus(); }
 }
 
 /* A miniature of the real UI: navbar, two cards (one active, one

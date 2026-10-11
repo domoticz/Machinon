@@ -412,6 +412,36 @@
     box-shadow: var(--dz-ring-accent);
 }
 
+/* The card's click and focus target (src/js/schemes.js): a transparent button
+   stretched over the whole card, so the card looks and clicks exactly as
+   before while a keyboard can reach it. Its own outline is dropped; the card
+   shows a solid accent outline 3px outside itself instead. Not the usual
+   --dz-btn-focus-ring: the selected state already spends a solid 2px accent
+   ring, which covers a box-shadow ring exactly and swallows a faint 35% one
+   next to it, so focus on the CURRENT card would not show. The 3px gap keeps
+   the two rings apart. */
+.dz-hub-scheme-picker .scheme-pick {
+    position: absolute;
+    inset: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: inherit;
+    background: transparent;
+    cursor: pointer;
+}
+
+.dz-hub-scheme-picker .scheme-pick:focus {
+    outline: none;
+}
+
+.dz-hub-scheme-picker .scheme-card:has(.scheme-pick:focus-visible) {
+    outline: 2px solid var(--dz-accent-color);
+    outline-offset: 3px;
+}
+
 .dz-hub-scheme-picker .swatches {
     display: flex;
     height: 28px; /* was 22px; seven swatches across 160px read as colour bands rather than hairlines */
@@ -445,12 +475,30 @@
 
 .dz-hub-scheme-picker .scheme-delete {
     position: absolute;
+    /* Above the stretched .scheme-pick, so it keeps its own clicks. */
+    z-index: 1;
     top: -2px;
     right: 4px;
     font-size: var(--dz-text-sm);
     line-height: 1;
     color: var(--secondary-text-color);
     cursor: pointer;
+    /* A <button>: drop the UA chrome so it paints as the bare glyph it was. */
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+}
+
+.dz-hub-scheme-picker .scheme-delete:focus {
+    outline: none;
+}
+
+.dz-hub-scheme-picker .scheme-delete:focus-visible {
+    border-radius: var(--dz-btn-radius);
+    box-shadow: var(--dz-btn-focus-ring);
 }
 
 .dz-hub-scheme-picker .scheme-delete:hover {

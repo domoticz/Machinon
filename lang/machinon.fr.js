@@ -11,6 +11,7 @@ language = {
     clear_search: "Effacer les résultats de recherche"
   },
   hub: {
+    tabs_label: "Paramètres du thème",
     loading: "Chargement..",
     house_managed: "Réglage de la maison, géré par un administrateur",
     house_badge: "maison",
@@ -317,6 +318,8 @@ language = {
         custom: { name: "Personnalisé", desc: "Vos sept couleurs à vous" }
       },
       delete_preset: "Supprimer le préréglage",
+      delete_named: "Supprimer le préréglage {name}",
+      group_label: "Schéma de couleurs",
       wheel_aria: "Choisir {label} avec une roue chromatique",
       hex_aria: "Valeur hex de {label}",
       save_preset: "Enregistrer comme préréglage",
@@ -402,6 +405,7 @@ language = {
   },
   problems: {
     badge_title: "Dispositifs ayant des problèmes",
+    badge_label: "Dispositifs ayant des problèmes : {count}",
     title: "Dispositifs à problèmes",
     intro: "Dispositifs actuellement expirés ou à batterie faible.",
     timeout: "Expiré",

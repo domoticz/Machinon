@@ -11,6 +11,7 @@ language = {
     clear_search: "Rensa sökresultat"
   },
   hub: {
+    tabs_label: "Temainställningar",
     loading: "Laddar..",
     house_managed: "Husinställning, hanteras av en administratör",
     house_badge: "hus",
@@ -317,6 +318,8 @@ language = {
         custom: { name: "Anpassad", desc: "Dina egna sju färger" }
       },
       delete_preset: "Radera förinställning",
+      delete_named: "Radera förinställning {name}",
+      group_label: "Färgschema",
       wheel_aria: "Välj {label} med en färgcirkel",
       hex_aria: "Hex-värde för {label}",
       save_preset: "Spara som förinställning",
@@ -402,6 +405,7 @@ language = {
   },
   problems: {
     badge_title: "Enheter med problem",
+    badge_label: "Enheter med problem: {count}",
     title: "Problemenheter",
     intro: "Enheter som just nu har nått tidsgränsen eller har lågt batteri.",
     timeout: "Tidsgräns nådd",

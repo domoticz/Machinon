@@ -203,6 +203,25 @@ function dzBuildThemeHub(routeHost) {
     var tabs = document.createElement("div");
     tabs.className = "dz-hub-tabs";
     tabs.setAttribute("role", "tablist");
+    tabs.setAttribute("aria-label", dzT("hub.tabs_label"));
+    /* The tab pattern's keyboard contract: one tab stop for the whole strip
+       (roving tabindex, set in dzHubShowGroup), arrows move between tabs and
+       activate them, Home/End jump to the ends. Activation goes through the
+       tab's own click so it does exactly what a click does. */
+    tabs.addEventListener("keydown", function (e) {
+        var all = Array.prototype.slice.call(tabs.querySelectorAll(".dz-hub-tab"));
+        var i = all.indexOf(document.activeElement);
+        if (i < 0) return;
+        var next = null;
+        if (e.key === "ArrowRight") next = all[(i + 1) % all.length];
+        else if (e.key === "ArrowLeft") next = all[(i - 1 + all.length) % all.length];
+        else if (e.key === "Home") next = all[0];
+        else if (e.key === "End") next = all[all.length - 1];
+        if (!next) return;
+        e.preventDefault();
+        next.click();
+        next.focus();
+    });
 
     var panel = document.createElement("div");
     panel.className = "dz-hub-panel";
@@ -231,6 +250,8 @@ function dzBuildThemeHub(routeHost) {
         item.className = "dz-hub-tab";
         item.setAttribute("data-group", group.id);
         item.setAttribute("role", "tab");
+        item.id = "dz-hub-tab-" + group.id;
+        item.setAttribute("aria-controls", "dz-hub-panel-" + group.id);
         item.textContent = dzT("hub.groups." + group.id);
         item.addEventListener("click", function () { dzHubShowGroup(group.id); });
         tabs.appendChild(item);
@@ -238,6 +259,9 @@ function dzBuildThemeHub(routeHost) {
         var section = document.createElement("section");
         section.className = "dz-hub-section";
         section.setAttribute("data-group", group.id);
+        section.id = "dz-hub-panel-" + group.id;
+        section.setAttribute("role", "tabpanel");
+        section.setAttribute("aria-labelledby", item.id);
         var h = document.createElement("h2");
         h.className = "dz-hub-section-title";
         h.textContent = dzT("hub.groups." + group.id);
@@ -846,6 +870,7 @@ function dzHubShowGroup(groupId) {
         var on = it.getAttribute("data-group") === groupId;
         it.classList.toggle("is-active", on);
         it.setAttribute("aria-selected", on ? "true" : "false");
+        it.tabIndex = on ? 0 : -1;
         if (on) activeTab = it;
     });
     /* The strip scrolls sideways when the tabs do not fit (.dz-hub-tabs,

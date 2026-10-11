@@ -205,6 +205,8 @@ function dzProblemsRefresh() {
                 badge.hidden = true;
             } else {
                 badge.querySelector(".dz-problem-count").textContent = String(rows.length);
+                /* The visible text is only the number; the name says what it counts. */
+                badge.setAttribute("aria-label", dzT("problems.badge_label", { count: rows.length }));
                 badge.hidden = false;
             }
         }
