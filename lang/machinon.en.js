@@ -10,7 +10,8 @@ language = {
     mainmenu: "Main menu",
     type_to_search: "Type to search",
     search_placeholder: "Name, Desc, Idx, Status",
-    clear_search: "Clear search results"
+    clear_search: "Clear search results",
+    search_no_match: "No devices on this page match “{query}”."
   },
   hub: {
     tabs_label: "Theme settings",

@@ -8,7 +8,8 @@ language = {
     mainmenu: "Hauptmenü",
     type_to_search: "Zum Suchen tippen",
     search_placeholder: "Name, Beschr., Idx, Status",
-    clear_search: "Suchergebnisse löschen"
+    clear_search: "Suchergebnisse löschen",
+    search_no_match: "Keine Geräte auf dieser Seite passen zu „{query}“."
   },
   hub: {
     tabs_label: "Theme-Einstellungen",

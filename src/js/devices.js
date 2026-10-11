@@ -1053,10 +1053,9 @@ function initDeviceLiveUpdates($scope) {
    register here instead of running their own MutationObserver, so one burst
    schedules one 50ms flush instead of one per module. devices.js loads first
    (custom.js THEME_MODULES), so this is defined before any caller runs.
-   Callbacks are invoked with no arguments: both registered subscribers
-   (card-drag-handle.js applyHandle, floorplan-stage.js applyClass) are
-   documented cheap no-ops when idle and never consumed the raw mutation
-   records, so the flush does not pass them. */
+   Callbacks are invoked with no arguments and must be cheap no-ops when
+   there is nothing for them to do: none consumes the raw mutation records, so
+   the flush does not pass them. */
 var domSettledCallbacks = [];
 function dzOnDomSettled(callback) {
     domSettledCallbacks.push(callback);

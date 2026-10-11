@@ -364,3 +364,16 @@ input[type="radio"]:checked::before {
 .dz-camera-filtered-out {
     display: none !important;
 }
+
+/* "No devices on this page match ..." (src/js/search.js dzSearchEmptyUpdate):
+   the Problem Devices empty-state tone (#dz-problems-state, css/problems.css)
+   with the ghost-button Clear beside it, wrapping under it on a phone. */
+#dz-search-empty {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--dz-card-space-lg);
+    font-size: var(--dz-text-sm);
+    color: var(--dz-table-control-text);
+    padding: var(--dz-card-space-lg) 0;
+}

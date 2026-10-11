@@ -8,7 +8,8 @@ language = {
     mainmenu: "Huvudmeny",
     type_to_search: "Skriv för att söka",
     search_placeholder: "Namn, Beskr., Idx, Status",
-    clear_search: "Rensa sökresultat"
+    clear_search: "Rensa sökresultat",
+    search_no_match: "Inga enheter på den här sidan matchar ”{query}”."
   },
   hub: {
     tabs_label: "Temainställningar",

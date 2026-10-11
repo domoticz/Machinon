@@ -8,7 +8,8 @@ language = {
     mainmenu: "Menu principal",
     type_to_search: "Tapez pour rechercher",
     search_placeholder: "Nom, Desc, Idx, Etat",
-    clear_search: "Effacer les résultats de recherche"
+    clear_search: "Effacer les résultats de recherche",
+    search_no_match: "Aucun dispositif de cette page ne correspond à « {query} »."
   },
   hub: {
     tabs_label: "Paramètres du thème",

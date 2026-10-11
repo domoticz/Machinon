@@ -9,6 +9,86 @@
    offers search on every page. The dashboard surfaces core's engine cannot
    see are handled by src/js/device-filter.js. */
 
+/* The box's own clear (set by setSearch): one dispatched keyup+change that every
+   engine hears, which the empty-state button below reuses. */
+var dzSearchClear = null;
+
+/* "No devices on this page match ..." with a Clear button, shown in the page
+   itself whenever a query is active, the route is searchable and no card is
+   left visible. Without it the only trace of the filter was the count beside
+   the box, and a query that followed the user to the next page (core restores
+   LastSearchFilter on every route) left that page blank for no visible reason.
+
+   It counts what is painted rather than asking each engine: three engines filter
+   (core's WatchLiveSearch, Angular on the classic dashboard, device-filter.js on
+   Dash2), and all of them hide cards one way or another. Cameras count, so a
+   query matching only a camera is not "no match". Lives inside the routed page's
+   content container, so a route change takes it away with the page it
+   described. */
+function dzSearchEmptyUpdate() {
+    var input = document.getElementById("searchInput");
+    var search = document.getElementById("search");
+    var query = input ? input.value.trim() : "";
+    var existing = document.getElementById("dz-search-empty");
+    /* Core's own result count, written by whichever engine just filtered this
+       page. Required to read 0 as well as no card being painted: between a route
+       change and the restore that re-applies the query, the new page's cards can
+       be absent or not yet filtered, and judging by the painted cards alone
+       flashed "no match" over a page the query does match (measured: three 50ms
+       samples on Utility). The count still holds the previous page's number
+       until the restore lands, so it cannot claim zero early. */
+    var countEl = search ? search.querySelector(".jsTbResultsCount") : null;
+    var counted = countEl ? parseInt(countEl.textContent.replace(/\s/g, ""), 10) : NaN;
+    var empty = false;
+    if (query && counted === 0 && search && !search.classList.contains("readonly")) {
+        empty = true;
+        var cards = document.querySelectorAll("#main-view .itemBlock, #main-view #dashCameras .movable");
+        for (var i = 0; i < cards.length; i++) {
+            if (cards[i].getClientRects().length) { empty = false; break; }
+        }
+    }
+    /* The page's content container, not merely the first child: several pages
+       park hidden dialogs and log panels (#dialog-renameselectorlevel,
+       #percentagelog, ...) ahead of or beside it. devices.js swaps its class
+       .container -> .container-fluid after render, so accept either. */
+    var view = document.querySelector("#main-view > .container-fluid, #main-view > .container");
+    if (!empty || !view) {
+        if (existing) existing.parentNode.removeChild(existing);
+        return;
+    }
+    if (!existing || existing.parentNode !== view) {
+        if (existing) existing.parentNode.removeChild(existing);
+        existing = document.createElement("div");
+        existing.id = "dz-search-empty";
+        existing.setAttribute("role", "status");
+        var text = document.createElement("span");
+        text.className = "dz-search-empty-text";
+        existing.appendChild(text);
+        var clear = document.createElement("button");
+        clear.type = "button";
+        clear.className = "btn btn-default dz-search-empty-clear";
+        clear.textContent = dzT("header.clear_search");
+        clear.addEventListener("click", function () { if (dzSearchClear) dzSearchClear(); });
+        existing.appendChild(clear);
+        view.insertBefore(existing, view.firstChild);
+    }
+    /* textContent: the query is whatever the user typed. */
+    existing.querySelector(".dz-search-empty-text").textContent = dzT("header.search_no_match", { query: query });
+}
+
+/* Coalesced, keep-first: a keystroke, the count repaint it causes and the
+   DOM-settled flush all ask within a few ms, and one run after the engines have
+   painted answers all of them. Never re-armed by a later request, so a stream of
+   them cannot postpone it forever. */
+var dzSearchEmptyTimer = null;
+function dzSearchEmptySchedule() {
+    if (dzSearchEmptyTimer !== null) return;
+    dzSearchEmptyTimer = setTimeout(function () {
+        dzSearchEmptyTimer = null;
+        dzSearchEmptyUpdate();
+    }, 60);
+}
+
 function setSearch() {
     var search = document.createElement("div");
     search.id = "search";
@@ -138,6 +218,7 @@ function setSearch() {
         input.dispatchEvent(new Event("keyup", { bubbles: true }));
         input.dispatchEvent(new Event("change", { bubbles: true }));
     }
+    dzSearchClear = clearSearch;
 
     /* Same hazard as syncLiveSearchSiblings above, on the same element: a
        jQuery-bound handler here would be stripped by WatchLiveSearch's
@@ -164,6 +245,18 @@ function setSearch() {
        these elements too. Bound on the wrapper so a click on the glyph inside
        it counts. */
     results.addEventListener("click", clearSearch);
+
+    /* Re-evaluate the empty state after every filter run. Typing reaches these
+       native listeners; core's restore on arrival does not (it uses jQuery's
+       .trigger, which dispatches nothing to the DOM, and hides cards with inline
+       styles the device observer ignores), but every engine repaints the count
+       when it finishes, so that repaint is the one signal they all share. The
+       settled flush covers re-renders that change the cards themselves. */
+    input.addEventListener("keyup", dzSearchEmptySchedule);
+    input.addEventListener("change", dzSearchEmptySchedule);
+    new MutationObserver(dzSearchEmptySchedule).observe(count, { childList: true, characterData: true, subtree: true });
+    if (typeof dzOnDomSettled === "function") { dzOnDomSettled(dzSearchEmptySchedule); }
+    window.addEventListener("hashchange", dzSearchEmptySchedule);
 
     /* Core calls WatchLiveSearch once at app.js boot, before this box exists,
        so bind it again now that it does. The call is .off().on(), so binding

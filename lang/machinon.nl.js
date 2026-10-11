@@ -11,7 +11,8 @@ language = {
     mainmenu: "Hoofdmenu",
     type_to_search: "Typ om te zoeken",
     search_placeholder: "Naam, Omschr., Idx, Status",
-    clear_search: "Zoekresultaten wissen"
+    clear_search: "Zoekresultaten wissen",
+    search_no_match: "Geen apparaten op deze pagina komen overeen met ‘{query}’."
   },
   hub: {
     tabs_label: "Thema-instellingen",
