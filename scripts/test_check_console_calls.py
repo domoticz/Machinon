@@ -19,12 +19,12 @@ mod = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(mod)
 
 
-def tree(root, custom_js="", src_js="", moment_js=""):
+def tree(root, custom_js="", src_js="", vendored_js=""):
     (root / "src" / "js").mkdir(parents=True)
     (root / "js").mkdir()
     (root / "custom.js").write_text(custom_js)
     (root / "src" / "js" / "devices.js").write_text(src_js)
-    (root / "js" / "moment.js").write_text(moment_js)
+    (root / "js" / "livestamp.js").write_text(vendored_js)
     return root
 
 
@@ -61,8 +61,8 @@ def test_the_recorders_own_debug_output_is_not_counted(tmp_path):
     assert sum(per_level.values()) == 0
 
 
-def test_vendored_moment_is_not_counted(tmp_path):
-    root = tree(tmp_path, "", "", 'console.warn("moment deprecation");\n')
+def test_vendored_file_is_not_counted(tmp_path):
+    root = tree(tmp_path, "", "", 'console.warn("vendored deprecation");\n')
     per_file, _ = mod.count(root)
     assert per_file == {}
 

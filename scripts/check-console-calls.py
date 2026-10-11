@@ -15,12 +15,9 @@ WHAT IT DOES NOT COUNT.
   * `console.debug` is the recorder's own output (diag.js), gated behind the
     Diagnostic logging setting. Counting it would penalise the very migration
     this check exists to protect.
-  * `js/moment.js` is vendored and never edited here.
+  * Vendored files (VENDORED below) are never edited here.
 
-BASELINE. 63 call sites, measured 2026-09-10 across custom.js, js/ and src/js/
-(39 warn, 23 log, 1 error). It differs from the 67 the design spec recorded on
-2026-09-09 because that figure came from a grep with no `(` in the pattern,
-counting `console.log` feature tests as calls, and included vendored moment.js.
+BASELINE is the measured count of call sites across custom.js, js/ and src/js/.
 Lower BASELINE in the same change whenever the real count drops, so the gain is
 locked in rather than left as headroom for the next addition.
 
@@ -40,11 +37,11 @@ import sys
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
 
-BASELINE = 63
+BASELINE = 62
 
 SOURCES = ["custom.js"]
 DIRS = ["js", "src/js"]
-VENDORED = {"js/moment.js"}
+VENDORED = {"js/livestamp.js"}
 
 # The `(` matters: `typeof console !== "undefined" && console.log` is a feature
 # test, not a call, and counting it made the first inventory of this codebase

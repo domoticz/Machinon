@@ -10,7 +10,45 @@
    Core's storesettings command is never used: it rewrites the whole settings
    form and blanks absent fields, which a partial theme write must not do. */
 
-var DZ_SETTINGS_SCHEMA_VERSION = 1;
+/* The shape every snapshot is written in. Bump it, and add the step that lifts
+   the previous shape to it in DZ_SETTINGS_MIGRATIONS, whenever a stored key is
+   renamed, split or retyped. */
+var DZ_SETTINGS_SCHEMA_VERSION = 2;
+
+/* DZ_SETTINGS_MIGRATIONS[n - 1] lifts a version-n snapshot to version n + 1.
+   Every step must be safe on data already in the newer shape: the browser
+   cache carries no version stamp, so dzThemeFromCache (settings-store.js) runs
+   it through the whole ladder from version 1 on every warm boot. In practice
+   that means a step only fills keys that are absent and only removes keys
+   that are retired. */
+var DZ_SETTINGS_MIGRATIONS = [
+    /* 1 -> 2: the single `notification` toggle became warn_timeout and
+       warn_battery (#198). Both are seeded from the old value, so nobody's
+       warnings change state on upgrade, and only when absent, so a user who
+       has since set them individually keeps that choice. */
+    function (snap) {
+        if (!snap.features || !("notification" in snap.features)) return;
+        var was = snap.features.notification === true;
+        if (!("warn_timeout" in snap.features)) snap.features.warn_timeout = was;
+        if (!("warn_battery" in snap.features)) snap.features.warn_battery = was;
+        delete snap.features.notification;
+    }
+];
+
+/* Lift a stored snapshot (the dzSettingsSnapshot shape) to the current
+   version, in place. A row with no version predates versioning and is
+   version 1. The one choke point every stored snapshot passes through before
+   it is applied. */
+function dzMigrateSnapshot(snap) {
+    if (!snap) return snap;
+    var v = typeof snap.schemaVersion === "number" && snap.schemaVersion >= 1 ? snap.schemaVersion : 1;
+    while (v < DZ_SETTINGS_SCHEMA_VERSION) {
+        DZ_SETTINGS_MIGRATIONS[v - 1](snap);
+        v++;
+    }
+    snap.schemaVersion = v;
+    return snap;
+}
 
 /* Deep-clone reference-typed values (icons array, user_schemes array,
    color_scheme object) so every snapshot owns its own copy. The overlay
@@ -196,22 +234,12 @@ function dzApiFetchLayers() {
 function dzApiLoad() {
     return dzApiFetchLayers().then(function(outcome) {
         if (outcome !== DZ_LOAD_LOADED) return outcome;
-        /* MIGRATION (notification split, #198): a row stored before the split
-           still carries features.notification and no warn_timeout/warn_battery.
-           dzApplySnapshot below only ever writes keys ALREADY present in
-           theme.features, so the migration must run on the snapshot BEFORE
-           it is applied, not after -- by the time theme.features holds the
-           result, dzApplySnapshot has already had its one chance to see
-           warn_timeout/warn_battery in the snap and would silently skip
-           them on a second pass. dzMigrateNotificationSplit is defined in
-           settings-store.js, loaded earlier in custom.js's THEME_MODULES but
-           only ever CALLED here at boot time, well after every module has
-           loaded; guarded anyway, same pattern as reconcileDomoticzSettingsInPlace's
-           migrateRetiredScheme guard, in case that load order ever changes. */
-        if (typeof dzMigrateNotificationSplit === "function") {
-            if (dzApiState.instanceSnap) dzMigrateNotificationSplit(dzApiState.instanceSnap);
-            if (dzApiState.userSnap) dzMigrateNotificationSplit(dzApiState.userSnap);
-        }
+        /* Migrated BEFORE they are applied: dzApplySnapshot only writes keys
+           already present in theme.features, so a row still carrying a
+           retired key must be lifted to the current shape first or the
+           renamed keys would never be seen. */
+        if (dzApiState.instanceSnap) dzMigrateSnapshot(dzApiState.instanceSnap);
+        if (dzApiState.userSnap) dzMigrateSnapshot(dzApiState.userSnap);
         if (dzApiState.instanceSnap) dzApplySnapshot(theme, dzApiState.instanceSnap);
         if (dzApiState.userSnap) dzApplySnapshot(theme, dzSnapshotSubset(dzApiState.userSnap, "user"));
         /* localStorage can throw here (private-browsing quota). The cache is

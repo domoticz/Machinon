@@ -53,43 +53,72 @@ function isEmptyObject(obj) {
     return true;
 }
 
-/* theme.json keys that describe the INSTALL rather than the user's choices.
-   The cache above stores the whole theme object, so on a warm boot these come
-   back exactly as they were when the cache was first written. Left alone they
-   freeze at the installed-then version: an upgraded theme keeps reporting the
-   old one in the hub's About tab AND to check_update.js, which compares it
-   against the repo and offers an update the user already has. Nothing the
-   server does can clear that, because the stale copy lives in the browser.
-   Settings and features are deliberately absent from this list; they belong
-   to the user and must survive untouched. */
-var DZ_THEME_METADATA_KEYS = [
-    "type", "name", "description", "license", "version", "author", "homepage", "wiki"
-];
+/* Rebuild the theme object for a warm boot: the shipped theme.json decides
+   everything that belongs to the INSTALL (metadata, feature ids, feature file
+   lists, which features and settings exist at all), and the cache contributes
+   only the user's choices, read through the same snapshot shape every other
+   settings path uses and lifted by the same migration ladder.
 
-/* Overlay the shipped metadata onto a theme object restored from cache, and
-   re-cache when it actually moved. FAILS CLOSED: a failed or malformed fetch
-   leaves the cached values in place rather than blanking the version the
-   About tab reads, so an offline boot still renders. */
-function refreshThemeMetadata() {
-    return fetch("styles/" + themeFolder + "/theme.json", { cache: "no-cache", credentials: "include" })
-        .then(function(response) { return response.json(); })
-        .then(function(localJson) {
-            if (!localJson || typeof localJson !== "object") { return; }
-            var was = theme.version;
-            var changed = false;
-            DZ_THEME_METADATA_KEYS.forEach(function(key) {
-                if (typeof localJson[key] === "undefined" || theme[key] === localJson[key]) { return; }
-                theme[key] = localJson[key];
-                changed = true;
-            });
-            if (!changed) { return; }
-            themeName = theme.name;
-            cacheThemeSettings();
-            console.log(themeName + " - theme metadata refreshed from theme.json (" + was + " -> " + theme.version + ")");
-        })
-        .catch(function(error) {
-            console.log("Machinon - theme.json metadata refresh failed, keeping cached values:", error);
-        });
+   Restoring the cached object as-is froze all of that at the version that
+   wrote it: an upgrade that renamed a feature file kept loading the old path,
+   a new feature had to be hand-seeded here or every unguarded read of it was a
+   TypeError, and the version and About links stayed stale. Keys the cache
+   holds that theme.json does not (the legacy transport's uservariable idx,
+   for one) are carried over untouched.
+
+   shipped null means theme.json could not be read: the cache stands, with any
+   manifest toggle it lacks seeded OFF and fileless, the safe default for a
+   feature this boot knows nothing about. */
+function dzThemeFromCache(cached, shipped) {
+    if (!shipped || typeof shipped !== "object" || !shipped.features) {
+        return dzThemeFromCacheOffline(cached);
+    }
+    var t = JSON.parse(JSON.stringify(shipped));
+    Object.keys(cached).forEach(function(key) {
+        if (key !== "features" && !Object.prototype.hasOwnProperty.call(t, key)) {
+            t[key] = cached[key];
+        }
+    });
+    dzApplySnapshot(t, dzCacheSnapshot(cached));
+    dzDeriveLegacyScheme(t);
+    return t;
+}
+
+/* The cache's user choices as a snapshot. A cache carries no version stamp,
+   so it is migrated from version 1 (every ladder step is safe on newer data,
+   see DZ_SETTINGS_MIGRATIONS). */
+function dzCacheSnapshot(cached) {
+    var snap = dzSettingsSnapshot(cached);
+    snap.schemaVersion = 1;
+    return dzMigrateSnapshot(snap);
+}
+
+function dzThemeFromCacheOffline(cached) {
+    var t = cached;
+    t.features = t.features || {};
+    dzManifestAllEntries().forEach(function(entry) {
+        if (entry.control === "toggle" && entry.storageKey && !t.features[entry.storageKey]) {
+            t.features[entry.storageKey] = { enabled: false, files: [] };
+        }
+    });
+    var snap = dzCacheSnapshot(t);
+    /* A key the ladder retired (renamed or split) leaves the feature table
+       too, so nothing still reads it. */
+    Object.keys(t.features).forEach(function(key) {
+        if (!Object.prototype.hasOwnProperty.call(snap.features, key)) delete t.features[key];
+    });
+    dzApplySnapshot(t, snap);
+    dzDeriveLegacyScheme(t);
+    return t;
+}
+
+/* Settings cached before the scheme picker existed carry no scheme: derive the
+   selection from the legacy feature flags it replaced. */
+function dzDeriveLegacyScheme(t) {
+    if (!t.features || t.scheme) return;
+    t.scheme = t.features.custom_color_scheme && t.features.custom_color_scheme.enabled ? "custom"
+        : (t.features.dark_theme && t.features.dark_theme.enabled ? "dark" : "light");
+    t.scheme_base = t.features.dark_theme && t.features.dark_theme.enabled ? "dark" : "light";
 }
 
 function loadSettings() {
@@ -118,118 +147,22 @@ function loadSettings() {
                     console.log("Machinon - failed to load theme.json:", error);
                 });
         } else {
-            theme = readCachedThemeSettings();
-            themeName = theme.name;
-            console.log(themeName + " - theme settings was already found in the browser.");
-            // Features added after a user's settings were cached: seed a default so
-            // downstream feature reads never hit an unknown key.
-            if (theme.features && !theme.features.hide_logo) {
-                theme.features.hide_logo = { id: 42, enabled: false, files: [] };
-            }
-            if (theme.features && !theme.features.log_plot_bands) {
-                theme.features.log_plot_bands = { id: 43, enabled: true, files: ["log_ranges.js"] };
-            }
-            if (theme.features && !theme.features.floorplan_popup_details) {
-                theme.features.floorplan_popup_details = { id: 44, enabled: false, files: ["floorplan_popup_details.css"] };
-            }
-            if (theme.features && !theme.features.rgbw_popup) {
-                theme.features.rgbw_popup = { id: 45, enabled: true, files: ["rgbw-popup.js", "rgbw-popup.css"] };
-            }
-            if (theme.features && !theme.features.warn_timeout) {
-                theme.features.warn_timeout = { id: 46, enabled: true, files: [] };
-            }
-            if (theme.features && !theme.features.warn_battery) {
-                theme.features.warn_battery = { id: 47, enabled: true, files: [] };
-            }
-            /* Without this, a cached theme object written before diagnostics
-               shipped leaves theme.features.diagnostic_logging undefined on
-               every existing install's first warm load, and any gate read that
-               is not written defensively is a TypeError. */
-            if (theme.features && !theme.features.diagnostic_logging) {
-                theme.features.diagnostic_logging = { id: 48, enabled: false, files: [] };
-            }
-            if (!theme.warn_repeat) {
-                theme.warn_repeat = "daily";
-            }
-            /* MIGRATION (notification split, #198): the single `notification`
-               toggle became warn_timeout and warn_battery. A cache written before this
-               split still carries theme.features.notification (raw
-               {id, enabled, files} shape, not the boolean-map shape
-               dzMigrateNotificationSplit below works on). warn_timeout/
-               warn_battery were just seeded above (from theme.json's shipped
-               default if this is the first time either is seen), so seed them
-               from the actual legacy value now, then drop the legacy key so it
-               never lingers as dead state.
-
-               DELIBERATELY NOT "only when absent" here, unlike
-               dzMigrateNotificationSplit below: this branch OVERWRITES
-               warn_timeout/warn_battery unconditionally whenever a legacy
-               notification key is found, even if this exact warm-boot pass
-               already seeded them moments ago from theme.json defaults. That
-               is safe ONLY because this raw-cache paint is provisional: an
-               authoritative load always runs afterwards this same boot
-               (checkUserVariableThemeSettings -> dzApiLoad or
-               checkUserVariableThemeSettingsLegacy, both further down the
-               boot chain) and re-applies onto theme.features from the real
-               stored snapshot, then re-caches -- so a value this branch gets
-               "wrong" for one JS tick is corrected before the user ever sees
-               it. If that ordering ever changes (an authoritative load moves
-               before this cache read, or stops running on a boot where a
-               legacy key is found), this becomes a real data-loss bug: it
-               would silently stomp a value the user had already set
-               individually for warn_timeout/warn_battery. Do not add an
-               "only when absent" guard here casually either -- the whole
-               point is that the legacy value must win over the JUST-SEEDED
-               default from a few lines above, which usually differs from
-               "absent". */
-            if (theme.features && theme.features.notification) {
-                var dzLegacyWarnWas = theme.features.notification.enabled === true;
-                theme.features.warn_timeout.enabled = dzLegacyWarnWas;
-                theme.features.warn_battery.enabled = dzLegacyWarnWas;
-                delete theme.features.notification;
-            }
-            // Settings cached before the scheme picker existed: derive the
-            // selection from the legacy feature flags.
-            if (theme.features && !theme.scheme) {
-                theme.scheme = theme.features.custom_color_scheme && theme.features.custom_color_scheme.enabled ? "custom"
-                    : (theme.features.dark_theme && theme.features.dark_theme.enabled ? "dark" : "light");
-                theme.scheme_base = theme.features.dark_theme && theme.features.dark_theme.enabled ? "dark" : "light";
-            }
-            /* The cache carries metadata as well as settings, so the version
-               (and the About tab's repo/wiki links) would otherwise stay at
-               whatever was installed when it was written. Awaited rather than
-               fired and forgotten: check_update.js and the About tab both read
-               theme.version, and neither should race a background patch. The
-               cold branch above already pays this same fetch. */
-            return refreshThemeMetadata();
+            var cached = readCachedThemeSettings();
+            return fetch("styles/" + themeFolder + "/theme.json", { cache: "no-cache", credentials: "include" })
+                .then(function(response) { return response.json(); })
+                .catch(function(error) {
+                    console.log("Machinon - theme.json unreadable, keeping the cached settings:", error);
+                    return null;
+                })
+                .then(function(shipped) {
+                    theme = dzThemeFromCache(cached, shipped);
+                    themeName = theme.name;
+                    if (shipped && shipped.features) { dzDefaultsSnap = dzSettingsSnapshot(shipped); }
+                    console.log(themeName + " - theme settings was already found in the browser.");
+                });
         }
     }
     return Promise.resolve();
-}
-
-/* MIGRATION (notification split, #198): the single `notification` toggle
-   became warn_timeout and warn_battery. Operates on a COMPACT snapshot (the
-   dzSettingsSnapshot shape: snap.features is key->boolean), not the raw
-   theme.features object (key->{id, enabled, files}) -- the two shapes look
-   similar but a boolean check against a raw feature object would always read
-   false. Every snapshot this theme produces (dzSettingsSnapshot's output, so
-   the native ThemeSettingsAPI's stored rows and the legacy uservariable
-   overlay's `stored` layer) is already in this shape by construction, so
-   this is the right level to migrate at. The raw-cache case (a browser's
-   localStorage still holding a pre-split theme object) is handled directly
-   in loadSettings() above, before any snapshot is ever taken.
-
-   Seeds BOTH new keys from the stored value so nobody's warnings change
-   state on upgrade, and only when the new keys are absent, so a user who has
-   since set them individually is never overwritten. */
-function dzMigrateNotificationSplit(snap) {
-    if (!snap || !snap.features) return snap;
-    if (!("notification" in snap.features)) return snap;
-    var was = snap.features.notification === true;
-    if (!("warn_timeout" in snap.features)) snap.features.warn_timeout = was;
-    if (!("warn_battery" in snap.features)) snap.features.warn_battery = was;
-    delete snap.features.notification;
-    return snap;
 }
 
 /* Uservariable transport (getters, setters, the three-variable read/write)
@@ -279,8 +212,12 @@ function checkUserVariableThemeSettingsLegacy(startedAt) {
     return dzThemeSettingsLoad().then(function(outcome) {
         dzSettingsLogLoad("legacy", outcome, startedAt);
         if (outcome === DZ_LOAD_LOADED) {
-            var stored = dzSettingsSnapshot(theme); /* dzThemeSettingsLoad already merged the vars into theme; snapshot captures them */
-            dzApplySnapshot(theme, dzMigrateNotificationSplit(dzMergeSettingsLayers(defaults, stored, null)));
+            /* dzThemeSettingsLoad already merged the vars into theme; the snapshot
+               captures them. Nothing to migrate here: the legacy vars hold feature
+               ids and positional values, which the loaders map straight onto the
+               current theme.features, so a retired key cannot reach this point. */
+            var stored = dzSettingsSnapshot(theme);
+            dzApplySnapshot(theme, dzMergeSettingsLayers(defaults, stored, null));
             cacheThemeSettings();
             return;
         }

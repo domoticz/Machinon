@@ -42,7 +42,7 @@ PREFIX = re.compile(r"^(dz|machinon)", re.IGNORECASE)
 THEME_SOURCES = ["custom.js"]
 THEME_DIRS = ["js", "src/js"]
 # Vendored, never edited here, and not in the shared prefix anyway.
-VENDORED = {"js/moment.js"}
+VENDORED = {"js/livestamp.js"}
 
 DECL = re.compile(r"^(?:var|function)\s+([A-Za-z_$][\w$]*)", re.MULTILINE)
 WINDOW_ASSIGN = re.compile(r"window\.([A-Za-z_$][\w$]*)\s*=(?!=)")
