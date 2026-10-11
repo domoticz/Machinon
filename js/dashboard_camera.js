@@ -73,7 +73,15 @@ function cameraPreview(section) {
     }
 }
 
+/* One pending refresh per camera. Leaving the Dashboard and coming back
+   before the pending timer fires used to start a second self-rescheduling
+   chain beside the first, and every later return added another, each
+   fetching a snapshot per interval. A new request or a new schedule first
+   drops whatever is pending for that camera. */
+var cameraTimers = [];
+
 function refreshCamera(camId) {
+    clearTimeout(cameraTimers[camId]);
     let workerId = workers[camId];
     if (typeof workerId === "undefined") {
         workerId = new Worker('styles/' + themeFolder +'/js/camera_worker.js');
@@ -89,8 +97,9 @@ function refreshCamera(camId) {
             }
             const background = URL.createObjectURL(camera.blob);
             $row.css("background-image", "url(" + background + ")");
+            clearTimeout(cameraTimers[camera.cameraId]);
             if (location.hash == "#/Dashboard") {
-                setTimeout(refreshCamera, theme.dashboard_camera_refresh*1000, camId);
+                cameraTimers[camera.cameraId] = setTimeout(refreshCamera, theme.dashboard_camera_refresh*1000, camera.cameraId);
             }
         });
     }

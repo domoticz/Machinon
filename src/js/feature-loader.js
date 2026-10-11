@@ -14,16 +14,24 @@ function enableThemeFeatures() {
     });
 }
 
+/* The query is the theme VERSION, not a constant: core's service worker serves
+   scripts stale-while-revalidate, so an unchanged URL hands the first boot
+   after an upgrade the previous release's feature code. A new version is a
+   new URL, fetched fresh. */
+function dzFeatureFileQuery() {
+    return "?v=" + encodeURIComponent(theme.version || themeName);
+}
+
 function loadThemeFeatureFiles(featureName) {
     var files = theme.features[featureName].files;
     var arrayLength = files.length;
     for (var i = 0; i < arrayLength; i++) {
         if (files[i].split(".").pop() == "js") {
-            var getviarequire = "./styles/" + themeFolder + "/js/" +  files[i] + "?" + themeName;
+            var getviarequire = "./styles/" + themeFolder + "/js/" +  files[i] + dzFeatureFileQuery();
             requirejs([ getviarequire ]);
         }
         if (files[i].split(".").pop() == "css") {
-            var CSSfile = "styles/" + themeFolder + "/css/" + files[i] + "?" + themeName;
+            var CSSfile = "styles/" + themeFolder + "/css/" + files[i] + dzFeatureFileQuery();
             var fileref = document.createElement("link");
             fileref.setAttribute("rel", "stylesheet");
             fileref.setAttribute("type", "text/css");

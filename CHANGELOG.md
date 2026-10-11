@@ -4,6 +4,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+- Faster on slower devices and wall tablets: pages no longer jump from a narrow column to full width right after they open, the Theme Hub no longer downloads the whole icon library unless you open its Icons tab, and returning to the Dashboard no longer makes camera previews refresh more often each time
 - Easier to read: the Log page status bar, the Theme Hub setting descriptions and scope tags, and the last reading on a device that stopped reporting, which now stays at full strength while only its icon and name are dimmed. The diagnostics texts in German, French, Polish and Swedish have their accents back (and German "press" no longer says "print"), and the Icon Library page is now translated (#227)
 - A search that matches nothing on the current page now says so, with a button to clear it, instead of leaving the page blank. This includes a search carried over from the previous page (#226)
 - In the Theme Hub, colour schemes can be chosen and deleted with the keyboard, the scheme in use is marked even if you never picked one, the tabs work with the arrow keys, and "Create a theme" keeps keyboard focus inside its window until you close it. The problem badge now tells screen readers what its number counts (#224)

@@ -164,6 +164,12 @@ function buildIconPackCard(ic) {
 
     var img = document.createElement("img");
     img.className = "iconpack-preview";
+    /* Lazy, and set before src or the browser starts the fetch anyway: the
+       library is built when the hub opens, usually on another tab, and browsers
+       defer lazy images inside a display:none panel until it is shown. Eager,
+       every hub open fetched the whole visible set (measured: 109 previews,
+       481 KB) for a tab the user may never look at. */
+    img.loading = "lazy";
     img.src = packPreviewUrl(ic.base, "On");
     img.alt = ic.name;
     /* preview state: On by default, hover shows Off (desktop), click/tap

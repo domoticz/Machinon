@@ -1138,3 +1138,20 @@ select.ui-corner-all option:hover {
     content: "  | 'Machinon-Dev' theme";
 }
 
+
+/* The routed page's container renders as .container (core's fixed 940/1170px
+   centred column) and devices.js swaps it to .container-fluid once Angular has
+   rendered, so above 767px every route entry painted a narrow column first and
+   then widened it: a layout shift on every navigation. Giving the unswapped
+   container the fluid box up front makes the swap a no-op visually. Below
+   768px Bootstrap already renders both the same (measured: no computed
+   difference at 390px). The swap stays: other rules target .container-fluid. */
+@media (min-width: 768px) {
+    #main-view > .container {
+        width: auto;
+        margin-left: 0;
+        margin-right: 0;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+}
