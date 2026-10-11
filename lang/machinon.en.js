@@ -202,6 +202,11 @@ language = {
     },
     iconlib: {
       load_failed: "Icon library not found in this theme install ({error}).",
+      intro: "Blue UI and Color are two styles of the same set and can be installed side by side; installed icons appear in every device's Switch Icon picker.",
+      tab_blue: "Blue UI",
+      tab_color: "Color",
+      tab_fun: "Fun",
+      search_placeholder: "Search icons..",
       no_match: "No icons match the search.",
       installed_chip: "Installed",
       install: "Install",

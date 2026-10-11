@@ -60,11 +60,11 @@ language = {
       },
       diagnostic_logging: {
         label: "Diagnostikloggning",
-        description: "Registrerar extra detaljer om vad temat gor, sa att du kan bifoga dem till en felrapport. Allt stannar i din webblasare och ingenting skickas. Kan lugnt lamnas avstangt."
+        description: "Registrerar extra detaljer om vad temat gör, så att du kan bifoga dem till en felrapport. Allt stannar i din webbläsare och ingenting skickas. Kan lugnt lämnas avstängt."
       },
       diagnostics_copy: {
         label: "Kopiera diagnostik",
-        description: "Kopierar det temat har registrerat, redo att klistra in i en felrapport. Dina enhetsnamn utelamnas, sa det ar sakert att publicera offentligt."
+        description: "Kopierar det temat har registrerat, redo att klistra in i en felrapport. Dina enhetsnamn utelämnas, så det är säkert att publicera offentligt."
       },
       center_popups: {
         label: "Centrera popup-dialoger",
@@ -201,6 +201,11 @@ language = {
     },
     iconlib: {
       load_failed: "Ikonbiblioteket hittades inte i den här temainstallationen ({error}).",
+      intro: "Blue UI och Färg är två stilar av samma uppsättning och kan installeras sida vid sida; installerade ikoner visas i ikonväljaren för varje enhet.",
+      tab_blue: "Blue UI",
+      tab_color: "Färg",
+      tab_fun: "Kul",
+      search_placeholder: "Sök ikoner..",
       no_match: "Inga ikoner matchar sökningen.",
       installed_chip: "Installerad",
       install: "Installera",
@@ -271,7 +276,7 @@ language = {
       copy: "Kopiera diagnostik",
       copied: "Kopierat. Klistra in det i din felrapport.",
       fallback: "Kopieringen misslyckades, texten finns nedan. Markera och kopiera den manuellt.",
-      hint: "Aterskapa problemet och tryck sedan har."
+      hint: "Återskapa problemet och tryck sedan här."
     },
     maintenance: {
       aria: "Temaunderhåll",

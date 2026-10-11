@@ -60,11 +60,11 @@ language = {
       },
       diagnostic_logging: {
         label: "Rejestrowanie diagnostyczne",
-        description: "Zapisuje dodatkowe szczegoly o tym, co robi motyw, aby mozna je bylo dolaczyc do zgloszenia bledu. Wszystko pozostaje w przegladarce i nic nie jest wysylane. Mozna spokojnie zostawic wylaczone."
+        description: "Zapisuje dodatkowe szczegóły o tym, co robi motyw, aby można je było dołączyć do zgłoszenia błędu. Wszystko pozostaje w przeglądarce i nic nie jest wysyłane. Można spokojnie zostawić wyłączone."
       },
       diagnostics_copy: {
-        label: "Kopiuj diagnostyke",
-        description: "Kopiuje to, co zarejestrowal motyw, gotowe do wklejenia w zgloszeniu bledu. Nazwy Twoich urzadzen sa pomijane, wiec mozna to bezpiecznie opublikowac."
+        label: "Kopiuj diagnostykę",
+        description: "Kopiuje to, co zarejestrował motyw, gotowe do wklejenia w zgłoszeniu błędu. Nazwy Twoich urządzeń są pomijane, więc można to bezpiecznie opublikować."
       },
       center_popups: {
         label: "Wyśrodkuj okna wyskakujące",
@@ -201,6 +201,11 @@ language = {
     },
     iconlib: {
       load_failed: "Nie znaleziono biblioteki ikon w tej instalacji motywu ({error}).",
+      intro: "Blue UI i Kolor to dwa style tego samego zestawu i można je zainstalować obok siebie; zainstalowane ikony pojawiają się w wyborze ikony każdego urządzenia.",
+      tab_blue: "Blue UI",
+      tab_color: "Kolor",
+      tab_fun: "Zabawne",
+      search_placeholder: "Szukaj ikon..",
       no_match: "Żadna ikona nie pasuje do wyszukiwania.",
       installed_chip: "Zainstalowana",
       install: "Zainstaluj",
@@ -268,10 +273,10 @@ language = {
       icons8_credit: "Ikony od Icons8"
     },
     diag: {
-      copy: "Kopiuj diagnostyke",
-      copied: "Skopiowano. Wklej to do zgloszenia bledu.",
-      fallback: "Kopiowanie nie powiodlo sie, tekst jest ponizej. Zaznacz go i skopiuj recznie.",
-      hint: "Odtworz problem, a nastepnie nacisnij tutaj."
+      copy: "Kopiuj diagnostykę",
+      copied: "Skopiowano. Wklej to do zgłoszenia błędu.",
+      fallback: "Kopiowanie nie powiodło się, tekst jest poniżej. Zaznacz go i skopiuj ręcznie.",
+      hint: "Odtwórz problem, a następnie naciśnij tutaj."
     },
     maintenance: {
       aria: "Konserwacja motywu",

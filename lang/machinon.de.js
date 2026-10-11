@@ -59,11 +59,11 @@ language = {
       },
       diagnostic_logging: {
         label: "Diagnoseprotokoll",
-        description: "Zeichnet zusatzliche Details daruber auf, was das Theme tut, damit Sie sie einem Fehlerbericht beilegen konnen. Alles bleibt in Ihrem Browser, es wird nichts gesendet. Kann bedenkenlos ausgeschaltet bleiben."
+        description: "Zeichnet zusätzliche Details darüber auf, was das Theme tut, damit du sie einem Fehlerbericht beilegen kannst. Alles bleibt in deinem Browser, es wird nichts gesendet. Kann bedenkenlos ausgeschaltet bleiben."
       },
       diagnostics_copy: {
         label: "Diagnose kopieren",
-        description: "Kopiert, was das Theme aufgezeichnet hat, bereit zum Einfugen in einen Fehlerbericht. Ihre Geratenamen bleiben aussen vor, es kann also gefahrlos offentlich gepostet werden."
+        description: "Kopiert, was das Theme aufgezeichnet hat, bereit zum Einfügen in einen Fehlerbericht. Deine Gerätenamen bleiben außen vor, es kann also gefahrlos öffentlich gepostet werden."
       },
       center_popups: {
         label: "Popup-Dialoge zentrieren",
@@ -200,6 +200,11 @@ language = {
     },
     iconlib: {
       load_failed: "Symbolbibliothek in dieser Design-Installation nicht gefunden ({error}).",
+      intro: "Blue UI und Farbe sind zwei Stile desselben Satzes und lassen sich nebeneinander installieren; installierte Symbole erscheinen in der Symbolauswahl jedes Geräts.",
+      tab_blue: "Blue UI",
+      tab_color: "Farbe",
+      tab_fun: "Spaß",
+      search_placeholder: "Symbole suchen..",
       no_match: "Keine Symbole passen zur Suche.",
       installed_chip: "Installiert",
       install: "Installieren",
@@ -269,9 +274,9 @@ language = {
     },
     diag: {
       copy: "Diagnose kopieren",
-      copied: "Kopiert. Fugen Sie es in Ihren Fehlerbericht ein.",
+      copied: "Kopiert. Füge es in deinen Fehlerbericht ein.",
       fallback: "Kopieren fehlgeschlagen, der Text steht unten. Bitte manuell markieren und kopieren.",
-      hint: "Reproduzieren Sie das Problem und drucken Sie dann hier."
+      hint: "Reproduziere das Problem und drücke dann hier."
     },
     maintenance: {
       aria: "Design-Wartung",

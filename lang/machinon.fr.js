@@ -59,11 +59,11 @@ language = {
       },
       diagnostic_logging: {
         label: "Journal de diagnostic",
-        description: "Enregistre des details supplementaires sur ce que fait le theme, afin de les joindre a un rapport de bogue. Tout reste dans votre navigateur et rien n'est envoye. Vous pouvez le laisser desactive sans probleme."
+        description: "Enregistre des détails supplémentaires sur ce que fait le thème, afin de les joindre à un rapport de bogue. Tout reste dans votre navigateur et rien n'est envoyé. Vous pouvez le laisser désactivé sans problème."
       },
       diagnostics_copy: {
         label: "Copier le diagnostic",
-        description: "Copie ce que le theme a enregistre, pret a coller dans un rapport de bogue. Les noms de vos appareils sont exclus, vous pouvez donc le publier sans risque."
+        description: "Copie ce que le thème a enregistré, prêt à coller dans un rapport de bogue. Les noms de vos dispositifs sont exclus, vous pouvez donc le publier sans risque."
       },
       center_popups: {
         label: "Centrer les fenêtres contextuelles",
@@ -200,6 +200,11 @@ language = {
     },
     iconlib: {
       load_failed: "Bibliothèque d'icônes introuvable dans cette installation du thème ({error}).",
+      intro: "Blue UI et Couleur sont deux styles du même ensemble et peuvent être installés côte à côte ; les icônes installées apparaissent dans le sélecteur d'icône de chaque dispositif.",
+      tab_blue: "Blue UI",
+      tab_color: "Couleur",
+      tab_fun: "Amusant",
+      search_placeholder: "Rechercher des icônes..",
       no_match: "Aucune icône ne correspond à la recherche.",
       installed_chip: "Installée",
       install: "Installer",
@@ -269,9 +274,9 @@ language = {
     },
     diag: {
       copy: "Copier le diagnostic",
-      copied: "Copie. Collez-le dans votre rapport de bogue.",
-      fallback: "La copie a echoue, le texte est ci-dessous. Selectionnez-le et copiez-le manuellement.",
-      hint: "Reproduisez le probleme, puis appuyez ici."
+      copied: "Copié. Collez-le dans votre rapport de bogue.",
+      fallback: "La copie a échoué, le texte est ci-dessous. Sélectionnez-le et copiez-le manuellement.",
+      hint: "Reproduisez le problème, puis appuyez ici."
     },
     maintenance: {
       aria: "Maintenance du thème",

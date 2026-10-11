@@ -45,8 +45,18 @@ function mountIconPackInHub() {
     container.load("styles/" + themeFolder + "/iconsettings.html", initIconPack);
 }
 
+/* The fragment ships without text: every string comes from the theme's own
+   language tables here, where the parity guard can see the keys. Core's
+   data-i18n could not translate them (it has no "Blue UI" or "Fun" entry), so
+   they stayed English in every language. */
 function initIconPack() {
-    $("#iconpack").i18n();
+    $("#iconpack .iconpack-intro").text(dzT("hub.iconlib.intro"));
+    $('#iconpackTabs button[data-tab="blue"]').text(dzT("hub.iconlib.tab_blue"));
+    $('#iconpackTabs button[data-tab="color"]').text(dzT("hub.iconlib.tab_color"));
+    $('#iconpackTabs button[data-tab="fun"]').text(dzT("hub.iconlib.tab_fun"));
+    $("#iconpackSearch").attr("placeholder", dzT("hub.iconlib.search_placeholder"));
+    $("#iconpackInstallAll").text(dzT("hub.iconlib.install_all"));
+    $("#iconpackGrid").text(dzT("hub.loading"));
     $("#iconpackSearch").on("input", renderIconPackGrid);
     $("#iconpackInstallAll").on("click", installAllPackIcons);
     $("#iconpackTabs").on("click", "button[data-tab]", function() {

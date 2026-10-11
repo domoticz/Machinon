@@ -203,6 +203,11 @@ language = {
     },
     iconlib: {
       load_failed: "Iconenbibliotheek niet gevonden in deze thema-installatie ({error}).",
+      intro: "Blue UI en Kleur zijn twee stijlen van dezelfde set en kunnen naast elkaar worden geïnstalleerd; geïnstalleerde iconen verschijnen in de iconenkiezer van elk apparaat.",
+      tab_blue: "Blue UI",
+      tab_color: "Kleur",
+      tab_fun: "Leuk",
+      search_placeholder: "Iconen zoeken..",
       no_match: "Geen enkel icoon komt overeen met de zoekopdracht.",
       installed_chip: "Geïnstalleerd",
       install: "Installeren",
