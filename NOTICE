@@ -1,14 +1,54 @@
 Machinon theme NOTICE
 
-Icons
-  This theme includes icons from Icons8 (https://icons8.com), used with
-  permission inherited from the original Machinon project.
-  Attribution: Icons by Icons8, https://icons8.com
-
-Fonts
-  Inter (SIL Open Font License 1.1)
-  JetBrains Mono (SIL Open Font License 1.1)
-  Ionicons (MIT License)
-
 Theme license: see LICENSE.txt (GPL v3).
 Original theme author: EdddieN (https://github.com/domoticz/Machinon).
+
+The components below ship with the theme under their own licenses, which
+are not the GPL.
+
+Icons
+  This theme includes icons from Icons8 (https://icons8.com), used with
+  permission inherited from the original Machinon project. They are not
+  covered by the theme's GPL license.
+  Attribution: Icons by Icons8, https://icons8.com
+
+Fonts (fonts/)
+  Inter v4.1: Copyright (c) 2016 The Inter Project Authors
+    (https://github.com/rsms/inter). SIL Open Font License 1.1, full text in
+    fonts/Inter-OFL.txt.
+  JetBrains Mono v2.304: Copyright 2020 The JetBrains Mono Project Authors
+    (https://github.com/JetBrains/JetBrainsMono). SIL Open Font License 1.1,
+    full text in fonts/JetBrainsMono-OFL.txt.
+  Ionicons v4.6.2 (fonts/ionicons.woff2, css/ionicons.min.css):
+    Copyright (c) 2015-present Ionic (http://ionic.io/). MIT License.
+    Its Android-style icons are based on Google's Material Design Icons
+    (https://github.com/google/material-design-icons), used under
+    CC BY 4.0 (http://creativecommons.org/licenses/by/4.0/).
+
+Scripts and styles
+  Livestamp.js v2.0.0 (js/livestamp.js): Copyright (c) 2014 Matt Bradley.
+    MIT License.
+  animate.css 3.7.2, rubberBand animation only (css/animate.css):
+    Copyright (c) 2019 Daniel Eden. MIT License. Later animate.css releases
+    (4.0 and up) use a different license; this file must stay on the 3.x
+    MIT code.
+
+MIT License (applies to every component above marked MIT):
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

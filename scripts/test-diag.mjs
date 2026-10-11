@@ -438,7 +438,7 @@ test("the schema admits the mode section and drops anything it does not name", (
     /* Rights and transport decide what a user can even do, which is what issue
        #202 turned on: a non-admin was shown a control only an admin can use. */
     const clean = dz.dzDiagSanitize("mode", {
-        admin: true, per_user: false, no_identity: false, transport: "native", username: "martijn"
+        admin: true, per_user: false, no_identity: false, transport: "native", username: "example-user"
     });
     assert.deepEqual(Object.keys(clean.value).sort(), ["admin", "no_identity", "per_user", "transport"]);
     assert.deepEqual(Array.from(clean.dropped), ["username"],
