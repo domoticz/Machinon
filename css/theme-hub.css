@@ -179,7 +179,10 @@
     padding: 0 8px; /* future --dz-gap token site (spacing project) */
     border-radius: var(--dz-btn-radius); /* pill, on the shared button radius token */
     color: var(--dz-accent-color);
-    background: rgba(var(--dz-accent-values), 0.12);
+    /* 6%, not more: the tint sits under 11px accent text, and at 12% it fell
+       to 4.36:1 on Machinon Light. Measured 4.73:1 at worst across all
+       shipped schemes. */
+    background: rgba(var(--dz-accent-values), 0.06);
     white-space: nowrap;
 }
 
@@ -206,8 +209,9 @@
     margin: 4px 0 0; /* quarter-step under the label line */
     font-size: var(--dz-text-xs);
     line-height: 1.45;
-    /* Muted body text: house pattern (color-mix over --dz-body-text), no new token. */
-    color: color-mix(in srgb, var(--dz-body-text) 62%, transparent);
+    /* The theme's secondary text token. A 62% body-text mix read lighter and
+       failed AA on every light scheme (3.55:1 on Gruvbox Light at this 12px). */
+    color: var(--secondary-text-color);
 }
 
 /* Preview column (filled via src/js/theme-hub-previews.js). Zero-size
@@ -744,7 +748,7 @@
     line-height: 1.45;
     /* Muted body text: house pattern (color-mix over --dz-body-text), no new
        token; matches .dz-hub-desc. */
-    color: color-mix(in srgb, var(--dz-body-text) 62%, transparent);
+    color: var(--secondary-text-color);
 }
 
 /* Contributions / credits block (restored published attribution). The heading
@@ -769,7 +773,7 @@
     line-height: 1.45;
     /* Muted body text: house pattern (color-mix over --dz-body-text), matches
        .dz-hub-about-desc. */
-    color: color-mix(in srgb, var(--dz-body-text) 62%, transparent);
+    color: var(--secondary-text-color);
 }
 
 .dz-hub-about-links,
@@ -828,7 +832,7 @@
     line-height: 1.45;
     /* Muted body text: house pattern (color-mix over --dz-body-text), matches
        .dz-hub-desc / .dz-hub-about-desc. */
-    color: color-mix(in srgb, var(--dz-body-text) 62%, transparent);
+    color: var(--secondary-text-color);
 }
 
 /* Maintenance block: bottom of the About tab. A titled section with the three
@@ -850,7 +854,7 @@
     margin: 0 0 8px; /* future --dz-gap token site (spacing project) */
     font-size: var(--dz-text-xs);
     line-height: 1.45;
-    color: color-mix(in srgb, var(--dz-body-text) 62%, transparent);
+    color: var(--secondary-text-color);
 }
 
 .dz-hub-maintenance-actions {
@@ -892,7 +896,7 @@
     margin: 0 0 8px; /* future --dz-gap token site (spacing project) */
     font-size: var(--dz-text-xs);
     line-height: 1.45;
-    color: color-mix(in srgb, var(--dz-body-text) 62%, transparent);
+    color: var(--secondary-text-color);
 }
 
 .dz-hub-image-list {

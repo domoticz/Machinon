@@ -50,8 +50,23 @@
 .log-toolbar {
 	background: var(--dz-widget-bg);
 }
+/* Core's style.css colours this bar for its dark console (#aac text, #4ec9b0
+   "Following", #ffdd57 "PAUSED"); on the theme's light widget surface those
+   measured 2.25:1, 2.04:1 and 1.33:1. "Following" is the normal state and
+   takes the bar's own secondary text; the accent would read 4.31:1 at this
+   11px size on Gruvbox Dark. Only "PAUSED" is set apart, in the warning tone.
+   Measured over all eight shipped schemes: 4.59:1 at worst. */
 .log-statusbar {
 	background: var(--dz-widget-bg);
+	color: var(--secondary-text-color);
+}
+
+.log-statusbar-following {
+	color: inherit;
+}
+
+.log-statusbar-paused {
+	color: var(--dz-status-warn);
 }
 
 .log-filter-btn {
@@ -82,8 +97,14 @@
     border-radius: 3px;
 }
 
+/* On the active (accent-filled) filter the count keeps the button's own fill
+   and is marked by an inset outline in the button's text colour: a white wash
+   lightened the fill under the white digits to 3.29:1. Outline, not border, so
+   the chip keeps its size. */
 .log-filter-btn-active .log-toggle-count {
-    background: rgba(255, 255, 255, 0.25);
+    background: transparent;
+    outline: 1px solid var(--dz-accent-text);
+    outline-offset: -1px;
 }
 
 /* Log[mobile] +11px sideways scroll. Core's own .log-toolbar

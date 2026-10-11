@@ -191,7 +191,7 @@
     font-family: var(--dz-font-family);
     font-size: var(--dz-text-xs);
     line-height: 1.45;
-    color: color-mix(in srgb, var(--dz-body-text) 62%, transparent);
+    color: var(--secondary-text-color);
 }
 
 @media (max-width: 767px) {
@@ -366,7 +366,7 @@
 .dz-wizard-drift-row {
     font-family: var(--dz-font-family);
     font-size: var(--dz-text-micro);
-    color: color-mix(in srgb, var(--dz-body-text) 62%, transparent);
+    color: var(--secondary-text-color);
 }
 
 .dz-wizard-drift-row { display: inline-flex; align-items: center; gap: 4px; }
