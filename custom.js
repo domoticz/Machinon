@@ -1,700 +1,445 @@
 var theme = {}, themeName = "", isMobile, lang, themeFolder;
-
-/* Toast bootstrap. index.html loads js/domoticz.js (line 137) and then this
-   file (142) as SYNCHRONOUS scripts, so both toast globals already exist here
-   and can be replaced with no polling and no race. THEME_MODULES below are
-   injected as async=false scripts and run later, so anything raised in that
-   window is BUFFERED as a raw call and drained by src/js/toast-hooks.js. Raw,
-   not interpreted: core's signatures stay knowledge of exactly one file. */
 (function() {
-    var buf = window.__dzToastBuffer = [];
-    function shim(fn) {
-        return function() {
-            var entry = { fn: fn, args: [].slice.call(arguments), cancelled: false, handle: null };
-            buf.push(entry);
-            /* generate_noty's return value is load-bearing in core:
-               $.cachenoty = generate_noty(...) then $.cachenoty.close(). */
-            return { close: function() {
-                entry.cancelled = true;
-                if (entry.handle) entry.handle.close();
-            } };
-        };
-    }
-    window.generate_noty = shim("noty");
-    window.ShowNotify = shim("shownotify");
+var buf = window.__dzToastBuffer = [];
+function shim(fn) {
+return function() {
+var entry = { fn: fn, args: [].slice.call(arguments), cancelled: false, handle: null };
+buf.push(entry);
+return { close: function() {
+entry.cancelled = true;
+if (entry.handle) entry.handle.close();
+} };
+};
+}
+window.generate_noty = shim("noty");
+window.ShowNotify = shim("shownotify");
 })();
-
-/* Diagnostics bootstrap. Same shape and the same reason as the toast buffer
-   above: this file, and the Angular config callbacks it installs below, run
-   BEFORE any THEME_MODULE, so a seam calling dzLog in that window would hit an
-   undefined global. Inside an Angular .config() callback that is not a missing
-   log line, it is a ReferenceError in core's module bootstrap, which costs the
-   user a blank Domoticz rather than a Domoticz missing two theme pages.
-
-   Buffered raw and drained by src/js/diag.js, and bounded because the
-   Diagnostic logging setting has not loaded yet at this point: if it turns out
-   to be off, which is the default, the buffer is discarded and nothing was ever
-   retained. Call sites here still guard with typeof, the same way the
-   dzProblemsRefresh call below does; this exists so that a guard that is missed
-   degrades to a lost line rather than to a broken page. */
 (function() {
-    var buf = window.__dzDiagBuffer = [];
-    window.dzLogOn = false;
-    window.dzLog = function(seam, event, fields) {
-        if (buf.length < 50) { buf.push([seam, event, fields]); }
-        return false;
-    };
+var buf = window.__dzDiagBuffer = [];
+window.dzLogOn = false;
+window.dzLog = function(seam, event, fields) {
+if (buf.length < 50) { buf.push([seam, event, fields]); }
+return false;
+};
 })();
-
 isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 var supported_lang = "en fr de sv nl pl";
-// The scheme colour palette now lives solely in the --dz-* tokens (dz-tokens.css / dark.css). The
-// hub's "Reset colours to the selected scheme" action reads the current scheme's defaults via
-// getSchemeDefaults() in src/js/scheme.js, so no duplicated light_theme/dark_theme JS objects are
-// needed here.
-
-/* The theme's always-loaded modules, in load order. Feature-toggled files
-   (theme.json "files") are separate and load on demand via the feature loader. */
 var THEME_MODULES = [
-    /* diag.js first: every module below it may call dzLog at load time, and the
-       kernel buffer above only covers the window before THEME_MODULES run. */
-    "src/js/diag.js",
-    "src/js/toasts.js",
-    "src/js/toast-hooks.js",
-    "src/js/settings-transport.js",
-    "src/js/settings-store.js",
-    "src/js/feature-loader.js",
-    "src/js/theme-manifest.js",
-    "src/js/scheme.js",
-    "src/js/schemes.js",
-    "src/js/color-oklch.js",
-    "src/js/color-repair.js",
-    "src/js/scheme-generator.js",
-    "src/js/iconpack.js",
-    "src/js/device-filter.js",
-    "src/js/search.js",
-    "src/js/page.js",
-    "src/js/theme-hub-previews.js",
-    "src/js/theme-hub.js",
-    "src/js/color-wheel.js",
-    "src/js/theme-wizard.js",
-    "src/js/set-filter.js",
-    "src/js/problems.js",
-    "src/js/devices.js",
-    "src/js/card-drag-handle.js",
-    "src/js/floorplan-stage.js",
-    "src/js/menu-icons.js"
+"src/js/diag.js",
+"src/js/url-guards.js",
+"src/js/toasts.js",
+"src/js/toast-hooks.js",
+"src/js/settings-transport.js",
+"src/js/settings-store.js",
+"src/js/feature-loader.js",
+"src/js/theme-manifest.js",
+"src/js/scheme.js",
+"src/js/schemes.js",
+"src/js/color-oklch.js",
+"src/js/color-repair.js",
+"src/js/scheme-generator.js",
+"src/js/iconpack.js",
+"src/js/device-filter.js",
+"src/js/search.js",
+"src/js/page.js",
+"src/js/theme-hub-previews.js",
+"src/js/theme-hub.js",
+"src/js/color-wheel.js",
+"src/js/theme-wizard.js",
+"src/js/set-filter.js",
+"src/js/problems.js",
+"src/js/devices.js",
+"src/js/card-drag-handle.js",
+"src/js/floorplan-stage.js",
+"src/js/menu-icons.js"
 ];
-
-/* Ordered script loader: script elements with async=false execute in insertion
-   order and use the browser cache ($.getScript appended a cache-busting query
-   on every page load). Resolves when all files have executed. */
 function loadThemeScripts(files) {
-    return Promise.all(files.map(function(file) {
-        return new Promise(function(resolve, reject) {
-            var s = document.createElement("script");
-            s.src = "styles/" + themeFolder + "/" + file;
-            s.async = false;
-            s.onload = resolve;
-            s.onerror = function() { reject(new Error(file + " failed to load")); };
-            document.head.appendChild(s);
-        });
-    }));
+return Promise.all(files.map(function(file) {
+return new Promise(function(resolve, reject) {
+var s = document.createElement("script");
+s.src = "styles/" + themeFolder + "/" + file;
+s.async = false;
+s.onload = resolve;
+s.onerror = function() { reject(new Error(file + " failed to load")); };
+document.head.appendChild(s);
+});
+}));
 }
-
-/* ===================================================================== *
- *  Real routes for the theme's own pages                                 *
- * ===================================================================== *
-
-   The theme owns two real, bookmarkable Angular routes: #/Theme (plus
-   #/Theme/:tab) for the theme hub and #/SetupMenu for the settings tile grid.
-   Core owns the Angular app, so they are registered by appending ONE .config()
-   block to core's 'app.routes' module, plus one .run() block that only listens
-   for $routeChangeError (no core path is REPLACED, which is the thing a .run()
-   would otherwise be needed for: a config block runs before core's own .when()
-   calls and would lose a key it shares with them).
-
-   THIS BLOCK MUST STAY AT CUSTOM.JS TOP LEVEL. index.html loads the theme's
-   custom.js synchronously and only then RequireJS, which pulls Angular in
-   asynchronously, so top-level code here is the last chance to reach
-   $routeProvider; the THEME_MODULES files above are injected as async=false
-   scripts and land after Angular has booted. Angular also assigns
-   window.angular EARLY as a bare object and attaches .module later
-   (setupModuleLoader), so the hook intercepts the .module assignment, not just
-   the window.angular one. Both traps are proven by the rig harnesses
-   ~/docker/domoticz-test/scripts/dz-route-feasibility.js and
-   dz-route-multipage.js.
-
-   FAIL CLOSED: dzRoutesActive turns true only once the config block has
-   actually run. Both pages keep their pre-route entry path (the Setup menu
-   click pseudo-route), so if core ever moves the hook out of reach the theme
-   degrades to that behaviour with one structured warning, and the guard
-   harness (dz-route-guard.js) fails loudly. */
 window.dzRoutesActive = false;
-
 var DZ_HUB_TEMPLATE = "styles/default/templates/dz-theme-hub.html";
 var DZ_GRID_TEMPLATE = "styles/default/templates/dz-setup-grid.html";
 var DZ_PROBLEMS_TEMPLATE = "styles/default/templates/dz-problems.html";
-/* Templates are requested under styles/default/ on purpose: core rewrites
-   /styles/default/<path> to the ACTIVE theme folder per file when the file
-   exists there (cWebem.cpp), which is how a theme ships its own templates. */
-
-/* Routed pages can be entered by URL long before the code that renders them
-   exists: the theme's init (settings + THEME_MODULES) and the feature files it
-   loads through RequireJS both land well after Angular has routed. So a routed
-   controller waits for a named milestone instead of guessing, and gives up with
-   one structured warning rather than leaving a page silently blank. */
-var DZ_ROUTE_WAIT_MS = 12000; // theme boot takes seconds; this only catches a broken boot
+var DZ_ROUTE_WAIT_MS = 12000;
 var dzRouteMilestones = {};
 var dzRouteMilestoneWaiters = {};
-
 function dzRouteMilestone(name) {
-    dzRouteMilestones[name] = true;
-    var waiting = dzRouteMilestoneWaiters[name];
-    delete dzRouteMilestoneWaiters[name];
-    if (waiting) waiting.forEach(function (fn) { fn(); });
+dzRouteMilestones[name] = true;
+var waiting = dzRouteMilestoneWaiters[name];
+delete dzRouteMilestoneWaiters[name];
+if (waiting) waiting.forEach(function (fn) { fn(); });
 }
-
 function dzWhenRouteMilestone(name, onReady, onMissing) {
-    if (dzRouteMilestones[name]) { onReady(); return; }
-    var done = false;
-    var timer = setTimeout(function () {
-        if (done) return;
-        done = true;
-        onMissing();
-    }, DZ_ROUTE_WAIT_MS);
-    dzRouteMilestoneWaiters[name] = dzRouteMilestoneWaiters[name] || [];
-    dzRouteMilestoneWaiters[name].push(function () {
-        if (done) return;
-        done = true;
-        clearTimeout(timer);
-        onReady();
-    });
+if (dzRouteMilestones[name]) { onReady(); return; }
+var done = false;
+var timer = setTimeout(function () {
+if (done) return;
+done = true;
+onMissing();
+}, DZ_ROUTE_WAIT_MS);
+dzRouteMilestoneWaiters[name] = dzRouteMilestoneWaiters[name] || [];
+dzRouteMilestoneWaiters[name].push(function () {
+if (done) return;
+done = true;
+clearTimeout(timer);
+onReady();
+});
 }
-
-/* Both routed pages mount the same way: wait for the milestone that makes the
-   page renderable, then hand the host element from the routed template to the
-   page's builder. $timeout(0) lets ngView attach the compiled template first,
-   so the host is in the document when the builder looks it up. */
 function dzRoutedController(hostId, milestone, mount, onMissing) {
-    return ["$routeParams", "$timeout", function ($routeParams, $timeout) {
-        $timeout(function () {
-            /* The route can be left again while the theme is still booting;
-               ngView then destroys the host, and neither the mount nor the
-               give-up path may touch a page the user is no longer on. */
-            function liveHost() {
-                var host = document.getElementById(hostId);
-                return (host && document.body.contains(host)) ? host : null;
-            }
-            dzWhenRouteMilestone(milestone, function () {
-                var host = liveHost();
-                if (host) mount(host, $routeParams);
-            }, function () {
-                if (liveHost()) onMissing();
-            });
-        }, 0);
-    }];
+return ["$routeParams", "$timeout", function ($routeParams, $timeout) {
+$timeout(function () {
+function liveHost() {
+var host = document.getElementById(hostId);
+return (host && document.body.contains(host)) ? host : null;
 }
-
+dzWhenRouteMilestone(milestone, function () {
+var host = liveHost();
+if (host) mount(host, $routeParams);
+}, function () {
+if (liveHost()) onMissing();
+});
+}, 0);
+}];
+}
 function dzHubRouteController() {
-    return dzRoutedController("dz-theme-hub-host", "theme", function (host, params) {
-        if (typeof dzMountThemeHubIn !== "function") {
-            console.warn("machinon_routes", "hub_builder_absent", "dzMountThemeHubIn missing; #/Theme left empty");
-            return;
-        }
-        dzMountThemeHubIn(host, params.tab || null);
-    }, function () {
-        console.warn("machinon_routes", "theme_not_ready", "theme init never completed; #/Theme left empty");
-    });
+return dzRoutedController("dz-theme-hub-host", "theme", function (host, params) {
+if (typeof dzMountThemeHubIn !== "function") {
+console.warn("machinon_routes", "hub_builder_absent", "dzMountThemeHubIn missing; #/Theme left empty");
+return;
 }
-
+dzMountThemeHubIn(host, params.tab || null);
+}, function () {
+console.warn("machinon_routes", "theme_not_ready", "theme init never completed; #/Theme left empty");
+});
+}
 function dzProblemsRouteController() {
-    return dzRoutedController("dz-problems", "problems", function () {
-        if (typeof dzProblemsRenderPage === "function") dzProblemsRenderPage();
-    }, function () {
-        console.warn("machinon_routes", "problems_not_ready", "theme init never completed; #/ProblemDevices left empty");
-    });
+return dzRoutedController("dz-problems", "problems", function () {
+if (typeof dzProblemsRenderPage === "function") dzProblemsRenderPage();
+}, function () {
+console.warn("machinon_routes", "problems_not_ready", "theme init never completed; #/ProblemDevices left empty");
+});
 }
-
 function dzSetupGridRouteController() {
-    return dzRoutedController("dz-setup-grid-host", "settingsGrid", function (host) {
-        window.dzBuildSettingsGrid(host);
-    }, function () {
-        /* The grid ships as the custom_settings_menu feature file (theme.json),
-           and registers itself only when core's Setup menu is present. Switched
-           off, or no menu to harvest, there is no grid to render: say so once
-           and hand the user core's own Settings page rather than a blank route. */
-        console.warn("machinon_routes", "grid_builder_absent", "custom_settings_menu did not register a grid; redirecting to #/Setup");
-        /* "#/Setup", not the bare "#Setup" core's own menu markup uses. Angular
-           runs with hashPrefix(''), so both reach the page, but the browser
-           records the bare form as its own history entry BEFORE Angular
-           normalises it. Measured: the bare form pushes TWO entries and Back
-           lands on #/Setup again, i.e. the user is stuck on the page they were
-           bounced to; the routed form pushes one and Back returns where they
-           came from. */
-        dzThemeNavigate("#/Setup");
-    });
+return dzRoutedController("dz-setup-grid-host", "settingsGrid", function (host) {
+window.dzBuildSettingsGrid(host);
+}, function () {
+console.warn("machinon_routes", "grid_builder_absent", "custom_settings_menu did not register a grid; redirecting to #/Setup");
+dzThemeNavigate("#/Setup");
+});
 }
-
-/* The pre-route way into each page, used when a routed template cannot load.
-   dzRoutesActive is already back to false by the time this runs, so both calls
-   take their legacy branch. The grid's legacy entry is the Setup menu click
-   handler (settings_page.js), so it is triggered rather than reimplemented: one
-   build path, not a second copy. */
 function dzOpenThemeLegacyPage(templateUrl) {
-    if (templateUrl === DZ_HUB_TEMPLATE) {
-        if (typeof dzOpenThemeHub === "function") dzOpenThemeHub();
-        return;
-    }
-    if (templateUrl === DZ_PROBLEMS_TEMPLATE) {
-        /* No legacy entry exists for this page (it has no Setup-menu-click
-           precursor like the hub/grid do), so the only safe move is off the
-           dead URL: the header badge keeps pointing here every tick, and
-           leaving the user parked on a route that will never render would
-           make the badge a dead end. The routed "#/Dashboard" form, not the
-           bare "#Dashboard": see the routed "#/Setup" form above for why
-           (the bare form pushes an extra history entry). */
-        console.warn("machinon_routes", "problems_template_absent", "route template did not load: " + templateUrl + "; redirecting to #/Dashboard");
-        dzThemeNavigate("#/Dashboard");
-        return;
-    }
-    if (window.jQuery) window.jQuery("#appnavbar li[has-permission='Admin']").click();
+if (templateUrl === DZ_HUB_TEMPLATE) {
+if (typeof dzOpenThemeHub === "function") dzOpenThemeHub();
+return;
 }
-
+if (templateUrl === DZ_PROBLEMS_TEMPLATE) {
+console.warn("machinon_routes", "problems_template_absent", "route template did not load: " + templateUrl + "; redirecting to #/Dashboard");
+dzThemeNavigate("#/Dashboard");
+return;
+}
+if (window.jQuery) window.jQuery("#appnavbar li[has-permission='Admin']").click();
+}
 function dzRegisterThemeRoutes(routesModule) {
-    /* Test hook (same convention as __dzForceNoApi / __dzForceNoRoutes): throw
-       from inside the hook, which is the one failure the containment above
-       exists for. __dzForceNoRoutes covers the CLEAN off path; this covers the
-       path where the hook breaks mid-flight, inside core's own
-       angular.module() call, where an uncontained throw takes core's router
-       down with it and leaves the user a blank Domoticz rather than a Domoticz
-       missing two pages. Without a way to force it, that property can only be
-       checked by hand. */
-    if (window.__dzThrowInRouteHook) { throw new Error("__dzThrowInRouteHook (test hook)"); }
-    routesModule.config(["$routeProvider", function ($routeProvider) {
-        var registered = 0;
-        function when(path, def) { registered += 1; $routeProvider.when(path, def); }
-        /* No permission key on purpose: the hub opens at every rights level
-           and right-sizes its own content. #/SetupMenu is admin-only, which
-           core's $routeChangeStart enforces for us (app.js). */
-        when("/Theme", { templateUrl: DZ_HUB_TEMPLATE, controller: dzHubRouteController() });
-        when("/Theme/:tab", { templateUrl: DZ_HUB_TEMPLATE, controller: dzHubRouteController() });
-        when("/SetupMenu", { templateUrl: DZ_GRID_TEMPLATE, permission: "Admin", controller: dzSetupGridRouteController() });
-        /* No permission key: read-only, and its data is scoped
-           server-side the same way #/Theme's own comment already
-           explains for that route. Route /ProblemDevices serves
-           templates/dz-problems.html: the template filename, the
-           problems.* i18n namespace and every dzProblems* identifier
-           predate the "Problem Devices" display name and stay as they
-           are (internal identifiers, not user-visible; renaming them
-           would only churn the diff). */
-        when("/ProblemDevices", { templateUrl: DZ_PROBLEMS_TEMPLATE, controller: dzProblemsRouteController() });
-        window.dzRoutesActive = true;
-        /* Diagnostics: which routes this theme actually got, and whether the
-           flag that every entry point reads turned true. A report of "the Theme
-           Hub link does nothing" is answered by this one line, and the answer is
-           not otherwise visible from a screenshot. Guarded with typeof because
-           this runs inside core's own angular.module() call, before any theme
-           module has loaded: an undefined global here is a ReferenceError in
-           core's bootstrap, i.e. a blank Domoticz rather than a missing log
-           line. The kernel shim in this file's own head is what receives it. */
-        if (typeof dzLog === "function") {
-            dzLog("routes", "registered", { routes: registered, active: window.dzRoutesActive });
-        }
-        /* The header badge (src/js/problems.js) hides itself whenever this flag
-           reads false, since #/ProblemDevices has no legacy build path: showing
-           it would be a dead entry point. Angular boots asynchronously (RequireJS
-           pulls it in after this file's top-level code runs), so problems.js's
-           own boot-time refresh can fire and read the flag BEFORE this config
-           block ever runs, hiding the badge for up to DZ_PROBLEMS_POLL_MS (the
-           next scheduled tick) on an otherwise completely normal load. Nudging a
-           refresh here, the instant the flag actually turns true, closes that
-           race regardless of which loaded first. */
-        if (typeof dzProblemsRefresh === "function") dzProblemsRefresh();
-    }]);
-
-    /* Core has no $routeChangeError handler, so a template that fails to load
-       (404, offline, a theme folder that lost templates/) would leave the URL on
-       the theme path with the PREVIOUS page still rendered, silently, and with
-       the legacy path already switched off. Catch it for the theme's own three
-       templates only: warn once, turn the routes back off (they cannot render
-       without their templates) and open the page the legacy way, so the user
-       still gets it. */
-    routesModule.run(["$rootScope", function ($rootScope) {
-        $rootScope.$on("$routeChangeError", function (event, current) {
-            var route = current && current.$$route;
-            var templateUrl = route && route.templateUrl;
-            if (templateUrl !== DZ_HUB_TEMPLATE && templateUrl !== DZ_GRID_TEMPLATE && templateUrl !== DZ_PROBLEMS_TEMPLATE) return;
-            console.warn("machinon_routes", "template_absent", "route template did not load: " + templateUrl + "; falling back to the legacy open");
-            window.dzRoutesActive = false;
-            if (typeof dzLog === "function") {
-                dzLog("routes", "refused", { routes: 0, active: false, reason: "template_absent" });
-            }
-            // Symmetric nudge: hide the badge immediately rather than leaving it
-            // visible (and its click a dead end) until the next poll tick.
-            if (typeof dzProblemsRefresh === "function") dzProblemsRefresh();
-            dzOpenThemeLegacyPage(templateUrl);
-        });
-    }]);
+if (window.__dzThrowInRouteHook) { throw new Error("__dzThrowInRouteHook (test hook)"); }
+routesModule.config(["$routeProvider", function ($routeProvider) {
+var registered = 0;
+function when(path, def) { registered += 1; $routeProvider.when(path, def); }
+when("/Theme", { templateUrl: DZ_HUB_TEMPLATE, controller: dzHubRouteController() });
+when("/Theme/:tab", { templateUrl: DZ_HUB_TEMPLATE, controller: dzHubRouteController() });
+when("/SetupMenu", { templateUrl: DZ_GRID_TEMPLATE, permission: "Admin", controller: dzSetupGridRouteController() });
+when("/ProblemDevices", { templateUrl: DZ_PROBLEMS_TEMPLATE, controller: dzProblemsRouteController() });
+window.dzRoutesActive = true;
+if (typeof dzLog === "function") {
+dzLog("routes", "registered", { routes: registered, active: window.dzRoutesActive });
 }
-
-/* Wrap angular.module so the theme's config block is appended the moment core
-   DEFINES 'app.routes' (a definition passes a dependency array; a plain
-   angular.module('x') is a getter call and must pass straight through). */
-/* Core's pushState mode (app.js dzHashNavViaPushState: Apple touch devices on
-   plain http, where iOS 27 reloads the page on a fragment navigation) moves
-   every route with history.pushState, and Angular intercepts plain #links too,
-   so no hashchange fires. Every theme page hook listens for hashchange, so this
-   restores exactly one per route change. History traversal still fires a native
-   hashchange, announced by a trusted popstate for the same URL; core's
-   dzNavigateHash dispatches an untrusted one and gets no native hashchange.
-   Dispatched on the next task, outside Angular's digest, like the native event. */
+if (typeof dzProblemsRefresh === "function") dzProblemsRefresh();
+}]);
+routesModule.run(["$rootScope", function ($rootScope) {
+$rootScope.$on("$routeChangeError", function (event, current) {
+var route = current && current.$$route;
+var templateUrl = route && route.templateUrl;
+if (templateUrl !== DZ_HUB_TEMPLATE && templateUrl !== DZ_GRID_TEMPLATE && templateUrl !== DZ_PROBLEMS_TEMPLATE) return;
+console.warn("machinon_routes", "template_absent", "route template did not load: " + templateUrl + "; falling back to the legacy open");
+window.dzRoutesActive = false;
+if (typeof dzLog === "function") {
+dzLog("routes", "refused", { routes: 0, active: false, reason: "template_absent" });
+}
+if (typeof dzProblemsRefresh === "function") dzProblemsRefresh();
+dzOpenThemeLegacyPage(templateUrl);
+});
+}]);
+}
 var dzTraversedTo = null;
-/* Registered at file load, before Angular boots: Angular's own popstate
-   listener handles the change synchronously, so one added later would learn
-   of the traversal only after $locationChangeSuccess has already fired. */
 window.addEventListener("popstate", function (e) {
-    if (e.isTrusted) dzTraversedTo = location.href;
+if (e.isTrusted) dzTraversedTo = location.href;
 });
-
 function dzBridgeHashChange($rootScope) {
-    if (window.dzHashNavViaPushState !== true) return;
-    $rootScope.$on("$locationChangeSuccess", function (event, newUrl, oldUrl) {
-        var native = dzTraversedTo === newUrl;
-        dzTraversedTo = null;
-        if (native || newUrl === oldUrl) return;
-        setTimeout(function () {
-            window.dispatchEvent(new HashChangeEvent("hashchange", { oldURL: oldUrl, newURL: newUrl }));
-        }, 0);
-    });
-}
-
-/* Route change from theme code. Core's dzNavigateHash keeps pushState-mode
-   devices off the fragment navigation iOS 27 answers with a full reload; cores
-   before it do not define it. */
-function dzThemeNavigate(hash) {
-    if (typeof dzNavigateHash === "function") dzNavigateHash(hash);
-    else location.hash = hash;
-}
-
-function dzWrapAngularModule(ng, realModule) {
-    var wrapped = function (name, deps) {
-        var m = realModule.apply(this, arguments);
-        /* This runs INSIDE core's angular.module() call, so a throw here would
-           abort core's own module definition. Contain it: the theme losing its
-           routes is a degradation, breaking the app is not. */
-        if (name === "domoticz" && deps) {
-            try {
-                m.run(["$rootScope", dzBridgeHashChange]);
-            } catch (e) {
-                dzLog("routes", "bridge_failed", { error: String(e) });
-            }
-        }
-        if (name === "app.routes" && deps) {
-            try {
-                dzRegisterThemeRoutes(m);
-            } catch (e) {
-                console.warn("machinon_routes", "hook_error", "route registration failed; theme pages stay on the legacy path", String(e));
-                /* Same guard as the successful path above, and for the same
-                   reason: this catch block is inside core's angular.module(). */
-                if (typeof dzLog === "function") {
-                    dzLog("routes", "refused", { routes: 0, active: false, reason: "hook_error" });
-                }
-            }
-        }
-        return m;
-    };
-    try {
-        Object.defineProperty(ng, "module", { configurable: true, writable: true, value: wrapped });
-    } catch (e) {
-        console.warn("machinon_routes", "hook_error", "angular.module is not replaceable; theme pages stay on the legacy path", String(e));
-    }
-}
-
-/* Contained on purpose: this can run from the window.angular setter below, i.e.
-   inside Angular's own publishExternalAPI, where a throw would take the whole
-   app down. Fail closed means degrade to the legacy path, never break core. */
-function dzHookAngular(ng) {
-    if (!ng || ng.__dzRoutesPatched) return;
-    try {
-        ng.__dzRoutesPatched = true;
-        if (ng.module) { dzWrapAngularModule(ng, ng.module); return; }
-        Object.defineProperty(ng, "module", {
-            configurable: true,
-            get: function () { return undefined; },
-            set: function (realModule) { dzWrapAngularModule(ng, realModule); }
-        });
-    } catch (e) {
-        console.warn("machinon_routes", "hook_error", "cannot hook angular.module; theme pages stay on the legacy path", String(e));
-    }
-}
-
-/* Installing the hook is not the same as reaching $routeProvider: core could
-   rename app.routes, define it before this file runs, or never load Angular at
-   all, and the theme would sit in fallback mode with nothing said. One bounded
-   timer turns that silence into a single structured warning. */
-var DZ_ROUTE_HOOK_WAIT_MS = 15000; // Angular boots in ~1-2s; this only catches a broken hook
-
-(function dzInstallRouteShim() {
-    /* Test hook, honoured first (same convention as __dzForceNoApi): forces the
-       pre-route behaviour so the fallback path stays covered by the harness. It
-       warns for itself, so no hook_absent timer is armed below. */
-    if (window.__dzForceNoRoutes) {
-        console.warn("machinon_routes", "forced_off", "__dzForceNoRoutes set; theme routes not registered (test hook)");
-        return;
-    }
-    try {
-        if (window.angular) {
-            dzHookAngular(window.angular);
-        } else {
-            var loaded;
-            Object.defineProperty(window, "angular", {
-                configurable: true,
-                get: function () { return loaded; },
-                set: function (ng) {
-                    loaded = ng;
-                    dzHookAngular(ng);
-                }
-            });
-        }
-    } catch (e) {
-        // A throw here would abort the rest of custom.js top level, including the
-        // getsettings fetch below that boots the whole theme.
-        console.warn("machinon_routes", "hook_error", "window.angular is not interceptable; theme routes not registered", String(e));
-    }
-
-    setTimeout(function () {
-        if (window.dzRoutesActive) return;
-        console.warn("machinon_routes", "hook_absent",
-            "no app.routes definition reached the hook within " + DZ_ROUTE_HOOK_WAIT_MS + "ms; theme pages stay on the legacy path");
-    }, DZ_ROUTE_HOOK_WAIT_MS);
-})();
-
-function dzBootJson(url) {
-    return fetch(url, { headers: { Accept: 'application/json' }, credentials: 'include' }).then(function(response) {
-        if (!response.ok) throw new Error(url + " answered " + response.status);
-        return response.json();
-    });
-}
-
-function dzBootText(url) {
-    return fetch(url, { cache: 'no-cache', credentials: 'include' }).then(function(response) {
-        return response.ok ? response.text() : null;
-    }).catch(function() { return null; });
-}
-
-/* Last resort for a session that may not read getsettings (admin-only since
-   core f594d8471) on a core whose getconfig does not name the theme. Core
-   serves the ACTIVE theme under styles/default/, so the installed folder whose
-   theme.json is byte-identical to that one is the active folder. A 7-character
-   name is skipped: libwebem rewrites /styles/<any 7 chars>/ (the length of
-   "default") to the active theme, so such a candidate always "matches". */
-function dzProbeThemeFolder() {
-    return Promise.all([
-        dzBootText('styles/default/theme.json'),
-        dzBootJson('json.htm?type=command&param=getthemes')
-    ]).then(function(results) {
-        var active = results[0];
-        var names = (results[1].result || []).map(function(t) { return t.theme; }).filter(function(name) {
-            return name && name.length !== 7;
-        });
-        if (!active) throw new Error("styles/default/theme.json is unreadable");
-        return Promise.all(names.map(function(name) {
-            return dzBootText('styles/' + encodeURIComponent(name) + '/theme.json');
-        })).then(function(texts) {
-            var matches = [];
-            texts.forEach(function(text, i) { if (text === active) matches.push(names[i]); });
-            if (!matches.length) throw new Error("no installed theme matches the active theme.json");
-            if (matches.length > 1) dzLog("boot", "theme_folder_ambiguous", { matches: matches.join(",") });
-            return matches.indexOf("machinon") >= 0 ? "machinon" : matches[0];
-        });
-    });
-}
-
-/* themeFolder is the theme's storage identity (themesettings_get theme=,
-   localStorage keys, uservariable names), so it must be the real folder name,
-   not the styles/default/ alias. Sources in order of preference: getconfig
-   (viewer-level) when the core names the theme there, getsettings (admins, and
-   every session on cores before its admin gate), then the probe. */
-function dzResolveThemeFolder(config) {
-    if (config.WebTheme) return Promise.resolve(config.WebTheme);
-    return dzBootJson('json.htm?type=command&param=getsettings').then(function(settings) {
-        if (!settings.WebTheme) throw new Error("getsettings carries no WebTheme");
-        return settings.WebTheme;
-    }).catch(function() {
-        return dzProbeThemeFolder();
-    });
-}
-
-dzBootJson('json.htm?type=command&param=getconfig').then(function(config) {
-    lang = (0 <= supported_lang.split(" ").indexOf(config.language)) ? config.language : 'en';
-    return dzResolveThemeFolder(config);
-}).then(function(folder) {
-    themeFolder = folder;
-
-    /* Load required script files (plus DOM ready) and then init the theme */
-    Promise.all([
-        /* Language: English is always the base table; a non-English selection
-           loads on top and dzDeepMerge (src/js/i18n.js) folds it over the
-           English table, so every key missing from a translation falls back
-           per-key to English. i18n.js loads first in this chain; script tags
-           load with async=false, so it executes before the merge runs. */
-        loadThemeScripts(["src/js/i18n.js", "lang/machinon.en.js"]).then(function () {
-            if (lang === "en") return;
-            var enTable = language;
-            return loadThemeScripts(["lang/machinon." + lang + ".js"]).then(function () {
-                language = dzDeepMerge(enTable, language);
-            }).catch(function () {
-                /* The overlay is a nice-to-have on top of the English table
-                   that already loaded above: a network hiccup or a bad CDN
-                   response on the translation file must not take the whole
-                   theme down with it. Log and keep going in English rather
-                   than rejecting this Promise.all member (which would sink
-                   the boot sequence's outer Promise.all and stop init_theme
-                   from ever running). The en+i18n.js load just above stays
-                   fatal, same as every other THEME_MODULES entry: the theme
-                   cannot run without dzT or dzDeepMerge either. */
-                console.warn("machinon_i18n", "overlay_load_failed", lang);
-                language = enTable;
-            });
-        }),
-        loadThemeScripts(THEME_MODULES),
-        new Promise(function(resolve) { $(resolve); })
-    ]).then(function() {
-        moment.locale(lang);
-        /* Load livestamp after moment is available (livestamp requires moment at parse time).
-           Use fetch+eval instead of $.getScript to avoid RequireJS intercepting
-           livestamp's anonymous define() call (causes "Mismatched anonymous define" error). */
-        fetch("styles/" + themeFolder + "/js/livestamp.js").then(function(r) { return r.text(); }).then(function(src) {
-            var _define = window.define;
-            window.define = undefined;
-            try { (0, eval)(src); } finally { window.define = _define; }
-            init_theme();
-        }).catch(function() {
-            console.log("Machinon - livestamp.js failed to load, continuing without it");
-            init_theme();
-        });
-    });
-}).catch(error => {
-    console.error(error);
+if (window.dzHashNavViaPushState !== true) return;
+$rootScope.$on("$locationChangeSuccess", function (event, newUrl, oldUrl) {
+var native = dzTraversedTo === newUrl;
+dzTraversedTo = null;
+if (native || newUrl === oldUrl) return;
+setTimeout(function () {
+window.dispatchEvent(new HashChangeEvent("hashchange", { oldURL: oldUrl, newURL: newUrl }));
+}, 0);
 });
-
+}
+function dzThemeNavigate(hash) {
+if (typeof dzNavigateHash === "function") dzNavigateHash(hash);
+else location.hash = hash;
+}
+function dzWrapAngularModule(ng, realModule) {
+var wrapped = function (name, deps) {
+var m = realModule.apply(this, arguments);
+if (name === "domoticz" && deps) {
+try {
+m.run(["$rootScope", dzBridgeHashChange]);
+} catch (e) {
+dzLog("routes", "bridge_failed", { error: String(e) });
+}
+}
+if (name === "app.routes" && deps) {
+try {
+dzRegisterThemeRoutes(m);
+} catch (e) {
+console.warn("machinon_routes", "hook_error", "route registration failed; theme pages stay on the legacy path", String(e));
+if (typeof dzLog === "function") {
+dzLog("routes", "refused", { routes: 0, active: false, reason: "hook_error" });
+}
+}
+}
+return m;
+};
+try {
+Object.defineProperty(ng, "module", { configurable: true, writable: true, value: wrapped });
+} catch (e) {
+console.warn("machinon_routes", "hook_error", "angular.module is not replaceable; theme pages stay on the legacy path", String(e));
+}
+}
+function dzHookAngular(ng) {
+if (!ng || ng.__dzRoutesPatched) return;
+try {
+ng.__dzRoutesPatched = true;
+if (ng.module) { dzWrapAngularModule(ng, ng.module); return; }
+Object.defineProperty(ng, "module", {
+configurable: true,
+get: function () { return undefined; },
+set: function (realModule) { dzWrapAngularModule(ng, realModule); }
+});
+} catch (e) {
+console.warn("machinon_routes", "hook_error", "cannot hook angular.module; theme pages stay on the legacy path", String(e));
+}
+}
+var DZ_ROUTE_HOOK_WAIT_MS = 15000;
+(function dzInstallRouteShim() {
+if (window.__dzForceNoRoutes) {
+console.warn("machinon_routes", "forced_off", "__dzForceNoRoutes set; theme routes not registered (test hook)");
+return;
+}
+try {
+if (window.angular) {
+dzHookAngular(window.angular);
+} else {
+var loaded;
+Object.defineProperty(window, "angular", {
+configurable: true,
+get: function () { return loaded; },
+set: function (ng) {
+loaded = ng;
+dzHookAngular(ng);
+}
+});
+}
+} catch (e) {
+console.warn("machinon_routes", "hook_error", "window.angular is not interceptable; theme routes not registered", String(e));
+}
+setTimeout(function () {
+if (window.dzRoutesActive) return;
+console.warn("machinon_routes", "hook_absent",
+"no app.routes definition reached the hook within " + DZ_ROUTE_HOOK_WAIT_MS + "ms; theme pages stay on the legacy path");
+}, DZ_ROUTE_HOOK_WAIT_MS);
+})();
+function dzBootJson(url) {
+return fetch(url, { headers: { Accept: 'application/json' }, credentials: 'include' }).then(function(response) {
+if (!response.ok) throw new Error(url + " answered " + response.status);
+return response.json();
+});
+}
+function dzBootText(url) {
+return fetch(url, { cache: 'no-cache', credentials: 'include' }).then(function(response) {
+return response.ok ? response.text() : null;
+}).catch(function() { return null; });
+}
+function dzProbeThemeFolder() {
+return Promise.all([
+dzBootText('styles/default/theme.json'),
+dzBootJson('json.htm?type=command&param=getthemes')
+]).then(function(results) {
+var active = results[0];
+var names = (results[1].result || []).map(function(t) { return t.theme; }).filter(function(name) {
+return name && name.length !== 7;
+});
+if (!active) throw new Error("styles/default/theme.json is unreadable");
+return Promise.all(names.map(function(name) {
+return dzBootText('styles/' + encodeURIComponent(name) + '/theme.json');
+})).then(function(texts) {
+var matches = [];
+texts.forEach(function(text, i) { if (text === active) matches.push(names[i]); });
+if (!matches.length) throw new Error("no installed theme matches the active theme.json");
+if (matches.length > 1) dzLog("boot", "theme_folder_ambiguous", { matches: matches.join(",") });
+return matches.indexOf("machinon") >= 0 ? "machinon" : matches[0];
+});
+});
+}
+function dzResolveThemeFolder(config) {
+if (config.WebTheme) return Promise.resolve(config.WebTheme);
+return dzBootJson('json.htm?type=command&param=getsettings').then(function(settings) {
+if (!settings.WebTheme) throw new Error("getsettings carries no WebTheme");
+return settings.WebTheme;
+}).catch(function() {
+return dzProbeThemeFolder();
+});
+}
+dzBootJson('json.htm?type=command&param=getconfig').then(function(config) {
+lang = (0 <= supported_lang.split(" ").indexOf(config.language)) ? config.language : 'en';
+document.documentElement.lang = config.language || lang;
+return dzResolveThemeFolder(config);
+}).then(function(folder) {
+themeFolder = folder;
+Promise.all([
+loadThemeScripts(["src/js/i18n.js", "lang/machinon.en.js"]).then(function () {
+if (lang === "en") return;
+var enTable = language;
+return loadThemeScripts(["lang/machinon." + lang + ".js"]).then(function () {
+language = dzDeepMerge(enTable, language);
+}).catch(function () {
+console.warn("machinon_i18n", "overlay_load_failed", lang);
+language = enTable;
+});
+}),
+loadThemeScripts(THEME_MODULES),
+new Promise(function(resolve) { $(resolve); })
+]).then(function() {
+moment.locale(lang);
+fetch("styles/" + themeFolder + "/js/livestamp.js").then(function(r) { return r.text(); }).then(function(src) {
+var _define = window.define;
+window.define = undefined;
+try { (0, eval)(src); } finally { window.define = _define; }
+init_theme();
+}).catch(function() {
+console.log("Machinon - livestamp.js failed to load, continuing without it");
+init_theme();
+});
+});
+}).catch(error => {
+console.error(error);
+});
 function init_theme() {
-    loadSettings().then(function() {
-
-    window.onhashchange = locationHashChanged;
-
-    /* Set $scope variable when angular is available. This is the one polling
-       wait kept on purpose: core owns the Angular app, so there is no event a
-       theme can subscribe to before the injector exists. Bounded: clears as
-       soon as Angular has booted. */
-    var $scope = null;
-    var checkAngular = setInterval(function() {
-        if (($scope === null) && (typeof angular !== "undefined") && (typeof angular.element(document.body).injector() !== "undefined")) {
-            clearInterval(checkAngular);
-            $scope = angular.element(document.body).injector().get('$rootScope');
-            initDeviceLiveUpdates($scope);
-        }
-    }, 100);
-
-    $(document).ready(function() {
-        initDeviceObserver();
-        enableThemeFeatures();
-        locationHashChanged();
-        setColorScheme();
-        applyCardWidths();
-        clampCorePopups();
-        armFlyoutContainment();
-        armSelectorWrapCornerRetag();
-        setLogo();
-        setSearch();
-        dzWireDashboardSearch();
-        dzProblemsInit();
-        setDevicesNativeSelectorForMobile();
-        patchSelectMenuCollision();
-        $(document).ajaxSuccess(ajaxSuccessCallback);
-
-        /* Set drag clone width to match the actual card width */
-        $(document).on("dragstart drag", ".ui-draggable", function(e, ui) {
-            if (ui && ui.helper) {
-                ui.helper.width($(this).width());
-            }
-        });
-
-        applyBackground();
-
-        $(".navbar").append('<div class="menu-toggle"><div></div></div>')
-        var navBarInner = $(".navbar-inner"), navBarToggle = $(".menu-toggle");
-        $(".menu-toggle").prop("title", dzT("header.mainmenu"));
-        navBarToggle.click(function() {
-            navBarInner.toggleClass("slide");
-        });
-        // Exclude dropdown containers from "tap closes the flyout": each owns its
-        // own open/close state and must not also be slammed shut by this blanket
-        // handler. class="dropdown" catches Setup's <li> (index.html ~1293), but
-        // core does not mark every dropdown container that way -- the non-admin
-        // "Other" entry (li#mLogout, ~1354) carries the same Bootstrap
-        // data-toggle="dropdown" toggle with no class="dropdown" at all, so the
-        // class-only check let a tap on it open the submenu and slide the whole
-        // flyout away in the same gesture. Exclude by the actual Bootstrap
-        // marker too, on the toggle <a> itself, not just the class core happens
-        // to add sometimes.
-        navBarInner.find(".container li").not(".dropdown").not(".dropdown-submenu").filter(function() {
-            return !$(this).children("a[data-toggle='dropdown']").length;
-        }).click(function() {
-            navBarInner.removeClass("slide");
-        });
-        $("#holder").click(function() {
-            navBarInner.removeClass("slide");
-        });
-        $(window).scroll(function() {
-            50 < $(this).scrollTop() ? $("div.menu-toggle").addClass("scrolled") : $("div.menu-toggle").removeClass("scrolled");
-        });
-        applyNavbarIconsText();
-
-        // ACE measures glyph width at init; when JetBrains Mono arrives later than the
-        // editor (font-display: swap), cursor/selection metrics go stale. Re-measure
-        // every live editor once the webfonts settle.
-        if (document.fonts && document.fonts.ready) {
-            document.fonts.ready.then(function () {
-                document.querySelectorAll('.ace_editor').forEach(function (el) {
-                    if (el.env && el.env.editor) {
-                        el.env.editor.renderer.updateFontSize();
-                    }
-                });
-            });
-        }
-
-        /* Perf-report F3: the defaults (cold) or cache (warm) are now painted and
-           wired above. Merge the Domoticz-stored settings and apply only the delta
-           in place. Runs last so the DOM the appliers touch (navbar, logo header)
-           exists, and replaces the old first-visit setTimeout(location.reload). */
-        var dzSettingsReconciled = reconcileDomoticzSettingsInPlace();
-
-        /* The theme is initialised: settings loaded, THEME_MODULES executed,
-           feature files requested. #/Theme waits for this milestone before it
-           builds the hub, so a page entered by URL renders with real settings
-           instead of defaults. THIS MUST WAIT ON reconcileDomoticzSettingsInPlace
-           SETTLING (bug found in ThemeSettings-migration review): that call
-           resolves checkUserVariableThemeSettings(), which is what actually
-           populates dzApiState.capable/perUser (settings-transport.js
-           dzProbeThemeSettingsAPI/dzApiLoad, both async fetches). Firing the
-           milestone synchronously right after the unawaited call (as this used
-           to) let a session whose FIRST navigation is directly #/Theme (bookmark,
-           deep link, F5 on the hub) build the hub against the pre-settle mode
-           default (api:false, perUser:false) -- no chips, no locks, no
-           promote/reset buttons, for the rest of the session, since
-           dzBuildThemeHub caches the hub by DOM id and never rebuilds. Fail
-           open on a reconcile failure (applyThemeDeltaInPlace could in
-           principle throw): the milestone must still fire so the hub renders
-           against whatever settled rather than staying blank forever. */
-        dzSettingsReconciled.then(function () {
-            dzRouteMilestone("theme");
-        }).catch(function (e) {
-            console.warn("machinon_routes", "reconcile_failed",
-                "settings reconcile did not complete cleanly; building the hub against whatever settled", String(e));
-            dzRouteMilestone("theme");
-        });
-    });
-    }); /* end loadSettings().then() */
+loadSettings().then(function() {
+window.onhashchange = locationHashChanged;
+var $scope = null;
+var angularPolls = 0;
+var checkAngular = setInterval(function() {
+if (($scope === null) && (typeof angular !== "undefined") && (typeof angular.element(document.body).injector() !== "undefined")) {
+clearInterval(checkAngular);
+$scope = angular.element(document.body).injector().get('$rootScope');
+initDeviceLiveUpdates($scope);
+} else if (++angularPolls >= 600) {
+clearInterval(checkAngular);
+if (typeof dzLog === "function") { dzLog("boot", "angular_absent", { waited_ms: 60000 }); }
+}
+}, 100);
+$(document).ready(function() {
+initDeviceObserver();
+enableThemeFeatures();
+locationHashChanged();
+setColorScheme();
+applyCardWidths();
+clampCorePopups();
+armFlyoutContainment();
+armSelectorWrapCornerRetag();
+setLogo();
+setSearch();
+dzWireDashboardSearch();
+dzProblemsInit();
+setDevicesNativeSelectorForMobile();
+patchSelectMenuCollision();
+$(document).ajaxSuccess(ajaxSuccessCallback);
+$(document).on("dragstart drag", ".ui-draggable", function(e, ui) {
+if (ui && ui.helper) {
+ui.helper.width($(this).width());
+}
+});
+applyBackground();
+var navBarInner = $(".navbar-inner");
+if (!navBarInner.attr("id")) navBarInner.attr("id", "dz-main-nav");
+var navBarToggle = $('<button type="button" class="menu-toggle"><span></span></button>').attr({
+title: dzT("header.mainmenu"),
+"aria-label": dzT("header.mainmenu"),
+"aria-controls": navBarInner.attr("id"),
+"aria-expanded": "false"
+});
+$(".navbar").append(navBarToggle);
+var syncNavMenuState = function() {
+var open = navBarInner.hasClass("slide");
+navBarToggle.attr("aria-expanded", open ? "true" : "false");
+navBarInner.prop("inert", navBarToggle.is(":visible") && !open);
+};
+new MutationObserver(syncNavMenuState).observe(navBarInner[0], { attributes: true, attributeFilter: ["class"] });
+if (window.ResizeObserver) new ResizeObserver(syncNavMenuState).observe(navBarToggle[0]);
+$(window).on("resize", syncNavMenuState);
+syncNavMenuState();
+navBarToggle.click(function(e) {
+navBarInner.toggleClass("slide");
+syncNavMenuState();
+if (e.detail === 0 && navBarInner.hasClass("slide")) {
+navBarInner.find("a[href]:visible").first().trigger("focus");
+}
+});
+$(document).on("keydown", function(e) {
+if (e.key === "Escape" && navBarInner.hasClass("slide")) {
+navBarInner.removeClass("slide");
+navBarToggle.trigger("focus");
+}
+});
+navBarInner.find(".container li").not(".dropdown").not(".dropdown-submenu").filter(function() {
+return !$(this).children("a[data-toggle='dropdown']").length;
+}).click(function() {
+navBarInner.removeClass("slide");
+});
+$("#holder").click(function() {
+navBarInner.removeClass("slide");
+});
+$(window).scroll(function() {
+navBarToggle.toggleClass("scrolled", 50 < $(this).scrollTop());
+});
+applyNavbarIconsText();
+if (document.fonts && document.fonts.ready) {
+document.fonts.ready.then(function () {
+document.querySelectorAll('.ace_editor').forEach(function (el) {
+if (el.env && el.env.editor) {
+el.env.editor.renderer.updateFontSize();
+}
+});
+});
+}
+var dzSettingsReconciled = reconcileDomoticzSettingsInPlace();
+dzSettingsReconciled.then(function () {
+dzRouteMilestone("theme");
+}).catch(function (e) {
+console.warn("machinon_routes", "reconcile_failed",
+"settings reconcile did not complete cleanly; building the hub against whatever settled", String(e));
+dzRouteMilestone("theme");
+});
+});
+});
 }

@@ -1,776 +1,454 @@
-/* Machinon toast surface.
- *
- * WHY THIS FILE EXISTS. Domoticz ships two unrelated toast mechanisms, both
- * globals in www/js/domoticz.js: generate_noty (Noty 3, 20 core call sites) and
- * ShowNotify (one static #notification div, 565 core call sites). Machinon
- * styled neither, and custom.css hid the second outright, so 565 core messages
- * plus two of our own rendered NOTHING. See the 2026-08-31 audit in todo.md.
- *
- * This module owns rendering. It knows nothing about Domoticz: the adapters in
- * src/js/toast-hooks.js own core's signatures.
- *
- * TOP-LEVEL CODE MUST NOT TOUCH `document`. scripts/test-toast-policy.mjs runs
- * this file in a node:vm context with no DOM, so the policy below stays
- * testable without a browser. Function bodies may use the DOM freely.
- */
-
-/* Timings. The group cap is the important one: a coalesced toast's deadline is
-   set once and extended AT MOST ONCE, never reset per arrival. A reset-per-event
-   deadline starves under exactly the storm coalescing exists to handle. */
 var DZ_TOAST_BASE_MS = 4000;
 var DZ_TOAST_ERROR_MS = 6000;
 var DZ_TOAST_GROUP_CAP_MS = 8000;
 var DZ_TOAST_COALESCE_MS = 1200;
 var DZ_TOAST_LOG_MAX = 50;
 var DZ_TOAST_NAME_CAP = 5;
-
-/* Default glyph by severity, used when an event carries no explicit ev.icon.
-   Ionicons is loaded unconditionally (custom.css imports css/ionicons.min.css),
-   so every one of these classes is always available. */
 var DZ_TOAST_DEFAULT_ICON = {
-    success: "ion-ios-checkmark-circle",
-    warning: "ion-ios-alert",
-    error: "ion-ios-close-circle",
-    info: "ion-ios-information-circle"
+success: "ion-ios-checkmark-circle",
+warning: "ion-ios-alert",
+error: "ion-ios-close-circle",
+info: "ion-ios-information-circle"
 };
-
 function dzToastCreateState() {
-    return { seen: {}, log: [] };
+return { seen: {}, log: [] };
 }
-
-/* Dedupe is per device+condition and lasts the SESSION, not a short window:
-   the measured defect is the same warning re-firing across route changes
-   minutes apart. A null key (every core toast) is never deduped. */
 function dzToastShouldSuppress(state, key) {
-    if (!key) return false;
-    return state.seen[key] === true;
+if (!key) return false;
+return state.seen[key] === true;
 }
-
 function dzToastMarkSeen(state, key) {
-    if (!key) return;
-    state.seen[key] = true;
+if (!key) return;
+state.seen[key] = true;
 }
-
-/* Called when a render pass sees the device WITHOUT the status class, i.e. the
-   condition genuinely cleared. Told once when it goes bad, again if it goes
-   bad again. */
 function dzToastClearKey(state, key) {
-    if (!key) return;
-    delete state.seen[key];
+if (!key) return;
+delete state.seen[key];
 }
-
-/* Persisted warn state, layered ON TOP OF the session dedupe above. The
-   session dedupe (dzToastShouldSuppress/dzToastMarkSeen) always applies and
-   resets on reload; this is the OPTIONAL extra quiet period a user can pick
-   (theme.warn_repeat: "visit" | "daily" | "episode"), backed by localStorage
-   ONLY, never the server: this is bookkeeping, not preference, and every
-   ThemeSettings write goes through a serialisation queue built for settings
-   edits, so a house with fifteen bad devices would push fifteen writes a day
-   through it. Per-browser is also arguably the right granularity for "have I
-   already told you". A storage failure degrades to `visit` behaviour, never
-   to silence: the functions below never let a throwing store suppress a
-   warning, only fail to remember one.
-
-   `store` is an abstraction, not raw localStorage: { get(key), set(key, ms),
-   remove(key), keys() }, each of which may throw (private browsing, quota,
-   disabled storage). The real implementation (devices.js) backs it with the
-   single localStorage key themeFolder + DZ_WARN_STORE_KEY_SUFFIX, one JSON
-   blob of key->last-warned-ms. Clearing a key (store.remove) is how a
-   recovered-then-failed-again device re-arms in EVERY mode, including
-   `daily`: dzWarnPass calls it the same way it already calls
-   dzToastClearKey for the session store, so a condition clearing is always
-   new information and never waits out the timer. */
 var DZ_WARN_STORE_KEY_SUFFIX = ".warnSeen";
 var DZ_WARN_DAILY_MS = 24 * 60 * 60 * 1000;
 var DZ_WARN_PRUNE_MS = 30 * 24 * 60 * 60 * 1000;
-
-/* true = allowed to warn now. `visit` never touches the store: a reload
-   always warns again, by design. */
 function dzWarnRepeatAllows(store, key, mode, now) {
-    if (mode === "visit") return true;
-    var last;
-    try {
-        last = store.get(key);
-    } catch (e) {
-        return true; /* unusable storage: never suppress, only fail to remember */
-    }
-    if (last === undefined || last === null) return true;
-    if (mode === "episode") return false; /* any recorded warning holds until cleared */
-    return (now - last) >= DZ_WARN_DAILY_MS; /* daily */
+if (mode === "visit") return true;
+var last;
+try {
+last = store.get(key);
+} catch (e) {
+return true;
 }
-
-/* Record that `key` warned at `now`. Best-effort: a failed write just means
-   the next check also finds nothing and allows again, i.e. it fails open,
-   never silently suppresses. */
+if (last === undefined || last === null) return true;
+if (mode === "episode") return false;
+return (now - last) >= DZ_WARN_DAILY_MS;
+}
 function dzWarnRecord(store, key, mode, now) {
-    if (mode === "visit") return;
-    try {
-        store.set(key, now);
-    } catch (e) { /* best effort */ }
+if (mode === "visit") return;
+try {
+store.set(key, now);
+} catch (e) { }
 }
-
-/* The dedupe key for one device warning. Never null when the caller has
-   EITHER an idx or a name, because dzToastShouldSuppress deliberately treats a
-   null key as "never dedupe" (that rule exists for core's own keyless toasts)
-   and a device warning handed a null key re-warns on every render pass for as
-   long as the page is open. A card whose idx will not resolve still has a
-   name, so it keys on that: two different devices sharing a display name is a
-   far cheaper failure than one device warning forever. */
 function dzWarnKey(prefix, idx, name) {
-    if (idx) return prefix + ":" + idx;
-    if (name) return prefix + ":name:" + name;
-    return null;
+if (idx) return prefix + ":" + idx;
+if (name) return prefix + ":name:" + name;
+return null;
 }
-
-/* Which keys the re-arm pass may actually clear: those NOT still flagged on
-   the same page. dzWarnPass applies this rule inline rather than calling this
-   function, to avoid materialising two arrays per warn type per render pass;
-   this is the rule's executable statement and what the tests assert against,
-   so the two must not drift. One device can paint more than one card (the classic
-   dashboard renders a device in every section it belongs to), and only one of
-   them need carry the status class. Clearing per unflagged card then wipes the
-   mark the flagged card just set, so the device warns again on the next render
-   pass, and the next, each arrival merging into the live toast and inflating
-   its count. Measured 2026-09-09: the title climbed 2 -> 4 -> 5 -> 6 from ONE
-   device while the seen set stayed empty after every pass. */
 function dzWarnClearableKeys(warnedKeys, clearedKeys) {
-    var warned = {};
-    (warnedKeys || []).forEach(function (k) { if (k) warned[k] = true; });
-    return (clearedKeys || []).filter(function (k) { return k && warned[k] !== true; });
+var warned = {};
+(warnedKeys || []).forEach(function (k) { if (k) warned[k] = true; });
+return (clearedKeys || []).filter(function (k) { return k && warned[k] !== true; });
 }
-
-/* Drop entries older than 30 days so the store does not grow forever for a
-   house whose devices come and go. */
 function dzWarnPrune(store, now) {
-    var keys;
-    try {
-        keys = store.keys();
-    } catch (e) {
-        return;
-    }
-    keys.forEach(function(key) {
-        var last;
-        try {
-            last = store.get(key);
-        } catch (e) {
-            return;
-        }
-        if (last === undefined || last === null) return;
-        if (now - last > DZ_WARN_PRUNE_MS) {
-            try { store.remove(key); } catch (e) { /* best effort */ }
-        }
-    });
+var keys;
+try {
+keys = store.keys();
+} catch (e) {
+return;
 }
-
-/* Returns one LINE per device, never a comma-joined sentence: device names
-   come from hardware and plugins and freely contain dashes, brackets and
-   other punctuation ("Woonkamer - Screen Links [kWh]"), which makes a comma
-   an ambiguous separator. Capped at DZ_TOAST_NAME_CAP names; anything past
-   that collapses into one trailing "and N more" line instead of growing the
-   toast without bound. */
+keys.forEach(function(key) {
+var last;
+try {
+last = store.get(key);
+} catch (e) {
+return;
+}
+if (last === undefined || last === null) return;
+if (now - last > DZ_WARN_PRUNE_MS) {
+try { store.remove(key); } catch (e) { }
+}
+});
+}
 function dzToastSummary(names, total) {
-    var shown = names.slice(0, DZ_TOAST_NAME_CAP);
-    var rest = total - shown.length;
-    var lines = shown.slice();
-    if (rest > 0) {
-        /* Localised, like every other group title in this file (see devices.js's
-           groupTitle functions). dzT degrades safely when `language` is
-           undefined, which is what the old typeof guard was for. One
-           composed key, not "and"/"more" glued around a bare number: a
-           translation needs to reorder around {count} in languages where
-           the word order differs from English. */
-        lines.push(dzT("toasts.and_more", { count: rest }));
-    }
-    return lines;
+var shown = names.slice(0, DZ_TOAST_NAME_CAP);
+var rest = total - shown.length;
+var lines = shown.slice();
+if (rest > 0) {
+lines.push(dzT("toasts.and_more", { count: rest }));
 }
-
-/* Grouping may only ever RAISE a short deadline to the cap. It never shortens a
-   caller's deliberately long timeout, and sticky (false) stays sticky. */
+return lines;
+}
 function dzToastDeadline(base, grouped) {
-    if (base === false) return false;
-    if (!grouped) return base;
-    return base > DZ_TOAST_GROUP_CAP_MS ? base : DZ_TOAST_GROUP_CAP_MS;
+if (base === false) return false;
+if (!grouped) return base;
+return base > DZ_TOAST_GROUP_CAP_MS ? base : DZ_TOAST_GROUP_CAP_MS;
 }
-
 function dzToastPushLog(state, event) {
-    state.log.push(event);
-    while (state.log.length > DZ_TOAST_LOG_MAX) state.log.shift();
+state.log.push(event);
+while (state.log.length > DZ_TOAST_LOG_MAX) state.log.shift();
 }
-
-/* ---- Renderer ---- */
-
 var dzToastState = dzToastCreateState();
 var dzToastStackEl = null;
-var dzToastVisible = [];   /* live toast records, oldest first */
-var dzToastQueue = [];     /* queued entries (dzToastQueuePush) waiting for a slot; never dropped */
-var dzToastGroups = {};    /* group -> live record OR still-queued entry, for coalescing */
-
-/* 4 on desktop, 2 on a phone: a three-line toast stacked three deep eats the
-   top third of an 844px viewport, and coalescing keeps a real storm at one or
-   two toasts anyway. */
+var dzToastVisible = [];
+var dzToastQueue = [];
+var dzToastGroups = {};
 function dzToastMaxVisible() {
-    return window.innerWidth <= 767 ? 2 : 4;
+return window.innerWidth <= 767 ? 2 : 4;
 }
-
 function dzToastStack() {
-    if (dzToastStackEl && dzToastStackEl.parentNode) return dzToastStackEl;
-    dzToastStackEl = document.createElement("div");
-    dzToastStackEl.id = "dz-toast-stack";
-    /* One polite region for the whole stack; individual error toasts add
-       role="alert" so they interrupt, without making every toast interrupt. */
-    dzToastStackEl.setAttribute("aria-live", "polite");
-    document.body.appendChild(dzToastStackEl);
-    return dzToastStackEl;
+if (dzToastStackEl && dzToastStackEl.parentNode) return dzToastStackEl;
+dzToastStackEl = document.createElement("div");
+dzToastStackEl.id = "dz-toast-stack";
+dzToastStackEl.setAttribute("aria-live", "polite");
+document.body.appendChild(dzToastStackEl);
+return dzToastStackEl;
 }
-
-/* Text nodes only, never innerHTML: titles and bodies carry device names, which
-   come from hardware and plugins. Injection is closed structurally here rather
-   than by remembering to escape at each of the ~600 call sites. */
 function dzToastLine(cls, text) {
-    var el = document.createElement("div");
-    el.className = cls;
-    el.appendChild(document.createTextNode(text));
-    return el;
+var el = document.createElement("div");
+el.className = cls;
+el.appendChild(document.createTextNode(text));
+return el;
 }
-
-/* Renders a merged-toast body as one line per device, replacing whatever the
-   container currently holds. Text nodes only, same as dzToastLine and for
-   the same reason: device names are untrusted (hardware, plugins), so each
-   line is its own escaped text node rather than a comma-joined string or,
-   worse, innerHTML with a <br> separator. Plain <div>s give the line break
-   for free via block layout, with no list markup and so no bullet glyph.
-   container.textContent = "" also clears any existing child elements, not
-   just text, so this is safe to call on a body div that already holds
-   lines from a previous merge. */
 function dzToastRenderBodyLines(container, lines) {
-    container.textContent = "";
-    lines.forEach(function(line) {
-        container.appendChild(dzToastLine("dz-toast-body-line", line));
-    });
+container.textContent = "";
+lines.forEach(function(line) {
+container.appendChild(dzToastLine("dz-toast-body-line", line));
+});
 }
-
-/* Accepts an href ONLY when it parses as an absolute http or https URL.
-   The URL constructor (not a regex) does the parsing, so this rejects
-   javascript:, data:, and every other scheme the same way a browser's own
-   scheme allow-list would, without trying to enumerate the deny-list by
-   hand. Returns the normalised href on success, null otherwise. */
-function dzToastValidHttpUrl(href) {
-    try {
-        var u = new URL(String(href), (typeof document !== "undefined" && document.baseURI) || undefined);
-        return (u.protocol === "http:" || u.protocol === "https:") ? u.href : null;
-    } catch (e) {
-        return null;
-    }
-}
-
-/* ev.action is a structured { label, href }, never raw markup: it exists so a
-   toast can carry a real link (e.g. the update notice's release page) without
-   the body ever being allowed to contain HTML. A rejected href still shows the
-   label, as plain text, so a bad action degrades to information rather than
-   silently disappearing. */
 function dzToastBuildAction(action) {
-    var row = document.createElement("div");
-    row.className = "dz-toast-action-row";
-    var label = (action && action.label) || "";
-    var url = action ? dzToastValidHttpUrl(action.href) : null;
-    if (url) {
-        var a = document.createElement("a");
-        a.className = "dz-toast-action";
-        a.href = url;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        a.appendChild(document.createTextNode(label));
-        row.appendChild(a);
-    } else {
-        row.appendChild(document.createTextNode(label));
-    }
-    return row;
+var row = document.createElement("div");
+row.className = "dz-toast-action-row";
+var label = (action && action.label) || "";
+var url = action ? dzValidHttpUrl(action.href) : null;
+if (url) {
+var a = document.createElement("a");
+a.className = "dz-toast-action";
+a.href = url;
+a.target = "_blank";
+a.rel = "noopener noreferrer";
+a.appendChild(document.createTextNode(label));
+row.appendChild(a);
+} else {
+row.appendChild(document.createTextNode(label));
 }
-
+return row;
+}
 function dzToastBuild(ev) {
-    var el = document.createElement("div");
-    el.className = "dz-toast dz-toast--" + (ev.type || "info");
-    if (ev.type === "error") el.setAttribute("role", "alert");
-    if (ev.source === "device-warning" && ev.group) {
-        el.classList.add("dz-toast--" + ev.group);
-    }
-
-    var icon = document.createElement("i");
-    icon.className = "dz-toast-icon " + (ev.icon || DZ_TOAST_DEFAULT_ICON[ev.type] || DZ_TOAST_DEFAULT_ICON.info);
-    icon.setAttribute("aria-hidden", "true");
-    el.appendChild(icon);
-
-    var content = document.createElement("div");
-    content.className = "dz-toast-content";
-    content.appendChild(dzToastLine("dz-toast-title", ev.title || ""));
-    /* ev.bodyLines is set instead of ev.body once a device-warning group has
-       merged past one device (dzToastQueueMerge, below): a queued entry
-       carries no DOM until dzToastDrain shows it, so the line-per-device
-       body has to be expressible on the plain event object, not only built
-       against a live element the way dzToastMerge builds it. */
-    if (ev.bodyLines && ev.bodyLines.length) {
-        var body = document.createElement("div");
-        body.className = "dz-toast-body";
-        dzToastRenderBodyLines(body, ev.bodyLines);
-        content.appendChild(body);
-    } else if (ev.body) {
-        content.appendChild(dzToastLine("dz-toast-body", ev.body));
-    }
-    if (ev.action) content.appendChild(dzToastBuildAction(ev.action));
-    /* Only a device warning ever carries a resolvable card idx (ev.deviceIdx,
-       set by dzWarnPass via dzCardIdx), so only this source gets the button
-       at all: every other toast (core's ~600 call sites, the theme's own)
-       would render a button that could never do anything. */
-    if (ev.source === "device-warning") {
-        var show = document.createElement("button");
-        show.type = "button";
-        show.className = "dz-toast-show-devices";
-        show.hidden = true; /* enabled by dzToastSyncShowDevices when idxs exist */
-        show.appendChild(document.createTextNode(dzT("toasts.show_devices")));
-        content.appendChild(show);
-    }
-    el.appendChild(content);
-
-    var close = document.createElement("button");
-    close.type = "button";
-    close.className = "dz-toast-close";
-    close.setAttribute("aria-label",
-        (typeof $ !== "undefined" && $.t) ? $.t("Close") : "Close");
-    close.appendChild(document.createTextNode("×"));
-    el.appendChild(close);
-    return { el: el, closeBtn: close };
+var el = document.createElement("div");
+el.className = "dz-toast dz-toast--" + (ev.type || "info");
+if (ev.type === "error") el.setAttribute("role", "alert");
+if (ev.source === "device-warning" && ev.group) {
+el.classList.add("dz-toast--" + ev.group);
 }
-
-/* Label carried as data, never scraped from the rendered title node
-   (MERGED-19): the title is built from the same rec fields, so reading it
-   back would just be a slower, more fragile way to reach what is already
-   sitting on rec. */
+var icon = document.createElement("i");
+icon.className = "dz-toast-icon " + (ev.icon || DZ_TOAST_DEFAULT_ICON[ev.type] || DZ_TOAST_DEFAULT_ICON.info);
+icon.setAttribute("aria-hidden", "true");
+el.appendChild(icon);
+var content = document.createElement("div");
+content.className = "dz-toast-content";
+content.appendChild(dzToastLine("dz-toast-title", ev.title || ""));
+if (ev.bodyLines && ev.bodyLines.length) {
+var body = document.createElement("div");
+body.className = "dz-toast-body";
+dzToastRenderBodyLines(body, ev.bodyLines);
+content.appendChild(body);
+} else if (ev.body) {
+content.appendChild(dzToastLine("dz-toast-body", ev.body));
+}
+if (ev.action) content.appendChild(dzToastBuildAction(ev.action));
+if (ev.source === "device-warning") {
+var show = document.createElement("button");
+show.type = "button";
+show.className = "dz-toast-show-devices";
+show.hidden = true;
+show.appendChild(document.createTextNode(dzT("toasts.show_devices")));
+content.appendChild(show);
+}
+el.appendChild(content);
+var close = document.createElement("button");
+close.type = "button";
+close.className = "dz-toast-close";
+close.setAttribute("aria-label",
+(typeof $ !== "undefined" && $.t) ? $.t("Close") : "Close");
+close.appendChild(document.createTextNode("×"));
+el.appendChild(close);
+return { el: el, closeBtn: close };
+}
 function dzToastFilterLabel(rec) {
-    if (rec.total > 1 && rec.ev.groupTitle) return rec.ev.groupTitle(rec.total);
-    return rec.names[0] || rec.ev.title || "";
+if (rec.total > 1 && rec.ev.groupTitle) return rec.ev.groupTitle(rec.total);
+return rec.names[0] || rec.ev.title || "";
 }
-
-/* Reveals or hides the filter button as rec.idxs changes shape. A group
-   leader can show up with no resolvable idx and gain one later, either on a
-   live merge (dzToastMerge) or during the queued carry-over (dzToastDrain,
-   which runs after dzToastShow already built the button hidden); both paths
-   call this so the button never lags what a click would actually do. */
 function dzToastSyncShowDevices(rec) {
-    var btn = rec.el && rec.el.querySelector(".dz-toast-show-devices");
-    if (btn) btn.hidden = !rec.idxs.length;
+var btn = rec.el && rec.el.querySelector(".dz-toast-show-devices");
+if (btn) btn.hidden = !rec.idxs.length;
 }
-
 function dzToastRemove(rec) {
-    if (rec.removed) return;
-    rec.removed = true;
-    if (rec.timer) clearTimeout(rec.timer);
-    if (rec.group && dzToastGroups[rec.group] === rec) delete dzToastGroups[rec.group];
-    var i = dzToastVisible.indexOf(rec);
-    if (i >= 0) dzToastVisible.splice(i, 1);
-    rec.el.classList.remove("dz-toast--in");
-    setTimeout(function() {
-        if (rec.el.parentNode) rec.el.parentNode.removeChild(rec.el);
-        dzToastDrain();
-    }, 320);
+if (rec.removed) return;
+rec.removed = true;
+if (rec.timer) clearTimeout(rec.timer);
+if (rec.group && dzToastGroups[rec.group] === rec) delete dzToastGroups[rec.group];
+var i = dzToastVisible.indexOf(rec);
+if (i >= 0) dzToastVisible.splice(i, 1);
+rec.el.classList.remove("dz-toast--in");
+setTimeout(function() {
+if (rec.el.parentNode) rec.el.parentNode.removeChild(rec.el);
+dzToastDrain();
+}, 320);
 }
-
-/* Deadline arming. rec.deadline is set ONCE and only ever raised by
-   dzToastDeadline; the remaining time is recomputed on resume, never reset by
-   a new arrival. */
 function dzToastArm(rec, ms) {
-    if (ms === false) return;
-    rec.startedAt = Date.now();
-    rec.remaining = ms;
-    rec.timer = setTimeout(function() { dzToastRemove(rec); }, ms);
+if (ms === false) return;
+rec.startedAt = Date.now();
+rec.remaining = ms;
+rec.timer = setTimeout(function() { dzToastRemove(rec); }, ms);
 }
-
-/* Low-level countdown control: stop/start the timer and recompute the
-   remaining time, without deciding whether the toast SHOULD be counting down.
-   Used both by the public pause/resume below (hover, focus) and by a group
-   merge extending the deadline, which must not silently restart a timer the
-   user paused. */
 function dzToastStopTimer(rec) {
-    if (rec.remaining === false || !rec.timer) return;
-    clearTimeout(rec.timer);
-    rec.timer = null;
-    rec.remaining = Math.max(0, rec.remaining - (Date.now() - rec.startedAt));
+if (rec.remaining === false || !rec.timer) return;
+clearTimeout(rec.timer);
+rec.timer = null;
+rec.remaining = Math.max(0, rec.remaining - (Date.now() - rec.startedAt));
 }
-
 function dzToastStartTimer(rec) {
-    if (rec.remaining === false || rec.timer || rec.removed || rec.paused) return;
-    dzToastArm(rec, rec.remaining);
+if (rec.remaining === false || rec.timer || rec.removed || rec.paused) return;
+dzToastArm(rec, rec.remaining);
 }
-
-/* Explicit paused flag, not one inferred from a null timer: a null rec.timer
-   also happens mid-merge, while the deadline is being recomputed, which is
-   not the same thing as "the user is reading this and it must not
-   disappear". Only hover and focus (via these two) ever set rec.paused, so a
-   merge's internal stop/start dance (dzToastMerge) can never un-pause a toast
-   the user is still hovering or focused on. */
 function dzToastPause(rec) {
-    rec.paused = true;
-    dzToastStopTimer(rec);
+rec.paused = true;
+dzToastStopTimer(rec);
 }
-
 function dzToastResume(rec) {
-    rec.paused = false;
-    dzToastStartTimer(rec);
+rec.paused = false;
+dzToastStartTimer(rec);
 }
-
 function dzToastShow(ev) {
-    var built = dzToastBuild(ev);
-    var rec = {
-        el: built.el, group: ev.group || null, names: ev.deviceName ? [ev.deviceName] : [],
-        members: dzToastMembers(ev),
-        total: ev.deviceName ? 1 : 0, base: ev.timeout, removed: false, timer: null,
-        remaining: ev.timeout, startedAt: 0, paused: false, ev: ev,
-        idxs: ev.deviceIdx ? [String(ev.deviceIdx)] : [],
-        hash: (typeof location !== "undefined" ? location.hash : "")
-    };
-    built.closeBtn.addEventListener("click", function(e) {
-        e.stopPropagation();
-        dzToastRemove(rec);
-    });
-    built.el.addEventListener("mouseenter", function() { dzToastPause(rec); });
-    built.el.addEventListener("mouseleave", function() { dzToastResume(rec); });
-    built.el.addEventListener("focusin", function() { dzToastPause(rec); });
-    built.el.addEventListener("focusout", function() { dzToastResume(rec); });
-
-    /* The explicit filter affordance for device warnings. A button, not a
-       clickable toast root: the toast already contains a real close button
-       and can contain action links, and ARIA forbids interactive controls
-       nested inside a button role. Bound unconditionally and gated by
-       rec.idxs at click time, because a group leader without a resolvable
-       idx can GAIN members on merge (dzToastSyncShowDevices flips
-       visibility then). The hash check makes a click after navigation a
-       plain dismiss: the members are cards of the page the toast was
-       raised on, and arming them elsewhere would blank the new page. */
-    var showBtn = rec.el.querySelector(".dz-toast-show-devices");
-    if (showBtn) {
-        showBtn.addEventListener("click", function (e) {
-            e.stopPropagation();
-            if (rec.idxs.length && location.hash === rec.hash &&
-                typeof dzApplySetFilter === "function") {
-                var members = {};
-                rec.idxs.forEach(function (idx) { members["d:" + idx] = true; });
-                dzApplySetFilter(members, dzToastFilterLabel(rec));
-            }
-            dzToastRemove(rec);
-        });
-    }
-    dzToastSyncShowDevices(rec);
-
-    /* Set here, not in dzToast: a toast that waited in the queue is shown by
-       dzToastDrain, and a createdAt assigned only on the dzToast path would be
-       undefined for those, making the coalesce window comparison NaN and
-       silently disabling grouping for exactly the storm case. */
-    rec.createdAt = Date.now();
-    dzToastStack().appendChild(built.el);
-    dzToastVisible.push(rec);
-    if (rec.group) dzToastGroups[rec.group] = rec;
-    /* Reflow before adding the transition class, or the entrance never plays. */
-    void built.el.offsetHeight;
-    built.el.classList.add("dz-toast--in");
-    dzToastArm(rec, dzToastDeadline(ev.timeout, false));
-    return rec;
+var built = dzToastBuild(ev);
+var rec = {
+el: built.el, group: ev.group || null, names: ev.deviceName ? [ev.deviceName] : [],
+members: dzToastMembers(ev),
+total: ev.deviceName ? 1 : 0, base: ev.timeout, removed: false, timer: null,
+remaining: ev.timeout, startedAt: 0, paused: false, ev: ev,
+idxs: ev.deviceIdx ? [String(ev.deviceIdx)] : [],
+hash: (typeof location !== "undefined" ? location.hash : "")
+};
+built.closeBtn.addEventListener("click", function(e) {
+e.stopPropagation();
+dzToastRemove(rec);
+});
+built.el.addEventListener("mouseenter", function() { dzToastPause(rec); });
+built.el.addEventListener("mouseleave", function() { dzToastResume(rec); });
+built.el.addEventListener("focusin", function() { dzToastPause(rec); });
+built.el.addEventListener("focusout", function() { dzToastResume(rec); });
+var showBtn = rec.el.querySelector(".dz-toast-show-devices");
+if (showBtn) {
+showBtn.addEventListener("click", function (e) {
+e.stopPropagation();
+if (rec.idxs.length && location.hash === rec.hash &&
+typeof dzApplySetFilter === "function") {
+var members = {};
+rec.idxs.forEach(function (idx) { members["d:" + idx] = true; });
+dzApplySetFilter(members, dzToastFilterLabel(rec));
 }
-
-/* Merge a same-group arrival into the live toast instead of stacking a second
-   one. Twelve stale devices become one toast, not twelve serialised over 48s. */
-/* One entry per DEVICE in the group, carrying both identifiers, because
-   neither alone is sufficient. Matching on idx alone lists one device twice:
-   the live device_update handler (src/js/devices.js) runs the warning pass on
-   its own timer, outside dzRunDevicePass's data-idx tagging loop, so a freshly
-   rendered card can arrive idx-less on one pass and idx-bearing on the next.
-   Matching on NAME alone collapses two real devices: Domoticz does not enforce
-   unique names, and an alert surface that reports one failure when two sensors
-   died is failing in the direction that costs the user something. It would
-   also contradict the badge and the Problem Devices page on the same screen,
-   which key on idx (src/js/problems.js).
-
-   So: the same idx is the same device; the same NAME is the same device only
-   when at least one side has no idx to disagree with. */
+dzToastRemove(rec);
+});
+}
+dzToastSyncShowDevices(rec);
+rec.createdAt = Date.now();
+dzToastStack().appendChild(built.el);
+dzToastVisible.push(rec);
+if (rec.group) dzToastGroups[rec.group] = rec;
+void built.el.offsetHeight;
+built.el.classList.add("dz-toast--in");
+dzToastArm(rec, dzToastDeadline(ev.timeout, false));
+return rec;
+}
 function dzToastMember(ev) {
-    return {
-        name: ev.deviceName || null,
-        idx: ev.deviceIdx ? String(ev.deviceIdx) : null
-    };
+return {
+name: ev.deviceName || null,
+idx: ev.deviceIdx ? String(ev.deviceIdx) : null
+};
 }
-
 function dzToastMembers(ev) {
-    return (ev.deviceName || ev.deviceIdx) ? [dzToastMember(ev)] : [];
+return (ev.deviceName || ev.deviceIdx) ? [dzToastMember(ev)] : [];
 }
-
 function dzToastMemberIndex(rec, ev) {
-    var idx = ev.deviceIdx ? String(ev.deviceIdx) : null;
-    var members = rec.members || [];
-    for (var i = 0; i < members.length; i++) {
-        var m = members[i];
-        if (idx && m.idx === idx) return i;
-        if (ev.deviceName && m.name === ev.deviceName && (!idx || !m.idx)) return i;
-    }
-    return -1;
+var idx = ev.deviceIdx ? String(ev.deviceIdx) : null;
+var members = rec.members || [];
+for (var i = 0; i < members.length; i++) {
+var m = members[i];
+if (idx && m.idx === idx) return i;
+if (ev.deviceName && m.name === ev.deviceName && (!idx || !m.idx)) return i;
 }
-
-/* A device already listed can still bring an idx the group has not got yet
-   (the idx-less-then-idx-bearing case above). Take it, so "Show these devices"
-   reaches the device, without touching the count or the body. */
+return -1;
+}
 function dzToastAdoptIdx(rec, member, ev) {
-    if (!ev.deviceIdx) return;
-    var idx = String(ev.deviceIdx);
-    if (member && !member.idx) member.idx = idx;
-    if (rec.idxs.indexOf(idx) === -1) rec.idxs.push(idx);
+if (!ev.deviceIdx) return;
+var idx = String(ev.deviceIdx);
+if (member && !member.idx) member.idx = idx;
+if (rec.idxs.indexOf(idx) === -1) rec.idxs.push(idx);
 }
-
-/* Returns true when the arrival was already in the group, i.e. nothing was
-   rendered. The caller needs that: dzWarnPass gates its persisted "last shown"
-   stamp on the result, and a warning the user never saw must not burn the
-   quiet period. */
 function dzToastMerge(rec, ev) {
-    var at = dzToastMemberIndex(rec, ev);
-    if (at !== -1) {
-        dzToastAdoptIdx(rec, rec.members[at], ev);
-        dzToastSyncShowDevices(rec);
-        /* Deliberately returns before the deadline extension below: a repeat of
-           a device already listed is not new information, so it must not hold
-           the toast open. A toast can therefore expire while repeats are still
-           arriving, which is the intended behaviour, not an oversight. */
-        return true;
-    }
-    if (ev.deviceName || ev.deviceIdx) rec.members.push(dzToastMember(ev));
-    if (ev.deviceName) rec.names.push(ev.deviceName);
-    if (ev.deviceIdx) rec.idxs.push(String(ev.deviceIdx));
-    dzToastSyncShowDevices(rec);
-    rec.total += 1;
-    var title = rec.el.querySelector(".dz-toast-title");
-    var body = rec.el.querySelector(".dz-toast-body");
-    title.textContent = ev.groupTitle ? ev.groupTitle(rec.total) : rec.total + " devices";
-    if (!body) {
-        body = document.createElement("div");
-        body.className = "dz-toast-body";
-        rec.el.querySelector(".dz-toast-content").appendChild(body);
-    }
-    dzToastRenderBodyLines(body, dzToastSummary(rec.names, rec.total));
-    /* One-way extension only. See dzToastDeadline. Stop/start the timer, not
-       pause/resume: a merge recomputing the deadline must never flip
-       rec.paused, or it would silently resume a toast the user is currently
-       hovering or focused on (dzToastStartTimer still no-ops while paused). */
-    var want = dzToastDeadline(rec.base, true);
-    if (want !== false && !rec.extended) {
-        rec.extended = true;
-        dzToastStopTimer(rec);
-        rec.remaining = want;
-        dzToastStartTimer(rec);
-    }
-    return false;
+var at = dzToastMemberIndex(rec, ev);
+if (at !== -1) {
+dzToastAdoptIdx(rec, rec.members[at], ev);
+dzToastSyncShowDevices(rec);
+return true;
 }
-
-/* Same idea as dzToastMerge, but for a group leader that is still sitting in
-   the queue: no DOM, no timer yet. Fold the arrival into the queued entry
-   directly (title, body, extended deadline) so it renders with the full
-   count the moment a slot opens, instead of every arrival before that being
-   lost. This, plus dzToastGroups registration in dzToastQueuePush below, is
-   what lets a group survive queueing instead of fanning out into one queued
-   event per arrival. */
+if (ev.deviceName || ev.deviceIdx) rec.members.push(dzToastMember(ev));
+if (ev.deviceName) rec.names.push(ev.deviceName);
+if (ev.deviceIdx) rec.idxs.push(String(ev.deviceIdx));
+dzToastSyncShowDevices(rec);
+rec.total += 1;
+var title = rec.el.querySelector(".dz-toast-title");
+var body = rec.el.querySelector(".dz-toast-body");
+title.textContent = ev.groupTitle ? ev.groupTitle(rec.total) : rec.total + " devices";
+if (!body) {
+body = document.createElement("div");
+body.className = "dz-toast-body";
+rec.el.querySelector(".dz-toast-content").appendChild(body);
+}
+dzToastRenderBodyLines(body, dzToastSummary(rec.names, rec.total));
+var want = dzToastDeadline(rec.base, true);
+if (want !== false && !rec.extended) {
+rec.extended = true;
+dzToastStopTimer(rec);
+rec.remaining = want;
+dzToastStartTimer(rec);
+}
+return false;
+}
 function dzToastQueueMerge(entry, ev) {
-    var at = dzToastMemberIndex(entry, ev);
-    if (at !== -1) {
-        dzToastAdoptIdx(entry, entry.members[at], ev);
-        return true;
-    }
-    if (ev.deviceName || ev.deviceIdx) entry.members.push(dzToastMember(ev));
-    if (ev.deviceName) entry.names.push(ev.deviceName);
-    if (ev.deviceIdx) entry.idxs.push(String(ev.deviceIdx));
-    entry.total += 1;
-    entry.ev.title = ev.groupTitle ? ev.groupTitle(entry.total) : dzT("toasts.devices", { count: entry.total });
-    /* bodyLines, not body: see the comment on ev.bodyLines in dzToastBuild.
-       The single-device body string this entry queued with is now stale and
-       must not coexist with the line list dzToastBuild would otherwise skip. */
-    entry.ev.bodyLines = dzToastSummary(entry.names, entry.total);
-    delete entry.ev.body;
-    if (!entry.extended) {
-        var want = dzToastDeadline(entry.ev.timeout, true);
-        if (want !== false) {
-            entry.extended = true;
-            entry.ev.timeout = want;
-        }
-    }
+var at = dzToastMemberIndex(entry, ev);
+if (at !== -1) {
+dzToastAdoptIdx(entry, entry.members[at], ev);
+return true;
 }
-
-/* Wrap a queued event with the same group bookkeeping a live toast carries
-   (names, total, createdAt, a removed flag), and register it in
-   dzToastGroups so a same-group arrival that shows up while this one is
-   still queued finds it and merges, instead of queuing a second event. */
+if (ev.deviceName || ev.deviceIdx) entry.members.push(dzToastMember(ev));
+if (ev.deviceName) entry.names.push(ev.deviceName);
+if (ev.deviceIdx) entry.idxs.push(String(ev.deviceIdx));
+entry.total += 1;
+entry.ev.title = ev.groupTitle ? ev.groupTitle(entry.total) : dzT("toasts.devices", { count: entry.total });
+entry.ev.bodyLines = dzToastSummary(entry.names, entry.total);
+delete entry.ev.body;
+if (!entry.extended) {
+var want = dzToastDeadline(entry.ev.timeout, true);
+if (want !== false) {
+entry.extended = true;
+entry.ev.timeout = want;
+}
+}
+}
 function dzToastQueuePush(ev) {
-    var entry = {
-        ev: ev, queued: true, removed: false, createdAt: Date.now(),
-        names: ev.deviceName ? [ev.deviceName] : [], total: ev.deviceName ? 1 : 0,
-        idxs: ev.deviceIdx ? [String(ev.deviceIdx)] : [],
-        members: dzToastMembers(ev),
-        hash: (typeof location !== "undefined" ? location.hash : ""),
-        extended: false
-    };
-    dzToastQueue.push(entry);
-    if (ev.group) dzToastGroups[ev.group] = entry;
-    return entry;
+var entry = {
+ev: ev, queued: true, removed: false, createdAt: Date.now(),
+names: ev.deviceName ? [ev.deviceName] : [], total: ev.deviceName ? 1 : 0,
+idxs: ev.deviceIdx ? [String(ev.deviceIdx)] : [],
+members: dzToastMembers(ev),
+hash: (typeof location !== "undefined" ? location.hash : ""),
+extended: false
+};
+dzToastQueue.push(entry);
+if (ev.group) dzToastGroups[ev.group] = entry;
+return entry;
 }
-
-/* Cancel a still-queued entry (its close() handle was called before a slot
-   ever opened). Identity-checked exactly like dzToastRemove clears a live
-   group entry: only delete dzToastGroups[group] if it still points at THIS
-   entry, so cancelling a stale handle can never clobber whatever group
-   record - live or queued - has taken its place since, and a closed group
-   can never be resurrected by a leftover reference. */
 function dzToastCancelQueued(entry) {
-    if (entry.removed) return;
-    entry.removed = true;
-    var i = dzToastQueue.indexOf(entry);
-    if (i >= 0) dzToastQueue.splice(i, 1);
-    if (entry.ev.group && dzToastGroups[entry.ev.group] === entry) delete dzToastGroups[entry.ev.group];
+if (entry.removed) return;
+entry.removed = true;
+var i = dzToastQueue.indexOf(entry);
+if (i >= 0) dzToastQueue.splice(i, 1);
+if (entry.ev.group && dzToastGroups[entry.ev.group] === entry) delete dzToastGroups[entry.ev.group];
 }
-
 function dzToastDrain() {
-    while (dzToastQueue.length && dzToastVisible.length < dzToastMaxVisible()) {
-        var entry = dzToastQueue.shift();
-        var rec = dzToastShow(entry.ev);
-        /* Carry over whatever this leader merged while it was still queued:
-           dzToastShow only knows about entry.ev's own single device. */
-        if (entry.total) {
-            rec.total = entry.total;
-            rec.names = entry.names.slice();
-            /* dzToastShow (above) already built the button against entry.ev's
-               own single idx; a re-sync here is what shows it for a leader
-               that only gained a resolvable idx through a queued merge. */
-            rec.idxs = entry.idxs.slice();
-            rec.members = entry.members.slice();
-            /* dzToastShow stamped rec.hash from the CURRENT location, but the
-               show-devices members are cards of the page this entry queued
-               on; restore that origin hash so the staleness guard in the
-               click handler still fires after a navigation that happened
-               while this toast was waiting for a slot. */
-            rec.hash = entry.hash;
-            dzToastSyncShowDevices(rec);
-        }
-        if (entry.extended) rec.extended = true;
-    }
+while (dzToastQueue.length && dzToastVisible.length < dzToastMaxVisible()) {
+var entry = dzToastQueue.shift();
+var rec = dzToastShow(entry.ev);
+if (entry.total) {
+rec.total = entry.total;
+rec.names = entry.names.slice();
+rec.idxs = entry.idxs.slice();
+rec.members = entry.members.slice();
+rec.hash = entry.hash;
+dzToastSyncShowDevices(rec);
 }
-
-/* The single entry point. Everything in the app - core's ~600 call sites, the
-   theme's own, and the device warnings - arrives here. */
+if (entry.extended) rec.extended = true;
+}
+}
 function dzToast(ev) {
-    if (!ev || typeof ev !== "object") return { close: function() {}, shown: false };
-    if (ev.timeout === undefined) {
-        ev.timeout = ev.type === "error" ? DZ_TOAST_ERROR_MS : DZ_TOAST_BASE_MS;
-    }
-    if (dzToastShouldSuppress(dzToastState, ev.key)) {
-        dzToastLogDecision(ev, "suppressed", 0);
-        return { close: function() {}, shown: false };
-    }
-    dzToastMarkSeen(dzToastState, ev.key);
-    dzToastPushLog(dzToastState, {
-        t: Date.now(), type: ev.type, title: ev.title, body: ev.body,
-        source: ev.source, deviceIdx: ev.deviceIdx || null
-    });
-
-    /* dzToastGroups holds either a live rec or a still-queued entry (queued:
-       true); both carry .removed and .createdAt, so the coalesce-window check
-       below is the same regardless of which one it finds. */
-    var live = ev.group ? dzToastGroups[ev.group] : null;
-    if (live && !live.removed && (Date.now() - live.createdAt) <= DZ_TOAST_COALESCE_MS) {
-        /* shown stays true for core's ~600 keyless call sites, whose contract
-           is "the event was registered". `duplicate` is the narrower fact the
-           device-warning caller needs: nothing was rendered, so nothing should
-           be recorded as delivered. */
-        if (live.queued) {
-            var dupQ = dzToastQueueMerge(live, ev);
-            dzToastLogDecision(ev, dupQ ? "duplicate" : "merged_queued", live.total);
-            return { close: function() { dzToastCancelQueued(live); }, shown: true, duplicate: dupQ };
-        }
-        var dup = dzToastMerge(live, ev);
-        dzToastLogDecision(ev, dup ? "duplicate" : "merged", live.total);
-        return { close: function() { dzToastRemove(live); }, shown: true, duplicate: dup };
-    }
-
-    if (dzToastVisible.length >= dzToastMaxVisible()) {
-        /* Queue, never drop: dropping the oldest means a storm shows only the
-           last few warnings. Group identity is preserved via dzToastQueuePush,
-           so a same-group storm still coalesces into one toast while it
-           waits for a slot instead of fanning out into a dozen serialised
-           ones. */
-        var entry = dzToastQueuePush(ev);
-        dzToastLogDecision(ev, "queued", entry.total);
-        return { close: function() { dzToastCancelQueued(entry); }, shown: true };
-    }
-    var rec = dzToastShow(ev);
-    dzToastLogDecision(ev, "shown", rec.total);
-    return { close: function() { dzToastRemove(rec); }, shown: true };
+if (!ev || typeof ev !== "object") return { close: function() {}, shown: false };
+if (ev.timeout === undefined) {
+ev.timeout = ev.type === "error" ? DZ_TOAST_ERROR_MS : DZ_TOAST_BASE_MS;
 }
-
-/* What the toast layer decided, and nothing about which device it concerned.
-   Guarded at the call site rather than inside, because dzToast is the sink for
-   core's several hundred notification call sites as well as the theme's own. */
+if (dzToastShouldSuppress(dzToastState, ev.key)) {
+dzToastLogDecision(ev, "suppressed", 0);
+return { close: function() {}, shown: false };
+}
+dzToastMarkSeen(dzToastState, ev.key);
+dzToastPushLog(dzToastState, {
+t: Date.now(), type: ev.type, title: ev.title, body: ev.body,
+source: ev.source, deviceIdx: ev.deviceIdx || null
+});
+var live = ev.group ? dzToastGroups[ev.group] : null;
+if (live && !live.removed && (Date.now() - live.createdAt) <= DZ_TOAST_COALESCE_MS) {
+if (live.queued) {
+var dupQ = dzToastQueueMerge(live, ev);
+dzToastLogDecision(ev, dupQ ? "duplicate" : "merged_queued", live.total);
+return { close: function() { dzToastCancelQueued(live); }, shown: true, duplicate: dupQ };
+}
+var dup = dzToastMerge(live, ev);
+dzToastLogDecision(ev, dup ? "duplicate" : "merged", live.total);
+return { close: function() { dzToastRemove(live); }, shown: true, duplicate: dup };
+}
+if (dzToastVisible.length >= dzToastMaxVisible()) {
+var entry = dzToastQueuePush(ev);
+dzToastLogDecision(ev, "queued", entry.total);
+return { close: function() { dzToastCancelQueued(entry); }, shown: true };
+}
+var rec = dzToastShow(ev);
+dzToastLogDecision(ev, "shown", rec.total);
+return { close: function() { dzToastRemove(rec); }, shown: true };
+}
 function dzToastLogDecision(ev, outcome, total) {
-    if (typeof dzLogOn === "undefined" || !dzLogOn) return;
-    try {
-        dzLog("toast", "decision", {
-            outcome: outcome,
-            group: ev.group || "none",
-            source: ev.source || "core",
-            type: ev.type || "info",
-            total: total || 0
-        });
-    } catch (e) { /* diagnostics never throw into the toast path */ }
+if (typeof dzLogOn === "undefined" || !dzLogOn) return;
+try {
+dzLog("toast", "decision", {
+outcome: outcome,
+group: ev.group || "none",
+source: ev.source || "core",
+type: ev.type || "info",
+total: total || 0
+});
+} catch (e) { }
 }
-
 function dzToastLog() { return dzToastState.log.slice(); }
-
-/* Tear down every toast through the real removal path. Removing .dz-toast
-   DOM nodes directly (as a caller resetting the surface might be tempted to
-   do) leaks a visible slot forever: dzToastVisible only shrinks via
-   dzToastRemove, which the close button and the per-toast timer call. Skip
-   that path and every dzToast() call afterward is silently queued against
-   slots that still look occupied, starving the stack for good. Both the dev
-   preview panel's "close all" button and the screenshot gallery harness
-   need this, so it lives here once instead of being reimplemented, wrong,
-   in each caller. Iterate a COPY of dzToastVisible: dzToastRemove splices
-   the live array, so iterating it directly would skip every other entry.
-   Also empties dzToastQueue so nothing queued drains in behind the wipe,
-   clearing dzToastGroups entries a queued entry (still) owns first so no
-   stale reference survives the wipe. */
 function dzToastCloseAll() {
-    dzToastVisible.slice().forEach(dzToastRemove);
-    dzToastQueue.forEach(function(entry) {
-        if (entry.ev.group && dzToastGroups[entry.ev.group] === entry) delete dzToastGroups[entry.ev.group];
-    });
-    dzToastQueue.length = 0;
+dzToastVisible.slice().forEach(dzToastRemove);
+dzToastQueue.forEach(function(entry) {
+if (entry.ev.group && dzToastGroups[entry.ev.group] === entry) delete dzToastGroups[entry.ev.group];
+});
+dzToastQueue.length = 0;
 }
-
-/* Esc dismisses the newest toast. Guarded by a typeof check because this file
-   is also executed in a node:vm context with no DOM by
-   scripts/test-toast-policy.mjs; a bare top-level document reference would
-   throw there and take the whole policy suite with it. */
 function dzToastInstallKeyboard() {
-    document.addEventListener("keydown", function(e) {
-        if (e.key !== "Escape" || !dzToastVisible.length) return;
-        dzToastRemove(dzToastVisible[dzToastVisible.length - 1]);
-    });
+document.addEventListener("keydown", function(e) {
+if (e.key !== "Escape" || !dzToastVisible.length) return;
+dzToastRemove(dzToastVisible[dzToastVisible.length - 1]);
+});
 }
 if (typeof document !== "undefined") dzToastInstallKeyboard();
-
-
-/* Diagnostics contributor: what the toast layer is holding right now. Registered
-   here because this module owns dzToastVisible/dzToastQueue and nothing else
-   should be reading them. */
 if (typeof dzDiagRegister === "function") {
-    dzDiagRegister("toasts", function(opts) {
-        var out = {
-            visible: dzToastVisible.length,
-            queued: dzToastQueue.length,
-            groups: dzToastVisible.map(function(r) { return r.group || "none"; })
-        };
-        if (opts && opts.names) {
-            out.names = dzToastVisible.map(function(r) { return (r.names || []).join(", "); });
-        }
-        return out;
-    });
+dzDiagRegister("toasts", function(opts) {
+var out = {
+visible: dzToastVisible.length,
+queued: dzToastQueue.length,
+groups: dzToastVisible.map(function(r) { return r.group || "none"; })
+};
+if (opts && opts.names) {
+out.names = dzToastVisible.map(function(r) { return (r.names || []).join(", "); });
+}
+return out;
+});
 }
