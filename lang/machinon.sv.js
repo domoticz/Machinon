@@ -16,6 +16,7 @@ house_managed: "Husinställning, hanteras av en administratör",
 house_badge: "hus",
 reload_note: "Träder i kraft efter omladdning",
 reload_now: "Ladda om nu",
+invalid_image_name: "Det här namnet kan inte användas: ange namnet på en bildfil i temats images-mapp, till exempel mylogo.png eller photos/lamp.jpg. Webbadresser och \"..\" accepteras inte.",
 locked_token: "Den här sessionen kan inte spara inställningar (applikationstoken).",
 locked_version: "Ditt konto kan inte ändra temainställningar i den här versionen av Domoticz. Fråga en administratör, eller be dem uppdatera Domoticz.",
 no_backing: "Inställningen är inte tillgänglig (ingen tillhörande funktion).",
@@ -32,12 +33,12 @@ about: "Om"
 },
 settings: {
 standby: {
-label: "Skärmvila",
-description: "Efter en tids inaktivitet tonar hela sidan ned till en mörk klockskärm; en tryckning eller ett klick tar tillbaka den."
+label: "Skärmsläckare",
+description: "Efter en tids inaktivitet tonar hela sidan ned till en mörk klocka; en tryckning eller ett klick tar tillbaka den."
 },
 standby_after: {
-label: "Vila efter (minuter)",
-description: "Anger hur många minuters inaktivitet som utlöser skärmvila. Gäller bara så länge Skärmvila också är på."
+label: "Skärmsläckare efter (minuter)",
+description: "Anger hur många minuters inaktivitet som utlöser skärmsläckaren. Gäller bara så länge Skärmsläckaren också är på."
 },
 check_update: {
 label: "Uppdateringsmeddelande",
@@ -133,7 +134,7 @@ description: "Visar en enhets senaste uppdateringstid som ett relativt uttryck, 
 },
 fade_off_items: {
 label: "Tona ned avstängda enheter",
-description: "Tona ned korten för enheter som är avstängda"
+description: "Tona ned korten för enheter som är av"
 },
 switch_instead_of_bigtext: {
 label: "Brytare i stället för statustext",
@@ -148,8 +149,8 @@ label: "Vindpilens riktning",
 description: "Domoticz rapporterar den riktning vinden kommer IFRÅN, och pilen pekar normalt åt det hållet. Slå på detta för att låta den peka åt motsatt håll, mot dit vinden blåser. Kompassetiketten (N, SV) förblir alltid den rapporterade. Påverkar bara de klassiska bildikonerna; med Settings > Icon style satt till glyfer kommer pilen från Domoticz själv och den här inställningen gör ingenting."
 },
 icon_image: {
-label: "Enhetsfoton i stället för ikoner",
-description: "Visar ett eget foto som en enhets kortikon i stället för dess vanliga på/av-ikon. Ställs in per enhet med redigeraren som detta visar."
+label: "Enhetsbild i stället för ikon",
+description: "Visar en egen bild som en enhets kortikon i stället för dess vanliga på/av-ikon. Ställs in per enhet med redigeraren som detta visar."
 },
 card_min_width: {
 label: "Minsta kortbredd",
@@ -172,12 +173,12 @@ label: "Bakgrundstyp",
 description: "Väljer hur bakgrundsbilden visas: utsträckt så att den fyller skärmen (cover), eller upprepad i sin ursprungliga storlek som ett mönster."
 },
 logo: {
-label: "Egen logotyp",
-description: "Anger en annan bild att använda som logotyp i navigeringsfältet, i stället för Machinons standardlogotyp. Ange namnet på en bildfil i temats images-mapp."
+label: "Egen logga",
+description: "Anger en annan bild att använda som logga i navigeringsfältet, i stället för Machinons standardlogga. Ange namnet på en bildfil i temats images-mapp."
 },
 hide_logo: {
-label: "Dölj logotypen",
-description: "Döljer logotypbilden i navigeringsfältet helt och lämnar den ytan tom."
+label: "Dölj logga",
+description: "Döljer loggan i navigeringsfältet helt och lämnar den ytan tom."
 },
 scheme: {
 label: "Färgschema",
@@ -303,7 +304,8 @@ add: "Lägg till",
 empty: "Inga enhetsbilder ännu.",
 idx_cell: "Idx {idx}",
 remove: "Ta bort",
-remove_aria: "Ta bort bilden för enhet {idx}"
+remove_aria: "Ta bort bilden för enhet {idx}",
+idx_invalid: "Ange enhetens Idx som ett heltal."
 },
 schemes: {
 swatches: {

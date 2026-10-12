@@ -16,6 +16,7 @@ house_managed: "Ustawienie domu, zarządzane przez administratora",
 house_badge: "dom",
 reload_note: "Działa po ponownym wczytaniu",
 reload_now: "Wczytaj ponownie",
+invalid_image_name: "Tej nazwy nie można użyć: wpisz nazwę pliku obrazu z folderu images motywu, na przykład mylogo.png lub photos/lamp.jpg. Adresy internetowe i \"..\" nie są akceptowane.",
 locked_token: "Ta sesja nie może zapisywać ustawień (token aplikacji).",
 locked_version: "Twoje konto nie może zmieniać ustawień motywu w tej wersji Domoticz. Poproś administratora lub poproś go o aktualizację Domoticz.",
 no_backing: "Ustawienie niedostępne (brak powiązanej funkcji).",
@@ -303,7 +304,8 @@ add: "Dodaj",
 empty: "Brak obrazów urządzeń.",
 idx_cell: "Idx {idx}",
 remove: "Usuń",
-remove_aria: "Usuń obraz urządzenia {idx}"
+remove_aria: "Usuń obraz urządzenia {idx}",
+idx_invalid: "Wpisz Idx urządzenia jako liczbę całkowitą."
 },
 schemes: {
 swatches: {

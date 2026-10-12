@@ -237,6 +237,11 @@ if ($(this).find("#name > i.ion-ios-lock").length === 0) {
 $(this).find("#name").prepend("<i class='ion-ios-lock' title='" + $.t("Protected") + "'></i>&nbsp;");
 }
 });
+$("div.item.statusDisabled").each(function() {
+if ($(this).find("#name > i.ion-ios-remove-circle-outline").length === 0) {
+$(this).find("#name").prepend("<i class='ion-ios-remove-circle-outline warning-text' title='" + $.t("Disabled") + "'></i>&nbsp;");
+}
+});
 dzWarnPass({
 selector: "div.item.statusTimeout",
 cleared: "div.item:not(.statusTimeout)",
@@ -451,6 +456,35 @@ $(this).attr("src", 'images/wind-direction/Wind' + direction + '.png');
 }
 });
 }
+var DZ_XLINK_NS = "http://www.w3.org/1999/xlink";
+function setFloorplanWindDirectionIcons() {
+if (theme.features.wind_direction.enabled !== true) return;
+var stage = document.getElementById("floorplancontent");
+if (!stage) return;
+stage.querySelectorAll("image").forEach(function(img) {
+var href = img.getAttributeNS(DZ_XLINK_NS, "href") || img.getAttribute("href") || "";
+var m = href.match(/^images\/Wind([A-Z]{1,3})\.png$/);
+if (m) img.setAttributeNS(DZ_XLINK_NS, "href", "images/wind-direction/Wind" + m[1] + ".png");
+});
+}
+var DZ_SVG_NS = "http://www.w3.org/2000/svg";
+function setFloorplanLastSeen() {
+if (theme.features.time_ago.enabled !== true) return;
+var stage = document.getElementById("floorplancontent");
+if (!stage) return;
+stage.querySelectorAll("tspan#lastupdate").forEach(function(tspan) {
+if (tspan.querySelector("tspan")) return;
+var when = moment(tspan.textContent.trim(), "YYYY-MM-DD HH:mm:ss", true);
+if (!when.isValid()) return;
+var title = document.createElementNS(DZ_SVG_NS, "title");
+title.textContent = when.format("L LT");
+var live = document.createElementNS(DZ_SVG_NS, "tspan");
+tspan.textContent = " ";
+tspan.appendChild(live);
+tspan.appendChild(title);
+$(live).livestamp(when.format());
+});
+}
 function setDeviceLastUpdate(idx, lastupdate, $trs) {
 if (typeof lastupdate === "string") {
 var dateMatch = lastupdate.match(/\d{4}[-/]\d{2}[-/]\d{2}[\sT]\d{2}:\d{2}:\d{2}/);
@@ -599,6 +633,8 @@ console.warn("dzOnDomSettled callback " + index + " (" + (callback.name || "anon
 });
 observer.takeRecords();
 }
+dzOnDomSettled(setFloorplanWindDirectionIcons);
+dzOnDomSettled(setFloorplanLastSeen);
 observer.observe(document.getElementById("holder") || document.body, {
 childList: true,
 subtree: true,

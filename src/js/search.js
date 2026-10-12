@@ -103,7 +103,16 @@ input.dispatchEvent(new Event("keyup", { bubbles: true }));
 input.dispatchEvent(new Event("change", { bubbles: true }));
 }
 dzSearchClear = clearSearch;
+var keyDown = false;
+input.addEventListener("keydown", function () { keyDown = true; });
+input.addEventListener("blur", function () { keyDown = false; });
+input.addEventListener("input", function () {
+if (!keyDown) {
+input.dispatchEvent(new Event("keyup", { bubbles: true }));
+}
+});
 input.addEventListener("keyup", function (event) {
+keyDown = false;
 if (event.key === "Enter") {
 input.blur();
 }

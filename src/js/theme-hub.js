@@ -413,19 +413,29 @@ var addBtn = document.createElement("button");
 addBtn.type = "button";
 addBtn.className = "btn btn-primary dz-hub-image-add-btn";
 addBtn.textContent = dzT("hub.imageEditor.add");
+var addError = document.createElement("div");
+addError.className = "dz-hub-image-add-error";
 addBtn.addEventListener("click", function () {
 var idx = idxInput.value.trim();
 var img = imgInput.value.trim();
-if (!/^\d+$/.test(idx) || !img) { return; }
+var idxBad = !/^\d+$/.test(idx);
+var imgBad = !img || dzThemeImageName(img) === null;
+dzHubFieldError(addError, idxInput, null);
+dzHubFieldError(addError, imgInput, null);
+if (idxBad) { dzHubFieldError(addError, idxInput, dzT("hub.imageEditor.idx_invalid")); return; }
+if (imgBad) { dzHubFieldError(addError, imgInput, dzT("hub.invalid_image_name")); return; }
 dzHubImageAdd(idx, img);
 idxInput.value = "";
 imgInput.value = "";
 dzHubRenderImageList(list);
 });
+idxInput.id = "dz-hub-image-idx";
+imgInput.id = "dz-hub-image-img";
 addRow.appendChild(idxInput);
 addRow.appendChild(imgInput);
 addRow.appendChild(addBtn);
 editor.appendChild(addRow);
+editor.appendChild(addError);
 dzHubRenderImageList(list);
 return editor;
 }
@@ -448,6 +458,7 @@ idxCell.textContent = dzT("hub.imageEditor.idx_cell", { idx: m.idx });
 var imgCell = document.createElement("span");
 imgCell.className = "dz-hub-image-cell dz-hub-image-name";
 imgCell.textContent = m.img;
+var refused = dzThemeImageName(m.img) === null;
 var rm = document.createElement("button");
 rm.type = "button";
 rm.className = "btn btn-danger dz-hub-image-remove";
@@ -457,6 +468,12 @@ rm.addEventListener("click", function () { dzHubImageRemove(i); dzHubRenderImage
 row.appendChild(idxCell);
 row.appendChild(imgCell);
 row.appendChild(rm);
+if (refused) {
+var why = document.createElement("p");
+why.className = "dz-hub-field-error";
+why.textContent = dzT("hub.invalid_image_name");
+row.appendChild(why);
+}
 list.appendChild(row);
 });
 }
@@ -1002,6 +1019,9 @@ desc.className = "dz-hub-desc";
 desc.textContent = dzT("hub.settings." + entry.key + ".description");
 textCell.appendChild(desc);
 if (entry.reloadOnDisable) textCell.appendChild(dzHubBuildReloadNote(entry));
+if (DZ_HUB_IMAGE_NAME_KEYS[entry.key] && control && dzHubImageNameRefused(control.value)) {
+dzHubFieldError(textCell, control, dzT("hub.invalid_image_name"));
+}
 var preview = document.createElement("div");
 preview.className = "dz-hub-preview";
 if (entry.previewId) {
@@ -1019,6 +1039,30 @@ row.appendChild(kids);
 }
 if (entry.key === "icon_image") { row.appendChild(dzHubBuildImageEditor()); }
 return row;
+}
+var DZ_HUB_IMAGE_NAME_KEYS = { logo: true };
+function dzHubImageNameRefused(value) {
+var v = String(value == null ? "" : value).trim();
+return v !== "" && dzThemeImageName(v) === null;
+}
+function dzHubFieldError(anchor, input, message) {
+var note = anchor.querySelector(".dz-hub-field-error");
+if (!message) {
+if (note) note.remove();
+input.removeAttribute("aria-invalid");
+input.removeAttribute("aria-describedby");
+return;
+}
+if (!note) {
+note = document.createElement("p");
+note.className = "dz-hub-field-error";
+note.id = input.id + "-error";
+note.setAttribute("aria-live", "polite");
+anchor.appendChild(note);
+}
+note.textContent = message;
+input.setAttribute("aria-invalid", "true");
+input.setAttribute("aria-describedby", note.id);
 }
 function dzHubBuildControl(entry) {
 var meta = DZ_HUB_INPUT_META[entry.storageKey] || {};
@@ -1054,6 +1098,12 @@ el.className = "dz-hub-input dz-hub-input-" + entry.control;
 el.setAttribute("data-setting-input", entry.key);
 el.addEventListener("change", function () {
 var value = (entry.control === "toggle") ? el.checked : el.value;
+if (DZ_HUB_IMAGE_NAME_KEYS[entry.key]) {
+var textCell = el.closest(".dz-hub-row").querySelector(".dz-hub-text");
+var refused = dzHubImageNameRefused(value);
+dzHubFieldError(textCell, el, refused ? dzT("hub.invalid_image_name") : null);
+if (refused) return;
+}
 dzApplyHubSetting(entry, value);
 if (entry.control === "toggle") dzHubSyncChildren(entry, el.checked);
 if (entry.key === "icon_image") dzHubToggleImageEditor(el.checked);

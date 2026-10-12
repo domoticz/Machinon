@@ -16,6 +16,7 @@ house_managed: "House setting, managed by an admin",
 house_badge: "house",
 reload_note: "Takes effect after reload",
 reload_now: "Reload now",
+invalid_image_name: "This name cannot be used: enter the name of an image file in the theme's images folder, such as mylogo.png or photos/lamp.jpg. Web addresses and \"..\" are not accepted.",
 locked_token: "This session cannot store settings (application token).",
 locked_version: "Your account cannot change theme settings on this Domoticz version. Ask an administrator, or ask them to update Domoticz.",
 no_backing: "Setting unavailable (no feature backing).",
@@ -304,7 +305,8 @@ add: "Add",
 empty: "No device images yet.",
 idx_cell: "Idx {idx}",
 remove: "Remove",
-remove_aria: "Remove image for device {idx}"
+remove_aria: "Remove image for device {idx}",
+idx_invalid: "Enter the device's Idx as a whole number."
 },
 schemes: {
 swatches: {

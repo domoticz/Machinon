@@ -16,6 +16,7 @@ house_managed: "Réglage de la maison, géré par un administrateur",
 house_badge: "maison",
 reload_note: "Prend effet après rechargement",
 reload_now: "Recharger maintenant",
+invalid_image_name: "Ce nom ne peut pas être utilisé : saisissez le nom d'un fichier image du dossier images du thème, par exemple mylogo.png ou photos/lamp.jpg. Les adresses web et \"..\" ne sont pas acceptés.",
 locked_token: "Cette session ne peut pas enregistrer les réglages (jeton d'application).",
 locked_version: "Votre compte ne peut pas modifier les réglages de thème sur cette version de Domoticz. Demandez à un administrateur, ou demandez-lui de mettre à jour Domoticz.",
 no_backing: "Réglage indisponible (aucune fonctionnalité associée).",
@@ -304,7 +305,8 @@ add: "Ajouter",
 empty: "Aucune image de dispositif pour l'instant.",
 idx_cell: "Idx {idx}",
 remove: "Supprimer",
-remove_aria: "Supprimer l'image du dispositif {idx}"
+remove_aria: "Supprimer l'image du dispositif {idx}",
+idx_invalid: "Saisissez l'Idx du dispositif sous forme de nombre entier."
 },
 schemes: {
 swatches: {

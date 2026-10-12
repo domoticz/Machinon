@@ -16,6 +16,7 @@ house_managed: "Instelling voor het hele huis, beheerd door een beheerder",
 house_badge: "huis",
 reload_note: "Wordt actief na opnieuw laden",
 reload_now: "Nu opnieuw laden",
+invalid_image_name: "Deze naam kan niet worden gebruikt: voer de naam in van een afbeeldingsbestand in de images-map van het thema, bijvoorbeeld mylogo.png of photos/lamp.jpg. Webadressen en \"..\" worden niet geaccepteerd.",
 locked_token: "Deze sessie kan geen instellingen opslaan (applicatietoken).",
 locked_version: "Je account kan de thema-instellingen in deze Domoticz-versie niet wijzigen. Vraag het een beheerder, of vraag hen om Domoticz bij te werken.",
 no_backing: "Instelling niet beschikbaar (geen bijbehorende functie).",
@@ -304,7 +305,8 @@ add: "Toevoegen",
 empty: "Nog geen apparaatafbeeldingen.",
 idx_cell: "Idx {idx}",
 remove: "Verwijderen",
-remove_aria: "Afbeelding voor apparaat {idx} verwijderen"
+remove_aria: "Afbeelding voor apparaat {idx} verwijderen",
+idx_invalid: "Voer de Idx van het apparaat in als geheel getal."
 },
 schemes: {
 swatches: {

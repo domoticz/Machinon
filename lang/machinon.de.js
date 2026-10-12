@@ -16,6 +16,7 @@ house_managed: "Haus-Einstellung, von einem Administrator verwaltet",
 house_badge: "Haus",
 reload_note: "Wirkt nach dem Neuladen",
 reload_now: "Jetzt neu laden",
+invalid_image_name: "Dieser Name kann nicht verwendet werden: Gib den Namen einer Bilddatei im images-Ordner des Themes ein, zum Beispiel mylogo.png oder photos/lamp.jpg. Webadressen und \"..\" werden nicht akzeptiert.",
 locked_token: "Diese Sitzung kann keine Einstellungen speichern (Anwendungstoken).",
 locked_version: "Dein Konto kann die Design-Einstellungen in dieser Domoticz-Version nicht ändern. Frage einen Administrator oder bitte ihn, Domoticz zu aktualisieren.",
 no_backing: "Einstellung nicht verfügbar (keine zugehörige Funktion).",
@@ -304,7 +305,8 @@ add: "Hinzufügen",
 empty: "Noch keine Gerätebilder.",
 idx_cell: "Idx {idx}",
 remove: "Entfernen",
-remove_aria: "Bild für Gerät {idx} entfernen"
+remove_aria: "Bild für Gerät {idx} entfernen",
+idx_invalid: "Gib die Idx des Geräts als ganze Zahl ein."
 },
 schemes: {
 swatches: {
