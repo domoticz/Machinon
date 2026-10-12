@@ -39,8 +39,8 @@ language = {
         description: "Efter en tids inaktivitet tonar hela sidan ned till en mörk klocka; en tryckning eller ett klick tar tillbaka den."
       },
       standby_after: {
-        label: "Vila efter (minuter)",
-        description: "Anger hur många minuters inaktivitet som utlöser skärmsläckare. Gäller bara så länge Skärmsläckare också är på."
+        label: "Skärmsläckare efter (minuter)",
+        description: "Anger hur många minuters inaktivitet som utlöser skärmsläckaren. Gäller bara så länge Skärmsläckaren också är på."
       },
       check_update: {
         label: "Uppdateringsmeddelande",
@@ -152,7 +152,7 @@ language = {
       },
       icon_image: {
         label: "Enhetsbild i stället för ikoner",
-        description: "Visar ett egen bild som en enhets kortikon i stället för dess vanliga på/av-ikon. Ställs in per enhet med redigeraren som detta visar."
+        description: "Visar en egen bild som en enhets kortikon i stället för dess vanliga på/av-ikon. Ställs in per enhet med redigeraren som detta visar."
       },
       card_min_width: {
         label: "Minsta kortbredd",
