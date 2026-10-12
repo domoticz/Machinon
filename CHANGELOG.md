@@ -5,6 +5,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 ## [Unreleased]
 
 - Devices on disabled hardware stand out again, on the dashboards and on every device page: a grey glow and a "blocked" sign next to the name, with the icon, name and controls dimmed like a device that stopped reporting. Domoticz only shows these devices when "Hide disabled hardware sensors" is turned off in its settings (#229)
+- The "Wind arrow direction" setting now also turns the wind arrow on floorplans, so a wind device points the same way on its card and on the plan (#190)
 
 ## [2.7.0] - 2026-10-11
 
