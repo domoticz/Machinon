@@ -3,8 +3,15 @@
 User-visible changes to the Machinon theme. New entries go under Unreleased as one-liners when a change lands; at release time they move into a version section, which also becomes the GitHub release notes. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
+
+- Devices on disabled hardware stand out again, on the dashboards and on every device page: a grey glow and a "blocked" sign next to the name, with the icon, name and controls dimmed like a device that stopped reporting. Domoticz only shows these devices when "Hide disabled hardware sensors" is turned off in its settings (#229)
+- The "Wind arrow direction" setting now also turns the wind arrow on floorplans, so a wind device points the same way on its card and on the plan (#190)
+- With "Relative times" on, a floorplan device popup now shows when the device was last seen as "5 minutes ago", like the device cards, instead of the raw date and time (#212)
+- Search now filters as soon as you paste, drop or dictate text into the box, instead of only after you click away from it
+- The Theme Hub now tells you when it can't use a custom logo or device photo name (for example a web address), instead of saving it and quietly showing the default
+- If your device is set to reduce motion, the on/off toggles on device cards now switch at once instead of sliding
 - Swedish translation improvements
-  
+
 ## [2.7.0] - 2026-10-11
 
 - Security fix: the custom page button name and address can no longer run code in your browser. The address must now be a web address (http or https) or a page on your Domoticz server; anything else opens a blank page

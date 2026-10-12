@@ -510,6 +510,16 @@ function setAllDevicesIconsStatus() {
         }
     });
 
+    /* Static like the lock, not blinking and never a toast: disabled hardware is
+       something the user switched off, not a fault to be alerted about. warning-text
+       is only the colour hook (device-status.css), not a severity. A "blocked" sign
+       rather than a power symbol, which reads as a button that would switch it on. */
+    $("div.item.statusDisabled").each(function() {
+        if ($(this).find("#name > i.ion-ios-remove-circle-outline").length === 0) {
+            $(this).find("#name").prepend("<i class='ion-ios-remove-circle-outline warning-text' title='" + $.t("Disabled") + "'></i>&nbsp;");
+        }
+    });
+
     /* Core's GetItemBackgroundStatus (app/app.js:921) makes these mutually
        exclusive: HaveTimeout beats BatteryLevel <= 10, so a timed-out device
        never also reports low battery. Two independent toggles all the same,
@@ -906,6 +916,50 @@ function setDeviceWindDirectionIcon(idx, direction, $trs) {
     });
 }
 
+/* Floorplans are core SVG (js/domoticzdevices.js), not cards: a wind device's
+   plan icon and its popup are <image> nodes pointing at images/WindXX.png, so
+   the card swap above never reaches them. Core replaces the icon node on every
+   refresh, which is a childList mutation, so running on each DOM settle keeps
+   the swap applied. A glyph icon style draws no <image>, so this is a no-op
+   there, as it is for the cards. */
+var DZ_XLINK_NS = "http://www.w3.org/1999/xlink";
+function setFloorplanWindDirectionIcons() {
+    if (theme.features.wind_direction.enabled !== true) return;
+    var stage = document.getElementById("floorplancontent");
+    if (!stage) return;
+    stage.querySelectorAll("image").forEach(function(img) {
+        var href = img.getAttributeNS(DZ_XLINK_NS, "href") || img.getAttribute("href") || "";
+        var m = href.match(/^images\/Wind([A-Z]{1,3})\.png$/);
+        if (m) img.setAttributeNS(DZ_XLINK_NS, "href", "images/wind-direction/Wind" + m[1] + ".png");
+    });
+}
+
+/* The floorplan popup's "Last Seen" is core SVG too (drawDetails): a
+   <tspan id="lastupdate"> holding " " + the raw timestamp. With Relative times
+   on, the time moves into a child tspan that livestamp drives like the card
+   cells, keeping the leading space in the parent, and an SVG <title> carries
+   the absolute time the cards show on hover. Core rebuilds the popup on every
+   refresh, so each rebuilt tspan is converted on the next settle; livestamp's
+   once-a-second rewrites are text-only, which the observer ignores. */
+var DZ_SVG_NS = "http://www.w3.org/2000/svg";
+function setFloorplanLastSeen() {
+    if (theme.features.time_ago.enabled !== true) return;
+    var stage = document.getElementById("floorplancontent");
+    if (!stage) return;
+    stage.querySelectorAll("tspan#lastupdate").forEach(function(tspan) {
+        if (tspan.querySelector("tspan")) return;
+        var when = moment(tspan.textContent.trim(), "YYYY-MM-DD HH:mm:ss", true);
+        if (!when.isValid()) return;
+        var title = document.createElementNS(DZ_SVG_NS, "title");
+        title.textContent = when.format("L LT");
+        var live = document.createElementNS(DZ_SVG_NS, "tspan");
+        tspan.textContent = " ";
+        tspan.appendChild(live);
+        tspan.appendChild(title);
+        $(live).livestamp(when.format());
+    });
+}
+
 /* $trs: the card's own tr set when the caller already holds it (the
    enhancement passes), else resolved by idx (live-update handlers). The
    global query is O(all cards) per call, which made the initial pass
@@ -1156,6 +1210,8 @@ function initDeviceObserver() {
            instead of re-triggering this same debounce for its own writes. */
         observer.takeRecords();
     }
+    dzOnDomSettled(setFloorplanWindDirectionIcons);
+    dzOnDomSettled(setFloorplanLastSeen);
     observer.observe(document.getElementById("holder") || document.body, {
         childList: true,
         subtree: true,

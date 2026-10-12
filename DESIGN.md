@@ -767,13 +767,14 @@ that a scheme overrides), so they are literal `rgba()`/`px` values rather than `
 ### Status Glows
 
 Semantic light, not depth: these ring the card in a status color instead of a resting drop shadow.
-Consumed by `css/device-status.css` (timeout/protected/low-battery card states).
+Consumed by `css/device-status.css` (timeout/protected/low-battery/disabled card states).
 
 | Token | Value | Usage |
 |-------|-------|-------|
 | `--dz-glow-timeout` | `0px 0px 10px 2px rgba(var(--dz-status-timeout-values), 0.5)` | Timeout status glow |
 | `--dz-glow-protected` | `0px 0px 10px 2px rgba(var(--dz-status-protected-values), 0.4)` | Protected status glow |
 | `--dz-glow-battery` | `0px 0px 10px 2px rgba(var(--dz-status-lowbat-values), 0.4)` | Low-battery status glow |
+| `--dz-glow-disabled` | `0px 0px 10px 2px color-mix(in srgb, var(--dz-icon-off) 60%, transparent)` | Disabled-hardware status glow |
 
 Each derives its color from the matching `--dz-status-*-values` RGB triplet (see
 [CSS Custom Property Mapping](#css-custom-property-mapping)); only the alpha and geometry are
@@ -824,6 +825,22 @@ from a prior constant, so there was nothing fixed for it to drift away from.
 
 Check with `scripts/measure-icon-contrast.py --check`, which walks every shipped scheme's own
 card colour for these three tokens the same way it already does for the identity colours above.
+
+**Disabled is not a status hue.** A device on disabled hardware (core's `statusDisabled`) is
+something the user switched off, not a fault, so its glow, hover ring and card glyph
+(`ion-ios-remove-circle-outline`, a "blocked" sign rather than a power symbol that would read as
+a button; static, never a toast) all take the neutral `--dz-icon-off` grey. That token is already
+measured at 3:1 on every scheme (see `dz-tokens.css`) and follows the scheme by derivation, so it
+needs no light/dark pair and no entry in `measure-icon-contrast.py`.
+
+**One dimming recipe for every state that is not live.** A timed-out card and a disabled card dim
+the same areas: the device image (opacity 0.5) and the name (by colour, so the status glyph inside
+it keeps its contrast). The reading and its "last seen" line stay at full strength in both. A
+disabled card also dims its controls (blinds buttons, toggle, dimmer, selector buttons), because
+disabled hardware cannot be commanded; Edit, Log and Timers stay usable. Protected and low-battery
+devices are still working and do not dim. In `css/device-status.css` each state only sets
+`--dz-card-glow` / `--dz-card-ring` (protected also overrides the hover shadows to keep its glow),
+and one shared set of rules paints them on classic and dynamic dashboard cards.
 
 ### Accent Rings
 

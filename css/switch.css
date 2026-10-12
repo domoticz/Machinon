@@ -75,3 +75,12 @@ input:checked + .slider:before {
 input:focus-visible + .slider {
     box-shadow: var(--dz-btn-focus-ring);
 }
+
+/* Under reduced motion the knob still lands in its new position, it just does not
+   glide there; same treatment as the toasts' slide (css/toasts.css). */
+@media (prefers-reduced-motion: reduce) {
+    .slider,
+    .slider:before {
+        transition: none;
+    }
+}

@@ -18,6 +18,7 @@ language = {
     house_badge: "hus",
     reload_note: "Träder i kraft efter omladdning",
     reload_now: "Ladda om nu",
+    invalid_image_name: "Det här namnet kan inte användas: ange namnet på en bildfil i temats images-mapp, till exempel mylogo.png eller photos/lamp.jpg. Webbadresser och \"..\" accepteras inte.",
     locked_token: "Den här sessionen kan inte spara inställningar (applikationstoken).",
     locked_version: "Ditt konto kan inte ändra temainställningar i den här versionen av Domoticz. Fråga en administratör, eller be dem uppdatera Domoticz.",
     no_backing: "Inställningen är inte tillgänglig (ingen tillhörande funktion).",
@@ -306,7 +307,8 @@ language = {
       empty: "Inga enhetsbilder ännu.",
       idx_cell: "Idx {idx}",
       remove: "Ta bort",
-      remove_aria: "Ta bort bilden för enhet {idx}"
+      remove_aria: "Ta bort bilden för enhet {idx}",
+      idx_invalid: "Ange enhetens Idx som ett heltal."
     },
     schemes: {
       swatches: {
