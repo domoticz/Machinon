@@ -934,6 +934,32 @@ function setFloorplanWindDirectionIcons() {
     });
 }
 
+/* The floorplan popup's "Last Seen" is core SVG too (drawDetails): a
+   <tspan id="lastupdate"> holding " " + the raw timestamp. With Relative times
+   on, the time moves into a child tspan that livestamp drives like the card
+   cells, keeping the leading space in the parent, and an SVG <title> carries
+   the absolute time the cards show on hover. Core rebuilds the popup on every
+   refresh, so each rebuilt tspan is converted on the next settle; livestamp's
+   once-a-second rewrites are text-only, which the observer ignores. */
+var DZ_SVG_NS = "http://www.w3.org/2000/svg";
+function setFloorplanLastSeen() {
+    if (theme.features.time_ago.enabled !== true) return;
+    var stage = document.getElementById("floorplancontent");
+    if (!stage) return;
+    stage.querySelectorAll("tspan#lastupdate").forEach(function(tspan) {
+        if (tspan.querySelector("tspan")) return;
+        var when = moment(tspan.textContent.trim(), "YYYY-MM-DD HH:mm:ss", true);
+        if (!when.isValid()) return;
+        var title = document.createElementNS(DZ_SVG_NS, "title");
+        title.textContent = when.format("L LT");
+        var live = document.createElementNS(DZ_SVG_NS, "tspan");
+        tspan.textContent = " ";
+        tspan.appendChild(live);
+        tspan.appendChild(title);
+        $(live).livestamp(when.format());
+    });
+}
+
 /* $trs: the card's own tr set when the caller already holds it (the
    enhancement passes), else resolved by idx (live-update handlers). The
    global query is O(all cards) per call, which made the initial pass
@@ -1185,6 +1211,7 @@ function initDeviceObserver() {
         observer.takeRecords();
     }
     dzOnDomSettled(setFloorplanWindDirectionIcons);
+    dzOnDomSettled(setFloorplanLastSeen);
     observer.observe(document.getElementById("holder") || document.body, {
         childList: true,
         subtree: true,
