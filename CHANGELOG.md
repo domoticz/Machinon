@@ -10,6 +10,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - Search now filters as soon as you paste, drop or dictate text into the box, instead of only after you click away from it
 - The Theme Hub now tells you when it can't use a custom logo or device photo name (for example a web address), instead of saving it and quietly showing the default
 - If your device is set to reduce motion, the on/off toggles on device cards now switch at once instead of sliding
+- Swedish translation improvements
 
 ## [2.7.0] - 2026-10-11
 
