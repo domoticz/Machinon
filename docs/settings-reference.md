@@ -276,7 +276,10 @@ For an individual device that has a custom photo assigned, shows that photo as i
 instead of the normal on/off icon. Assign one by turning this setting on: an editor for it opens
 right here, where you map a device (by its Idx number, shown on the device's own edit screen) to
 an image file placed in the theme's images folder. It's a per-device choice, not a global one:
-devices with no photo assigned keep their normal icon either way.
+devices with no photo assigned keep their normal icon either way. The editor uses the same rule as
+the logo: a web address or a name containing `..` is not added and gets a message instead, and a
+saved mapping whose name the theme can't use is marked in the list (that device keeps its normal
+icon).
 
 ### Card min width
 <!-- key: card_min_width -->
@@ -318,8 +321,10 @@ Chooses how the background image is displayed: stretched and cropped to fill the
 <!-- key: logo -->
 
 Sets an alternate image to use as the navbar logo, in place of Machinon's default. Give it the
-name of an image file placed in the theme's images folder; unlike the background image, a web
-address here doesn't work.
+name of an image file placed in the theme's images folder (a subfolder is fine, such as
+`photos/logo.png`); unlike the background image, a web address here doesn't work. A name the theme
+can't use, such as a web address or one containing `..`, is not saved: the setting shows a short
+message under its description and the current logo stays.
 
 ### Hide logo
 <!-- key: hide_logo -->

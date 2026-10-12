@@ -8,6 +8,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - The "Wind arrow direction" setting now also turns the wind arrow on floorplans, so a wind device points the same way on its card and on the plan (#190)
 - With "Relative times" on, a floorplan device popup now shows when the device was last seen as "5 minutes ago", like the device cards, instead of the raw date and time (#212)
 - Search now filters as soon as you paste, drop or dictate text into the box, instead of only after you click away from it
+- The Theme Hub now tells you when it can't use a custom logo or device photo name (for example a web address), instead of saving it and quietly showing the default
 
 ## [2.7.0] - 2026-10-11
 
