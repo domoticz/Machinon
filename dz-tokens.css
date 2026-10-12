@@ -548,6 +548,10 @@
     --dz-glow-timeout:   0px 0px 10px 2px rgba(var(--dz-status-timeout-values), 0.5);
     --dz-glow-protected: 0px 0px 10px 2px rgba(var(--dz-status-protected-values), 0.4);
     --dz-glow-battery:   0px 0px 10px 2px rgba(var(--dz-status-lowbat-values), 0.4);
+    /* Disabled hardware is a state the user chose, not a fault, so it takes the neutral
+       off-icon grey rather than a status hue. --dz-icon-off already derives from scheme
+       inputs on this element, so one definition serves light, dark and every scheme. */
+    --dz-glow-disabled:  0px 0px 10px 2px color-mix(in srgb, var(--dz-icon-off) 60%, transparent);
     /* Accent rings; ring-hover COMPOSES the resting card shadow so a hover rule can
        never delete it (the single-property trap, DESIGN.md Elevation). ring-hover-inset
        is the Dynamic Dashboard variant: that context has 0px vertical ancestor clearance,

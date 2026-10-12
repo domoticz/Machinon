@@ -510,6 +510,16 @@ function setAllDevicesIconsStatus() {
         }
     });
 
+    /* Static like the lock, not blinking and never a toast: disabled hardware is
+       something the user switched off, not a fault to be alerted about. warning-text
+       is only the colour hook (device-status.css), not a severity. A "blocked" sign
+       rather than a power symbol, which reads as a button that would switch it on. */
+    $("div.item.statusDisabled").each(function() {
+        if ($(this).find("#name > i.ion-ios-remove-circle-outline").length === 0) {
+            $(this).find("#name").prepend("<i class='ion-ios-remove-circle-outline warning-text' title='" + $.t("Disabled") + "'></i>&nbsp;");
+        }
+    });
+
     /* Core's GetItemBackgroundStatus (app/app.js:921) makes these mutually
        exclusive: HaveTimeout beats BatteryLevel <= 10, so a timed-out device
        never also reports low battery. Two independent toggles all the same,

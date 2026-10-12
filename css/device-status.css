@@ -1,5 +1,5 @@
 /*
-  device-status.css - device status animations (update pulse, timeout, protected, low battery) for Machinon.
+  device-status.css - device status animations (update pulse, timeout, protected, low battery, disabled) for Machinon.
   One of the feature files split out of custom.css - see the @import block in
   custom.css. Extracted because its selectors (.updatePulse keyframe + status modifiers) are unique to this feature and appear
   nowhere else, so relocating it earlier in the cascade changes no outcome (verified). Keep
@@ -22,57 +22,54 @@ tr.update-pulse {
 .item.fadeOff {
     opacity: 0.5;
 }
-/* Device is timeout. The glow goes on the card tr like the other statuses, NOT on the
-   .item wrapper: on classic pages the wrapper is 16px wider than the card (Bootstrap span
-   padding; measured item w=403 vs tr w=387), so a wrapper glow floats 8px outside the card
-   edge and doubles up with the tr hover ring. !important beats the resting card shadow in
-   cards.css, whose #holder selector outranks a class chain. */
-.item.statusTimeout tr {
-    box-shadow: var(--dz-glow-timeout) !important;
+/* Device status cards: timeout, protected, low battery, disabled hardware. Each state only
+   declares its colours here; the shared rules below paint them, so a new state is one block
+   of variables, not another copy of every rule.
+     --dz-card-glow         resting glow
+     --dz-card-ring         hover ring and the status glyph's colour
+     --dz-card-hover        hover shadow on classic cards
+     --dz-card-hover-inset  hover shadow on dynamic dashboard cards (full-bleed in a clipped
+                            cell, so an outer ring would be shaved off)
+   The hover shadow restates the resting drop shadow before the ring: box-shadow is one
+   property, so listing only the ring would delete the card's shadow on hover (see cards.css).
+   Protected keeps its glow on hover instead of a ring. */
+.item:is(.statusTimeout, .statusProtected, .statusLowBattery, .statusDisabled) {
+    --dz-card-hover:       var(--dz-elev-card), 0px 0px 0px 2px var(--dz-card-ring);
+    --dz-card-hover-inset: inset 0px 0px 0px 2px var(--dz-card-ring);
 }
-/* Stale, not unreadable: only the device image and the name dim. The last
-   reading and its "last seen" line stay at full contrast, because that value is
-   what the user needs to judge the device by; dimming the whole card took it to
-   2.12:1 on Machinon Light. The name dims by colour, not opacity, so the pulsing
-   timeout glyph inside it (.warning-text, below) keeps its own colour and blink
-   at full strength. The name selector repeats cards.css's "div.item.statusTimeout
-   td#name" so it wins on order (this file is imported after cards.css). */
-.item.statusTimeout #img {
-    opacity: 0.5;
+.item.statusTimeout {
+    --dz-card-glow: var(--dz-glow-timeout);
+    --dz-card-ring: rgb(var(--dz-status-timeout-values));
 }
-div.item.statusTimeout td#name {
-    color: color-mix(in srgb, var(--dz-body-text) 50%, transparent);
+.item.statusLowBattery {
+    --dz-card-glow: var(--dz-glow-battery);
+    --dz-card-ring: rgb(var(--dz-status-lowbat-values));
 }
-
-/* Restate the resting drop shadow before the ring: box-shadow is one property, so listing
-   only the ring would delete the card's shadow on hover (see cards.css). Inset on the dynamic
-   dashboard, where the card is full-bleed in a clipped cell and an outer ring is shaved off. */
-.item.statusTimeout tr:hover {
-    box-shadow: var(--dz-elev-card),
-                0px 0px 0px 2px rgb(var(--dz-status-timeout-values)) !important;
+/* Core sets statusDisabled from item.HardwareDisabled; there is no per-device flag. Neutral
+   grey, not a status hue: the user switched this hardware off, it is not a fault. */
+.item.statusDisabled {
+    --dz-card-glow: var(--dz-glow-disabled);
+    --dz-card-ring: var(--dz-icon-off);
 }
-.dd-widget-body .item.statusTimeout tr:hover {
-    box-shadow: inset 0px 0px 0px 2px rgb(var(--dz-status-timeout-values)) !important;
-}
-/* Switch is protected */
-.item.statusProtected tr {
-    box-shadow: var(--dz-glow-protected) !important;
-}
-.item.statusProtected tr:hover {
-    box-shadow: var(--dz-glow-protected) !important;
+.item.statusProtected {
+    --dz-card-glow:        var(--dz-glow-protected);
+    --dz-card-hover:       var(--dz-glow-protected);
+    --dz-card-hover-inset: var(--dz-glow-protected);
 }
 
-/* Device has low battery */
-.item.statusLowBattery tr {
-    box-shadow: var(--dz-glow-battery) !important;
+/* The glow goes on the card tr, NOT on the .item wrapper: on classic pages the wrapper is
+   16px wider than the card (Bootstrap span padding; measured item w=403 vs tr w=387), so a
+   wrapper glow floats 8px outside the card edge and doubles up with the tr hover ring.
+   !important beats the resting card shadow in cards.css, whose #holder selector outranks a
+   class chain. */
+.item:is(.statusTimeout, .statusProtected, .statusLowBattery, .statusDisabled) tr {
+    box-shadow: var(--dz-card-glow) !important;
 }
-
-.item.statusLowBattery tr:hover {
-    box-shadow: var(--dz-elev-card),
-                0px 0px 0px 2px rgb(var(--dz-status-lowbat-values)) !important;
+.item:is(.statusTimeout, .statusProtected, .statusLowBattery, .statusDisabled) tr:hover {
+    box-shadow: var(--dz-card-hover) !important;
 }
-.dd-widget-body .item.statusLowBattery tr:hover {
-    box-shadow: inset 0px 0px 0px 2px rgb(var(--dz-status-lowbat-values)) !important;
+.dd-widget-body .item:is(.statusTimeout, .statusProtected, .statusLowBattery, .statusDisabled) tr:hover {
+    box-shadow: var(--dz-card-hover-inset) !important;
 }
 
 /* Dynamic dashboard device cards paint their surface on `.item.itemBlock` rather than on
@@ -84,25 +81,36 @@ div.item.statusTimeout td#name {
 .dd-widget--dz-device .item.itemBlock table[id^="item"] > tbody > tr {
     box-shadow: none !important;
 }
-.dd-widget--dz-device .item.statusTimeout.itemBlock {
-    box-shadow: var(--dz-glow-timeout) !important;
+.dd-widget--dz-device .item.itemBlock:is(.statusTimeout, .statusProtected, .statusLowBattery, .statusDisabled) {
+    box-shadow: var(--dz-card-glow) !important;
 }
-.dd-widget--dz-device .item.statusProtected.itemBlock,
-.dd-widget--dz-device .item.statusProtected.itemBlock:hover {
-    box-shadow: var(--dz-glow-protected) !important;
-}
-.dd-widget--dz-device .item.statusLowBattery.itemBlock {
-    box-shadow: var(--dz-glow-battery) !important;
-}
-/* Hover keeps the inset ring the rest of this surface uses, in the status colour. */
-.dd-widget--dz-device .item.statusTimeout.itemBlock:hover {
-    box-shadow: inset 0px 0px 0px 2px rgb(var(--dz-status-timeout-values)) !important;
-}
-.dd-widget--dz-device .item.statusLowBattery.itemBlock:hover {
-    box-shadow: inset 0px 0px 0px 2px rgb(var(--dz-status-lowbat-values)) !important;
+.dd-widget--dz-device .item.itemBlock:is(.statusTimeout, .statusProtected, .statusLowBattery, .statusDisabled):hover {
+    box-shadow: var(--dz-card-hover-inset) !important;
 }
 
-/* The status GLYPH prepended next to the device name (src/js/devices.js:567,
+/* A device that is not live (timed out, or on disabled hardware) dims its image and its
+   name, and nothing else of what it reports: the last reading and its "last seen" line stay
+   at full contrast, because that value is what the user judges the device by; dimming the
+   whole card took it to 2.12:1 on Machinon Light. The name dims by colour, not opacity, so
+   the status glyph inside it (.warning-text, below) keeps its own colour at full strength.
+   The name selector matches cards.css's "div.item.statusTimeout td#name" in specificity so
+   it wins on order (this file is imported after cards.css). Protected and low-battery
+   devices are still working, so they do not dim. */
+.item:is(.statusTimeout, .statusDisabled) #img {
+    opacity: 0.5;
+}
+div.item:is(.statusTimeout, .statusDisabled) td#name {
+    color: color-mix(in srgb, var(--dz-body-text) 50%, transparent);
+}
+/* Disabled hardware cannot be commanded, so its controls dim too: the blinds buttons, the
+   toggle and dimmer (td.input on the dashboard, #type on the device pages) and the selector
+   buttons. #status itself is not dimmed, it also carries readings such as a dew point. Edit,
+   Log and Timers stay at full strength, since a disabled device can still be edited. */
+.item.statusDisabled :is(#img2, #img3, td.input, #type .dimslider, #status .btn-group) {
+    opacity: 0.5;
+}
+
+/* The status GLYPH prepended next to the device name (setAllDevicesIconsStatus in src/js/devices.js,
    `<i class="<icon> blink warning-text">`). Core paints `.warning-text` a
    literal `red` (www/css/style.css:1943) and the theme only ever gave that
    class a font-weight, so until now a timed-out card showed a repaired,
@@ -126,12 +134,8 @@ div.item.statusTimeout td#name {
    (`.blink { animation: none }`, or Playwright's `animations: "disabled"`)
    before capturing or measuring, or a mid-fade frame reads as a colour
    regression that is not there. */
-.item.statusTimeout .warning-text {
-    color: rgb(var(--dz-status-timeout-values));
-}
-
-.item.statusLowBattery .warning-text {
-    color: rgb(var(--dz-status-lowbat-values));
+.item:is(.statusTimeout, .statusLowBattery, .statusDisabled) .warning-text {
+    color: var(--dz-card-ring);
 }
 
 .blink {

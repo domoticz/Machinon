@@ -4,6 +4,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+- Devices on disabled hardware stand out again, on the dashboards and on every device page: a grey glow and a "blocked" sign next to the name, with the icon, name and controls dimmed like a device that stopped reporting. Domoticz only shows these devices when "Hide disabled hardware sensors" is turned off in its settings (#229)
+
 ## [2.7.0] - 2026-10-11
 
 - Security fix: the custom page button name and address can no longer run code in your browser. The address must now be a web address (http or https) or a page on your Domoticz server; anything else opens a blank page
