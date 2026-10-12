@@ -3,7 +3,8 @@
 User-visible changes to the Machinon theme. New entries go under Unreleased as one-liners when a change lands; at release time they move into a version section, which also becomes the GitHub release notes. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
-
+- Swedish translation improvements
+  
 ## [2.7.0] - 2026-10-11
 
 - Security fix: the custom page button name and address can no longer run code in your browser. The address must now be a web address (http or https) or a page on your Domoticz server; anything else opens a blank page
