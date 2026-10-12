@@ -226,7 +226,25 @@ function setSearch() {
        Enter and Escape. Native addEventListener survives it. The dispatch in
        clearSearch re-enters this handler with no key at all, which matches
        neither branch, so there is no recursion to guard against. */
+    /* Every engine above filters on keyup or change, so text that arrives
+       without a key (context-menu paste, drag and drop, dictation, autocomplete,
+       spellcheck replacement) filtered only once the box lost focus. Such an
+       input event has no key held down, so it gets the same real dispatched
+       keyup the clear uses. Keyed off "no keydown in flight" rather than a list
+       of inputTypes: dictation reports a plain insertText on some platforms, and
+       a typed key must not filter twice. Blur resets the flag in case focus left
+       between keydown and keyup. */
+    var keyDown = false;
+    input.addEventListener("keydown", function () { keyDown = true; });
+    input.addEventListener("blur", function () { keyDown = false; });
+    input.addEventListener("input", function () {
+        if (!keyDown) {
+            input.dispatchEvent(new Event("keyup", { bubbles: true }));
+        }
+    });
+
     input.addEventListener("keyup", function (event) {
+        keyDown = false;
         if (event.key === "Enter") {
             input.blur();
         }
