@@ -916,6 +916,24 @@ function setDeviceWindDirectionIcon(idx, direction, $trs) {
     });
 }
 
+/* Floorplans are core SVG (js/domoticzdevices.js), not cards: a wind device's
+   plan icon and its popup are <image> nodes pointing at images/WindXX.png, so
+   the card swap above never reaches them. Core replaces the icon node on every
+   refresh, which is a childList mutation, so running on each DOM settle keeps
+   the swap applied. A glyph icon style draws no <image>, so this is a no-op
+   there, as it is for the cards. */
+var DZ_XLINK_NS = "http://www.w3.org/1999/xlink";
+function setFloorplanWindDirectionIcons() {
+    if (theme.features.wind_direction.enabled !== true) return;
+    var stage = document.getElementById("floorplancontent");
+    if (!stage) return;
+    stage.querySelectorAll("image").forEach(function(img) {
+        var href = img.getAttributeNS(DZ_XLINK_NS, "href") || img.getAttribute("href") || "";
+        var m = href.match(/^images\/Wind([A-Z]{1,3})\.png$/);
+        if (m) img.setAttributeNS(DZ_XLINK_NS, "href", "images/wind-direction/Wind" + m[1] + ".png");
+    });
+}
+
 /* $trs: the card's own tr set when the caller already holds it (the
    enhancement passes), else resolved by idx (live-update handlers). The
    global query is O(all cards) per call, which made the initial pass
@@ -1166,6 +1184,7 @@ function initDeviceObserver() {
            instead of re-triggering this same debounce for its own writes. */
         observer.takeRecords();
     }
+    dzOnDomSettled(setFloorplanWindDirectionIcons);
     observer.observe(document.getElementById("holder") || document.body, {
         childList: true,
         subtree: true,
