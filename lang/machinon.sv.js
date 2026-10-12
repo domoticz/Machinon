@@ -151,7 +151,7 @@ language = {
         description: "Domoticz rapporterar den riktning vinden kommer IFRÅN, och pilen pekar normalt åt det hållet. Slå på detta för att låta den peka åt motsatt håll, mot dit vinden blåser. Kompassetiketten (N, SV) förblir alltid den rapporterade. Påverkar bara de klassiska bildikonerna; med Settings > Icon style satt till glyfer kommer pilen från Domoticz själv och den här inställningen gör ingenting."
       },
       icon_image: {
-        label: "Enhetsbild i stället för ikoner",
+        label: "Enhetsbild i stället för ikon",
         description: "Visar en egen bild som en enhets kortikon i stället för dess vanliga på/av-ikon. Ställs in per enhet med redigeraren som detta visar."
       },
       card_min_width: {
