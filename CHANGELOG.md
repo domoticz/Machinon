@@ -4,6 +4,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+## [2.7.2] - 2026-10-14
+
 - On iPhone and iPad, tapping a field no longer zooms the page in and leaves it zoomed, which pushed the Apply Settings button on the Settings page out of view so settings could not be saved. Pinch-zoom still works as before (#233)
 
 ## [2.7.1] - 2026-10-12
