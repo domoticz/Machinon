@@ -77,8 +77,8 @@ put the files in place. To switch to it:
 2. On the **System** tab (the tab that opens by default), find the **Theme** dropdown under
    **User Interface** and select `machinon`.
 3. Click **Apply Settings**. On a desktop screen it's the red button next to the row of tabs at
-   the top of the page; narrower than 767 pixels (see [Mobile layouts](mobile.md)), Machinon pins
-   it to a bar fixed to the bottom of the screen instead.
+   the top of the page; narrower than 767 pixels (see [Mobile layouts](mobile.md)), Machinon moves
+   it to a bar along the bottom of the screen instead.
 
 !!! warning "The theme choice only persists once you click Apply Settings"
     Picking `machinon` from the dropdown previews it, but the choice is not saved to Domoticz

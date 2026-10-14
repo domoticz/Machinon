@@ -124,7 +124,7 @@ cd domoticz/www/styles
 git clone -b dist --single-branch https://github.com/domoticz/Machinon.git machinon
 ```
 
-In Domoticz, go to Setup > Settings, open the System tab, and find the Theme dropdown under User Interface. Pick `machinon`, then click Apply Settings (top right next to the row of tabs on a desktop screen, or a bar fixed to the bottom of the screen on a phone) to save the choice, and hard-refresh your browser (Ctrl+Shift+R) so it picks up the new files. No Domoticz restart is needed.
+In Domoticz, go to Setup > Settings, open the System tab, and find the Theme dropdown under User Interface. Pick `machinon`, then click Apply Settings (top right next to the row of tabs on a desktop screen, or a bar along the bottom of the screen on a phone) to save the choice, and hard-refresh your browser (Ctrl+Shift+R) so it picks up the new files. No Domoticz restart is needed.
 
 To update later, run `git pull` inside the `machinon` folder.
 

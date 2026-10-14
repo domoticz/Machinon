@@ -79,5 +79,5 @@ all.
 - The Settings page's **Apply Settings** button also changes position here: instead of sitting at
   the top right next to the row of tabs (see [Troubleshooting and
   FAQ](troubleshooting-and-faq.md#the-theme-is-selected-but-nothing-changed) for where it
-  normally is), it becomes a floating bar fixed to the bottom of the screen, so it stays reachable
-  without scrolling back up.
+  normally is), it moves to a bar along the bottom of the screen, below the settings, so it stays
+  reachable without scrolling back up.

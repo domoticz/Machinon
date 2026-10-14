@@ -76,9 +76,14 @@ function locationHashChanged() {
     if (location.hash == "#/CustomIcons") {
         setCustomIconsPage();
     }
-    /* #/Setup needs no theme hook anymore: there is no injected Theme tab;
-       theme settings live in the hub (src/js/theme-hub.js), a click
-       pseudo-route with no hash of its own. */
+    /* The selector matches only a button still in its strip, so a hash
+       change that fires while the previous Setup view (button already
+       moved) is being swapped out waits for the new view instead. */
+    if (location.hash == "#/Setup") {
+        whenElementRenders("setup-apply", "#settingscontent #tabs > li.pull-right > a.sub-tabs-apply", function() {
+            dzPlaceSetupApply(document, !!window.matchMedia && window.matchMedia(DZ_PHONE_QUERY).matches);
+        });
+    }
 }
 
 function setPageTitle() {
@@ -180,8 +185,8 @@ function applyNavbarIconsText() {
 }
 
 /* iOS Safari zooms the page in when a text field under 16px takes focus and
-   leaves it zoomed, so position-fixed UI (Setup's phone Apply bar) ends up
-   outside the visible area. Core and Bootstrap size their fields at 14px.
+   leaves it zoomed, so the user has to pinch back out after every field.
+   Core and Bootstrap size their fields at 14px.
    maximum-scale=1 stops that focus zoom, and iOS ignores it for the user's
    own pinch, so pinch-zoom keeps working there. Every other platform honours
    it as a pinch-zoom lock, which is why this is iOS only. */
@@ -204,6 +209,40 @@ function dzPreventFocusZoom() {
     var meta = document.querySelector('meta[name="viewport"]');
     if (!meta) return;
     meta.setAttribute("content", dzViewportNoFocusZoom(meta.getAttribute("content") || ""));
+}
+
+/* Setup's Apply Settings button lives inside the sub-tabs strip (core
+   views/setup.html), and at phone widths that strip scrolls sideways. iOS
+   Safari does not paint a position:fixed element inside a scrolling
+   ancestor, so a bottom bar cannot be made from the button where it stands.
+   At phone widths it moves to a bar of its own below the tab content, and
+   back into the strip when the viewport widens. Moving the node keeps
+   core's ng-click listener. If core's markup changes so nothing matches,
+   the button stays in the strip, where css/settings.css still keeps it in
+   view. */
+var DZ_PHONE_QUERY = "(max-width: 767px)";
+
+function dzPlaceSetupApply(doc, phone) {
+    var apply = doc.querySelector("#settingscontent a.sub-tabs-apply");
+    var home = doc.querySelector("#settingscontent #tabs > li.pull-right");
+    var content = doc.querySelector("#settingscontent #content");
+    if (!apply || !home || !content) return;
+    var dock = doc.querySelector("#settingscontent .dz-setup-apply");
+    if (!dock) {
+        dock = doc.createElement("div");
+        dock.className = "dz-setup-apply";
+        content.appendChild(dock);
+    }
+    var target = phone ? dock : home;
+    if (apply.parentNode !== target) target.appendChild(apply);
+}
+
+function dzArmSetupApplyDock() {
+    if (!window.matchMedia) return;
+    var mq = window.matchMedia(DZ_PHONE_QUERY);
+    var place = function () { dzPlaceSetupApply(document, mq.matches); };
+    // addListener, not addEventListener("change"): Safari before 14 has only the former.
+    mq.addListener(place);
 }
 
 // Core positions its device popups (index.html: rgbw_popup, setpoint_popup,

@@ -523,9 +523,12 @@ button.menu-toggle:focus-visible {
    hover/active) off this pill-shaped CTA, but a fully transparent bottom
    border is equally invisible and this selector's two classes already
    outrank both of those .sub-tabs rules (2 classes beats 1), so the
-   override is unnecessary now. */
+   override is unnecessary now. At phone widths src/js/page.js moves the
+   button out of the strip into Setup's .dz-setup-apply bar, hence the third
+   selector. */
 .sub-tabs .sub-tabs-apply,
-.sub-tabs > li > a.sub-tabs-apply {
+.sub-tabs > li > a.sub-tabs-apply,
+.dz-setup-apply .sub-tabs-apply {
     background: var(--dz-btn-danger-bg) !important;
     border: 1px solid transparent;
     border-radius: var(--dz-btn-radius);
@@ -543,7 +546,8 @@ button.menu-toggle:focus-visible {
    button's hover too (css/style.css, same selector, border-color #a02622), and
    that rule outranks the transparent border on the base rule above. */
 .sub-tabs .sub-tabs-apply:hover,
-.sub-tabs > li > a.sub-tabs-apply:hover {
+.sub-tabs > li > a.sub-tabs-apply:hover,
+.dz-setup-apply .sub-tabs-apply:hover {
     background: color-mix(in srgb, var(--dz-btn-danger-bg) 90%, black) !important;
     border-color: transparent;
     color: var(--dz-btn-primary-text) !important;
@@ -551,7 +555,8 @@ button.menu-toggle:focus-visible {
 }
 
 .sub-tabs .sub-tabs-apply:focus-visible,
-.sub-tabs > li > a.sub-tabs-apply:focus-visible {
+.sub-tabs > li > a.sub-tabs-apply:focus-visible,
+.dz-setup-apply .sub-tabs-apply:focus-visible {
     outline: none;
     box-shadow: var(--dz-btn-shadow), var(--dz-btn-focus-ring);
 }
