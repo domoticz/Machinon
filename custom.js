@@ -608,6 +608,7 @@ function init_theme() {
     }, 100);
 
     $(document).ready(function() {
+        dzPreventFocusZoom();
         initDeviceObserver();
         enableThemeFeatures();
         locationHashChanged();
