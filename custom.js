@@ -123,7 +123,7 @@ function loadThemeScripts(files) {
    window.angular EARLY as a bare object and attaches .module later
    (setupModuleLoader), so the hook intercepts the .module assignment, not just
    the window.angular one. Both traps are proven by the rig harnesses
-   ~/docker/domoticz-test/scripts/dz-route-feasibility.js and
+   ~/src/domoticz/domoticz-test/scripts/dz-route-feasibility.js and
    dz-route-multipage.js.
 
    FAIL CLOSED: dzRoutesActive turns true only once the config block has
