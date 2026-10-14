@@ -323,49 +323,15 @@ ul.machinon_ul li {
         white-space: normal;
     }
 
-    #settings section:last-child {
-        margin-bottom: 50px;
-    }
-
-    /* Phone widths: core's Apply Settings row (the .sub-tabs strip's
-       li.pull-right) becomes one fixed bottom bar. The bar paints over
-       whatever in-flow content occupies its band, including at the page's
-       first, unscrolled paint (measured live: System tab's AutoBackup
-       checkbox, 390x844 viewport). A broader probe (390x844, 360x780,
-       320x568, every Setup tab, top and scrolled-to-bottom, both schemes)
-       found the same defect class on several other tabs too (Log's debug
-       checkboxes, Notifications' Test button, Energy Dashboard's icon
-       picker), so the fix has to be structural, not a one-off nudge of a
-       single control.
-
-       Reserving trailing padding (the section:last-child rule above) cannot
-       fix this: it only adds room past the document's true end, and the
-       colliding row usually is not the last one - the collision is that the
-       fixed bar's 40px band is painted OVER whatever the normal document flow
-       put there, at ANY scroll offset including zero. The only CSS-only fix
-       that holds at every offset is to stop the tab content from ever being
-       laid out in that band at all: cap #my-tab-content to the viewport
-       height minus the chrome above it and the bar's own reserve, and let it
-       scroll internally. The chrome above (#settingscontent's top offset) is
-       50px and is WIDTH-INDEPENDENT (identical at 390, 360
-       and 320) because it is just the static navbar + banner; nothing here
-       hardcodes the sub-tabs row's OWN height, since that wraps to a
-       different number of lines per width (10 tab labels) - flex hands
-       #my-tab-content whatever is left after #tabs' natural (possibly
-       multi-line) height, so the wrap is never a magic number to keep in
-       sync. The bar's own footprint (34px button height + 5px bottom offset,
-       measured as a 38px gap from the viewport's bottom edge to the
-       bar's top edge at all three widths) rounds up to 40px, plus 10px of
-       daylight (the theme's small spacing step) between the scroll clip edge
-       and the bar itself so no row visually touches it - 50px total.
-
-       An overflow-clipped row's own layout box still exists at full,
-       unclipped geometry even though nothing paints there, so any
-       geometry-only overlap check needs to account for the clip range, not
-       just raw bounding boxes, or it reports a false collision here.
-       Verified empirically (390x844/360x780/320x568, every Setup tab, top
-       and scrolled-to-bottom, both schemes): zero geometric overlaps
-       remain. */
+    /* Phone widths: Setup becomes a viewport-high column. The sub-tabs strip
+       stays at the top and the tab content scrolls inside the space left
+       below it, so Apply Settings (which lives in the strip) is always on
+       screen. The chrome above (#settingscontent's top offset) is 50px and
+       is WIDTH-INDEPENDENT (identical at 390, 360 and 320) because it is
+       just the static navbar + banner; below it, the enclosing
+       .container-fluid keeps a 20px bottom padding. Subtracting both keeps
+       the page itself from scrolling. Nothing here hardcodes the strip's
+       own height, flex hands #my-tab-content whatever is left. */
     #settingscontent {
         display: flex;
         flex-direction: column;
@@ -376,8 +342,8 @@ ul.machinon_ul li {
            either strand a sliver of #my-tab-content under the bar or leave
            a gap above it depending on bar state; 100dvh tracks the actual
            visible ("small") viewport instead. */
-        height: calc(100vh - 50px - 50px);
-        height: calc(100dvh - 50px - 50px);
+        height: calc(100vh - 50px - 20px);
+        height: calc(100dvh - 50px - 20px);
     }
 
     /* Descendant-scoped to #settingscontent (unique to views/setup.html):
@@ -446,18 +412,43 @@ ul.machinon_ul li {
         scrollbar-color: var(--dz-accent-color) var(--dz-body-bg);
     }
 
-    #settings li.pull-right {
-        position: fixed;
-        left: 0;
-        bottom: 5px;
-        width: 100%;
-        text-align: center;
-        z-index: 10;
+    /* Apply Settings is core's li.pull-right INSIDE the strip, which scrolls
+       sideways here, and iOS Safari does not paint a position:fixed element
+       inside a scrolling ancestor. src/js/page.js (dzPlaceSetupApply) moves
+       the button into .dz-setup-apply, a bar of its own at the bottom of
+       this column, and the emptied strip item collapses. Without that move
+       the button sticks to the strip's right end instead, still in view.
+       margin-left:auto keeps it at the right end when the tabs all fit, and
+       the body-coloured backing hides the tabs scrolling underneath. */
+    #settingscontent #tabs > li.pull-right {
+        position: sticky;
+        right: 0;
+        z-index: 1;
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        padding-left: 10px;
+        background: var(--dz-body-bg);
     }
 
-    #settings .pull-right a {
-        margin: 0 20px;
-        box-shadow: var(--dz-elev-card);
+    #settingscontent #tabs > li.pull-right:empty {
+        display: none;
+    }
+
+    /* The last flex item of #content's column, so it takes its height before
+       #my-tab-content gets the rest: nothing is pinned and nothing can be
+       painted over. */
+    #settingscontent .dz-setup-apply {
+        flex: 0 0 auto;
+        display: flex;
+        justify-content: center;
+        padding-top: 10px;
+        border-top: 1px solid var(--dz-border-color);
+    }
+
+    #settingscontent .dz-setup-apply .sub-tabs-apply {
+        display: inline-block;
+        cursor: pointer;
     }
 }
 

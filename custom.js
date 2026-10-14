@@ -609,6 +609,7 @@ function init_theme() {
 
     $(document).ready(function() {
         dzPreventFocusZoom();
+        dzArmSetupApplyDock();
         initDeviceObserver();
         enableThemeFeatures();
         locationHashChanged();

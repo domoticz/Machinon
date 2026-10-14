@@ -2662,7 +2662,7 @@ mobile-polish layout rule key off 979px, and dialogs/search key off 767px - see
 
 - Hamburger menu replaces horizontal navbar (max-width: 979px)
 - Search input collapses to icon, expands on focus with blue background pill (max-width: 767px)
-- Settings buttons become fixed bottom bar
+- Setup's Apply Settings button moves out of the sub-tab strip into `.dz-setup-apply`, an in-flow bar at the bottom of the viewport-high Setup column (`src/js/page.js` `dzPlaceSetupApply`; max-width: 767px). Never `position: fixed`: the strip scrolls sideways there, and iOS Safari does not paint a fixed element inside a scrolling ancestor
 - Dialog content tables switch to `table-layout: fixed` with word-wrap (max-width: 767px)
 - Edit-form tables (`.table-details`, sub-device picker) stack label above field, inputs full-width (releases core's inline 356px/250px widths and the theme's 250px input cap; < 768px)
 - Page-title rows: title owns the flex row (button column content-sized, core split it 50/50); h1 steps `{typography.display}` 26px -> `{typography.md}` 16px

@@ -156,3 +156,65 @@ test("a page without a viewport tag is left alone", () => {
     const { ctx } = viewportPage({ userAgent: UA.iphone, maxTouchPoints: 5 }, null);
     assert.doesNotThrow(() => ctx.dzPreventFocusZoom());
 });
+
+/* Just enough DOM for dzPlaceSetupApply: nodes that know their parent, and a
+   document that answers the four selectors it asks. */
+function node(className) {
+    const n = { className: className || "", parentNode: null, children: [],
+        appendChild(child) {
+            if (child.parentNode) {
+                const siblings = child.parentNode.children;
+                siblings.splice(siblings.indexOf(child), 1);
+            }
+            child.parentNode = n;
+            n.children.push(child);
+            return child;
+        } };
+    return n;
+}
+
+function setupPage({ markup = true } = {}) {
+    const content = node(), home = node("pull-right"), apply = node("sub-tabs-apply");
+    if (markup) home.appendChild(apply);
+    const doc = {
+        createElement: () => node(),
+        querySelector(sel) {
+            if (sel === "#settingscontent a.sub-tabs-apply") return markup ? apply : null;
+            if (sel === "#settingscontent #tabs > li.pull-right") return markup ? home : null;
+            if (sel === "#settingscontent #content") return content;
+            if (sel === "#settingscontent .dz-setup-apply") {
+                return content.children.find((c) => c.className === "dz-setup-apply") || null;
+            }
+            return null;
+        }
+    };
+    return { doc, content, home, apply };
+}
+
+test("at phone width Apply moves out of the scrolling strip into one bar", () => {
+    /* iOS does not paint a fixed element inside a scrolling ancestor, so the
+       button has to leave the strip to be seen at all. */
+    const page = setupPage();
+    dz.dzPlaceSetupApply(page.doc, true);
+    assert.equal(page.apply.parentNode.className, "dz-setup-apply");
+    assert.equal(page.apply.parentNode.parentNode, page.content);
+    assert.equal(page.home.children.length, 0, "the strip item is left empty, which the CSS collapses");
+
+    dz.dzPlaceSetupApply(page.doc, true);
+    assert.equal(page.content.children.length, 1, "a repeat call reuses the bar");
+});
+
+test("widening the viewport puts Apply back in the strip", () => {
+    const page = setupPage();
+    dz.dzPlaceSetupApply(page.doc, true);
+    dz.dzPlaceSetupApply(page.doc, false);
+    assert.equal(page.apply.parentNode, page.home);
+});
+
+test("unrecognised Setup markup is left alone", () => {
+    /* No button found means core changed the page; adding an empty bar
+       would only take space from the tab content. */
+    const page = setupPage({ markup: false });
+    dz.dzPlaceSetupApply(page.doc, true);
+    assert.equal(page.content.children.length, 0);
+});
