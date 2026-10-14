@@ -4,7 +4,9 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
-- On iPhone, the Settings page shows its Apply Settings button again, in a bar along the bottom of the screen, so settings can be saved without zooming out (#233)
+## [2.7.3] - 2026-10-14
+
+- On iPhone, the Settings page now shows its Apply Settings button, in a bar along the bottom of the screen, so settings can be saved without zooming out (#233)
 
 ## [2.7.2] - 2026-10-14
 
