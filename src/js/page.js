@@ -37,6 +37,11 @@ theme.features.dashboard_camera_section && cameraPreview(theme.features.dashboar
 if (location.hash == "#/CustomIcons") {
 setCustomIconsPage();
 }
+if (location.hash == "#/Setup") {
+whenElementRenders("setup-apply", "#settingscontent #tabs > li.pull-right > a.sub-tabs-apply", function() {
+dzPlaceSetupApply(document, !!window.matchMedia && window.matchMedia(DZ_PHONE_QUERY).matches);
+});
+}
 }
 function setPageTitle() {
 var pagedetect = window.location.href.split("#/")[1];
@@ -120,6 +125,27 @@ if (!dzIsIOS(navigator)) return;
 var meta = document.querySelector('meta[name="viewport"]');
 if (!meta) return;
 meta.setAttribute("content", dzViewportNoFocusZoom(meta.getAttribute("content") || ""));
+}
+var DZ_PHONE_QUERY = "(max-width: 767px)";
+function dzPlaceSetupApply(doc, phone) {
+var apply = doc.querySelector("#settingscontent a.sub-tabs-apply");
+var home = doc.querySelector("#settingscontent #tabs > li.pull-right");
+var content = doc.querySelector("#settingscontent #content");
+if (!apply || !home || !content) return;
+var dock = doc.querySelector("#settingscontent .dz-setup-apply");
+if (!dock) {
+dock = doc.createElement("div");
+dock.className = "dz-setup-apply";
+content.appendChild(dock);
+}
+var target = phone ? dock : home;
+if (apply.parentNode !== target) target.appendChild(apply);
+}
+function dzArmSetupApplyDock() {
+if (!window.matchMedia) return;
+var mq = window.matchMedia(DZ_PHONE_QUERY);
+var place = function () { dzPlaceSetupApply(document, mq.matches); };
+mq.addListener(place);
 }
 var corePopupClampArmed = false;
 function clampCorePopups() {
