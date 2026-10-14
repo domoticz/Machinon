@@ -179,6 +179,33 @@ function applyNavbarIconsText() {
     $(".navbar").toggleClass("notext", !!feat && feat.enabled !== false);
 }
 
+/* iOS Safari zooms the page in when a text field under 16px takes focus and
+   leaves it zoomed, so position-fixed UI (Setup's phone Apply bar) ends up
+   outside the visible area. Core and Bootstrap size their fields at 14px.
+   maximum-scale=1 stops that focus zoom, and iOS ignores it for the user's
+   own pinch, so pinch-zoom keeps working there. Every other platform honours
+   it as a pinch-zoom lock, which is why this is iOS only. */
+function dzIsIOS(nav) {
+    if (!nav || typeof nav.userAgent !== "string") return false;
+    if (/iPhone|iPad|iPod/.test(nav.userAgent)) return true;
+    // iPadOS asks for desktop sites with a Mac user agent; a Mac has no touch points.
+    return /Macintosh/.test(nav.userAgent) && nav.maxTouchPoints > 1;
+}
+
+function dzViewportNoFocusZoom(content) {
+    if (/maximum-scale\s*=/.test(content)) {
+        return content.replace(/maximum-scale\s*=\s*[^,;\s]*/, "maximum-scale=1.0");
+    }
+    return content ? content + ", maximum-scale=1.0" : "maximum-scale=1.0";
+}
+
+function dzPreventFocusZoom() {
+    if (!dzIsIOS(navigator)) return;
+    var meta = document.querySelector('meta[name="viewport"]');
+    if (!meta) return;
+    meta.setAttribute("content", dzViewportNoFocusZoom(meta.getAttribute("content") || ""));
+}
+
 // Core positions its device popups (index.html: rgbw_popup, setpoint_popup,
 // thermostat3_popup, rfy_popup) at the raw click coordinates with no viewport clamping
 // (js/domoticz.js, ShowRGBWPopupInt: top = mouseY, left = mouseX + 15), so a popup opened
