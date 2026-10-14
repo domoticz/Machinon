@@ -83,7 +83,7 @@ a call never fails the check; it prints the lower number to record in the script
 
 One check cannot run in CI:
 
-- `~/docker/domoticz-test/scripts/dz-repair-live.js` needs a running Domoticz with the theme
+- `~/src/domoticz/domoticz-test/scripts/dz-repair-live.js` needs a running Domoticz with the theme
   bind-mounted. It is the only thing that checks the live colour-scheme wiring - that no shipped
   scheme's colours move, and that hand-built and generated palettes are repaired - so run it by
   hand if you touch `src/js/scheme.js`, `src/js/color-repair.js` or `css/toasts.css`.

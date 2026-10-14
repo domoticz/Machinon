@@ -1388,7 +1388,7 @@ because the tile background contains 15% of the colour itself. `css/toasts.css` 
 exits on one contrast comparison. A pathological mid-toned hand-built palette is 3.98ms, 76ms at
 20x CPU throttle. `setColorScheme()` is on the boot path, so that is per page load.
 
-Contract: `~/docker/domoticz-test/scripts/dz-repair-live.js` (shipped schemes unchanged, hand-built
+Contract: `~/src/domoticz/domoticz-test/scripts/dz-repair-live.js` (shipped schemes unchanged, hand-built
 and wizard-generated palettes repaired, no stale values after a scheme switch) and
 `scripts/test-color-repair.mjs` for the pure function.
 
