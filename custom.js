@@ -359,6 +359,7 @@ if (typeof dzLog === "function") { dzLog("boot", "angular_absent", { waited_ms: 
 }
 }, 100);
 $(document).ready(function() {
+dzPreventFocusZoom();
 initDeviceObserver();
 enableThemeFeatures();
 locationHashChanged();
