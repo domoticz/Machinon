@@ -66,7 +66,7 @@ It works with current Domoticz beta and stable releases.
 
   ![Machinon dashboard, dark scheme](docs/screenshots/dashboard-dark.png)
 
-- **Search that finds things**: type in the header's search box and the page narrows as you type. It matches a device's name, description, number, type, or the hardware it comes from, so searching for a type such as "blind" pulls every blind onto one screen. Several words count in any order, and what you typed follows you from page to page instead of being cleared on every navigation. See [Finding devices](https://domoticz.github.io/Machinon/docs/finding-devices/) in the manual.
+- **Search that finds things**: type in the header's search box and the page narrows as you type. It matches a device's name, description, number, type, or the hardware it comes from, so searching for a type such as "blind" pulls every blind onto one screen. Several words count in any order, and what you typed follows you from page to page instead of being cleared on every navigation. Each device card's menu can also copy the device's idx, a dzVents line, its API address, or a details block for support posts. See [Finding devices](https://domoticz.github.io/Machinon/docs/finding-devices/) in the manual.
 
   ![The Switches page filtered to eight blinds by a search for "blind"](docs/screenshots/search.png)
 
