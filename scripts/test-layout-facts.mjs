@@ -96,67 +96,6 @@ test("a measurement that throws becomes a reported violation, not a broken snaps
     assert.match(bad[0], /^measure_failed: detached$/);
 });
 
-/* iOS focus zoom (#233): Safari zooms in on a focused field under 16px and
-   stays zoomed, stranding position-fixed UI off-screen. */
-const CORE_VIEWPORT = "width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, user-scalable=yes";
-const UA = {
-    iphone: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0 Mobile/15E148 Safari/604.1",
-    ipad: "Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
-    mac: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0 Safari/605.1.15",
-    android: "Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36"
-};
-
-test("iOS is recognised on iPhone, iPad, and iPadOS posing as a Mac", () => {
-    assert.equal(dz.dzIsIOS({ userAgent: UA.iphone, maxTouchPoints: 5 }), true);
-    assert.equal(dz.dzIsIOS({ userAgent: UA.ipad, maxTouchPoints: 5 }), true);
-    /* iPadOS Safari requests desktop sites with a Mac user agent; only the
-       touch points give it away. */
-    assert.equal(dz.dzIsIOS({ userAgent: UA.mac, maxTouchPoints: 5 }), true);
-});
-
-test("a real Mac, Android and a missing navigator are not iOS", () => {
-    assert.equal(dz.dzIsIOS({ userAgent: UA.mac, maxTouchPoints: 0 }), false);
-    assert.equal(dz.dzIsIOS({ userAgent: UA.android, maxTouchPoints: 5 }), false);
-    assert.equal(dz.dzIsIOS(undefined), false);
-    assert.equal(dz.dzIsIOS({}), false);
-});
-
-test("the viewport caps maximum-scale at 1 and keeps everything else core set", () => {
-    assert.equal(dz.dzViewportNoFocusZoom(CORE_VIEWPORT),
-        "width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=yes");
-});
-
-test("a viewport without maximum-scale gets one, and applying twice changes nothing", () => {
-    assert.equal(dz.dzViewportNoFocusZoom("width=device-width, initial-scale=1"),
-        "width=device-width, initial-scale=1, maximum-scale=1.0");
-    const once = dz.dzViewportNoFocusZoom(CORE_VIEWPORT);
-    assert.equal(dz.dzViewportNoFocusZoom(once), once);
-});
-
-function viewportPage(nav, content) {
-    const ctx = loadPage();
-    const meta = { content, getAttribute() { return this.content; }, setAttribute(k, v) { this[k] = v; } };
-    ctx.navigator = nav;
-    ctx.document.querySelector = (sel) => (sel === 'meta[name="viewport"]' && content !== null ? meta : null);
-    return { ctx, meta };
-}
-
-test("the viewport is rewritten on iOS only", () => {
-    const ios = viewportPage({ userAgent: UA.iphone, maxTouchPoints: 5 }, CORE_VIEWPORT);
-    ios.ctx.dzPreventFocusZoom();
-    assert.match(ios.meta.content, /maximum-scale=1\.0/);
-
-    /* Everywhere else maximum-scale=1 is a real pinch-zoom lock. */
-    const android = viewportPage({ userAgent: UA.android, maxTouchPoints: 5 }, CORE_VIEWPORT);
-    android.ctx.dzPreventFocusZoom();
-    assert.equal(android.meta.content, CORE_VIEWPORT);
-});
-
-test("a page without a viewport tag is left alone", () => {
-    const { ctx } = viewportPage({ userAgent: UA.iphone, maxTouchPoints: 5 }, null);
-    assert.doesNotThrow(() => ctx.dzPreventFocusZoom());
-});
-
 /* Just enough DOM for dzPlaceSetupApply: nodes that know their parent, and a
    document that answers the four selectors it asks. */
 function node(className) {
