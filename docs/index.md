@@ -29,7 +29,9 @@ detail.
   shrinking the desktop layout.
 - **Search that finds things**: type in the header box and the page narrows as you type, matching
   a device's name, description, number, type or hardware. Several words count in any order, and
-  the term follows you from page to page. See [Finding devices](finding-devices.md).
+  the term follows you from page to page. Each device card's menu can also copy the device's
+  idx, a dzVents line, its API address, or a details block for support posts. See
+  [Finding devices](finding-devices.md).
 - **Problem alerts**: a warning icon in the header counts the devices that are timed out or low
   on battery, and disappears once none are. Click it, or open Problem Devices from the
   Setup menu, for the full list, each row showing an icon for the
