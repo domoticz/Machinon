@@ -4,6 +4,15 @@ language = {
   common: {
     close: "Stäng"
   },
+  device_copy: {
+    title: "Kopiera enhetsinfo",
+    copy_idx: "Kopiera idx",
+    copy_dzvents: "Kopiera för dzVents",
+    copy_api: "Kopiera API-URL",
+    copy_details: "Kopiera enhetsdetaljer",
+    copied: "Kopierat",
+    fallback: "Kopieringen misslyckades: markera texten och kopiera den manuellt"
+  },
   header: {
     mainmenu: "Huvudmeny",
     type_to_search: "Skriv för att söka",

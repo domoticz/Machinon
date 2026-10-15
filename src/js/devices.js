@@ -803,11 +803,13 @@ function setDeviceOptions(idx, $trs) {
         let subnav = $(this).find(".options");
         let subnavButton = $(this).find(".options-cell");
         if (subnav.length && subnavButton.length == 0) {
-            /* Display idx in the options */
-            $(subnav).append('<a class="btnsmall" id="idno"><i>Idx: ' + idx + "</i></a>");
+            /* The idx row, and the copy actions it opens (src/js/device-copy.js) */
+            var itemEl = $(this).closest('.item')[0] || $(this).parents('.item')[0];
+            subnav[0].appendChild(dzDeviceCopyMount(idx, itemEl));
             $(this).append('<td class="options-cell" title="' + $.t("More options") + '"><i class="ion-md-more"></i></td>');
             $(this).on("click", "td.options-cell", function(e) {
                 e.preventDefault();
+                dzDeviceCopyCollapse($(this).siblings("td.options")[0]);
                 $(this).siblings("td.options").slideToggle(400);
                 $(this).siblings("td.options").unbind("mouseleave");
                 $(this).siblings("td.options").mouseleave(function() {
@@ -822,7 +824,6 @@ function setDeviceOptions(idx, $trs) {
             $(timers).append($(this).find('.options .btnsmall[data-i18n="Timers"]').html("<i class='ion-ios-timer disabledText' title='" + $.t("Timers") + "'></i>"));
             $(timers).append($(this).find('.options .btnsmall-sel[data-i18n="Timers"]').html("<i class='ion-ios-timer' title='" + $.t("Timers") + "'></i>"));
             /* Check favorite state from Angular scope (ng-hide timing unreliable) */
-            var itemEl = $(this).closest('.item')[0] || $(this).parents('.item')[0];
             var scope = (typeof angular !== "undefined" && itemEl) ? angular.element(itemEl).scope() : null;
             var device = scope?.device || scope?.ctrl?.device || scope?.item;
             var isFavorite = device ? device.Favorite !== 0 : false;

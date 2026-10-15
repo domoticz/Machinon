@@ -97,6 +97,52 @@ One difference worth knowing: the **Dashboard** is not searchable on a phone, be
 dashboard is a different, compact layout rather than the card grid the search filters. Switches,
 Scenes, Temperature, Weather and Utility all search normally on a phone.
 
+## Copying a device's details
+
+Every device card's menu (the three dots in its top right corner) ends with the device's
+number, its idx, for example **Idx: 16**. Click it to open four copy actions underneath. The menu
+is on the same pages as the search: the Dashboard on a computer, Switches, Scenes, Temperature,
+Weather and Utility.
+
+![A device card's menu with the copy actions open under the Idx row](screenshots/card-menu-copy.png)
+
+| Action | What it copies | For example |
+|---|---|---|
+| **Copy idx** | just the number | `16` |
+| **Copy for dzVents** | a line to paste into a dzVents script, with the name as a comment | `domoticz.devices(16) -- Possible Rain` |
+| **Copy API URL** | the address that reads this device through the Domoticz JSON API | `http://192.168.1.10:8080/json.htm?type=command&param=getdevices&rid=16` |
+| **Copy device details** | a short block of facts to paste into a forum or GitHub post | see below |
+
+The device details look like this, one line per fact the device has:
+
+```text
+Device: HVAC Mode (idx 90)
+Type: Light/Switch, Selector Switch, Selector
+Hardware: Dummy
+Hardware type: Dummy (Does nothing, use for virtual switches only)
+Device ID / unit: 000140AA / 1
+Value: Auto
+Last update: 2026-10-15 09:00:00
+Domoticz 2026.4 (build 18468), Machinon 2.7.3
+```
+
+The details are always in English, whatever language Domoticz is set to, because they are meant
+for the people reading your support post.
+
+After a copy, the row briefly reads **Copied**. If your browser refuses to copy, a small text box
+opens in the menu instead, with the text already selected: copy it from there yourself (Ctrl+C,
+Cmd+C on a Mac, or press and hold on a phone). None of these actions changes anything on the
+device.
+
+On a **scene** or **group** card the actions follow suit: the dzVents line uses
+`domoticz.scenes(...)` or `domoticz.groups(...)`, and the API address reads the scene
+(`param=getscenes`). Scenes and groups are numbered separately from devices, so a scene and a
+device can share a number.
+
+The API address is built from the address you are browsing Domoticz on, so it works from the same
+place. It never includes a user name or password, even if your browser's address bar has one in
+it. If Domoticz asks for a login, the address needs the same login when you use it elsewhere.
+
 ## See also
 
 Searching narrows a page to what you typed. There is a second way to narrow a page, aimed at a

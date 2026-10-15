@@ -6,6 +6,15 @@ language = {
   common: {
     close: "Close"
   },
+  device_copy: {
+    title: "Copy device info",
+    copy_idx: "Copy idx",
+    copy_dzvents: "Copy for dzVents",
+    copy_api: "Copy API URL",
+    copy_details: "Copy device details",
+    copied: "Copied",
+    fallback: "Copy failed: select this text and copy it manually"
+  },
   header: {
     mainmenu: "Main menu",
     type_to_search: "Type to search",

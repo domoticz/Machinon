@@ -1110,18 +1110,11 @@ function dzHubCustomMount(entry) {
    for Android has no on-device console, so machinonDiag() is the developer
    convenience and this button is the user path.
 
-   The clipboard write is guarded by its REJECTION, not by a presence check.
-   navigator.clipboard exists on plenty of origins where writeText still rejects
-   with NotAllowedError (document not focused, permission denied), so a presence
-   check passes and the button then reports success for a copy that never
-   happened, which is exactly the silent failure this button must not have. The
-   API is also genuinely absent on a plain-HTTP LAN install, so the textarea
-   fallback is the common path rather than the edge case.
-
-   The fallback writes textarea.value, never innerHTML: with names included the
-   text carries plugin- and hardware-supplied device names, and this is a
-   first-of-its-kind surface in the theme, so it does not inherit the toast
-   surface's text-node contract. */
+   The copy goes through dzCopyText (src/js/clipboard.js), which reports a
+   refused copy instead of claiming success. When it is refused the text is
+   shown in a read-only box to copy by hand; that box is written through
+   textarea.value, never innerHTML, because with names included the text
+   carries plugin- and hardware-supplied device names. */
 function dzHubDiagCopyMount(entry) {
     /* Not a .dz-hub-row: that is a three-column control/text/preview grid for a
        setting with a value, and this is an action. Follows the maintenance
@@ -1169,13 +1162,10 @@ function dzHubDiagCopyMount(entry) {
             try { text = machinonDiagText(); }
             catch (e) { status.textContent = String(e && e.message ? e.message : e); return; }
             area.hidden = true;
-            if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).then(function() {
-                    status.textContent = dzT("hub.diag.copied");
-                }, function() { showFallback(text); });
-                return;
-            }
-            showFallback(text);
+            dzCopyText(text).then(function(ok) {
+                if (ok) status.textContent = dzT("hub.diag.copied");
+                else showFallback(text);
+            });
         });
 
     mount.appendChild(btn);
