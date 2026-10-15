@@ -608,7 +608,6 @@ function init_theme() {
     }, 100);
 
     $(document).ready(function() {
-        dzPreventFocusZoom();
         dzArmSetupApplyDock();
         initDeviceObserver();
         enableThemeFeatures();
