@@ -2,6 +2,15 @@ language = {
 common: {
 close: "Sluiten"
 },
+device_copy: {
+title: "Apparaatinfo kopiëren",
+copy_idx: "Idx kopiëren",
+copy_dzvents: "Kopiëren voor dzVents",
+copy_api: "API-URL kopiëren",
+copy_details: "Apparaatgegevens kopiëren",
+copied: "Gekopieerd",
+fallback: "Kopiëren mislukt: selecteer deze tekst en kopieer hem handmatig"
+},
 header: {
 mainmenu: "Hoofdmenu",
 type_to_search: "Typ om te zoeken",

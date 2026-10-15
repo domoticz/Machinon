@@ -109,23 +109,6 @@ function applyNavbarIconsText() {
 var feat = theme.features && theme.features.navbar_icons_text;
 $(".navbar").toggleClass("notext", !!feat && feat.enabled !== false);
 }
-function dzIsIOS(nav) {
-if (!nav || typeof nav.userAgent !== "string") return false;
-if (/iPhone|iPad|iPod/.test(nav.userAgent)) return true;
-return /Macintosh/.test(nav.userAgent) && nav.maxTouchPoints > 1;
-}
-function dzViewportNoFocusZoom(content) {
-if (/maximum-scale\s*=/.test(content)) {
-return content.replace(/maximum-scale\s*=\s*[^,;\s]*/, "maximum-scale=1.0");
-}
-return content ? content + ", maximum-scale=1.0" : "maximum-scale=1.0";
-}
-function dzPreventFocusZoom() {
-if (!dzIsIOS(navigator)) return;
-var meta = document.querySelector('meta[name="viewport"]');
-if (!meta) return;
-meta.setAttribute("content", dzViewportNoFocusZoom(meta.getAttribute("content") || ""));
-}
 var DZ_PHONE_QUERY = "(max-width: 767px)";
 function dzPlaceSetupApply(doc, phone) {
 var apply = doc.querySelector("#settingscontent a.sub-tabs-apply");

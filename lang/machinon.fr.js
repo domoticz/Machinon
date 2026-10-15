@@ -2,6 +2,15 @@ language = {
 common: {
 close: "Fermer"
 },
+device_copy: {
+title: "Copier les infos de l'appareil",
+copy_idx: "Copier l'idx",
+copy_dzvents: "Copier pour dzVents",
+copy_api: "Copier l'URL de l'API",
+copy_details: "Copier les détails de l'appareil",
+copied: "Copié",
+fallback: "Échec de la copie : sélectionnez ce texte et copiez-le manuellement"
+},
 header: {
 mainmenu: "Menu principal",
 type_to_search: "Tapez pour rechercher",

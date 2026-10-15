@@ -665,13 +665,10 @@ var text;
 try { text = machinonDiagText(); }
 catch (e) { status.textContent = String(e && e.message ? e.message : e); return; }
 area.hidden = true;
-if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
-navigator.clipboard.writeText(text).then(function() {
-status.textContent = dzT("hub.diag.copied");
-}, function() { showFallback(text); });
-return;
-}
-showFallback(text);
+dzCopyText(text).then(function(ok) {
+if (ok) status.textContent = dzT("hub.diag.copied");
+else showFallback(text);
+});
 });
 mount.appendChild(btn);
 mount.appendChild(status);
