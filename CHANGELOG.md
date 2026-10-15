@@ -4,6 +4,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+## [2.8.0] - 2026-10-15
+
 - A device card's menu now copies the device's details: click the Idx row to copy its number, a dzVents line, its JSON API address, or a details block ready for a forum or GitHub post. Works on scene and group cards too
 - On iPhone and iPad, pinch-to-zoom works again on every page. Tapping a small field may zoom the page in again, as it did before 2.7.2; pinch out to return (#233)
 
