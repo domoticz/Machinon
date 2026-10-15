@@ -81,6 +81,8 @@ var THEME_MODULES = [
     "src/js/theme-wizard.js",
     "src/js/set-filter.js",
     "src/js/problems.js",
+    "src/js/clipboard.js",
+    "src/js/device-copy.js",
     "src/js/devices.js",
     "src/js/card-drag-handle.js",
     "src/js/floorplan-stage.js",

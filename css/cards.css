@@ -1066,7 +1066,10 @@ body table#itemtable tr > .options {
     right: var(--dz-card-options-offset);
     top: var(--dz-card-options-top);
     box-shadow: var(--dz-elev-overlay);
-    z-index: 1;
+    /* Above core's dimmer sliders (www/css/style.css .dimslider, z-index 1):
+       at an equal z-index a slider in a LATER card paints over a menu tall
+       enough to reach into that card. */
+    z-index: 2;
     padding: var(--dz-card-space-md) 0;
     width: max-content;
     min-width: var(--dz-card-options-min-width);
@@ -1143,6 +1146,73 @@ body table#itemtable tr > .options {
 .options .btnsmall:hover,
 .options .btnsmall-sel:hover {
     color: var(--dz-accent-color);
+}
+
+/* Device copy actions (src/js/device-copy.js): the Idx row is the toggle,
+   keeping the italic it always had, with a chevron that turns when open.
+   The actions it reveals are ordinary menu rows; a divider above sets them
+   apart from core's Edit/Notifications rows without indenting, which would
+   stop the hover band short of the popup edge. */
+.options .dz-idno {
+    font-style: italic;
+    cursor: pointer;
+}
+
+.options .dz-idno::after {
+    content: "\25BE";
+    display: inline-block;
+    margin-left: var(--dz-card-space-sm);
+    font-style: normal;
+}
+
+.options .dz-idno[aria-expanded="true"]::after {
+    transform: rotate(180deg);
+}
+
+.options .dz-copy-menu {
+    border-top: 1px solid var(--dz-border-color);
+}
+
+/* Collapsed, the actions keep their place in the width calculation (the
+   menu is max-content wide), so opening them does not make the menu jump
+   wider. visibility:hidden still takes them out of the tab order and the
+   accessibility tree, as display:none would. */
+.options .dz-copy-menu[hidden] {
+    display: block;
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    border-top: 0;
+}
+
+.options .dz-copy-item {
+    cursor: pointer;
+}
+
+/* Shown only when the browser refused the copy: the text, selected, to copy
+   by hand. It must take the menu's width, never set it (the menu is
+   max-content wide), and a textarea cannot do that itself: its own width
+   feeds the menu's size in every engine, whatever its declared width. So
+   the wrapper does it: width 0 gives it no size of its own while the menu
+   measures its content, and min-width 100% then stretches it to the menu. */
+.options .dz-copy-fallback {
+    box-sizing: border-box;
+    width: 0;
+    min-width: 100%;
+    padding: var(--dz-card-space-sm) var(--dz-card-space-lg);
+}
+
+.options .dz-copy-fallback[hidden] {
+    display: none;
+}
+
+.options .dz-copy-fallback-text {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    font-size: var(--dz-text-xs);
+    resize: none;
 }
 
 .favorite {
