@@ -1452,6 +1452,14 @@ deliberately not migrated onto the equivalent `--dz-menu-*` token: `--dz-card-ra
 differ (5px vs 6px, overlay vs popup elevation) and that difference is intentional, not an
 oversight.
 
+The flyout's last row is the device's idx, which is a toggle: it opens the copy actions
+(`src/js/device-copy.js`) as ordinary menu rows below a single `--dz-border-color` divider, with
+no indent, so the hover band still spans the full popup width. Collapsed, those rows keep their
+place in the width calculation (hidden by height and visibility, not `display: none`), so the
+max-content popup does not change width when they open. The flyout's `z-index` is 2, one above
+core's `.dimslider` (`www/css/style.css`, `z-index: 1`): at an equal value a slider in a later
+card paints over a flyout that reaches into it.
+
 A second, easily-confused surface is explicitly NOT part of the menu family at all: the settings
 tile grid's own nested sub-menu (`.dropdown-content`, built by `js/settings_page.js` inside a
 grouped tile). Its real surface tokens are the card tier (`--dz-widget-bg` / `--dz-card-radius` /
