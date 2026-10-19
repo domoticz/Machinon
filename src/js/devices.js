@@ -7,7 +7,7 @@ if (!isMobile) return;
 $(".selectorlevels span.ui-selectmenu-button").each(function() {
 $(this).hide();
 var selectorId = $(this).attr("id").split("-", 1)[0];
-$("#" + selectorId + ":not(.ui-widget)").on("change", function(e) {
+$("#" + selectorId + ":not(.ui-widget)").not("[ng-change]").on("change", function() {
 var selected = $(this).children("option:selected");
 SwitchSelectorLevel($(this).attr("data-idx"), selected.text(), selected.val());
 });

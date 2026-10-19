@@ -414,9 +414,9 @@ navBarInner.removeClass("slide");
 navBarToggle.trigger("focus");
 }
 });
-navBarInner.find(".container li").not(".dropdown").not(".dropdown-submenu").filter(function() {
-return !$(this).children("a[data-toggle='dropdown']").length;
-}).click(function() {
+navBarInner.on("click", ".container li", function() {
+var li = $(this);
+if (li.is(".dropdown, .dropdown-submenu") || li.children("a[data-toggle='dropdown']").length) return;
 navBarInner.removeClass("slide");
 });
 $("#holder").click(function() {
