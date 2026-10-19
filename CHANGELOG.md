@@ -4,6 +4,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+- On a phone, tapping Custom in the side menu now opens your custom pages instead of closing the menu (#243)
+
 ## [2.8.0] - 2026-10-15
 
 - A device card's menu now copies the device's details: click the Idx row to copy its number, a dzVents line, its JSON API address, or a details block ready for a forum or GitHub post. Works on scene and group cards too

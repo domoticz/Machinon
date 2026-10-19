@@ -688,14 +688,14 @@ function init_theme() {
         // handler. class="dropdown" catches Setup's <li> (index.html ~1293), but
         // core does not mark every dropdown container that way -- the non-admin
         // "Other" entry (li#mLogout, ~1354) carries the same Bootstrap
-        // data-toggle="dropdown" toggle with no class="dropdown" at all, so the
-        // class-only check let a tap on it open the submenu and slide the whole
-        // flyout away in the same gesture. Exclude by the actual Bootstrap
-        // marker too, on the toggle <a> itself, not just the class core happens
-        // to add sometimes.
-        navBarInner.find(".container li").not(".dropdown").not(".dropdown-submenu").filter(function() {
-            return !$(this).children("a[data-toggle='dropdown']").length;
-        }).click(function() {
+        // data-toggle="dropdown" toggle with no class="dropdown" at all. Exclude
+        // by the actual Bootstrap marker too, on the toggle <a> itself.
+        // Decided at tap time, not when this runs: core turns the Custom entry
+        // (li.clcustommenu) into a dropdown only once its getconfig lists two
+        // or more custom pages, which can land after the theme has booted.
+        navBarInner.on("click", ".container li", function() {
+            var li = $(this);
+            if (li.is(".dropdown, .dropdown-submenu") || li.children("a[data-toggle='dropdown']").length) return;
             navBarInner.removeClass("slide");
         });
         $("#holder").click(function() {
