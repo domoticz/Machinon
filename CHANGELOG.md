@@ -4,6 +4,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+## [2.8.1] - 2026-10-19
+
 - On a phone, tapping Custom in the side menu now opens your custom pages instead of closing the menu (#243)
 - On a phone, choosing a level in a selector switch's dropdown now sets that level instead of switching the device back to Off right after (#245)
 
