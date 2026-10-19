@@ -38,7 +38,13 @@ function setDevicesNativeSelectorForMobile() {
     $(".selectorlevels span.ui-selectmenu-button").each(function() {
         $(this).hide();
         var selectorId = $(this).attr("id").split("-", 1)[0];
-        $("#" + selectorId + ":not(.ui-widget)").on("change", function(e) {
+        /* Who sends the level depends on the core. Its Angular light widget
+           (2026.1 on) sends it from the select's own ng-change, and a second
+           sender here would post Angular's "number:20" option value, which
+           core reads as level 0. Older cores (2025.2) send from the
+           selectmenu's events, which a native change never fires, so there
+           this handler is the only sender. */
+        $("#" + selectorId + ":not(.ui-widget)").not("[ng-change]").on("change", function() {
             var selected = $(this).children("option:selected");
             SwitchSelectorLevel($(this).attr("data-idx"), selected.text(), selected.val());
         });
