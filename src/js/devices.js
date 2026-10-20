@@ -104,6 +104,16 @@ function getCardDevice(item) {
     return scope ? (scope.device || (scope.ctrl && scope.ctrl.device)) : null;
 }
 
+/* Any card's record, scenes and groups included: device widgets keep it as
+   device, ctrl.device or item, and core's dz-scene-widget renders inside
+   its ng-repeat's scope, which holds it as scene. Read it when it is
+   needed, not once, so it reflects the current state. */
+function dzCardRecord(itemEl) {
+    if (typeof angular === "undefined" || !itemEl) return null;
+    var scope = angular.element(itemEl).scope();
+    return (scope && (scope.device || (scope.ctrl && scope.ctrl.device) || scope.item || scope.scene)) || null;
+}
+
 /* Switch-detection gate, shared by the initial pass below and the
    MutationObserver re-enhance pass (initDeviceObserver). A card is a plain
    on/off switch when core gave the device a SwitchType at all (only its
@@ -830,8 +840,7 @@ function setDeviceOptions(idx, $trs) {
             $(timers).append($(this).find('.options .btnsmall[data-i18n="Timers"]').html("<i class='ion-ios-timer disabledText' title='" + $.t("Timers") + "'></i>"));
             $(timers).append($(this).find('.options .btnsmall-sel[data-i18n="Timers"]').html("<i class='ion-ios-timer' title='" + $.t("Timers") + "'></i>"));
             /* Check favorite state from Angular scope (ng-hide timing unreliable) */
-            var scope = (typeof angular !== "undefined" && itemEl) ? angular.element(itemEl).scope() : null;
-            var device = scope?.device || scope?.ctrl?.device || scope?.item;
+            var device = dzCardRecord(itemEl);
             var isFavorite = device ? device.Favorite !== 0 : false;
             var icon;
             if (isFavorite) {
@@ -842,8 +851,7 @@ function setDeviceOptions(idx, $trs) {
             var favTd = $('<td class="favorite">' + icon + "</td>");
             favTd.on("click", function() {
                 /* Re-read current state at click time, not creation time */
-                var currentScope = angular.element(itemEl).scope();
-                var currentDevice = currentScope?.device || currentScope?.ctrl?.device || currentScope?.item;
+                var currentDevice = dzCardRecord(itemEl);
                 var currentlyFav = currentDevice ? currentDevice.Favorite !== 0 : false;
                 /* Find core's favorite toggle by its ng-click action, which is the
                    only thing stable across markups: upstream fdab5e10c changed the
