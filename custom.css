@@ -1013,6 +1013,24 @@ select.ui-corner-all option:hover {
     color: var(--dz-body-text) !important;
 }
 
+/* Core spaces the Backup / Restore / Vacuum buttons with runs of &nbsp; inside a <center>
+   (www/views/setup.html), so once they wrap on a phone they touch, and each wrapped line
+   keeps a different share of that text, leaving the left edges ragged. A wrapping flex row
+   centres them on even 8px gaps ({spacing.xs}, the dialog button gap); the &nbsp; runs
+   become zero-width flex items at font-size 0, which is safe because these buttons pin
+   their own font size (DESIGN.md, Buttons). Margins, not gap, so those empty items add no
+   extra space. */
+#restoredatabase center:has(> .btn) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    font-size: 0;
+}
+
+#restoredatabase center:has(> .btn) > .btn {
+    margin: 4px;
+}
+
 /* Core's short-log table couples unrelated rows through one column model: the first column
    is pinned to 60px inline and the checkbox rows have no colspan (views/setup.html:226,238,
    241), so their labels wrap word-by-word in a 60px column; freeing the widths instead makes
