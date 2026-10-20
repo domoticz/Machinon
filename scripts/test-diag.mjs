@@ -425,6 +425,19 @@ test("Edge and Safari are not reported as the engines they impersonate", () => {
     assert.equal(dz.dzDiagEngine(safari), "safari/18");
 });
 
+test("iPhone and iPad browsers are named, not reported as other", () => {
+    /* Mobile Safari puts Mobile/<build> before "Safari"; Chrome, Firefox and
+       Edge on iOS use iOS tokens and all claim Safari as well. */
+    const ios = (os, tail) => `Mozilla/5.0 (${os} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) ${tail}`;
+    assert.equal(dz.dzDiagEngine(ios("iPhone; CPU iPhone OS 27_0_1", "Version/27.0 Mobile/15E148 Safari/604.1")), "safari/27");
+    assert.equal(dz.dzDiagEngine(ios("iPad; CPU OS 18_0", "Version/18.0 Mobile/15E148 Safari/604.1")), "safari/18");
+    assert.equal(dz.dzDiagEngine(ios("iPhone; CPU iPhone OS 18_0", "CriOS/130.0.6723.90 Mobile/15E148 Safari/604.1")), "chrome/130");
+    assert.equal(dz.dzDiagEngine(ios("iPhone; CPU iPhone OS 18_0", "FxiOS/130.0 Mobile/15E148 Safari/605.1.15")), "firefox/130");
+    assert.equal(dz.dzDiagEngine(ios("iPhone; CPU iPhone OS 18_0", "EdgiOS/130.0.2849.80 Version/18.0 Mobile/15E148 Safari/604.1")), "edge/130");
+    /* An in-app web view has no browser token at all; it stays other. */
+    assert.equal(dz.dzDiagEngine(ios("iPhone; CPU iPhone OS 18_0", "Mobile/15E148")), "other");
+});
+
 test("an unrecognised or absent user agent is reported as unknown, never echoed", () => {
     /* The failure that must not happen: falling back to the raw string, which
        would put a full fingerprint into an artifact meant for a public issue. */
