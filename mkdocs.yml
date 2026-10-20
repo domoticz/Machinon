@@ -57,9 +57,14 @@ theme:
   # project's existing navigation.tabs, toc.integrate and search.share.
   # toc.follow is deliberately absent: it steers the standalone table of
   # contents, which toc.integrate folds into the sidebar.
+  #
+  # navigation.instant and navigation.instant.prefetch are deliberately absent.
+  # With instant navigation on, a link clicked right after scrolling carries
+  # the old page's navigation.tracking fragment into the new URL, and when the
+  # new page has the same heading ("See also" ends many pages here) it can
+  # open scrolled down to it: https://github.com/zensical/ui/issues/279
+  # Put both back once that is fixed in the pinned zensical version.
   features:
-    - navigation.instant
-    - navigation.instant.prefetch
     - navigation.tracking
     - navigation.tabs
     - navigation.sections
