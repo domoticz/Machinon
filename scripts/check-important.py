@@ -26,7 +26,7 @@ import sys
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
 
-BASELINE = 510
+BASELINE = 509
 
 SOURCES = ["custom.css", "dark.css", "dz-tokens.css"]
 DIRS = ["css"]

@@ -9,6 +9,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - The diagnostics report now names Safari, Chrome and Firefox on iPhone and iPad instead of listing the browser as "other"
 - On a phone, the Backup, Restore and Vacuum Database buttons on Setup's Backup/Restore tab no longer touch each other and line up evenly
 - In a floorplan's device popup, the expand arrow, favourite star and camera icons now use the theme's icon style and colours (#212)
+- The dashboard's Cameras section now appears together with the rest of the dashboard instead of pushing everything below it down, no longer sometimes goes missing, and no longer leaves an empty Cameras heading on the phone layout (#201)
 
 ## [2.8.1] - 2026-10-19
 
