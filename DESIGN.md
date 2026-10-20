@@ -2010,10 +2010,13 @@ beside its rule in the named file:
 - **`.span3 #status` is accent-colored while classic `#status` is body-text colored**: an open,
   unresolved question (deliberate compact-tile emphasis, or drift), flagged beside the rule in
   `css/compact.css`.
-- **The camera section loads late.** `#dashCameras` is injected outside the Angular digest, so
-  any geometry measurement or screenshot of a dashboard with cameras must poll for it present
-  in the DOM AND height-stable across two consecutive polls before capturing. **Constraint.**
-  The injection and its digest-bypass account live in `js/dashboard_camera.js`.
+- **The camera section can still land after the dashboard.** `#dashCameras` is injected outside
+  the Angular digest, from the observer that sees core's first section, so it normally appears
+  in the same frame as the rest of the dashboard. Only a camera list slower than the dashboard
+  itself adds it later, so any geometry measurement or screenshot of a dashboard with cameras
+  must still poll for it present in the DOM AND height-stable across two consecutive polls
+  before capturing. **Constraint.** The injection and its timing live in
+  `js/dashboard_camera.js`. Classic dashboard only; the phone layout gets no section.
 - **Two grid-gap values stay untokenized.** The classic 10px card-grid gap and the Dynamic
   Dashboard's 4px tightened gap stay literal in `css/cards.css`: 4px is not a step on the
   card-space scale, so the pair cannot be tokenized symmetrically without an off-scale token or

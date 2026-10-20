@@ -213,8 +213,12 @@ stacking every section full width down the page.
 ### Camera previews on the dashboard
 <!-- key: dashboard_camera -->
 
-Adds live camera thumbnails to the dashboard, refreshed on an interval. Its own two settings
-below control where they appear and how often they refresh.
+Adds live camera thumbnails to the classic dashboard, refreshed on an interval. Its own two
+settings below control where they appear and how often they refresh.
+
+The previews appear on the classic dashboard only. The Dynamic Dashboard has its own Camera Feed
+widget (Domoticz 2026.2 and newer) that you add to a layout instead, and the compact phone layout
+of the dashboard shows no camera row.
 
 ### Camera preview refresh (seconds)
 <!-- key: dashboard_camera_refresh -->
@@ -226,6 +230,8 @@ Camera previews on the dashboard is also on.
 <!-- key: dashboard_camera_section -->
 
 When on, groups every enabled camera into its own "Cameras" section at the top of the dashboard.
+The section appears together with the rest of the dashboard, so the sections below it do not move
+down as the page loads.
 Turned off, it's designed to show each camera's preview in place of that device's own status
 text wherever it already appears on the dashboard, instead of a dedicated section. Only takes
 effect while Camera previews on the dashboard is also on.
