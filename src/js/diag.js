@@ -249,9 +249,12 @@ var DZ_DIAG_ENGINES = [
     ["edge", /Edg(?:e|A|iOS)?\/(\d+)/],
     ["opera", /OPR\/(\d+)/],
     ["samsung", /SamsungBrowser\/(\d+)/],
-    ["firefox", /Firefox\/(\d+)?/],
-    ["chrome", /Chrome\/(\d+)/],
-    ["safari", /Version\/(\d+)[.\d]* Safari/]
+    ["firefox", /(?:Firefox|FxiOS)\/(\d+)?/],
+    ["chrome", /(?:Chrome|CriOS)\/(\d+)/],
+    /* iPhone and iPad Safari put Mobile/<build> between the version and
+       "Safari", and the other iOS browsers name themselves with an iOS
+       token (CriOS, FxiOS, EdgiOS) instead of their desktop one. */
+    ["safari", /Version\/(\d+)[.\d]*(?: Mobile\/\w+)? Safari/]
 ];
 
 function dzDiagEngine(ua) {
