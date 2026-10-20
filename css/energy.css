@@ -22,5 +22,13 @@
 #eicon {
     fill: var(--dz-body-text)!important;
 }
+/* Core colours the diagram's labels (.etext) white for its own dark page, but #emain above
+   takes the theme background, light in the light schemes. Most labels sit inside a <g> and
+   pick up floorplan.css's broad `g text` rule; the outside temperature is a direct child of
+   the <svg>, so without this it stays white on the light card. The id outranks core's
+   class, so no !important is needed even though core's sheet loads after the theme. */
+#emain svg text {
+    fill: var(--dz-body-text);
+}
 
 
