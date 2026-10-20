@@ -38,12 +38,15 @@ function setDevicesNativeSelectorForMobile() {
     $(".selectorlevels span.ui-selectmenu-button").each(function() {
         $(this).hide();
         var selectorId = $(this).attr("id").split("-", 1)[0];
-        /* Who sends the level depends on the core. Its Angular light widget
-           (2026.1 on) sends it from the select's own ng-change, and a second
-           sender here would post Angular's "number:20" option value, which
-           core reads as level 0. Older cores (2025.2) send from the
-           selectmenu's events, which a native change never fires, so there
-           this handler is the only sender. */
+        /* Who sends the level depends on the template core rendered. The
+           device pages' template sends from the select's own ng-change, and
+           a second sender here would post Angular's "number:20" option
+           value, which core reads as level 0. The desktop Dashboard template
+           has no ng-change and sends from the selectmenu's events, which a
+           native change never fires. Core picks that template whenever its
+           own phone check says no (an iPad, an Android tablet, or "force
+           desktop view"), while isMobile is true for those, so there this
+           handler is the only sender. */
         $("#" + selectorId + ":not(.ui-widget)").not("[ng-change]").on("change", function() {
             var selected = $(this).children("option:selected");
             SwitchSelectorLevel($(this).attr("data-idx"), selected.text(), selected.val());
