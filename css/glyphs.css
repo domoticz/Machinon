@@ -250,3 +250,46 @@ dz-device-icon > .dz-icon-glyph.dz-icon--off,
 .btn.btn-icon > .dz-chrome-icon.fa-star {
     color: var(--dz-icon-star);
 }
+
+
+/* --- Floorplan popup chrome ----------------------------------------------
+
+   The device popup's expand chevron (#twisty), favourite star (#favorite) and
+   camera link (#webcam) are core's makeSVGglyph output (js/domoticzdevices.js):
+   a <foreignObject> holding <i class="fa-... dz-chrome-icon">. They are the
+   only Font Awesome shapes left in a popup that is otherwise drawn in the
+   theme's language, so they swap to the Ionicons the cards use (the card star
+   is ion-ios-star / -outline, src/js/devices.js setDeviceOptions).
+
+   Font Awesome 7 draws the glyph from custom properties (font-awesome/css/
+   fontawesome.css: content var(--fa), family var(--fa-family), weight
+   var(--fa-style)), so setting those swaps the shape without touching core's
+   markup, and the id selectors outrank the .fa-* classes that set them. The
+   chevron keeps pointing up because core flips it with a rotate when the
+   popup expands. Chevron and camera are actions, so they take the card action
+   accent; the star keeps --dz-icon-star from the rule above.
+
+   Cores before this markup draw PNG <image> elements here, which have no
+   .dz-chrome-icon, so these rules match nothing on them. */
+.DeviceDetails foreignObject > i.dz-chrome-icon {
+    --fa-family: var(--dz-font-icons);
+    --fa-style: 400;
+}
+
+#twisty > i.dz-chrome-icon {
+    --fa: "\f3d8"; /* ion-ios-arrow-up */
+    color: var(--dz-card-icon-accent);
+}
+
+#favorite > i.fa-solid.dz-chrome-icon {
+    --fa: "\f4b3"; /* ion-ios-star */
+}
+
+#favorite > i.fa-regular.dz-chrome-icon {
+    --fa: "\f4b2"; /* ion-ios-star-outline */
+}
+
+#webcam > i.dz-chrome-icon {
+    --fa: "\f4cd"; /* ion-ios-videocam */
+    color: var(--dz-card-icon-accent);
+}
