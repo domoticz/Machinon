@@ -8,6 +8,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - The star on a scene or group card now shows whether it is on the Dashboard, and clicking it on a favourite removes it again (#248)
 - The diagnostics report now names Safari, Chrome and Firefox on iPhone and iPad instead of listing the browser as "other"
 - On a phone, the Backup, Restore and Vacuum Database buttons on Setup's Backup/Restore tab no longer touch each other and line up evenly
+- In a floorplan's device popup, the expand arrow, favourite star and camera icons now use the theme's icon style and colours (#212)
 
 ## [2.8.1] - 2026-10-19
 

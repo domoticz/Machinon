@@ -2388,8 +2388,11 @@ it recolors an SVG shape; issue #6959 tracked replacement art for exactly that r
 icon rework has since replaced both with themeable markup: the slider knob is the plain
 `circle#sliderhandle` themed above, and the chevron is a `<foreignObject id="twisty">` wrapping
 a Font Awesome glyph (`js/domoticzdevices.js` `makeSVGglyph`), the same element the expanded-state
-rules above already target by id. The chevron's own color is still unthemed (inherits its
-default), which is out of this task's scope.
+rules above already target by id. That chevron, the expanded row's favourite star and the
+camera link are Font Awesome glyphs in core; `css/glyphs.css` ("Floorplan popup chrome") swaps
+them to the cards' Ionicons (`ion-ios-arrow-up`, `ion-ios-star` / `-outline`, `ion-ios-videocam`).
+Chevron and camera take `--dz-card-icon-accent`, the star `--dz-icon-star`. Cores that still draw
+PNGs there are left as they are.
 
 The surface's invariant, across light/dark x collapsed/expanded x feature off/on: no `url(#...)`
 computed fill and no pure-black stroke may survive anywhere in the popup.

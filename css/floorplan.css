@@ -235,6 +235,7 @@ g.selector .level-list .level path {
 #twisty {
     display: none;
 }
+/* The chevron's glyph and colour, once shown: css/glyphs.css, "Floorplan popup chrome". */
 
 /* Expanded-state action pills (feature: floorplan_popup_details, css/floorplan_popup_details.css).
    Core fills both with url(#ButtonImage1), a gradient that tracks nothing. Put them on the
