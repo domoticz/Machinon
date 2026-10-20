@@ -101,16 +101,6 @@ function dzDeviceCopyDetails(device, idx, versions, kind) {
     return lines.join("\n");
 }
 
-/* The card's record from its Angular scope, read at click time so the value
-   and last update are current. Device widgets keep it as device,
-   ctrl.device or item (the favourite star in devices.js reads the same);
-   core's dz-scene-widget keeps it as scene. */
-function dzDeviceCopyRecord(itemEl) {
-    if (typeof angular === "undefined" || !itemEl) return null;
-    var scope = angular.element(itemEl).scope();
-    return (scope && (scope.device || (scope.ctrl && scope.ctrl.device) || scope.item || scope.scene)) || null;
-}
-
 function dzDeviceCopyVersions() {
     return {
         domoticz: (typeof dzApiState !== "undefined" && dzApiState.domoticzVersion) || "",
@@ -195,14 +185,14 @@ function dzDeviceCopyMount(idx, itemEl) {
     [
         ["copy_idx", function() { return id; }],
         ["copy_dzvents", function() {
-            var dev = dzDeviceCopyRecord(itemEl);
+            var dev = dzCardRecord(itemEl);
             return dzDeviceCopyDzVents(id, dev && dev.Name, kind(dev));
         }],
         ["copy_api", function() {
-            return dzDeviceCopyApiUrl(id, document.baseURI, kind(dzDeviceCopyRecord(itemEl)));
+            return dzDeviceCopyApiUrl(id, document.baseURI, kind(dzCardRecord(itemEl)));
         }],
         ["copy_details", function() {
-            var dev = dzDeviceCopyRecord(itemEl);
+            var dev = dzCardRecord(itemEl);
             return dzDeviceCopyDetails(dev, id, dzDeviceCopyVersions(), kind(dev));
         }]
     ].forEach(function(entry) {
