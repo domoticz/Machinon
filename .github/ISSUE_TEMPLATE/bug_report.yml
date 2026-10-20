@@ -25,7 +25,7 @@ body:
     id: domoticz-version
     attributes:
       label: Domoticz version
-      description: Setup, then About
+      description: Setup, then About. Machinon supports Domoticz stable releases from the last 12 months and the current beta.
       placeholder: e.g. 2026.3 build 18239
     validations:
       required: true

@@ -60,6 +60,14 @@ the browser to see the change.
 
 `DESIGN.md` is the source of truth for design tokens (colors, type scale, spacing, radius); `scripts/check-tokens.sh` and `scripts/check-typography.sh` fail when the CSS drifts from what it documents, so update `DESIGN.md` in the same edit as any token change.
 
+### Supported Domoticz versions
+
+Machinon supports every Domoticz stable release from the last 12 months, plus the current beta, and always at least the two newest stable releases. The current minimum is stated once for users, in the Requirements of [README.md](README.md) and [docs/installation.md](docs/installation.md); the user-facing explanation of the policy lives in docs/installation.md.
+
+- A stable release leaves support at the first Machinon minor release (`x.Y.0`) after it turns 12 months old, never in a patch release. Dropping a version is a reason to make the next release a minor one. That release's changelog says so in a line of its own, and the same change raises the minimum in README.md, docs/installation.md and site/index.html.
+- The oldest supported stable is what a change aimed at newer Domoticz behaviour is checked against: show that it does nothing harmful there by running it on that version, not by reading the code.
+- Code that exists only for a Domoticz release that has left support is not removed in a sweep. It comes out when its file is next edited for another reason.
+
 ### Checks
 
 Before opening a PR, run the guard suite and the build check locally. Install the pinned dev tools first with `pip install -r requirements-dev.txt`. The commands below are the quick local subset that catches most failures. CI runs more on every push (the node and pytest suites, the contrast, site and settings-docs checks, and the docs build): `.github/workflows/validate.yml` is the complete list, and running its `run:` lines locally is how to be sure CI will be clean.

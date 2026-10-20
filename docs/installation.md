@@ -2,8 +2,9 @@
 
 ## Requirements
 
-- A running Domoticz installation: Domoticz 2025.2 or newer. Machinon is developed against the
-  latest Domoticz beta, so that's the recommended version to run it on. The Setup menu, and the
+- A running Domoticz installation: Domoticz 2026.1 or newer (see [Supported Domoticz
+  versions](#supported-domoticz-versions) below). Machinon is developed against the latest
+  Domoticz beta, so that's the recommended version to run it on. The Setup menu, and the
   Theme Hub entry inside it (see [Theme Hub](theme-hub.md)), is visible to admin users only, on
   both stable and beta releases; non-admin logins have a separate path to it, covered on that
   same page.
@@ -12,6 +13,27 @@
 - A current browser: Chrome or Edge 111, Firefox 121, Safari 16.2 or newer (all from 2023). The
   theme uses modern CSS such as `:has()` and `color-mix()`, so an older browser, for example on
   an old wall tablet, may not show it correctly.
+
+### Supported Domoticz versions
+
+Machinon supports every Domoticz stable release from the last 12 months, plus the current beta,
+and always at least the two newest stable releases. Changes are tested on the current beta and
+on the oldest supported stable release.
+
+When a stable release turns 12 months old, the next Machinon feature release (2.9.0, 3.0.0 and
+so on, never a bug-fix release such as 2.8.1) stops supporting it. Its release notes say so, and
+the minimum version on this page changes with it. Nothing is removed from the theme at that
+moment, but later changes are no longer tested on that Domoticz version, so pages may gradually
+stop looking or working right on it.
+
+If you stay on an older Domoticz:
+
+- Install the last Machinon release that supported it with the release zip (Option 2 below), and
+  don't update the theme until you update Domoticz. The release notes on the [GitHub Releases
+  page](https://github.com/domoticz/Machinon/releases) say when a Domoticz version was dropped.
+- Don't install or update through the dist branch, PyPluginStore, the Theme Manager plugin or
+  the full source (Options 1, 3, 4 and 5): they always give you the newest Machinon, which may no
+  longer support your Domoticz.
 
 ## Installing Machinon
 

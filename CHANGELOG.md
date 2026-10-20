@@ -4,6 +4,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+- Machinon now needs Domoticz 2026.1 or newer. From now on it supports every Domoticz stable release from the last 12 months plus the current beta, so Domoticz 2025.2 is no longer supported; if you stay on 2025.2, keep Machinon 2.8.1 (see Supported Domoticz versions in the installation guide)
+
 ## [2.8.1] - 2026-10-19
 
 - On a phone, tapping Custom in the side menu now opens your custom pages instead of closing the menu (#243)

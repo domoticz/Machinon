@@ -107,7 +107,7 @@ A device's Log page. The colored background zones are the device's Bar Ranges, w
 
 ## Requirements
 
-- A running Domoticz installation: Domoticz 2025.2 or newer, latest beta recommended. The theme is developed against the beta. The Setup menu, and the Theme Hub entry inside it, is visible to admin users only, on both stable and beta; non-admin logins have a separate path to it, see [Theme Hub](https://domoticz.github.io/Machinon/docs/theme-hub/) in the manual.
+- A running Domoticz installation: Domoticz 2026.1 or newer, latest beta recommended. The theme is developed against the beta. Machinon supports every Domoticz stable release from the last 12 months plus the current beta; see [Supported Domoticz versions](https://domoticz.github.io/Machinon/docs/installation/#supported-domoticz-versions) for what happens when a release drops out. The Setup menu, and the Theme Hub entry inside it, is visible to admin users only, on both stable and beta; non-admin logins have a separate path to it, see [Theme Hub](https://domoticz.github.io/Machinon/docs/theme-hub/) in the manual.
 - A browser you can hard-refresh (Ctrl+Shift+R) after installing or updating the theme.
 - A current browser: Chrome or Edge 111, Firefox 121, Safari 16.2 or newer (all from 2023). The theme uses modern CSS such as `:has()` and `color-mix()`, so an older browser, for example on an old wall tablet, may not show it correctly.
 
