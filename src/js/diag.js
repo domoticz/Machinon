@@ -132,9 +132,9 @@ var DZ_DIAG_ENGINES = [
 ["edge", /Edg(?:e|A|iOS)?\/(\d+)/],
 ["opera", /OPR\/(\d+)/],
 ["samsung", /SamsungBrowser\/(\d+)/],
-["firefox", /Firefox\/(\d+)?/],
-["chrome", /Chrome\/(\d+)/],
-["safari", /Version\/(\d+)[.\d]* Safari/]
+["firefox", /(?:Firefox|FxiOS)\/(\d+)?/],
+["chrome", /(?:Chrome|CriOS)\/(\d+)/],
+["safari", /Version\/(\d+)[.\d]*(?: Mobile\/\w+)? Safari/]
 ];
 function dzDiagEngine(ua) {
 try {

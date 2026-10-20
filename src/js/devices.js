@@ -45,6 +45,11 @@ var el = item.closest(".item")[0];
 var scope = (typeof angular !== "undefined" && el) ? angular.element(el).scope() : null;
 return scope ? (scope.device || (scope.ctrl && scope.ctrl.device)) : null;
 }
+function dzCardRecord(itemEl) {
+if (typeof angular === "undefined" || !itemEl) return null;
+var scope = angular.element(itemEl).scope();
+return (scope && (scope.device || (scope.ctrl && scope.ctrl.device) || scope.item || scope.scene)) || null;
+}
 function isPlainOnOffSwitch(item) {
 var device = getCardDevice(item);
 if (!device) return false;
@@ -398,8 +403,7 @@ $(timers).append($(this).find('.options .btnsmall[data-i18n="Log"]').html("<i cl
 $(timers).append($(this).find('.options .btnsmall[href*="Log"]:not(.btnsmall[data-i18n="Log"])').html("<i class='ion-ios-stats' title='" + $.t("Log") + "'></i>"));
 $(timers).append($(this).find('.options .btnsmall[data-i18n="Timers"]').html("<i class='ion-ios-timer disabledText' title='" + $.t("Timers") + "'></i>"));
 $(timers).append($(this).find('.options .btnsmall-sel[data-i18n="Timers"]').html("<i class='ion-ios-timer' title='" + $.t("Timers") + "'></i>"));
-var scope = (typeof angular !== "undefined" && itemEl) ? angular.element(itemEl).scope() : null;
-var device = scope?.device || scope?.ctrl?.device || scope?.item;
+var device = dzCardRecord(itemEl);
 var isFavorite = device ? device.Favorite !== 0 : false;
 var icon;
 if (isFavorite) {
@@ -409,8 +413,7 @@ icon = '<i class="ion-ios-star-outline lcursor" title="' + $.t("Add to Dashboard
 }
 var favTd = $('<td class="favorite">' + icon + "</td>");
 favTd.on("click", function() {
-var currentScope = angular.element(itemEl).scope();
-var currentDevice = currentScope?.device || currentScope?.ctrl?.device || currentScope?.item;
+var currentDevice = dzCardRecord(itemEl);
 var currentlyFav = currentDevice ? currentDevice.Favorite !== 0 : false;
 var clickTarget = currentlyFav
 ? rows.find('.options [ng-click*="akeFavorite(0)"]')

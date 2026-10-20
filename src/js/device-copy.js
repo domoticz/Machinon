@@ -62,11 +62,6 @@ if (dzDeviceCopyClean(v.theme)) built.push("Machinon " + dzDeviceCopyClean(v.the
 if (built.length) lines.push(built.join(", "));
 return lines.join("\n");
 }
-function dzDeviceCopyRecord(itemEl) {
-if (typeof angular === "undefined" || !itemEl) return null;
-var scope = angular.element(itemEl).scope();
-return (scope && (scope.device || (scope.ctrl && scope.ctrl.device) || scope.item || scope.scene)) || null;
-}
 function dzDeviceCopyVersions() {
 return {
 domoticz: (typeof dzApiState !== "undefined" && dzApiState.domoticzVersion) || "",
@@ -136,14 +131,14 @@ try { area.focus(); area.select(); } catch (e) { }
 [
 ["copy_idx", function() { return id; }],
 ["copy_dzvents", function() {
-var dev = dzDeviceCopyRecord(itemEl);
+var dev = dzCardRecord(itemEl);
 return dzDeviceCopyDzVents(id, dev && dev.Name, kind(dev));
 }],
 ["copy_api", function() {
-return dzDeviceCopyApiUrl(id, document.baseURI, kind(dzDeviceCopyRecord(itemEl)));
+return dzDeviceCopyApiUrl(id, document.baseURI, kind(dzCardRecord(itemEl)));
 }],
 ["copy_details", function() {
-var dev = dzDeviceCopyRecord(itemEl);
+var dev = dzCardRecord(itemEl);
 return dzDeviceCopyDetails(dev, id, dzDeviceCopyVersions(), kind(dev));
 }]
 ].forEach(function(entry) {
