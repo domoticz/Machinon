@@ -567,6 +567,14 @@ test("dark_theme.css follows the painted variant: one link, and only its own lin
     assert.equal(b.darkLinks().length, 1);
     b.ctx.dzSetDarkFile(false);
     assert.equal(b.darkLinks().length, 0);
+    /* Another theme folder's copy is left alone. */
+    const foreign = b.ctx.document.createElement("link");
+    foreign.setAttribute("href", "styles/machinon-dev/css/dark_theme.css");
+    b.ctx.document.head.appendChild(foreign);
+    b.ctx.dzSetDarkFile(true);
+    assert.equal(b.darkLinks().length, 2, "this folder's own link is added beside it");
+    b.ctx.dzSetDarkFile(false);
+    assert.deepEqual(b.darkLinks().map((l) => l.getAttribute("href")), ["styles/machinon-dev/css/dark_theme.css"]);
 });
 
 test("the early block's dark_theme.css link is adopted at seed and removed when the resolve wants light", async () => {
@@ -655,6 +663,23 @@ test("dzSetSchemeMode saves the mode and the family member once, and clears the 
     await b.ctx.dzSetSchemeMode("light");
     assert.equal(b.ctx.theme.scheme, "custom");
     assert.equal(b.persists.length, 2);
+});
+
+test("a mode saved without its member because the scheme files failed is logged", async () => {
+    const b = browser({ failFetch: true });
+    savedTheme(b, "gruvbox-light", "light");
+    const logs = [];
+    b.ctx.dzLog = (seam, event, fields) => { logs.push([seam, event, { ...fields }]); };
+    await b.ctx.dzSetSchemeMode("dark");
+    assert.equal(b.ctx.theme.scheme_mode, "dark");
+    assert.equal(b.ctx.theme.scheme, "gruvbox-light");
+    assert.equal(b.persists.length, 1);
+    assert.deepEqual(logs.filter((l) => l[1] === "mode_member_unsaved"), [["colormode", "mode_member_unsaved", { mode: "dark" }]]);
+    /* A single family has no member to save, which is no failure. */
+    logs.length = 0;
+    b.ctx.theme.scheme = "custom";
+    await b.ctx.dzSetSchemeMode("light");
+    assert.deepEqual(logs.filter((l) => l[1] === "mode_member_unsaved"), []);
 });
 
 test("a generated pair is saved on the member the mode and device ask for", async () => {
@@ -810,7 +835,13 @@ const RECORD_FIXTURES = [
     { name: "an override outside the whitelist is no override", raw: rec({ mode: "light" }),
       override: { variant: "__proto__", deviceDark: false },
       expect: { family: "gruvbox", variant: "light", attr: "custom", darkFile: false, tokens: GOOD_RECORD.light.tokens } },
-    { name: "Machinon Dark loads the dark file", raw: machinonRecord("dark"),
+    { name: "Machinon Dark loads the dark file with the painter's query", raw: machinonRecord("dark"),
+      query: "?v=" + SHIPPED_THEME.version,
+      expect: { family: "machinon", variant: "dark", attr: "dark", darkFile: true, tokens: {} } },
+    { name: "a version that is not a plain version string adds no query",
+      raw: { ...machinonRecord("dark"), version: "1\"><x" },
+      expect: { family: "machinon", variant: "dark", attr: "dark", darkFile: true, tokens: {} } },
+    { name: "a record without a version adds no query", raw: { ...machinonRecord("dark"), version: undefined },
       expect: { family: "machinon", variant: "dark", attr: "dark", darkFile: true, tokens: {} } },
     { name: "Machinon Light sets nothing", raw: machinonRecord("light"),
       expect: { family: "machinon", variant: "light", attr: null, darkFile: false, tokens: {} } },
@@ -879,7 +910,7 @@ for (const fx of RECORD_FIXTURES) {
         assert.deepEqual(clone(page.ctx.__dzEarlyPaint),
                          { family: fx.expect.family, variant: fx.expect.variant, darkFile: fx.expect.darkFile });
         assert.deepEqual(page.links.map((l) => l.getAttribute("href")),
-                         fx.expect.darkFile ? ["styles/machinon/css/dark_theme.css"] : []);
+                         fx.expect.darkFile ? ["styles/machinon/css/dark_theme.css" + (fx.query || "")] : []);
     });
 }
 
@@ -992,6 +1023,26 @@ test("a mate whose colours are not at hand keeps its half from the previous reco
     c.ctx.setColorScheme();
     await c.ctx.dzApplyColorMode();
     assert.equal(JSON.parse(c.store.get("dzPaintRecord")).dark, undefined, "another family's half is never kept");
+});
+
+test("after an upgrade the mate's half survives from the old record until the scheme files load", async () => {
+    const b = browser();
+    const t = savedTheme(b, "gruvbox-light", "light");
+    const old = clone(GOOD_RECORD);
+    old.version = "0.0.1";
+    old.dark.tokens = { "--dz-body-bg": "rgb(9, 9, 9)" };
+    b.store.set("dzPaintRecord", JSON.stringify(old));
+    b.ctx.dzSeedPaintedSlug();
+    b.ctx.setColorScheme();
+    await b.ctx.dzApplyColorMode();
+    const r = JSON.parse(b.store.get("dzPaintRecord"));
+    assert.equal(r.version, t.version);
+    assert.equal(r.light.tokens["--dz-body-bg"], rgb(SCHEMES["gruvbox-light"].colors.background));
+    assert.deepEqual(r.dark.tokens, old.dark.tokens, "kept for the early paint, not painted");
+    assert.equal(b.fetches.length, 0);
+    await b.ctx.loadBuiltinSchemes();
+    const fresh = JSON.parse(b.store.get("dzPaintRecord"));
+    assert.equal(fresh.dark.tokens["--dz-body-bg"], rgb(SCHEMES["gruvbox-dark"].colors.background));
 });
 
 test("loading the scheme files refreshes the mate's half and keeps the painted one", async () => {
@@ -1152,6 +1203,20 @@ test("an early paint left standing over the shipped defaults is repainted by the
     assert.equal(c.darkLinks().length, 1);
 });
 
+test("a failed settings merge still repaints over an early paint and reports the failure", async () => {
+    const b = browser();
+    savedTheme(b, "dark", "dark");
+    b.store.set("dzPaintRecord", JSON.stringify(machinonRecord("dark")));
+    runEarlyIn(b.ctx);
+    b.ctx.dzSettingsFromDefaults = true;
+    b.ctx.dzSeedPaintedSlug();
+    b.ctx.checkUserVariableThemeSettings = () => Promise.reject(new Error("load failed"));
+    await assert.rejects(b.ctx.reconcileDomoticzSettingsInPlace(), /load failed/);
+    await tick();
+    assert.deepEqual(b.paints, ["dark"], "the live settings paint, repairFixedColors included");
+    assert.equal(b.events.filter((e) => e.type === "dz:colormode").length, 1, "the switch learns the variant");
+});
+
 test("the token names outside --dz- are exactly the painter's, in both validators", () => {
     const b = browser();
     const outside = [...b.ctx.DZ_CUSTOM_TOKENS].filter((n) => !/^--dz-/.test(n));
@@ -1289,8 +1354,20 @@ test("picker state: an unknown mode marks the saved member, an unknown pick sele
     assert.equal(none.note, null);
 });
 
-test("picker cards: one per family, named from the lang files, the scheme files and the presets", () => {
-    cm.dzT = (key) => "T:" + key;
+/* cm is shared by every test in this file, so a dzT stub is put back after
+   the body, whether it passes or throws. */
+function withDzT(stub, body) {
+    const had = Object.prototype.hasOwnProperty.call(cm, "dzT");
+    const was = cm.dzT;
+    cm.dzT = stub;
+    try {
+        return body();
+    } finally {
+        if (had) cm.dzT = was; else delete cm.dzT;
+    }
+}
+
+test("picker cards: one per family, named from the lang files, the scheme files and the presets", () => withDzT((key) => "T:" + key, () => {
     const users = [
         { name: "Sunset", variant: "light", pair: "u:s1", base: "light", colors: { background: "#ffeedd" } },
         { name: "Sunset", variant: "dark",  pair: "u:s1", base: "dark",  colors: { background: "#221100" } },
@@ -1326,16 +1403,15 @@ test("picker cards: one per family, named from the lang files, the scheme files 
     assert.equal(cards["user-pair:u:h1"].presetVariant, "dark");
     assert.equal(cards.custom.light.background, "#abcdef");
     assert.equal(cards.custom.deletable, false);
-});
+}));
 
-test("picker cards: built-ins without their scheme files are named by family id", () => {
-    cm.dzT = (key) => key;
+test("picker cards: built-ins without their scheme files are named by family id", () => withDzT((key) => key, () => {
     const fam = cm.dzSchemeFamilies([]).filter((f) => f.id === "gruvbox")[0];
     const card = cm.dzSchemeCardModel(fam, {}, [], null);
     assert.equal(card.name, "gruvbox");
     assert.equal(card.light, null);
     assert.equal(card.dark, null);
-});
+}));
 
 test("Machinon's card colours mirror the base token defaults", () => {
     const tokens = readFileSync("dz-tokens.css", "utf8");

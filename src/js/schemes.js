@@ -389,8 +389,9 @@ function setDarkFeature(enabled) {
    rather than a bug to fix.
 
    Idempotent by its own flag: one link at most, and the only link it removes
-   is the one it tracks. A link already in the page is adopted rather than
-   doubled. */
+   is the one it tracks. A link to this folder's file already in the page
+   (custom.js's early block adds one) is adopted rather than doubled; another
+   theme folder's copy is not this theme's to adopt. */
 var DZ_DARK_FILE = "dark_theme.css";
 var dzDarkFileLoaded = false;
 var dzDarkFileLink = null;
@@ -399,9 +400,11 @@ function dzSetDarkFile(on) {
     on = on === true;
     if (on === dzDarkFileLoaded) return;
     if (on) {
+        var own = "styles/" + themeFolder + "/css/" + DZ_DARK_FILE;
         var links = document.getElementsByTagName("link");
         for (var i = 0; i < links.length && !dzDarkFileLink; i++) {
-            if ((links[i].getAttribute("href") || "").indexOf("/css/" + DZ_DARK_FILE) !== -1) { dzDarkFileLink = links[i]; }
+            var path = (links[i].getAttribute("href") || "").split("?")[0];
+            if (path === own || path.slice(-own.length - 1) === "/" + own) { dzDarkFileLink = links[i]; }
         }
         if (!dzDarkFileLink) {
             var link = document.createElement("link");
@@ -615,6 +618,8 @@ function renderSchemePicker() {
         });
         dzUpdateSchemePickers();
         if (typeof dzHubSyncSchemeSwatches === "function") { dzHubSyncSchemeSwatches(); }
+    }).catch(function (e) {
+        if (typeof dzLog === "function") { dzLog("schemes", "picker_build_failed", { error: String(e) }); }
     });
 }
 
@@ -647,13 +652,18 @@ function dzBuildSchemePicker(container, cards) {
     note.className = "scheme-mode-note";
     note.id = container.id + "-mode-note";
     note.hidden = true;
+    /* Both notes describe the mode buttons. A hidden note still counts for
+       a description, so dzUpdateSchemePicker empties whichever is hidden. */
+    var noticeText = document.createElement("span");
+    noticeText.className = "scheme-override-text";
+    noticeText.id = container.id + "-override-note";
     DZ_SCHEME_MODE_ORDER.forEach(function (mode) {
         var btn = document.createElement("button");
         btn.type = "button";
         btn.className = "scheme-mode-btn";
         btn.setAttribute("data-mode", mode);
         btn.setAttribute("aria-pressed", "false");
-        btn.setAttribute("aria-describedby", note.id);
+        btn.setAttribute("aria-describedby", note.id + " " + noticeText.id);
         btn.textContent = dzSchemeModeLabel(mode);
         btn.addEventListener("click", function () {
             dzSetSchemeMode(mode).then(dzUpdateSchemePickers);
@@ -666,8 +676,6 @@ function dzBuildSchemePicker(container, cards) {
     var notice = document.createElement("div");
     notice.className = "scheme-override";
     notice.hidden = true;
-    var noticeText = document.createElement("span");
-    noticeText.className = "scheme-override-text";
     notice.appendChild(noticeText);
     var clear = document.createElement("button");
     clear.type = "button";
@@ -835,9 +843,9 @@ function dzUpdateSchemePicker(container, state) {
     var notice = container.querySelector(".scheme-override");
     if (notice) {
         notice.hidden = !state.override;
+        notice.querySelector(".scheme-override-text").textContent = state.override
+            ? dzT("hub.schemes.note_override", { variant: dzSchemeModeLabel(state.override) }) : "";
         if (state.override) {
-            notice.querySelector(".scheme-override-text").textContent =
-                dzT("hub.schemes.note_override", { variant: dzSchemeModeLabel(state.override) });
             notice.querySelector(".scheme-override-clear").textContent =
                 dzT("hub.schemes.clear_override", { mode: dzSchemeModeLabel(state.mode) });
         }

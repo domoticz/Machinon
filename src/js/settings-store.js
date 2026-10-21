@@ -312,6 +312,14 @@ function reconcileDomoticzSettingsInPlace() {
            then the first paint of the real settings. */
         dzApplyColorMode(dzPaintInputs(before) !== dzPaintInputs(theme) ||
                          (dzSettingsFromDefaults && !!window.__dzEarlyPaint));
+    }).catch(function(e) {
+        /* A failed merge must not leave the early paint as the only one: with
+           no resolve there is no dz:colormode (the switch stays hidden) and
+           no repairFixedColors. While only the early block has painted, the
+           resolver treats this call as forced; after a boot paint it paints
+           only a changed slug. The caller logs the failure. */
+        dzApplyColorMode();
+        throw e;
     });
 }
 

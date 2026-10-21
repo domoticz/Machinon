@@ -671,10 +671,22 @@ function dzHubDoResetColors() {
         background: d.bg, main_color: d.main, navbar: d.navbar, item: d.item,
         main_text: d.text, alt_text: d.alt_text, disabled: d.disabled
     };
-    if (typeof applyCustomColorScheme === "function") { applyCustomColorScheme(theme.color_scheme); }
     if (typeof dzHubSyncSchemeSwatches === "function") { dzHubSyncSchemeSwatches(); }
     cacheThemeSettings();
     dzHubPersist();
+    dzHubRepaintColors();
+}
+
+/* Repaint after an edit of theme.color_scheme through the resolver, the
+   way a scheme pick paints: repairFixedColors runs for the new colours, the
+   paint record keeps the next boot's early paint on the edited palette, and
+   the Custom card's preview follows. Forced because the slug is unchanged
+   while its colours are new. */
+function dzHubRepaintColors() {
+    if (typeof dzApplyColorMode !== "function") { return; }
+    dzApplyColorMode(true).then(function () {
+        if (typeof dzUpdateSchemePickers === "function") { dzUpdateSchemePickers(); }
+    });
 }
 
 /* ---- Per-user actions (ThemeSettings migration): promote personal settings
@@ -1650,11 +1662,9 @@ function dzHubBuildColorSwatch(field, anchor) {
     var built = dzBuildColorField(dzT("hub.schemes.swatches." + field.field), current, function (hex) {
         theme.color_scheme = theme.color_scheme || {};
         theme.color_scheme[field.field] = hex;
-        // scheme.js applyCustomColorScheme: the same setProperty applier a
-        // scheme pick runs, unchanged.
-        applyCustomColorScheme(theme.color_scheme);
         cacheThemeSettings();
         dzHubPersist();
+        dzHubRepaintColors();
         // schemes.js warnIfContrastFails: the same WCAG gate the deleted
         // legacy Save handler ran, preserved.
         warnIfContrastFails(theme.color_scheme, dzT("hub.schemes.wcag_what_custom"));

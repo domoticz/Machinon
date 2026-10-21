@@ -52,12 +52,16 @@
         } else if (half.attr === "custom") {
             html.setAttribute("data-dz-scheme", "custom");
         }
-        /* src/js/schemes.js dzSetDarkFile adopts this link at boot. */
+        /* src/js/schemes.js dzSetDarkFile adopts this link at boot. The query
+           is the one src/js/feature-loader.js dzFeatureFileQuery adds, so the
+           file has one cache entry; a version with other characters goes
+           without it rather than being escaped differently. */
         if (half.dark_file) {
+            var query = typeof rec.version === "string" && /^[0-9A-Za-z._-]+$/.test(rec.version) ? "?v=" + rec.version : "";
             var link = document.createElement("link");
             link.setAttribute("rel", "stylesheet");
             link.setAttribute("type", "text/css");
-            link.setAttribute("href", "styles/" + rec.folder + "/css/dark_theme.css");
+            link.setAttribute("href", "styles/" + rec.folder + "/css/dark_theme.css" + query);
             document.getElementsByTagName("head")[0].appendChild(link);
         }
         window.__dzEarlyPaint = { family: rec.family, variant: variant, darkFile: half.dark_file };
