@@ -290,17 +290,20 @@ core; never working documents that do not ship.
 > and text-on-accent (`--dz-accent-text`, the token every "text on an accent surface" rule
 > consumes; scheme key `accent_text`) at 3:1 or better.
 > The Machinon card's hardcoded preview swatches (both halves) must match the computed tokens.
-> Adding a scheme = one JSON file + an `index.json` entry. The shipped set is deliberately
-> small: four families, each a light and dark pair. Machinon Light
+> Adding a scheme means a light and a dark JSON file (each declaring `pair`, `variant`,
+> `family_name` and `family_description`), their `index.json` entries and a `DZ_BUILTIN_PAIRS`
+> row in `src/js/color-mode.js`; `scripts/test-scheme-pairs.mjs` fails until all of them agree.
+> The shipped set is deliberately small, every family a light and dark pair. Machinon Light
 > and Machinon Dark are the token defaults themselves and carry no JSON; Magenta, Paper and
-> Gruvbox are the three JSON families, and Magenta is the base's hue opposite. Retired slugs
+> Gruvbox are the JSON families, and Magenta is the base's hue opposite. Retired slugs
 > are migrated by `DZ_SCHEME_MIGRATIONS` in `src/js/schemes.js`: most map to their old base so a
 > user's light/dark intent survives a deletion, and the one exception (`e-ink` -> `paper-light`)
 > is a rename onto its direct successor rather than a base fallback, which still preserves the
 > same intent. A surviving slug must never appear in that map.
 > The swatch order is `Background, Menu, Item, Main, Text, Secondary Text, Disabled`, grouped
-> as surfaces from page to card, then the accent, then text, then state. One list in
-> `src/js/schemes.js` drives both the card previews and the custom-colour editor.
+> as surfaces from page to card, then the accent, then text, then state. That list
+> (`DZ_COLOR_SCHEME_FIELDS` in `src/js/schemes.js`) drives the custom-colour editor; a picker
+> card previews a subset per version, `DZ_SCHEME_SWATCH_KEYS` (page, card, accent, text).
 >
 > Deliberately NOT tokenized: the login page and the offline splash (fixed brand surfaces),
 > Blockly's canvas, and the legacy dark_theme.css gradient. Everything else colour-bearing flows
@@ -489,8 +492,9 @@ water is.
 `"variant": "light"`/`"dark"`), and `dzSaveGeneratedPair` (`src/js/schemes.js`) writes them onto
 both halves of a wizard-generated pair (`pair` a fresh id from `dzNewPairId`, `variant` its base).
 The base pair (`light`/`dark`, the token defaults with no JSON) is declared as `"machinon"` in
-the static `DZ_BUILTIN_PAIRS` table (`src/js/color-mode.js`). A legacy hand-saved preset (`saveCurrentColorsAsScheme`, predating this
-metadata) has no `pair` and is correctly treated as unpaired.
+the static `DZ_BUILTIN_PAIRS` table (`src/js/color-mode.js`). A legacy hand-saved preset
+(`saveCurrentColorsAsScheme`, predating this metadata) has no `pair` and is correctly treated as
+unpaired.
 
 `src/js/color-mode.js` owns the grouping: `dzSchemeFamilies` builds light/dark families from a static
 table of the built-in pairs plus the user's saved presets, and `dzFamilyOf(slug, families)` finds the
@@ -727,9 +731,9 @@ The default logo is an inline SVG wordmark (`images/machinon/brand/logo.svg`, lo
 
 The hamburger bars are `--dz-accent-text` on the accent strip; scrolled, the toggle detaches into an `--dz-accent-color` box (with `--dz-elev-popup`) keeping the on-accent bars. When the flyout opens, that box is dropped and the bars become the close X in `--dz-body-text` on the neutral drawer, the same whether opened from the top or while scrolled. The search box is `--dz-accent-text` on the strip; its mobile expanded field is a neutral `--dz-widget-bg` popup (accent border) so it stands out from the accent header.
 
-The strip's right-hand controls are right floats, so DOM order is visual order from the right edge: the problem badge (outermost), search, then the **light/dark switch** (`#dz-mode-toggle`, `css/color-mode-toggle.css`, from 980px). Each module places itself (problems.js inserts the badge before `#search`, the switch goes after it), so neither the badge nor the switch appearing moves search; `dz-color-mode-contract.mjs` pins the order. The switch is the two-segment member of the toggle-selected family (the [Selector Levels](#selector-levels) and the Theme Hub mode switch): one `<button>` drawn as a sun | moon pill, 56x30 (two `--dz-btn-icon-box` segments, the search field's height), `--dz-btn-radius` outer corners, `--dz-icon-size-sm` glyphs, and the painted variant's segment filled. On the accent strip it takes the on-accent colours: `--dz-accent-text` border and icons, the filled segment inverted (`--dz-accent-text` fill, `--dz-accent-color` icon). The whole pill is one control whose name is the action ("Switch to dark"/"Switch to light"), with no `aria-pressed`; a tap flips the painted variant on this device only. Keyboard focus is the hamburger's recipe, a 2px `currentColor` outline around the pill. It hides while a single-version theme is painted and when the Theme Hub's "Light/dark toggle" setting (Colors group, on by default) is off; the setting applies live. On a route with nothing to search (`#search.readonly`) the field collapses and the dimmed magnifier hangs left of the search box, so the switch steps inward by `--dz-icon-size-lg` on top of its usual gap and never covers it.
+The strip's right-hand controls are right floats, so DOM order is visual order from the right edge: the problem badge (outermost), search, then the **light/dark switch** (`#dz-mode-toggle`, `css/color-mode-toggle.css`, from 980px). Each module places itself (problems.js inserts the badge before `#search`, the switch goes after it), so neither the badge nor the switch appearing moves search; `dz-color-mode-contract.mjs` pins the order. The switch is the two-segment member of the toggle-selected family (the [Selector Levels](#selector-levels) and the Theme Hub mode switch): one `<button>` drawn as a sun | moon pill, 56x30 (two `--dz-btn-icon-box` segments wide, 30px tall, a pixel short of the search field), `--dz-btn-radius` outer corners, `--dz-icon-size-sm` glyphs, and the painted variant's segment filled. On the accent strip it takes the on-accent colours: `--dz-accent-text` border and icons, the filled segment inverted (`--dz-accent-text` fill, `--dz-accent-color` icon). The whole pill is one control whose name is the action ("Switch to dark"/"Switch to light"), with no `aria-pressed`; a tap flips the painted variant on this device only. Keyboard focus is the hamburger's recipe, a 2px `currentColor` outline around the pill. It hides while a single-version theme is painted and when the Theme Hub's "Light/dark toggle" setting (Colors group, on by default) is off; the setting applies live. On a route with nothing to search (`#search.readonly`) the field collapses and the dimmed magnifier hangs left of the search box, so the switch steps inward by `--dz-icon-size-lg` on top of its usual gap and never covers it.
 
-In the flyout (below 980px) the same switch (`#dz-mode-toggle-menu`) sits at the top right of the drawer, on the close X's row, in the body tokens: `--dz-btn-ghost-border`, `--dz-btn-ghost-text` icons and `--dz-btn-toggle-selected-bg/-text` for the filled segment. The button is absolutely positioned, so the menu rows keep their place; it is a 44px tall touch target with the pill 3px (`--dz-card-space-xs`) down, centred on the X. The icons-only menu (`navbar_icons_text`, `.navbar.notext`) keeps the same placement: its drawer is four `--dz-btn-icon-box` wide (two switch widths, 112px), the close X in the left half of the close row and the switch in the right, with the icons centred in the rows below (`css/sidemenu.css`).
+In the flyout (below 980px) the same switch (`#dz-mode-toggle-menu`) sits at the top right of the drawer, on the close X's row, in the body tokens: `--dz-btn-ghost-border`, `--dz-btn-ghost-text` icons and `--dz-btn-toggle-selected-bg/-text` for the filled segment. The button is absolutely positioned, so the menu rows keep their place; it is a 44px tall touch target with 3px (`--dz-card-space-xs`) of top padding, and the pill sits a little lower than the X, its centre about 6px below the X's. The icons-only menu (`navbar_icons_text`, `.navbar.notext`) keeps the same placement: its drawer is four `--dz-btn-icon-box` wide (two switch widths, 112px), the close X in the left half of the close row and the switch in the right, with the icons centred in the rows below (`css/sidemenu.css`).
 
 ## Border Radius
 

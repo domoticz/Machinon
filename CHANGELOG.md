@@ -7,7 +7,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - On Domoticz 2026.1, the sensor timeout and low battery warnings and the RGBW colour popup are back on after updating Machinon: settings added in a newer version no longer switch themselves off when your saved settings predate them
 - On the Energy page, the outside temperature is now readable in the light colour schemes instead of white on a light background
 - On the phone dashboard with Domoticz 2026.4 or newer, a switch that is off lights up its Off button again, so every switch shows whether it is on or off (#259)
-- The Theme Hub's Colors and schemes tab now shows each theme as one card with its light and dark version, and you choose Light, Dark or Follow device; Follow device switches along with your phone or computer's own light/dark setting, on each device separately. New installations start in Follow device, existing ones keep the colours they had
+- The Theme Hub's Colors and schemes tab now shows each theme as one card with its light and dark version, and you choose Light, Dark or Follow device; Follow device switches along with your phone or computer's own light/dark setting, on each device separately
+- After updating, your colours stay as they were (the mode is set to Light or Dark to match them); new installations start in Follow device
 - A sun/moon switch in the header (in the menu on a phone) flips the screen between your theme's light and dark version on that device only, without changing your settings; turn it off with Light/dark toggle on the Colors and schemes tab
 - Dark colour schemes no longer flash light while a page loads (from the second visit in each browser)
 - On phones, the icons-only menu opens wider so its icons have room

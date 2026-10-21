@@ -19,7 +19,7 @@
    mode switch (css/theme-hub.css .scheme-mode, css/buttons.css .btn-group):
    one border, outer corners on the button radius, inner corners square, the
    painted variant's segment filled. Two icon-only button boxes wide, border
-   included (56px); 30px tall, the height of the search field it sits
+   included (56px); 30px tall, a pixel short of the search field it sits
    beside. */
 .dz-mode-pill {
     display: flex;
@@ -91,8 +91,8 @@
 /* Flyout menu, below 980px: top right of the drawer, on the row of the close
    X (css/nav.css button.menu-toggle, fixed at the top left). Absolutely
    positioned in the drawer, so it takes no room from the menu rows. The
-   button is a 44px tall touch target; the pill sits 3px down in it, which
-   puts its centre on the X's. */
+   button is a 44px tall touch target with 3px of top padding; the pill
+   sits a little lower than the X, its centre about 6px below the X's. */
 #dz-mode-toggle-menu {
     position: absolute;
     top: 0;

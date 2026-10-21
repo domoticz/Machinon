@@ -95,14 +95,17 @@ How long a tap lasts depends on your mode:
   the page keeps it.
 - Choosing a mode in the Theme Hub always ends it.
 - **Reset theme to defaults** and **Clear cached settings** (Theme Hub, **About** tab) end it too.
+- Picking another theme does not end it: the new theme shows the version you switched to.
 
 While a tap is in effect, the Colors and schemes tab says so, for example "On this device you
 switched to Dark with the toggle.", with a button to go back to your mode.
 
 One limit to know about: Machinon only notices the device switching while a Machinon page is
-open. If the device switches twice while no page is open, say to dark in the evening and back
-to light the next morning, it looks as if nothing changed, so a tap from the evening before
-still applies. Tap the switch again, or use the button on the Colors and schemes tab.
+open. Say that in Follow device you tap to dark in the afternoon, and the device turns dark in
+the evening and light again the next morning, all while no Machinon page is open. The next
+morning the device is in the same state as when you tapped, so Machinon cannot tell anything
+happened and your tap still applies. Tap the switch again, or use the button on the Colors and
+schemes tab.
 
 The switch is on by default. To remove it, turn off **Light/dark toggle** on the Colors and
 schemes tab; it disappears at once, without a reload.
@@ -189,9 +192,8 @@ layouts. Click any one to see it full size.
 
 There are two ways to build a palette of your own. The theme wizard is the fast route: give it
 one or two colors and a look you like, and it builds a finished theme with a light and a dark
-version for you. The
-manual color editor is the slow route: every one of the seven swatches is yours to set by hand,
-for when you already know exactly what you want. Neither one replaces the other, pick whichever
+version for you. The manual color editor is the slow route: every one of the seven swatches is
+yours to set by hand, for when you already know exactly what you want. Neither one replaces the other, pick whichever
 fits the moment.
 
 ### The fast way: the theme wizard
@@ -223,7 +225,7 @@ To delete a theme you made this way, click the small "x" on its card. That remov
 and its dark version.
 
 A saved theme is personal, the same as any other theme pick: it follows the account that saved
-it, and other people on the same Domoticz don't see them. You don't need admin rights to
+it, and other people on the same Domoticz don't see it. You don't need admin rights to
 create one. That's different from installing an icon, which changes the icon library for everyone
 and is an administrator action (see [Icons](icons.md)). If your installation has no separate
 logins, Domoticz can't tell users apart, so themes created there are shared like every other
