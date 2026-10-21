@@ -153,6 +153,7 @@ test("deleting one half of a pair does not leave theme.scheme dangling on the ot
         scheme: "user:Sunset|dark"
     };
     dz.cacheThemeSettings = function () {};
+    dz.dzApplyColorMode = function () {};
 
     dz.deleteUserScheme("Sunset", "light");
 
@@ -261,4 +262,419 @@ test("pair members agree on family_name and family_description", () => {
         assert.equal(members[0].family_name, members[1].family_name, pair);
         assert.equal(members[0].family_description, members[1].family_description, pair);
     }
+});
+
+/* ---- Painting the light/dark variant: the runtime, in a fake browser ----
+
+   The shipping modules run in a vm context with just enough document,
+   localStorage, matchMedia and fetch for the paint path. fetch reads the real
+   scheme files from disk and counts requests; dispatched events, persists and
+   paints are recorded so a test can assert how many of each an action caused. */
+const SHIPPED_THEME = JSON.parse(readFileSync("theme.json", "utf8"));
+const RUNTIME = ["src/js/settings-transport.js", "src/js/settings-store.js", "src/js/feature-loader.js",
+                 "src/js/scheme.js", "src/js/schemes.js", "src/js/color-mode.js"];
+
+function fakeElement(tag, owner) {
+    const attrs = new Map();
+    return {
+        tagName: tag.toUpperCase(), parentNode: null,
+        setAttribute(k, v) { attrs.set(k, String(v)); },
+        getAttribute(k) { return attrs.has(k) ? attrs.get(k) : null; },
+        removeAttribute(k) { attrs.delete(k); },
+        get href() { return this.getAttribute("href") || ""; },
+        appendChild(n) { owner.nodes.push(n); n.parentNode = this; return n; },
+        removeChild(n) { owner.nodes.splice(owner.nodes.indexOf(n), 1); n.parentNode = null; return n; }
+    };
+}
+
+function browser({ dark = false, failFetch = false } = {}) {
+    const props = new Map();
+    const owner = { nodes: [] };
+    const html = fakeElement("html", owner);
+    html.style = {
+        setProperty(k, v) { props.set(k, String(v)); },
+        removeProperty(k) { props.delete(k); },
+        getPropertyValue(k) { return props.get(k) || ""; }
+    };
+    const head = fakeElement("head", owner);
+    const events = [];
+    const media = { matches: dark, listeners: [],
+        addEventListener(type, fn) { if (type === "change") this.listeners.push(fn); } };
+    const store = new Map();
+    const fetches = [];
+    const persists = [];
+    const ctx = vm.createContext({
+        console, JSON, Math, Promise, Object, Array, String, Date,
+        theme: {}, themeFolder: "machinon", themeName: "Machinon",
+        CustomEvent: class { constructor(type, init) { this.type = type; this.detail = init && init.detail; } },
+        localStorage: {
+            getItem: (k) => (store.has(k) ? store.get(k) : null),
+            setItem: (k, v) => { store.set(k, String(v)); },
+            removeItem: (k) => { store.delete(k); }
+        },
+        matchMedia: (q) => { assert.equal(q, "(prefers-color-scheme: dark)"); return media; },
+        getComputedStyle: () => ({ getPropertyValue: (k) => props.get(k) || "" }),
+        fetch: (url) => {
+            fetches.push(url);
+            if (failFetch) return Promise.reject(new Error("offline"));
+            const path = url.replace(/^styles\/machinon\//, "");
+            return Promise.resolve({ json: () => Promise.resolve(JSON.parse(readFileSync(path, "utf8"))) });
+        },
+        document: {
+            documentElement: html, head,
+            getElementsByTagName: (t) => (t === "head" ? [head] : owner.nodes.filter((n) => n.tagName === t.toUpperCase())),
+            getElementById: () => null,
+            createElement: (t) => fakeElement(t, owner),
+            dispatchEvent: (e) => { events.push(e); return true; }
+        }
+    });
+    ctx.window = ctx;
+    for (const f of RUNTIME) vm.runInContext(readFileSync(f, "utf8"), ctx, { filename: f });
+    ctx.dzHubPersist = () => { persists.push(JSON.stringify(ctx.dzSettingsSnapshot(ctx.theme))); return Promise.resolve(); };
+    const paints = [];
+    const realPaint = ctx.dzPaintState;
+    ctx.dzPaintState = (state) => { paints.push(state.slug); return realPaint(state); };
+    return {
+        ctx, props, html, events, media, store, fetches, persists, paints,
+        darkLinks: () => owner.nodes.filter((n) => n.tagName === "LINK" && n.href.indexOf("dark_theme.css") !== -1),
+        setDark(on) { media.matches = on; media.listeners.forEach((fn) => fn({ matches: on })); }
+    };
+}
+
+/* A theme as a page holds it after boot: shipped defaults plus a saved pick. */
+function savedTheme(b, slug, mode) {
+    const t = clone(SHIPPED_THEME);
+    t.scheme_mode = mode;
+    t.scheme = slug;
+    if (slug === "light" || slug === "dark") {
+        t.scheme_base = slug;
+        t.features.custom_color_scheme.enabled = false;
+        t.features.dark_theme.enabled = slug === "dark";
+    } else {
+        t.scheme_base = SCHEMES[slug].base;
+        t.color_scheme = clone(SCHEMES[slug].colors);
+        t.features.custom_color_scheme.enabled = true;
+        t.features.dark_theme.enabled = false;
+    }
+    b.ctx.theme = t;
+    return t;
+}
+const clone = (o) => JSON.parse(JSON.stringify(o));
+const rgb = (hex) => `rgb(${parseInt(hex.substr(1, 2), 16)},${parseInt(hex.substr(3, 2), 16)},${parseInt(hex.substr(5, 2), 16)})`;
+const tick = () => new Promise((r) => setTimeout(r, 0));
+
+test("dzStateForSlug: saved, Machinon, user pair and built-in members", () => {
+    const users = [
+        { name: "Sunset", variant: "light", pair: "u:s1", base: "light", colors: { background: "#ffeedd" } },
+        { name: "Sunset", variant: "dark",  pair: "u:s1", base: "dark",  colors: { background: "#221100" } }
+    ];
+    const fams = cm.dzSchemeFamilies(users);
+    const savedState = { slug: "light", attr: null, colors: null, darkFile: false };
+    const sources = { savedSlug: "light", savedState, userSchemes: users,
+                      builtinColors: { "gruvbox-dark": { background: "#282828" } } };
+    const before = JSON.stringify(sources);
+    const st = (slug) => clone(cm.dzStateForSlug(slug, fams, sources));
+    assert.equal(cm.dzStateForSlug("light", fams, sources), savedState);
+    assert.deepEqual(st("dark"), { slug: "dark", attr: "dark", colors: null, darkFile: true });
+    assert.deepEqual(st("user:Sunset|dark"),
+                     { slug: "user:Sunset|dark", attr: "dark", colors: { background: "#221100" }, darkFile: false });
+    assert.deepEqual(st("user:Sunset|light"),
+                     { slug: "user:Sunset|light", attr: "custom", colors: { background: "#ffeedd" }, darkFile: false });
+    assert.deepEqual(st("gruvbox-dark"),
+                     { slug: "gruvbox-dark", attr: "dark", colors: { background: "#282828" }, darkFile: false });
+    assert.deepEqual(st("gruvbox-light"), null, "colours not at hand: the caller fetches them");
+    assert.deepEqual(st("no-such"), null);
+    assert.equal(JSON.stringify(sources), before, "sources are read, never written");
+    const fresh = cm.dzStateForSlug("user:Sunset|dark", fams, sources);
+    fresh.colors.background = "#000000";
+    assert.equal(users[1].colors.background, "#221100", "a painted state never aliases stored colours");
+});
+
+test("a built-in pair's JSON base is its variant, so the family member decides the underlay", () => {
+    for (const slug of INDEX) assert.equal(SCHEMES[slug].base, SCHEMES[slug].variant, slug);
+});
+
+test("an override paints the other member and leaves the saved model byte-identical", async () => {
+    const b = browser();
+    const t = savedTheme(b, "gruvbox-light", "light");
+    const snap = JSON.stringify(b.ctx.dzSettingsSnapshot(t));
+    const whole = JSON.stringify(t);
+    b.ctx.dzSetColorOverride("dark");
+    await b.ctx.dzApplyColorMode();
+    assert.equal(b.html.getAttribute("data-dz-scheme"), "dark");
+    assert.equal(b.props.get("--dz-body-bg"), rgb(SCHEMES["gruvbox-dark"].colors.background));
+    assert.equal(JSON.stringify(b.ctx.dzSettingsSnapshot(b.ctx.theme)), snap);
+    assert.equal(JSON.stringify(b.ctx.theme), whole);
+    assert.equal(b.persists.length, 0, "painting persists nothing");
+    assert.equal(b.store.get("machinon.themeSettings"), undefined, "painting caches nothing");
+    /* An unrelated save afterwards writes the SAVED variant, not the painted one. */
+    b.ctx.cacheThemeSettings();
+    b.ctx.persistSchemeChoice();
+    assert.equal(b.persists[0], snap);
+    assert.equal(JSON.parse(b.store.get("machinon.themeSettings")).scheme, "gruvbox-light");
+});
+
+test("Follow device on a dark device paints Machinon Dark without the dark flag or a fetch", async () => {
+    const b = browser({ dark: true });
+    const t = savedTheme(b, "light", "auto");
+    const snap = JSON.stringify(b.ctx.dzSettingsSnapshot(t));
+    b.ctx.dzSeedPaintedSlug();
+    b.ctx.setColorScheme();
+    await b.ctx.dzApplyColorMode();
+    assert.deepEqual(b.paints, ["light", "dark"]);
+    assert.equal(b.html.getAttribute("data-dz-scheme"), "dark");
+    assert.equal(b.darkLinks().length, 1);
+    assert.equal(b.ctx.theme.features.dark_theme.enabled, false);
+    assert.equal(JSON.stringify(b.ctx.dzSettingsSnapshot(b.ctx.theme)), snap);
+    assert.equal(b.fetches.length, 0);
+    assert.equal(b.ctx.dzPaintedVariant(), "dark");
+});
+
+test("an unchanged resolve paints nothing and dispatches the event once", async () => {
+    const b = browser();
+    savedTheme(b, "magenta-dark", "dark");
+    b.ctx.dzSeedPaintedSlug();
+    b.ctx.setColorScheme();
+    await b.ctx.dzApplyColorMode();
+    await b.ctx.dzApplyColorMode();
+    assert.deepEqual(b.paints, ["magenta-dark"]);
+    assert.equal(b.events.length, 1);
+    assert.equal(b.events[0].type, "dz:colormode");
+    assert.deepEqual({ ...b.events[0].detail }, { slug: "magenta-dark", variant: "dark", single: false });
+    assert.equal(b.ctx.dzLastColorMode, b.events[0].detail);
+    assert.equal(b.fetches.length, 0, "a fixed mode that matches the pick fetches no scheme");
+});
+
+test("a single family paints as saved and reports no variant", async () => {
+    const b = browser({ dark: true });
+    const t = savedTheme(b, "light", "auto");
+    t.scheme = "custom";
+    t.features.custom_color_scheme.enabled = true;
+    await b.ctx.dzApplyColorMode();
+    assert.deepEqual({ ...b.ctx.dzLastColorMode }, { slug: "custom", variant: null, single: true });
+    assert.equal(b.ctx.dzPaintedVariant(), null);
+});
+
+test("Follow device repaints on a device switch; a fixed mode ignores it", async () => {
+    const b = browser();
+    savedTheme(b, "paper-light", "auto");
+    b.ctx.dzArmColorModeListener();
+    b.ctx.dzArmColorModeListener();
+    assert.equal(b.media.listeners.length, 1, "armed once");
+    await b.ctx.dzApplyColorMode();
+    b.setDark(true);
+    await tick(); await tick();
+    assert.equal(b.ctx.dzLastColorMode.slug, "paper-dark");
+    assert.equal(b.persists.length, 0);
+    b.ctx.theme.scheme_mode = "light";
+    const n = b.paints.length;
+    b.setDark(false);
+    await tick(); await tick();
+    assert.equal(b.paints.length, n);
+});
+
+test("an override made under one device state is dropped once the device switches", async () => {
+    const b = browser();
+    savedTheme(b, "light", "auto");
+    b.ctx.dzSetColorOverride("dark");
+    assert.deepEqual({ ...b.ctx.dzColorOverride() }, { variant: "dark", deviceDark: false });
+    await b.ctx.dzApplyColorMode();
+    assert.equal(b.ctx.dzLastColorMode.slug, "dark");
+    b.media.matches = true;
+    await b.ctx.dzApplyColorMode();
+    assert.equal(b.ctx.dzColorOverride(), null);
+    assert.equal(b.ctx.dzLastColorMode.slug, "dark", "the device itself is dark now");
+    b.media.matches = false;
+    await b.ctx.dzApplyColorMode();
+    assert.equal(b.ctx.dzLastColorMode.slug, "light");
+});
+
+test("override storage is whitelisted, and a tap still paints when storage is blocked", async () => {
+    const b = browser();
+    savedTheme(b, "light", "light");
+    b.store.set("machinon.colorOverride", '{"variant":"__proto__","deviceDark":false}');
+    assert.equal(b.ctx.dzColorOverride(), null);
+    b.store.set("machinon.colorOverride", "not json");
+    assert.equal(b.ctx.dzColorOverride(), null);
+    b.ctx.localStorage.setItem = () => { throw new Error("quota"); };
+    b.ctx.localStorage.getItem = () => { throw new Error("blocked"); };
+    b.ctx.localStorage.removeItem = () => { throw new Error("blocked"); };
+    b.ctx.dzSetColorOverride("dark");
+    assert.deepEqual({ ...b.ctx.dzColorOverride() }, { variant: "dark", deviceDark: false });
+    await b.ctx.dzApplyColorMode();
+    assert.equal(b.ctx.dzLastColorMode.slug, "dark");
+    b.ctx.dzSetColorOverride(null);
+    await b.ctx.dzApplyColorMode();
+    assert.equal(b.ctx.dzLastColorMode.slug, "light");
+});
+
+test("the painter's dark file is the one theme.json lists for the dark_theme feature", () => {
+    const b = browser();
+    assert.deepEqual(SHIPPED_THEME.features.dark_theme.files, [b.ctx.DZ_DARK_FILE]);
+});
+
+test("dark_theme.css follows the painted variant: one link, and only its own link removed", () => {
+    const b = browser();
+    savedTheme(b, "light", "light");
+    b.ctx.dzSetDarkFile(true);
+    b.ctx.dzSetDarkFile(true);
+    assert.equal(b.darkLinks().length, 1);
+    b.ctx.dzSetDarkFile(false);
+    b.ctx.dzSetDarkFile(false);
+    assert.equal(b.darkLinks().length, 0);
+    /* A link something else put there is adopted rather than doubled, and is
+       not removed by a "keep it off" call that never tracked it. */
+    const other = b.ctx.document.createElement("link");
+    other.setAttribute("href", "styles/machinon/css/dark_theme.css?v=x");
+    b.ctx.document.head.appendChild(other);
+    b.ctx.dzSetDarkFile(false);
+    assert.equal(b.darkLinks().length, 1);
+    b.ctx.dzSetDarkFile(true);
+    assert.equal(b.darkLinks().length, 1);
+});
+
+test("the saved dark flag no longer loads or unloads dark_theme.css", () => {
+    const b = browser();
+    savedTheme(b, "light", "light");
+    b.ctx.setDarkFeature(true);
+    assert.equal(b.ctx.theme.features.dark_theme.enabled, true);
+    assert.equal(b.darkLinks().length, 0);
+    b.ctx.$ = (fn) => fn;
+    b.ctx.$.each = (o, fn) => Object.keys(o).forEach((k) => fn(k, o[k]));
+    b.ctx.requirejs = () => {};
+    b.ctx.enableThemeFeatures();
+    assert.equal(b.darkLinks().length, 0, "the painter owns the file");
+});
+
+test("applyScheme: one paint, one persist; an unknown slug does nothing", async () => {
+    const b = browser();
+    savedTheme(b, "light", "dark");
+    await b.ctx.applyScheme("gruvbox-dark");
+    assert.deepEqual(b.paints, ["gruvbox-dark"]);
+    assert.equal(b.persists.length, 1);
+    assert.equal(b.ctx.theme.scheme, "gruvbox-dark");
+    assert.equal(b.ctx.theme.scheme_base, "dark");
+    await b.ctx.applyScheme("nope");
+    assert.equal(b.paints.length, 1);
+    assert.equal(b.persists.length, 1);
+    await b.ctx.applyScheme("dark");
+    assert.deepEqual(b.paints, ["gruvbox-dark", "dark"]);
+    assert.equal(b.ctx.theme.features.dark_theme.enabled, true);
+    assert.equal(b.darkLinks().length, 1);
+});
+
+test("a pick under a mode paints the mode's member even when the saved member is the other", async () => {
+    const b = browser();
+    savedTheme(b, "light", "dark");
+    await b.ctx.applyScheme("magenta-light");
+    assert.equal(b.ctx.theme.scheme, "magenta-light", "the pick is saved as made");
+    assert.deepEqual(b.paints, ["magenta-dark"], "one paint, of the variant the mode wants");
+});
+
+test("dzPickFamily saves the member for the mode and the device", async () => {
+    const b = browser({ dark: true });
+    savedTheme(b, "light", "auto");
+    await b.ctx.dzPickFamily("paper");
+    assert.equal(b.ctx.theme.scheme, "paper-dark");
+    b.ctx.theme.scheme_mode = "light";
+    await b.ctx.dzPickFamily("gruvbox");
+    assert.equal(b.ctx.theme.scheme, "gruvbox-light");
+    const n = b.persists.length;
+    await b.ctx.dzPickFamily("no-such-family");
+    assert.equal(b.persists.length, n);
+});
+
+test("dzSetSchemeMode saves the mode and the family member once, and clears the override", async () => {
+    const b = browser();
+    savedTheme(b, "gruvbox-light", "light");
+    b.ctx.dzSetColorOverride("dark");
+    await b.ctx.dzSetSchemeMode("sideways");
+    assert.equal(b.ctx.theme.scheme_mode, "light");
+    assert.equal(b.persists.length, 0);
+    await b.ctx.dzSetSchemeMode("dark");
+    assert.equal(b.ctx.theme.scheme_mode, "dark");
+    assert.equal(b.ctx.theme.scheme, "gruvbox-dark");
+    assert.equal(b.ctx.theme.scheme_base, "dark");
+    assert.equal(b.ctx.dzColorOverride(), null);
+    assert.equal(b.persists.length, 1);
+    assert.equal(JSON.parse(b.persists[0]).values.scheme_mode, "dark");
+    assert.equal(b.ctx.dzLastColorMode.slug, "gruvbox-dark");
+    /* A single family has no member to switch: the mode alone is saved. */
+    b.ctx.theme.scheme = "custom";
+    await b.ctx.dzSetSchemeMode("light");
+    assert.equal(b.ctx.theme.scheme, "custom");
+    assert.equal(b.persists.length, 2);
+});
+
+test("a generated pair is saved on the member the mode and device ask for", async () => {
+    const b = browser({ dark: true });
+    savedTheme(b, "light", "auto");
+    const pair = { light: { background: "#ffffff" }, dark: { background: "#101010" } };
+    const slug = b.ctx.dzSaveGeneratedPair("Sunset", { accent: "#e2703a", look: "soft" }, pair);
+    await tick();
+    assert.equal(slug, "user:Sunset|dark");
+    assert.equal(b.ctx.theme.scheme, "user:Sunset|dark");
+    b.ctx.theme.scheme_mode = "light";
+    assert.equal(b.ctx.dzSaveGeneratedPair("Sunset", { accent: "#e2703a", look: "soft" }, pair), "user:Sunset|light");
+    await tick();
+    /* Re-saving under the same name repaints the new colours even though the
+       painted slug is unchanged. */
+    pair.light.background = "#fafafa";
+    b.ctx.dzSaveGeneratedPair("Sunset", { accent: "#e2703a", look: "soft" }, pair);
+    await tick();
+    assert.equal(b.props.get("--dz-body-bg"), "rgb(250,250,250)");
+});
+
+test("deleting the painted pair repaints what is saved now", async () => {
+    const b = browser();
+    const t = savedTheme(b, "light", "light");
+    t.user_schemes = [
+        { name: "Sunset", variant: "light", pair: "u:s1", base: "light", colors: { background: "#ffeedd" } },
+        { name: "Sunset", variant: "dark",  pair: "u:s1", base: "dark",  colors: { background: "#221100" } }
+    ];
+    await b.ctx.applyScheme("user:Sunset|light");
+    b.ctx.dzSetColorOverride("dark");
+    await b.ctx.dzApplyColorMode();
+    assert.equal(b.ctx.dzLastColorMode.slug, "user:Sunset|dark");
+    b.ctx.deleteUserScheme("Sunset", "dark");
+    await tick();
+    assert.equal(b.ctx.theme.scheme, "custom");
+    assert.equal(b.ctx.dzLastColorMode.slug, "custom");
+    assert.equal(b.html.getAttribute("data-dz-scheme"), "custom");
+});
+
+test("a paint whose built-in colours cannot be fetched keeps the saved paint and never rejects", async () => {
+    const b = browser({ failFetch: true });
+    savedTheme(b, "gruvbox-light", "dark");
+    b.ctx.dzSeedPaintedSlug();
+    b.ctx.setColorScheme();
+    await b.ctx.dzApplyColorMode();
+    assert.deepEqual(b.paints, ["gruvbox-light"]);
+    assert.equal(b.ctx.dzLastColorMode.slug, "gruvbox-light");
+});
+
+test("loadBuiltinSchemes shares one in-flight load and retries after a failure", async () => {
+    const b = browser({ failFetch: true });
+    const p1 = b.ctx.loadBuiltinSchemes();
+    const p2 = b.ctx.loadBuiltinSchemes();
+    assert.equal(p1, p2);
+    assert.deepEqual({ ...(await p1) }, {});
+    assert.equal(b.fetches.length, 1);
+    await b.ctx.loadBuiltinSchemes();
+    assert.equal(b.fetches.length, 2, "a failure is not memoized");
+});
+
+test("a newer paint wins over an older one still waiting for scheme files", async () => {
+    const b = browser();
+    savedTheme(b, "light", "light");
+    b.ctx.dzSetColorOverride("dark");
+    b.ctx.theme.scheme = "paper-light";
+    b.ctx.theme.color_scheme = clone(SCHEMES["paper-light"].colors);
+    b.ctx.theme.features.custom_color_scheme.enabled = true;
+    const slow = b.ctx.dzApplyColorMode();
+    b.ctx.dzSetColorOverride(null);
+    const fast = b.ctx.dzApplyColorMode();
+    await Promise.all([slow, fast]);
+    assert.equal(b.ctx.dzLastColorMode.slug, "paper-light");
+    assert.equal(b.html.getAttribute("data-dz-scheme"), "custom");
 });

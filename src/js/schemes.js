@@ -8,11 +8,13 @@
    Adding a scheme = adding a file plus an index.json entry. */
 
 var BUILTIN_SCHEMES = null; /* slug -> scheme object, fetched once */
+var BUILTIN_SCHEMES_P = null; /* the load in flight, shared by concurrent callers */
 
 function loadBuiltinSchemes() {
     if (BUILTIN_SCHEMES) return Promise.resolve(BUILTIN_SCHEMES);
+    if (BUILTIN_SCHEMES_P) return BUILTIN_SCHEMES_P;
     var base = "styles/" + themeFolder + "/schemes/";
-    return fetch(base + "index.json", { credentials: "include" })
+    BUILTIN_SCHEMES_P = fetch(base + "index.json", { credentials: "include" })
         .then(function(r) { return r.json(); })
         .then(function(slugs) {
             return Promise.all(slugs.map(function(slug) {
@@ -22,15 +24,19 @@ function loadBuiltinSchemes() {
             }));
         })
         .then(function(schemes) {
-            BUILTIN_SCHEMES = {};
-            schemes.forEach(function(s) { BUILTIN_SCHEMES[s.slug] = s; });
-            return BUILTIN_SCHEMES;
+            var all = {};
+            schemes.forEach(function(s) { all[s.slug] = s; });
+            BUILTIN_SCHEMES = all;
+            BUILTIN_SCHEMES_P = null;
+            return all;
         })
         .catch(function(e) {
-            console.log(themeName + " - failed to load built-in schemes:", e);
-            BUILTIN_SCHEMES = {};
-            return BUILTIN_SCHEMES;
+            /* Not memoized: the next caller tries again. */
+            BUILTIN_SCHEMES_P = null;
+            if (typeof dzLog === "function") { dzLog("schemes", "load_failed", { error: String(e) }); }
+            return {};
         });
+    return BUILTIN_SCHEMES_P;
 }
 
 /* Retired slugs mapped to their survivor. A stored pick that no longer
@@ -81,10 +87,10 @@ function dzNewPairId(name) {
     return "u:" + slug + "-" + Date.now().toString(36) + "-" + DZ_PAIR_SEQ;
 }
 
-/* Persist both variants of a generated pair and apply the one matching the
-   base the user is currently on, so saving never yanks them from dark to
-   light. Replaces any existing pair of the same name, so re-running the
-   wizard with the same name updates rather than duplicating. */
+/* Persist both variants of a generated pair and save the member the mode
+   (in Follow device, the device) stands for, so saving never yanks the user
+   from dark to light. Replaces any existing pair of the same name, so
+   re-running the wizard with the same name updates rather than duplicating. */
 function dzSaveGeneratedPair(name, seed, pairColors) {
     name = (name || "").trim().slice(0, 40);
     if (!name) { return null; }
@@ -99,8 +105,10 @@ function dzSaveGeneratedPair(name, seed, pairColors) {
             colors: Object.assign({}, pairColors[variant])
         });
     });
-    var wantDark = theme.scheme_base === "dark";
-    var slug = "user:" + name + "|" + (wantDark ? "dark" : "light");
+    var fam = dzFamilyOf("user:" + name + "|light", dzSchemeFamilies(theme.user_schemes));
+    var slug = fam && !fam.single
+        ? dzSavedMemberFor(fam, theme.scheme_mode, dzDeviceDark())
+        : "user:" + name + "|light";
     /* No cacheThemeSettings() here: applyScheme(slug) always finds the preset
        just pushed above (the slug names one of the two entries added this
        call) and caches on that found-preset path itself; caching twice would
@@ -126,7 +134,7 @@ function dzSaveGeneratedPair(name, seed, pairColors) {
 function migrateRetiredScheme() {
     var target = DZ_SCHEME_MIGRATIONS[theme.scheme];
     if (!target) return Promise.resolve(false);
-    console.log(themeName + " - scheme '" + theme.scheme + "' was retired, migrating to '" + target + "'");
+    if (typeof dzLog === "function") { dzLog("schemes", "retired_migrated", { from: theme.scheme, to: target }); }
     return applyScheme(target).then(function() { return true; });
 }
 
@@ -232,6 +240,7 @@ function saveCurrentColorsAsScheme(name) {
     cacheThemeSettings();
     persistSchemeChoice();
     renderSchemePicker();
+    dzApplyColorMode();
     warnIfContrastFails(theme.color_scheme, dzT("hub.schemes.wcag_what_preset", { name: name }));
 }
 
@@ -266,6 +275,7 @@ function deleteUserScheme(name, variant) {
     cacheThemeSettings();
     persistSchemeChoice();
     renderSchemePicker();
+    dzApplyColorMode();
 }
 
 /* The slug of the scheme in effect, picked or not. theme.scheme is unset until
@@ -343,22 +353,28 @@ function dzSaveSchemeColors(slug, scheme) {
 }
 
 /* Apply a scheme by slug: save it (see dzSaveSchemeModel; persisted
-   immediately, see persistSchemeChoice) and repaint once. An unknown slug
-   changes nothing. */
+   immediately, see persistSchemeChoice) and repaint once, painting the
+   variant the mode asks for (color-mode.js). Forced, because the slug on
+   screen may be unchanged while its colours are new. An unknown slug changes
+   nothing. */
 function applyScheme(slug) {
     return dzSaveSchemeModel(slug).then(function (ok) {
-        if (ok) setColorScheme();
+        if (ok) return dzApplyColorMode(true);
     });
 }
 
 /* The dark_theme FEATURE outlived its checkbox (removed once the picker's
-   Machinon Dark card superseded it): the feature still carries
-   dark_theme.css, persists in the stored feature-id list, and drives the base
-   attribute in setColorScheme(). Load/unload its file here the way the
-   checkbox handler used to.
+   Machinon Dark card superseded it): it persists in the stored feature-id
+   list and says whether the SAVED scheme is Machinon Dark. It no longer
+   loads anything: dark_theme.css follows the PAINTED variant (dzSetDarkFile
+   below), which may be the other member of the saved pair. */
+function setDarkFeature(enabled) {
+    theme.features.dark_theme.enabled = enabled;
+}
 
-   Named dark schemes (built-in presets and anything the wizard generates) run
-   WITHOUT it, deliberately. What that costs them is now down to three rules,
+/* dark_theme.css is loaded only while Machinon Dark is painted. Named dark
+   schemes (built-in presets and anything the wizard generates) run WITHOUT
+   it, deliberately. What that costs them is now down to three rules,
    audited 2026-09-01:
 
      #login:before                     hardcoded Machinon blue - correct to skip
@@ -372,12 +388,36 @@ function applyScheme(slug) {
    purpose: measured, machinon-dark paints it rgb(220,230,240) (body text) and
    gruvbox-dark rgb(131,165,152) (its own accent). Both readable, and the
    scheme's accent there is arguably right, so this is a documented difference
-   rather than a bug to fix. */
-function setDarkFeature(enabled) {
-    var was = theme.features.dark_theme.enabled === true;
-    theme.features.dark_theme.enabled = enabled;
-    if (enabled && !was) { loadThemeFeatureFiles("dark_theme"); }
-    if (!enabled && was) { unloadThemeFeatureFiles("dark_theme"); }
+   rather than a bug to fix.
+
+   Idempotent by its own flag: one link at most, and the only link it removes
+   is the one it tracks. A link already in the page is adopted rather than
+   doubled. */
+var DZ_DARK_FILE = "dark_theme.css";
+var dzDarkFileLoaded = false;
+var dzDarkFileLink = null;
+
+function dzSetDarkFile(on) {
+    on = on === true;
+    if (on === dzDarkFileLoaded) return;
+    if (on) {
+        var links = document.getElementsByTagName("link");
+        for (var i = 0; i < links.length && !dzDarkFileLink; i++) {
+            if ((links[i].getAttribute("href") || "").indexOf("/css/" + DZ_DARK_FILE) !== -1) { dzDarkFileLink = links[i]; }
+        }
+        if (!dzDarkFileLink) {
+            var link = document.createElement("link");
+            link.setAttribute("rel", "stylesheet");
+            link.setAttribute("type", "text/css");
+            link.setAttribute("href", "styles/" + themeFolder + "/css/" + DZ_DARK_FILE + dzFeatureFileQuery());
+            document.getElementsByTagName("head")[0].appendChild(link);
+            dzDarkFileLink = link;
+        }
+    } else if (dzDarkFileLink) {
+        if (dzDarkFileLink.parentNode) { dzDarkFileLink.parentNode.removeChild(dzDarkFileLink); }
+        dzDarkFileLink = null;
+    }
+    dzDarkFileLoaded = on;
 }
 
 /* Suffix -> color_scheme field, in swatch order (Background, Menu, Item,

@@ -4,8 +4,11 @@
    (core ships it) and is NOT unloaded on toggle-off: an executed script
    cannot be un-executed, so js-backed features fully stop only on reload. */
 
+/* dark_theme is skipped: its flag describes the SAVED scheme, while its file
+   must follow the PAINTED one, so schemes.js dzSetDarkFile owns that file. */
 function enableThemeFeatures() {
     $.each(theme.features, function(key, feature) {
+        if (key === "dark_theme") return;
         if (feature.enabled === true) {
             if (feature.files.length > 0) {
                 loadThemeFeatureFiles(key);
