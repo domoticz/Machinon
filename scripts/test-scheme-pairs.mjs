@@ -10,13 +10,16 @@ for (const slug of INDEX) {
     SCHEMES[slug].slug = slug;
 }
 
-function loadSchemesJs() {
+function loadModules(files) {
     const ctx = vm.createContext({ Math, console, JSON, window: {} });
-    vm.runInContext(readFileSync("src/js/schemes.js", "utf8"), ctx,
-                    { filename: "src/js/schemes.js" });
+    for (const f of files) {
+        vm.runInContext(readFileSync(f, "utf8"), ctx, { filename: f });
+    }
     return ctx;
 }
-const dz = loadSchemesJs();
+const dz = loadModules(["src/js/schemes.js"]);
+const cm = loadModules(["src/js/schemes.js", "src/js/color-mode.js"]);
+const FAM0 = cm.dzSchemeFamilies([]);
 
 test("every built-in scheme declares pair and variant", () => {
     for (const slug of INDEX) {
@@ -39,36 +42,49 @@ test("every built-in pair has exactly one light and one dark member", () => {
     }
 });
 
-test("findPairMate resolves both directions for every built-in", () => {
+test("every built-in resolves to a light/dark family that round-trips", () => {
     for (const slug of INDEX) {
-        const mate = dz.dzFindPairMate(slug, SCHEMES, []);
-        assert.ok(mate, `${slug} has no mate`);
-        assert.equal(dz.dzFindPairMate(mate, SCHEMES, []), slug,
-                     `${slug} <-> ${mate} does not round-trip`);
+        const fam = cm.dzFamilyOf(slug, FAM0);
+        assert.ok(fam && !fam.single, `${slug} has no family`);
+        assert.equal(fam.id, SCHEMES[slug].pair);
+        const mate = SCHEMES[slug].variant === "light" ? fam.dark : fam.light;
+        assert.ok(mate && mate !== slug, `${slug} has no mate`);
+        assert.equal(cm.dzFamilyOf(mate, FAM0), fam, `${slug} <-> ${mate} does not round-trip`);
     }
 });
 
-test("findPairMate resolves the base light/dark slugs", () => {
-    assert.equal(dz.dzFindPairMate("light", SCHEMES, []), "dark");
-    assert.equal(dz.dzFindPairMate("dark", SCHEMES, []), "light");
+test("the base light/dark slugs form the machinon family", () => {
+    const fam = cm.dzFamilyOf("light", FAM0);
+    assert.equal(fam.id, "machinon");
+    assert.equal(fam.light, "light");
+    assert.equal(fam.dark, "dark");
+    assert.equal(cm.dzFamilyOf("dark", FAM0), fam);
 });
 
-test("findPairMate resolves a generated user pair", () => {
+test("a generated user pair forms one family", () => {
     const users = [
         { name: "Sunset", variant: "light", pair: "u:sunset-1", base: "light", colors: {} },
         { name: "Sunset", variant: "dark",  pair: "u:sunset-1", base: "dark",  colors: {} }
     ];
-    assert.equal(dz.dzFindPairMate("user:Sunset|light", SCHEMES, users), "user:Sunset|dark");
-    assert.equal(dz.dzFindPairMate("user:Sunset|dark", SCHEMES, users), "user:Sunset|light");
+    const fam = cm.dzFamilyOf("user:Sunset|light", cm.dzSchemeFamilies(users));
+    assert.equal(fam.id, "user-pair:u:sunset-1");
+    assert.equal(fam.dark, "user:Sunset|dark");
+    assert.equal(fam.kind, "user");
 });
 
-test("findPairMate returns null for an unpaired legacy preset", () => {
-    const users = [{ name: "Old", base: "light", colors: {} }];
-    assert.equal(dz.dzFindPairMate("user:Old", SCHEMES, users), null);
-    assert.equal(dz.dzFindPairMate("custom", SCHEMES, []), null);
+test("an unpaired legacy preset and Custom are single families", () => {
+    const fam = cm.dzSchemeFamilies([{ name: "Old", base: "light", colors: {} }]);
+    const old = cm.dzFamilyOf("user:Old", fam);
+    assert.equal(old.single, true);
+    assert.equal(old.kind, "legacy");
+    assert.equal(old.id, "user:Old");
+    const custom = cm.dzFamilyOf("custom", fam);
+    assert.equal(custom.id, "custom");
+    assert.equal(custom.single, true);
+    assert.equal(cm.dzFamilyOf("nope", fam), null);
 });
 
-test("a saved generated pair round-trips through findPairMate", () => {
+test("a saved generated pair round-trips through the family lookup", () => {
     const users = [];
     const seed = { accent: "#E2703A", surface: null, look: "soft" };
     // Shape produced by dzSaveGeneratedPair, asserted directly so the storage
@@ -78,7 +94,8 @@ test("a saved generated pair round-trips through findPairMate", () => {
         users.push({ name: "Sunset", variant, pair: pairId, base: variant,
                      seed, colors: { background: "#FFFFFF" } });
     }
-    assert.equal(dz.dzFindPairMate("user:Sunset|light", SCHEMES, users), "user:Sunset|dark");
+    const fam = cm.dzFamilyOf("user:Sunset|light", cm.dzSchemeFamilies(users));
+    assert.equal(fam.dark, "user:Sunset|dark");
     for (const u of users) {
         assert.equal(u.seed.look, "soft");
         assert.equal(u.base, u.variant, "base must mirror variant for a generated preset");
@@ -94,30 +111,27 @@ test("pair ids are unique per generation", () => {
     }
 });
 
-test("findPairMate matches an exact legacy name before splitting on a literal pipe", () => {
-    // A hand-saved preset's own name may contain "|" (saveCurrentColorsAsScheme
-    // does not forbid it). A decoy unrelated pair named "Warm" with variant
-    // "Cool" is included so that splitting on "|" first would silently
-    // resolve "user:Warm|Cool" to THAT pair's mate instead of recognising the
-    // exact, unpaired, legacy preset actually named "Warm|Cool". Without the
-    // decoy, splitting happens to find no match either way and the case does
-    // not distinguish exact-first from split-first ordering.
+test("family lookup matches an exact legacy name before splitting on a literal pipe", () => {
+    // A hand-saved preset's own name may contain "|". A decoy unrelated pair
+    // named "Warm" with variant "Cool" is included so that splitting on "|"
+    // first would resolve "user:Warm|Cool" to THAT pair instead of the exact,
+    // unpaired legacy preset actually named "Warm|Cool".
     const legacyUsers = [
         { name: "Warm|Cool", base: "light", colors: {} },
         { name: "Warm", variant: "Cool",  pair: "decoy", base: "light", colors: {} },
         { name: "Warm", variant: "other", pair: "decoy", base: "dark",  colors: {} }
     ];
-    assert.equal(dz.dzFindPairMate("user:Warm|Cool", SCHEMES, legacyUsers), null);
+    const legacy = cm.dzFamilyOf("user:Warm|Cool", cm.dzSchemeFamilies(legacyUsers));
+    assert.equal(legacy.kind, "legacy");
+    assert.equal(legacy.single, true);
 
-    // A generated pair whose name also happens to contain "|" must still
-    // resolve via the split fallback once the exact match misses, proving
-    // the ordering (exact-first, then split) is correct rather than merely
-    // different from before.
+    // A generated pair whose name also contains "|" still resolves as a pair.
     const pairedUsers = [
         { name: "Warm|Cool", variant: "light", pair: "p1", base: "light", colors: {} },
         { name: "Warm|Cool", variant: "dark",  pair: "p1", base: "dark",  colors: {} }
     ];
-    assert.equal(dz.dzFindPairMate("user:Warm|Cool|light", SCHEMES, pairedUsers), "user:Warm|Cool|dark");
+    const fam = cm.dzFamilyOf("user:Warm|Cool|light", cm.dzSchemeFamilies(pairedUsers));
+    assert.equal(fam.dark, "user:Warm|Cool|dark");
 });
 
 test("deleting one half of a pair does not leave theme.scheme dangling on the other half", () => {
@@ -159,4 +173,83 @@ test("dzActiveSchemeSlug names the scheme in effect, picked or not", () => {
     assert.equal(run({ features: feats(false, true) }), "dark");
     assert.equal(run({ features: feats(true, false) }), "custom");
     assert.equal(run({ scheme: "", features: feats(false, true) }), "dark");
+});
+
+const USERS = [
+    { name: "Sunset", variant: "light", pair: "u:sunset-1", base: "light", colors: {} },
+    { name: "Sunset", variant: "dark",  pair: "u:sunset-1", base: "dark",  colors: {} },
+    { name: "Old preset", base: "light", colors: {} }
+];
+const FAM = cm.dzSchemeFamilies(USERS);
+
+test("static pair table matches the shipped scheme files", () => {
+    for (const slug of INDEX) {
+        assert.deepEqual({ ...cm.DZ_BUILTIN_PAIRS[slug] },
+                         { pair: SCHEMES[slug].pair, variant: SCHEMES[slug].variant }, slug);
+    }
+    assert.equal(Object.keys(cm.DZ_BUILTIN_PAIRS).length, INDEX.length + 2);
+});
+test("families: machinon first, built-ins, user pair, legacy, custom last", () => {
+    const ids = FAM.map((f) => f.id);
+    assert.equal(ids[0], "machinon");
+    assert.equal(ids[ids.length - 1], "custom");
+    const sunset = FAM.find((f) => f.presetName === "Sunset");
+    assert.equal(sunset.light, "user:Sunset|light");
+    assert.equal(sunset.dark, "user:Sunset|dark");
+    assert.equal(FAM.find((f) => f.presetName === "Old preset").single, true);
+});
+test("hostile user_schemes entries never touch Object.prototype", () => {
+    const bad = [null, "x", 5, { name: "a", pair: "__proto__", variant: "dark", colors: {} },
+                 { name: "b", pair: "constructor", variant: "light", colors: {} },
+                 { name: "c", pair: "toString", variant: "dark", colors: {} },
+                 { name: 7, variant: "dark" }, { name: "d", pair: "p", variant: "sideways" }];
+    cm.dzSchemeFamilies(bad);
+    assert.equal(({}).dark, undefined);
+    assert.equal(({}).light, undefined);
+    assert.equal(typeof Object.prototype.toString, "function");
+});
+test("legacy exact name wins over a generated pair member", () => {
+    const fam = cm.dzSchemeFamilies([{ name: "Sunset|light", base: "light", colors: {} }, ...USERS]);
+    assert.equal(cm.dzFamilyOf("user:Sunset|light", fam).kind, "legacy");
+});
+test("resolve: fixed, auto, override, single, unknown, half-deleted", () => {
+    assert.equal(cm.dzResolvePaintSlug("gruvbox-light", "dark", null, false, FAM), "gruvbox-dark");
+    assert.equal(cm.dzResolvePaintSlug("magenta-light", "auto", null, true, FAM), "magenta-dark");
+    assert.equal(cm.dzResolvePaintSlug("light", "light", { variant: "dark", deviceDark: false }, false, FAM), "dark");
+    assert.equal(cm.dzResolvePaintSlug("custom", "dark", null, true, FAM), "custom");
+    assert.equal(cm.dzResolvePaintSlug("no-such", "dark", null, true, FAM), "no-such");
+    const half = cm.dzSchemeFamilies([USERS[0]]);
+    assert.equal(cm.dzResolvePaintSlug("user:Sunset|light", "dark", null, true, half), "user:Sunset|light");
+    assert.equal(cm.dzResolvePaintSlug("gruvbox-dark", undefined, null, false, FAM), "gruvbox-dark");
+});
+test("override values are whitelisted", () => {
+    for (const raw of [null, 5, "x", { variant: "constructor", deviceDark: false },
+                       { variant: "__proto__", deviceDark: true }, { variant: "dark", deviceDark: "yes" }]) {
+        assert.equal(cm.dzCleanOverride(raw), null, JSON.stringify(raw));
+    }
+    assert.deepEqual({ ...cm.dzCleanOverride({ variant: "dark", deviceDark: true, extra: 1 }) },
+                     { variant: "dark", deviceDark: true });
+});
+test("a pick saves the mode's member, never the override's", () => {
+    const g = FAM.find((f) => f.id === "gruvbox");
+    assert.equal(cm.dzSavedMemberFor(g, "light", true), "gruvbox-light");
+    assert.equal(cm.dzSavedMemberFor(g, "auto", true), "gruvbox-dark");
+    assert.equal(cm.dzSavedMemberFor(FAM.find((f) => f.id === "custom"), "dark", true), "custom");
+});
+test("override validity, including the accepted even-flip limit", () => {
+    const ov = { variant: "light", deviceDark: true };
+    assert.equal(cm.dzOverrideStillValid(ov, "auto", false), false);
+    assert.equal(cm.dzOverrideStillValid(ov, "dark", false), true);
+    /* Owner-accepted limit (2026-10-21): two device switches while no page
+       observed them leave the state equal, so the override survives. */
+    assert.equal(cm.dzOverrideStillValid(ov, "auto", true), true);
+});
+test("pair members agree on family_name and family_description", () => {
+    const byPair = {};
+    for (const slug of INDEX) (byPair[SCHEMES[slug].pair] ||= []).push(SCHEMES[slug]);
+    for (const [pair, members] of Object.entries(byPair)) {
+        assert.ok(members[0].family_name, `${pair} lacks family_name`);
+        assert.equal(members[0].family_name, members[1].family_name, pair);
+        assert.equal(members[0].family_description, members[1].family_description, pair);
+    }
 });

@@ -492,13 +492,11 @@ The two hardcoded default cards (Machinon Light/Dark in `renderSchemePicker`) ca
 "machinon"` the same way. A legacy hand-saved preset (`saveCurrentColorsAsScheme`, predating this
 metadata) has no `pair` and is correctly treated as unpaired.
 
-`dzFindPairMate(slug, schemes, userSchemes)` resolves a slug's counterpart: the two base cards via
-a hardcoded `DZ_BASE_PAIR` map, everything else by matching `pair` with the opposite `variant`
-among the built-in schemes list and the user's saved presets, returning `null` for anything
-unpaired. **It deliberately has no UI caller yet.** This is groundwork for a future header
-light/dark toggle (flip the active scheme to its counterpart without opening the hub), not dead
-code left over from a removed feature - the same deliberate-unread-field pattern as `card.pair` in
-the scheme picker's card data.
+`src/js/color-mode.js` owns the grouping: `dzSchemeFamilies` builds light/dark families from a static
+table of the built-in pairs plus the user's saved presets, and `dzFamilyOf(slug, families)` finds the
+family a slug belongs to (an unpaired legacy preset or Custom is a single family). Which member is
+painted for a saved pick is decided at paint time by `dzResolvePaintSlug`, from the colour mode, an
+optional one-off override and the device's light/dark state; the saved pick itself is never rewritten.
 
 ## Typography
 

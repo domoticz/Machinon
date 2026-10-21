@@ -4,6 +4,8 @@
     "base": "dark",
     "pair": "gruvbox",
     "variant": "dark",
+    "family_name": "Gruvbox",
+    "family_description": "Warm retro paper, or earthy retro dark",
     "preview": {
         "bg": "#282828",
         "surface": "#3c3836",
