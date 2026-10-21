@@ -4,6 +4,8 @@
     "base": "dark",
     "pair": "paper",
     "variant": "dark",
+    "family_name": "Paper",
+    "family_description": "Monochrome: zero chrome, colour reserved for states",
     "preview": { "bg": "#121212", "surface": "#1E1E1E", "accent": "#D0D0D0", "text": "#EDEDED" },
     "colors": {
         "background": "#121212",

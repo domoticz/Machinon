@@ -68,6 +68,7 @@ var THEME_MODULES = [
     "src/js/theme-manifest.js",
     "src/js/scheme.js",
     "src/js/schemes.js",
+    "src/js/color-mode.js",
     "src/js/color-oklch.js",
     "src/js/color-repair.js",
     "src/js/scheme-generator.js",

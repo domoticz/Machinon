@@ -61,65 +61,12 @@ var DZ_SCHEME_MIGRATIONS = {
     "solarized-light":  "light"
 };
 
-/* Slug of the light/dark counterpart of `slug`, or null when it has none.
-
-   Pairing is declared metadata, not a filename convention: "magenta-light"
-   and "magenta-dark" used to be related only by how they were named, and
-   applyScheme() treats every slug as unrelated, so nothing could answer
-   "what is the dark version of what I am on". This is the lookup a header
-   light/dark toggle needs. It has no UI caller yet; it exists now because
-   retrofitting pairing onto presets already saved in users' installs is far
-   more expensive than declaring it from the start.
-
-   `schemes` and `userSchemes` are parameters rather than globals so this has
-   no load-order dependency and can be unit-tested. Generated user pairs use
-   the slug form "user:<name>|<variant>"; legacy hand-saved presets have no
-   pair and correctly return null. */
-var DZ_BASE_PAIR = { light: "dark", dark: "light" };
-
-function dzFindPairMate(slug, schemes, userSchemes) {
-    if (!slug) { return null; }
-    if (DZ_BASE_PAIR[slug]) { return DZ_BASE_PAIR[slug]; }
-
-    if (slug.indexOf("user:") === 0) {
-        var rest = slug.substring(5);
-        /* Exact legacy match first, same reasoning as applyScheme: a
-           hand-saved preset's own name may contain "|", so check whether any
-           preset owns the whole remainder before splitting it. */
-        var mine = null, variant;
-        (userSchemes || []).forEach(function (p) {
-            if (p.name === rest) { mine = p; }
-        });
-        if (mine) {
-            variant = mine.variant;
-        } else {
-            var bar = rest.lastIndexOf("|");
-            if (bar === -1) { return null; } // legacy unpaired preset
-            var name = rest.substring(0, bar);
-            variant = rest.substring(bar + 1);
-            (userSchemes || []).forEach(function (p) {
-                if (p.name === name && p.variant === variant) { mine = p; }
-            });
-        }
-        if (!mine || !mine.pair) { return null; }
-        var mate = null;
-        (userSchemes || []).forEach(function (p) {
-            if (p.pair === mine.pair && p.variant !== variant) { mate = p; }
-        });
-        return mate ? "user:" + mate.name + "|" + mate.variant : null;
-    }
-
-    var self = schemes && schemes[slug];
-    if (!self || !self.pair) { return null; }
-    var found = null;
-    Object.keys(schemes).forEach(function (other) {
-        var s = schemes[other];
-        if (other !== slug && s.pair === self.pair && s.variant !== self.variant) {
-            found = other;
-        }
-    });
-    return found;
-}
+/* Pairing is declared metadata, not a filename convention: scheme JSONs and
+   generated user pairs carry `pair` and `variant`. color-mode.js owns the
+   grouping into light/dark families (dzSchemeFamilies, dzFamilyOf) and the
+   choice of which member to paint. Generated user pairs use the slug form
+   "user:<name>|<variant>"; legacy hand-saved presets have no pair and form
+   single families. */
 
 /* Pair ids must be unique within one install: a user may generate two pairs
    from the same seed colours and name them differently, and a name collision
@@ -482,11 +429,9 @@ function renderSchemePicker() {
            dz-tokens.css / dark.css token defaults, and their descriptions are
            authored here for the same reason.
 
-           Every card below carries a `pair` id (declared metadata, mirroring
-           the scheme JSONs' own `pair` field), but nothing reads card.pair
-           yet: it is groundwork for a future header light/dark toggle, the
-           same reason dzFindPairMate has no caller yet either. Both landed
-           together on purpose, not as an oversight. */
+           Every card below carries a `pair` id mirroring the scheme JSONs' own
+           `pair` field; color-mode.js groups cards into light/dark families
+           from the same data. */
         var cards = [
             { slug: "light", name: dzT("hub.schemes.builtin.light.name"), pair: "machinon", desc: dzT("hub.schemes.builtin.light.desc"), colors: { background: "#f4f8fc", navbar: "#e9f2fb", item: "#ffffff", main_color: "#396d9e", main_text: "#1b2b3a", alt_text: "#3e5568", disabled: "#8ca0b3" } },
             { slug: "dark", name: dzT("hub.schemes.builtin.dark.name"), pair: "machinon", desc: dzT("hub.schemes.builtin.dark.desc"), colors: { background: "#0f1620", navbar: "#0a0f16", item: "#18202b", main_color: "#98ccfd", main_text: "#dce6f0", alt_text: "#9db2c6", disabled: "#5e7183" } }
