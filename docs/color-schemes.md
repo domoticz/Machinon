@@ -82,9 +82,7 @@ on the device you tap it on. The half that is filled in shows which version is o
 - **On a computer or tablet** (980 pixels wide or more) it sits in the header, next to the search
   box.
 - **On a phone or a narrow window** it is in the menu: open the menu and it is at the top right,
-  on the row with the close button. With the icons-only menu (the [Icon-only
-  navbar](settings-reference.md#icon-only-navbar-hide-text) setting) it stands upright below the
-  menu entries.
+  on the row with the close button.
 
 A tap changes only what this device shows. Nothing is saved to Domoticz, your mode in the Theme
 Hub stays as it was, and your other devices and other users keep their colors.
