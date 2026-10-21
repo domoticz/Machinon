@@ -62,7 +62,7 @@ It works with current Domoticz beta and stable releases.
 
   </details>
 
-- **Light and dark variants**: every color scheme ships both, so the whole interface follows your preference.
+- **Light and dark modes**: every built-in color scheme comes in a light and a dark version. Pick Light, Dark, or Follow device to match your phone or computer's own setting, and flip between them with the sun/moon switch in the header.
 
   ![Machinon dashboard, dark scheme](docs/screenshots/dashboard-dark.png)
 

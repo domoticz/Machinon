@@ -70,7 +70,7 @@ The Theme Hub is organized into nine tabs, in this order:
 | **Device cards** | How individual device cards look and behave everywhere they appear: relative times, dimming devices that are off, toggles instead of status text, the wind direction arrow, device photos, and the card width range. |
 | **Charts and log** | Device history charts: range bands on log graphs. |
 | **Background and branding** | The page background image and the navbar logo. |
-| **Colors and schemes** | Pick a built-in color scheme, or design your own and save it as a preset. |
+| **Colors and schemes** | Pick a theme and whether it shows light, dark, or follows your device; show or hide the light/dark switch; or design your own colors. |
 | **Icon packs** | Browse the icon library and install icons one at a time onto individual devices. Shown to administrators only, since an installed icon changes for everyone. |
 | **About** | The theme's version, credits, links, and maintenance actions such as resetting settings back to their defaults. |
 
