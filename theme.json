@@ -18,6 +18,7 @@
     "card_min_width": 320,
     "card_max_width": 500,
     "warn_repeat": "daily",
+    "scheme_mode": "auto",
     "color_scheme": {
         "background":"",
         "main_color": "",
