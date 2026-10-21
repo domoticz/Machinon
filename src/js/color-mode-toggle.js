@@ -84,9 +84,13 @@ function setModeToggles() {
         logo.insertBefore(dzBuildModeToggle(DZ_MODE_TOGGLE_IDS[0]),
                           search && search.parentNode === logo ? search.nextSibling : null);
     }
+    /* Last in the drawer: absolutely positioned at its top right it does not
+       matter where it sits in the DOM, but in the icons-only drawer it is in
+       flow under the menu rows (css/color-mode-toggle.css), and last keeps
+       it after the links in the tab order. */
     var menu = document.querySelector(".navbar-inner");
     if (menu && !document.getElementById(DZ_MODE_TOGGLE_IDS[1])) {
-        menu.insertBefore(dzBuildModeToggle(DZ_MODE_TOGGLE_IDS[1]), menu.firstChild);
+        menu.appendChild(dzBuildModeToggle(DZ_MODE_TOGGLE_IDS[1]));
     }
     dzSyncModeToggles();
 }
