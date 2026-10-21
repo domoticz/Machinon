@@ -4,6 +4,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+- On Domoticz 2026.1, the sensor timeout and low battery warnings and the RGBW colour popup are back on after updating Machinon: settings added in a newer version no longer switch themselves off when your saved settings predate them
 - On the Energy page, the outside temperature is now readable in the light colour schemes instead of white on a light background
 - On the phone dashboard with Domoticz 2026.4 or newer, a switch that is off lights up its Off button again, so every switch shows whether it is on or off (#259)
 
