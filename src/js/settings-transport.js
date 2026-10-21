@@ -679,6 +679,7 @@ function dzThemeSettingsLoad() {
                 }
                 if (data.status != "OK") { resolve(DZ_LOAD_FAILED); return; }
                 var had = false, pending = [];
+                dzLegacyLoaded = { list: null, watermark: undefined };
                 var featuresVarName = "theme-" + themeFolder + "-features";
                 var customVarName = "theme-" + themeFolder + "-custom";
                 var colorsVarName = "theme-" + themeFolder + "-colors";
@@ -688,7 +689,13 @@ function dzThemeSettingsLoad() {
                     if (value.Name == colorsVarName) { console.log(themeName + " - found theme colors settings in Domoticz database (user variable Idx: " + value.idx + ")"); had = true; theme.usercolorsvariable = value.idx; pending.push(getColorsThemeSettings(value.idx)); }
                 });
                 if (!had) { resolve(DZ_LOAD_EMPTY); return; }
-                Promise.all(pending).then(function() { resolve(DZ_LOAD_LOADED); });
+                /* The caller's load barrier waits on this resolve, so a failure
+                   applying the feature rule must not leave it pending. */
+                Promise.all(pending).then(dzApplyLegacyFeatures).catch(function(e) {
+                    if (typeof dzLog === "function") {
+                        dzLog("settings", "legacy_features_failed", { error: String(e && e.message || e) });
+                    }
+                }).then(function() { resolve(DZ_LOAD_LOADED); });
             },
             error: function() {
                 console.warn(themeName + " - could not reach Domoticz to load theme settings (permission, login, or connection); keeping current values");
@@ -714,7 +721,9 @@ function dzThemeSettingsSaveNow(action) {
 
     /* Positional contract: readers index into this array, APPEND ONLY. 0-6
        original; 7/8 scheme + base; 9 saved colour presets; 10/11 card widths;
-       12 camera refresh seconds; 13 device-warning repeat preference (#198).
+       12 camera refresh seconds; 13 device-warning repeat preference (#198);
+       14 the highest feature id this version knows, which makes the -features
+       list exact for readers (dzLegacyFeatureStates).
        Positions 10-13 close the cache-only gap for settings that used to
        live only in localStorage and never followed the user across
        browsers. getCustomThemeSettings tolerates short arrays via length
@@ -724,7 +733,7 @@ function dzThemeSettingsSaveNow(action) {
         theme.logo, theme.icons, theme.background_img, theme.background_type,
         theme.scheme, theme.scheme_base, theme.user_schemes,
         theme.card_min_width, theme.card_max_width, theme.dashboard_camera_refresh,
-        theme.warn_repeat
+        theme.warn_repeat, dzLegacyFeatureWatermark(theme.features)
     ];
 
     /* POST, not GET: the params used to ride the query string, which Domoticz's
@@ -806,9 +815,93 @@ function getThemeUserVar(idx, settingType, applyFn) {
     });
 }
 
+/* The -features var stores the ids that were ENABLED, so an id missing from it
+   means either "switched off" or "the version that wrote it did not have this
+   setting yet". Reading every missing id as off silently switched off each new
+   default-on setting for every install on this transport, and dropped the
+   device warnings entirely when the single `notification` toggle (id 29) was
+   split into warn_timeout/warn_battery in v2.4.0, because the snapshot
+   migration that carries the old value over never runs here.
+
+   Since this rule exists, every save also stores the highest feature id the
+   writer knew (custom position 14, dzLegacyFeatureWatermark), which makes the
+   list exact: an id above it takes its shipped default. A list written before
+   that has no watermark; what can be inferred about it:
+   - no version before the watermark knew an id above 48;
+   - a list holding id 29 was written before v2.4.0, so both warnings take its
+     value (on), and rgbw_popup (45, added in v2.1.0) takes its default because
+     a v2.0.0 list cannot have known it;
+   - a list with neither warning id cannot be told apart from one written after
+     v2.4.0 had already read both as off, so both take their default once.
+     Owner decision 2026-10-21: re-enabling a deliberate "both off" is the
+     lesser harm than leaving everyone's warnings silently dead. The next save
+     writes the watermark, after which the user's choice is exact again. */
+var DZ_LEGACY_UNMARKED_KNOWN_MAX = 48;
+var DZ_LEGACY_NOTIFICATION_ID = 29;
+
+function dzLegacyWatermarkValid(w) {
+    return typeof w === "number" && isFinite(w) && w >= 0 && Math.floor(w) === w;
+}
+
+/* key -> enabled for every feature in `features`. `defaults` is key -> the
+   shipped theme.json value. Pure, so test-settings-transport.mjs runs it. */
+function dzLegacyFeatureStates(list, watermark, features, defaults) {
+    var marked = dzLegacyWatermarkValid(watermark);
+    var known = marked ? watermark : DZ_LEGACY_UNMARKED_KNOWN_MAX;
+    var has = function(id) { return list.indexOf(id) > -1; };
+    var out = {};
+    Object.keys(features).forEach(function(key) {
+        var id = features[key].id;
+        out[key] = id > known ? defaults[key] === true : has(id);
+    });
+    if (!marked) {
+        var timeout = features.warn_timeout, battery = features.warn_battery;
+        if (has(DZ_LEGACY_NOTIFICATION_ID)) {
+            if (timeout) out.warn_timeout = true;
+            if (battery) out.warn_battery = true;
+            if (features.rgbw_popup) out.rgbw_popup = defaults.rgbw_popup === true;
+        } else if (timeout && battery && !has(timeout.id) && !has(battery.id)) {
+            out.warn_timeout = defaults.warn_timeout === true;
+            out.warn_battery = defaults.warn_battery === true;
+        }
+    }
+    return out;
+}
+
+function dzLegacyFeatureWatermark(features) {
+    var max = 0;
+    Object.keys(features).forEach(function(key) {
+        if (typeof features[key].id === "number" && features[key].id > max) max = features[key].id;
+    });
+    return max;
+}
+
+/* The two vars load in parallel and the rule needs both, so the feature list
+   and the watermark are only collected here and applied once both have
+   arrived (dzThemeSettingsLoad). A list that is not an array is ignored, which
+   keeps the features as they painted rather than reading them all as off. */
+var dzLegacyLoaded = { list: null, watermark: undefined };
+
 function getFeatureThemeSettings(idx) {
     return getThemeUserVar(idx, "feature", function(enabledFeatureIds) {
-        $.each(theme.features, function(key, feature) { feature.enabled = $.inArray(feature.id, enabledFeatureIds) > -1; });
+        if (Array.isArray(enabledFeatureIds)) dzLegacyLoaded.list = enabledFeatureIds;
+    });
+}
+
+function dzApplyLegacyFeatures() {
+    if (!dzLegacyLoaded.list) return Promise.resolve();
+    var list = dzLegacyLoaded.list, watermark = dzLegacyLoaded.watermark;
+    return dzEnsureDefaultsSnap().catch(function() { return null; }).then(function(snap) {
+        var defaults = {};
+        $.each(theme.features, function(key, feature) {
+            /* Without the shipped defaults (theme.json unreadable) fall back
+               to what painted, never to off. */
+            defaults[key] = snap && snap.features && Object.prototype.hasOwnProperty.call(snap.features, key)
+                ? snap.features[key] === true : feature.enabled === true;
+        });
+        var states = dzLegacyFeatureStates(list, watermark, theme.features, defaults);
+        $.each(theme.features, function(key, feature) { feature.enabled = states[key]; });
+        cacheThemeSettings();
     });
 }
 
@@ -821,6 +914,7 @@ function getCustomThemeSettings(idx) {
         if (c.length > 11) { if (c[10] !== undefined) theme.card_min_width = c[10]; if (c[11] !== undefined) theme.card_max_width = c[11]; }
         if (c.length > 12 && c[12] !== undefined) theme.dashboard_camera_refresh = c[12];
         if (c.length > 13 && c[13] !== undefined) theme.warn_repeat = c[13];
+        if (c.length > 14) dzLegacyLoaded.watermark = c[14];
     });
 }
 

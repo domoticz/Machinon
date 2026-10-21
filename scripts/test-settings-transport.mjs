@@ -133,3 +133,73 @@ test("dzApplySnapshot applies only the value keys a settings snapshot defines", 
     assert.equal(t.polluted, undefined);
     assert.equal(t.bogus, undefined);
 });
+
+/* Legacy uservariable transport (cores without the ThemeSettings API, e.g.
+   Domoticz 2026.1): the -features var stores the ids that were ENABLED, so an
+   id the writer never knew about must not read as "switched off". */
+const FEATURES = {
+    time_ago: { id: 16 }, rgbw_popup: { id: 45 }, warn_timeout: { id: 46 },
+    warn_battery: { id: 47 }, diagnostic_logging: { id: 48 }, future_toggle: { id: 49 }
+};
+const DEFAULTS = {
+    time_ago: true, rgbw_popup: true, warn_timeout: true,
+    warn_battery: true, diagnostic_logging: false, future_toggle: true
+};
+const legacyStates = (list, watermark) =>
+    loadTransport().dzLegacyFeatureStates(list, watermark, FEATURES, DEFAULTS);
+
+test("legacy: a watermarked list is exact, newer ids take their default", () => {
+    const s = legacyStates([16, 46], 48);
+    assert.equal(s.time_ago, true);
+    assert.equal(s.rgbw_popup, false);
+    assert.equal(s.warn_timeout, true);
+    assert.equal(s.warn_battery, false);
+    assert.equal(s.diagnostic_logging, false);
+    assert.equal(s.future_toggle, true);
+});
+
+test("legacy: an unmarked list never knew ids above 48", () => {
+    assert.equal(legacyStates([16, 46, 47, 45], undefined).future_toggle, true);
+});
+
+test("legacy: a pre-2.4 list carries the old warnings toggle onto both new ones", () => {
+    const s = legacyStates([16, 29, 43], undefined);
+    assert.equal(s.warn_timeout, true);
+    assert.equal(s.warn_battery, true);
+});
+
+test("legacy: a pre-2.4 list gets the RGBW popup default, 2.0.0 never knew it", () => {
+    assert.equal(legacyStates([16, 29], undefined).rgbw_popup, true);
+});
+
+test("legacy: an unmarked list with neither warning resets both to their default once", () => {
+    const s = legacyStates([16, 45], undefined);
+    assert.equal(s.warn_timeout, true);
+    assert.equal(s.warn_battery, true);
+    assert.equal(s.rgbw_popup, true);
+});
+
+test("legacy: an unmarked 2.4+ list keeps a deliberate choice between the warnings", () => {
+    const s = legacyStates([16, 46], undefined);
+    assert.equal(s.warn_timeout, true);
+    assert.equal(s.warn_battery, false);
+    assert.equal(s.rgbw_popup, false);
+});
+
+test("legacy: a watermarked list keeps both warnings off when both are absent", () => {
+    const s = legacyStates([16], 48);
+    assert.equal(s.warn_timeout, false);
+    assert.equal(s.warn_battery, false);
+});
+
+test("legacy: junk watermarks are treated as absent", () => {
+    for (const wm of ["48", -1, 1.5, null, {}, NaN]) {
+        assert.equal(legacyStates([16, 46, 47], wm).future_toggle, true, String(wm));
+    }
+});
+
+test("legacy: the save writes the highest known feature id as the watermark", () => {
+    const ctx = loadTransport();
+    assert.equal(ctx.dzLegacyFeatureWatermark(FEATURES), 49);
+    assert.equal(ctx.dzLegacyFeatureWatermark({}), 0);
+});
