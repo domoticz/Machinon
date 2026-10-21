@@ -259,14 +259,19 @@ test("scheme_mode: a v3 row rewritten by a v2 writer re-derives from its base (a
 });
 
 /* Drives the real legacy loaders against stubbed uservariables. */
-async function legacyLoad({ list, custom, theme, withCustom = true }) {
+async function legacyLoad({ list, custom, theme, withCustom = true, customFails }) {
     const vars = { 1: list, 2: custom };
     const t = Object.assign({
         scheme: "light", scheme_base: "light",
         features: { dark_theme: { id: 3, enabled: false }, time_ago: { id: 16, enabled: false } }
     }, theme || {});
     const $ = {
-        ajax: (o) => { const m = /idx=(\d+)/.exec(o.url); o.success({ status: "OK", result: [{ Value: JSON.stringify(vars[m[1]]) }] }); },
+        ajax: (o) => {
+            const m = /idx=(\d+)/.exec(o.url);
+            if (customFails === "error" && m[1] === "2") return o.error();
+            if (customFails === "malformed" && m[1] === "2") return o.success({ status: "OK", result: [{ Value: "{not json" }] });
+            o.success({ status: "OK", result: [{ Value: JSON.stringify(vars[m[1]]) }] });
+        },
         each: (c, fn) => { Object.keys(c).forEach((k) => fn(k, c[k])); }
     };
     const ctx = loadTransport({
@@ -312,4 +317,19 @@ test("scheme_mode legacy: the save writes the mode at custom[15]", async () => {
     });
     await ctx.dzThemeSettingsSaveNow("add");
     assert.equal(JSON.parse(sent["theme-machinon-custom"])[15], "auto");
+});
+
+test("scheme_mode legacy: a failed custom read keeps the painted auto", async () => {
+    const t = await legacyLoad({ list: [], custom: C15, customFails: "error", theme: { scheme_mode: "auto", scheme_base: "dark" } });
+    assert.equal(t.scheme_mode, "auto");
+});
+
+test("scheme_mode legacy: a malformed custom value keeps the painted auto", async () => {
+    const t = await legacyLoad({ list: [], custom: C15, customFails: "malformed", theme: { scheme_mode: "auto", scheme_base: "dark" } });
+    assert.equal(t.scheme_mode, "auto");
+});
+
+test("scheme_mode legacy: an unread custom var with an invalid painted mode still derives", async () => {
+    const t = await legacyLoad({ list: [], custom: C15, customFails: "error", theme: { scheme_mode: "junk", scheme_base: "dark" } });
+    assert.equal(t.scheme_mode, "dark");
 });
