@@ -204,13 +204,10 @@ function warnIfContrastFails(cs, what) {
 /* Shared "|" guard for every scheme-name save path. "|" separates name from
    variant in a generated pair's slug (user:<name>|<variant>, dzSaveGeneratedPair
    above). A hand-saved preset named e.g. "Sunset|light" would collide with the
-   light half of a generated pair named "Sunset": renderSchemePicker would emit
-   two cards with the identical data-scheme, both showing selected, and
-   applyScheme's exact-name-first rule makes the generated half unreachable.
-   Centralized here (rather than duplicated per caller, which is exactly how
-   it drifted before: theme-wizard.js had this check and saveCurrentColorsAsScheme
-   below did not) so every current AND future save path enforces the same
-   rule. Returns an error message to show the user, or null when the name is
+   light half of a generated pair named "Sunset": both would own the slug
+   "user:Sunset|light", and the exact-name-first rule (dzUserPresetFor,
+   dzFamilyOf) makes the generated half unreachable. One shared check, so
+   every current and future save path enforces the same rule. Returns an error message to show the user, or null when the name is
    fine. */
 function dzSchemeNameError(name) {
     if ((name || "").indexOf("|") !== -1) {
@@ -245,9 +242,9 @@ function saveCurrentColorsAsScheme(name) {
     warnIfContrastFails(theme.color_scheme, dzT("hub.schemes.wcag_what_preset", { name: name }));
 }
 
-/* Deleting one half of a generated pair deletes both: the two cards are one
-   thing to the user, and leaving an orphan half is worse than either
-   outcome. Legacy unpaired presets (no `pair`) delete singly, unchanged. */
+/* A generated pair is one theme to the user (one picker card), so naming
+   either half deletes both; an orphan half would be worse than either
+   outcome. Legacy unpaired presets (no `pair`) delete singly. */
 function deleteUserScheme(name, variant) {
     var all = theme.user_schemes || [];
     var target = null;
@@ -437,14 +434,132 @@ var DZ_COLOR_SCHEME_FIELDS = [
     { suffix: "alt_text", field: "alt_text" },
     { suffix: "disabled", field: "disabled" }
 ];
+/* ---- The picker: one card per theme family, plus the colour mode ----
 
-/* Scheme-picker card mount points, registered by their hosts via
-   registerSchemePickerContainer (the hub registers #dzHubSchemePicker,
-   theme-hub.js dzHubSchemeMount). Starts EMPTY: no legacy Theme tab exists
-   any more, so no container id is hardcoded here.
-   Rendering targets every registered id actually present in the document; an
-   id not currently in the DOM (hub not open) is skipped. */
+   A card stands for a family (color-mode.js dzSchemeFamilies): a light/dark
+   pair, or a single-version theme (Custom, a preset saved before pairs
+   existed). Picking a card saves the member the mode stands for
+   (dzPickFamily); the Light / Dark / Follow device switch above the cards
+   saves the mode (dzSetSchemeMode). Each card previews both versions, the one
+   this device paints at full strength and the other dimmed (nothing dims
+   while a single-version theme is selected), and the selected card marks its
+   painted version with a bar under it.
+
+   The DOM is built once per data change (a preset saved or deleted) and
+   otherwise updated in place: a paint (the dz:colormode event), a device
+   light/dark switch or a pick only flips classes, aria-pressed and the notes,
+   so tapping through modes never rebuilds the cards. */
+
+/* The four colours a card previews per version, in strip order: page, card,
+   accent, text. Enough to tell the themes apart; all seven stay in the
+   custom-colour editor. */
+var DZ_SCHEME_SWATCH_KEYS = ["background", "item", "main_color", "main_text"];
+
+/* Machinon's own two versions have no scheme file: their preview colours
+   mirror the dz-tokens.css / dark.css token defaults (dz-scheme-picker.js on
+   the rig pins this copy to the computed tokens). */
+var DZ_MACHINON_SWATCHES = {
+    light: { background: "#f4f8fc", item: "#ffffff", main_color: "#396d9e", main_text: "#1b2b3a" },
+    dark:  { background: "#0f1620", item: "#18202b", main_color: "#98ccfd", main_text: "#dce6f0" }
+};
+
+var DZ_SCHEME_MODE_ORDER = ["light", "dark", "auto"];
+
+/* Literal keys, so the lang parity check sees every call site. */
+function dzSchemeModeLabel(mode) {
+    if (mode === "dark") { return dzT("hub.schemes.mode_dark"); }
+    if (mode === "auto") { return dzT("hub.schemes.mode_auto"); }
+    return dzT("hub.schemes.mode_light");
+}
+
+/* What a family's card shows: { id, name, desc, single, deletable,
+   presetName, presetVariant, light, dark }, light and dark being the preview
+   colours of each version (dark is null on a single card). Built-in names
+   come from the scheme files (family_name / family_description); when they
+   failed to load the card is named by its family id. Custom previews
+   customColors, the user's live colours. */
+function dzSchemeCardModel(fam, schemes, userSchemes, customColors) {
+    var card = { id: fam.id, name: fam.id, desc: null, single: fam.single,
+                 deletable: fam.deletable, presetName: fam.presetName,
+                 presetVariant: undefined, light: null, dark: null };
+    var presets = Array.isArray(userSchemes) ? userSchemes.filter(function (p) {
+        return p && typeof p === "object" && p.name === fam.presetName;
+    }) : [];
+    if (fam.kind === "machinon") {
+        card.name = dzT("hub.schemes.builtin.machinon.name");
+        card.desc = dzT("hub.schemes.builtin.machinon.desc");
+        card.light = DZ_MACHINON_SWATCHES.light;
+        card.dark = DZ_MACHINON_SWATCHES.dark;
+    } else if (fam.kind === "builtin") {
+        var all = schemes || {};
+        var light = Object.prototype.hasOwnProperty.call(all, fam.light) ? all[fam.light] : null;
+        var dark = Object.prototype.hasOwnProperty.call(all, fam.dark) ? all[fam.dark] : null;
+        var either = light || dark;
+        if (either) {
+            card.name = either.family_name || either.name || fam.id;
+            card.desc = either.family_description || either.description || null;
+        }
+        card.light = light ? light.colors : null;
+        card.dark = dark ? dark.colors : null;
+    } else if (fam.kind === "custom") {
+        card.name = dzT("hub.schemes.builtin.custom.name");
+        card.desc = dzT("hub.schemes.builtin.custom.desc");
+        card.light = customColors || null;
+    } else if (fam.kind === "legacy") {
+        card.name = fam.presetName;
+        var legacy = presets.filter(function (p) { return p.pair === undefined; })[0];
+        card.light = legacy ? legacy.colors : null;
+    } else {
+        card.name = fam.presetName;
+        var pairId = fam.id.substring("user-pair:".length);
+        presets.forEach(function (p) {
+            if (p.pair !== pairId || (p.variant !== "light" && p.variant !== "dark")) { return; }
+            if (!card[p.variant]) { card[p.variant] = p.colors; }
+            if (card.presetVariant === undefined) { card.presetVariant = p.variant; }
+        });
+    }
+    if (card.single) {
+        card.light = card.light || card.dark;
+        card.dark = null;
+    }
+    return card;
+}
+
+/* What the picker marks for the saved model on this device:
+   { selected: family id or null, single, mode, variant, override, note }.
+   variant is the version painted for a paired family, the one every card
+   shows at full strength; it follows the painter's own resolution
+   (color-mode.js), so the cards agree with the screen. override is the
+   variant of an override that changes what is painted, else null. note is
+   "single", "auto_dark", "auto_light" or null: a fixed mode needs no note,
+   and an override has a notice of its own. */
+function dzSchemePickerState(families, saved, mode, override, deviceDark) {
+    var fam = dzFamilyOf(saved, families);
+    var single = !!(fam && fam.single);
+    var ov = dzCleanOverride(override);
+    if (ov && !dzOverrideStillValid(ov, mode, deviceDark)) { ov = null; }
+    if (ov && ov.variant === dzWantedVariant(mode, null, deviceDark)) { ov = null; }
+    var variant = dzWantedVariant(mode, ov, deviceDark);
+    if (!variant) { variant = fam && !single && saved === fam.dark ? "dark" : "light"; }
+    var note = null;
+    if (single) {
+        note = "single";
+    } else if (mode === "auto" && !ov) {
+        note = deviceDark ? "auto_dark" : "auto_light";
+    }
+    return { selected: fam ? fam.id : null, single: single, mode: mode, variant: variant,
+             override: single || !ov ? null : ov.variant, note: note };
+}
+
+/* Picker mount points, registered by their hosts (the hub registers
+   #dzHubSchemePicker, theme-hub.js dzHubSchemeMount). Rendering targets every
+   registered id present in the document; one not in the DOM (hub not open) is
+   skipped. */
 var DZ_SCHEME_PICKER_CONTAINER_IDS = [];
+/* The data the cards were last built from (dzSchemePickerData), so an update
+   can tell a data change, which rebuilds, from a paint, which does not. */
+var dzSchemePickerDataKey = null;
+var dzSchemePickerArmed = false;
 
 function registerSchemePickerContainer(id) {
     if (id && DZ_SCHEME_PICKER_CONTAINER_IDS.indexOf(id) === -1) {
@@ -452,135 +567,279 @@ function registerSchemePickerContainer(id) {
     }
 }
 
-/* Render the scheme cards into every registered container (see
-   DZ_SCHEME_PICKER_CONTAINER_IDS above). All DOM is built with
-   createElement/textContent; scheme values only ever reach style properties,
-   never markup. */
+function dzSchemePickerContainers() {
+    return DZ_SCHEME_PICKER_CONTAINER_IDS
+        .map(function (id) { return document.getElementById(id); })
+        .filter(function (el) { return !!el; });
+}
+
+function dzSchemePickerData() {
+    try {
+        return JSON.stringify(theme.user_schemes || []);
+    } catch (e) {
+        return "";
+    }
+}
+
+/* One listener for every container, registered once: a paint and a device
+   light/dark switch both update the pickers in place. */
+function dzArmSchemePicker() {
+    if (dzSchemePickerArmed) { return; }
+    dzSchemePickerArmed = true;
+    document.addEventListener("dz:colormode", function () { dzUpdateSchemePickers(); });
+    try {
+        var mq = window.matchMedia ? window.matchMedia(DZ_DEVICE_DARK_QUERY) : null;
+        if (mq && mq.addEventListener) {
+            mq.addEventListener("change", function () { dzUpdateSchemePickers(); });
+        } else if (mq && mq.addListener) {
+            mq.addListener(function () { dzUpdateSchemePickers(); });
+        }
+    } catch (e) {
+        if (typeof dzLog === "function") { dzLog("schemes", "picker_listen_failed", { error: String(e) }); }
+    }
+}
+
+/* Build the picker into every registered container. All DOM is built with
+   createElement/textContent; scheme colours only ever reach
+   style.backgroundColor, never markup. */
 function renderSchemePicker() {
-    var containers = DZ_SCHEME_PICKER_CONTAINER_IDS
-        .map(function(id) { return document.getElementById(id); })
-        .filter(function(el) { return !!el; });
-    if (!containers.length) return;
-    loadBuiltinSchemes().then(function(schemes) {
-        /* Every card previews the SAME seven colours in the SAME order as the
-           custom colour editor's inputs (Background, Menu, Item, Main, Text,
-           Secondary, Disabled), so preset cards and the Custom card are
-           comparable at a glance. Keys are color_scheme key-space; preset
-           swatches derive from each scheme's full colors object (all
-           schemes are fully fetched by loadBuiltinSchemes, the 4-key
-           preview{} block in scheme JSONs is no longer read here). */
-        var SWATCH_KEYS = ["background", "navbar", "item", "main_color", "main_text", "alt_text", "disabled"];
-        /* Base (schemeless) themes have no JSON; their colours mirror the
-           dz-tokens.css / dark.css token defaults, and their descriptions are
-           authored here for the same reason.
-
-           Every card below carries a `pair` id mirroring the scheme JSONs' own
-           `pair` field; color-mode.js groups cards into light/dark families
-           from the same data. */
-        var cards = [
-            { slug: "light", name: dzT("hub.schemes.builtin.light.name"), pair: "machinon", desc: dzT("hub.schemes.builtin.light.desc"), colors: { background: "#f4f8fc", navbar: "#e9f2fb", item: "#ffffff", main_color: "#396d9e", main_text: "#1b2b3a", alt_text: "#3e5568", disabled: "#8ca0b3" } },
-            { slug: "dark", name: dzT("hub.schemes.builtin.dark.name"), pair: "machinon", desc: dzT("hub.schemes.builtin.dark.desc"), colors: { background: "#0f1620", navbar: "#0a0f16", item: "#18202b", main_color: "#98ccfd", main_text: "#dce6f0", alt_text: "#9db2c6", disabled: "#5e7183" } }
-        ];
-        Object.keys(schemes).forEach(function(slug) {
-            var s = schemes[slug];
-            cards.push({ slug: slug, name: s.name, pair: s.pair, desc: s.description, colors: s.colors || {} });
+    if (!dzSchemePickerContainers().length) return;
+    dzArmSchemePicker();
+    dzSchemePickerDataKey = dzSchemePickerData();
+    loadBuiltinSchemes().then(function (schemes) {
+        var cards = dzSchemeFamilies(theme.user_schemes).map(function (fam) {
+            return dzSchemeCardModel(fam, schemes, theme.user_schemes, theme.color_scheme);
         });
-        /* Generated pairs render as "<name> Light" / "<name> Dark" adjacent to
-           each other; legacy unpaired presets keep their bare name and slug. */
-        (theme.user_schemes || []).forEach(function(p) {
-            var slug = p.variant ? "user:" + p.name + "|" + p.variant : "user:" + p.name;
-            var label = p.variant
-                ? dzT("hub.schemes.pair_label", {
-                    name: p.name,
-                    variant: p.variant === "dark" ? dzT("hub.schemes.dark") : dzT("hub.schemes.light")
-                })
-                : p.name;
-            cards.push({ slug: slug, name: label, pair: p.pair, variant: p.variant,
-                         presetName: p.name, deletable: true, colors: p.colors || {} });
+        dzSchemePickerContainers().forEach(function (container) {
+            dzBuildSchemePicker(container, cards);
         });
-        /* colors: null = the Custom card, resolved to the user's live
-           colours at render time below. */
-        cards.push({ slug: "custom", name: dzT("hub.schemes.builtin.custom.name"), desc: dzT("hub.schemes.builtin.custom.desc"), colors: null });
-
-        // Build fresh DOM per container (a node cannot have two parents); the
-        // `cards` data above is computed once and shared read-only across them.
-        var active = dzActiveSchemeSlug();
-        containers.forEach(function(container) {
-            container.textContent = "";
-            container.setAttribute("role", "group");
-            container.setAttribute("aria-label", dzT("hub.schemes.group_label"));
-            cards.forEach(function(card, i) {
-                var el = document.createElement("div");
-                el.className = "scheme-card" + (active === card.slug ? " selected" : "");
-                el.setAttribute("data-scheme", card.slug);
-
-                /* The card is a plain container; this transparent button,
-                   stretched over it (css/theme-hub.css), is what takes focus and
-                   clicks. A card that WAS the button could not hold the delete
-                   control below: a button's content is presentational, so a
-                   screen reader could never reach a control nested in it. */
-                var pick = document.createElement("button");
-                pick.type = "button";
-                pick.className = "scheme-pick";
-                pick.setAttribute("aria-label", card.name);
-                pick.setAttribute("aria-pressed", active === card.slug ? "true" : "false");
-                el.appendChild(pick);
-
-                var swatches = document.createElement("div");
-                swatches.className = "swatches";
-                var cs = card.colors || theme.color_scheme || {};
-                SWATCH_KEYS.forEach(function(key) {
-                    var sw = document.createElement("span");
-                    if (cs[key]) sw.style.backgroundColor = cs[key];
-                    swatches.appendChild(sw);
-                });
-                el.appendChild(swatches);
-
-                var label = document.createElement("div");
-                label.className = "scheme-name";
-                label.textContent = card.name;
-                el.appendChild(label);
-
-                if (card.desc) {
-                    var desc = document.createElement("div");
-                    desc.className = "scheme-desc";
-                    desc.id = container.id + "-desc-" + i;
-                    desc.textContent = card.desc;
-                    el.appendChild(desc);
-                    pick.setAttribute("aria-describedby", desc.id);
-                }
-
-                if (card.deletable) {
-                    var del = document.createElement("button");
-                    del.type = "button";
-                    del.className = "scheme-delete";
-                    del.textContent = "×";
-                    del.title = dzT("hub.schemes.delete_preset");
-                    del.setAttribute("aria-label", dzT("hub.schemes.delete_named", { name: card.name }));
-                    del.addEventListener("click", function(e) {
-                        e.stopPropagation();
-                        deleteUserScheme(card.presetName || card.name, card.variant);
-                    });
-                    el.appendChild(del);
-                }
-
-                el.addEventListener("click", function() {
-                    applyScheme(card.slug).then(function() {
-                        container.querySelectorAll(".scheme-card").forEach(function(c) {
-                            c.classList.remove("selected");
-                            c.querySelector(".scheme-pick").setAttribute("aria-pressed", "false");
-                        });
-                        el.classList.add("selected");
-                        pick.setAttribute("aria-pressed", "true");
-                        // Keep the hub's own custom-colour swatches (value + enabled
-                        // state) in step with the pick. Guarded: schemes.js must not
-                        // hard-depend on the hub module.
-                        if (typeof dzHubSyncSchemeSwatches === "function") { dzHubSyncSchemeSwatches(); }
-                    });
-                });
-                container.appendChild(el);
-            });
-        });
+        dzUpdateSchemePickers();
         if (typeof dzHubSyncSchemeSwatches === "function") { dzHubSyncSchemeSwatches(); }
     });
+}
+
+function dzSchemeSwatchStrip(colors) {
+    var strip = document.createElement("div");
+    strip.className = "swatches";
+    DZ_SCHEME_SWATCH_KEYS.forEach(function (key) {
+        var sw = document.createElement("span");
+        if (colors && typeof colors[key] === "string") { sw.style.backgroundColor = colors[key]; }
+        strip.appendChild(sw);
+    });
+    return strip;
+}
+
+/* Build fresh DOM into one container (a node cannot have two parents); the
+   card models are shared read-only. Selection, dimming and notes are left to
+   dzUpdateSchemePickers. */
+function dzBuildSchemePicker(container, cards) {
+    container.textContent = "";
+    container.removeAttribute("role");
+    container.removeAttribute("aria-label");
+
+    var modeWrap = document.createElement("div");
+    modeWrap.className = "scheme-mode-wrap";
+    var group = document.createElement("div");
+    group.className = "scheme-mode";
+    group.setAttribute("role", "group");
+    group.setAttribute("aria-label", dzT("hub.schemes.mode_label"));
+    var note = document.createElement("p");
+    note.className = "scheme-mode-note";
+    note.id = container.id + "-mode-note";
+    note.hidden = true;
+    DZ_SCHEME_MODE_ORDER.forEach(function (mode) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "scheme-mode-btn";
+        btn.setAttribute("data-mode", mode);
+        btn.setAttribute("aria-pressed", "false");
+        btn.setAttribute("aria-describedby", note.id);
+        btn.textContent = dzSchemeModeLabel(mode);
+        btn.addEventListener("click", function () {
+            dzSetSchemeMode(mode).then(dzUpdateSchemePickers);
+        });
+        group.appendChild(btn);
+    });
+    modeWrap.appendChild(group);
+    modeWrap.appendChild(note);
+
+    var notice = document.createElement("div");
+    notice.className = "scheme-override";
+    notice.hidden = true;
+    var noticeText = document.createElement("span");
+    noticeText.className = "scheme-override-text";
+    notice.appendChild(noticeText);
+    var clear = document.createElement("button");
+    clear.type = "button";
+    clear.className = "btn btn-default btn-small scheme-override-clear";
+    clear.addEventListener("click", function () {
+        dzSetColorOverride(null);
+        dzApplyColorMode().then(dzUpdateSchemePickers);
+    });
+    notice.appendChild(clear);
+    modeWrap.appendChild(notice);
+    container.appendChild(modeWrap);
+
+    var list = document.createElement("div");
+    list.className = "scheme-cards";
+    list.setAttribute("role", "group");
+    list.setAttribute("aria-label", dzT("hub.schemes.group_label"));
+    cards.forEach(function (card, i) {
+        var el = document.createElement("div");
+        el.className = "scheme-card" + (card.single ? " is-single" : "") + (card.deletable ? " is-deletable" : "");
+        el.setAttribute("data-family", card.id);
+
+        /* The card is a plain container; this transparent button, stretched
+           over it (css/theme-hub.css), is what takes focus and clicks. A card
+           that WAS the button could not hold the delete control below: a
+           button's content is presentational, so a screen reader could never
+           reach a control nested in it. */
+        var pick = document.createElement("button");
+        pick.type = "button";
+        pick.className = "scheme-pick";
+        pick.setAttribute("aria-label", card.name);
+        pick.setAttribute("aria-pressed", "false");
+        el.appendChild(pick);
+
+        var preview = document.createElement("div");
+        preview.className = "scheme-preview";
+        (card.single ? ["light"] : ["light", "dark"]).forEach(function (variant) {
+            var half = document.createElement("div");
+            half.className = "scheme-half";
+            half.setAttribute("data-variant", variant);
+            half.appendChild(dzSchemeSwatchStrip(card[variant]));
+            var marker = document.createElement("div");
+            marker.className = "scheme-marker";
+            half.appendChild(marker);
+            preview.appendChild(half);
+        });
+        el.appendChild(preview);
+
+        var text = document.createElement("div");
+        text.className = "scheme-text";
+        var label = document.createElement("div");
+        label.className = "scheme-name";
+        label.textContent = card.name;
+        text.appendChild(label);
+        if (card.desc) {
+            var desc = document.createElement("div");
+            desc.className = "scheme-desc";
+            desc.id = container.id + "-desc-" + i;
+            desc.textContent = card.desc;
+            text.appendChild(desc);
+            pick.setAttribute("aria-describedby", desc.id);
+        }
+        el.appendChild(text);
+
+        if (card.deletable) {
+            /* One delete per card: deleteUserScheme removes both versions of
+               a pair, so it is called once with either version's name. */
+            var del = document.createElement("button");
+            del.type = "button";
+            del.className = "scheme-delete";
+            del.textContent = "×";
+            del.title = dzT("hub.schemes.delete_preset");
+            del.setAttribute("aria-label", card.single
+                ? dzT("hub.schemes.delete_named", { name: card.name })
+                : dzT("hub.schemes.delete_pair_named", { name: card.name }));
+            del.addEventListener("click", function (e) {
+                e.stopPropagation();
+                deleteUserScheme(card.presetName, card.presetVariant);
+            });
+            el.appendChild(del);
+        }
+
+        el.addEventListener("click", function () {
+            dzPickFamily(card.id).then(function () {
+                dzUpdateSchemePickers();
+                // Keep the hub's own custom-colour swatches (value + enabled
+                // state) in step with the pick. Guarded: schemes.js must not
+                // hard-depend on the hub module.
+                if (typeof dzHubSyncSchemeSwatches === "function") { dzHubSyncSchemeSwatches(); }
+            });
+        });
+        list.appendChild(el);
+    });
+    container.appendChild(list);
+}
+
+/* Bring every built picker in line with the saved model and this device, in
+   place. A change to the presets since the last build rebuilds instead. */
+function dzUpdateSchemePickers() {
+    var containers = dzSchemePickerContainers();
+    if (!containers.length) { return; }
+    if (dzSchemePickerDataKey !== null && dzSchemePickerData() !== dzSchemePickerDataKey) {
+        renderSchemePicker();
+        return;
+    }
+    var families = dzSchemeFamilies(theme.user_schemes);
+    var state = dzSchemePickerState(families, dzActiveSchemeSlug(), theme.scheme_mode,
+                                    dzColorOverride(), dzDeviceDark());
+    containers.forEach(function (container) { dzUpdateSchemePicker(container, state); });
+}
+
+function dzUpdateSchemePicker(container, state) {
+    var group = container.querySelector(".scheme-mode");
+    if (!group) { return; }
+    group.setAttribute("aria-disabled", state.single ? "true" : "false");
+    Array.prototype.forEach.call(group.querySelectorAll(".scheme-mode-btn"), function (btn) {
+        var on = !state.single && btn.getAttribute("data-mode") === state.mode;
+        btn.disabled = state.single;
+        btn.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+
+    var selectedName = "";
+    Array.prototype.forEach.call(container.querySelectorAll(".scheme-card"), function (el) {
+        var selected = el.getAttribute("data-family") === state.selected;
+        var single = el.classList.contains("is-single");
+        el.classList.toggle("selected", selected);
+        var pick = el.querySelector(".scheme-pick");
+        if (pick) { pick.setAttribute("aria-pressed", selected ? "true" : "false"); }
+        if (selected) {
+            var name = el.querySelector(".scheme-name");
+            selectedName = name ? name.textContent : "";
+        }
+        Array.prototype.forEach.call(el.querySelectorAll(".scheme-half"), function (half) {
+            /* A single-version pick has no light/dark to show, so nothing
+               dims while it is selected. */
+            var active = single || state.single || half.getAttribute("data-variant") === state.variant;
+            var strip = half.querySelector(".swatches");
+            var marker = half.querySelector(".scheme-marker");
+            if (strip) { strip.classList.toggle("is-dimmed", !active); }
+            if (marker) { marker.classList.toggle("is-active", selected && active); }
+        });
+        /* Custom previews the live colours, which a pick rewrites. */
+        if (el.getAttribute("data-family") === "custom") {
+            var cs = theme.color_scheme || {};
+            Array.prototype.forEach.call(el.querySelectorAll(".swatches span"), function (sw, i) {
+                var value = cs[DZ_SCHEME_SWATCH_KEYS[i]];
+                sw.style.backgroundColor = typeof value === "string" ? value : "";
+            });
+        }
+    });
+
+    var note = container.querySelector(".scheme-mode-note");
+    if (note) {
+        var text = "";
+        if (state.note === "single") {
+            text = dzT("hub.schemes.note_single", { name: selectedName });
+        } else if (state.note === "auto_dark") {
+            text = dzT("hub.schemes.note_auto_dark");
+        } else if (state.note === "auto_light") {
+            text = dzT("hub.schemes.note_auto_light");
+        }
+        note.textContent = text;
+        note.hidden = !text;
+    }
+
+    var notice = container.querySelector(".scheme-override");
+    if (notice) {
+        notice.hidden = !state.override;
+        if (state.override) {
+            notice.querySelector(".scheme-override-text").textContent =
+                dzT("hub.schemes.note_override", { variant: dzSchemeModeLabel(state.override) });
+            notice.querySelector(".scheme-override-clear").textContent =
+                dzT("hub.schemes.clear_override", { mode: dzSchemeModeLabel(state.mode) });
+        }
+    }
 }

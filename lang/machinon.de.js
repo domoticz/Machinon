@@ -193,7 +193,7 @@ language = {
       },
       scheme: {
         label: "Farbschema",
-        description: "Legt das gesamte Farbschema des Designs fest: eine helle oder dunkle Basis mit benannten Farbpaletten."
+        description: "Wähle ein Design und dann Hell, Dunkel oder dass es diesem Gerät folgt."
       },
       custom_color_scheme: {
         label: "Eigene Farben",
@@ -330,12 +330,12 @@ language = {
         disabled: "Deaktiviert"
       },
       builtin: {
-        light: { name: "Machinon Hell", desc: "Das Standardaussehen: klares Blau auf Weiß" },
-        dark: { name: "Machinon Dunkel", desc: "Das Standardaussehen: leuchtendes Blau auf Marineblau" },
+        machinon: { name: "Machinon", desc: "Das Standardaussehen: klares Blau auf Weiß oder leuchtend auf Marineblau" },
         custom: { name: "Benutzerdefiniert", desc: "Deine eigenen sieben Farben" }
       },
       delete_preset: "Voreinstellung löschen",
       delete_named: "Voreinstellung {name} löschen",
+      delete_pair_named: "Design {name} löschen (beide Versionen)",
       group_label: "Farbschema",
       wheel_aria: "{label} mit einem Farbkreis wählen",
       hex_aria: "Hex-Wert für {label}",
@@ -343,7 +343,15 @@ language = {
       preset_name_prompt: "Name der Voreinstellung",
       light: "Hell",
       dark: "Dunkel",
-      pair_label: "{name} {variant}",
+      mode_label: "Farbmodus",
+      mode_light: "Hell",
+      mode_dark: "Dunkel",
+      mode_auto: "Gerät folgen",
+      note_auto_dark: "Dieses Gerät ist im dunklen Modus, daher siehst du die dunkle Version.",
+      note_auto_light: "Dieses Gerät ist im hellen Modus, daher siehst du die helle Version.",
+      note_single: "{name} hat nur eine Version, daher gelten Hell und Dunkel nicht. Wähle ein anderes Design, um sie zu nutzen.",
+      note_override: "Auf diesem Gerät hast du mit dem Umschalter zu {variant} gewechselt.",
+      clear_override: "Wieder {mode} verwenden",
       wcag_what_preset: "Voreinstellung \"{name}\" gespeichert, aber sie",
       wcag_what_custom: "Das eigene Farbschema",
       wcag_body: "Text auf Hintergrund {ratio}:1 (WCAG AA erfordert 4.5)",
@@ -369,7 +377,7 @@ language = {
       accent_label: "Hauptfarbe",
       surface_label: "Grauton",
       drift_label: "Deine Farbe wurde angepasst, damit sie lesbar bleibt:",
-      saved_lead: "Als zwei Schemata gespeichert, „{name} Hell“ und „{name} Dunkel“.",
+      saved_lead: "{name} mit einer hellen und einer dunklen Version gespeichert.",
       preview: {
         device: "Wohnzimmer",
         status: "21,4 °C · 47%",

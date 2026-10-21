@@ -194,7 +194,7 @@ language = {
       },
       scheme: {
         label: "Färgschema",
-        description: "Anger temats övergripande färgschema: en ljus eller mörk grund, med namngivna färgpaletter."
+        description: "Välj ett tema och sedan ljust, mörkt eller låt det följa den här enheten."
       },
       custom_color_scheme: {
         label: "Egna färger",
@@ -330,12 +330,12 @@ language = {
         disabled: "Inaktiverad"
       },
       builtin: {
-        light: { name: "Machinon Ljus", desc: "Standardutseendet: rent blått på vitt" },
-        dark: { name: "Machinon Mörk", desc: "Standardutseendet: blått som lyser mot marinblått" },
+        machinon: { name: "Machinon", desc: "Standardutseendet: rent blått på vitt, eller lysande mot marinblått" },
         custom: { name: "Anpassad", desc: "Dina egna sju färger" }
       },
       delete_preset: "Radera förinställning",
       delete_named: "Radera förinställning {name}",
+      delete_pair_named: "Radera temat {name} (båda versionerna)",
       group_label: "Färgschema",
       wheel_aria: "Välj {label} med en färgcirkel",
       hex_aria: "Hex-värde för {label}",
@@ -343,7 +343,15 @@ language = {
       preset_name_prompt: "Namn på förinställningen",
       light: "Ljus",
       dark: "Mörk",
-      pair_label: "{name} {variant}",
+      mode_label: "Färgläge",
+      mode_light: "Ljust",
+      mode_dark: "Mörkt",
+      mode_auto: "Följ enheten",
+      note_auto_dark: "Den här enheten är i mörkt läge, så du ser den mörka versionen.",
+      note_auto_light: "Den här enheten är i ljust läge, så du ser den ljusa versionen.",
+      note_single: "{name} har bara en version, så ljust och mörkt gäller inte. Välj ett annat tema för att använda dem.",
+      note_override: "På den här enheten bytte du till {variant} med knappen.",
+      clear_override: "Använd {mode} igen",
       wcag_what_preset: "Förinställningen \"{name}\" sparades, men den",
       wcag_what_custom: "Det egna färgschemat",
       wcag_body: "text mot bakgrund {ratio}:1 (WCAG AA kräver 4.5)",
@@ -369,7 +377,7 @@ language = {
       accent_label: "Huvudfärg",
       surface_label: "Gråton",
       drift_label: "Din färg justerades för att förbli läsbar:",
-      saved_lead: "Sparat som två scheman, ”{name} Ljus” och ”{name} Mörk”.",
+      saved_lead: "{name} sparat med en ljus och en mörk version.",
       preview: {
         device: "Vardagsrum",
         status: "21,4 °C · 47%",

@@ -196,7 +196,7 @@ language = {
       },
       scheme: {
         label: "Kleurenschema",
-        description: "Bepaalt het volledige kleurenschema van het thema: een lichte of donkere basis, met benoemde kleurpaletten."
+        description: "Kies een thema en daarna licht, donker, of laat het dit apparaat volgen."
       },
       custom_color_scheme: {
         label: "Eigen kleuren",
@@ -333,12 +333,12 @@ language = {
         disabled: "Uitgeschakeld"
       },
       builtin: {
-        light: { name: "Machinon Licht", desc: "De standaardstijl: helder blauw op wit" },
-        dark: { name: "Machinon Donker", desc: "De standaardstijl: blauw dat gloeit op marineblauw" },
+        machinon: { name: "Machinon", desc: "De standaardstijl: helder blauw op wit, of gloeiend op marineblauw" },
         custom: { name: "Eigen", desc: "Je eigen zeven kleuren" }
       },
       delete_preset: "Voorinstelling verwijderen",
       delete_named: "Voorinstelling {name} verwijderen",
+      delete_pair_named: "Thema {name} verwijderen (beide versies)",
       group_label: "Kleurenschema",
       wheel_aria: "{label} kiezen met een kleurenwiel",
       hex_aria: "Hexwaarde van {label}",
@@ -346,7 +346,15 @@ language = {
       preset_name_prompt: "Naam van de voorinstelling",
       light: "Licht",
       dark: "Donker",
-      pair_label: "{name} {variant}",
+      mode_label: "Kleurmodus",
+      mode_light: "Licht",
+      mode_dark: "Donker",
+      mode_auto: "Apparaat volgen",
+      note_auto_dark: "Dit apparaat staat in donkere modus, dus je ziet de donkere versie.",
+      note_auto_light: "Dit apparaat staat in lichte modus, dus je ziet de lichte versie.",
+      note_single: "{name} heeft maar één versie, dus licht en donker zijn niet van toepassing. Kies een ander thema om ze te gebruiken.",
+      note_override: "Op dit apparaat ben je met de schakelaar naar {variant} gegaan.",
+      clear_override: "Weer {mode} gebruiken",
       wcag_what_preset: "Voorinstelling \"{name}\" opgeslagen, maar die",
       wcag_what_custom: "Het eigen kleurenschema",
       wcag_body: "tekst op achtergrond {ratio}:1 (WCAG AA vereist 4.5)",
@@ -372,7 +380,7 @@ language = {
       accent_label: "Hoofdkleur",
       surface_label: "Grijstint",
       drift_label: "Je kleur is aangepast zodat hij leesbaar blijft:",
-      saved_lead: "Opgeslagen als twee schema's, “{name} Licht” en “{name} Donker”.",
+      saved_lead: "{name} opgeslagen met een lichte en een donkere versie.",
       preview: {
         device: "Woonkamer",
         status: "21,4 °C · 47%",
