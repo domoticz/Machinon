@@ -378,15 +378,12 @@
 }
 
 /* ---- Scheme picker + custom-colour swatches, hosted -----------------------
-   src/js/theme-hub.js mounts the SAME src/js/schemes.js renderSchemePicker
-   cards and 7 colour swatches here (registerSchemePickerContainer, not a
-   rewrite). Card styling is scoped to the hub's own container id, and this
-   block is the only scheme card styling in the theme. Spacing on the hub's 8px rhythm, fonts on --dz-text-*
-   tokens only. */
+   src/js/theme-hub.js mounts the src/js/schemes.js picker and the 7 colour
+   swatches here (registerSchemePickerContainer). Card styling is scoped to
+   the hub's own container, and this block is the only scheme card styling in
+   the theme. Spacing on the hub's 8px rhythm, fonts on --dz-text-* tokens
+   only. */
 .dz-hub-scheme-picker {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px; /* future --dz-gap token site (spacing project); css/settings.css #schemePicker uses 10px, kept at 8px here for the hub's rhythm */
     /* 2px of the 8px block margin is spent as padding so the selected card's
        2px outer ring (--dz-ring-accent) has somewhere to draw: .dz-hub-panel's
        overflow-y:auto computes overflow-x to auto as well (the same CSS
@@ -401,14 +398,144 @@
     max-width: 100%;
 }
 
+/* Light | Dark | Follow device: the connected segmented idiom of
+   css/buttons.css .btn-group (accent border, outer corners on the button
+   radius, inner corners square, the toggle-selected fill for the pressed
+   segment), drawn on the button tokens directly. Not .btn-group .btn-default
+   itself: that ghost rule's !important background outranks the shared
+   [disabled] treatment, so a single-version theme could not grey the switch
+   out. Full width on a phone, capped where three labels sit comfortably. */
+.dz-hub-scheme-picker .scheme-mode {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: 420px;
+}
+
+.dz-hub-scheme-picker .scheme-mode-btn {
+    -webkit-appearance: none;
+    appearance: none;
+    min-width: 0;
+    margin: 0 0 0 -1px;
+    padding: var(--dz-btn-pad-md);
+    border: 1px solid var(--dz-accent-color);
+    border-radius: 0;
+    background: transparent;
+    color: var(--dz-btn-ghost-text);
+    font-family: var(--dz-font-family);
+    font-size: var(--dz-text-xs);
+    line-height: var(--dz-btn-line-height);
+    text-align: center;
+    cursor: pointer;
+    transition: background-color .12s ease, color .12s ease;
+}
+
+.dz-hub-scheme-picker .scheme-mode-btn:first-child {
+    margin-left: 0;
+    border-top-left-radius: var(--dz-btn-radius);
+    border-bottom-left-radius: var(--dz-btn-radius);
+}
+
+.dz-hub-scheme-picker .scheme-mode-btn:last-child {
+    border-top-right-radius: var(--dz-btn-radius);
+    border-bottom-right-radius: var(--dz-btn-radius);
+}
+
+.dz-hub-scheme-picker .scheme-mode-btn:hover {
+    background: var(--dz-btn-hover-bg);
+}
+
+.dz-hub-scheme-picker .scheme-mode-btn[aria-pressed="true"] {
+    background: var(--dz-btn-toggle-selected-bg);
+    color: var(--dz-btn-toggle-selected-text);
+}
+
+.dz-hub-scheme-picker .scheme-mode-btn:focus {
+    outline: none;
+}
+
+/* Lifted so the neighbouring segment, drawn later, cannot cover the ring. */
+.dz-hub-scheme-picker .scheme-mode-btn:focus-visible {
+    position: relative;
+    z-index: 1;
+    box-shadow: var(--dz-btn-focus-ring);
+}
+
+/* A single-version theme: the switch keeps its unselected look, faded, so
+   the three choices stay readable next to the note that explains them. The
+   shared disabled fill would turn it into one grey bar. */
+.dz-hub-scheme-picker .scheme-mode[aria-disabled="true"] {
+    opacity: 0.5;
+}
+
+.dz-hub-scheme-picker .scheme-mode-btn:disabled {
+    background: transparent;
+    cursor: not-allowed;
+}
+
+/* Phones: the switch spans the panel, at a touch-sized height. */
+@media (max-width: 767px) {
+    .dz-hub-scheme-picker .scheme-mode {
+        max-width: none;
+    }
+
+    .dz-hub-scheme-picker .scheme-mode-btn {
+        min-height: 44px;
+    }
+}
+
+.dz-hub-scheme-picker .scheme-mode-note,
+.dz-hub-scheme-picker .scheme-override {
+    margin: 6px 0 0; /* future --dz-gap token site (spacing project) */
+    font-size: var(--dz-text-xs);
+    line-height: 1.45;
+    color: var(--secondary-text-color);
+}
+
+.dz-hub-scheme-picker .scheme-override {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px; /* future --dz-gap token site (spacing project) */
+}
+
+/* The hidden attribute must win over the flex display above. */
+.dz-hub-scheme-picker .scheme-override[hidden] {
+    display: none;
+}
+
+/* One full-width row per theme on a phone; from 768px the same rows in as
+   many columns as fit (three at 1440). */
+.dz-hub-scheme-picker .scheme-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* future --dz-gap token site (spacing project) */
+    margin-top: 12px;
+}
+
+@media (min-width: 768px) {
+    .dz-hub-scheme-picker .scheme-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    }
+}
+
 .dz-hub-scheme-picker .scheme-card {
     position: relative;
-    cursor: pointer;
-    width: 160px; /* at 9 cards (four families, light+dark, plus custom) the row wraps across multiple lines on desktop rather than fitting on one. At 360px the hub's own chrome leaves the panel only ~277px wide, so cards wrap one-up rather than two-up; still fully contained, just a taller single column */
-    padding: 6px; /* future --dz-gap token site (spacing project) */
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    padding: 8px 12px; /* future --dz-gap token site (spacing project) */
     border: 1px solid var(--dz-input-border);
-    border-radius: var(--dz-btn-radius);
+    border-radius: var(--dz-card-radius);
+    background: var(--dz-widget-bg);
+    cursor: pointer;
     transition: border-color 0.15s ease;
+}
+
+/* Room for the delete glyph in the top corner. */
+.dz-hub-scheme-picker .scheme-card.is-deletable {
+    padding-right: 28px;
 }
 
 .dz-hub-scheme-picker .scheme-card:hover {
@@ -421,9 +548,9 @@
 }
 
 /* The card's click and focus target (src/js/schemes.js): a transparent button
-   stretched over the whole card, so the card looks and clicks exactly as
-   before while a keyboard can reach it. Its own outline is dropped; the card
-   shows a solid accent outline 3px outside itself instead. Not the usual
+   stretched over the whole card, so the card looks and clicks as one control
+   while a keyboard can reach it. Its own outline is dropped; the card shows a
+   solid accent outline 3px outside itself instead. Not the usual
    --dz-btn-focus-ring: the selected state already spends a solid 2px accent
    ring, which covers a box-shadow ring exactly and swallows a faint 35% one
    next to it, so focus on the CURRENT card would not show. The 3px gap keeps
@@ -450,34 +577,70 @@
     outline-offset: 3px;
 }
 
+/* Light version, then dark: each a four-colour strip with its marker bar
+   underneath. A single-version theme shows one. */
+.dz-hub-scheme-picker .scheme-preview {
+    display: flex;
+    flex-shrink: 0;
+    gap: 4px;
+}
+
+.dz-hub-scheme-picker .scheme-half {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
 .dz-hub-scheme-picker .swatches {
     display: flex;
-    height: 28px; /* was 22px; seven swatches across 160px read as colour bands rather than hairlines */
+    border: 1px solid var(--dz-input-border);
     border-radius: 4px;
     overflow: hidden;
-    border: 1px solid var(--dz-input-border);
+    transition: opacity 0.15s ease;
 }
 
 .dz-hub-scheme-picker .swatches span {
-    flex: 1;
+    display: block;
+    width: 14px;
+    height: 32px;
+}
+
+/* The version this device does not paint, on every card. */
+.dz-hub-scheme-picker .swatches.is-dimmed {
+    opacity: 0.35;
+}
+
+.dz-hub-scheme-picker .scheme-marker {
+    height: 3px;
+    border-radius: 2px;
+}
+
+/* Under the painted version of the selected card only. */
+.dz-hub-scheme-picker .scheme-marker.is-active {
+    background-color: var(--dz-accent-color);
+}
+
+.dz-hub-scheme-picker .scheme-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
 }
 
 .dz-hub-scheme-picker .scheme-name {
-    margin-top: 6px; /* future --dz-gap token site (spacing project) */
-    font-size: var(--dz-text-xs);
-    text-align: center;
+    font-size: var(--dz-text-sm);
+    font-weight: var(--dz-weight-semibold);
     color: var(--dz-body-text);
+    overflow-wrap: anywhere;
 }
 
-/* Each scheme's own one-line description (schemes/*.json "description"; the two
-   base cards and Custom carry theirs in schemes.js). One step below the name on
-   the type scale, in the secondary text colour, so it supports the name without
-   competing with it. Absent on user presets, which have no description. */
+/* The family's one-line description (schemes/*.json family_description; the
+   Machinon and Custom cards carry theirs in the lang files). One step below
+   the name on the type scale, in the secondary text colour, so it supports
+   the name without competing with it. Absent on the user's own themes. */
 .dz-hub-scheme-picker .scheme-desc {
-    margin-top: 2px;
-    font-size: var(--dz-text-micro);
-    line-height: 1.3;
-    text-align: center;
+    font-size: var(--dz-text-xs);
+    line-height: 1.35;
     color: var(--secondary-text-color);
 }
 
@@ -485,8 +648,8 @@
     position: absolute;
     /* Above the stretched .scheme-pick, so it keeps its own clicks. */
     z-index: 1;
-    top: -2px;
-    right: 4px;
+    top: 4px;
+    right: 8px;
     font-size: var(--dz-text-sm);
     line-height: 1;
     color: var(--secondary-text-color);

@@ -289,7 +289,7 @@ core; never working documents that do not ship.
 > Every shipped scheme must hold body text vs body background at WCAG AA 4.5:1 or better,
 > and text-on-accent (`--dz-accent-text`, the token every "text on an accent surface" rule
 > consumes; scheme key `accent_text`) at 3:1 or better.
-> The two base cards' hardcoded preview swatches must match the computed tokens.
+> The Machinon card's hardcoded preview swatches (both halves) must match the computed tokens.
 > Adding a scheme = one JSON file + an `index.json` entry. The shipped set is deliberately
 > small: four families, each a light and dark pair. Machinon Light
 > and Machinon Dark are the token defaults themselves and carry no JSON; Magenta, Paper and
@@ -488,8 +488,8 @@ water is.
 (`schemes/*.json`) now carries them (e.g. Paper Light/Dark both carry `"pair": "paper"`, with
 `"variant": "light"`/`"dark"`), and `dzSaveGeneratedPair` (`src/js/schemes.js`) writes them onto
 both halves of a wizard-generated pair (`pair` a fresh id from `dzNewPairId`, `variant` its base).
-The two hardcoded default cards (Machinon Light/Dark in `renderSchemePicker`) carry `pair:
-"machinon"` the same way. A legacy hand-saved preset (`saveCurrentColorsAsScheme`, predating this
+The base pair (`light`/`dark`, the token defaults with no JSON) is declared as `"machinon"` in
+the static `DZ_BUILTIN_PAIRS` table (`src/js/color-mode.js`). A legacy hand-saved preset (`saveCurrentColorsAsScheme`, predating this
 metadata) has no `pair` and is correctly treated as unpaired.
 
 `src/js/color-mode.js` owns the grouping: `dzSchemeFamilies` builds light/dark families from a static
@@ -2455,10 +2455,48 @@ duplicating them: the scheme picker and 7-swatch custom-colour editor (`src/js/s
 the hub is attached to the live document; the reason lives in `src/js/theme-hub.js`
 (`dzBuildThemeHub`).
 
+**Scheme picker: one card per theme, plus the colour mode.** The Colors group's picker
+(`renderSchemePicker`, `src/js/schemes.js`) shows one `.scheme-card` per theme family
+(`dzSchemeFamilies`): Machinon, the built-in pairs, the user's own wizard themes, legacy presets
+and Custom. Names come from the lang files (Machinon, Custom), the scheme files' `family_name` /
+`family_description` (built-ins) or the preset name (user themes, which carry no description).
+
+- **Layout.** Under the section header sits the mode switch, then the cards, then "Create a
+  theme". Below 768px every card is a full-width row; from 768px the same rows sit in a
+  `repeat(auto-fill, minmax(360px, 1fr))` grid (three columns at 1440, two at 1024). A row is
+  the swatch preview on the left, name (`{typography.sm}` semibold) and description
+  (`{typography.xs}`, secondary text) on the right; card radius `--dz-card-radius` on
+  `--dz-widget-bg`, the selected card `--dz-ring-accent`.
+- **Mode switch.** `Light | Dark | Follow device`, a named `role=group` of three buttons with
+  `aria-pressed`. It draws the connected segmented idiom of [Button Groups](#button-groups) on
+  the button tokens directly (accent border, `--dz-btn-radius` outer corners,
+  `--dz-btn-toggle-selected-bg/-text` for the pressed segment, `--dz-btn-hover-bg`,
+  `--dz-btn-focus-ring`), capped at 420px on wide screens and full width with a 44px minimum
+  height below 768px. **Constraint.** It is not `.btn-group .btn-default` itself: that ghost
+  rule's `!important` background outranks the shared `[disabled]` treatment.
+- **Swatches, dimmed and marked.** Each paired card shows two four-colour strips (background,
+  item, accent, text), light then dark; a single-version card shows one. The version this
+  device paints is at full strength and the other is dimmed (opacity 0.35) on every card; the
+  selected card also carries a 3px accent bar under its painted half. While a single-version
+  theme is selected nothing dims, since light and dark do not apply.
+- **Single-version themes.** Selecting Custom or a legacy preset disables the switch
+  (`aria-disabled` on the group, `disabled` buttons, none pressed). It keeps its unselected look
+  at opacity 0.5 rather than the grey `--dz-btn-disabled-*` fill, so the three choices stay
+  readable next to the note that explains them.
+- **Notes.** One line under the switch: the single-version note, or under Follow device the
+  device note ("This device is in dark mode, so you see the dark version"); a fixed Light or
+  Dark has none. When the quick toggle has overridden the mode on this device, a notice says so
+  with a button that clears the override.
+- **Delete.** A user theme's card carries one delete control; a wizard theme is deleted with
+  both versions in one write (`deleteUserScheme`), a legacy preset on its own.
+- **Updates in place.** The cards are rebuilt only when the presets change; a paint (the
+  `dz:colormode` event), a device light/dark switch, a pick or a mode click only flips classes,
+  `aria-pressed` and the notes, through one listener registered once.
+
 **Scheme cards, keyboard and state.** Each `.scheme-card` is a plain container; a transparent
-`.scheme-pick` `<button>` stretched over it takes clicks and focus and carries the scheme name and
-`aria-pressed`, so a user scheme's `.scheme-delete` (a button too) is never nested inside another
-control. The card of the scheme IN EFFECT is the selected one even before anyone picks
+`.scheme-pick` `<button>` stretched over it takes clicks and focus and carries the theme name and
+`aria-pressed`, so a user theme's `.scheme-delete` (a button too) is never nested inside another
+control. The card of the family IN EFFECT is the selected one even before anyone picks
 (`dzActiveSchemeSlug`). Keyboard focus shows as a solid 2px `--dz-accent-color` outline 3px
 outside the card, not `--dz-btn-focus-ring`: the selected `--dz-ring-accent` would cover or
 swallow that ring on the current card. The Hub tabs follow the tab pattern (one tab stop,

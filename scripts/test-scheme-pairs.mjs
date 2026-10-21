@@ -1172,3 +1172,123 @@ test("a record another theme version wrote is repainted from the scheme files an
     await c.ctx.dzApplyColorMode(true);
     assert.ok(c.fetches.length > 0);
 });
+
+/* ---- The grouped picker's pure parts (schemes.js) ---- */
+
+test("picker state: fixed modes mark the mode's version and need no note", () => {
+    const fams = cm.dzSchemeFamilies([]);
+    const light = cm.dzSchemePickerState(fams, "light", "light", null, true);
+    assert.deepEqual({ ...light }, { selected: "machinon", single: false, mode: "light",
+                                     variant: "light", override: null, note: null });
+    const dark = cm.dzSchemePickerState(fams, "gruvbox-light", "dark", null, false);
+    assert.equal(dark.selected, "gruvbox");
+    assert.equal(dark.variant, "dark", "the mode decides the painted version, not the saved member");
+    assert.equal(dark.note, null);
+});
+
+test("picker state: Follow device follows the device and says so", () => {
+    const fams = cm.dzSchemeFamilies([]);
+    const d = cm.dzSchemePickerState(fams, "paper-light", "auto", null, true);
+    assert.equal(d.variant, "dark");
+    assert.equal(d.note, "auto_dark");
+    const l = cm.dzSchemePickerState(fams, "paper-dark", "auto", null, false);
+    assert.equal(l.variant, "light");
+    assert.equal(l.note, "auto_light");
+});
+
+test("picker state: a single-version theme disables the mode with its own note", () => {
+    const fams = cm.dzSchemeFamilies([{ name: "Old", base: "dark", colors: {} }]);
+    for (const slug of ["custom", "user:Old"]) {
+        const s = cm.dzSchemePickerState(fams, slug, "dark", { variant: "light", deviceDark: false }, false);
+        assert.equal(s.single, true, slug);
+        assert.equal(s.note, "single", slug);
+        assert.equal(s.override, null, "the toggle does not apply to a single version");
+    }
+});
+
+test("picker state: an override shows only while it changes what is painted", () => {
+    const fams = cm.dzSchemeFamilies([]);
+    const on = cm.dzSchemePickerState(fams, "light", "light", { variant: "dark", deviceDark: false }, false);
+    assert.equal(on.override, "dark");
+    assert.equal(on.variant, "dark", "the cards show what the screen shows");
+    const same = cm.dzSchemePickerState(fams, "light", "light", { variant: "light", deviceDark: false }, false);
+    assert.equal(same.override, null);
+    const auto = cm.dzSchemePickerState(fams, "light", "auto", { variant: "dark", deviceDark: false }, false);
+    assert.equal(auto.override, "dark");
+    assert.equal(auto.note, null, "the override notice replaces the Follow device note");
+    /* Made under a dark device, now light: expired in Follow device. */
+    const stale = cm.dzSchemePickerState(fams, "light", "auto", { variant: "dark", deviceDark: true }, false);
+    assert.equal(stale.override, null);
+    assert.equal(stale.variant, "light");
+    assert.equal(stale.note, "auto_light");
+    const junk = cm.dzSchemePickerState(fams, "light", "light", { variant: "url(x)", deviceDark: false }, false);
+    assert.equal(junk.override, null);
+});
+
+test("picker state: an unknown mode marks the saved member, an unknown pick selects nothing", () => {
+    const fams = cm.dzSchemeFamilies([]);
+    assert.equal(cm.dzSchemePickerState(fams, "gruvbox-dark", undefined, null, false).variant, "dark");
+    const none = cm.dzSchemePickerState(fams, "user:Gone", "light", null, false);
+    assert.equal(none.selected, null);
+    assert.equal(none.single, false, "the mode stays usable");
+    assert.equal(none.note, null);
+});
+
+test("picker cards: one per family, named from the lang files, the scheme files and the presets", () => {
+    cm.dzT = (key) => "T:" + key;
+    const users = [
+        { name: "Sunset", variant: "light", pair: "u:s1", base: "light", colors: { background: "#ffeedd" } },
+        { name: "Sunset", variant: "dark",  pair: "u:s1", base: "dark",  colors: { background: "#221100" } },
+        { name: "Old", base: "light", colors: { background: "#123456" } },
+        { name: "Half", variant: "dark", pair: "u:h1", base: "dark", colors: { background: "#010203" } }
+    ];
+    const fams = cm.dzSchemeFamilies(users);
+    const cards = Object.fromEntries(fams.map((f) => [f.id, cm.dzSchemeCardModel(f, SCHEMES, users, { background: "#abcdef" })]));
+    assert.deepEqual(Object.keys(cards), ["machinon", "magenta", "paper", "gruvbox",
+                                         "user-pair:u:s1", "user:Old", "user-pair:u:h1", "custom"]);
+    assert.equal(cards.machinon.name, "T:hub.schemes.builtin.machinon.name");
+    assert.equal(cards.machinon.light.background, "#f4f8fc");
+    assert.equal(cards.machinon.dark.background, "#0f1620");
+    for (const id of ["magenta", "paper", "gruvbox"]) {
+        const light = SCHEMES[id + "-light"];
+        assert.equal(cards[id].name, light.family_name, id);
+        assert.equal(cards[id].desc, light.family_description, id);
+        assert.equal(cards[id].light, light.colors);
+        assert.equal(cards[id].dark, SCHEMES[id + "-dark"].colors);
+    }
+    const sunset = cards["user-pair:u:s1"];
+    assert.equal(sunset.name, "Sunset");
+    assert.equal(sunset.single, false);
+    assert.equal(sunset.dark.background, "#221100");
+    assert.equal(sunset.presetName, "Sunset");
+    assert.ok(sunset.presetVariant === "light" || sunset.presetVariant === "dark");
+    assert.equal(cards["user:Old"].single, true);
+    assert.equal(cards["user:Old"].light.background, "#123456");
+    assert.equal(cards["user:Old"].dark, null);
+    assert.equal(cards["user:Old"].presetVariant, undefined, "a legacy preset deletes by name alone");
+    assert.equal(cards["user-pair:u:h1"].single, true, "a pair missing a half is one version");
+    assert.equal(cards["user-pair:u:h1"].light.background, "#010203");
+    assert.equal(cards["user-pair:u:h1"].presetVariant, "dark");
+    assert.equal(cards.custom.light.background, "#abcdef");
+    assert.equal(cards.custom.deletable, false);
+});
+
+test("picker cards: built-ins without their scheme files are named by family id", () => {
+    cm.dzT = (key) => key;
+    const fam = cm.dzSchemeFamilies([]).filter((f) => f.id === "gruvbox")[0];
+    const card = cm.dzSchemeCardModel(fam, {}, [], null);
+    assert.equal(card.name, "gruvbox");
+    assert.equal(card.light, null);
+    assert.equal(card.dark, null);
+});
+
+test("Machinon's card colours mirror the base token defaults", () => {
+    const tokens = readFileSync("dz-tokens.css", "utf8");
+    const dark = readFileSync("dark.css", "utf8");
+    const pick = (css, name) => (css.match(new RegExp("^\\s*" + name + ":\\s*(#[0-9a-fA-F]{6})", "m")) || [])[1];
+    const want = { background: "--dz-body-bg", item: "--dz-widget-bg", main_color: "--dz-accent-color", main_text: "--dz-body-text" };
+    for (const [key, token] of Object.entries(want)) {
+        assert.equal(cm.DZ_MACHINON_SWATCHES.light[key].toLowerCase(), (pick(tokens, token) || "").toLowerCase(), "light " + key);
+        assert.equal(cm.DZ_MACHINON_SWATCHES.dark[key].toLowerCase(), (pick(dark, token) || "").toLowerCase(), "dark " + key);
+    }
+});

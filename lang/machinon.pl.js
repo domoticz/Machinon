@@ -194,7 +194,7 @@ language = {
       },
       scheme: {
         label: "Schemat kolorów",
-        description: "Ustawia ogólny schemat kolorów motywu: jasną lub ciemną podstawę wraz z nazwanymi paletami kolorów."
+        description: "Wybierz motyw, a potem tryb jasny, ciemny lub zgodny z tym urządzeniem."
       },
       custom_color_scheme: {
         label: "Własne kolory",
@@ -330,12 +330,12 @@ language = {
         disabled: "Wyłączone"
       },
       builtin: {
-        light: { name: "Machinon Jasny", desc: "Wygląd domyślny: czysty błękit na bieli" },
-        dark: { name: "Machinon Ciemny", desc: "Wygląd domyślny: błękit świecący na granacie" },
+        machinon: { name: "Machinon", desc: "Wygląd domyślny: czysty błękit na bieli lub świecący na granacie" },
         custom: { name: "Własny", desc: "Twoich siedem kolorów" }
       },
       delete_preset: "Usuń zestaw",
       delete_named: "Usuń zestaw {name}",
+      delete_pair_named: "Usuń motyw {name} (obie wersje)",
       group_label: "Schemat kolorów",
       wheel_aria: "Wybierz {label} za pomocą koła kolorów",
       hex_aria: "Wartość hex dla {label}",
@@ -343,7 +343,15 @@ language = {
       preset_name_prompt: "Nazwa zestawu",
       light: "Jasny",
       dark: "Ciemny",
-      pair_label: "{name} {variant}",
+      mode_label: "Tryb kolorów",
+      mode_light: "Jasny",
+      mode_dark: "Ciemny",
+      mode_auto: "Jak urządzenie",
+      note_auto_dark: "To urządzenie jest w trybie ciemnym, więc widzisz wersję ciemną.",
+      note_auto_light: "To urządzenie jest w trybie jasnym, więc widzisz wersję jasną.",
+      note_single: "{name} ma tylko jedną wersję, więc tryb jasny i ciemny nie mają zastosowania. Wybierz inny motyw, aby z nich korzystać.",
+      note_override: "Na tym urządzeniu przełącznikiem wybrano tryb: {variant}.",
+      clear_override: "Wróć do trybu: {mode}",
       wcag_what_preset: "Zestaw \"{name}\" zapisany, ale",
       wcag_what_custom: "Własny schemat kolorów",
       wcag_body: "tekst na tle {ratio}:1 (WCAG AA wymaga 4.5)",
@@ -369,7 +377,7 @@ language = {
       accent_label: "Kolor główny",
       surface_label: "Odcień szarości",
       drift_label: "Twój kolor został dostosowany, aby pozostał czytelny:",
-      saved_lead: "Zapisano jako dwa schematy, „{name} Jasny” i „{name} Ciemny”.",
+      saved_lead: "Zapisano {name} w wersji jasnej i ciemnej.",
       preview: {
         device: "Salon",
         status: "21,4 °C · 47%",

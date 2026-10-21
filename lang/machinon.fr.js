@@ -193,7 +193,7 @@ language = {
       },
       scheme: {
         label: "Schéma de couleurs",
-        description: "Définit le schéma de couleurs global du thème: une base claire ou sombre, avec des palettes de couleurs nommées."
+        description: "Choisissez un thème, puis clair, sombre, ou laissez-le suivre cet appareil."
       },
       custom_color_scheme: {
         label: "Couleurs personnalisées",
@@ -330,12 +330,12 @@ language = {
         disabled: "Désactivé"
       },
       builtin: {
-        light: { name: "Machinon Clair", desc: "L'aspect par défaut: un bleu net sur blanc" },
-        dark: { name: "Machinon Sombre", desc: "L'aspect par défaut: du bleu lumineux sur bleu nuit" },
+        machinon: { name: "Machinon", desc: "L'aspect par défaut: un bleu net sur blanc, ou lumineux sur bleu nuit" },
         custom: { name: "Personnalisé", desc: "Vos sept couleurs à vous" }
       },
       delete_preset: "Supprimer le préréglage",
       delete_named: "Supprimer le préréglage {name}",
+      delete_pair_named: "Supprimer le thème {name} (les deux versions)",
       group_label: "Schéma de couleurs",
       wheel_aria: "Choisir {label} avec une roue chromatique",
       hex_aria: "Valeur hex de {label}",
@@ -343,7 +343,15 @@ language = {
       preset_name_prompt: "Nom du préréglage",
       light: "Clair",
       dark: "Sombre",
-      pair_label: "{name} {variant}",
+      mode_label: "Mode de couleur",
+      mode_light: "Clair",
+      mode_dark: "Sombre",
+      mode_auto: "Suivre l'appareil",
+      note_auto_dark: "Cet appareil est en mode sombre, vous voyez donc la version sombre.",
+      note_auto_light: "Cet appareil est en mode clair, vous voyez donc la version claire.",
+      note_single: "{name} n'a qu'une seule version, le clair et le sombre ne s'appliquent donc pas. Choisissez un autre thème pour les utiliser.",
+      note_override: "Sur cet appareil, vous êtes passé à {variant} avec le bouton bascule.",
+      clear_override: "Utiliser à nouveau {mode}",
       wcag_what_preset: "Préréglage \"{name}\" enregistré, mais il",
       wcag_what_custom: "Le schéma de couleurs personnalisé",
       wcag_body: "texte sur fond {ratio}:1 (WCAG AA exige 4.5)",
@@ -369,7 +377,7 @@ language = {
       accent_label: "Couleur principale",
       surface_label: "Teinte des gris",
       drift_label: "Votre couleur a été ajustée pour rester lisible:",
-      saved_lead: "Enregistré en deux schémas, « {name} Clair » et « {name} Sombre ».",
+      saved_lead: "{name} enregistré avec une version claire et une version sombre.",
       preview: {
         device: "Salon",
         status: "21,4 °C · 47%",

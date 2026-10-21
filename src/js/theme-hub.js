@@ -1204,18 +1204,22 @@ function dzHubIconPacksMount(entry) {
 var DZ_HUB_SCHEME_PICKER_ID = "dzHubSchemePicker";
 var DZ_HUB_COLOR_INPUT_PREFIX = "dz-hub-color-";
 
-/* Mounts schemes.js's renderSchemePicker cards (built-in schemes, user
-   presets with their delete affordance, the Custom card) into the colors
-   section. The cards themselves, click handling and applyScheme() call are
-   100% schemes.js code, unchanged; this only provides the container and
-   registers it. */
+/* Mounts schemes.js's picker (the colour mode switch, one card per theme,
+   delete on the user's own themes) into the colors section; the cards, their
+   clicks and every save are schemes.js code, this only provides the container
+   and registers it. */
 function dzHubSchemeMount(entry) {
     var mount = document.createElement("div");
     mount.className = "dz-hub-custom-mount";
     mount.setAttribute("data-custom", entry.key);
     mount.appendChild(dzHubCustomHeader(entry));
 
-    /* The generated-theme on-ramp, above the picker it writes into. The manual
+    var picker = document.createElement("div");
+    picker.id = DZ_HUB_SCHEME_PICKER_ID;
+    picker.className = "dz-hub-scheme-picker";
+    mount.appendChild(picker);
+
+    /* The generated-theme on-ramp, under the cards it adds to. The manual
        seven-swatch editor below is untouched: this is an easier route to the
        same place, not a replacement for it. */
     var actions = document.createElement("div");
@@ -1229,11 +1233,6 @@ function dzHubSchemeMount(entry) {
     });
     actions.appendChild(createBtn);
     mount.appendChild(actions);
-
-    var picker = document.createElement("div");
-    picker.id = DZ_HUB_SCHEME_PICKER_ID;
-    picker.className = "dz-hub-scheme-picker";
-    mount.appendChild(picker);
 
     if (typeof registerSchemePickerContainer === "function") {
         registerSchemePickerContainer(DZ_HUB_SCHEME_PICKER_ID);

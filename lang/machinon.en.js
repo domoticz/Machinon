@@ -195,7 +195,7 @@ language = {
       },
       scheme: {
         label: "Color scheme",
-        description: "Sets the theme's overall color scheme: a light or dark base, with named color palettes."
+        description: "Pick a theme, then choose light, dark, or let it follow this device."
       },
       custom_color_scheme: {
         label: "Custom colors",
@@ -332,12 +332,12 @@ language = {
         disabled: "Disabled"
       },
       builtin: {
-        light: { name: "Machinon Light", desc: "The default look: clean blue on white" },
-        dark: { name: "Machinon Dark", desc: "The default look: blue glowing on navy" },
+        machinon: { name: "Machinon", desc: "The default look: clean blue on white, or glowing on navy" },
         custom: { name: "Custom", desc: "Your own seven colours" }
       },
       delete_preset: "Delete preset",
       delete_named: "Delete preset {name}",
+      delete_pair_named: "Delete theme {name} (both versions)",
       group_label: "Color scheme",
       wheel_aria: "Pick {label} with a colour wheel",
       hex_aria: "{label} hex value",
@@ -345,7 +345,15 @@ language = {
       preset_name_prompt: "Preset name",
       light: "Light",
       dark: "Dark",
-      pair_label: "{name} {variant}",
+      mode_label: "Colour mode",
+      mode_light: "Light",
+      mode_dark: "Dark",
+      mode_auto: "Follow device",
+      note_auto_dark: "This device is in dark mode, so you see the dark version.",
+      note_auto_light: "This device is in light mode, so you see the light version.",
+      note_single: "{name} has a single version, so light and dark do not apply. Pick another theme to use them.",
+      note_override: "On this device you switched to {variant} with the toggle.",
+      clear_override: "Use {mode} again",
       wcag_what_preset: "Preset \"{name}\" saved, but it",
       wcag_what_custom: "The custom colour scheme",
       wcag_body: "text on background {ratio}:1 (WCAG AA needs 4.5)",
@@ -371,7 +379,7 @@ language = {
       accent_label: "Main colour",
       surface_label: "Grey tint",
       drift_label: "Your colour was adjusted to stay readable:",
-      saved_lead: "Saved as two schemes, “{name} Light” and “{name} Dark”.",
+      saved_lead: "Saved {name} with a light and a dark version.",
       preview: {
         device: "Living Room",
         status: "21.4 °C · 47%",
