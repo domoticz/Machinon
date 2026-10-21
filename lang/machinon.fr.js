@@ -301,7 +301,7 @@ language = {
       reset_theme: "Réinitialiser le thème aux valeurs par défaut",
       reset_theme_confirm: "Réinitialiser tous les réglages du thème à leurs valeurs par défaut ? Cela supprime les réglages de thème enregistrés et recharge la page.",
       clear_cache: "Effacer les réglages en cache",
-      clear_cache_confirm: "Effacer les réglages de thème en cache de ce navigateur et recharger ? Vos réglages enregistrés sur le serveur sont conservés.",
+      clear_cache_confirm: "Effacer les réglages de thème en cache de ce navigateur et recharger ? Cela annule aussi un changement fait avec la bascule clair/sombre sur cet appareil et oublie les couleurs mémorisées. Vos réglages enregistrés sur le serveur sont conservés.",
       reset_colors: "Réinitialiser les couleurs au schéma sélectionné",
       reset_colors_confirm: "Réinitialiser les couleurs personnalisées à la palette par défaut du schéma sélectionné ?",
       promote: "Enregistrer mes préférences actuelles comme valeurs par défaut de la maison",

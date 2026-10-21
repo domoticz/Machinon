@@ -194,8 +194,8 @@ layouts. Click any one to see it full size.
 There are two ways to build a palette of your own. The theme wizard is the fast route: give it
 one or two colors and a look you like, and it builds a finished theme with a light and a dark
 version for you. The manual color editor is the slow route: every one of the seven swatches is
-yours to set by hand, for when you already know exactly what you want. Neither one replaces the other, pick whichever
-fits the moment.
+yours to set by hand, for when you already know exactly what you want. Neither one replaces
+the other, pick whichever fits the moment.
 
 ### The fast way: the theme wizard
 

@@ -303,7 +303,7 @@ language = {
       reset_theme: "Reset theme to defaults",
       reset_theme_confirm: "Reset all theme settings to their defaults? This deletes the stored theme settings and reloads the page.",
       clear_cache: "Clear cached settings",
-      clear_cache_confirm: "Clear this browser's cached theme settings and reload? Your settings saved on the server are kept.",
+      clear_cache_confirm: "Clear this browser's cached theme settings and reload? This also undoes a switch made with the light/dark toggle on this device and forgets the remembered colours. Your settings saved on the server are kept.",
       reset_colors: "Reset colours to the selected scheme",
       reset_colors_confirm: "Reset the custom colours to the selected scheme's default palette?",
       promote: "Save my current preferences as house defaults",

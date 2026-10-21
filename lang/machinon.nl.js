@@ -304,7 +304,7 @@ language = {
       reset_theme: "Thema terugzetten naar standaardwaarden",
       reset_theme_confirm: "Alle thema-instellingen terugzetten naar hun standaardwaarden? Dit verwijdert de opgeslagen thema-instellingen en laadt de pagina opnieuw.",
       clear_cache: "Instellingen in de cache wissen",
-      clear_cache_confirm: "De thema-instellingen in de cache van deze browser wissen en opnieuw laden? Je instellingen die op de server zijn opgeslagen blijven behouden.",
+      clear_cache_confirm: "De thema-instellingen in de cache van deze browser wissen en opnieuw laden? Dit maakt ook een wissel met de licht/donker-schakelaar op dit apparaat ongedaan en vergeet de onthouden kleuren. Je instellingen die op de server zijn opgeslagen blijven behouden.",
       reset_colors: "Kleuren terugzetten naar het gekozen schema",
       reset_colors_confirm: "De eigen kleuren terugzetten naar het standaardpalet van het gekozen schema?",
       promote: "Mijn huidige voorkeuren opslaan als huisstandaard",

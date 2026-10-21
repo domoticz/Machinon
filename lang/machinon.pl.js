@@ -301,7 +301,7 @@ language = {
       reset_theme: "Przywróć domyślne ustawienia motywu",
       reset_theme_confirm: "Przywrócić wszystkie ustawienia motywu do wartości domyślnych? Spowoduje to usunięcie zapisanych ustawień motywu i ponowne wczytanie strony.",
       clear_cache: "Wyczyść ustawienia z pamięci podręcznej",
-      clear_cache_confirm: "Wyczyścić ustawienia motywu z pamięci podręcznej tej przeglądarki i wczytać stronę ponownie? Ustawienia zapisane na serwerze pozostaną nienaruszone.",
+      clear_cache_confirm: "Wyczyścić ustawienia motywu z pamięci podręcznej tej przeglądarki i wczytać stronę ponownie? Cofnie to też zmianę wykonaną przełącznikiem jasny/ciemny na tym urządzeniu i usunie zapamiętane kolory. Ustawienia zapisane na serwerze pozostaną nienaruszone.",
       reset_colors: "Przywróć kolory wybranego schematu",
       reset_colors_confirm: "Przywrócić własne kolory do domyślnej palety wybranego schematu?",
       promote: "Zapisz moje bieżące preferencje jako domyślne dla domu",

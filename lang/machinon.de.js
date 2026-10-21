@@ -301,7 +301,7 @@ language = {
       reset_theme: "Design auf Standardwerte zurücksetzen",
       reset_theme_confirm: "Alle Design-Einstellungen auf ihre Standardwerte zurücksetzen? Dies löscht die gespeicherten Design-Einstellungen und lädt die Seite neu.",
       clear_cache: "Zwischengespeicherte Einstellungen löschen",
-      clear_cache_confirm: "Die in diesem Browser zwischengespeicherten Design-Einstellungen löschen und neu laden? Deine auf dem Server gespeicherten Einstellungen bleiben erhalten.",
+      clear_cache_confirm: "Die in diesem Browser zwischengespeicherten Design-Einstellungen löschen und neu laden? Das macht auch einen Wechsel mit dem Hell/Dunkel-Umschalter auf diesem Gerät rückgängig und vergisst die gemerkten Farben. Deine auf dem Server gespeicherten Einstellungen bleiben erhalten.",
       reset_colors: "Farben auf das gewählte Schema zurücksetzen",
       reset_colors_confirm: "Die eigenen Farben auf die Standardpalette des gewählten Schemas zurücksetzen?",
       promote: "Meine aktuellen Einstellungen als Haus-Standard speichern",
