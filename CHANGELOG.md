@@ -5,6 +5,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 ## [Unreleased]
 
 - On the Energy page, the outside temperature is now readable in the light colour schemes instead of white on a light background
+- On the phone dashboard with Domoticz 2026.4 or newer, a switch that is off lights up its Off button again, so every switch shows whether it is on or off (#259)
 
 ## [2.9.0] - 2026-10-20
 

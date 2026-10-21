@@ -261,11 +261,15 @@ body.dashMobile table.mobileitem .btn-mini {
     box-sizing: border-box;
 }
 
-/* Core marks the active selector level with .btn-info (views/
-   dashboard_mobile.html), and --dz-accent-color/--dz-accent-text are the
-   exact values --dz-btn-toggle-selected-bg/-text alias, so this rule alone
-   renders the active state correctly. */
+/* Core marks the active selector level and the On button of a device that is on
+   with .btn-info (views/dashboard_mobile.html), and --dz-accent-color/
+   --dz-accent-text are the exact values --dz-btn-toggle-selected-bg/-text
+   alias, so this rule alone renders the active state correctly. The Off button
+   of a device that is off carries .btn-off-active instead since Domoticz 2026.4
+   (.btn-info before that); it takes the same fill, as core's own sheet does, so
+   one button of every On/Off pair is always lit. */
 body.dashMobile table.mobileitem .btn-mini.btn-info,
+body.dashMobile table.mobileitem .btn-mini.btn-off-active,
 body.dashMobile table.mobileitem .btn-mini.active,
 body.dashMobile table.mobileitem .btn-mini:active {
     background: var(--dz-accent-color) !important;
@@ -428,10 +432,10 @@ body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) > span
    chip"), which every OTHER .btn-mini on this page correctly keeps (that
    fill is right for a standalone On/Off/Contact/Siren chip; only the
    selector-level segments, joined into this family-connected shell,
-   need to go back to a true ghost). :not(.btn-info):not(.active) mirrors
-   how the active-state rule two sections up in this file identifies the
-   selected chip - the same two classes core/the theme use for "on". */
-body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) .btn-mini:not(.btn-info):not(.active) {
+   need to go back to a true ghost). The :not() list mirrors how the
+   active-state rule two sections up in this file identifies the selected
+   chip. */
+body.dashMobile table.mobileitem td#status > span:has(> span > .btn-mini) .btn-mini:not(.btn-info):not(.btn-off-active):not(.active) {
     background: transparent !important;
     border-color: var(--dz-accent-color) !important;
 }
