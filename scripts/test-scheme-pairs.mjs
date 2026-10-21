@@ -809,8 +809,8 @@ const withDark = (tokens) => rec({ dark: { attr: "dark", dark_file: false, token
 function machinonRecord(variant) {
     return { v: 1, folder: "machinon", family: "machinon", saved: variant, mode: variant,
              version: SHIPPED_THEME.version,
-             light: { attr: null, dark_file: false, tokens: {} },
-             dark: { attr: "dark", dark_file: true, tokens: {} } };
+             light: { attr: null, dark_file: false, version: SHIPPED_THEME.version, tokens: {} },
+             dark: { attr: "dark", dark_file: true, version: SHIPPED_THEME.version, tokens: {} } };
 }
 
 /* expect: null (the record is refused: no paint) or what is painted. */
@@ -843,6 +843,9 @@ const RECORD_FIXTURES = [
       expect: { family: "machinon", variant: "dark", attr: "dark", darkFile: true, tokens: {} } },
     { name: "a record without a version adds no query", raw: { ...machinonRecord("dark"), version: undefined },
       expect: { family: "machinon", variant: "dark", attr: "dark", darkFile: true, tokens: {} } },
+    { name: "a half another theme version wrote still paints early",
+      raw: rec({ version: "2.0.0", dark: { ...GOOD_RECORD.dark, version: "0.0.1" } }),
+      expect: { family: "gruvbox", variant: "dark", attr: "dark", darkFile: false, tokens: GOOD_RECORD.dark.tokens } },
     { name: "Machinon Light sets nothing", raw: machinonRecord("light"),
       expect: { family: "machinon", variant: "light", attr: null, darkFile: false, tokens: {} } },
     { name: "hostile token names and values are dropped, the rest paints",
@@ -1014,7 +1017,7 @@ test("a mate whose colours are not at hand keeps its half from the previous reco
     await b.ctx.dzApplyColorMode();
     const r = JSON.parse(b.store.get("dzPaintRecord"));
     assert.equal(r.mode, "light");
-    assert.deepEqual(r.dark, prev.dark);
+    assert.deepEqual(r.dark, { ...prev.dark, version: prev.version }, "a half without a version holds the record's");
     assert.equal(r.light.tokens["--dz-body-bg"], rgb(SCHEMES["gruvbox-light"].colors.background));
     const c = browser({ failFetch: true });
     savedTheme(c, "paper-light", "light");
@@ -1043,6 +1046,53 @@ test("after an upgrade the mate's half survives from the old record until the sc
     await b.ctx.loadBuiltinSchemes();
     const fresh = JSON.parse(b.store.get("dzPaintRecord"));
     assert.equal(fresh.dark.tokens["--dz-body-bg"], rgb(SCHEMES["gruvbox-dark"].colors.background));
+});
+
+test("a mate's half kept from an old record is never the final paint of a later boot", async () => {
+    /* The upgrade boot paints the saved member and loads no scheme file. */
+    const b = browser({ dark: false });
+    const t = savedTheme(b, "gruvbox-light", "auto");
+    const old = clone(GOOD_RECORD);
+    old.mode = "auto";
+    old.version = "0.0.1";
+    old.dark.tokens = { "--dz-body-bg": "rgb(9, 9, 9)" };
+    b.store.set("dzPaintRecord", JSON.stringify(old));
+    runEarlyIn(b.ctx);
+    b.ctx.dzSeedPaintedSlug();
+    b.ctx.setColorScheme();
+    await b.ctx.dzApplyColorMode(true);
+    assert.equal(b.fetches.length, 0);
+    const record = b.store.get("dzPaintRecord");
+    assert.equal(JSON.parse(record).dark.version, "0.0.1", "the kept half keeps its own version");
+
+    /* The next boot is on a dark device: the early block may show the kept
+       half, the boot repaint must not settle on it. */
+    const c = browser({ dark: true });
+    savedTheme(c, "gruvbox-light", "auto");
+    c.store.set("dzPaintRecord", record);
+    runEarlyIn(c.ctx);
+    assert.equal(c.props.get("--dz-body-bg"), "rgb(9, 9, 9)");
+    c.ctx.dzSeedPaintedSlug();
+    await c.ctx.dzApplyColorMode(true);
+    assert.ok(c.fetches.length > 0, "the scheme files are fetched");
+    assert.deepEqual(c.paints, ["gruvbox-dark"]);
+    assert.equal(c.props.get("--dz-body-bg"), rgb(SCHEMES["gruvbox-dark"].colors.background));
+    const r = JSON.parse(c.store.get("dzPaintRecord"));
+    assert.equal(r.dark.version, t.version);
+    assert.equal(r.dark.tokens["--dz-body-bg"], rgb(SCHEMES["gruvbox-dark"].colors.background));
+});
+
+test("a record an older build wrote, without versions on its halves, is read at the record's version", () => {
+    const parsed = cm.dzParsePaintRecord(JSON.stringify(rec({ version: "1.2.3" })));
+    assert.equal(parsed.light.version, "1.2.3");
+    assert.equal(parsed.dark.version, "1.2.3");
+    const mixed = clone(GOOD_RECORD);
+    mixed.version = "1.2.3";
+    mixed.dark.version = "1.0.0";
+    mixed.light.version = 7;
+    const m = cm.dzParsePaintRecord(JSON.stringify(mixed));
+    assert.equal(m.dark.version, "1.0.0");
+    assert.equal(m.light.version, null, "a version that is not a string is no version");
 });
 
 test("loading the scheme files refreshes the mate's half and keeps the painted one", async () => {
