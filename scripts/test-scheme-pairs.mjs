@@ -1174,6 +1174,29 @@ test("a record another theme version wrote is repainted from the scheme files an
     assert.ok(c.fetches.length > 0);
 });
 
+test("an unforced resolve overtaking the boot repaint of an old record still repaints and rewrites it", async () => {
+    const b = browser({ dark: true });
+    const t = savedTheme(b, "gruvbox-light", "auto");
+    const old = clone(GOOD_RECORD);
+    old.mode = "auto";
+    old.version = "0.0.1";
+    old.dark.tokens = { "--dz-body-bg": "rgb(9, 9, 9)" };
+    b.store.set("dzPaintRecord", JSON.stringify(old));
+    runEarlyIn(b.ctx);
+    b.ctx.dzSeedPaintedSlug();
+    assert.equal(b.ctx.dzPaintedSlug, "gruvbox-dark");
+    /* init_theme's forced resolve waits on the scheme files; the settings
+       merge then finds nothing changed and resolves unforced. */
+    const boot = b.ctx.dzApplyColorMode(true);
+    const merge = b.ctx.dzApplyColorMode(false);
+    await Promise.all([boot, merge]);
+    assert.deepEqual(b.paints, ["gruvbox-dark"], "the owed repaint happens once");
+    assert.equal(b.props.get("--dz-body-bg"), rgb(SCHEMES["gruvbox-dark"].colors.background));
+    const r = JSON.parse(b.store.get("dzPaintRecord"));
+    assert.equal(r.version, t.version, "the old record is rewritten");
+    assert.equal(r.dark.tokens["--dz-body-bg"], rgb(SCHEMES["gruvbox-dark"].colors.background));
+});
+
 /* ---- The grouped picker's pure parts (schemes.js) ---- */
 
 test("picker state: fixed modes mark the mode's version and need no note", () => {
