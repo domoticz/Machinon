@@ -751,7 +751,11 @@ function init_theme() {
             navBarInner.prop("inert", navBarToggle.is(":visible") && !open);
         };
         new MutationObserver(syncNavMenuState).observe(navBarInner[0], { attributes: true, attributeFilter: ["class"] });
-        if (window.ResizeObserver) new ResizeObserver(syncNavMenuState).observe(navBarToggle[0]);
+        /* Deferred a frame: the :visible check forces a layout, and WebKit can
+           hand the observer a 0x0 first reading while stylesheets still load;
+           a synchronous layout then resizes the button mid-delivery and raises
+           "ResizeObserver loop completed with undelivered notifications". */
+        if (window.ResizeObserver) new ResizeObserver(function() { requestAnimationFrame(syncNavMenuState); }).observe(navBarToggle[0]);
         $(window).on("resize", syncNavMenuState);
         syncNavMenuState();
         navBarToggle.click(function(e) {
