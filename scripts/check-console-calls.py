@@ -37,7 +37,7 @@ import sys
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
 
-BASELINE = 62
+BASELINE = 60
 
 SOURCES = ["custom.js"]
 DIRS = ["js", "src/js"]

@@ -361,9 +361,9 @@ var THEME_MANIFEST = [
                 reloadOnDisable: false, status: "keep", scope: "user"
             }
             /* dark_theme has NO standalone toggle row here on purpose. It is a
-               live theme.json feature (drives applyScheme("dark") / Machinon
-               Dark via setDarkFeature + setColorScheme, and loads
-               dark_theme.css), but dark is chosen through the scheme picker
+               live theme.json feature (the saved half of applyScheme("dark") /
+               Machinon Dark; schemes.js dzSetDarkFile loads dark_theme.css
+               while it is painted), but dark is chosen through the scheme picker
                above, not a manual flag. A manual flip of dark_theme desyncs
                <html data-dz-scheme> from the loaded dark_theme.css (light
                token base + dark-only overrides = a broken half-dark render),

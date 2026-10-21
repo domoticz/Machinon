@@ -615,7 +615,13 @@ function init_theme() {
         initDeviceObserver();
         enableThemeFeatures();
         locationHashChanged();
-        setColorScheme();
+        /* An early paint already shows a variant; repainting the saved one
+           over it first would flash it. Without one, the saved model paints
+           and dzApplyColorMode repaints only if the mode wants the mate. */
+        dzSeedPaintedSlug();
+        if (!window.__dzEarlyPaint) { setColorScheme(); }
+        dzApplyColorMode();
+        dzArmColorModeListener();
         applyCardWidths();
         clampCorePopups();
         armFlyoutContainment();

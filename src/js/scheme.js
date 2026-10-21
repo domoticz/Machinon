@@ -9,7 +9,8 @@
    active as the token UNDERLAY beneath any colour overrides (shadows, panel
    backgrounds), "custom" puts them on the light base. Keeping the decision
    apart from the painting is what lets color-mode.js paint a variant that is
-   not the saved one without writing anything into theme. */
+   not the saved one without writing anything into theme. darkFile says
+   whether dark_theme.css is loaded (schemes.js dzSetDarkFile). */
 var dzLastPaintState = null;
 
 /* The state the SAVED model asks for: custom colours win, then the dark
@@ -40,12 +41,18 @@ function dzPaintState(state) {
     } else {
         html.removeAttribute('data-dz-scheme');
     }
+    dzSetDarkFile(state.darkFile === true);
     repairFixedColors();
     dzLastPaintState = state;
 }
 
+/* Paint the saved model as is. color-mode.js dzApplyColorMode then paints the
+   variant the mode asks for, if that differs; recording the slug here is what
+   tells it this paint happened. */
 function setColorScheme() {
-    dzPaintState(dzSavedPaintState());
+    var state = dzSavedPaintState();
+    dzPaintState(state);
+    dzPaintedSlug = state.slug;
 }
 
 /* The theme's FIXED colours are chosen per light/dark base and measured against

@@ -294,17 +294,11 @@ function reconcileDomoticzSettingsInPlace() {
            loads before schemes.js in custom.js's module list. */
         if (typeof migrateRetiredScheme === "function") { return migrateRetiredScheme(); }
         return false;
-    }).then(function(migrated) {
-        /* migrateRetiredScheme() -> applyScheme() already loaded/unloaded
-           dark_theme.css itself (setDarkFeature), a real side effect that
-           already ran. Sync the snapshot's dark_theme entry to the live one
-           so the delta differ below does not see the same false->true (or
-           true->false) transition again and repeat the file load/unload
-           (feature-loader.js has no duplicate guard). */
-        if (migrated && before.features && theme.features && theme.features.dark_theme) {
-            before.features.dark_theme.enabled = theme.features.dark_theme.enabled;
-        }
+    }).then(function() {
         applyThemeDeltaInPlace(before);
+        /* Unconditional: the mode or the user's presets may have changed even
+           when nothing else did, and an unchanged resolve paints nothing. */
+        dzApplyColorMode();
     });
 }
 
@@ -320,6 +314,8 @@ function applyThemeDeltaInPlace(before) {
     var reloadNeeded = false;
     if (before.features && theme.features) {
         $.each(theme.features, function(key, feature) {
+            /* The painter owns dark_theme.css (feature-loader.js enableThemeFeatures). */
+            if (key === "dark_theme") return;
             var was = !!(before.features[key] && before.features[key].enabled === true);
             var now = feature.enabled === true;
             if (was === now) return;
