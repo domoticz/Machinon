@@ -121,9 +121,15 @@ function dzDeriveLegacyScheme(t) {
     t.scheme_base = t.features.dark_theme && t.features.dark_theme.enabled ? "dark" : "light";
 }
 
+/* True while the page runs on the shipped defaults because this browser had
+   no cached settings: the Domoticz merge is the first time the user's own
+   settings are known. */
+var dzSettingsFromDefaults = false;
+
 function loadSettings() {
     if (typeof Storage !== "undefined") {
         if (localStorage.getItem(themeFolder + ".themeSettings") === null) {
+            dzSettingsFromDefaults = true;
             return fetch("styles/" + themeFolder + "/theme.json", { cache: "no-cache", credentials: "include" })
                 .then(function(response) { return response.json(); })
                 .then(function(localJson) {
@@ -296,9 +302,28 @@ function reconcileDomoticzSettingsInPlace() {
         return false;
     }).then(function() {
         applyThemeDeltaInPlace(before);
-        /* Unconditional: the mode or the user's presets may have changed even
-           when nothing else did, and an unchanged resolve paints nothing. */
-        dzApplyColorMode();
+        /* The colours repaint here and only here, through the resolver, so a
+           boot whose painted variant is not the saved one paints once instead
+           of the saved member first. Unconditional: the mode or the user's
+           presets may have changed even when nothing else did, and an
+           unchanged resolve paints nothing; forced when the colours behind an
+           unchanged slug may be new, and when the boot left an early paint
+           standing over the defaults (custom.js init_theme), because this is
+           then the first paint of the real settings. */
+        dzApplyColorMode(dzPaintInputs(before) !== dzPaintInputs(theme) ||
+                         (dzSettingsFromDefaults && !!window.__dzEarlyPaint));
+    });
+}
+
+/* Everything a paint state is built from (scheme.js dzSavedPaintState,
+   color-mode.js dzStateForSlug), as one comparable string. */
+function dzPaintInputs(t) {
+    var f = t.features || {};
+    return JSON.stringify({
+        scheme: t.scheme, scheme_base: t.scheme_base, color_scheme: t.color_scheme,
+        user_schemes: t.user_schemes,
+        custom: !!(f.custom_color_scheme && f.custom_color_scheme.enabled === true),
+        dark: !!(f.dark_theme && f.dark_theme.enabled === true)
     });
 }
 
@@ -344,8 +369,8 @@ function applyThemeDeltaInPlace(before) {
     /* Idempotent visual appliers: each reduces its stored value through
        setProperty/attr/class, so re-applying an unchanged value is a no-op
        paint. Flag-driven card details (time_ago, switch scenes, ...) with no
-       files re-render on the next Domoticz device poll. */
-    setColorScheme();
+       files re-render on the next Domoticz device poll. Colours are not
+       among them: the caller repaints them through the resolver. */
     applyCardWidths();
     setLogo();
     dzApplyCustomPageLabel();

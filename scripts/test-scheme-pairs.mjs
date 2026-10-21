@@ -274,10 +274,19 @@ const SHIPPED_THEME = JSON.parse(readFileSync("theme.json", "utf8"));
 const RUNTIME = ["src/js/settings-transport.js", "src/js/settings-store.js", "src/js/feature-loader.js",
                  "src/js/scheme.js", "src/js/schemes.js", "src/js/color-mode.js"];
 
+function fakeStyle(props) {
+    return {
+        setProperty(k, v) { props.set(k, String(v)); },
+        removeProperty(k) { props.delete(k); },
+        getPropertyValue(k) { return props.get(k) || ""; }
+    };
+}
+
 function fakeElement(tag, owner) {
     const attrs = new Map();
     return {
         tagName: tag.toUpperCase(), parentNode: null,
+        style: fakeStyle(new Map()),
         setAttribute(k, v) { attrs.set(k, String(v)); },
         getAttribute(k) { return attrs.has(k) ? attrs.get(k) : null; },
         removeAttribute(k) { attrs.delete(k); },
@@ -291,11 +300,7 @@ function browser({ dark = false, failFetch = false } = {}) {
     const props = new Map();
     const owner = { nodes: [] };
     const html = fakeElement("html", owner);
-    html.style = {
-        setProperty(k, v) { props.set(k, String(v)); },
-        removeProperty(k) { props.delete(k); },
-        getPropertyValue(k) { return props.get(k) || ""; }
-    };
+    html.style = fakeStyle(props);
     const head = fakeElement("head", owner);
     const events = [];
     const media = { matches: dark, listeners: [],
@@ -522,15 +527,30 @@ test("dark_theme.css follows the painted variant: one link, and only its own lin
     b.ctx.dzSetDarkFile(false);
     b.ctx.dzSetDarkFile(false);
     assert.equal(b.darkLinks().length, 0);
-    /* A link something else put there is adopted rather than doubled, and is
-       not removed by a "keep it off" call that never tracked it. */
+    /* A link already in the page is adopted rather than doubled, and once
+       adopted it goes when the painter turns the file off. */
     const other = b.ctx.document.createElement("link");
     other.setAttribute("href", "styles/machinon/css/dark_theme.css?v=x");
     b.ctx.document.head.appendChild(other);
-    b.ctx.dzSetDarkFile(false);
-    assert.equal(b.darkLinks().length, 1);
     b.ctx.dzSetDarkFile(true);
     assert.equal(b.darkLinks().length, 1);
+    b.ctx.dzSetDarkFile(false);
+    assert.equal(b.darkLinks().length, 0);
+});
+
+test("the early block's dark_theme.css link is adopted at seed and removed when the resolve wants light", async () => {
+    const b = browser();
+    const t = savedTheme(b, "dark", "dark");
+    b.store.set("dzPaintRecord", JSON.stringify(machinonRecord("dark")));
+    runEarlyIn(b.ctx);
+    assert.equal(b.darkLinks().length, 1, "the early block loaded the file");
+    b.ctx.dzSeedPaintedSlug();
+    await b.ctx.dzApplyColorMode(true);
+    assert.equal(b.darkLinks().length, 1, "adopted, not doubled");
+    t.scheme_mode = "light";
+    await b.ctx.dzApplyColorMode();
+    assert.equal(b.ctx.dzLastColorMode.slug, "light");
+    assert.equal(b.darkLinks().length, 0, "the adopted link is the painter's to remove");
 });
 
 test("the saved dark flag no longer loads or unloads dark_theme.css", () => {
@@ -677,4 +697,420 @@ test("a newer paint wins over an older one still waiting for scheme files", asyn
     await Promise.all([slow, fast]);
     assert.equal(b.ctx.dzLastColorMode.slug, "paper-light");
     assert.equal(b.html.getAttribute("data-dz-scheme"), "custom");
+});
+
+/* ---- The paint record and the early paint ----
+
+   custom.js opens with a block that paints from the record before any theme
+   script loads. color-mode.js cannot be loaded that early, so the block
+   carries its own copy of the record validation; every fixture below runs
+   through both copies, which must agree. */
+const CUSTOM_JS = readFileSync("custom.js", "utf8");
+const EARLY_SRC = CUSTOM_JS.slice(0, CUSTOM_JS.indexOf("\n})();\n") + 6);
+
+function runEarlyIn(ctx) {
+    vm.runInContext(EARLY_SRC, ctx, { filename: "custom.js#early" });
+}
+
+/* A page as the early block finds it: an empty <html>, a head, storage and
+   the device's light/dark state; nothing else exists yet. */
+function earlyPage({ store = {}, deviceDark = false, storageThrows = false } = {}) {
+    const props = new Map();
+    const owner = { nodes: [] };
+    const html = fakeElement("html", owner);
+    html.style = fakeStyle(props);
+    const head = fakeElement("head", owner);
+    const ctx = vm.createContext({
+        localStorage: {
+            getItem: (k) => {
+                if (storageThrows) throw new Error("SecurityError");
+                return Object.prototype.hasOwnProperty.call(store, k) ? store[k] : null;
+            }
+        },
+        matchMedia: () => ({ matches: deviceDark }),
+        document: {
+            documentElement: html,
+            getElementsByTagName: (t) => (t === "head" ? [head] : []),
+            createElement: (t) => fakeElement(t, owner)
+        }
+    });
+    ctx.window = ctx;
+    runEarlyIn(ctx);
+    return { ctx, props, html, links: owner.nodes.filter((n) => n.tagName === "LINK") };
+}
+
+const GOOD_RECORD = {
+    v: 1, folder: "machinon", family: "gruvbox", saved: "gruvbox-light", mode: "dark",
+    light: { attr: "custom", dark_file: false, tokens: { "--dz-body-bg": "rgb(251,241,199)" } },
+    dark: { attr: "dark", dark_file: false, tokens: {
+        "--dz-body-bg": "rgb(40, 40, 40)", "--dz-accent-values": "215,153,33",
+        "--dz-status-timeout-values": "204, 36, 29", "--dz-sun-color": "#FABD2F",
+        "--dz-toast-severity-lowbat": "#d79921", "--dz-widget-bg": "rgba(1, 2, 3, .5)"
+    } }
+};
+const rec = (patch) => Object.assign(clone(GOOD_RECORD), patch);
+const withDark = (tokens) => rec({ dark: { attr: "dark", dark_file: false, tokens } });
+function machinonRecord(variant) {
+    return { v: 1, folder: "machinon", family: "machinon", saved: variant, mode: variant,
+             light: { attr: null, dark_file: false, tokens: {} },
+             dark: { attr: "dark", dark_file: true, tokens: {} } };
+}
+
+/* expect: null (the record is refused: no paint) or what is painted. */
+const RECORD_FIXTURES = [
+    { name: "a fixed dark mode paints the dark half", raw: GOOD_RECORD,
+      expect: { family: "gruvbox", variant: "dark", attr: "dark", darkFile: false, tokens: GOOD_RECORD.dark.tokens } },
+    { name: "a fixed light mode paints the light half", raw: rec({ mode: "light" }),
+      expect: { family: "gruvbox", variant: "light", attr: "custom", darkFile: false, tokens: GOOD_RECORD.light.tokens } },
+    { name: "auto on a dark device paints the dark half", raw: rec({ mode: "auto" }), deviceDark: true,
+      expect: { family: "gruvbox", variant: "dark", attr: "dark", darkFile: false, tokens: GOOD_RECORD.dark.tokens } },
+    { name: "auto on a light device paints the light half", raw: rec({ mode: "auto" }), deviceDark: false,
+      expect: { family: "gruvbox", variant: "light", attr: "custom", darkFile: false, tokens: GOOD_RECORD.light.tokens } },
+    { name: "an override made under the current device state wins in auto", raw: rec({ mode: "auto" }),
+      override: { variant: "dark", deviceDark: false },
+      expect: { family: "gruvbox", variant: "dark", attr: "dark", darkFile: false, tokens: GOOD_RECORD.dark.tokens } },
+    { name: "an override made under the other device state is void in auto", raw: rec({ mode: "auto" }),
+      override: { variant: "dark", deviceDark: true },
+      expect: { family: "gruvbox", variant: "light", attr: "custom", darkFile: false, tokens: GOOD_RECORD.light.tokens } },
+    { name: "an override wins in a fixed mode", raw: rec({ mode: "light" }), deviceDark: true,
+      override: { variant: "dark", deviceDark: false },
+      expect: { family: "gruvbox", variant: "dark", attr: "dark", darkFile: false, tokens: GOOD_RECORD.dark.tokens } },
+    { name: "an override outside the whitelist is no override", raw: rec({ mode: "light" }),
+      override: { variant: "__proto__", deviceDark: false },
+      expect: { family: "gruvbox", variant: "light", attr: "custom", darkFile: false, tokens: GOOD_RECORD.light.tokens } },
+    { name: "Machinon Dark loads the dark file", raw: machinonRecord("dark"),
+      expect: { family: "machinon", variant: "dark", attr: "dark", darkFile: true, tokens: {} } },
+    { name: "Machinon Light sets nothing", raw: machinonRecord("light"),
+      expect: { family: "machinon", variant: "light", attr: null, darkFile: false, tokens: {} } },
+    { name: "hostile token names and values are dropped, the rest paints",
+      raw: withDark({
+          "--dz-body-bg": "rgb(1,2,3)",
+          "--dz-nav-bg": "url(https://evil.example/x.png)",
+          "--dz-widget-bg": "red;",
+          "--dz-accent-color": "rgb(1,2,3);background:url(x)",
+          "--dz-body-text": 12,
+          "--dz-widget-text": null,
+          "--DZ-SHOUT": "rgb(1,2,3)",
+          "--dz-x;y": "rgb(1,2,3)",
+          "color": "rgb(1,2,3)",
+          "--secondary-text-color": "rgb(1,2,3)",
+          "__proto__": "rgb(1,2,3)",
+          "--dz-sun-color": "#abc",
+          "--dz-moon-color": "#12345g",
+          "--dz-accent-red": "rgba(1,2,3,1.5)",
+          "--dz-card-min-width": "300px",
+          "--dz-input-border": "rgb(1000,2,3)",
+          "--dz-status-disabled": "rgba(9, 9, 9, 0.25)"
+      }),
+      expect: { family: "gruvbox", variant: "dark", attr: "dark", darkFile: false,
+                tokens: { "--dz-body-bg": "rgb(1,2,3)", "--dz-status-disabled": "rgba(9, 9, 9, 0.25)" } } },
+    { name: "no record", raw: null, expect: null },
+    { name: "JSON garbage", raw: "{not json", expect: null },
+    { name: "the JSON literal null", raw: "null", expect: null },
+    { name: "a JSON array", raw: "[1]", expect: null },
+    { name: "a newer record version", raw: rec({ v: 2 }), expect: null },
+    { name: "a string version", raw: rec({ v: "1" }), expect: null },
+    { name: "the wanted half is missing", raw: rec({ dark: undefined }), expect: null },
+    { name: "the wanted half is not an object", raw: rec({ dark: "dark" }), expect: null },
+    { name: "tokens null", raw: rec({ dark: { attr: "dark", dark_file: false, tokens: null } }), expect: null },
+    { name: "tokens an array", raw: rec({ dark: { attr: "dark", dark_file: false, tokens: ["rgb(1,2,3)"] } }), expect: null },
+    { name: "an unknown attribute value", raw: rec({ dark: { attr: "evil", dark_file: false, tokens: {} } }), expect: null },
+    { name: "a non-boolean dark_file", raw: rec({ dark: { attr: "dark", dark_file: "yes", tokens: {} } }), expect: null },
+    { name: "an unknown mode", raw: rec({ mode: "sideways" }), expect: null },
+    { name: "a folder that could leave the styles path", raw: rec({ folder: "../x" }), expect: null },
+    { name: "no folder", raw: rec({ folder: undefined }), expect: null },
+    { name: "a family that is not a string", raw: rec({ family: 7 }), expect: null }
+];
+
+for (const fx of RECORD_FIXTURES) {
+    test(`paint record, both validators: ${fx.name}`, () => {
+        const raw = fx.raw === null || typeof fx.raw === "string" ? fx.raw : JSON.stringify(fx.raw);
+        const deviceDark = fx.deviceDark === true;
+        const got = cm.dzReadPaintRecord(raw, deviceDark, fx.override);
+        const store = {};
+        if (raw !== null) store.dzPaintRecord = raw;
+        if (fx.override) store["machinon.colorOverride"] = JSON.stringify(fx.override);
+        const page = earlyPage({ store, deviceDark });
+        if (fx.expect === null) {
+            assert.equal(got, null);
+            assert.equal(page.props.size, 0, "the early block set tokens for a refused record");
+            assert.equal(page.html.getAttribute("data-dz-scheme"), null);
+            assert.equal(page.links.length, 0);
+            assert.equal(page.ctx.__dzEarlyPaint, undefined);
+            return;
+        }
+        assert.deepEqual(clone(got), { folder: "machinon", ...fx.expect });
+        assert.deepEqual(Object.fromEntries(page.props), fx.expect.tokens);
+        assert.equal(page.html.getAttribute("data-dz-scheme"), fx.expect.attr);
+        assert.deepEqual(clone(page.ctx.__dzEarlyPaint),
+                         { family: fx.expect.family, variant: fx.expect.variant, darkFile: fx.expect.darkFile });
+        assert.deepEqual(page.links.map((l) => l.getAttribute("href")),
+                         fx.expect.darkFile ? ["styles/machinon/css/dark_theme.css"] : []);
+    });
+}
+
+test("dzReadPaintRecord refuses a raw value that is not a string", () => {
+    assert.equal(cm.dzReadPaintRecord(GOOD_RECORD, true, null), null);
+    assert.equal(cm.dzReadPaintRecord(undefined, true, null), null);
+});
+
+test("the early block is the first statement of custom.js and survives blocked storage", () => {
+    assert.ok(CUSTOM_JS.startsWith("/* Paint the right light/dark variant"), "not the first statement");
+    assert.ok(EARLY_SRC.indexOf("dzPaintRecord") !== -1, "the extracted block is not the early paint");
+    const page = earlyPage({ storageThrows: true });
+    assert.equal(page.props.size, 0);
+    assert.equal(page.ctx.__dzEarlyPaint, undefined);
+});
+
+test("dzBuildPaintRecord: version 1, filtered tokens, absent halves omitted", () => {
+    const built = cm.dzBuildPaintRecord({
+        folder: "machinon", family: "gruvbox", saved: "gruvbox-light", mode: "auto",
+        light: { attr: "custom", darkFile: false, tokens: { "--dz-body-bg": "rgb(1,2,3)", "--dz-nav-bg": "url(x)" } },
+        dark: null
+    });
+    assert.deepEqual(clone(built), {
+        v: 1, folder: "machinon", family: "gruvbox", saved: "gruvbox-light", mode: "auto",
+        light: { attr: "custom", dark_file: false, tokens: { "--dz-body-bg": "rgb(1,2,3)" } }
+    });
+    const back = cm.dzReadPaintRecord(JSON.stringify(built), false, null);
+    assert.deepEqual(clone(back.tokens), { "--dz-body-bg": "rgb(1,2,3)" });
+    const base = { folder: "machinon", family: "f", saved: "s", mode: "light", light: null, dark: null };
+    assert.equal(cm.dzBuildPaintRecord({ ...base, folder: "a/b" }), null);
+    assert.equal(cm.dzBuildPaintRecord({ ...base, mode: undefined }), null);
+    assert.equal(cm.dzBuildPaintRecord({ ...base, family: null }), null);
+});
+
+test("every value the painters write passes the token filter", () => {
+    const b = browser();
+    savedTheme(b, "paper-dark", "dark");
+    b.ctx.dzSeedPaintedSlug();
+    b.ctx.setColorScheme();
+    /* Repaired values: an uppercase hex from the oklch solver, a lowercase
+       one passed through, and the status triplet with spaces. */
+    b.props.set("--dz-sun-color", "#FAD232");
+    b.props.set("--dz-moon-color", "#8ba4d8");
+    b.props.set("--dz-status-timeout-values", "204, 36, 29");
+    const written = [...b.props.entries()].filter(([k]) => /^--dz-/.test(k) && k.indexOf("card") === -1);
+    assert.ok(written.length > 10, "the paint set the scheme's tokens");
+    const kept = cm.dzBuildPaintRecord({ folder: "machinon", family: "paper", saved: "paper-dark", mode: "dark",
+        light: null, dark: { attr: "dark", darkFile: false, tokens: Object.fromEntries(written) } });
+    assert.deepEqual(clone(kept.dark.tokens), Object.fromEntries(written));
+});
+
+test("a paint writes the record: the painted half read back, the mate computed from its colours", async () => {
+    const b = browser();
+    savedTheme(b, "gruvbox-light", "dark");
+    b.ctx.dzSeedPaintedSlug();
+    b.ctx.setColorScheme();
+    await b.ctx.dzApplyColorMode();
+    const r = JSON.parse(b.store.get("dzPaintRecord"));
+    assert.equal(r.v, 1);
+    assert.equal(r.folder, "machinon");
+    assert.equal(r.family, "gruvbox");
+    assert.equal(r.saved, "gruvbox-light");
+    assert.equal(r.mode, "dark");
+    assert.equal(r.dark.attr, "dark");
+    assert.equal(r.dark.dark_file, false);
+    assert.equal(r.dark.tokens["--dz-body-bg"], rgb(SCHEMES["gruvbox-dark"].colors.background));
+    assert.equal(r.light.attr, "custom");
+    assert.equal(r.light.tokens["--dz-body-bg"], rgb(SCHEMES["gruvbox-light"].colors.background));
+    assert.equal(b.html.getAttribute("data-dz-scheme"), "dark", "computing the mate touched the page");
+    assert.equal(b.props.get("--dz-body-bg"), rgb(SCHEMES["gruvbox-dark"].colors.background));
+});
+
+test("Machinon records both halves without tokens; a single family records its one version under both", async () => {
+    const b = browser();
+    savedTheme(b, "light", "light");
+    b.ctx.dzSeedPaintedSlug();
+    b.ctx.setColorScheme();
+    await b.ctx.dzApplyColorMode();
+    assert.deepEqual(JSON.parse(b.store.get("dzPaintRecord")), machinonRecord("light"));
+    const c = browser();
+    const t = savedTheme(c, "gruvbox-dark", "auto");
+    t.scheme = "custom";
+    c.ctx.dzSeedPaintedSlug();
+    c.ctx.setColorScheme();
+    await c.ctx.dzApplyColorMode();
+    const r = JSON.parse(c.store.get("dzPaintRecord"));
+    assert.equal(r.family, "custom");
+    assert.deepEqual(r.light, r.dark);
+    assert.equal(r.dark.attr, "dark");
+    assert.equal(r.dark.tokens["--dz-body-bg"], rgb(SCHEMES["gruvbox-dark"].colors.background));
+});
+
+test("a mate whose colours are not at hand keeps its half from the previous record", async () => {
+    const b = browser({ failFetch: true });
+    savedTheme(b, "gruvbox-light", "light");
+    const prev = clone(GOOD_RECORD);
+    b.store.set("dzPaintRecord", JSON.stringify(prev));
+    b.ctx.dzSeedPaintedSlug();
+    b.ctx.setColorScheme();
+    await b.ctx.dzApplyColorMode();
+    const r = JSON.parse(b.store.get("dzPaintRecord"));
+    assert.equal(r.mode, "light");
+    assert.deepEqual(r.dark, prev.dark);
+    assert.equal(r.light.tokens["--dz-body-bg"], rgb(SCHEMES["gruvbox-light"].colors.background));
+    const c = browser({ failFetch: true });
+    savedTheme(c, "paper-light", "light");
+    c.store.set("dzPaintRecord", JSON.stringify(prev));
+    c.ctx.dzSeedPaintedSlug();
+    c.ctx.setColorScheme();
+    await c.ctx.dzApplyColorMode();
+    assert.equal(JSON.parse(c.store.get("dzPaintRecord")).dark, undefined, "another family's half is never kept");
+});
+
+test("loading the scheme files refreshes the mate's half and keeps the painted one", async () => {
+    const b = browser();
+    savedTheme(b, "gruvbox-light", "light");
+    b.ctx.dzSeedPaintedSlug();
+    b.ctx.setColorScheme();
+    await b.ctx.dzApplyColorMode();
+    const stale = JSON.parse(b.store.get("dzPaintRecord"));
+    stale.dark = { attr: "dark", dark_file: false, tokens: { "--dz-body-bg": "rgb(9,9,9)" } };
+    stale.light.tokens["--dz-body-bg"] = "rgb(7,7,7)";
+    b.store.set("dzPaintRecord", JSON.stringify(stale));
+    await b.ctx.loadBuiltinSchemes();
+    const r = JSON.parse(b.store.get("dzPaintRecord"));
+    assert.equal(r.dark.tokens["--dz-body-bg"], rgb(SCHEMES["gruvbox-dark"].colors.background));
+    assert.equal(r.light.tokens["--dz-body-bg"], "rgb(7,7,7)", "the painted half is what was on screen");
+});
+
+test("blocked storage never breaks a paint", async () => {
+    const b = browser();
+    savedTheme(b, "gruvbox-light", "dark");
+    b.ctx.localStorage.setItem = () => { throw new Error("quota"); };
+    b.ctx.localStorage.getItem = () => { throw new Error("blocked"); };
+    b.ctx.dzSeedPaintedSlug();
+    b.ctx.setColorScheme();
+    await b.ctx.dzApplyColorMode();
+    assert.equal(b.ctx.dzLastColorMode.slug, "gruvbox-dark");
+});
+
+test("a boot after an early paint repaints once from the record, with no scheme fetch", async () => {
+    const b = browser();
+    savedTheme(b, "gruvbox-light", "dark");
+    const first = b.ctx;
+    first.dzSeedPaintedSlug();
+    first.setColorScheme();
+    await first.dzApplyColorMode();
+    const record = b.store.get("dzPaintRecord");
+
+    const c = browser();
+    savedTheme(c, "gruvbox-light", "dark");
+    c.store.set("dzPaintRecord", record);
+    runEarlyIn(c.ctx);
+    assert.equal(c.props.get("--dz-body-bg"), rgb(SCHEMES["gruvbox-dark"].colors.background));
+    c.ctx.dzSeedPaintedSlug();
+    assert.equal(c.ctx.dzPaintedSlug, "gruvbox-dark");
+    await c.ctx.dzApplyColorMode(true);
+    assert.deepEqual(c.paints, ["gruvbox-dark"], "one paint, of the variant already on screen");
+    assert.equal(c.fetches.length, 0, "the record supplies the mate's colours");
+    assert.equal(c.props.get("--dz-body-bg"), rgb(SCHEMES["gruvbox-dark"].colors.background));
+    assert.equal(c.html.getAttribute("data-dz-scheme"), "dark");
+});
+
+test("an early paint of a family that no longer exists is repainted", async () => {
+    const b = browser();
+    savedTheme(b, "light", "light");
+    b.store.set("dzPaintRecord", JSON.stringify(rec({ family: "user-pair:gone" })));
+    runEarlyIn(b.ctx);
+    b.ctx.dzSeedPaintedSlug();
+    assert.equal(b.ctx.dzPaintedSlug, null);
+    await b.ctx.dzApplyColorMode(true);
+    assert.deepEqual(b.paints, ["light"]);
+    assert.equal(b.html.getAttribute("data-dz-scheme"), null);
+    assert.equal(b.props.get("--dz-body-bg"), undefined, "the stale tokens are cleared");
+});
+
+test("an early paint of the wanted variant stays when its colours cannot be fetched", async () => {
+    const b = browser({ failFetch: true });
+    savedTheme(b, "gruvbox-light", "dark");
+    b.store.set("dzPaintRecord", JSON.stringify(rec({ dark: undefined, light: GOOD_RECORD.light })));
+    b.ctx.__dzEarlyPaint = { family: "gruvbox", variant: "dark", darkFile: false };
+    b.ctx.dzSeedPaintedSlug();
+    await b.ctx.dzApplyColorMode(true);
+    assert.deepEqual(b.paints, [], "the saved light member never paints over the dark one on screen");
+});
+
+/* The Domoticz-stored settings merge after boot. Its colour repaint goes
+   through the resolver, so a mismatch boot is never painted twice and
+   dark_theme.css is not dropped and re-added. */
+function reconcileHarness(b, mutate) {
+    b.ctx.checkUserVariableThemeSettings = () => { mutate(b.ctx.theme); return Promise.resolve(); };
+    b.ctx.$ = { each: (o, fn) => Object.keys(o).forEach((k) => fn(k, o[k])) };
+    for (const f of ["setLogo", "dzApplyCustomPageLabel", "applyBackground", "applyNavbarIconsText", "dzDiagRefreshGate"]) {
+        b.ctx[f] = () => {};
+    }
+    /* The reconcile does not wait for its repaint, which may fetch scheme
+       files first. */
+    return b.ctx.reconcileDomoticzSettingsInPlace().then(() => new Promise((r) => setTimeout(r, 20)));
+}
+
+test("a settings merge that changes no colour paints nothing and keeps dark_theme.css", async () => {
+    const b = browser();
+    savedTheme(b, "light", "dark");
+    b.ctx.dzSeedPaintedSlug();
+    b.ctx.setColorScheme();
+    await b.ctx.dzApplyColorMode();
+    assert.deepEqual(b.paints, ["light", "dark"]);
+    const head = b.ctx.document.head;
+    let churn = 0;
+    const add = head.appendChild.bind(head);
+    head.appendChild = (n) => { churn++; return add(n); };
+    await reconcileHarness(b, (t) => { t.card_min_width = 321; });
+    assert.deepEqual(b.paints, ["light", "dark"]);
+    assert.equal(churn, 0);
+    assert.equal(b.darkLinks().length, 1);
+});
+
+test("a settings merge that changes the colours paints them once", async () => {
+    const b = browser();
+    savedTheme(b, "light", "dark");
+    b.ctx.dzSeedPaintedSlug();
+    b.ctx.setColorScheme();
+    await b.ctx.dzApplyColorMode();
+    await reconcileHarness(b, (t) => {
+        t.scheme = "gruvbox-light";
+        t.scheme_base = "light";
+        t.color_scheme = clone(SCHEMES["gruvbox-light"].colors);
+        t.features.custom_color_scheme.enabled = true;
+    });
+    assert.deepEqual(b.paints, ["light", "dark", "gruvbox-dark"]);
+    assert.equal(b.darkLinks().length, 0);
+    const c = browser();
+    savedTheme(c, "gruvbox-light", "light");
+    c.ctx.theme.scheme = "custom";
+    c.ctx.dzSeedPaintedSlug();
+    c.ctx.setColorScheme();
+    await c.ctx.dzApplyColorMode();
+    await reconcileHarness(c, (t) => { t.color_scheme = { background: "#101010" }; });
+    assert.deepEqual(c.paints, ["custom", "custom"], "same slug, new colours: repainted once");
+    assert.equal(c.props.get("--dz-body-bg"), "rgb(16,16,16)");
+});
+
+test("an early paint left standing over the shipped defaults is repainted by the merge", async () => {
+    const b = browser();
+    savedTheme(b, "light", "auto");
+    b.store.set("dzPaintRecord", JSON.stringify(machinonRecord("dark")));
+    runEarlyIn(b.ctx);
+    b.ctx.dzSettingsFromDefaults = true;
+    b.ctx.dzSeedPaintedSlug();
+    /* The merge finds the user's Machinon Dark, which the early block showed. */
+    await reconcileHarness(b, (t) => {
+        t.scheme = "dark"; t.scheme_base = "dark"; t.scheme_mode = "dark";
+        t.features.dark_theme.enabled = true;
+    });
+    assert.deepEqual(b.paints, ["dark"], "painted once, by the merge");
+    assert.equal(b.darkLinks().length, 1, "the early link was kept");
+    /* Nothing stored differs from what the early block showed: still one
+       paint, the first of the real settings (repairFixedColors included). */
+    const c = browser();
+    savedTheme(c, "dark", "dark");
+    c.store.set("dzPaintRecord", JSON.stringify(machinonRecord("dark")));
+    runEarlyIn(c.ctx);
+    c.ctx.dzSettingsFromDefaults = true;
+    c.ctx.dzSeedPaintedSlug();
+    await reconcileHarness(c, () => {});
+    assert.deepEqual(c.paints, ["dark"]);
+    assert.equal(c.darkLinks().length, 1);
 });

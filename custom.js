@@ -1,3 +1,66 @@
+/* Paint the right light/dark variant before the page shows. Everything
+   here reads a record the theme itself wrote after its last paint
+   (src/js/color-mode.js dzWritePaintRecord); the theme folder, the scheme
+   files and scheme.js are all unavailable this early, which is why the
+   record carries final token values for both variants. Any problem means
+   "do nothing": the normal boot paint follows a moment later, and a throw
+   here would take the toast buffer, the route hook and the whole boot
+   chain below with it. First visit of a browser has no record yet and
+   paints on the normal path (documented limit).
+
+   The validation repeats dzParsePaintRecord / dzReadPaintRecord, which
+   cannot be loaded this early; scripts/test-scheme-pairs.mjs runs this block
+   and those functions over the same fixtures, so the copies cannot drift.
+   Nothing is written until the whole half has validated. */
+(function() {
+    try {
+        var rec = JSON.parse(localStorage.getItem("dzPaintRecord"));
+        if (!rec || typeof rec !== "object" || rec.v !== 1) return;
+        if (typeof rec.folder !== "string" || !/^[A-Za-z0-9_-]+$/.test(rec.folder)) return;
+        if (typeof rec.family !== "string") return;
+        var mode = rec.mode;
+        if (mode !== "light" && mode !== "dark" && mode !== "auto") return;
+        var deviceDark = !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        var variant = mode === "auto" ? (deviceDark ? "dark" : "light") : mode;
+        var ov = null;
+        try { ov = JSON.parse(localStorage.getItem(rec.folder + ".colorOverride")); } catch (e) { ov = null; }
+        if (ov && typeof ov === "object" && (ov.variant === "light" || ov.variant === "dark") &&
+            typeof ov.deviceDark === "boolean" && (mode !== "auto" || ov.deviceDark === deviceDark)) {
+            variant = ov.variant;
+        }
+        var half = rec[variant];
+        if (!half || typeof half !== "object" || Array.isArray(half)) return;
+        if (half.attr !== null && half.attr !== "dark" && half.attr !== "custom") return;
+        if (typeof half.dark_file !== "boolean") return;
+        var tokens = half.tokens;
+        if (!tokens || typeof tokens !== "object" || Array.isArray(tokens)) return;
+        var NAME = /^--dz-[a-z0-9-]+$/;
+        var VALUE = /^(rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(,\s*(0|1|0?\.\d+)\s*)?\)|\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}|#[0-9a-fA-F]{6})$/;
+        var html = document.documentElement;
+        var names = Object.keys(tokens);
+        for (var i = 0; i < names.length; i++) {
+            var value = tokens[names[i]];
+            if (NAME.test(names[i]) && typeof value === "string" && VALUE.test(value)) {
+                html.style.setProperty(names[i], value);
+            }
+        }
+        if (half.attr === "dark") {
+            html.setAttribute("data-dz-scheme", "dark");
+        } else if (half.attr === "custom") {
+            html.setAttribute("data-dz-scheme", "custom");
+        }
+        /* src/js/schemes.js dzSetDarkFile adopts this link at boot. */
+        if (half.dark_file) {
+            var link = document.createElement("link");
+            link.setAttribute("rel", "stylesheet");
+            link.setAttribute("type", "text/css");
+            link.setAttribute("href", "styles/" + rec.folder + "/css/dark_theme.css");
+            document.getElementsByTagName("head")[0].appendChild(link);
+        }
+        window.__dzEarlyPaint = { family: rec.family, variant: variant, darkFile: half.dark_file };
+    } catch (e) { /* storage blocked or record corrupt: normal boot paint */ }
+})();
+
 var theme = {}, themeName = "", isMobile, lang, themeFolder;
 
 /* Toast bootstrap. index.html loads js/domoticz.js (line 137) and then this
@@ -582,7 +645,7 @@ dzBootJson('json.htm?type=command&param=getconfig').then(function(config) {
             init_theme();
         });
     });
-}).catch(error => {
+}).catch(function(error) {
     console.error(error);
 });
 
@@ -615,12 +678,22 @@ function init_theme() {
         initDeviceObserver();
         enableThemeFeatures();
         locationHashChanged();
-        /* An early paint already shows a variant; repainting the saved one
-           over it first would flash it. Without one, the saved model paints
-           and dzApplyColorMode repaints only if the mode wants the mate. */
+        /* Without an early paint the saved model paints, and
+           dzApplyColorMode repaints only if the mode wants the mate. An early
+           paint already shows a variant, and repainting the saved one over it
+           first would flash it: the resolve is forced instead, repainting from
+           the live settings (in the same frame when the colours are at hand),
+           which corrects a stale record and runs repairFixedColors, which the
+           early block cannot. On shipped defaults (no cached settings) the
+           record is the better guess, so the early paint stands until the
+           Domoticz merge paints the real settings. */
         dzSeedPaintedSlug();
-        if (!window.__dzEarlyPaint) { setColorScheme(); }
-        dzApplyColorMode();
+        if (!window.__dzEarlyPaint) {
+            setColorScheme();
+            dzApplyColorMode();
+        } else if (!dzSettingsFromDefaults) {
+            dzApplyColorMode(true);
+        }
         dzArmColorModeListener();
         applyCardWidths();
         clampCorePopups();

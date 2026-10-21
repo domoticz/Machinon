@@ -28,6 +28,7 @@ function loadBuiltinSchemes() {
             schemes.forEach(function(s) { all[s.slug] = s; });
             BUILTIN_SCHEMES = all;
             BUILTIN_SCHEMES_P = null;
+            if (typeof dzRefreshPaintRecord === "function") { dzRefreshPaintRecord(); }
             return all;
         })
         .catch(function(e) {
