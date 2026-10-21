@@ -3,27 +3,49 @@
    (never a composed <style> element), so untrusted settings values cannot
    inject CSS rules. */
 
-function setColorScheme() {
+/* A paint state is everything one paint needs, decided up front:
+   { slug, attr: null|"dark"|"custom", colors: object|null, darkFile: boolean }.
+   attr is the data-dz-scheme value (null removes it): "dark" keeps dark.css
+   active as the token UNDERLAY beneath any colour overrides (shadows, panel
+   backgrounds), "custom" puts them on the light base. Keeping the decision
+   apart from the painting is what lets color-mode.js paint a variant that is
+   not the saved one without writing anything into theme. */
+var dzLastPaintState = null;
+
+/* The state the SAVED model asks for: custom colours win, then the dark
+   feature, else light. theme.scheme_base picks the underlay beneath custom
+   colours; built-in schemes (src/js/schemes.js) set it, and hand-built
+   custom colours historically ran on the light base, which the undefined
+   fallback preserves. */
+function dzSavedPaintState() {
+    var f = theme.features || {};
+    var slug = typeof dzActiveSchemeSlug === 'function' ? dzActiveSchemeSlug() : theme.scheme;
+    var darkFile = !!(f.dark_theme && f.dark_theme.enabled);
+    if (f.custom_color_scheme && f.custom_color_scheme.enabled === true) {
+        return {
+            slug: slug, attr: theme.scheme_base === 'dark' ? 'dark' : 'custom',
+            colors: Object.assign({}, theme.color_scheme), darkFile: darkFile
+        };
+    }
+    return { slug: slug, attr: darkFile ? 'dark' : null, colors: null, darkFile: darkFile };
+}
+
+/* Paint one state. Reads nothing from theme and writes nothing to it. */
+function dzPaintState(state) {
     var html = document.documentElement;
-    if (theme.features.custom_color_scheme && theme.features.custom_color_scheme.enabled === true) {
-        clearCustomColorScheme();
-        applyCustomColorScheme(theme.color_scheme);
-        /* theme.scheme_base picks the token UNDERLAY beneath the overrides:
-           "dark" keeps dark.css active for every token the scheme does not
-           set (shadows, panel backgrounds); anything else sits on the light
-           base. Built-in schemes (src/js/schemes.js) set it; hand-built
-           custom colors historically ran on the light base, which the
-           undefined fallback preserves. */
-        html.setAttribute('data-dz-scheme', theme.scheme_base === 'dark' ? 'dark' : 'custom');
+    clearCustomColorScheme();
+    if (state.colors) { applyCustomColorScheme(state.colors); }
+    if (state.attr === 'dark' || state.attr === 'custom') {
+        html.setAttribute('data-dz-scheme', state.attr);
     } else {
-        clearCustomColorScheme();
-        if (theme.features.dark_theme && theme.features.dark_theme.enabled) {
-            html.setAttribute('data-dz-scheme', 'dark');
-        } else {
-            html.removeAttribute('data-dz-scheme');
-        }
+        html.removeAttribute('data-dz-scheme');
     }
     repairFixedColors();
+    dzLastPaintState = state;
+}
+
+function setColorScheme() {
+    dzPaintState(dzSavedPaintState());
 }
 
 /* The theme's FIXED colours are chosen per light/dark base and measured against
@@ -117,8 +139,8 @@ function dzHexToTriplet(hex) {
 // Read the current base scheme's DEFAULT palette straight from the --dz-* tokens (single source of
 // truth in dz-tokens.css / dark.css), so the theme-settings "reset scheme" button no longer needs a
 // duplicated JS colour map. Temporarily strips any active custom-colour override and forces the base
-// (light/dark) scheme attribute, reads the resolved tokens, then restores the real scheme via
-// setColorScheme(). All synchronous, so no repaint happens between - the user sees no flicker.
+// (light/dark) scheme attribute, reads the resolved tokens, then restores whatever was painted.
+// All synchronous, so no repaint happens between - the user sees no flicker.
 function getSchemeDefaults() {
     var html = document.documentElement;
     clearCustomColorScheme();
@@ -138,7 +160,7 @@ function getSchemeDefaults() {
         alt_text: v('--secondary-text-color'),
         disabled: v('--dz-status-disabled')
     };
-    setColorScheme();
+    dzPaintState(dzLastPaintState || dzSavedPaintState());
     return defaults;
 }
 
@@ -173,9 +195,10 @@ var DZ_CUSTOM_TOKENS = [
 // Apply the user's custom colours as --dz-* overrides on <html> via setProperty.
 // setProperty validates the value and cannot break out of the property, and hexToRGB reduces
 // input to a numeric rgb(n,n,n), so untrusted theme.color_scheme values (settings -> DB) cannot
-// inject CSS rules. Never compose a <style> element's text from these values.
-function applyCustomColorScheme(cs) {
-    var s = document.documentElement.style;
+// inject CSS rules. Never compose a <style> element's text from these values. target defaults
+// to <html>; another element receives the same declarations without touching the page.
+function applyCustomColorScheme(cs, target) {
+    var s = (target || document.documentElement).style;
     var set = function (token, val) { if (val) { s.setProperty(token, hexToRGB(val)); } };
     set('--dz-body-bg', cs.background);
     set('--dz-body-text', cs.main_text);

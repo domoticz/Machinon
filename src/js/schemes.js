@@ -268,13 +268,9 @@ function deleteUserScheme(name, variant) {
     renderSchemePicker();
 }
 
-/* Apply a scheme by slug: "light"/"dark" are the token bases, "custom" is
-   the user's own colours (the hub's swatch editor), "user:<name>" a saved preset,
-   anything else a built-in preset. Applies live, caches, and persists to
-   the Domoticz user variables immediately (see persistSchemeChoice). */
 /* The slug of the scheme in effect, picked or not. theme.scheme is unset until
    someone picks one, and then the page is painted by the rule scheme.js
-   setColorScheme applies: custom colours win, then the dark feature, else
+   dzSavedPaintState applies: custom colours win, then the dark feature, else
    light. The picker marks this card so the default is visibly the default. */
 function dzActiveSchemeSlug() {
     if (theme.scheme) return theme.scheme;
@@ -284,66 +280,74 @@ function dzActiveSchemeSlug() {
     return "light";
 }
 
-function applyScheme(slug) {
+/* The saved preset a "user:" slug names, or undefined. Exact legacy match
+   first: a hand-saved preset may contain "|" in its own name, and splitting on
+   it would silently resolve to nothing. Only if no preset owns the whole
+   string is it read as the generated "<name>|<variant>" form. */
+function dzUserPresetFor(slug) {
+    var rest = slug.substring(5);
+    var all = theme.user_schemes || [];
+    var preset = all.filter(function (p) { return p.name === rest; })[0];
+    if (preset) return preset;
+    var bar = rest.lastIndexOf("|");
+    if (bar === -1) return undefined;
+    var wantName = rest.substring(0, bar);
+    var wantVariant = rest.substring(bar + 1);
+    return all.filter(function (p) {
+        return p.name === wantName && p.variant === wantVariant;
+    })[0];
+}
+
+/* Write a pick into the SAVED model: scheme, scheme_base, color_scheme and the
+   two features that describe it, then cache and persist once. Resolves true
+   when the slug named a scheme, false (nothing written) when it did not.
+   "light"/"dark" are the token bases, "custom" is the user's own colours (the
+   hub's swatch editor), "user:<name>" a saved preset, anything else a
+   built-in preset. Paints nothing. */
+function dzSaveSchemeModel(slug) {
+    var found;
     if (slug === "light" || slug === "dark") {
         theme.scheme = slug;
         theme.scheme_base = slug;
         theme.features.custom_color_scheme.enabled = false;
         setDarkFeature(slug === "dark");
-        setColorScheme();
-        cacheThemeSettings();
-        persistSchemeChoice();
-        return Promise.resolve();
-    }
-    if (slug === "custom") {
+        found = Promise.resolve(true);
+    } else if (slug === "custom") {
         theme.scheme = "custom";
         theme.features.custom_color_scheme.enabled = true;
-        setColorScheme();
-        cacheThemeSettings();
-        persistSchemeChoice();
-        return Promise.resolve();
+        found = Promise.resolve(true);
+    } else if (slug.indexOf("user:") === 0) {
+        found = Promise.resolve(dzSaveSchemeColors(slug, dzUserPresetFor(slug)));
+    } else {
+        found = loadBuiltinSchemes().then(function (schemes) {
+            return dzSaveSchemeColors(slug, schemes[slug]);
+        });
     }
-    if (slug.indexOf("user:") === 0) {
-        var rest = slug.substring(5);
-        /* Exact legacy match first: a hand-saved preset may contain "|" in its
-           own name, and splitting on it would silently resolve to nothing.
-           Only if no preset owns the whole string do we read it as the
-           generated "<name>|<variant>" form. */
-        var preset = (theme.user_schemes || []).filter(function (p) {
-            return p.name === rest;
-        })[0];
-        if (!preset) {
-            var bar = rest.lastIndexOf("|");
-            if (bar !== -1) {
-                var wantName = rest.substring(0, bar);
-                var wantVariant = rest.substring(bar + 1);
-                preset = (theme.user_schemes || []).filter(function (p) {
-                    return p.name === wantName && p.variant === wantVariant;
-                })[0];
-            }
+    return found.then(function (ok) {
+        if (ok) {
+            cacheThemeSettings();
+            persistSchemeChoice();
         }
-        if (!preset) return Promise.resolve();
-        theme.scheme = slug;
-        theme.scheme_base = preset.base === "dark" ? "dark" : "light";
-        theme.color_scheme = Object.assign({}, preset.colors);
-        theme.features.custom_color_scheme.enabled = true;
-        setDarkFeature(false);
-        setColorScheme();
-        cacheThemeSettings();
-        persistSchemeChoice();
-        return Promise.resolve();
-    }
-    return loadBuiltinSchemes().then(function(schemes) {
-        var scheme = schemes[slug];
-        if (!scheme) return;
-        theme.scheme = slug;
-        theme.scheme_base = scheme.base === "dark" ? "dark" : "light";
-        theme.color_scheme = Object.assign({}, scheme.colors);
-        theme.features.custom_color_scheme.enabled = true;
-        setDarkFeature(false);
-        setColorScheme();
-        cacheThemeSettings();
-        persistSchemeChoice();
+        return ok;
+    });
+}
+
+function dzSaveSchemeColors(slug, scheme) {
+    if (!scheme) return false;
+    theme.scheme = slug;
+    theme.scheme_base = scheme.base === "dark" ? "dark" : "light";
+    theme.color_scheme = Object.assign({}, scheme.colors);
+    theme.features.custom_color_scheme.enabled = true;
+    setDarkFeature(false);
+    return true;
+}
+
+/* Apply a scheme by slug: save it (see dzSaveSchemeModel; persisted
+   immediately, see persistSchemeChoice) and repaint once. An unknown slug
+   changes nothing. */
+function applyScheme(slug) {
+    return dzSaveSchemeModel(slug).then(function (ok) {
+        if (ok) setColorScheme();
     });
 }
 
