@@ -44,6 +44,12 @@ The Temperature page.
 
 The Utility page.
 
+![The Theme Hub's Colors and schemes tab on a phone in light mode](screenshots/mobile-theme-hub-colors.png){ width="390" height="844" loading=lazy }
+![The same tab on a phone in dark mode](screenshots/mobile-theme-hub-colors-dark.png){ width="390" height="844" loading=lazy }
+
+The Theme Hub's Colors and schemes tab with Follow device selected, on a phone in light mode and
+on one in dark mode. The cards stack into one column.
+
 ![Device graph on a mobile screen](screenshots/mobile-device-graph.png)
 
 A device's Log page, with the chart scaled to fit the screen.
@@ -52,9 +58,8 @@ A device's Log page, with the chart scaled to fit the screen.
 
 Once the menu bar has collapsed into the hamburger icon (below 980 pixels wide, see below), the
 sun and moon switch moves from the header into the menu. Tap the hamburger and the switch is at
-the top right, on the row with the close button. Tap it to
-flip this device between the light and the dark version of your theme; the filled half shows the
-version on screen.
+the top right, on the row with the close button. Tap it to flip this device between the light
+and the dark version of your theme; the filled half shows the version on screen.
 
 ![The phone menu open, with the light/dark switch at its top right](screenshots/mobile-menu-mode-toggle.png){ width="390" height="844" loading=lazy }
 

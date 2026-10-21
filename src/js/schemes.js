@@ -5,7 +5,9 @@
    scheme copies its colors into theme.color_scheme and rides the existing
    custom_color_scheme plumbing: the setProperty applier (never composed
    <style> text), the localStorage cache and the Domoticz user-variable sync.
-   Adding a scheme = adding a file plus an index.json entry. */
+   Adding a scheme means a light and a dark file (pair, variant, family_name,
+   family_description), their index.json entries and a DZ_BUILTIN_PAIRS row
+   in color-mode.js; scripts/test-scheme-pairs.mjs fails until they agree. */
 
 var BUILTIN_SCHEMES = null; /* slug -> scheme object, fetched once */
 var BUILTIN_SCHEMES_P = null; /* the load in flight, shared by concurrent callers */
