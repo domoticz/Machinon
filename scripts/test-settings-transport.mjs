@@ -203,3 +203,113 @@ test("legacy: the save writes the highest known feature id as the watermark", ()
     assert.equal(ctx.dzLegacyFeatureWatermark(FEATURES), 49);
     assert.equal(ctx.dzLegacyFeatureWatermark({}), 0);
 });
+
+/* theme.scheme_mode: native migration (2 -> 3) and the legacy custom[15]. */
+const clone = (o) => JSON.parse(JSON.stringify(o));
+const migrate = (snap) => clone(loadTransport().dzMigrateSnapshot(snap));
+
+test("scheme_mode: a v2 row that saved a dark scheme migrates to dark", () => {
+    const out = migrate({ schemaVersion: 2, features: {}, values: { scheme: "nord", scheme_base: "dark" } });
+    assert.equal(out.values.scheme_mode, "dark");
+    assert.equal(out.schemaVersion, 3);
+});
+
+test("scheme_mode: a v2 row that never picked a scheme migrates to light, not auto", () => {
+    assert.equal(migrate({ schemaVersion: 2, features: {}, values: {} }).values.scheme_mode, "light");
+});
+
+test("scheme_mode: a v2 row with only the dark feature migrates to dark", () => {
+    const out = migrate({ schemaVersion: 2, features: { dark_theme: true }, values: {} });
+    assert.equal(out.values.scheme_mode, "dark");
+});
+
+test("scheme_mode: an existing valid mode is kept by the migration", () => {
+    const out = migrate({ schemaVersion: 2, features: {}, values: { scheme_base: "dark", scheme_mode: "auto" } });
+    assert.equal(out.values.scheme_mode, "auto");
+});
+
+test("scheme_mode: an invalid stored mode is re-derived from the base", () => {
+    const out = migrate({ schemaVersion: 2, features: {}, values: { scheme_base: "dark", scheme_mode: "sideways" } });
+    assert.equal(out.values.scheme_mode, "dark");
+});
+
+test("scheme_mode: a non-object snapshot or values does not throw and stays usable", () => {
+    const ctx = loadTransport();
+    for (const bad of ["x", 5, null, []]) {
+        assert.doesNotThrow(() => ctx.dzMigrateSnapshot(bad), String(JSON.stringify(bad)));
+    }
+    for (const values of ["x", 5, null, []]) {
+        const out = clone(ctx.dzMigrateSnapshot({ schemaVersion: 2, features: {}, values }));
+        assert.equal(out.values.scheme_mode, "light", JSON.stringify(values));
+    }
+});
+
+test("scheme_mode: the snapshot carries it beside scheme and scheme_base", () => {
+    const v = clone(loadTransport().dzSettingsSnapshot({
+        scheme: "nord", scheme_base: "dark", scheme_mode: "auto", features: {}
+    }).values);
+    assert.equal(v.scheme_mode, "auto");
+    assert.equal(v.scheme, "nord");
+    assert.equal(v.scheme_base, "dark");
+});
+
+test("scheme_mode: a v3 row rewritten by a v2 writer re-derives from its base (accepted downgrade behaviour)", () => {
+    const out = migrate({ schemaVersion: 2, features: {}, values: { scheme: "light", scheme_base: "light" } });
+    assert.equal(out.values.scheme_mode, "light");
+});
+
+/* Drives the real legacy loaders against stubbed uservariables. */
+async function legacyLoad({ list, custom, theme, withCustom = true }) {
+    const vars = { 1: list, 2: custom };
+    const t = Object.assign({
+        scheme: "light", scheme_base: "light",
+        features: { dark_theme: { id: 3, enabled: false }, time_ago: { id: 16, enabled: false } }
+    }, theme || {});
+    const $ = {
+        ajax: (o) => { const m = /idx=(\d+)/.exec(o.url); o.success({ status: "OK", result: [{ Value: JSON.stringify(vars[m[1]]) }] }); },
+        each: (c, fn) => { Object.keys(c).forEach((k) => fn(k, c[k])); }
+    };
+    const ctx = loadTransport({
+        $, theme: t, themeFolder: "machinon", themeName: "Machinon",
+        cacheThemeSettings: () => {}, dzDefaultsSnap: null,
+        fetch: async () => ({ json: async () => ({ features: { dark_theme: { id: 3, enabled: false }, time_ago: { id: 16, enabled: false } } }) })
+    });
+    ctx.dzLegacyLoaded = { list: null, watermark: undefined, mode: undefined };
+    const pending = [ctx.getFeatureThemeSettings(1)];
+    if (withCustom) pending.push(ctx.getCustomThemeSettings(2));
+    await Promise.all(pending).then(ctx.dzApplyLegacyFeatures).then(ctx.dzApplyLegacySchemeMode);
+    return ctx.theme;
+}
+const C15 = ["10", "Home", "", "", [], "", "", "nord", "dark", [], 320, 500, 10, "daily", 49];
+
+test("scheme_mode legacy: a 15 entry array with a dark base derives dark", async () => {
+    assert.equal((await legacyLoad({ list: [], custom: C15 })).scheme_mode, "dark");
+});
+
+test("scheme_mode legacy: custom[15] auto is read as auto", async () => {
+    assert.equal((await legacyLoad({ list: [], custom: C15.concat(["auto"]) })).scheme_mode, "auto");
+});
+
+test("scheme_mode legacy: junk at custom[15] is derived from the base", async () => {
+    for (const junk of [{}, "sideways"]) {
+        assert.equal((await legacyLoad({ list: [], custom: C15.concat([junk]) })).scheme_mode, "dark", JSON.stringify(junk));
+    }
+});
+
+test("scheme_mode legacy: a list-only load derives from the dark_theme feature", async () => {
+    const t = await legacyLoad({ list: [3], custom: null, withCustom: false, theme: { scheme_base: undefined } });
+    assert.equal(t.scheme_mode, "dark");
+});
+
+test("scheme_mode legacy: the save writes the mode at custom[15]", async () => {
+    let sent = {};
+    class Body { constructor() { this.m = {}; } set(k, v) { this.m[k] = v; } }
+    const ctx = loadTransport({
+        URLSearchParams: Body, themeFolder: "machinon", themeName: "Machinon",
+        theme: { features: {}, scheme_mode: "auto", scheme_base: "light" },
+        $: { each: () => {} },
+        fetch: async (u, o) => { sent[o.body.m.vname] = o.body.m.vvalue; return { ok: true, json: async () => ({ status: "OK" }) }; }
+    });
+    await ctx.dzThemeSettingsSaveNow("add");
+    assert.equal(JSON.parse(sent["theme-machinon-custom"])[15], "auto");
+});

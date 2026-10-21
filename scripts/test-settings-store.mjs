@@ -164,7 +164,8 @@ test("dzMergeConflict: only this session's changes override the fresh server row
     const fresh = { schemaVersion: 2, features: { a: true, b: false }, values: { x: 7, y: 1 } };
     const out = dz.dzMergeConflict(base, intended, fresh);
     assert.deepEqual(clone(out.features), { a: false, b: false }, "a changed here wins; b changed elsewhere is kept");
-    assert.deepEqual(clone(out.values), { x: 7, y: 5 });
+    assert.deepEqual(clone(out.values), { x: 7, y: 5, scheme_mode: "light" },
+        "the unversioned fresh row is lifted through the ladder, which seeds the mode");
 });
 
 test("dzMergeConflict: a fresh row in an older shape is migrated before the merge", () => {
@@ -176,4 +177,31 @@ test("dzMergeConflict: a fresh row in an older shape is migrated before the merg
     assert.equal("notification" in out.features, false, "a v1 key must not ride into a row stamped v2");
     assert.equal(out.features.warn_timeout, false);
     assert.equal(out.values.button_name, "x");
+});
+
+/* theme.scheme_mode through the warm-boot rebuild. */
+test("scheme_mode: a cache that predates it ends in the mode its base implies, not the shipped auto", () => {
+    const dz = load();
+    const cache = oldCache();
+    delete cache.scheme_mode;
+    cache.scheme = "nord"; cache.scheme_base = "dark";
+    assert.equal(dz.dzThemeFromCache(cache, clone(SHIPPED)).scheme_mode, "dark");
+});
+
+test("scheme_mode: a cache that already carries it is not re-derived", () => {
+    const dz = load();
+    const cache = oldCache();
+    cache.scheme_base = "dark"; cache.scheme_mode = "auto";
+    assert.equal(dz.dzThemeFromCache(cache, clone(SHIPPED)).scheme_mode, "auto");
+});
+
+test("scheme_mode: the shipped theme.json alone gives a fresh install auto", () => {
+    assert.equal(SHIPPED.scheme_mode, "auto");
+});
+
+test("scheme_mode: themes differing only in the mode have different fingerprints", () => {
+    const dz = load();
+    const a = clone(SHIPPED), b = clone(SHIPPED);
+    a.scheme_mode = "light"; b.scheme_mode = "dark";
+    assert.notEqual(dz.themeSettingsFingerprint(a), dz.themeSettingsFingerprint(b));
 });

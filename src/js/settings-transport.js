@@ -13,7 +13,15 @@
 /* The shape every snapshot is written in. Bump it, and add the step that lifts
    the previous shape to it in DZ_SETTINGS_MIGRATIONS, whenever a stored key is
    renamed, split or retyped. */
-var DZ_SETTINGS_SCHEMA_VERSION = 2;
+var DZ_SETTINGS_SCHEMA_VERSION = 3;
+
+/* The mode an existing stored row implies: the base it saved. Shared by the
+   2 -> 3 migration and the legacy reader, so both transports agree. */
+function dzModeFromStoredBase(base, darkFeatureOn) {
+    if (base === "dark" || base === "light") return base;
+    return darkFeatureOn === true ? "dark" : "light";
+}
+var DZ_SCHEME_MODES = { light: true, dark: true, auto: true };
 
 /* DZ_SETTINGS_MIGRATIONS[n - 1] lifts a version-n snapshot to version n + 1.
    Every step must be safe on data already in the newer shape: the browser
@@ -32,6 +40,19 @@ var DZ_SETTINGS_MIGRATIONS = [
         if (!("warn_timeout" in snap.features)) snap.features.warn_timeout = was;
         if (!("warn_battery" in snap.features)) snap.features.warn_battery = was;
         delete snap.features.notification;
+    },
+    /* 2 -> 3: theme.scheme_mode separates light/dark from the theme. A stored
+       row or cache from before it gets the mode its own base implies, so it
+       opens exactly as before; only "no stored settings at all" falls through
+       to theme.json's "auto", which is what a fresh install gets. Known
+       limit: a save by an older Machinon rewrites the row without the mode,
+       and the next upgrade re-derives it from the base (Follow device becomes
+       a fixed mode). Accepted, there is no key older versions round-trip. */
+    function (snap) {
+        if (!snap.values || typeof snap.values !== "object" || Array.isArray(snap.values)) snap.values = {};
+        if (DZ_SCHEME_MODES[snap.values.scheme_mode] === true) return;
+        snap.values.scheme_mode = dzModeFromStoredBase(snap.values.scheme_base,
+            snap.features && snap.features.dark_theme);
     }
 ];
 
@@ -40,7 +61,7 @@ var DZ_SETTINGS_MIGRATIONS = [
    version 1. The one choke point every stored snapshot passes through before
    it is applied. */
 function dzMigrateSnapshot(snap) {
-    if (!snap) return snap;
+    if (!snap || typeof snap !== "object" || Array.isArray(snap)) return snap;
     var v = typeof snap.schemaVersion === "number" && snap.schemaVersion >= 1 ? snap.schemaVersion : 1;
     while (v < DZ_SETTINGS_SCHEMA_VERSION) {
         DZ_SETTINGS_MIGRATIONS[v - 1](snap);
@@ -82,7 +103,7 @@ function dzSettingsSnapshot(t) {
             standby_after: t.standby_after, button_name: t.button_name,
             custom_url: t.custom_url, logo: t.logo, icons: dzCloneValue(t.icons),
             background_img: t.background_img, background_type: t.background_type,
-            scheme: t.scheme, scheme_base: t.scheme_base,
+            scheme: t.scheme, scheme_base: t.scheme_base, scheme_mode: t.scheme_mode,
             user_schemes: dzCloneValue(t.user_schemes), color_scheme: dzCloneValue(t.color_scheme),
             card_min_width: t.card_min_width, card_max_width: t.card_max_width,
             dashboard_camera_refresh: t.dashboard_camera_refresh, warn_repeat: t.warn_repeat
@@ -679,7 +700,7 @@ function dzThemeSettingsLoad() {
                 }
                 if (data.status != "OK") { resolve(DZ_LOAD_FAILED); return; }
                 var had = false, pending = [];
-                dzLegacyLoaded = { list: null, watermark: undefined };
+                dzLegacyLoaded = { list: null, watermark: undefined, mode: undefined };
                 var featuresVarName = "theme-" + themeFolder + "-features";
                 var customVarName = "theme-" + themeFolder + "-custom";
                 var colorsVarName = "theme-" + themeFolder + "-colors";
@@ -691,7 +712,7 @@ function dzThemeSettingsLoad() {
                 if (!had) { resolve(DZ_LOAD_EMPTY); return; }
                 /* The caller's load barrier waits on this resolve, so a failure
                    applying the feature rule must not leave it pending. */
-                Promise.all(pending).then(dzApplyLegacyFeatures).catch(function(e) {
+                Promise.all(pending).then(dzApplyLegacyFeatures).then(dzApplyLegacySchemeMode).catch(function(e) {
                     if (typeof dzLog === "function") {
                         dzLog("settings", "legacy_features_failed", { error: String(e && e.message || e) });
                     }
@@ -723,7 +744,7 @@ function dzThemeSettingsSaveNow(action) {
        original; 7/8 scheme + base; 9 saved colour presets; 10/11 card widths;
        12 camera refresh seconds; 13 device-warning repeat preference (#198);
        14 the highest feature id this version knows, which makes the -features
-       list exact for readers (dzLegacyFeatureStates).
+       list exact for readers (dzLegacyFeatureStates); 15 the light/dark mode.
        Positions 10-13 close the cache-only gap for settings that used to
        live only in localStorage and never followed the user across
        browsers. getCustomThemeSettings tolerates short arrays via length
@@ -733,7 +754,8 @@ function dzThemeSettingsSaveNow(action) {
         theme.logo, theme.icons, theme.background_img, theme.background_type,
         theme.scheme, theme.scheme_base, theme.user_schemes,
         theme.card_min_width, theme.card_max_width, theme.dashboard_camera_refresh,
-        theme.warn_repeat, dzLegacyFeatureWatermark(theme.features)
+        theme.warn_repeat, dzLegacyFeatureWatermark(theme.features),
+        theme.scheme_mode
     ];
 
     /* POST, not GET: the params used to ride the query string, which Domoticz's
@@ -880,7 +902,7 @@ function dzLegacyFeatureWatermark(features) {
    and the watermark are only collected here and applied once both have
    arrived (dzThemeSettingsLoad). A list that is not an array is ignored, which
    keeps the features as they painted rather than reading them all as off. */
-var dzLegacyLoaded = { list: null, watermark: undefined };
+var dzLegacyLoaded = { list: null, watermark: undefined, mode: undefined };
 
 function getFeatureThemeSettings(idx) {
     return getThemeUserVar(idx, "feature", function(enabledFeatureIds) {
@@ -905,6 +927,17 @@ function dzApplyLegacyFeatures() {
     });
 }
 
+/* Runs after dzApplyLegacyFeatures so the dark_theme feature is final when
+   it is the fallback. A stored mode wins; an install that predates the mode
+   (short array, or junk at position 15) gets the one its base implies. */
+function dzApplyLegacySchemeMode() {
+    var f = theme.features && theme.features.dark_theme;
+    var mode = dzLegacyLoaded.mode;
+    theme.scheme_mode = DZ_SCHEME_MODES[mode] === true ? mode
+        : dzModeFromStoredBase(theme.scheme_base, f && f.enabled);
+    cacheThemeSettings();
+}
+
 function getCustomThemeSettings(idx) {
     return getThemeUserVar(idx, "custom", function(c) {
         theme.standby_after = c[0]; theme.button_name = c[1]; theme.custom_url = c[2];
@@ -915,6 +948,7 @@ function getCustomThemeSettings(idx) {
         if (c.length > 12 && c[12] !== undefined) theme.dashboard_camera_refresh = c[12];
         if (c.length > 13 && c[13] !== undefined) theme.warn_repeat = c[13];
         if (c.length > 14) dzLegacyLoaded.watermark = c[14];
+        if (c.length > 15) dzLegacyLoaded.mode = c[15];
     });
 }
 

@@ -439,7 +439,7 @@ function dzManifestAllEntries() {
    here: it has a real manifest row in the colors group, which dzSettingScope
    resolves first, so an entry here would never be reached. */
 var DZ_SCOPE_EXTRAS = {
-    scheme_base: "user", color_scheme: "user", user_schemes: "user",
+    scheme_base: "user", scheme_mode: "user", color_scheme: "user", user_schemes: "user",
     dark_theme: "user", icons: "house"
 };
 
