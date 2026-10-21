@@ -195,7 +195,7 @@ function dzStateForSlug(slug, families, sources) {
    theme folder is not known when the record is read) holding the final token
    values of both members of the painted family:
 
-     { v: 1, folder, family, saved, mode,
+     { v: 1, folder, family, saved, mode, version,
        light: { attr: null|"custom"|"dark", dark_file: bool, tokens: { name: value } },
        dark:  { ... } }
 
@@ -203,24 +203,35 @@ function dzStateForSlug(slug, families, sources) {
    else runs; it carries its own copy of the validation below because this
    file is not loaded yet at that point, and a unit test runs both copies over
    the same fixtures. A single-version family stores its one version under
-   both keys, so it paints whatever the mode.
+   both keys, so it paints whatever the mode. version is the theme version
+   that wrote it: the resolver uses the record's tokens only while that is
+   still the running version, because an upgrade may change a shipped
+   scheme's colours (the early block ignores it, the boot repaint follows).
 
    The record is input, not trusted state: a name must look like a theme
-   token and a value must have one of the shapes the painters write (scheme.js
+   token (or be one of the few older token names the painter still writes,
+   DZ_TOKEN_EXTRA_NAMES) and a value must have one of the shapes the painters write (scheme.js
    hexToRGB "rgb(r,g,b)", the "r,g,b" and "r, g, b" triplets, and the "#rrggbb"
    repaired colours), so nothing that can carry url() or a second declaration
    reaches setProperty. Anything else is dropped; a malformed half is no half. */
 var DZ_PAINT_RECORD_KEY = "dzPaintRecord";
 var DZ_TOKEN_NAME = /^--dz-[a-z0-9-]+$/;
+/* Exactly the entries of scheme.js DZ_CUSTOM_TOKENS outside the --dz-
+   namespace (a unit test pins it); custom.js's early block has a copy. */
+var DZ_TOKEN_EXTRA_NAMES = ["--secondary-text-color"];
 var DZ_TOKEN_VALUE = /^(rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(,\s*(0|1|0?\.\d+)\s*)?\)|\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}|#[0-9a-fA-F]{6})$/;
 var DZ_FOLDER_NAME = /^[A-Za-z0-9_-]+$/;
+
+function dzTokenNameOk(name) {
+    return DZ_TOKEN_NAME.test(name) || DZ_TOKEN_EXTRA_NAMES.indexOf(name) !== -1;
+}
 
 function dzCleanTokens(raw) {
     if (!raw || typeof raw !== "object" || Array.isArray(raw)) { return null; }
     var out = {};
     Object.keys(raw).forEach(function (name) {
         var value = raw[name];
-        if (DZ_TOKEN_NAME.test(name) && typeof value === "string" && DZ_TOKEN_VALUE.test(value)) {
+        if (dzTokenNameOk(name) && typeof value === "string" && DZ_TOKEN_VALUE.test(value)) {
             out[name] = value;
         }
     });
@@ -252,6 +263,7 @@ function dzParsePaintRecord(raw) {
     if (typeof rec.family !== "string") { return null; }
     if (rec.mode !== "light" && rec.mode !== "dark" && rec.mode !== "auto") { return null; }
     return { folder: rec.folder, family: rec.family, saved: rec.saved, mode: rec.mode,
+             version: typeof rec.version === "string" ? rec.version : null,
              light: dzCleanPaintHalf(rec.light), dark: dzCleanPaintHalf(rec.dark) };
 }
 
@@ -268,14 +280,17 @@ function dzReadPaintRecord(raw, deviceDark, override) {
              attr: half.attr, darkFile: half.darkFile, tokens: half.tokens };
 }
 
-/* The record to store, from { folder, family, saved, mode, light, dark }
-   (halves as { attr, darkFile, tokens } or null, which is left out). Null when
-   the record could not be read back as written. */
+/* The record to store, from { folder, family, saved, mode, version, light,
+   dark } (halves as { attr, darkFile, tokens } or null, which is left out,
+   as is a version that is not a string). Null when the record could not be
+   read back as written. */
 function dzBuildPaintRecord(input) {
+    if (!input || typeof input !== "object") { return null; }
     if (typeof input.folder !== "string" || !DZ_FOLDER_NAME.test(input.folder)) { return null; }
     if (typeof input.family !== "string" || typeof input.saved !== "string") { return null; }
     if (input.mode !== "light" && input.mode !== "dark" && input.mode !== "auto") { return null; }
     var rec = { v: 1, folder: input.folder, family: input.family, saved: input.saved, mode: input.mode };
+    if (typeof input.version === "string") { rec.version = input.version; }
     ["light", "dark"].forEach(function (variant) {
         var half = input[variant];
         if (!half) { return; }
@@ -360,12 +375,16 @@ function dzBuiltinColorsOf(schemes) {
     return out;
 }
 
+/* The stored record, or null when there is none or another theme version
+   wrote it: its tokens may then predate a change to a shipped scheme. */
 function dzLoadPaintRecord() {
+    var rec = null;
     try {
-        return dzParsePaintRecord(localStorage.getItem(DZ_PAINT_RECORD_KEY));
+        rec = dzParsePaintRecord(localStorage.getItem(DZ_PAINT_RECORD_KEY));
     } catch (e) {
         return null;
     }
+    return rec && typeof theme.version === "string" && rec.version === theme.version ? rec : null;
 }
 
 /* The inline tokens a paint can leave on an element: the scheme tokens and
@@ -376,7 +395,7 @@ function dzPaintTokenNames() {
     DZ_REPAIR_STATUS.forEach(function (name) {
         names.push("--dz-status-" + name + "-values", "--dz-toast-severity-" + name);
     });
-    return names.filter(function (name) { return DZ_TOKEN_NAME.test(name); });
+    return names.filter(dzTokenNameOk);
 }
 
 function dzStyleTokens(el) {
@@ -419,7 +438,7 @@ function dzWritePaintRecord(families, keepPainted) {
     if (fam) {
         var variant = !fam.single && state.slug === fam.dark ? "dark" : "light";
         var input = { folder: themeFolder, family: fam.id, saved: dzActiveSchemeSlug(),
-                      mode: theme.scheme_mode, light: null, dark: null };
+                      mode: theme.scheme_mode, version: theme.version, light: null, dark: null };
         var painted = keepPainted === true && prev ? prev[variant] : null;
         if (!painted) {
             painted = { attr: state.attr, darkFile: state.darkFile === true,

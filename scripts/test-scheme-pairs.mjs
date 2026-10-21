@@ -752,6 +752,7 @@ const rec = (patch) => Object.assign(clone(GOOD_RECORD), patch);
 const withDark = (tokens) => rec({ dark: { attr: "dark", dark_file: false, tokens } });
 function machinonRecord(variant) {
     return { v: 1, folder: "machinon", family: "machinon", saved: variant, mode: variant,
+             version: SHIPPED_THEME.version,
              light: { attr: null, dark_file: false, tokens: {} },
              dark: { attr: "dark", dark_file: true, tokens: {} } };
 }
@@ -793,7 +794,8 @@ const RECORD_FIXTURES = [
           "--DZ-SHOUT": "rgb(1,2,3)",
           "--dz-x;y": "rgb(1,2,3)",
           "color": "rgb(1,2,3)",
-          "--secondary-text-color": "rgb(1,2,3)",
+          "--secondary-text-color": "rgb(4,5,6)",
+          "--other-text-color": "rgb(1,2,3)",
           "__proto__": "rgb(1,2,3)",
           "--dz-sun-color": "#abc",
           "--dz-moon-color": "#12345g",
@@ -803,7 +805,8 @@ const RECORD_FIXTURES = [
           "--dz-status-disabled": "rgba(9, 9, 9, 0.25)"
       }),
       expect: { family: "gruvbox", variant: "dark", attr: "dark", darkFile: false,
-                tokens: { "--dz-body-bg": "rgb(1,2,3)", "--dz-status-disabled": "rgba(9, 9, 9, 0.25)" } } },
+                tokens: { "--dz-body-bg": "rgb(1,2,3)", "--secondary-text-color": "rgb(4,5,6)",
+                          "--dz-status-disabled": "rgba(9, 9, 9, 0.25)" } } },
     { name: "no record", raw: null, expect: null },
     { name: "JSON garbage", raw: "{not json", expect: null },
     { name: "the JSON literal null", raw: "null", expect: null },
@@ -890,7 +893,8 @@ test("every value the painters write passes the token filter", () => {
     b.props.set("--dz-sun-color", "#FAD232");
     b.props.set("--dz-moon-color", "#8ba4d8");
     b.props.set("--dz-status-timeout-values", "204, 36, 29");
-    const written = [...b.props.entries()].filter(([k]) => /^--dz-/.test(k) && k.indexOf("card") === -1);
+    const written = [...b.props.entries()].filter(([k]) => k.indexOf("card") === -1);
+    assert.ok(written.some(([k]) => k === "--secondary-text-color"), "the scheme sets its secondary text");
     assert.ok(written.length > 10, "the paint set the scheme's tokens");
     const kept = cm.dzBuildPaintRecord({ folder: "machinon", family: "paper", saved: "paper-dark", mode: "dark",
         light: null, dark: { attr: "dark", darkFile: false, tokens: Object.fromEntries(written) } });
@@ -941,7 +945,7 @@ test("Machinon records both halves without tokens; a single family records its o
 test("a mate whose colours are not at hand keeps its half from the previous record", async () => {
     const b = browser({ failFetch: true });
     savedTheme(b, "gruvbox-light", "light");
-    const prev = clone(GOOD_RECORD);
+    const prev = { ...clone(GOOD_RECORD), version: SHIPPED_THEME.version };
     b.store.set("dzPaintRecord", JSON.stringify(prev));
     b.ctx.dzSeedPaintedSlug();
     b.ctx.setColorScheme();
@@ -1002,9 +1006,10 @@ test("a boot after an early paint repaints once from the record, with no scheme 
     assert.equal(c.props.get("--dz-body-bg"), rgb(SCHEMES["gruvbox-dark"].colors.background));
     c.ctx.dzSeedPaintedSlug();
     assert.equal(c.ctx.dzPaintedSlug, "gruvbox-dark");
+    assert.equal(JSON.parse(record).version, SHIPPED_THEME.version);
     await c.ctx.dzApplyColorMode(true);
     assert.deepEqual(c.paints, ["gruvbox-dark"], "one paint, of the variant already on screen");
-    assert.equal(c.fetches.length, 0, "the record supplies the mate's colours");
+    assert.equal(c.fetches.length, 0, "a record of this version supplies the mate's colours");
     assert.equal(c.props.get("--dz-body-bg"), rgb(SCHEMES["gruvbox-dark"].colors.background));
     assert.equal(c.html.getAttribute("data-dz-scheme"), "dark");
 });
@@ -1113,4 +1118,57 @@ test("an early paint left standing over the shipped defaults is repainted by the
     await reconcileHarness(c, () => {});
     assert.deepEqual(c.paints, ["dark"]);
     assert.equal(c.darkLinks().length, 1);
+});
+
+test("the token names outside --dz- are exactly the painter's, in both validators", () => {
+    const b = browser();
+    const outside = [...b.ctx.DZ_CUSTOM_TOKENS].filter((n) => !/^--dz-/.test(n));
+    assert.deepEqual([...cm.DZ_TOKEN_EXTRA_NAMES], outside);
+    const early = /var EXTRA = (\[[^\]]*\]);/.exec(EARLY_SRC);
+    assert.ok(early, "the early block lists its extra names");
+    assert.deepEqual(JSON.parse(early[1]), outside);
+});
+
+test("a paint from the record keeps the scheme's secondary text colour", async () => {
+    const b = browser();
+    savedTheme(b, "gruvbox-light", "dark");
+    b.ctx.dzSeedPaintedSlug();
+    b.ctx.setColorScheme();
+    await b.ctx.dzApplyColorMode();
+    const c = browser();
+    savedTheme(c, "gruvbox-light", "dark");
+    c.store.set("dzPaintRecord", b.store.get("dzPaintRecord"));
+    runEarlyIn(c.ctx);
+    const want = rgb(SCHEMES["gruvbox-dark"].colors.alt_text);
+    assert.equal(c.props.get("--secondary-text-color"), want, "the early block paints it");
+    c.ctx.dzSeedPaintedSlug();
+    await c.ctx.dzApplyColorMode(true);
+    assert.equal(c.fetches.length, 0);
+    assert.equal(c.props.get("--secondary-text-color"), want, "the boot repaint from the record keeps it");
+});
+
+test("a record another theme version wrote is repainted from the scheme files and rewritten", async () => {
+    const b = browser();
+    const t = savedTheme(b, "gruvbox-light", "dark");
+    const old = clone(GOOD_RECORD);
+    old.version = "0.0.1";
+    old.dark.tokens = { "--dz-body-bg": "rgb(9, 9, 9)" };
+    b.store.set("dzPaintRecord", JSON.stringify(old));
+    runEarlyIn(b.ctx);
+    assert.equal(b.props.get("--dz-body-bg"), "rgb(9, 9, 9)", "the early block paints it regardless");
+    b.ctx.dzSeedPaintedSlug();
+    await b.ctx.dzApplyColorMode(true);
+    assert.ok(b.fetches.length > 0, "the scheme files were read");
+    assert.equal(b.props.get("--dz-body-bg"), rgb(SCHEMES["gruvbox-dark"].colors.background));
+    const r = JSON.parse(b.store.get("dzPaintRecord"));
+    assert.equal(r.version, t.version);
+    assert.equal(r.dark.tokens["--dz-body-bg"], rgb(SCHEMES["gruvbox-dark"].colors.background));
+    /* A record without a version is treated the same way. */
+    const c = browser();
+    savedTheme(c, "gruvbox-light", "dark");
+    c.store.set("dzPaintRecord", JSON.stringify(GOOD_RECORD));
+    runEarlyIn(c.ctx);
+    c.ctx.dzSeedPaintedSlug();
+    await c.ctx.dzApplyColorMode(true);
+    assert.ok(c.fetches.length > 0);
 });
