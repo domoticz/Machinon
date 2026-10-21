@@ -84,10 +84,9 @@ function setModeToggles() {
         logo.insertBefore(dzBuildModeToggle(DZ_MODE_TOGGLE_IDS[0]),
                           search && search.parentNode === logo ? search.nextSibling : null);
     }
-    /* Last in the drawer: absolutely positioned at its top right it does not
-       matter where it sits in the DOM, but in the icons-only drawer it is in
-       flow under the menu rows (css/color-mode-toggle.css), and last keeps
-       it after the links in the tab order. */
+    /* Last in the drawer: it is absolutely positioned on the close row in
+       both menus (css/color-mode-toggle.css), so its DOM place only decides
+       the tab order, and last keeps it after the links. */
     var menu = document.querySelector(".navbar-inner");
     if (menu && !document.getElementById(DZ_MODE_TOGGLE_IDS[1])) {
         menu.appendChild(dzBuildModeToggle(DZ_MODE_TOGGLE_IDS[1]));
@@ -95,7 +94,8 @@ function setModeToggles() {
     dzSyncModeToggles();
 }
 
-document.addEventListener("dz:colormode", function (e) {
-    dzLastColorMode = e.detail;
+/* color-mode.js dzDispatchColorMode sets dzLastColorMode before it
+   dispatches. */
+document.addEventListener("dz:colormode", function () {
     dzSyncModeToggles();
 });

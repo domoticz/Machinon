@@ -23,6 +23,16 @@ function dzModeFromStoredBase(base, darkFeatureOn) {
 }
 var DZ_SCHEME_MODES = { light: true, dark: true, auto: true };
 
+/* Settings as merged into t, with a mode that is not one of DZ_SCHEME_MODES
+   (corrupt stored data) replaced by the one the base implies: an unknown
+   mode resolves to no variant, which would leave the light/dark switch
+   showing while a tap on it paints nothing. */
+function dzNormaliseSchemeMode(t) {
+    if (DZ_SCHEME_MODES[t.scheme_mode] === true) return;
+    var f = t.features && t.features.dark_theme;
+    t.scheme_mode = dzModeFromStoredBase(t.scheme_base, !!(f && f.enabled === true));
+}
+
 /* DZ_SETTINGS_MIGRATIONS[n - 1] lifts a version-n snapshot to version n + 1.
    Every step must be safe on data already in the newer shape: the browser
    cache carries no version stamp, so dzThemeFromCache (settings-store.js) runs
@@ -263,6 +273,8 @@ function dzApiLoad() {
         if (dzApiState.userSnap) dzMigrateSnapshot(dzApiState.userSnap);
         if (dzApiState.instanceSnap) dzApplySnapshot(theme, dzApiState.instanceSnap);
         if (dzApiState.userSnap) dzApplySnapshot(theme, dzSnapshotSubset(dzApiState.userSnap, "user"));
+        /* A current-version row skips the migration that validates the mode. */
+        dzNormaliseSchemeMode(theme);
         /* localStorage can throw here (private-browsing quota). The cache is
            only the warm-boot fast path and the snapshots are already applied,
            so a failed write must not reject this load: a rejection would
@@ -933,10 +945,8 @@ function dzApplyLegacyFeatures() {
    the -custom array was never read (failed or malformed), the painted mode
    stands, like every other custom field, and is derived only if invalid. */
 function dzApplyLegacySchemeMode() {
-    var f = theme.features && theme.features.dark_theme;
-    var mode = dzLegacyLoaded.custom ? dzLegacyLoaded.mode : theme.scheme_mode;
-    theme.scheme_mode = DZ_SCHEME_MODES[mode] === true ? mode
-        : dzModeFromStoredBase(theme.scheme_base, f && f.enabled);
+    if (dzLegacyLoaded.custom) { theme.scheme_mode = dzLegacyLoaded.mode; }
+    dzNormaliseSchemeMode(theme);
     cacheThemeSettings();
 }
 

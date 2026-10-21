@@ -210,10 +210,11 @@ function dzStateForSlug(slug, families, sources) {
 
    The record is input, not trusted state: a name must look like a theme
    token (or be one of the few older token names the painter still writes,
-   DZ_TOKEN_EXTRA_NAMES) and a value must have one of the shapes the painters write (scheme.js
-   hexToRGB "rgb(r,g,b)", the "r,g,b" and "r, g, b" triplets, and the "#rrggbb"
-   repaired colours), so nothing that can carry url() or a second declaration
-   reaches setProperty. Anything else is dropped; a malformed half is no half. */
+   DZ_TOKEN_EXTRA_NAMES) and a value must have one of the shapes the painters
+   write (scheme.js hexToRGB "rgb(r,g,b)", the "r,g,b" and "r, g, b"
+   triplets, and the "#rrggbb" repaired colours), so nothing that can carry
+   url() or a second declaration reaches setProperty. Anything else is
+   dropped; a malformed half is no half. */
 var DZ_PAINT_RECORD_KEY = "dzPaintRecord";
 var DZ_TOKEN_NAME = /^--dz-[a-z0-9-]+$/;
 /* Exactly the entries of scheme.js DZ_CUSTOM_TOKENS outside the --dz-
@@ -388,16 +389,23 @@ function dzBuiltinColorsOf(schemes) {
     return out;
 }
 
-/* The stored record, or null when there is none or another theme version
-   wrote it: its tokens may then predate a change to a shipped scheme. */
-function dzLoadPaintRecord() {
-    var rec = null;
+/* The stored record whichever theme version wrote it, or null. */
+function dzLoadAnyPaintRecord() {
     try {
-        rec = dzParsePaintRecord(localStorage.getItem(DZ_PAINT_RECORD_KEY));
+        return dzParsePaintRecord(localStorage.getItem(DZ_PAINT_RECORD_KEY));
     } catch (e) {
         return null;
     }
+}
+
+/* rec, or null when another theme version wrote it: its tokens may then
+   predate a change to a shipped scheme. */
+function dzCurrentPaintRecord(rec) {
     return rec && typeof theme.version === "string" && rec.version === theme.version ? rec : null;
+}
+
+function dzLoadPaintRecord() {
+    return dzCurrentPaintRecord(dzLoadAnyPaintRecord());
 }
 
 /* The inline tokens a paint can leave on an element: the scheme tokens and
@@ -438,15 +446,19 @@ function dzRecordHalf(state) {
    colours included; keepPainted reuses the stored painted half instead, for a
    refresh that may run while the hub previews colours on the page. The mate
    half comes from its colours when they are at hand, else from the previous
-   record of the same family, else it is left out. Best effort: storage may be
-   blocked or full. */
+   record of the same family, else it is left out. A previous record another
+   theme version wrote still supplies the mate as a last resort: a half with
+   older colours keeps the next boot's early paint on the right variant, and
+   dzRefreshPaintRecord replaces it once the scheme files load. Best effort:
+   storage may be blocked or full. */
 function dzWritePaintRecord(families, keepPainted) {
     dzPaintRecordDue = false;
     var state = dzLastPaintState;
     if (!state) { return; }
     var fam = dzFamilyOf(state.slug, families);
-    var prev = dzLoadPaintRecord();
-    if (prev && (!fam || prev.family !== fam.id)) { prev = null; }
+    var stored = dzLoadAnyPaintRecord();
+    if (stored && (!fam || stored.family !== fam.id)) { stored = null; }
+    var prev = dzCurrentPaintRecord(stored);
     var rec = null;
     if (fam) {
         var variant = !fam.single && state.slug === fam.dark ? "dark" : "light";
@@ -466,7 +478,7 @@ function dzWritePaintRecord(families, keepPainted) {
                 userSchemes: theme.user_schemes, builtinColors: dzSyncBuiltinColors(), record: prev
             });
             input[variant] = painted;
-            input[other] = mate ? dzRecordHalf(mate) : null;
+            input[other] = mate ? dzRecordHalf(mate) : stored ? stored[other] : null;
         }
         rec = dzBuildPaintRecord(input);
     }
@@ -609,11 +621,15 @@ function dzSetSchemeMode(mode) {
     theme.scheme_mode = mode;
     dzSetColorOverride(null);
     var fam = dzFamilyOf(dzActiveSchemeSlug(), dzSchemeFamilies(theme.user_schemes));
-    var saved = fam && !fam.single
+    var paired = !!(fam && !fam.single);
+    var saved = paired
         ? dzSaveSchemeModel(dzSavedMemberFor(fam, mode, dzDeviceDark()))
         : Promise.resolve(false);
     return saved.then(function (ok) {
         if (!ok) {
+            /* The member's colours could not be loaded: the mode is saved
+               without it, beside the previous member, until the next pick. */
+            if (paired && typeof dzLog === "function") { dzLog("colormode", "mode_member_unsaved", { mode: mode }); }
             cacheThemeSettings();
             persistSchemeChoice();
         }

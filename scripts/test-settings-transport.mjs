@@ -258,6 +258,23 @@ test("scheme_mode: a v3 row rewritten by a v2 writer re-derives from its base (a
     assert.equal(out.values.scheme_mode, "light");
 });
 
+test("scheme_mode: a current-version native row with a corrupt mode is normalised after the merge", async () => {
+    for (const [stored, base, want] of [["sideways", "dark", "dark"], [7, "light", "light"], ["auto", "dark", "auto"]]) {
+        const ctx = loadTransport({
+            theme: { features: { dark_theme: { enabled: false } }, scheme_mode: "auto", scheme_base: "light" },
+            cacheThemeSettings: () => {}
+        });
+        ctx.dzApiFetchLayers = () => {
+            ctx.dzApiState.instanceSnap = { schemaVersion: 3, features: {},
+                                            values: { scheme: "nord", scheme_base: base, scheme_mode: stored } };
+            ctx.dzApiState.userSnap = null;
+            return Promise.resolve(ctx.DZ_LOAD_LOADED);
+        };
+        assert.equal(await ctx.dzApiLoad(), ctx.DZ_LOAD_LOADED);
+        assert.equal(ctx.theme.scheme_mode, want, JSON.stringify(stored));
+    }
+});
+
 /* Drives the real legacy loaders against stubbed uservariables. */
 async function legacyLoad({ list, custom, theme, withCustom = true, customFails }) {
     const vars = { 1: list, 2: custom };
