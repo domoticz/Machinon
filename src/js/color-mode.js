@@ -362,6 +362,19 @@ function dzSetColorOverride(variant) {
     }
 }
 
+/* Drop the paint record and the override, for a reset or a cache clear:
+   the reload must show what the settings say, not a frame of the previous
+   look and not a tap that outlives the reset. */
+function dzForgetPaint() {
+    dzOverrideMemory = undefined;
+    try {
+        localStorage.removeItem(DZ_PAINT_RECORD_KEY);
+        localStorage.removeItem(dzColorOverrideKey());
+    } catch (e) {
+        if (typeof dzLog === "function") { dzLog("colormode", "forget_paint_failed", { error: String(e) }); }
+    }
+}
+
 /* Built-in colours a paint can use without a network round trip. */
 function dzSyncBuiltinColors() {
     return dzBuiltinColorsOf(BUILTIN_SCHEMES);

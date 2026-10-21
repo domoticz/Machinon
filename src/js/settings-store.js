@@ -380,6 +380,17 @@ function applyThemeDeltaInPlace(before) {
     dzDiagRefreshGate(true);
 }
 
+/* Everything this browser keeps for the theme: the settings cache and the
+   colour state color-mode.js stores beside it. The settings stored in
+   Domoticz are untouched. Private mode or blocked storage leaves nothing to
+   clear. */
+function dzClearThemeCache() {
+    try {
+        localStorage.removeItem(themeFolder + ".themeSettings");
+    } catch (e) { /* nothing cached to clear */ }
+    if (typeof dzForgetPaint === "function") { dzForgetPaint(); }
+}
+
 function resetTheme() {
     var deletePromises = [];
 
@@ -405,9 +416,7 @@ function resetTheme() {
     }
 
     Promise.all(deletePromises).then(function() {
-        if (typeof Storage !== "undefined") {
-            localStorage.removeItem(themeFolder + ".themeSettings");
-        }
+        dzClearThemeCache();
         $.get("json.htm?type=command&param=addlogmessage&message=" + themeFolder + " theme reset to defaults");
         location.reload();
     });

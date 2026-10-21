@@ -513,6 +513,37 @@ test("override storage is whitelisted, and a tap still paints when storage is bl
     assert.equal(b.ctx.dzLastColorMode.slug, "light");
 });
 
+test("a reset and a cache clear drop the settings cache, the paint record and a tap", async () => {
+    const b = browser();
+    savedTheme(b, "gruvbox-light", "light");
+    b.ctx.dzSeedPaintedSlug();
+    b.ctx.setColorScheme();
+    b.ctx.dzSetColorOverride("dark");
+    await b.ctx.dzApplyColorMode();
+    b.ctx.cacheThemeSettings();
+    b.store.set("dzOtherKey", "kept");
+    for (const k of ["machinon.themeSettings", "dzPaintRecord", "machinon.colorOverride"]) assert.ok(b.store.has(k), k);
+    b.ctx.dzClearThemeCache();
+    assert.deepEqual([...b.store.keys()], ["dzOtherKey"]);
+    assert.equal(b.ctx.dzColorOverride(), null, "the page's own copy of the tap is gone too");
+    /* The legacy transport's reset finishes through the same clear. */
+    const c = browser();
+    savedTheme(c, "gruvbox-light", "light");
+    c.store.set("machinon.themeSettings", "{}");
+    c.store.set("dzPaintRecord", "{}");
+    c.store.set("machinon.colorOverride", '{"variant":"dark","deviceDark":false}');
+    let reloads = 0;
+    c.ctx.$ = { get() {} };
+    c.ctx.location = { reload() { reloads++; } };
+    c.ctx.resetTheme();
+    await tick();
+    assert.equal(c.store.size, 0);
+    assert.equal(reloads, 1);
+    /* Blocked storage neither throws nor stops the reload. */
+    c.ctx.localStorage.removeItem = () => { throw new Error("blocked"); };
+    c.ctx.dzClearThemeCache();
+});
+
 test("the painter's dark file is the one theme.json lists for the dark_theme feature", () => {
     const b = browser();
     assert.deepEqual(SHIPPED_THEME.features.dark_theme.files, [b.ctx.DZ_DARK_FILE]);

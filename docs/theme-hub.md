@@ -112,7 +112,9 @@ without separate logins, that label never appears, because there is nothing to d
 explained above.
 
 The About tab's maintenance actions let you reset your own personal settings back to the shared
-defaults, and, if you're an admin, reset or update those shared defaults for everyone.
+defaults, and, if you're an admin, reset or update those shared defaults for everyone. Its
+**Reset theme to defaults** and **Clear cached settings** buttons also clear what the browser
+you use them in remembers: the colors it opens pages in and a tap on the light/dark switch.
 
 Which specific setting is personal and which is shared is documented setting by setting in the
 settings reference.
