@@ -646,17 +646,16 @@ function dzHubDoResetTheme() {
 }
 
 /* Clear only the browser cache (the old reset dialog's "clear localStorage"
-   button): drop the cached theme settings and reload; the server-stored settings
-   are kept, so the reload re-seeds the cache from them.
+   button): drop the cached theme settings, the paint record and a light/dark
+   tap (settings-store.js dzClearThemeCache) and reload; the server-stored
+   settings are kept, so the reload re-seeds the cache from them.
 
    Also the finishing step of dzHubDoResetTheme above, clean or partial: once
    rows have been reset server-side, the cached snapshot is the only thing still
    holding the old values, and the reload re-seeds from whatever the server now
    has. Same primitive, two callers - do not duplicate it. */
 function dzHubDoClearCache() {
-    try {
-        if (typeof Storage !== "undefined") { localStorage.removeItem(themeFolder + ".themeSettings"); }
-    } catch (e) { /* private mode: nothing cached to clear */ }
+    dzClearThemeCache();
     location.reload();
 }
 

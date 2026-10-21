@@ -2579,7 +2579,9 @@ house defaults; **"Reset my personal settings"** deletes the caller's personal r
 back to the house defaults; **"Reset the house defaults"** (admin) resets the shared row to
 factory values, leaving other users' personal settings untouched. "Reset theme to defaults" is
 mode-aware rather than mode-gated: it resets every native layer this identity can reach, then
-clears the localStorage cache and reloads. **Constraint.** The visibility gating and the
+clears the browser's copy (settings cache, paint record and light/dark override, all through
+`dzClearThemeCache` in `src/js/settings-store.js`, which "clear the browser cache" also uses) and
+reloads. **Constraint.** The visibility gating and the
 promote no-op rationale live in `src/js/theme-hub.js`; the write paths in
 `src/js/settings-transport.js`.
 

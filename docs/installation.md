@@ -141,8 +141,9 @@ To remove Machinon completely:
 
 1. While Machinon is still the active theme, open the Theme Hub, go to the **About** tab and use
    **Reset theme to defaults** under Maintenance. This deletes the theme settings Domoticz stores
-   for your login (and, for an admin, the house-wide defaults), clears the copy cached in this
-   browser, and reloads the page.
+   for your login (and, for an admin, the house-wide defaults), clears what this browser keeps of
+   them (the cached copy, the remembered colors and a tap on the light/dark switch), and reloads
+   the page.
 2. Switch Domoticz to another theme.
 3. Delete the `machinon` folder from `domoticz/www/styles/`.
 
@@ -154,6 +155,7 @@ What stays behind:
   Icons**.
 - **Other users' personal theme settings.** On an installation with separate logins, step 1 only
   resets the settings of the login that runs it. They do nothing once Machinon is gone.
-- **Small entries in each browser's storage** for your Domoticz address: the cached settings,
-  which devices have already warned you, and the diagnostic logging switch. They are only read by
+- **Small entries in each browser's storage** for your Domoticz address: the cached settings, the
+  remembered colors and light/dark switch tap of browsers other than the one you reset from, which
+  devices have already warned you, and the diagnostic logging switch. They are only read by
   Machinon; clear the site data for your Domoticz address in the browser to remove them.
