@@ -301,7 +301,7 @@ language = {
       reset_theme: "Återställ temat till standardvärden",
       reset_theme_confirm: "Återställa alla temainställningar till sina standardvärden? Detta raderar de sparade temainställningarna och laddar om sidan.",
       clear_cache: "Rensa cachade inställningar",
-      clear_cache_confirm: "Rensa den här webbläsarens cachade temainställningar och ladda om? Dina inställningar som sparats på servern behålls.",
+      clear_cache_confirm: "Rensa den här webbläsarens cachade temainställningar och ladda om? Det ångrar också ett byte med ljust/mörkt-knappen på den här enheten och glömmer de sparade färgerna. Dina inställningar som sparats på servern behålls.",
       reset_colors: "Återställ färgerna till det valda schemat",
       reset_colors_confirm: "Återställa de egna färgerna till det valda schemats standardpalett?",
       promote: "Spara mina nuvarande inställningar som husets standard",
