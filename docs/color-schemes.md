@@ -131,9 +131,10 @@ For the switch in the phone menu, see [Mobile layouts](mobile.md#the-lightdark-s
 Machinon remembers in each browser which colors it last showed, so from the second visit on,
 pages open straight in your theme, dark versions included, with no white flash while the page
 loads. The very first visit from a new browser, or after clearing the browser's site data, can
-show the default light colors for a moment before your theme appears. **Reset theme to defaults**
-and **Clear cached settings** in the Theme Hub also make the browser forget these colors, so the
-page that reloads opens in the default colors rather than a moment of the old ones.
+show the default colors for a moment before your theme appears. **Reset theme to defaults**
+and **Clear cached settings** in the Theme Hub also make the browser forget these colors. After a
+reset the page reloads in the default colors. After clearing cached settings it reloads like a
+first visit: the default colors for a moment, then your own theme.
 
 What is remembered belongs to the browser, not to your Domoticz login. If two people with
 different themes take turns in the same browser, the page can open in the previous person's
