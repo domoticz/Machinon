@@ -11,7 +11,9 @@
    The validation repeats dzParsePaintRecord / dzReadPaintRecord, which
    cannot be loaded this early; scripts/test-scheme-pairs.mjs runs this block
    and those functions over the same fixtures, so the copies cannot drift.
-   Nothing is written until the whole half has validated. */
+   Nothing is written until the whole half has validated. The record's theme
+   version is not checked here: the boot repaint corrects a record an older
+   version wrote, within the same load. */
 (function() {
     try {
         var rec = JSON.parse(localStorage.getItem("dzPaintRecord"));
@@ -35,12 +37,13 @@
         var tokens = half.tokens;
         if (!tokens || typeof tokens !== "object" || Array.isArray(tokens)) return;
         var NAME = /^--dz-[a-z0-9-]+$/;
+        var EXTRA = ["--secondary-text-color"];
         var VALUE = /^(rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(,\s*(0|1|0?\.\d+)\s*)?\)|\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}|#[0-9a-fA-F]{6})$/;
         var html = document.documentElement;
         var names = Object.keys(tokens);
         for (var i = 0; i < names.length; i++) {
             var value = tokens[names[i]];
-            if (NAME.test(names[i]) && typeof value === "string" && VALUE.test(value)) {
+            if ((NAME.test(names[i]) || EXTRA.indexOf(names[i]) !== -1) && typeof value === "string" && VALUE.test(value)) {
                 html.style.setProperty(names[i], value);
             }
         }
