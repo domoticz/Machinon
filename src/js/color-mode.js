@@ -494,9 +494,13 @@ function dzPaintedVariant() {
    unchanged slug paints nothing unless force is set: a saving action passes it
    because the slug may be the same while its colours are new (a pair saved
    again under its own name). A call overtaken by a newer one while waiting
-   for scheme files paints nothing. Never rejects. */
+   for scheme files paints nothing. Until a paint of this page has landed,
+   only the early block has painted, from a record that may be stale, so
+   every call counts as forced: an unforced call overtaking the forced boot
+   repaint would otherwise cancel it. Never rejects. */
 function dzApplyColorMode(force) {
     var seq = ++dzColorModeSeq;
+    var forced = force === true || dzLastPaintState === null;
     var families = null;
     return new Promise(function (resolve) {
         var mode = theme.scheme_mode;
@@ -509,7 +513,7 @@ function dzApplyColorMode(force) {
         }
         var saved = dzActiveSchemeSlug();
         var slug = dzResolvePaintSlug(saved, mode, override, deviceDark, families);
-        if (slug === dzPaintedSlug && force !== true) { resolve(null); return; }
+        if (slug === dzPaintedSlug && !forced) { resolve(null); return; }
         var sources = { savedSlug: saved, savedState: dzSavedPaintState(),
                         userSchemes: theme.user_schemes, builtinColors: dzSyncBuiltinColors(),
                         record: dzLoadPaintRecord() };
@@ -529,7 +533,7 @@ function dzApplyColorMode(force) {
     }).then(function (state) {
         if (seq !== dzColorModeSeq) { return; }
         var painted = false;
-        if (state && (state.slug !== dzPaintedSlug || force === true)) {
+        if (state && (state.slug !== dzPaintedSlug || forced)) {
             dzPaintState(state);
             dzPaintedSlug = state.slug;
             painted = true;
