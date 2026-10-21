@@ -1,35 +1,139 @@
 # Color schemes
 
-Machinon ships eight color schemes, four light and four dark, and lets you build and save your
-own on top of them. Every scheme lives on the Theme Hub's **Colors and schemes** tab.
+Machinon's colors come in themes. Each built-in theme has a light and a dark version, and you
+choose both the theme and when to use which version: always light, always dark, or following
+the light/dark setting of the phone, tablet or computer you are looking at. You can also build
+and save themes of your own. Everything lives on the Theme Hub's **Colors and schemes** tab.
 
-## Picking a scheme
+## Picking a theme and a mode
 
 Open the Theme Hub (see [Theme Hub](theme-hub.md) if you haven't yet) and go to **Colors and
-schemes**. Each scheme is shown as a card: a name, a short description, and a strip of seven
-color swatches so you can see the palette before picking it. Click a card to apply it.
+schemes**. Each theme is shown as one card: a name, a short description, and a preview of both
+versions side by side. The version this device is showing is at full strength and the other one
+is dimmed, and the selected card has a bar under the version on screen. Click a card to use that
+theme.
 
-The choice takes effect immediately and is saved right away, there's no separate Apply or Save
-step. It's a personal setting: on an installation with separate logins, your pick applies only to
-your own account, and other users keep whichever scheme they last chose. See [Theme
+Above the cards, a three-way switch sets the mode:
+
+| Mode | What you see |
+| --- | --- |
+| **Light** | Always the theme's light version. |
+| **Dark** | Always the theme's dark version. |
+| **Follow device** | The version that matches the light or dark setting of the device you are using. When that setting changes, for example when your phone switches to dark in the evening, Machinon follows straight away, without a reload. |
+
+In Follow device, a line under the switch tells you which version this device is getting and
+why, for example "This device is in dark mode, so you see the dark version."
+
+Every choice takes effect immediately and is saved right away; there is no separate Apply or
+Save step. The theme and the mode are personal settings: on an installation with separate
+logins they apply only to your own account, and other users keep their own. See [Theme
 Hub](theme-hub.md#personal-settings-versus-shared-settings) for how personal settings work if
-your installation has no separate logins.
+your installation has no separate logins. Even when everyone shares one set of settings, Follow
+device is decided by each device on its own: a phone in dark mode shows the dark version while
+a computer in light mode shows the light one, at the same time.
 
-## The eight schemes
+A new installation starts in Follow device with the Machinon theme. Updating Machinon does not
+change what you already had: if you used a dark scheme you are on **Dark**, otherwise on
+**Light**, with the same theme as before.
 
-Two schemes are Machinon's own defaults and don't carry a color file of their own; the other six
-are three color families, each with a light and a dark variant.
+<div class="grid" markdown>
 
-| Scheme | Variant | Description |
+<figure markdown="span">
+![The Colors and schemes tab with Follow device selected on a device in light mode](screenshots/theme-hub-colors.png){ width="1440" height="900" loading=lazy }
+<figcaption>Follow device on a device in light mode</figcaption>
+</figure>
+
+<figure markdown="span">
+![The same tab on a device in dark mode, showing the dark version](screenshots/theme-hub-colors-dark.png){ width="1440" height="900" loading=lazy }
+<figcaption>The same choice on a device in dark mode</figcaption>
+</figure>
+
+</div>
+
+### Themes with a single version
+
+**Custom** (your own seven colors) and presets saved with **Save as preset** have only one
+version. While one of them is selected, the Light, Dark and Follow device switch is greyed out
+with a note saying the theme has a single version, and the light/dark switch in the header is
+hidden, because there is nothing to switch to. Your mode is kept: pick a theme with both versions
+again and it applies as before.
+
+## The built-in themes
+
+In the Theme Hub, each theme below is one card holding both of its versions. Machinon is the
+default.
+
+| Theme | Version | Description |
 | --- | --- | --- |
-| Machinon Light | Light | The default look: clean blue on white |
-| Machinon Dark | Dark | The default look: blue glowing on navy |
-| Magenta Light | Light | Warm magenta on white |
-| Magenta Dark | Dark | Magenta glow on plum black |
-| Paper Light | Light | Monochrome paper: zero-chrome interface, colour reserved for states |
-| Paper Dark | Dark | Ink on slate: the monochrome pair of Paper Light |
-| Gruvbox Light | Light | Warm retro paper |
-| Gruvbox Dark | Dark | Retro warm dark with earthy accents |
+| Machinon | Light | The default look: clean blue on white |
+| Machinon | Dark | The default look: blue glowing on navy |
+| Magenta | Light | Warm magenta on white |
+| Magenta | Dark | Magenta glow on plum black |
+| Paper | Light | Monochrome paper: zero-chrome interface, colour reserved for states |
+| Paper | Dark | Ink on slate: the monochrome pair of Paper Light |
+| Gruvbox | Light | Warm retro paper |
+| Gruvbox | Dark | Retro warm dark with earthy accents |
+
+## The light/dark switch
+
+The sun and moon switch flips the screen between the light and the dark version of your theme,
+on the device you tap it on. The half that is filled in shows which version is on screen.
+
+- **On a computer or tablet** (980 pixels wide or more) it sits in the header, next to the search
+  box.
+- **On a phone or a narrow window** it is in the menu: open the menu and it is at the top right,
+  on the row with the close button. With the icons-only menu (the [Icon-only
+  navbar](settings-reference.md#icon-only-navbar-hide-text) setting) it stands upright below the
+  menu entries.
+
+A tap changes only what this device shows. Nothing is saved to Domoticz, your mode in the Theme
+Hub stays as it was, and your other devices and other users keep their colors.
+
+How long a tap lasts depends on your mode:
+
+- In **Follow device**, until the device itself next switches between light and dark. From then
+  on Machinon follows the device again.
+- In **Light** or **Dark**, until you tap again. It is remembered in this browser, so reloading
+  the page keeps it.
+- Choosing a mode in the Theme Hub always ends it.
+
+While a tap is in effect, the Colors and schemes tab says so, for example "On this device you
+switched to Dark with the toggle.", with a button to go back to your mode.
+
+One limit to know about: Machinon only notices the device switching while a Machinon page is
+open. If the device switches twice while no page is open, say to dark in the evening and back
+to light the next morning, it looks as if nothing changed, so a tap from the evening before
+still applies. Tap the switch again, or use the button on the Colors and schemes tab.
+
+The switch is on by default. To remove it, turn off **Light/dark toggle** on the Colors and
+schemes tab; it disappears at once, without a reload.
+
+<div class="grid" markdown>
+
+<figure markdown="span">
+![The light/dark switch in the header, next to the search box, with the sun half filled](screenshots/header-mode-toggle.png){ width="436" height="104" loading=lazy }
+<figcaption>Light version on screen</figcaption>
+</figure>
+
+<figure markdown="span">
+![The same switch with the moon half filled, in the dark version](screenshots/header-mode-toggle-dark.png){ width="436" height="104" loading=lazy }
+<figcaption>Dark version on screen</figcaption>
+</figure>
+
+</div>
+
+For the switch in the phone menu, see [Mobile layouts](mobile.md#the-lightdark-switch-in-the-menu).
+
+## Opening pages in the right colors
+
+Machinon remembers in each browser which colors it last showed, so from the second visit on,
+pages open straight in your theme, dark versions included, with no white flash while the page
+loads. The very first visit from a new browser, or after clearing the browser's site data, can
+show the default light colors for a moment before your theme appears.
+
+What is remembered belongs to the browser, not to your Domoticz login. If two people with
+different themes take turns in the same browser, the page can open in the previous person's
+colors for a moment before switching to yours.
 
 ## What each scheme looks like
 
@@ -83,7 +187,8 @@ layouts. Click any one to see it full size.
 ## Building your own colors
 
 There are two ways to build a palette of your own. The theme wizard is the fast route: give it
-one or two colors and a look you like, and it builds a finished pair of schemes for you. The
+one or two colors and a look you like, and it builds a finished theme with a light and a dark
+version for you. The
 manual color editor is the slow route: every one of the seven swatches is yours to set by hand,
 for when you already know exactly what you want. Neither one replaces the other, pick whichever
 fits the moment.
@@ -109,11 +214,15 @@ through it:
 
 Behind the scenes, the wizard builds a full light theme and a full dark theme from your choices
 and checks every color it generates for readability, so text stays easy to read wherever it
-lands. Both new schemes are added to the picker above, and whichever one matches the mode
-(light or dark) you're currently in is applied right away.
+lands. The new theme is added to the picker as one card holding both versions, and is applied
+right away in the version your mode asks for, so it works with Light, Dark and Follow device and
+with the light/dark switch like the built-in themes.
 
-Both saved schemes are personal, the same as any other scheme pick: they follow the account that
-saved them, and other people on the same Domoticz don't see them. You don't need admin rights to
+To delete a theme you made this way, click the small "x" on its card. That removes both its light
+and its dark version.
+
+A saved theme is personal, the same as any other theme pick: it follows the account that saved
+it, and other people on the same Domoticz don't see them. You don't need admin rights to
 create one. That's different from installing an icon, which changes the icon library for everyone
 and is an administrator action (see [Icons](icons.md)). If your installation has no separate
 logins, Domoticz can't tell users apart, so themes created there are shared like every other
@@ -140,7 +249,7 @@ setting; see [Theme Hub](theme-hub.md#personal-settings-versus-shared-settings).
 
 ### Full creative control: the manual color editor
 
-Click the **Custom** card, the last one in the list, to switch to your own palette. Once it's
+Click the **Custom** card to switch to your own palette. Once it's
 selected, seven color swatches become editable. Each one paints a specific part of the
 interface:
 
@@ -163,9 +272,11 @@ result as you go.
 #### Saving a custom palette as a preset
 
 Once you're happy with a custom palette, click **Save as preset** and give it a name. It's added
-to the scheme list as its own card, with a small "x" you can click to delete it later. Saved
-presets are personal, the same as a built-in scheme pick: they follow the account that saved
-them.
+to the picker as its own card, with a small "x" you can click to delete it later. A preset has a
+single version, the colors you saved, so the mode switch and the light/dark switch don't apply to
+it (see [Themes with a single version](#themes-with-a-single-version)); for a theme with both
+versions, use the theme wizard. Saved presets are personal, the same as a built-in theme pick:
+they follow the account that saved them.
 
 ## The contrast warning
 

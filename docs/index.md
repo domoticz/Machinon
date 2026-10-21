@@ -19,8 +19,9 @@ detail.
 
 ## Highlights
 
-- **Color schemes**: eight built-in schemes, each with a light and dark variant, plus a
-  custom color picker if you want to design your own palette.
+- **Color schemes**: built-in themes, each with a light and a dark version that you choose, or
+  that follows your device's own light/dark setting, plus a custom color picker if you want to
+  design your own palette.
 - **One settings page**: every setting lives in the Theme Hub, reachable from Domoticz's Setup
   menu once the theme is active.
 - **Refreshed icons**: a library of over 250 device icons, installed one at a time

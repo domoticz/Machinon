@@ -342,7 +342,10 @@ Hides the navbar logo image entirely, leaving that space empty.
 ### Color scheme
 <!-- key: scheme -->
 
-See [Color schemes](color-schemes.md).
+Picks your theme and whether it shows its light version, its dark version, or follows the
+light/dark setting of the device you are using (Follow device). New installations start in Follow
+device; an existing installation keeps the scheme it had, as Light or Dark. See [Color
+schemes](color-schemes.md#picking-a-theme-and-a-mode).
 
 ### Custom colors
 <!-- key: custom_color_scheme -->
@@ -354,10 +357,12 @@ See [Color schemes: building your own colors](color-schemes.md#building-your-own
 
 On by default. Shows a sun/moon button that switches the theme on screen between its light and
 dark version. On a wide screen it sits in the header next to search; below 980 pixels wide it is
-at the top right of the menu, on the row with the close button. A tap changes only the device
-you tap it on: nothing is saved to Domoticz, and your other devices and other users keep their
-colors. The button is hidden while a theme with only one version is selected, such as Custom
-colors. Turning this setting off hides the button at once, without a reload.
+at the top right of the menu, on the row with the close button (upright below the menu entries
+with the icons-only menu). A tap changes only the device you tap it on: nothing is saved to
+Domoticz, and your other devices and other users keep their colors. The button is hidden while a
+theme with only one version is selected, such as Custom colors. Turning this setting off hides
+the button at once, without a reload. See [Color schemes: the light/dark
+switch](color-schemes.md#the-lightdark-switch) for how long a tap lasts.
 
 ## Icons
 

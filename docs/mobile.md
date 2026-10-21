@@ -48,6 +48,20 @@ The Utility page.
 
 A device's Log page, with the chart scaled to fit the screen.
 
+## The light/dark switch in the menu
+
+Once the menu bar has collapsed into the hamburger icon (below 980 pixels wide, see below), the
+sun and moon switch moves from the header into the menu. Tap the hamburger and the switch is at
+the top right, on the row with the close button. Tap it to
+flip this device between the light and the dark version of your theme; the filled half shows the
+version on screen. With the icons-only menu it stands upright below the menu entries.
+
+![The phone menu open, with the light/dark switch at its top right](screenshots/mobile-menu-mode-toggle.png){ width="390" height="844" loading=lazy }
+
+Like the header switch on a larger screen, a tap changes only this device and saves nothing to
+Domoticz. See [Color schemes: the light/dark switch](color-schemes.md#the-lightdark-switch) for
+how long a tap lasts and how to turn the switch off.
+
 ## At 979px: the navigation bar switches
 
 Once the window narrows past 979 pixels, the horizontal menu bar collapses into a hamburger icon
