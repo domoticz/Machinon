@@ -1,10 +1,10 @@
 # Settings reference
 
-This page explains all 39 entries in the Theme Hub, one per setting or self-contained section,
-grouped into the same nine tabs as the [Theme Hub](theme-hub.md). Two of those entries, the icon
-library and the About panel, aren't settings in the toggle-or-value sense (see [Theme Hub:
+This page explains every entry in the Theme Hub, one per setting or self-contained section,
+grouped into the same nine tabs as the [Theme Hub](theme-hub.md). A few of those entries, such as
+the icon library and the About panel, aren't settings in the toggle-or-value sense (see [Theme Hub:
 personal settings versus shared settings](theme-hub.md#personal-settings-versus-shared-settings));
-they're documented here for completeness alongside the 37 actual settings. If you're new to the
+they're documented here for completeness alongside the actual settings. If you're new to the
 Theme Hub itself, its own page explains where to find it, what the nine groups cover, and how
 personal settings differ from shared ones; this page is the per-setting detail it points at, not
 a repeat of it.
@@ -348,6 +348,16 @@ See [Color schemes](color-schemes.md).
 <!-- key: custom_color_scheme -->
 
 See [Color schemes: building your own colors](color-schemes.md#building-your-own-colors).
+
+### Light/dark toggle
+<!-- key: color_mode_toggle -->
+
+On by default. Shows a sun/moon button that switches the theme on screen between its light and
+dark version. On a wide screen it sits in the header next to search; below 980 pixels wide it is
+at the top right of the menu, on the row with the close button. A tap changes only the device
+you tap it on: nothing is saved to Domoticz, and your other devices and other users keep their
+colors. The button is hidden while a theme with only one version is selected, such as Custom
+colors. Turning this setting off hides the button at once, without a reload.
 
 ## Icons
 

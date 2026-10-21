@@ -359,6 +359,11 @@ var THEME_MANIFEST = [
                 key: "custom_color_scheme", storageKey: "custom_color_scheme", control: "custom",
                 appliesTo: "whole_ui", previewId: null, parent: null,
                 reloadOnDisable: false, status: "keep", scope: "user"
+            },
+            {
+                key: "color_mode_toggle", storageKey: "color_mode_toggle", control: "toggle",
+                appliesTo: "navbar", previewId: null, parent: null,
+                reloadOnDisable: false, status: "keep", scope: "user"
             }
             /* dark_theme has NO standalone toggle row here on purpose. It is a
                live theme.json feature (the saved half of applyScheme("dark") /

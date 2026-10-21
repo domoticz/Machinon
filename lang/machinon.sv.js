@@ -18,7 +18,9 @@ language = {
     type_to_search: "Skriv för att söka",
     search_placeholder: "Namn, Beskr., Idx, Status",
     clear_search: "Rensa sökresultat",
-    search_no_match: "Inga enheter på den här sidan matchar ”{query}”."
+    search_no_match: "Inga enheter på den här sidan matchar ”{query}”.",
+    mode_to_dark: "Byt till mörkt",
+    mode_to_light: "Byt till ljust"
   },
   hub: {
     tabs_label: "Temainställningar",
@@ -199,6 +201,10 @@ language = {
       custom_color_scheme: {
         label: "Egna färger",
         description: "Bygger ditt eget färgschema genom att välja 7 enskilda färger."
+      },
+      color_mode_toggle: {
+        label: "Ljust/mörkt-knapp",
+        description: "Visar en sol/måne-knapp bredvid sökningen (i menyn på små skärmar) som växlar det aktuella temat mellan dess ljusa och mörka version, bara på den här enheten. Valet sparas inte i Domoticz, och knappen döljs medan ett tema med bara en version är valt."
       },
       iconpacks: {
         label: "Ikonbibliotek",

@@ -18,7 +18,9 @@ language = {
     type_to_search: "Tapez pour rechercher",
     search_placeholder: "Nom, Desc, Idx, Etat",
     clear_search: "Effacer les résultats de recherche",
-    search_no_match: "Aucun dispositif de cette page ne correspond à « {query} »."
+    search_no_match: "Aucun dispositif de cette page ne correspond à « {query} ».",
+    mode_to_dark: "Passer au sombre",
+    mode_to_light: "Passer au clair"
   },
   hub: {
     tabs_label: "Paramètres du thème",
@@ -198,6 +200,10 @@ language = {
       custom_color_scheme: {
         label: "Couleurs personnalisées",
         description: "Construit votre propre schéma de couleurs en choisissant 7 couleurs individuelles."
+      },
+      color_mode_toggle: {
+        label: "Bascule clair/sombre",
+        description: "Affiche à côté de la recherche (dans le menu sur les petits écrans) un bouton soleil/lune qui fait passer le thème actuel de sa version claire à sa version sombre, sur cet appareil uniquement. Le choix n'est pas enregistré dans Domoticz, et le bouton est masqué tant qu'un thème à une seule version est sélectionné."
       },
       iconpacks: {
         label: "Bibliothèque d'icônes",

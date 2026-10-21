@@ -18,7 +18,9 @@ language = {
     type_to_search: "Wpisz, aby wyszukać",
     search_placeholder: "Nazwa, Opis, Idx, Status",
     clear_search: "Wyczyść wyniki wyszukiwania",
-    search_no_match: "Żadne urządzenie na tej stronie nie pasuje do „{query}”."
+    search_no_match: "Żadne urządzenie na tej stronie nie pasuje do „{query}”.",
+    mode_to_dark: "Przełącz na ciemny",
+    mode_to_light: "Przełącz na jasny"
   },
   hub: {
     tabs_label: "Ustawienia motywu",
@@ -199,6 +201,10 @@ language = {
       custom_color_scheme: {
         label: "Własne kolory",
         description: "Tworzy Twój własny schemat kolorów przez wybranie 7 pojedynczych kolorów."
+      },
+      color_mode_toggle: {
+        label: "Przełącznik jasny/ciemny",
+        description: "Pokazuje obok wyszukiwania (na małych ekranach w menu) przycisk słońce/księżyc, który przełącza bieżący motyw między wersją jasną a ciemną tylko na tym urządzeniu. Wybór nie jest zapisywany w Domoticz, a przycisk jest ukryty, gdy wybrany jest motyw z tylko jedną wersją."
       },
       iconpacks: {
         label: "Biblioteka ikon",
