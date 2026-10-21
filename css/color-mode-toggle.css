@@ -63,6 +63,17 @@
     color: var(--dz-accent-text);
 }
 
+/* On a route with nothing to search (#search.readonly, css/search.css) the
+   field collapses to zero width and the magnifier, positioned against the
+   field's right edge, hangs out to the left of #search's box, where the
+   switch would sit on top of it. The switch steps inward by the magnifier's
+   slot (its icon size) on top of the usual gap. It is inserted right after
+   #search (color-mode-toggle.js setModeToggles), hence the sibling
+   combinator. */
+#search.readonly + #dz-mode-toggle {
+    margin-right: calc(var(--dz-card-space-lg) + var(--dz-icon-size-lg));
+}
+
 #dz-mode-toggle .dz-mode-pill {
     border-color: var(--dz-accent-text);
 }
