@@ -700,7 +700,7 @@ function dzThemeSettingsLoad() {
                 }
                 if (data.status != "OK") { resolve(DZ_LOAD_FAILED); return; }
                 var had = false, pending = [];
-                dzLegacyLoaded = { list: null, watermark: undefined, mode: undefined };
+                dzLegacyLoaded = { list: null, watermark: undefined, mode: undefined, custom: false };
                 var featuresVarName = "theme-" + themeFolder + "-features";
                 var customVarName = "theme-" + themeFolder + "-custom";
                 var colorsVarName = "theme-" + themeFolder + "-colors";
@@ -902,7 +902,7 @@ function dzLegacyFeatureWatermark(features) {
    and the watermark are only collected here and applied once both have
    arrived (dzThemeSettingsLoad). A list that is not an array is ignored, which
    keeps the features as they painted rather than reading them all as off. */
-var dzLegacyLoaded = { list: null, watermark: undefined, mode: undefined };
+var dzLegacyLoaded = { list: null, watermark: undefined, mode: undefined, custom: false };
 
 function getFeatureThemeSettings(idx) {
     return getThemeUserVar(idx, "feature", function(enabledFeatureIds) {
@@ -929,10 +929,12 @@ function dzApplyLegacyFeatures() {
 
 /* Runs after dzApplyLegacyFeatures so the dark_theme feature is final when
    it is the fallback. A stored mode wins; an install that predates the mode
-   (short array, or junk at position 15) gets the one its base implies. */
+   (short array, or junk at position 15) gets the one its base implies. When
+   the -custom array was never read (failed or malformed), the painted mode
+   stands, like every other custom field, and is derived only if invalid. */
 function dzApplyLegacySchemeMode() {
     var f = theme.features && theme.features.dark_theme;
-    var mode = dzLegacyLoaded.mode;
+    var mode = dzLegacyLoaded.custom ? dzLegacyLoaded.mode : theme.scheme_mode;
     theme.scheme_mode = DZ_SCHEME_MODES[mode] === true ? mode
         : dzModeFromStoredBase(theme.scheme_base, f && f.enabled);
     cacheThemeSettings();
@@ -940,6 +942,7 @@ function dzApplyLegacySchemeMode() {
 
 function getCustomThemeSettings(idx) {
     return getThemeUserVar(idx, "custom", function(c) {
+        dzLegacyLoaded.custom = true;
         theme.standby_after = c[0]; theme.button_name = c[1]; theme.custom_url = c[2];
         theme.logo = c[3]; theme.icons = c[4]; theme.background_img = c[5]; theme.background_type = c[6];
         if (c.length > 8) { theme.scheme = c[7]; theme.scheme_base = c[8]; }
