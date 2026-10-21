@@ -203,10 +203,19 @@ test("hostile user_schemes entries never touch Object.prototype", () => {
                  { name: "b", pair: "constructor", variant: "light", colors: {} },
                  { name: "c", pair: "toString", variant: "dark", colors: {} },
                  { name: 7, variant: "dark" }, { name: "d", pair: "p", variant: "sideways" }];
-    cm.dzSchemeFamilies(bad);
-    assert.equal(({}).dark, undefined);
-    assert.equal(({}).light, undefined);
-    assert.equal(typeof Object.prototype.toString, "function");
+    const fam = cm.dzSchemeFamilies(bad);
+    /* The probe runs inside the context: its Object.prototype is the one the
+       code under test could pollute, not this file's. */
+    assert.equal(vm.runInContext(
+        "({}).dark === undefined && ({}).light === undefined && typeof Object.prototype.toString === 'function'", cm), true);
+    /* Well-formed entries with odd ids are kept as inert single families;
+       malformed ones (non-object, non-string name, bad variant) are skipped. */
+    assert.deepEqual(Array.from(fam, (f) => f.id), [
+        ...FAM0.slice(0, -1).map((f) => f.id),
+        "user-pair:__proto__", "user-pair:constructor", "user-pair:toString", "custom"]);
+    for (const f of fam.filter((x) => x.kind === "user")) {
+        assert.equal(f.single, true, f.id);
+    }
 });
 test("legacy exact name wins over a generated pair member", () => {
     const fam = cm.dzSchemeFamilies([{ name: "Sunset|light", base: "light", colors: {} }, ...USERS]);
