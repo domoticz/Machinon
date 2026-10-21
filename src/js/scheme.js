@@ -4,7 +4,10 @@
    inject CSS rules. */
 
 /* A paint state is everything one paint needs, decided up front:
-   { slug, attr: null|"dark"|"custom", colors: object|null, darkFile: boolean }.
+   { slug, attr: null|"dark"|"custom", colors: object|null, darkFile: boolean },
+   or with tokens (name -> final value) instead of colors when it comes from
+   the paint record (color-mode.js), whose names and values are validated
+   there.
    attr is the data-dz-scheme value (null removes it): "dark" keeps dark.css
    active as the token UNDERLAY beneath any colour overrides (shadows, panel
    backgrounds), "custom" puts them on the light base. Keeping the decision
@@ -35,7 +38,11 @@ function dzSavedPaintState() {
 function dzPaintState(state) {
     var html = document.documentElement;
     clearCustomColorScheme();
-    if (state.colors) { applyCustomColorScheme(state.colors); }
+    if (state.colors) {
+        applyCustomColorScheme(state.colors);
+    } else if (state.tokens) {
+        Object.keys(state.tokens).forEach(function (name) { html.style.setProperty(name, state.tokens[name]); });
+    }
     if (state.attr === 'dark' || state.attr === 'custom') {
         html.setAttribute('data-dz-scheme', state.attr);
     } else {
@@ -283,7 +290,7 @@ function hexToRGB(h, values_only) {
         return values_only ? "0,0,0" : "rgb(0,0,0)";
     }
 
-    let r = 0, g = 0, b = 0;
+    var r = 0, g = 0, b = 0;
 
     // 3 digits
     if (h.length == 4) {

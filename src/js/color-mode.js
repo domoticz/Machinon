@@ -14,8 +14,9 @@
 
    Everything up to the runtime section is a function of its arguments.
    Built-in pairs come from a static table, so resolution needs no network; a
-   unit test pins the table to what schemes/*.json declare. Maps built from stored data are prototype-free
-   so a hostile pair id or preset name cannot reach Object.prototype. */
+   unit test pins the table to what schemes/*.json declare. Maps built from
+   stored data are prototype-free so a hostile pair id or preset name cannot
+   reach Object.prototype. */
 
 var DZ_BUILTIN_PAIRS = {
     "light":         { pair: "machinon", variant: "light" },
@@ -147,10 +148,13 @@ function dzSavedMemberFor(fam, mode, deviceDark) {
 
 /* A paint state for a slug (the scheme.js shape: { slug, attr, colors,
    darkFile }), from sources given synchronously: { savedSlug, savedState,
-   userSchemes, builtinColors } (builtinColors: slug -> colors, may be empty).
-   The saved slug paints its saved state; any other slug is the mate of a
-   saved pair member. Returns null when the colours it needs are not in the
-   sources, so the caller can fetch them. Colours are copied, never aliased. */
+   userSchemes, builtinColors, record } (builtinColors: slug -> colors, may be
+   empty; record: a dzParsePaintRecord result or null). The saved slug paints
+   its saved state; any other slug is the mate of a saved pair member. A
+   built-in member whose scheme file is not loaded yet paints the tokens the
+   paint record holds for it (state.tokens instead of colors). Returns null
+   when neither source has it, so the caller can fetch it. Colours and tokens
+   are copied, never aliased. */
 function dzStateForSlug(slug, families, sources) {
     if (slug === sources.savedSlug) { return sources.savedState; }
     var fam = dzFamilyOf(slug, families);
@@ -173,10 +177,115 @@ function dzStateForSlug(slug, families, sources) {
     } else if (sources.builtinColors &&
                Object.prototype.hasOwnProperty.call(sources.builtinColors, slug)) {
         colors = sources.builtinColors[slug];
+    } else if (sources.record && sources.record.family === fam.id && sources.record[variant]) {
+        var half = sources.record[variant];
+        return { slug: slug, attr: half.attr, colors: null,
+                 tokens: Object.assign({}, half.tokens), darkFile: half.darkFile };
     }
     if (!colors || typeof colors !== "object") { return null; }
     return { slug: slug, attr: base === "dark" ? "dark" : "custom",
              colors: Object.assign({}, colors), darkFile: false };
+}
+
+/* ---- The paint record ----
+
+   The page's colours are painted by scripts that load well after the first
+   frame. To show the right variant from the start, every paint leaves a
+   record in localStorage (key dzPaintRecord, one per browser, because the
+   theme folder is not known when the record is read) holding the final token
+   values of both members of the painted family:
+
+     { v: 1, folder, family, saved, mode,
+       light: { attr: null|"custom"|"dark", dark_file: bool, tokens: { name: value } },
+       dark:  { ... } }
+
+   custom.js opens with a block that reads it and paints before anything
+   else runs; it carries its own copy of the validation below because this
+   file is not loaded yet at that point, and a unit test runs both copies over
+   the same fixtures. A single-version family stores its one version under
+   both keys, so it paints whatever the mode.
+
+   The record is input, not trusted state: a name must look like a theme
+   token and a value must have one of the shapes the painters write (scheme.js
+   hexToRGB "rgb(r,g,b)", the "r,g,b" and "r, g, b" triplets, and the "#rrggbb"
+   repaired colours), so nothing that can carry url() or a second declaration
+   reaches setProperty. Anything else is dropped; a malformed half is no half. */
+var DZ_PAINT_RECORD_KEY = "dzPaintRecord";
+var DZ_TOKEN_NAME = /^--dz-[a-z0-9-]+$/;
+var DZ_TOKEN_VALUE = /^(rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(,\s*(0|1|0?\.\d+)\s*)?\)|\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}|#[0-9a-fA-F]{6})$/;
+var DZ_FOLDER_NAME = /^[A-Za-z0-9_-]+$/;
+
+function dzCleanTokens(raw) {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) { return null; }
+    var out = {};
+    Object.keys(raw).forEach(function (name) {
+        var value = raw[name];
+        if (DZ_TOKEN_NAME.test(name) && typeof value === "string" && DZ_TOKEN_VALUE.test(value)) {
+            out[name] = value;
+        }
+    });
+    return out;
+}
+
+/* A stored half ({ attr, dark_file, tokens }) as { attr, darkFile, tokens },
+   or null when any part is malformed. */
+function dzCleanPaintHalf(raw) {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) { return null; }
+    if (raw.attr !== null && raw.attr !== "dark" && raw.attr !== "custom") { return null; }
+    if (typeof raw.dark_file !== "boolean") { return null; }
+    var tokens = dzCleanTokens(raw.tokens);
+    if (!tokens) { return null; }
+    return { attr: raw.attr, darkFile: raw.dark_file, tokens: tokens };
+}
+
+/* The record from its stored text, both halves cleaned, or null. */
+function dzParsePaintRecord(raw) {
+    if (typeof raw !== "string") { return null; }
+    var rec;
+    try {
+        rec = JSON.parse(raw);
+    } catch (e) {
+        return null;
+    }
+    if (!rec || typeof rec !== "object" || rec.v !== 1) { return null; }
+    if (typeof rec.folder !== "string" || !DZ_FOLDER_NAME.test(rec.folder)) { return null; }
+    if (typeof rec.family !== "string") { return null; }
+    if (rec.mode !== "light" && rec.mode !== "dark" && rec.mode !== "auto") { return null; }
+    return { folder: rec.folder, family: rec.family, saved: rec.saved, mode: rec.mode,
+             light: dzCleanPaintHalf(rec.light), dark: dzCleanPaintHalf(rec.dark) };
+}
+
+/* What the early block paints for this device and override:
+   { folder, family, variant, attr, darkFile, tokens }, or null for "paint
+   nothing, the normal boot paints". */
+function dzReadPaintRecord(raw, deviceDark, override) {
+    var rec = dzParsePaintRecord(raw);
+    if (!rec) { return null; }
+    var variant = dzWantedVariant(rec.mode, override, deviceDark);
+    var half = variant ? rec[variant] : null;
+    if (!half) { return null; }
+    return { folder: rec.folder, family: rec.family, variant: variant,
+             attr: half.attr, darkFile: half.darkFile, tokens: half.tokens };
+}
+
+/* The record to store, from { folder, family, saved, mode, light, dark }
+   (halves as { attr, darkFile, tokens } or null, which is left out). Null when
+   the record could not be read back as written. */
+function dzBuildPaintRecord(input) {
+    if (typeof input.folder !== "string" || !DZ_FOLDER_NAME.test(input.folder)) { return null; }
+    if (typeof input.family !== "string" || typeof input.saved !== "string") { return null; }
+    if (input.mode !== "light" && input.mode !== "dark" && input.mode !== "auto") { return null; }
+    var rec = { v: 1, folder: input.folder, family: input.family, saved: input.saved, mode: input.mode };
+    ["light", "dark"].forEach(function (variant) {
+        var half = input[variant];
+        if (!half) { return; }
+        rec[variant] = {
+            attr: half.attr === "dark" || half.attr === "custom" ? half.attr : null,
+            dark_file: half.darkFile === true,
+            tokens: dzCleanTokens(half.tokens) || {}
+        };
+    });
+    return rec;
 }
 
 /* ---- Runtime: the painted state ----
@@ -186,11 +295,15 @@ function dzStateForSlug(slug, families, sources) {
    (dzSetSchemeMode, dzPickFamily, which go through schemes.js). A painted
    variant that differs from the saved one therefore can never reach the
    cache or a Domoticz write. dzPaintedSlug is the slug on screen, kept true
-   by every paint (setColorScheme records the saved one). */
+   by every paint (setColorScheme records the saved one), or null when an
+   early paint showed a family that no longer exists. */
 var dzPaintedSlug = null;
 var dzLastColorMode = null;
 var dzColorModeSeq = 0;
 var dzColorModeArmed = false;
+/* The first resolve of a page writes the record even when it paints
+   nothing, so a boot that painted the saved model leaves one behind. */
+var dzPaintRecordDue = true;
 /* This page's latest override decision, so a tap still works when storage is
    blocked or full; undefined until this page makes one. */
 var dzOverrideMemory;
@@ -247,6 +360,101 @@ function dzBuiltinColorsOf(schemes) {
     return out;
 }
 
+function dzLoadPaintRecord() {
+    try {
+        return dzParsePaintRecord(localStorage.getItem(DZ_PAINT_RECORD_KEY));
+    } catch (e) {
+        return null;
+    }
+}
+
+/* The inline tokens a paint can leave on an element: the scheme tokens and
+   the repaired fixed colours (scheme.js), the same set dzPaintState clears,
+   so a record never carries a name the next paint would not remove. */
+function dzPaintTokenNames() {
+    var names = DZ_CUSTOM_TOKENS.concat(DZ_REPAIR_IDENTITY);
+    DZ_REPAIR_STATUS.forEach(function (name) {
+        names.push("--dz-status-" + name + "-values", "--dz-toast-severity-" + name);
+    });
+    return names.filter(function (name) { return DZ_TOKEN_NAME.test(name); });
+}
+
+function dzStyleTokens(el) {
+    var out = {};
+    dzPaintTokenNames().forEach(function (name) {
+        var value = String(el.style.getPropertyValue(name) || "").trim();
+        if (value) { out[name] = value; }
+    });
+    return out;
+}
+
+/* A record half for a state that is not on screen: colours go through the
+   real applier on a detached element and are read back from it. */
+function dzRecordHalf(state) {
+    var tokens = {};
+    if (state.colors) {
+        var probe = document.createElement("div");
+        applyCustomColorScheme(state.colors, probe);
+        tokens = dzStyleTokens(probe);
+    } else if (state.tokens) {
+        tokens = state.tokens;
+    }
+    return { attr: state.attr, darkFile: state.darkFile === true, tokens: tokens };
+}
+
+/* Record what is painted. The painted half is read back from <html>, repaired
+   colours included; keepPainted reuses the stored painted half instead, for a
+   refresh that may run while the hub previews colours on the page. The mate
+   half comes from its colours when they are at hand, else from the previous
+   record of the same family, else it is left out. Best effort: storage may be
+   blocked or full. */
+function dzWritePaintRecord(families, keepPainted) {
+    dzPaintRecordDue = false;
+    var state = dzLastPaintState;
+    if (!state) { return; }
+    var fam = dzFamilyOf(state.slug, families);
+    var prev = dzLoadPaintRecord();
+    if (prev && (!fam || prev.family !== fam.id)) { prev = null; }
+    var rec = null;
+    if (fam) {
+        var variant = !fam.single && state.slug === fam.dark ? "dark" : "light";
+        var input = { folder: themeFolder, family: fam.id, saved: dzActiveSchemeSlug(),
+                      mode: theme.scheme_mode, light: null, dark: null };
+        var painted = keepPainted === true && prev ? prev[variant] : null;
+        if (!painted) {
+            painted = { attr: state.attr, darkFile: state.darkFile === true,
+                        tokens: dzStyleTokens(document.documentElement) };
+        }
+        if (fam.single) {
+            input.light = input.dark = painted;
+        } else {
+            var other = variant === "dark" ? "light" : "dark";
+            var mate = dzStateForSlug(fam[other], families, {
+                savedSlug: dzActiveSchemeSlug(), savedState: dzSavedPaintState(),
+                userSchemes: theme.user_schemes, builtinColors: dzSyncBuiltinColors(), record: prev
+            });
+            input[variant] = painted;
+            input[other] = mate ? dzRecordHalf(mate) : null;
+        }
+        rec = dzBuildPaintRecord(input);
+    }
+    try {
+        if (rec) {
+            localStorage.setItem(DZ_PAINT_RECORD_KEY, JSON.stringify(rec));
+        } else {
+            localStorage.removeItem(DZ_PAINT_RECORD_KEY);
+        }
+    } catch (e) {
+        if (typeof dzLog === "function") { dzLog("colormode", "paint_record_store_failed", { error: String(e) }); }
+    }
+}
+
+/* The scheme files just loaded: the mate half can now come from them. */
+function dzRefreshPaintRecord() {
+    if (!dzLastPaintState) { return; }
+    dzWritePaintRecord(dzSchemeFamilies(theme.user_schemes), true);
+}
+
 function dzDispatchColorMode(slug, families) {
     var fam = dzFamilyOf(slug, families);
     var single = !fam || fam.single;
@@ -284,24 +492,30 @@ function dzApplyColorMode(force) {
         var slug = dzResolvePaintSlug(saved, mode, override, deviceDark, families);
         if (slug === dzPaintedSlug && force !== true) { resolve(null); return; }
         var sources = { savedSlug: saved, savedState: dzSavedPaintState(),
-                        userSchemes: theme.user_schemes, builtinColors: dzSyncBuiltinColors() };
+                        userSchemes: theme.user_schemes, builtinColors: dzSyncBuiltinColors(),
+                        record: dzLoadPaintRecord() };
         var state = dzStateForSlug(slug, families, sources);
         if (state) { resolve(state); return; }
         resolve(loadBuiltinSchemes().then(function (schemes) {
             sources.builtinColors = dzBuiltinColorsOf(schemes);
             var fetched = dzStateForSlug(slug, families, sources);
             if (fetched) { return fetched; }
-            /* Colours unavailable (offline, or a scheme file gone): the saved
-               pick stays painted, and the next resolve tries again. */
+            /* Colours unavailable (offline, or a scheme file gone): whatever
+               is on screen stays when it already is the wanted slug (an early
+               paint), otherwise the saved pick paints; the next resolve tries
+               again. */
             if (typeof dzLog === "function") { dzLog("colormode", "variant_unavailable", { slug: slug }); }
-            return sources.savedState;
+            return slug === dzPaintedSlug ? null : sources.savedState;
         }));
     }).then(function (state) {
         if (seq !== dzColorModeSeq) { return; }
+        var painted = false;
         if (state && (state.slug !== dzPaintedSlug || force === true)) {
             dzPaintState(state);
             dzPaintedSlug = state.slug;
+            painted = true;
         }
+        if (painted || dzPaintRecordDue) { dzWritePaintRecord(families); }
         if (!dzLastColorMode || dzLastColorMode.slug !== dzPaintedSlug) {
             dzDispatchColorMode(dzPaintedSlug, families);
         }
@@ -310,11 +524,21 @@ function dzApplyColorMode(force) {
     });
 }
 
-/* Boot: what is on screen before the first resolve. An early paint names
-   the slug it painted; otherwise the saved pick is what setColorScheme paints. */
+/* Boot: what is on screen before the first resolve. Without an early paint
+   it is the saved pick, which setColorScheme paints. An early paint names a
+   family and a variant; a family that no longer exists leaves the slug
+   unknown (null), so the next resolve repaints. The dark_theme.css link the
+   early block added is adopted here, so the painter removes it when the
+   resolve wants a variant without it. */
 function dzSeedPaintedSlug() {
     var early = window.__dzEarlyPaint;
-    dzPaintedSlug = early && typeof early.slug === "string" ? early.slug : dzActiveSchemeSlug();
+    if (!early) {
+        dzPaintedSlug = dzActiveSchemeSlug();
+        return;
+    }
+    var fam = dzSchemeFamilies(theme.user_schemes).filter(function (f) { return f.id === early.family; })[0];
+    dzPaintedSlug = fam ? (fam.single ? fam.light : fam[early.variant]) || null : null;
+    if (early.darkFile === true) { dzSetDarkFile(true); }
 }
 
 /* A device light/dark switch matters only in Follow device, or when an
