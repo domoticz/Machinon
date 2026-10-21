@@ -129,6 +129,11 @@
             "enabled": false,
             "files": []
         },
+        "color_mode_toggle": {
+            "id": 49,
+            "enabled": true,
+            "files": []
+        },
         "dashboard_columns": {
             "id":30,
             "enabled":false,

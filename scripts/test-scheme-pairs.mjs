@@ -1043,7 +1043,8 @@ test("an early paint of the wanted variant stays when its colours cannot be fetc
 function reconcileHarness(b, mutate) {
     b.ctx.checkUserVariableThemeSettings = () => { mutate(b.ctx.theme); return Promise.resolve(); };
     b.ctx.$ = { each: (o, fn) => Object.keys(o).forEach((k) => fn(k, o[k])) };
-    for (const f of ["setLogo", "dzApplyCustomPageLabel", "applyBackground", "applyNavbarIconsText", "dzDiagRefreshGate"]) {
+    for (const f of ["setLogo", "dzApplyCustomPageLabel", "applyBackground", "applyNavbarIconsText", "dzSyncModeToggles",
+                     "dzDiagRefreshGate"]) {
         b.ctx[f] = () => {};
     }
     /* The reconcile does not wait for its repaint, which may fetch scheme
@@ -1291,4 +1292,90 @@ test("Machinon's card colours mirror the base token defaults", () => {
         assert.equal(cm.DZ_MACHINON_SWATCHES.light[key].toLowerCase(), (pick(tokens, token) || "").toLowerCase(), "light " + key);
         assert.equal(cm.DZ_MACHINON_SWATCHES.dark[key].toLowerCase(), (pick(dark, token) || "").toLowerCase(), "dark " + key);
     }
+});
+
+/* The quick toggle (color-mode-toggle.js) over the same fake page: its
+   buttons are plain objects found by id, and dz:colormode is delivered to
+   the listener the file registers. */
+function withToggle(b) {
+    const listeners = [];
+    b.ctx.document.addEventListener = (type, fn) => { if (type === "dz:colormode") listeners.push(fn); };
+    const buttons = {};
+    ["dz-mode-toggle", "dz-mode-toggle-menu"].forEach((id) => {
+        const btn = fakeElement("button", { nodes: [] });
+        btn.hidden = true;
+        buttons[id] = btn;
+    });
+    b.ctx.document.getElementById = (id) => buttons[id] || null;
+    b.ctx.dzT = (key) => key;
+    vm.runInContext(readFileSync("src/js/color-mode-toggle.js", "utf8"), b.ctx, { filename: "src/js/color-mode-toggle.js" });
+    b.ctx.document.dispatchEvent = (e) => { b.events.push(e); listeners.forEach((fn) => fn(e)); return true; };
+    b.buttons = buttons;
+    return b;
+}
+
+function overrideOf(b) {
+    return b.store.has("machinon.colorOverride") ? JSON.parse(b.store.get("machinon.colorOverride")) : null;
+}
+
+test("toggle: a tap under a fixed mode stores the other variant, a tap back clears it", async () => {
+    const b = withToggle(browser());
+    savedTheme(b, "gruvbox-light", "light");
+    b.ctx.dzSeedPaintedSlug();
+    await b.ctx.dzApplyColorMode();
+    const btn = b.buttons["dz-mode-toggle"];
+    assert.equal(btn.hidden, false);
+    assert.equal(btn.getAttribute("aria-label"), "header.mode_to_dark");
+    assert.equal(btn.getAttribute("data-painted"), "light");
+    b.ctx.dzToggleColorMode();
+    await new Promise((r) => setTimeout(r, 20));
+    assert.equal(b.ctx.dzPaintedSlug, "gruvbox-dark");
+    assert.deepEqual(overrideOf(b), { variant: "dark", deviceDark: false });
+    assert.equal(btn.getAttribute("aria-label"), "header.mode_to_light");
+    assert.equal(btn.getAttribute("data-painted"), "dark");
+    b.ctx.dzToggleColorMode();
+    await new Promise((r) => setTimeout(r, 20));
+    assert.equal(b.ctx.dzPaintedSlug, "gruvbox-light");
+    assert.equal(overrideOf(b), null, "tapping back to the mode's variant leaves no override");
+    assert.equal(b.ctx.theme.scheme, "gruvbox-light");
+    assert.deepEqual(b.persists, [], "a tap never saves");
+});
+
+test("toggle: under Follow device a device switch drops the tap's override", async () => {
+    const b = withToggle(browser());
+    savedTheme(b, "gruvbox-light", "auto");
+    b.ctx.dzSeedPaintedSlug();
+    b.ctx.dzArmColorModeListener();
+    await b.ctx.dzApplyColorMode();
+    b.ctx.dzToggleColorMode();
+    await new Promise((r) => setTimeout(r, 20));
+    assert.deepEqual(overrideOf(b), { variant: "dark", deviceDark: false });
+    b.setDark(true);
+    await new Promise((r) => setTimeout(r, 20));
+    assert.equal(overrideOf(b), null);
+    assert.equal(b.ctx.dzPaintedSlug, "gruvbox-dark");
+    assert.equal(b.buttons["dz-mode-toggle"].getAttribute("aria-label"), "header.mode_to_light");
+});
+
+test("toggle: hidden for a single-version theme and while the setting is off", async () => {
+    const b = withToggle(browser());
+    savedTheme(b, "light", "light");
+    b.ctx.dzSeedPaintedSlug();
+    await b.ctx.dzApplyColorMode();
+    const both = () => Object.values(b.buttons).map((x) => x.hidden);
+    assert.deepEqual(both(), [false, false]);
+    b.ctx.theme.features.color_mode_toggle.enabled = false;
+    b.ctx.dzSyncModeToggles();
+    assert.deepEqual(both(), [true, true]);
+    b.ctx.theme.features.color_mode_toggle.enabled = true;
+    b.ctx.dzLastColorMode = { slug: "custom", variant: null, single: true };
+    b.ctx.dzSyncModeToggles();
+    assert.deepEqual(both(), [true, true]);
+});
+
+test("toggle: the buttons stay hidden until the first dz:colormode", () => {
+    const b = withToggle(browser());
+    savedTheme(b, "light", "light");
+    b.ctx.dzSyncModeToggles();
+    assert.deepEqual(Object.values(b.buttons).map((x) => x.hidden), [true, true]);
 });

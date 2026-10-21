@@ -18,7 +18,9 @@ language = {
     type_to_search: "Zum Suchen tippen",
     search_placeholder: "Name, Beschr., Idx, Status",
     clear_search: "Suchergebnisse löschen",
-    search_no_match: "Keine Geräte auf dieser Seite passen zu „{query}“."
+    search_no_match: "Keine Geräte auf dieser Seite passen zu „{query}“.",
+    mode_to_dark: "Zu Dunkel wechseln",
+    mode_to_light: "Zu Hell wechseln"
   },
   hub: {
     tabs_label: "Theme-Einstellungen",
@@ -198,6 +200,10 @@ language = {
       custom_color_scheme: {
         label: "Eigene Farben",
         description: "Erstellt dein eigenes Farbschema, indem du 7 einzelne Farben wählst."
+      },
+      color_mode_toggle: {
+        label: "Hell/Dunkel-Umschalter",
+        description: "Zeigt neben der Suche (auf kleinen Bildschirmen im Menü) eine Sonne/Mond-Taste, die das aktuelle Design nur auf diesem Gerät zwischen seiner hellen und dunklen Version umschaltet. Die Wahl wird nicht in Domoticz gespeichert, und die Taste ist ausgeblendet, solange ein Design mit nur einer Version gewählt ist."
       },
       iconpacks: {
         label: "Symbolbibliothek",

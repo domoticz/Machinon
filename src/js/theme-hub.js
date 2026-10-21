@@ -1006,7 +1006,8 @@ var DZ_HUB_APPLIERS = {
     button_name: dzApplyCustomPageLabel, // page.js dzApplyCustomPageLabel -> #customPage label
     background_img: applyBackground,     // page.js applyBackground -> html background
     background_type: applyBackground,    // "
-    navbar_icons_text: applyNavbarIconsText // page.js applyNavbarIconsText -> .navbar.notext
+    navbar_icons_text: applyNavbarIconsText, // page.js applyNavbarIconsText -> .navbar.notext
+    color_mode_toggle: dzSyncModeToggles     // color-mode-toggle.js -> shows or hides both toggle buttons
 };
 
 /* Number min/max and select option VALUES, carried over verbatim from the

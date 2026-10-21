@@ -21,7 +21,9 @@ language = {
     type_to_search: "Typ om te zoeken",
     search_placeholder: "Naam, Omschr., Idx, Status",
     clear_search: "Zoekresultaten wissen",
-    search_no_match: "Geen apparaten op deze pagina komen overeen met ‘{query}’."
+    search_no_match: "Geen apparaten op deze pagina komen overeen met ‘{query}’.",
+    mode_to_dark: "Naar donker",
+    mode_to_light: "Naar licht"
   },
   hub: {
     tabs_label: "Thema-instellingen",
@@ -201,6 +203,10 @@ language = {
       custom_color_scheme: {
         label: "Eigen kleuren",
         description: "Bouwt je eigen kleurenschema door 7 losse kleuren te kiezen."
+      },
+      color_mode_toggle: {
+        label: "Licht/donker-schakelaar",
+        description: "Toont naast het zoekveld (op kleine schermen in het menu) een zon/maan-knop die het huidige thema alleen op dit apparaat wisselt tussen de lichte en de donkere versie. De keuze wordt niet in Domoticz opgeslagen, en de knop is verborgen zolang een thema met maar één versie gekozen is."
       },
       iconpacks: {
         label: "Iconenbibliotheek",

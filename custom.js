@@ -135,6 +135,7 @@ var THEME_MODULES = [
     "src/js/scheme.js",
     "src/js/schemes.js",
     "src/js/color-mode.js",
+    "src/js/color-mode-toggle.js",
     "src/js/color-oklch.js",
     "src/js/color-repair.js",
     "src/js/scheme-generator.js",
@@ -704,6 +705,7 @@ function init_theme() {
         armSelectorWrapCornerRetag();
         setLogo();
         setSearch();
+        setModeToggles();
         dzWireDashboardSearch();
         dzProblemsInit();
         setDevicesNativeSelectorForMobile();

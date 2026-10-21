@@ -333,3 +333,17 @@ test("scheme_mode legacy: an unread custom var with an invalid painted mode stil
     const t = await legacyLoad({ list: [], custom: C15, customFails: "error", theme: { scheme_mode: "junk", scheme_base: "dark" } });
     assert.equal(t.scheme_mode, "dark");
 });
+
+/* The light/dark toggle (id 49) ships on, so an install whose settings an
+   earlier version saved gets it on too, while a list that knew id 49 keeps
+   the user's off. Read from the shipped theme.json, not a fixture. */
+test("legacy: the shipped light/dark toggle is on for a list saved before it existed", () => {
+    const shipped = JSON.parse(readFileSync("theme.json", "utf8")).features;
+    const defaults = {};
+    Object.keys(shipped).forEach((k) => { defaults[k] = shipped[k].enabled === true; });
+    assert.equal(shipped.color_mode_toggle.id, 49);
+    assert.deepEqual(shipped.color_mode_toggle.files, []);
+    const tr = loadTransport();
+    assert.equal(tr.dzLegacyFeatureStates([16, 46, 47], 48, shipped, defaults).color_mode_toggle, true);
+    assert.equal(tr.dzLegacyFeatureStates([16, 46, 47], 49, shipped, defaults).color_mode_toggle, false);
+});

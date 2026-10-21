@@ -376,6 +376,7 @@ function applyThemeDeltaInPlace(before) {
     dzApplyCustomPageLabel();
     applyBackground();
     applyNavbarIconsText();
+    dzSyncModeToggles();
     dzDiagRefreshGate(true);
 }
 

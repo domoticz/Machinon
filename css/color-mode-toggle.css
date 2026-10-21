@@ -1,0 +1,120 @@
+/*
+  color-mode-toggle.css - the light/dark quick toggle (src/js/color-mode-toggle.js).
+  One of the feature files split out of custom.css - see the @import block in
+  custom.css. Its selectors (.dz-mode-*, #dz-mode-toggle*) appear nowhere else.
+*/
+
+/* The button is only the hit area; the pill inside it is what shows. */
+.dz-mode-toggle {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+/* Two connected segments, sun then moon: the segmented idiom of the Theme Hub
+   mode switch (css/theme-hub.css .scheme-mode, css/buttons.css .btn-group):
+   one border, outer corners on the button radius, inner corners square, the
+   painted variant's segment filled. Two icon-only button boxes wide, border
+   included (56px); 30px tall, the height of the search field it sits
+   beside. */
+.dz-mode-pill {
+    display: flex;
+    box-sizing: border-box;
+    width: calc(2 * var(--dz-btn-icon-box));
+    height: 30px;
+    border: var(--dz-btn-ghost-border);
+    border-radius: var(--dz-btn-radius);
+    overflow: hidden;
+}
+
+.dz-mode-seg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    color: var(--dz-btn-ghost-text);
+    transition: background-color .12s ease, color .12s ease;
+}
+
+.dz-mode-seg i {
+    font-size: var(--dz-icon-size-sm);
+    line-height: 1;
+}
+
+.dz-mode-toggle[data-painted="light"] .dz-mode-seg-light,
+.dz-mode-toggle[data-painted="dark"] .dz-mode-seg-dark {
+    background-color: var(--dz-btn-toggle-selected-bg);
+    color: var(--dz-btn-toggle-selected-text);
+}
+
+/* Header strip, from 980px: a right float inward of search (5px top margin
+   plus the 30px pill fill the 40px row, as for #search), with the same 10px
+   gap search keeps from the badge. On the accent strip the switch takes the
+   on-accent colour, inverted for the filled segment, so it reads on the bar
+   the way the hamburger and search do. */
+#dz-mode-toggle {
+    float: right;
+    margin-top: 5px;
+    margin-right: var(--dz-card-space-lg);
+    color: var(--dz-accent-text);
+}
+
+#dz-mode-toggle .dz-mode-pill {
+    border-color: var(--dz-accent-text);
+}
+
+#dz-mode-toggle .dz-mode-seg {
+    color: var(--dz-accent-text);
+}
+
+#dz-mode-toggle[data-painted="light"] .dz-mode-seg-light,
+#dz-mode-toggle[data-painted="dark"] .dz-mode-seg-dark {
+    background-color: var(--dz-accent-text);
+    color: var(--dz-accent-color);
+}
+
+/* Flyout menu, below 980px: top right of the drawer, on the row of the close
+   X (css/nav.css button.menu-toggle, fixed at the top left). Absolutely
+   positioned in the drawer, so it takes no room from the menu rows. The
+   button is a 44px tall touch target; the pill sits 3px down in it, which
+   puts its centre on the X's. */
+#dz-mode-toggle-menu {
+    position: absolute;
+    top: 0;
+    right: var(--dz-card-space-sm);
+    height: 44px;
+    padding-top: var(--dz-card-space-xs);
+    box-sizing: border-box;
+    color: var(--dz-body-text);
+    /* Above the menu rows it overhangs by a few pixels. */
+    z-index: 1;
+}
+
+@media (max-width: 979px) {
+    #dz-mode-toggle {
+        display: none;
+    }
+}
+
+@media (min-width: 980px) {
+    #dz-mode-toggle-menu {
+        display: none;
+    }
+}
+
+/* Keyboard focus: an outline around the pill in the button's own colour,
+   the hamburger's recipe (css/nav.css button.menu-toggle:focus-visible),
+   because the accent-tinted --dz-btn-focus-ring would not show on the
+   accent strip. */
+.dz-mode-toggle:focus {
+    outline: none;
+}
+
+.dz-mode-toggle:focus-visible .dz-mode-pill {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}

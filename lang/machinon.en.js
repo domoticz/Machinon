@@ -20,7 +20,9 @@ language = {
     type_to_search: "Type to search",
     search_placeholder: "Name, Desc, Idx, Status",
     clear_search: "Clear search results",
-    search_no_match: "No devices on this page match “{query}”."
+    search_no_match: "No devices on this page match “{query}”.",
+    mode_to_dark: "Switch to dark",
+    mode_to_light: "Switch to light"
   },
   hub: {
     tabs_label: "Theme settings",
@@ -200,6 +202,10 @@ language = {
       custom_color_scheme: {
         label: "Custom colors",
         description: "Builds your own color scheme by picking 7 individual colors."
+      },
+      color_mode_toggle: {
+        label: "Light/dark toggle",
+        description: "Shows a sun/moon button next to search (in the menu on small screens) that switches the current theme between its light and dark version on this device only. The choice is not saved to Domoticz, and the button hides while a theme with only one version is selected."
       },
       iconpacks: {
         label: "Icon library",
