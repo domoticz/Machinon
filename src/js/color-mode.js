@@ -149,7 +149,7 @@ function dzSavedMemberFor(fam, mode, deviceDark) {
 /* A paint state for a slug (the scheme.js shape: { slug, attr, colors,
    darkFile }), from sources given synchronously: { savedSlug, savedState,
    userSchemes, builtinColors, record } (builtinColors: slug -> colors, may be
-   empty; record: a dzParsePaintRecord result or null). The saved slug paints
+   empty; record: a dzCurrentPaintRecord result or null). The saved slug paints
    its saved state; any other slug is the mate of a saved pair member. A
    built-in member whose scheme file is not loaded yet paints the tokens the
    paint record holds for it (state.tokens instead of colors). Returns null
@@ -196,17 +196,19 @@ function dzStateForSlug(slug, families, sources) {
    values of both members of the painted family:
 
      { v: 1, folder, family, saved, mode, version,
-       light: { attr: null|"custom"|"dark", dark_file: bool, tokens: { name: value } },
+       light: { attr: null|"custom"|"dark", dark_file: bool, version, tokens: { name: value } },
        dark:  { ... } }
 
    custom.js opens with a block that reads it and paints before anything
    else runs; it carries its own copy of the validation below because this
    file is not loaded yet at that point, and a unit test runs both copies over
    the same fixtures. A single-version family stores its one version under
-   both keys, so it paints whatever the mode. version is the theme version
-   that wrote it: the resolver uses the record's tokens only while that is
-   still the running version, because an upgrade may change a shipped
-   scheme's colours (the early block ignores it, the boot repaint follows).
+   both keys, so it paints whatever the mode. A half's version is the theme
+   version whose colours it holds (a record without one per half holds the
+   record's version in both): the resolver paints a half's tokens only while
+   that is still the running version, because an upgrade may change a
+   shipped scheme's colours. The early block ignores versions and the boot
+   repaint corrects it. The record's own version is the one that wrote it.
 
    The record is input, not trusted state: a name must look like a theme
    token (or be one of the few older token names the painter still writes,
@@ -239,15 +241,18 @@ function dzCleanTokens(raw) {
     return out;
 }
 
-/* A stored half ({ attr, dark_file, tokens }) as { attr, darkFile, tokens },
-   or null when any part is malformed. */
-function dzCleanPaintHalf(raw) {
+/* A stored half ({ attr, dark_file, version, tokens }) as { attr, darkFile,
+   version, tokens }, or null when any part is malformed. A half without a
+   version holds the colours of fallback, the record's version. */
+function dzCleanPaintHalf(raw, fallback) {
     if (!raw || typeof raw !== "object" || Array.isArray(raw)) { return null; }
     if (raw.attr !== null && raw.attr !== "dark" && raw.attr !== "custom") { return null; }
     if (typeof raw.dark_file !== "boolean") { return null; }
     var tokens = dzCleanTokens(raw.tokens);
     if (!tokens) { return null; }
-    return { attr: raw.attr, darkFile: raw.dark_file, tokens: tokens };
+    var version = Object.prototype.hasOwnProperty.call(raw, "version") ? raw.version : fallback;
+    return { attr: raw.attr, darkFile: raw.dark_file,
+             version: typeof version === "string" ? version : null, tokens: tokens };
 }
 
 /* The record from its stored text, both halves cleaned, or null. */
@@ -263,9 +268,10 @@ function dzParsePaintRecord(raw) {
     if (typeof rec.folder !== "string" || !DZ_FOLDER_NAME.test(rec.folder)) { return null; }
     if (typeof rec.family !== "string") { return null; }
     if (rec.mode !== "light" && rec.mode !== "dark" && rec.mode !== "auto") { return null; }
+    var version = typeof rec.version === "string" ? rec.version : null;
     return { folder: rec.folder, family: rec.family, saved: rec.saved, mode: rec.mode,
-             version: typeof rec.version === "string" ? rec.version : null,
-             light: dzCleanPaintHalf(rec.light), dark: dzCleanPaintHalf(rec.dark) };
+             version: version,
+             light: dzCleanPaintHalf(rec.light, version), dark: dzCleanPaintHalf(rec.dark, version) };
 }
 
 /* What the early block paints for this device and override:
@@ -282,9 +288,9 @@ function dzReadPaintRecord(raw, deviceDark, override) {
 }
 
 /* The record to store, from { folder, family, saved, mode, version, light,
-   dark } (halves as { attr, darkFile, tokens } or null, which is left out,
-   as is a version that is not a string). Null when the record could not be
-   read back as written. */
+   dark } (halves as { attr, darkFile, version, tokens } or null, which is
+   left out, as is a version that is not a string). Null when the record
+   could not be read back as written. */
 function dzBuildPaintRecord(input) {
     if (!input || typeof input !== "object") { return null; }
     if (typeof input.folder !== "string" || !DZ_FOLDER_NAME.test(input.folder)) { return null; }
@@ -300,6 +306,7 @@ function dzBuildPaintRecord(input) {
             dark_file: half.darkFile === true,
             tokens: dzCleanTokens(half.tokens) || {}
         };
+        if (typeof half.version === "string") { rec[variant].version = half.version; }
     });
     return rec;
 }
@@ -398,10 +405,15 @@ function dzLoadAnyPaintRecord() {
     }
 }
 
-/* rec, or null when another theme version wrote it: its tokens may then
-   predate a change to a shipped scheme. */
+/* rec with only the halves that hold the running version's colours (the
+   others may predate a change to a shipped scheme), or null. */
 function dzCurrentPaintRecord(rec) {
-    return rec && typeof theme.version === "string" && rec.version === theme.version ? rec : null;
+    if (!rec || typeof theme.version !== "string") { return null; }
+    var out = Object.assign({}, rec);
+    ["light", "dark"].forEach(function (variant) {
+        if (out[variant] && out[variant].version !== theme.version) { out[variant] = null; }
+    });
+    return out;
 }
 
 function dzLoadPaintRecord() {
@@ -439,18 +451,18 @@ function dzRecordHalf(state) {
     } else if (state.tokens) {
         tokens = state.tokens;
     }
-    return { attr: state.attr, darkFile: state.darkFile === true, tokens: tokens };
+    return { attr: state.attr, darkFile: state.darkFile === true, version: theme.version, tokens: tokens };
 }
 
 /* Record what is painted. The painted half is read back from <html>, repaired
    colours included; keepPainted reuses the stored painted half instead, for a
    refresh that may run while the hub previews colours on the page. The mate
    half comes from its colours when they are at hand, else from the previous
-   record of the same family, else it is left out. A previous record another
-   theme version wrote still supplies the mate as a last resort: a half with
-   older colours keeps the next boot's early paint on the right variant, and
-   dzRefreshPaintRecord replaces it once the scheme files load. Best effort:
-   storage may be blocked or full. */
+   record of the same family, else it is left out. A half with another theme
+   version's colours is still kept as a last resort, with its own version: it
+   keeps the next boot's early paint on the right variant, the resolver never
+   paints it as final, and dzRefreshPaintRecord replaces it once the scheme
+   files load. Best effort: storage may be blocked or full. */
 function dzWritePaintRecord(families, keepPainted) {
     dzPaintRecordDue = false;
     var state = dzLastPaintState;
@@ -466,7 +478,7 @@ function dzWritePaintRecord(families, keepPainted) {
                       mode: theme.scheme_mode, version: theme.version, light: null, dark: null };
         var painted = keepPainted === true && prev ? prev[variant] : null;
         if (!painted) {
-            painted = { attr: state.attr, darkFile: state.darkFile === true,
+            painted = { attr: state.attr, darkFile: state.darkFile === true, version: theme.version,
                         tokens: dzStyleTokens(document.documentElement) };
         }
         if (fam.single) {
