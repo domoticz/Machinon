@@ -357,8 +357,7 @@ See [Color schemes: building your own colors](color-schemes.md#building-your-own
 
 On by default. Shows a sun/moon button that switches the theme on screen between its light and
 dark version. On a wide screen it sits in the header next to search; below 980 pixels wide it is
-at the top right of the menu, on the row with the close button (upright below the menu entries
-with the icons-only menu). A tap changes only the device you tap it on: nothing is saved to
+at the top right of the menu, on the row with the close button. A tap changes only the device you tap it on: nothing is saved to
 Domoticz, and your other devices and other users keep their colors. The button is hidden while a
 theme with only one version is selected, such as Custom colors. Turning this setting off hides
 the button at once, without a reload. See [Color schemes: the light/dark

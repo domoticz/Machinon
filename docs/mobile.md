@@ -54,7 +54,7 @@ Once the menu bar has collapsed into the hamburger icon (below 980 pixels wide, 
 sun and moon switch moves from the header into the menu. Tap the hamburger and the switch is at
 the top right, on the row with the close button. Tap it to
 flip this device between the light and the dark version of your theme; the filled half shows the
-version on screen. With the icons-only menu it stands upright below the menu entries.
+version on screen.
 
 ![The phone menu open, with the light/dark switch at its top right](screenshots/mobile-menu-mode-toggle.png){ width="390" height="844" loading=lazy }
 

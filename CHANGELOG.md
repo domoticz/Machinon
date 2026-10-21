@@ -10,6 +10,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - The Theme Hub's Colors and schemes tab now shows each theme as one card with its light and dark version, and you choose Light, Dark or Follow device; Follow device switches along with your phone or computer's own light/dark setting, on each device separately. New installations start in Follow device, existing ones keep the colours they had
 - A sun/moon switch in the header (in the menu on a phone) flips the screen between your theme's light and dark version on that device only, without changing your settings; turn it off with Light/dark toggle on the Colors and schemes tab
 - Dark colour schemes no longer flash light while a page loads (from the second visit in each browser)
+- On phones, the icons-only menu opens wider so its icons have room
 
 ## [2.9.0] - 2026-10-20
 

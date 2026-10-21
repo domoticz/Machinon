@@ -52,8 +52,13 @@
     z-index: 1001;
 }
 
+/* Icons-only menu (navbar_icons_text): two light/dark switch widths (the
+   pill is two icon boxes, css/color-mode-toggle.css), so the switch lies on
+   the close row exactly as in the text menu, the close X in the left slot
+   and the switch in the right one, and the icons below have room on both
+   sides while the page stays visible beside the drawer. */
 .navbar.notext .navbar-inner {
-    width: 45px;
+    width: calc(4 * var(--dz-btn-icon-box));
 }
 
 .navbar-inverse .navbar-inner.slide {
@@ -97,8 +102,12 @@
     float: none;
 }
 
-.navbar.notext .nav > li {
-    width: 45px;
+/* Rows in the icons-only drawer: Bootstrap's 10px right margin on the list
+   becomes the 3px core indents each row with on the left (style.css
+   .navbar .nav > li), so rows, separators and the hover fill sit centred
+   in the drawer. */
+.navbar.notext .nav {
+    margin-right: var(--dz-card-space-xs);
 }
 
 .navbar .nav li a:before, .navbar .nav li a:hover:before {
@@ -171,6 +180,19 @@
 
 .navbar .nav .current_page_item > a:hover {
     background: var(--dz-menu-item-hover-bg) !important;
+}
+
+/* Icons-only rows centre their icon. The gutter that spaces an icon from its
+   label has no label to space from here, and the current item's selector is
+   repeated so its left alignment above does not win. */
+.navbar.notext .nav > li > a,
+.navbar.notext .nav .current_page_item > a {
+    text-align: center;
+}
+
+.navbar.notext .nav li a img,
+.navbar.notext .nav li a .dz-nav-glyph {
+    padding-right: 0;
 }
 
 .navbar .nav li ul li ul {

@@ -729,7 +729,7 @@ The hamburger bars are `--dz-accent-text` on the accent strip; scrolled, the tog
 
 The strip's right-hand controls are right floats, so DOM order is visual order from the right edge: the problem badge (outermost), search, then the **light/dark switch** (`#dz-mode-toggle`, `css/color-mode-toggle.css`, from 980px). Each module places itself (problems.js inserts the badge before `#search`, the switch goes after it), so neither the badge nor the switch appearing moves search; `dz-color-mode-contract.mjs` pins the order. The switch is the two-segment member of the toggle-selected family (the [Selector Levels](#selector-levels) and the Theme Hub mode switch): one `<button>` drawn as a sun | moon pill, 56x30 (two `--dz-btn-icon-box` segments, the search field's height), `--dz-btn-radius` outer corners, `--dz-icon-size-sm` glyphs, and the painted variant's segment filled. On the accent strip it takes the on-accent colours: `--dz-accent-text` border and icons, the filled segment inverted (`--dz-accent-text` fill, `--dz-accent-color` icon). The whole pill is one control whose name is the action ("Switch to dark"/"Switch to light"), with no `aria-pressed`; a tap flips the painted variant on this device only. Keyboard focus is the hamburger's recipe, a 2px `currentColor` outline around the pill. It hides while a single-version theme is painted and when the Theme Hub's "Light/dark toggle" setting (Colors group, on by default) is off; the setting applies live. On a route with nothing to search (`#search.readonly`) the field collapses and the dimmed magnifier hangs left of the search box, so the switch steps inward by `--dz-icon-size-lg` on top of its usual gap and never covers it.
 
-In the flyout (below 980px) the same switch (`#dz-mode-toggle-menu`) sits at the top right of the drawer, on the close X's row, in the body tokens: `--dz-btn-ghost-border`, `--dz-btn-ghost-text` icons and `--dz-btn-toggle-selected-bg/-text` for the filled segment. The button is absolutely positioned, so the menu rows keep their place; it is a 44px tall touch target with the pill 3px (`--dz-card-space-xs`) down, centred on the X. In the icons-only menu (`navbar_icons_text`, `.navbar.notext`) the drawer is 45px wide and its rows start right under the X, so the pill stands upright instead (sun above moon, 30x56) in flow below the last row, with a full-width hit area of at least 44px each way.
+In the flyout (below 980px) the same switch (`#dz-mode-toggle-menu`) sits at the top right of the drawer, on the close X's row, in the body tokens: `--dz-btn-ghost-border`, `--dz-btn-ghost-text` icons and `--dz-btn-toggle-selected-bg/-text` for the filled segment. The button is absolutely positioned, so the menu rows keep their place; it is a 44px tall touch target with the pill 3px (`--dz-card-space-xs`) down, centred on the X. The icons-only menu (`navbar_icons_text`, `.navbar.notext`) keeps the same placement: its drawer is four `--dz-btn-icon-box` wide (two switch widths, 112px), the close X in the left half of the close row and the switch in the right, with the icons centred in the rows below (`css/sidemenu.css`).
 
 ## Border Radius
 
@@ -1344,6 +1344,12 @@ Item density matches the desktop dropdowns (`8px 10px`); the current item carrie
 left edge, never the horizontal underline (vertical surface). The open-state close ("X") bars read
 `var(--dz-body-text)`, not `#fff`, clearing the WCAG SC 1.4.11 3:1 non-text floor against the
 scheme surface; the closed hamburger's `#fff` bars stay, sitting on the blue banner instead.
+The icons-only menu (`navbar_icons_text`, `.navbar.notext`) narrows the drawer to
+`calc(4 * var(--dz-btn-icon-box))` (112px, two light/dark switch widths), so the close row holds
+the X on the left and the switch on the right, placed exactly as in the text menu. Its rows keep
+the text menu's order, padding, separators and current-item edge; the list's right margin
+matches core's 3px left indent so rows sit centred, and each icon is centred in its row (no
+label gutter), leaving the page visible beside the drawer.
 **Constraint.** The panel must be `box-sizing: border-box`; the overhang arithmetic and the glass
 measurement account live with the rule in `css/sidemenu.css`.
 

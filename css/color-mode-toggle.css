@@ -109,30 +109,6 @@
     #dz-mode-toggle {
         display: none;
     }
-
-    /* Icons-only menu (navbar_icons_text, .navbar.notext): css/sidemenu.css
-       narrows the drawer to 45px, which clips the 56px pill and puts it
-       under the close X, and the rows start right below the X. The pill
-       stands upright instead (sun above moon, 30x56) in flow below the last
-       row, across the drawer's full 45px (the negative margins undo its 5px
-       padding), so it is wholly visible and its hit area is at least 44px
-       each way without covering the X or moving a row. :not([hidden]) so
-       the display here never beats the hidden state. */
-    .navbar.notext #dz-mode-toggle-menu:not([hidden]) {
-        position: static;
-        display: flex;
-        justify-content: center;
-        height: auto;
-        margin: var(--dz-card-space-lg) calc(-1 * var(--dz-card-space-sm)) 0;
-        padding: var(--dz-card-space-sm) 0;
-        width: calc(100% + 2 * var(--dz-card-space-sm));
-    }
-
-    .navbar.notext #dz-mode-toggle-menu .dz-mode-pill {
-        flex-direction: column;
-        width: 30px;
-        height: calc(2 * var(--dz-btn-icon-box));
-    }
 }
 
 @media (min-width: 980px) {
