@@ -16,7 +16,9 @@ mainmenu: "Main menu",
 type_to_search: "Type to search",
 search_placeholder: "Name, Desc, Idx, Status",
 clear_search: "Clear search results",
-search_no_match: "No devices on this page match “{query}”."
+search_no_match: "No devices on this page match “{query}”.",
+mode_to_dark: "Switch to dark",
+mode_to_light: "Switch to light"
 },
 hub: {
 tabs_label: "Theme settings",
@@ -191,11 +193,15 @@ description: "Hides the navbar logo image entirely, leaving that space empty."
 },
 scheme: {
 label: "Color scheme",
-description: "Sets the theme's overall color scheme: a light or dark base, with named color palettes."
+description: "Pick a theme, then choose light, dark, or let it follow this device."
 },
 custom_color_scheme: {
 label: "Custom colors",
 description: "Builds your own color scheme by picking 7 individual colors."
+},
+color_mode_toggle: {
+label: "Light/dark toggle",
+description: "Shows a sun/moon button next to search (in the menu on small screens) that switches the current theme between its light and dark version on this device only. The choice is not saved to Domoticz, and the button hides while a theme with only one version is selected."
 },
 iconpacks: {
 label: "Icon library",
@@ -293,7 +299,7 @@ note: "Each action asks for confirmation first.",
 reset_theme: "Reset theme to defaults",
 reset_theme_confirm: "Reset all theme settings to their defaults? This deletes the stored theme settings and reloads the page.",
 clear_cache: "Clear cached settings",
-clear_cache_confirm: "Clear this browser's cached theme settings and reload? Your settings saved on the server are kept.",
+clear_cache_confirm: "Clear this browser's cached theme settings and reload? This also undoes a switch made with the light/dark toggle on this device and forgets the remembered colours. Your settings saved on the server are kept.",
 reset_colors: "Reset colours to the selected scheme",
 reset_colors_confirm: "Reset the custom colours to the selected scheme's default palette?",
 promote: "Save my current preferences as house defaults",
@@ -328,12 +334,12 @@ alt_text: "Secondary Text",
 disabled: "Disabled"
 },
 builtin: {
-light: { name: "Machinon Light", desc: "The default look: clean blue on white" },
-dark: { name: "Machinon Dark", desc: "The default look: blue glowing on navy" },
+machinon: { name: "Machinon", desc: "The default look: clean blue on white, or glowing on navy" },
 custom: { name: "Custom", desc: "Your own seven colours" }
 },
 delete_preset: "Delete preset",
 delete_named: "Delete preset {name}",
+delete_pair_named: "Delete theme {name} (both versions)",
 group_label: "Color scheme",
 wheel_aria: "Pick {label} with a colour wheel",
 hex_aria: "{label} hex value",
@@ -341,7 +347,15 @@ save_preset: "Save as preset",
 preset_name_prompt: "Preset name",
 light: "Light",
 dark: "Dark",
-pair_label: "{name} {variant}",
+mode_label: "Colour mode",
+mode_light: "Light",
+mode_dark: "Dark",
+mode_auto: "Follow device",
+note_auto_dark: "This device is in dark mode, so you see the dark version.",
+note_auto_light: "This device is in light mode, so you see the light version.",
+note_single: "{name} has a single version, so light and dark do not apply. Pick another theme to use them.",
+note_override: "On this device you switched to {variant} with the toggle.",
+clear_override: "Use {mode} again",
 wcag_what_preset: "Preset \"{name}\" saved, but it",
 wcag_what_custom: "The custom colour scheme",
 wcag_body: "text on background {ratio}:1 (WCAG AA needs 4.5)",
@@ -367,7 +381,7 @@ tint_toggle: "Tint the greys with a different colour",
 accent_label: "Main colour",
 surface_label: "Grey tint",
 drift_label: "Your colour was adjusted to stay readable:",
-saved_lead: "Saved as two schemes, “{name} Light” and “{name} Dark”.",
+saved_lead: "Saved {name} with a light and a dark version.",
 preview: {
 device: "Living Room",
 status: "21.4 °C · 47%",

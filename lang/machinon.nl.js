@@ -16,7 +16,9 @@ mainmenu: "Hoofdmenu",
 type_to_search: "Typ om te zoeken",
 search_placeholder: "Naam, Omschr., Idx, Status",
 clear_search: "Zoekresultaten wissen",
-search_no_match: "Geen apparaten op deze pagina komen overeen met ‘{query}’."
+search_no_match: "Geen apparaten op deze pagina komen overeen met ‘{query}’.",
+mode_to_dark: "Naar donker",
+mode_to_light: "Naar licht"
 },
 hub: {
 tabs_label: "Thema-instellingen",
@@ -191,11 +193,15 @@ description: "Verbergt de logoafbeelding in de navigatiebalk volledig en laat di
 },
 scheme: {
 label: "Kleurenschema",
-description: "Bepaalt het volledige kleurenschema van het thema: een lichte of donkere basis, met benoemde kleurpaletten."
+description: "Kies een thema en daarna licht, donker, of laat het dit apparaat volgen."
 },
 custom_color_scheme: {
 label: "Eigen kleuren",
 description: "Bouwt je eigen kleurenschema door 7 losse kleuren te kiezen."
+},
+color_mode_toggle: {
+label: "Licht/donker-schakelaar",
+description: "Toont naast het zoekveld (op kleine schermen in het menu) een zon/maan-knop die het huidige thema alleen op dit apparaat wisselt tussen de lichte en de donkere versie. De keuze wordt niet in Domoticz opgeslagen, en de knop is verborgen zolang een thema met maar één versie gekozen is."
 },
 iconpacks: {
 label: "Iconenbibliotheek",
@@ -293,7 +299,7 @@ note: "Elke actie vraagt eerst om bevestiging.",
 reset_theme: "Thema terugzetten naar standaardwaarden",
 reset_theme_confirm: "Alle thema-instellingen terugzetten naar hun standaardwaarden? Dit verwijdert de opgeslagen thema-instellingen en laadt de pagina opnieuw.",
 clear_cache: "Instellingen in de cache wissen",
-clear_cache_confirm: "De thema-instellingen in de cache van deze browser wissen en opnieuw laden? Je instellingen die op de server zijn opgeslagen blijven behouden.",
+clear_cache_confirm: "De thema-instellingen in de cache van deze browser wissen en opnieuw laden? Dit maakt ook een wissel met de licht/donker-schakelaar op dit apparaat ongedaan en vergeet de onthouden kleuren. Je instellingen die op de server zijn opgeslagen blijven behouden.",
 reset_colors: "Kleuren terugzetten naar het gekozen schema",
 reset_colors_confirm: "De eigen kleuren terugzetten naar het standaardpalet van het gekozen schema?",
 promote: "Mijn huidige voorkeuren opslaan als huisstandaard",
@@ -328,12 +334,12 @@ alt_text: "Secundaire tekst",
 disabled: "Uitgeschakeld"
 },
 builtin: {
-light: { name: "Machinon Licht", desc: "De standaardstijl: helder blauw op wit" },
-dark: { name: "Machinon Donker", desc: "De standaardstijl: blauw dat gloeit op marineblauw" },
+machinon: { name: "Machinon", desc: "De standaardstijl: helder blauw op wit, of gloeiend op marineblauw" },
 custom: { name: "Eigen", desc: "Je eigen zeven kleuren" }
 },
 delete_preset: "Voorinstelling verwijderen",
 delete_named: "Voorinstelling {name} verwijderen",
+delete_pair_named: "Thema {name} verwijderen (beide versies)",
 group_label: "Kleurenschema",
 wheel_aria: "{label} kiezen met een kleurenwiel",
 hex_aria: "Hexwaarde van {label}",
@@ -341,7 +347,15 @@ save_preset: "Opslaan als voorinstelling",
 preset_name_prompt: "Naam van de voorinstelling",
 light: "Licht",
 dark: "Donker",
-pair_label: "{name} {variant}",
+mode_label: "Kleurmodus",
+mode_light: "Licht",
+mode_dark: "Donker",
+mode_auto: "Apparaat volgen",
+note_auto_dark: "Dit apparaat staat in donkere modus, dus je ziet de donkere versie.",
+note_auto_light: "Dit apparaat staat in lichte modus, dus je ziet de lichte versie.",
+note_single: "{name} heeft maar één versie, dus licht en donker zijn niet van toepassing. Kies een ander thema om ze te gebruiken.",
+note_override: "Op dit apparaat ben je met de schakelaar naar {variant} gegaan.",
+clear_override: "Weer {mode} gebruiken",
 wcag_what_preset: "Voorinstelling \"{name}\" opgeslagen, maar die",
 wcag_what_custom: "Het eigen kleurenschema",
 wcag_body: "tekst op achtergrond {ratio}:1 (WCAG AA vereist 4.5)",
@@ -367,7 +381,7 @@ tint_toggle: "De grijstinten met een andere kleur tinten",
 accent_label: "Hoofdkleur",
 surface_label: "Grijstint",
 drift_label: "Je kleur is aangepast zodat hij leesbaar blijft:",
-saved_lead: "Opgeslagen als twee schema's, “{name} Licht” en “{name} Donker”.",
+saved_lead: "{name} opgeslagen met een lichte en een donkere versie.",
 preview: {
 device: "Woonkamer",
 status: "21,4 °C · 47%",

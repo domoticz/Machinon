@@ -340,9 +340,7 @@ dzHubDoClearCache();
 });
 }
 function dzHubDoClearCache() {
-try {
-if (typeof Storage !== "undefined") { localStorage.removeItem(themeFolder + ".themeSettings"); }
-} catch (e) { }
+dzClearThemeCache();
 location.reload();
 }
 function dzHubDoResetColors() {
@@ -352,10 +350,16 @@ theme.color_scheme = {
 background: d.bg, main_color: d.main, navbar: d.navbar, item: d.item,
 main_text: d.text, alt_text: d.alt_text, disabled: d.disabled
 };
-if (typeof applyCustomColorScheme === "function") { applyCustomColorScheme(theme.color_scheme); }
 if (typeof dzHubSyncSchemeSwatches === "function") { dzHubSyncSchemeSwatches(); }
 cacheThemeSettings();
 dzHubPersist();
+dzHubRepaintColors();
+}
+function dzHubRepaintColors() {
+if (typeof dzApplyColorMode !== "function") { return; }
+dzApplyColorMode(true).then(function () {
+if (typeof dzUpdateSchemePickers === "function") { dzUpdateSchemePickers(); }
+});
 }
 function dzHubPromote() {
 dzHubConfirm(
@@ -571,7 +575,8 @@ hide_logo: setLogo,
 button_name: dzApplyCustomPageLabel,
 background_img: applyBackground,
 background_type: applyBackground,
-navbar_icons_text: applyNavbarIconsText
+navbar_icons_text: applyNavbarIconsText,
+color_mode_toggle: dzSyncModeToggles
 };
 var DZ_HUB_INPUT_META = {
 standby_after: { min: 1 },
@@ -693,6 +698,10 @@ var mount = document.createElement("div");
 mount.className = "dz-hub-custom-mount";
 mount.setAttribute("data-custom", entry.key);
 mount.appendChild(dzHubCustomHeader(entry));
+var picker = document.createElement("div");
+picker.id = DZ_HUB_SCHEME_PICKER_ID;
+picker.className = "dz-hub-scheme-picker";
+mount.appendChild(picker);
 var actions = document.createElement("div");
 actions.className = "dz-hub-swatch-actions";
 var createBtn = document.createElement("button");
@@ -704,10 +713,6 @@ if (typeof dzOpenThemeWizard === "function") { dzOpenThemeWizard(); }
 });
 actions.appendChild(createBtn);
 mount.appendChild(actions);
-var picker = document.createElement("div");
-picker.id = DZ_HUB_SCHEME_PICKER_ID;
-picker.className = "dz-hub-scheme-picker";
-mount.appendChild(picker);
 if (typeof registerSchemePickerContainer === "function") {
 registerSchemePickerContainer(DZ_HUB_SCHEME_PICKER_ID);
 }
@@ -936,9 +941,9 @@ var current = (theme.color_scheme && theme.color_scheme[field.field]) || "#00000
 var built = dzBuildColorField(dzT("hub.schemes.swatches." + field.field), current, function (hex) {
 theme.color_scheme = theme.color_scheme || {};
 theme.color_scheme[field.field] = hex;
-applyCustomColorScheme(theme.color_scheme);
 cacheThemeSettings();
 dzHubPersist();
+dzHubRepaintColors();
 warnIfContrastFails(theme.color_scheme, dzT("hub.schemes.wcag_what_custom"));
 }, {
 inputId: DZ_HUB_COLOR_INPUT_PREFIX + field.suffix,

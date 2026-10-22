@@ -4,6 +4,8 @@
     "base": "light",
     "pair": "magenta",
     "variant": "light",
+    "family_name": "Magenta",
+    "family_description": "Warm magenta on white, or glowing on plum black",
     "preview": { "bg": "#FAF0F7", "surface": "#FFFFFF", "accent": "#99407E", "text": "#292528" },
     "colors": {
         "background": "#FAF0F7",

@@ -1,23 +1,42 @@
-function setColorScheme() {
+var dzLastPaintState = null;
+function dzSavedPaintState() {
+var f = theme.features || {};
+var slug = typeof dzActiveSchemeSlug === 'function' ? dzActiveSchemeSlug() : theme.scheme;
+var darkFile = !!(f.dark_theme && f.dark_theme.enabled);
+if (f.custom_color_scheme && f.custom_color_scheme.enabled === true) {
+return {
+slug: slug, attr: theme.scheme_base === 'dark' ? 'dark' : 'custom',
+colors: Object.assign({}, theme.color_scheme), darkFile: darkFile
+};
+}
+return { slug: slug, attr: darkFile ? 'dark' : null, colors: null, darkFile: darkFile };
+}
+function dzPaintState(state) {
 var html = document.documentElement;
-if (theme.features.custom_color_scheme && theme.features.custom_color_scheme.enabled === true) {
 clearCustomColorScheme();
-applyCustomColorScheme(theme.color_scheme);
-html.setAttribute('data-dz-scheme', theme.scheme_base === 'dark' ? 'dark' : 'custom');
-} else {
-clearCustomColorScheme();
-if (theme.features.dark_theme && theme.features.dark_theme.enabled) {
-html.setAttribute('data-dz-scheme', 'dark');
+if (state.colors) {
+applyCustomColorScheme(state.colors);
+} else if (state.tokens) {
+Object.keys(state.tokens).forEach(function (name) { html.style.setProperty(name, state.tokens[name]); });
+}
+if (state.attr === 'dark' || state.attr === 'custom') {
+html.setAttribute('data-dz-scheme', state.attr);
 } else {
 html.removeAttribute('data-dz-scheme');
 }
-}
+dzSetDarkFile(state.darkFile === true);
 repairFixedColors();
+dzLastPaintState = state;
+}
+function setColorScheme() {
+var state = dzSavedPaintState();
+dzPaintState(state);
+dzPaintedSlug = state.slug;
 }
 var DZ_REPAIR_STATUS = ['timeout', 'lowbat', 'protected'];
 var DZ_REPAIR_IDENTITY = [
 '--dz-widget-amber', '--dz-widget-energy-export', '--dz-widget-energy-gas',
-'--dz-widget-energy-water', '--dz-widget-energy-price',
+'--dz-widget-energy-water', '--dz-widget-energy-price', '--dz-widget-energy-grid',
 '--dz-sun-color', '--dz-moon-color'
 ];
 function repairFixedColors() {
@@ -91,7 +110,7 @@ text: v('--dz-body-text'),
 alt_text: v('--secondary-text-color'),
 disabled: v('--dz-status-disabled')
 };
-setColorScheme();
+dzPaintState(dzLastPaintState || dzSavedPaintState());
 return defaults;
 }
 var DZ_CUSTOM_TOKENS = [
@@ -100,10 +119,10 @@ var DZ_CUSTOM_TOKENS = [
 '--dz-btn-success-bg', '--dz-btn-warning-bg', '--secondary-text-color', '--dz-accent-values',
 '--dz-accent-text', '--dz-sun-color', '--dz-moon-color', '--dz-accent-red-values',
 '--dz-widget-amber', '--dz-widget-energy-export', '--dz-widget-energy-gas',
-'--dz-widget-energy-water', '--dz-widget-energy-price'
+'--dz-widget-energy-water', '--dz-widget-energy-price', '--dz-widget-energy-grid'
 ];
-function applyCustomColorScheme(cs) {
-var s = document.documentElement.style;
+function applyCustomColorScheme(cs, target) {
+var s = (target || document.documentElement).style;
 var set = function (token, val) { if (val) { s.setProperty(token, hexToRGB(val)); } };
 set('--dz-body-bg', cs.background);
 set('--dz-body-text', cs.main_text);
@@ -125,6 +144,7 @@ set('--dz-widget-energy-export', cs.energy_export);
 set('--dz-widget-energy-gas', cs.energy_gas);
 set('--dz-widget-energy-water', cs.energy_water);
 set('--dz-widget-energy-price', cs.energy_price);
+set('--dz-widget-energy-grid', cs.energy_grid);
 if (cs.main_color) { s.setProperty('--dz-accent-values', hexToRGB(cs.main_color, true)); }
 if (cs.error) { s.setProperty('--dz-accent-red-values', hexToRGB(cs.error, true)); }
 }
@@ -153,7 +173,7 @@ function hexToRGB(h, values_only) {
 if (!h || typeof h !== 'string') {
 return values_only ? "0,0,0" : "rgb(0,0,0)";
 }
-let r = 0, g = 0, b = 0;
+var r = 0, g = 0, b = 0;
 if (h.length == 4) {
 r = "0x" + h[1] + h[1];
 g = "0x" + h[2] + h[2];

@@ -226,6 +226,11 @@ reloadOnDisable: false, status: "keep", scope: "user"
 key: "custom_color_scheme", storageKey: "custom_color_scheme", control: "custom",
 appliesTo: "whole_ui", previewId: null, parent: null,
 reloadOnDisable: false, status: "keep", scope: "user"
+},
+{
+key: "color_mode_toggle", storageKey: "color_mode_toggle", control: "toggle",
+appliesTo: "navbar", previewId: null, parent: null,
+reloadOnDisable: false, status: "keep", scope: "user"
 }
 ]
 },
@@ -267,7 +272,7 @@ all = all.concat(THEME_MANIFEST[i].entries);
 return all;
 }
 var DZ_SCOPE_EXTRAS = {
-scheme_base: "user", color_scheme: "user", user_schemes: "user",
+scheme_base: "user", scheme_mode: "user", color_scheme: "user", user_schemes: "user",
 dark_theme: "user", icons: "house"
 };
 function dzSettingScope(storageKey) {

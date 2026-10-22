@@ -1,5 +1,6 @@
 function enableThemeFeatures() {
 $.each(theme.features, function(key, feature) {
+if (key === "dark_theme") return;
 if (feature.enabled === true) {
 if (feature.files.length > 0) {
 loadThemeFeatureFiles(key);

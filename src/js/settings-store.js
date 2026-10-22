@@ -56,9 +56,11 @@ t.scheme = t.features.custom_color_scheme && t.features.custom_color_scheme.enab
 : (t.features.dark_theme && t.features.dark_theme.enabled ? "dark" : "light");
 t.scheme_base = t.features.dark_theme && t.features.dark_theme.enabled ? "dark" : "light";
 }
+var dzSettingsFromDefaults = false;
 function loadSettings() {
 if (typeof Storage !== "undefined") {
 if (localStorage.getItem(themeFolder + ".themeSettings") === null) {
+dzSettingsFromDefaults = true;
 return fetch("styles/" + themeFolder + "/theme.json", { cache: "no-cache", credentials: "include" })
 .then(function(response) { return response.json(); })
 .then(function(localJson) {
@@ -145,7 +147,7 @@ feats[k] = t.features[k] && t.features[k].enabled === true;
 }
 return JSON.stringify({
 features: feats,
-scheme: t.scheme, scheme_base: t.scheme_base, color_scheme: t.color_scheme,
+scheme: t.scheme, scheme_base: t.scheme_base, scheme_mode: t.scheme_mode, color_scheme: t.color_scheme,
 card_min_width: t.card_min_width, card_max_width: t.card_max_width,
 logo: t.logo, background_img: t.background_img, background_type: t.background_type,
 button_name: t.button_name
@@ -156,11 +158,22 @@ var before = JSON.parse(JSON.stringify(theme));
 return checkUserVariableThemeSettings().then(function() {
 if (typeof migrateRetiredScheme === "function") { return migrateRetiredScheme(); }
 return false;
-}).then(function(migrated) {
-if (migrated && before.features && theme.features && theme.features.dark_theme) {
-before.features.dark_theme.enabled = theme.features.dark_theme.enabled;
-}
+}).then(function() {
 applyThemeDeltaInPlace(before);
+dzApplyColorMode(dzPaintInputs(before) !== dzPaintInputs(theme) ||
+(dzSettingsFromDefaults && !!window.__dzEarlyPaint));
+}).catch(function(e) {
+dzApplyColorMode();
+throw e;
+});
+}
+function dzPaintInputs(t) {
+var f = t.features || {};
+return JSON.stringify({
+scheme: t.scheme, scheme_base: t.scheme_base, color_scheme: t.color_scheme,
+user_schemes: t.user_schemes,
+custom: !!(f.custom_color_scheme && f.custom_color_scheme.enabled === true),
+dark: !!(f.dark_theme && f.dark_theme.enabled === true)
 });
 }
 function applyThemeDeltaInPlace(before) {
@@ -169,6 +182,7 @@ if (themeSettingsFingerprint(before) === themeSettingsFingerprint(theme)) return
 var reloadNeeded = false;
 if (before.features && theme.features) {
 $.each(theme.features, function(key, feature) {
+if (key === "dark_theme") return;
 var was = !!(before.features[key] && before.features[key].enabled === true);
 var now = feature.enabled === true;
 if (was === now) return;
@@ -184,13 +198,19 @@ unloadThemeFeatureFiles(key);
 });
 }
 if (reloadNeeded) { location.reload(); return; }
-setColorScheme();
 applyCardWidths();
 setLogo();
 dzApplyCustomPageLabel();
 applyBackground();
 applyNavbarIconsText();
+dzSyncModeToggles();
 dzDiagRefreshGate(true);
+}
+function dzClearThemeCache() {
+try {
+localStorage.removeItem(themeFolder + ".themeSettings");
+} catch (e) { }
+if (typeof dzForgetPaint === "function") { dzForgetPaint(); }
 }
 function resetTheme() {
 var deletePromises = [];
@@ -214,9 +234,7 @@ if (typeof theme.usercolorsvariable !== "undefined") {
 deletePromises.push(deleteVariable(theme.usercolorsvariable, "colors"));
 }
 Promise.all(deletePromises).then(function() {
-if (typeof Storage !== "undefined") {
-localStorage.removeItem(themeFolder + ".themeSettings");
-}
+dzClearThemeCache();
 $.get("json.htm?type=command&param=addlogmessage&message=" + themeFolder + " theme reset to defaults");
 location.reload();
 });

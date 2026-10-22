@@ -1,8 +1,10 @@
 var BUILTIN_SCHEMES = null;
+var BUILTIN_SCHEMES_P = null;
 function loadBuiltinSchemes() {
 if (BUILTIN_SCHEMES) return Promise.resolve(BUILTIN_SCHEMES);
+if (BUILTIN_SCHEMES_P) return BUILTIN_SCHEMES_P;
 var base = "styles/" + themeFolder + "/schemes/";
-return fetch(base + "index.json", { credentials: "include" })
+BUILTIN_SCHEMES_P = fetch(base + "index.json", { credentials: "include" })
 .then(function(r) { return r.json(); })
 .then(function(slugs) {
 return Promise.all(slugs.map(function(slug) {
@@ -12,15 +14,19 @@ return fetch(base + slug + ".json", { credentials: "include" })
 }));
 })
 .then(function(schemes) {
-BUILTIN_SCHEMES = {};
-schemes.forEach(function(s) { BUILTIN_SCHEMES[s.slug] = s; });
-return BUILTIN_SCHEMES;
+var all = {};
+schemes.forEach(function(s) { all[s.slug] = s; });
+BUILTIN_SCHEMES = all;
+BUILTIN_SCHEMES_P = null;
+if (typeof dzRefreshPaintRecord === "function") { dzRefreshPaintRecord(); }
+return all;
 })
 .catch(function(e) {
-console.log(themeName + " - failed to load built-in schemes:", e);
-BUILTIN_SCHEMES = {};
-return BUILTIN_SCHEMES;
+BUILTIN_SCHEMES_P = null;
+if (typeof dzLog === "function") { dzLog("schemes", "load_failed", { error: String(e) }); }
+return {};
 });
+return BUILTIN_SCHEMES_P;
 }
 var DZ_SCHEME_MIGRATIONS = {
 "blue-ui-light": "light",
@@ -39,45 +45,6 @@ var DZ_SCHEME_MIGRATIONS = {
 "nord": "dark",
 "solarized-light": "light"
 };
-var DZ_BASE_PAIR = { light: "dark", dark: "light" };
-function dzFindPairMate(slug, schemes, userSchemes) {
-if (!slug) { return null; }
-if (DZ_BASE_PAIR[slug]) { return DZ_BASE_PAIR[slug]; }
-if (slug.indexOf("user:") === 0) {
-var rest = slug.substring(5);
-var mine = null, variant;
-(userSchemes || []).forEach(function (p) {
-if (p.name === rest) { mine = p; }
-});
-if (mine) {
-variant = mine.variant;
-} else {
-var bar = rest.lastIndexOf("|");
-if (bar === -1) { return null; }
-var name = rest.substring(0, bar);
-variant = rest.substring(bar + 1);
-(userSchemes || []).forEach(function (p) {
-if (p.name === name && p.variant === variant) { mine = p; }
-});
-}
-if (!mine || !mine.pair) { return null; }
-var mate = null;
-(userSchemes || []).forEach(function (p) {
-if (p.pair === mine.pair && p.variant !== variant) { mate = p; }
-});
-return mate ? "user:" + mate.name + "|" + mate.variant : null;
-}
-var self = schemes && schemes[slug];
-if (!self || !self.pair) { return null; }
-var found = null;
-Object.keys(schemes).forEach(function (other) {
-var s = schemes[other];
-if (other !== slug && s.pair === self.pair && s.variant !== self.variant) {
-found = other;
-}
-});
-return found;
-}
 var DZ_PAIR_SEQ = 0;
 function dzNewPairId(name) {
 DZ_PAIR_SEQ += 1;
@@ -98,8 +65,10 @@ seed: { accent: seed.accent, surface: seed.surface || null, look: seed.look },
 colors: Object.assign({}, pairColors[variant])
 });
 });
-var wantDark = theme.scheme_base === "dark";
-var slug = "user:" + name + "|" + (wantDark ? "dark" : "light");
+var fam = dzFamilyOf("user:" + name + "|light", dzSchemeFamilies(theme.user_schemes));
+var slug = fam && !fam.single
+? dzSavedMemberFor(fam, theme.scheme_mode, dzDeviceDark())
+: "user:" + name + "|light";
 applyScheme(slug);
 renderSchemePicker();
 if (typeof dzHubSyncSchemeSwatches === "function") { dzHubSyncSchemeSwatches(); }
@@ -108,7 +77,7 @@ return slug;
 function migrateRetiredScheme() {
 var target = DZ_SCHEME_MIGRATIONS[theme.scheme];
 if (!target) return Promise.resolve(false);
-console.log(themeName + " - scheme '" + theme.scheme + "' was retired, migrating to '" + target + "'");
+if (typeof dzLog === "function") { dzLog("schemes", "retired_migrated", { from: theme.scheme, to: target }); }
 return applyScheme(target).then(function() { return true; });
 }
 function persistSchemeChoice() {
@@ -178,6 +147,7 @@ theme.scheme = "user:" + name;
 cacheThemeSettings();
 persistSchemeChoice();
 renderSchemePicker();
+dzApplyColorMode();
 warnIfContrastFails(theme.color_scheme, dzT("hub.schemes.wcag_what_preset", { name: name }));
 }
 function deleteUserScheme(name, variant) {
@@ -201,6 +171,7 @@ theme.scheme = "custom";
 cacheThemeSettings();
 persistSchemeChoice();
 renderSchemePicker();
+dzApplyColorMode();
 }
 function dzActiveSchemeSlug() {
 if (theme.scheme) return theme.scheme;
@@ -209,69 +180,89 @@ if (f.custom_color_scheme && f.custom_color_scheme.enabled === true) return "cus
 if (f.dark_theme && f.dark_theme.enabled === true) return "dark";
 return "light";
 }
-function applyScheme(slug) {
+function dzUserPresetFor(slug) {
+var rest = slug.substring(5);
+var all = theme.user_schemes || [];
+var preset = all.filter(function (p) { return p.name === rest; })[0];
+if (preset) return preset;
+var bar = rest.lastIndexOf("|");
+if (bar === -1) return undefined;
+var wantName = rest.substring(0, bar);
+var wantVariant = rest.substring(bar + 1);
+return all.filter(function (p) {
+return p.name === wantName && p.variant === wantVariant;
+})[0];
+}
+function dzSaveSchemeModel(slug) {
+var found;
 if (slug === "light" || slug === "dark") {
 theme.scheme = slug;
 theme.scheme_base = slug;
 theme.features.custom_color_scheme.enabled = false;
 setDarkFeature(slug === "dark");
-setColorScheme();
-cacheThemeSettings();
-persistSchemeChoice();
-return Promise.resolve();
-}
-if (slug === "custom") {
+found = Promise.resolve(true);
+} else if (slug === "custom") {
 theme.scheme = "custom";
 theme.features.custom_color_scheme.enabled = true;
-setColorScheme();
+found = Promise.resolve(true);
+} else if (slug.indexOf("user:") === 0) {
+found = Promise.resolve(dzSaveSchemeColors(slug, dzUserPresetFor(slug)));
+} else {
+found = loadBuiltinSchemes().then(function (schemes) {
+return dzSaveSchemeColors(slug, schemes[slug]);
+});
+}
+return found.then(function (ok) {
+if (ok) {
 cacheThemeSettings();
 persistSchemeChoice();
-return Promise.resolve();
 }
-if (slug.indexOf("user:") === 0) {
-var rest = slug.substring(5);
-var preset = (theme.user_schemes || []).filter(function (p) {
-return p.name === rest;
-})[0];
-if (!preset) {
-var bar = rest.lastIndexOf("|");
-if (bar !== -1) {
-var wantName = rest.substring(0, bar);
-var wantVariant = rest.substring(bar + 1);
-preset = (theme.user_schemes || []).filter(function (p) {
-return p.name === wantName && p.variant === wantVariant;
-})[0];
+return ok;
+});
 }
-}
-if (!preset) return Promise.resolve();
-theme.scheme = slug;
-theme.scheme_base = preset.base === "dark" ? "dark" : "light";
-theme.color_scheme = Object.assign({}, preset.colors);
-theme.features.custom_color_scheme.enabled = true;
-setDarkFeature(false);
-setColorScheme();
-cacheThemeSettings();
-persistSchemeChoice();
-return Promise.resolve();
-}
-return loadBuiltinSchemes().then(function(schemes) {
-var scheme = schemes[slug];
-if (!scheme) return;
+function dzSaveSchemeColors(slug, scheme) {
+if (!scheme) return false;
 theme.scheme = slug;
 theme.scheme_base = scheme.base === "dark" ? "dark" : "light";
 theme.color_scheme = Object.assign({}, scheme.colors);
 theme.features.custom_color_scheme.enabled = true;
 setDarkFeature(false);
-setColorScheme();
-cacheThemeSettings();
-persistSchemeChoice();
+return true;
+}
+function applyScheme(slug) {
+return dzSaveSchemeModel(slug).then(function (ok) {
+if (ok) return dzApplyColorMode(true);
 });
 }
 function setDarkFeature(enabled) {
-var was = theme.features.dark_theme.enabled === true;
 theme.features.dark_theme.enabled = enabled;
-if (enabled && !was) { loadThemeFeatureFiles("dark_theme"); }
-if (!enabled && was) { unloadThemeFeatureFiles("dark_theme"); }
+}
+var DZ_DARK_FILE = "dark_theme.css";
+var dzDarkFileLoaded = false;
+var dzDarkFileLink = null;
+function dzSetDarkFile(on) {
+on = on === true;
+if (on === dzDarkFileLoaded) return;
+if (on) {
+var own = "styles/" + themeFolder + "/css/" + DZ_DARK_FILE;
+var links = document.getElementsByTagName("link");
+for (var i = 0; i < links.length && !dzDarkFileLink; i++) {
+var path = (links[i].getAttribute("href") || "").split("?")[0];
+if (path === own || path.slice(-own.length - 1) === "/" + own) { dzDarkFileLink = links[i]; }
+}
+if (!dzDarkFileLink) {
+var link = document.createElement("link");
+link.setAttribute("rel", "stylesheet");
+link.setAttribute("type", "text/css");
+link.setAttribute("href", "styles/" + themeFolder + "/css/" + DZ_DARK_FILE + dzFeatureFileQuery());
+document.getElementsByTagName("head")[0].appendChild(link);
+dzDarkFileLink = link;
+}
+} else if (dzDarkFileLink) {
+if (dzDarkFileLink.parentNode) { dzDarkFileLink.parentNode.removeChild(dzDarkFileLink); }
+dzDarkFileLink = null;
+}
+dzDarkFileLoaded = on;
 }
 var DZ_COLOR_SCHEME_FIELDS = [
 { suffix: "bg", field: "background" },
@@ -282,102 +273,323 @@ var DZ_COLOR_SCHEME_FIELDS = [
 { suffix: "alt_text", field: "alt_text" },
 { suffix: "disabled", field: "disabled" }
 ];
+var DZ_SCHEME_SWATCH_KEYS = ["background", "item", "main_color", "main_text"];
+var DZ_MACHINON_SWATCHES = {
+light: { background: "#f4f8fc", item: "#ffffff", main_color: "#396d9e", main_text: "#1b2b3a" },
+dark: { background: "#0f1620", item: "#18202b", main_color: "#98ccfd", main_text: "#dce6f0" }
+};
+var DZ_SCHEME_MODE_ORDER = ["light", "dark", "auto"];
+function dzSchemeModeLabel(mode) {
+if (mode === "dark") { return dzT("hub.schemes.mode_dark"); }
+if (mode === "auto") { return dzT("hub.schemes.mode_auto"); }
+return dzT("hub.schemes.mode_light");
+}
+function dzSchemeCardModel(fam, schemes, userSchemes, customColors) {
+var card = { id: fam.id, name: fam.id, desc: null, single: fam.single,
+deletable: fam.deletable, presetName: fam.presetName,
+presetVariant: undefined, light: null, dark: null };
+var presets = Array.isArray(userSchemes) ? userSchemes.filter(function (p) {
+return p && typeof p === "object" && p.name === fam.presetName;
+}) : [];
+if (fam.kind === "machinon") {
+card.name = dzT("hub.schemes.builtin.machinon.name");
+card.desc = dzT("hub.schemes.builtin.machinon.desc");
+card.light = DZ_MACHINON_SWATCHES.light;
+card.dark = DZ_MACHINON_SWATCHES.dark;
+} else if (fam.kind === "builtin") {
+var all = schemes || {};
+var light = Object.prototype.hasOwnProperty.call(all, fam.light) ? all[fam.light] : null;
+var dark = Object.prototype.hasOwnProperty.call(all, fam.dark) ? all[fam.dark] : null;
+var either = light || dark;
+if (either) {
+card.name = either.family_name || either.name || fam.id;
+card.desc = either.family_description || either.description || null;
+}
+card.light = light ? light.colors : null;
+card.dark = dark ? dark.colors : null;
+} else if (fam.kind === "custom") {
+card.name = dzT("hub.schemes.builtin.custom.name");
+card.desc = dzT("hub.schemes.builtin.custom.desc");
+card.light = customColors || null;
+} else if (fam.kind === "legacy") {
+card.name = fam.presetName;
+var legacy = presets.filter(function (p) { return p.pair === undefined; })[0];
+card.light = legacy ? legacy.colors : null;
+} else {
+card.name = fam.presetName;
+var pairId = fam.id.substring("user-pair:".length);
+presets.forEach(function (p) {
+if (p.pair !== pairId || (p.variant !== "light" && p.variant !== "dark")) { return; }
+if (!card[p.variant]) { card[p.variant] = p.colors; }
+if (card.presetVariant === undefined) { card.presetVariant = p.variant; }
+});
+}
+if (card.single) {
+card.light = card.light || card.dark;
+card.dark = null;
+}
+return card;
+}
+function dzSchemePickerState(families, saved, mode, override, deviceDark) {
+var fam = dzFamilyOf(saved, families);
+var single = !!(fam && fam.single);
+var ov = dzCleanOverride(override);
+if (ov && !dzOverrideStillValid(ov, mode, deviceDark)) { ov = null; }
+if (ov && ov.variant === dzWantedVariant(mode, null, deviceDark)) { ov = null; }
+var variant = dzWantedVariant(mode, ov, deviceDark);
+if (!variant) { variant = fam && !single && saved === fam.dark ? "dark" : "light"; }
+var note = null;
+if (single) {
+note = "single";
+} else if (mode === "auto" && !ov) {
+note = deviceDark ? "auto_dark" : "auto_light";
+}
+return { selected: fam ? fam.id : null, single: single, mode: mode, variant: variant,
+override: single || !ov ? null : ov.variant, note: note };
+}
 var DZ_SCHEME_PICKER_CONTAINER_IDS = [];
+var dzSchemePickerDataKey = null;
+var dzSchemePickerArmed = false;
 function registerSchemePickerContainer(id) {
 if (id && DZ_SCHEME_PICKER_CONTAINER_IDS.indexOf(id) === -1) {
 DZ_SCHEME_PICKER_CONTAINER_IDS.push(id);
 }
 }
+function dzSchemePickerContainers() {
+return DZ_SCHEME_PICKER_CONTAINER_IDS
+.map(function (id) { return document.getElementById(id); })
+.filter(function (el) { return !!el; });
+}
+function dzSchemePickerData() {
+try {
+return JSON.stringify(theme.user_schemes || []);
+} catch (e) {
+return "";
+}
+}
+function dzArmSchemePicker() {
+if (dzSchemePickerArmed) { return; }
+dzSchemePickerArmed = true;
+document.addEventListener("dz:colormode", function () { dzUpdateSchemePickers(); });
+try {
+var mq = window.matchMedia ? window.matchMedia(DZ_DEVICE_DARK_QUERY) : null;
+if (mq && mq.addEventListener) {
+mq.addEventListener("change", function () { dzUpdateSchemePickers(); });
+} else if (mq && mq.addListener) {
+mq.addListener(function () { dzUpdateSchemePickers(); });
+}
+} catch (e) {
+if (typeof dzLog === "function") { dzLog("schemes", "picker_listen_failed", { error: String(e) }); }
+}
+}
 function renderSchemePicker() {
-var containers = DZ_SCHEME_PICKER_CONTAINER_IDS
-.map(function(id) { return document.getElementById(id); })
-.filter(function(el) { return !!el; });
-if (!containers.length) return;
-loadBuiltinSchemes().then(function(schemes) {
-var SWATCH_KEYS = ["background", "navbar", "item", "main_color", "main_text", "alt_text", "disabled"];
-var cards = [
-{ slug: "light", name: dzT("hub.schemes.builtin.light.name"), pair: "machinon", desc: dzT("hub.schemes.builtin.light.desc"), colors: { background: "#f4f8fc", navbar: "#e9f2fb", item: "#ffffff", main_color: "#396d9e", main_text: "#1b2b3a", alt_text: "#3e5568", disabled: "#8ca0b3" } },
-{ slug: "dark", name: dzT("hub.schemes.builtin.dark.name"), pair: "machinon", desc: dzT("hub.schemes.builtin.dark.desc"), colors: { background: "#0f1620", navbar: "#0a0f16", item: "#18202b", main_color: "#98ccfd", main_text: "#dce6f0", alt_text: "#9db2c6", disabled: "#5e7183" } }
-];
-Object.keys(schemes).forEach(function(slug) {
-var s = schemes[slug];
-cards.push({ slug: slug, name: s.name, pair: s.pair, desc: s.description, colors: s.colors || {} });
+if (!dzSchemePickerContainers().length) return;
+dzArmSchemePicker();
+dzSchemePickerDataKey = dzSchemePickerData();
+loadBuiltinSchemes().then(function (schemes) {
+var cards = dzSchemeFamilies(theme.user_schemes).map(function (fam) {
+return dzSchemeCardModel(fam, schemes, theme.user_schemes, theme.color_scheme);
 });
-(theme.user_schemes || []).forEach(function(p) {
-var slug = p.variant ? "user:" + p.name + "|" + p.variant : "user:" + p.name;
-var label = p.variant
-? dzT("hub.schemes.pair_label", {
-name: p.name,
-variant: p.variant === "dark" ? dzT("hub.schemes.dark") : dzT("hub.schemes.light")
-})
-: p.name;
-cards.push({ slug: slug, name: label, pair: p.pair, variant: p.variant,
-presetName: p.name, deletable: true, colors: p.colors || {} });
+dzSchemePickerContainers().forEach(function (container) {
+dzBuildSchemePicker(container, cards);
 });
-cards.push({ slug: "custom", name: dzT("hub.schemes.builtin.custom.name"), desc: dzT("hub.schemes.builtin.custom.desc"), colors: null });
-var active = dzActiveSchemeSlug();
-containers.forEach(function(container) {
+dzUpdateSchemePickers();
+if (typeof dzHubSyncSchemeSwatches === "function") { dzHubSyncSchemeSwatches(); }
+}).catch(function (e) {
+if (typeof dzLog === "function") { dzLog("schemes", "picker_build_failed", { error: String(e) }); }
+});
+}
+function dzSchemeSwatchStrip(colors) {
+var strip = document.createElement("div");
+strip.className = "swatches";
+DZ_SCHEME_SWATCH_KEYS.forEach(function (key) {
+var sw = document.createElement("span");
+if (colors && typeof colors[key] === "string") { sw.style.backgroundColor = colors[key]; }
+strip.appendChild(sw);
+});
+return strip;
+}
+function dzBuildSchemePicker(container, cards) {
 container.textContent = "";
-container.setAttribute("role", "group");
-container.setAttribute("aria-label", dzT("hub.schemes.group_label"));
-cards.forEach(function(card, i) {
+container.removeAttribute("role");
+container.removeAttribute("aria-label");
+var modeWrap = document.createElement("div");
+modeWrap.className = "scheme-mode-wrap";
+var group = document.createElement("div");
+group.className = "scheme-mode";
+group.setAttribute("role", "group");
+group.setAttribute("aria-label", dzT("hub.schemes.mode_label"));
+var note = document.createElement("p");
+note.className = "scheme-mode-note";
+note.id = container.id + "-mode-note";
+note.hidden = true;
+var noticeText = document.createElement("span");
+noticeText.className = "scheme-override-text";
+noticeText.id = container.id + "-override-note";
+DZ_SCHEME_MODE_ORDER.forEach(function (mode) {
+var btn = document.createElement("button");
+btn.type = "button";
+btn.className = "scheme-mode-btn";
+btn.setAttribute("data-mode", mode);
+btn.setAttribute("aria-pressed", "false");
+btn.setAttribute("aria-describedby", note.id + " " + noticeText.id);
+btn.textContent = dzSchemeModeLabel(mode);
+btn.addEventListener("click", function () {
+dzSetSchemeMode(mode).then(dzUpdateSchemePickers);
+});
+group.appendChild(btn);
+});
+modeWrap.appendChild(group);
+modeWrap.appendChild(note);
+var notice = document.createElement("div");
+notice.className = "scheme-override";
+notice.hidden = true;
+notice.appendChild(noticeText);
+var clear = document.createElement("button");
+clear.type = "button";
+clear.className = "btn btn-default btn-small scheme-override-clear";
+clear.addEventListener("click", function () {
+dzSetColorOverride(null);
+dzApplyColorMode().then(dzUpdateSchemePickers);
+});
+notice.appendChild(clear);
+modeWrap.appendChild(notice);
+container.appendChild(modeWrap);
+var list = document.createElement("div");
+list.className = "scheme-cards";
+list.setAttribute("role", "group");
+list.setAttribute("aria-label", dzT("hub.schemes.group_label"));
+cards.forEach(function (card, i) {
 var el = document.createElement("div");
-el.className = "scheme-card" + (active === card.slug ? " selected" : "");
-el.setAttribute("data-scheme", card.slug);
+el.className = "scheme-card" + (card.single ? " is-single" : "") + (card.deletable ? " is-deletable" : "");
+el.setAttribute("data-family", card.id);
 var pick = document.createElement("button");
 pick.type = "button";
 pick.className = "scheme-pick";
 pick.setAttribute("aria-label", card.name);
-pick.setAttribute("aria-pressed", active === card.slug ? "true" : "false");
+pick.setAttribute("aria-pressed", "false");
 el.appendChild(pick);
-var swatches = document.createElement("div");
-swatches.className = "swatches";
-var cs = card.colors || theme.color_scheme || {};
-SWATCH_KEYS.forEach(function(key) {
-var sw = document.createElement("span");
-if (cs[key]) sw.style.backgroundColor = cs[key];
-swatches.appendChild(sw);
+var preview = document.createElement("div");
+preview.className = "scheme-preview";
+(card.single ? ["light"] : ["light", "dark"]).forEach(function (variant) {
+var half = document.createElement("div");
+half.className = "scheme-half";
+half.setAttribute("data-variant", variant);
+half.appendChild(dzSchemeSwatchStrip(card[variant]));
+var marker = document.createElement("div");
+marker.className = "scheme-marker";
+half.appendChild(marker);
+preview.appendChild(half);
 });
-el.appendChild(swatches);
+el.appendChild(preview);
+var text = document.createElement("div");
+text.className = "scheme-text";
 var label = document.createElement("div");
 label.className = "scheme-name";
 label.textContent = card.name;
-el.appendChild(label);
+text.appendChild(label);
 if (card.desc) {
 var desc = document.createElement("div");
 desc.className = "scheme-desc";
 desc.id = container.id + "-desc-" + i;
 desc.textContent = card.desc;
-el.appendChild(desc);
+text.appendChild(desc);
 pick.setAttribute("aria-describedby", desc.id);
 }
+el.appendChild(text);
 if (card.deletable) {
 var del = document.createElement("button");
 del.type = "button";
 del.className = "scheme-delete";
 del.textContent = "×";
 del.title = dzT("hub.schemes.delete_preset");
-del.setAttribute("aria-label", dzT("hub.schemes.delete_named", { name: card.name }));
-del.addEventListener("click", function(e) {
+del.setAttribute("aria-label", card.single
+? dzT("hub.schemes.delete_named", { name: card.name })
+: dzT("hub.schemes.delete_pair_named", { name: card.name }));
+del.addEventListener("click", function (e) {
 e.stopPropagation();
-deleteUserScheme(card.presetName || card.name, card.variant);
+deleteUserScheme(card.presetName, card.presetVariant);
 });
 el.appendChild(del);
 }
-el.addEventListener("click", function() {
-applyScheme(card.slug).then(function() {
-container.querySelectorAll(".scheme-card").forEach(function(c) {
-c.classList.remove("selected");
-c.querySelector(".scheme-pick").setAttribute("aria-pressed", "false");
-});
-el.classList.add("selected");
-pick.setAttribute("aria-pressed", "true");
+el.addEventListener("click", function () {
+dzPickFamily(card.id).then(function () {
+dzUpdateSchemePickers();
 if (typeof dzHubSyncSchemeSwatches === "function") { dzHubSyncSchemeSwatches(); }
 });
 });
-container.appendChild(el);
+list.appendChild(el);
 });
+container.appendChild(list);
+}
+function dzUpdateSchemePickers() {
+var containers = dzSchemePickerContainers();
+if (!containers.length) { return; }
+if (dzSchemePickerDataKey !== null && dzSchemePickerData() !== dzSchemePickerDataKey) {
+renderSchemePicker();
+return;
+}
+var families = dzSchemeFamilies(theme.user_schemes);
+var state = dzSchemePickerState(families, dzActiveSchemeSlug(), theme.scheme_mode,
+dzColorOverride(), dzDeviceDark());
+containers.forEach(function (container) { dzUpdateSchemePicker(container, state); });
+}
+function dzUpdateSchemePicker(container, state) {
+var group = container.querySelector(".scheme-mode");
+if (!group) { return; }
+group.setAttribute("aria-disabled", state.single ? "true" : "false");
+Array.prototype.forEach.call(group.querySelectorAll(".scheme-mode-btn"), function (btn) {
+var on = !state.single && btn.getAttribute("data-mode") === state.mode;
+btn.disabled = state.single;
+btn.setAttribute("aria-pressed", on ? "true" : "false");
 });
-if (typeof dzHubSyncSchemeSwatches === "function") { dzHubSyncSchemeSwatches(); }
+var selectedName = "";
+Array.prototype.forEach.call(container.querySelectorAll(".scheme-card"), function (el) {
+var selected = el.getAttribute("data-family") === state.selected;
+var single = el.classList.contains("is-single");
+el.classList.toggle("selected", selected);
+var pick = el.querySelector(".scheme-pick");
+if (pick) { pick.setAttribute("aria-pressed", selected ? "true" : "false"); }
+if (selected) {
+var name = el.querySelector(".scheme-name");
+selectedName = name ? name.textContent : "";
+}
+Array.prototype.forEach.call(el.querySelectorAll(".scheme-half"), function (half) {
+var active = single || state.single || half.getAttribute("data-variant") === state.variant;
+var strip = half.querySelector(".swatches");
+var marker = half.querySelector(".scheme-marker");
+if (strip) { strip.classList.toggle("is-dimmed", !active); }
+if (marker) { marker.classList.toggle("is-active", selected && active); }
 });
+if (el.getAttribute("data-family") === "custom") {
+var cs = theme.color_scheme || {};
+Array.prototype.forEach.call(el.querySelectorAll(".swatches span"), function (sw, i) {
+var value = cs[DZ_SCHEME_SWATCH_KEYS[i]];
+sw.style.backgroundColor = typeof value === "string" ? value : "";
+});
+}
+});
+var note = container.querySelector(".scheme-mode-note");
+if (note) {
+var text = "";
+if (state.note === "single") {
+text = dzT("hub.schemes.note_single", { name: selectedName });
+} else if (state.note === "auto_dark") {
+text = dzT("hub.schemes.note_auto_dark");
+} else if (state.note === "auto_light") {
+text = dzT("hub.schemes.note_auto_light");
+}
+note.textContent = text;
+note.hidden = !text;
+}
+var notice = container.querySelector(".scheme-override");
+if (notice) {
+notice.hidden = !state.override;
+notice.querySelector(".scheme-override-text").textContent = state.override
+? dzT("hub.schemes.note_override", { variant: dzSchemeModeLabel(state.override) }) : "";
+if (state.override) {
+notice.querySelector(".scheme-override-clear").textContent =
+dzT("hub.schemes.clear_override", { mode: dzSchemeModeLabel(state.mode) });
+}
+}
 }

@@ -16,7 +16,9 @@ mainmenu: "Menu główne",
 type_to_search: "Wpisz, aby wyszukać",
 search_placeholder: "Nazwa, Opis, Idx, Status",
 clear_search: "Wyczyść wyniki wyszukiwania",
-search_no_match: "Żadne urządzenie na tej stronie nie pasuje do „{query}”."
+search_no_match: "Żadne urządzenie na tej stronie nie pasuje do „{query}”.",
+mode_to_dark: "Przełącz na ciemny",
+mode_to_light: "Przełącz na jasny"
 },
 hub: {
 tabs_label: "Ustawienia motywu",
@@ -191,11 +193,15 @@ description: "Całkowicie ukrywa obraz logo na pasku nawigacji, pozostawiając t
 },
 scheme: {
 label: "Schemat kolorów",
-description: "Ustawia ogólny schemat kolorów motywu: jasną lub ciemną podstawę wraz z nazwanymi paletami kolorów."
+description: "Wybierz motyw, a potem tryb jasny, ciemny lub zgodny z tym urządzeniem."
 },
 custom_color_scheme: {
 label: "Własne kolory",
 description: "Tworzy Twój własny schemat kolorów przez wybranie 7 pojedynczych kolorów."
+},
+color_mode_toggle: {
+label: "Przełącznik jasny/ciemny",
+description: "Pokazuje obok wyszukiwania (na małych ekranach w menu) przycisk słońce/księżyc, który przełącza bieżący motyw między wersją jasną a ciemną tylko na tym urządzeniu. Wybór nie jest zapisywany w Domoticz, a przycisk jest ukryty, gdy wybrany jest motyw z tylko jedną wersją."
 },
 iconpacks: {
 label: "Biblioteka ikon",
@@ -292,7 +298,7 @@ note: "Każda czynność najpierw prosi o potwierdzenie.",
 reset_theme: "Przywróć domyślne ustawienia motywu",
 reset_theme_confirm: "Przywrócić wszystkie ustawienia motywu do wartości domyślnych? Spowoduje to usunięcie zapisanych ustawień motywu i ponowne wczytanie strony.",
 clear_cache: "Wyczyść ustawienia z pamięci podręcznej",
-clear_cache_confirm: "Wyczyścić ustawienia motywu z pamięci podręcznej tej przeglądarki i wczytać stronę ponownie? Ustawienia zapisane na serwerze pozostaną nienaruszone.",
+clear_cache_confirm: "Wyczyścić ustawienia motywu z pamięci podręcznej tej przeglądarki i wczytać stronę ponownie? Cofnie to też zmianę wykonaną przełącznikiem jasny/ciemny na tym urządzeniu i usunie zapamiętane kolory. Ustawienia zapisane na serwerze pozostaną nienaruszone.",
 reset_colors: "Przywróć kolory wybranego schematu",
 reset_colors_confirm: "Przywrócić własne kolory do domyślnej palety wybranego schematu?",
 promote: "Zapisz moje bieżące preferencje jako domyślne dla domu",
@@ -327,12 +333,12 @@ alt_text: "Tekst pomocniczy",
 disabled: "Wyłączone"
 },
 builtin: {
-light: { name: "Machinon Jasny", desc: "Wygląd domyślny: czysty błękit na bieli" },
-dark: { name: "Machinon Ciemny", desc: "Wygląd domyślny: błękit świecący na granacie" },
+machinon: { name: "Machinon", desc: "Wygląd domyślny: czysty błękit na bieli lub świecący na granacie" },
 custom: { name: "Własny", desc: "Twoich siedem kolorów" }
 },
 delete_preset: "Usuń zestaw",
 delete_named: "Usuń zestaw {name}",
+delete_pair_named: "Usuń motyw {name} (obie wersje)",
 group_label: "Schemat kolorów",
 wheel_aria: "Wybierz {label} za pomocą koła kolorów",
 hex_aria: "Wartość hex dla {label}",
@@ -340,7 +346,15 @@ save_preset: "Zapisz jako zestaw",
 preset_name_prompt: "Nazwa zestawu",
 light: "Jasny",
 dark: "Ciemny",
-pair_label: "{name} {variant}",
+mode_label: "Tryb kolorów",
+mode_light: "Jasny",
+mode_dark: "Ciemny",
+mode_auto: "Jak urządzenie",
+note_auto_dark: "To urządzenie jest w trybie ciemnym, więc widzisz wersję ciemną.",
+note_auto_light: "To urządzenie jest w trybie jasnym, więc widzisz wersję jasną.",
+note_single: "{name} ma tylko jedną wersję, więc tryb jasny i ciemny nie mają zastosowania. Wybierz inny motyw, aby z nich korzystać.",
+note_override: "Na tym urządzeniu przełącznikiem wybrano tryb: {variant}.",
+clear_override: "Wróć do trybu: {mode}",
 wcag_what_preset: "Zestaw \"{name}\" zapisany, ale",
 wcag_what_custom: "Własny schemat kolorów",
 wcag_body: "tekst na tle {ratio}:1 (WCAG AA wymaga 4.5)",
@@ -366,7 +380,7 @@ tint_toggle: "Zabarw szarości innym kolorem",
 accent_label: "Kolor główny",
 surface_label: "Odcień szarości",
 drift_label: "Twój kolor został dostosowany, aby pozostał czytelny:",
-saved_lead: "Zapisano jako dwa schematy, „{name} Jasny” i „{name} Ciemny”.",
+saved_lead: "Zapisano {name} w wersji jasnej i ciemnej.",
 preview: {
 device: "Salon",
 status: "21,4 °C · 47%",

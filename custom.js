@@ -1,3 +1,52 @@
+(function() {
+try {
+var rec = JSON.parse(localStorage.getItem("dzPaintRecord"));
+if (!rec || typeof rec !== "object" || rec.v !== 1) return;
+if (typeof rec.folder !== "string" || !/^[A-Za-z0-9_-]+$/.test(rec.folder)) return;
+if (typeof rec.family !== "string") return;
+var mode = rec.mode;
+if (mode !== "light" && mode !== "dark" && mode !== "auto") return;
+var deviceDark = !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+var variant = mode === "auto" ? (deviceDark ? "dark" : "light") : mode;
+var ov = null;
+try { ov = JSON.parse(localStorage.getItem(rec.folder + ".colorOverride")); } catch (e) { ov = null; }
+if (ov && typeof ov === "object" && (ov.variant === "light" || ov.variant === "dark") &&
+typeof ov.deviceDark === "boolean" && (mode !== "auto" || ov.deviceDark === deviceDark)) {
+variant = ov.variant;
+}
+var half = rec[variant];
+if (!half || typeof half !== "object" || Array.isArray(half)) return;
+if (half.attr !== null && half.attr !== "dark" && half.attr !== "custom") return;
+if (typeof half.dark_file !== "boolean") return;
+var tokens = half.tokens;
+if (!tokens || typeof tokens !== "object" || Array.isArray(tokens)) return;
+var NAME = /^--dz-[a-z0-9-]+$/;
+var EXTRA = ["--secondary-text-color"];
+var VALUE = /^(rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(,\s*(0|1|0?\.\d+)\s*)?\)|\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}|#[0-9a-fA-F]{6})$/;
+var html = document.documentElement;
+var names = Object.keys(tokens);
+for (var i = 0; i < names.length; i++) {
+var value = tokens[names[i]];
+if ((NAME.test(names[i]) || EXTRA.indexOf(names[i]) !== -1) && typeof value === "string" && VALUE.test(value)) {
+html.style.setProperty(names[i], value);
+}
+}
+if (half.attr === "dark") {
+html.setAttribute("data-dz-scheme", "dark");
+} else if (half.attr === "custom") {
+html.setAttribute("data-dz-scheme", "custom");
+}
+if (half.dark_file) {
+var query = typeof rec.version === "string" && /^[0-9A-Za-z._-]+$/.test(rec.version) ? "?v=" + rec.version : "";
+var link = document.createElement("link");
+link.setAttribute("rel", "stylesheet");
+link.setAttribute("type", "text/css");
+link.setAttribute("href", "styles/" + rec.folder + "/css/dark_theme.css" + query);
+document.getElementsByTagName("head")[0].appendChild(link);
+}
+window.__dzEarlyPaint = { family: rec.family, variant: variant, darkFile: half.dark_file };
+} catch (e) { }
+})();
 var theme = {}, themeName = "", isMobile, lang, themeFolder;
 (function() {
 var buf = window.__dzToastBuffer = [];
@@ -35,6 +84,8 @@ var THEME_MODULES = [
 "src/js/theme-manifest.js",
 "src/js/scheme.js",
 "src/js/schemes.js",
+"src/js/color-mode.js",
+"src/js/color-mode-toggle.js",
 "src/js/color-oklch.js",
 "src/js/color-repair.js",
 "src/js/scheme-generator.js",
@@ -342,7 +393,7 @@ console.log("Machinon - livestamp.js failed to load, continuing without it");
 init_theme();
 });
 });
-}).catch(error => {
+}).catch(function(error) {
 console.error(error);
 });
 function init_theme() {
@@ -365,13 +416,21 @@ dzArmSetupApplyDock();
 initDeviceObserver();
 enableThemeFeatures();
 locationHashChanged();
+dzSeedPaintedSlug();
+if (!window.__dzEarlyPaint) {
 setColorScheme();
+dzApplyColorMode();
+} else if (!dzSettingsFromDefaults) {
+dzApplyColorMode(true);
+}
+dzArmColorModeListener();
 applyCardWidths();
 clampCorePopups();
 armFlyoutContainment();
 armSelectorWrapCornerRetag();
 setLogo();
 setSearch();
+setModeToggles();
 dzWireDashboardSearch();
 dzProblemsInit();
 setDevicesNativeSelectorForMobile();
@@ -398,7 +457,7 @@ navBarToggle.attr("aria-expanded", open ? "true" : "false");
 navBarInner.prop("inert", navBarToggle.is(":visible") && !open);
 };
 new MutationObserver(syncNavMenuState).observe(navBarInner[0], { attributes: true, attributeFilter: ["class"] });
-if (window.ResizeObserver) new ResizeObserver(syncNavMenuState).observe(navBarToggle[0]);
+if (window.ResizeObserver) new ResizeObserver(function() { requestAnimationFrame(syncNavMenuState); }).observe(navBarToggle[0]);
 $(window).on("resize", syncNavMenuState);
 syncNavMenuState();
 navBarToggle.click(function(e) {

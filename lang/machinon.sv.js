@@ -16,7 +16,9 @@ mainmenu: "Huvudmeny",
 type_to_search: "Skriv för att söka",
 search_placeholder: "Namn, Beskr., Idx, Status",
 clear_search: "Rensa sökresultat",
-search_no_match: "Inga enheter på den här sidan matchar ”{query}”."
+search_no_match: "Inga enheter på den här sidan matchar ”{query}”.",
+mode_to_dark: "Byt till mörkt",
+mode_to_light: "Byt till ljust"
 },
 hub: {
 tabs_label: "Temainställningar",
@@ -191,11 +193,15 @@ description: "Döljer loggan i navigeringsfältet helt och lämnar den ytan tom.
 },
 scheme: {
 label: "Färgschema",
-description: "Anger temats övergripande färgschema: en ljus eller mörk grund, med namngivna färgpaletter."
+description: "Välj ett tema och sedan ljust, mörkt eller låt det följa den här enheten."
 },
 custom_color_scheme: {
 label: "Egna färger",
 description: "Bygger ditt eget färgschema genom att välja 7 enskilda färger."
+},
+color_mode_toggle: {
+label: "Ljust/mörkt-knapp",
+description: "Visar en sol/måne-knapp bredvid sökningen (i menyn på små skärmar) som växlar det aktuella temat mellan dess ljusa och mörka version, bara på den här enheten. Valet sparas inte i Domoticz, och knappen döljs medan ett tema med bara en version är valt."
 },
 iconpacks: {
 label: "Ikonbibliotek",
@@ -292,7 +298,7 @@ note: "Varje åtgärd ber om bekräftelse först.",
 reset_theme: "Återställ temat till standardvärden",
 reset_theme_confirm: "Återställa alla temainställningar till sina standardvärden? Detta raderar de sparade temainställningarna och laddar om sidan.",
 clear_cache: "Rensa cachade inställningar",
-clear_cache_confirm: "Rensa den här webbläsarens cachade temainställningar och ladda om? Dina inställningar som sparats på servern behålls.",
+clear_cache_confirm: "Rensa den här webbläsarens cachade temainställningar och ladda om? Det ångrar också ett byte med ljust/mörkt-knappen på den här enheten och glömmer de sparade färgerna. Dina inställningar som sparats på servern behålls.",
 reset_colors: "Återställ färgerna till det valda schemat",
 reset_colors_confirm: "Återställa de egna färgerna till det valda schemats standardpalett?",
 promote: "Spara mina nuvarande inställningar som husets standard",
@@ -327,12 +333,12 @@ alt_text: "Sekundär text",
 disabled: "Inaktiverad"
 },
 builtin: {
-light: { name: "Machinon Ljus", desc: "Standardutseendet: rent blått på vitt" },
-dark: { name: "Machinon Mörk", desc: "Standardutseendet: blått som lyser mot marinblått" },
+machinon: { name: "Machinon", desc: "Standardutseendet: rent blått på vitt, eller lysande mot marinblått" },
 custom: { name: "Anpassad", desc: "Dina egna sju färger" }
 },
 delete_preset: "Radera förinställning",
 delete_named: "Radera förinställning {name}",
+delete_pair_named: "Radera temat {name} (båda versionerna)",
 group_label: "Färgschema",
 wheel_aria: "Välj {label} med en färgcirkel",
 hex_aria: "Hex-värde för {label}",
@@ -340,7 +346,15 @@ save_preset: "Spara som förinställning",
 preset_name_prompt: "Namn på förinställningen",
 light: "Ljus",
 dark: "Mörk",
-pair_label: "{name} {variant}",
+mode_label: "Färgläge",
+mode_light: "Ljust",
+mode_dark: "Mörkt",
+mode_auto: "Följ enheten",
+note_auto_dark: "Den här enheten är i mörkt läge, så du ser den mörka versionen.",
+note_auto_light: "Den här enheten är i ljust läge, så du ser den ljusa versionen.",
+note_single: "{name} har bara en version, så ljust och mörkt gäller inte. Välj ett annat tema för att använda dem.",
+note_override: "På den här enheten bytte du till {variant} med knappen.",
+clear_override: "Använd {mode} igen",
 wcag_what_preset: "Förinställningen \"{name}\" sparades, men den",
 wcag_what_custom: "Det egna färgschemat",
 wcag_body: "text mot bakgrund {ratio}:1 (WCAG AA kräver 4.5)",
@@ -366,7 +380,7 @@ tint_toggle: "Tona gråtonerna med en annan färg",
 accent_label: "Huvudfärg",
 surface_label: "Gråton",
 drift_label: "Din färg justerades för att förbli läsbar:",
-saved_lead: "Sparat som två scheman, ”{name} Ljus” och ”{name} Mörk”.",
+saved_lead: "{name} sparat med en ljus och en mörk version.",
 preview: {
 device: "Vardagsrum",
 status: "21,4 °C · 47%",

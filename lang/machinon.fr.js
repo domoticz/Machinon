@@ -16,7 +16,9 @@ mainmenu: "Menu principal",
 type_to_search: "Tapez pour rechercher",
 search_placeholder: "Nom, Desc, Idx, Etat",
 clear_search: "Effacer les résultats de recherche",
-search_no_match: "Aucun dispositif de cette page ne correspond à « {query} »."
+search_no_match: "Aucun dispositif de cette page ne correspond à « {query} ».",
+mode_to_dark: "Passer au sombre",
+mode_to_light: "Passer au clair"
 },
 hub: {
 tabs_label: "Paramètres du thème",
@@ -191,11 +193,15 @@ description: "Masque entièrement l'image du logo de la barre de navigation, lai
 },
 scheme: {
 label: "Schéma de couleurs",
-description: "Définit le schéma de couleurs global du thème: une base claire ou sombre, avec des palettes de couleurs nommées."
+description: "Choisissez un thème, puis clair, sombre, ou laissez-le suivre cet appareil."
 },
 custom_color_scheme: {
 label: "Couleurs personnalisées",
 description: "Construit votre propre schéma de couleurs en choisissant 7 couleurs individuelles."
+},
+color_mode_toggle: {
+label: "Bascule clair/sombre",
+description: "Affiche à côté de la recherche (dans le menu sur les petits écrans) un bouton soleil/lune qui fait passer le thème actuel de sa version claire à sa version sombre, sur cet appareil uniquement. Le choix n'est pas enregistré dans Domoticz, et le bouton est masqué tant qu'un thème à une seule version est sélectionné."
 },
 iconpacks: {
 label: "Bibliothèque d'icônes",
@@ -293,7 +299,7 @@ note: "Chaque action demande d'abord une confirmation.",
 reset_theme: "Réinitialiser le thème aux valeurs par défaut",
 reset_theme_confirm: "Réinitialiser tous les réglages du thème à leurs valeurs par défaut ? Cela supprime les réglages de thème enregistrés et recharge la page.",
 clear_cache: "Effacer les réglages en cache",
-clear_cache_confirm: "Effacer les réglages de thème en cache de ce navigateur et recharger ? Vos réglages enregistrés sur le serveur sont conservés.",
+clear_cache_confirm: "Effacer les réglages de thème en cache de ce navigateur et recharger ? Cela annule aussi un changement fait avec la bascule clair/sombre sur cet appareil et oublie les couleurs mémorisées. Vos réglages enregistrés sur le serveur sont conservés.",
 reset_colors: "Réinitialiser les couleurs au schéma sélectionné",
 reset_colors_confirm: "Réinitialiser les couleurs personnalisées à la palette par défaut du schéma sélectionné ?",
 promote: "Enregistrer mes préférences actuelles comme valeurs par défaut de la maison",
@@ -328,12 +334,12 @@ alt_text: "Texte secondaire",
 disabled: "Désactivé"
 },
 builtin: {
-light: { name: "Machinon Clair", desc: "L'aspect par défaut: un bleu net sur blanc" },
-dark: { name: "Machinon Sombre", desc: "L'aspect par défaut: du bleu lumineux sur bleu nuit" },
+machinon: { name: "Machinon", desc: "L'aspect par défaut: un bleu net sur blanc, ou lumineux sur bleu nuit" },
 custom: { name: "Personnalisé", desc: "Vos sept couleurs à vous" }
 },
 delete_preset: "Supprimer le préréglage",
 delete_named: "Supprimer le préréglage {name}",
+delete_pair_named: "Supprimer le thème {name} (les deux versions)",
 group_label: "Schéma de couleurs",
 wheel_aria: "Choisir {label} avec une roue chromatique",
 hex_aria: "Valeur hex de {label}",
@@ -341,7 +347,15 @@ save_preset: "Enregistrer comme préréglage",
 preset_name_prompt: "Nom du préréglage",
 light: "Clair",
 dark: "Sombre",
-pair_label: "{name} {variant}",
+mode_label: "Mode de couleur",
+mode_light: "Clair",
+mode_dark: "Sombre",
+mode_auto: "Suivre l'appareil",
+note_auto_dark: "Cet appareil est en mode sombre, vous voyez donc la version sombre.",
+note_auto_light: "Cet appareil est en mode clair, vous voyez donc la version claire.",
+note_single: "{name} n'a qu'une seule version, le clair et le sombre ne s'appliquent donc pas. Choisissez un autre thème pour les utiliser.",
+note_override: "Sur cet appareil, vous êtes passé à {variant} avec le bouton bascule.",
+clear_override: "Utiliser à nouveau {mode}",
 wcag_what_preset: "Préréglage \"{name}\" enregistré, mais il",
 wcag_what_custom: "Le schéma de couleurs personnalisé",
 wcag_body: "texte sur fond {ratio}:1 (WCAG AA exige 4.5)",
@@ -367,7 +381,7 @@ tint_toggle: "Teinter les gris avec une autre couleur",
 accent_label: "Couleur principale",
 surface_label: "Teinte des gris",
 drift_label: "Votre couleur a été ajustée pour rester lisible:",
-saved_lead: "Enregistré en deux schémas, « {name} Clair » et « {name} Sombre ».",
+saved_lead: "{name} enregistré avec une version claire et une version sombre.",
 preview: {
 device: "Salon",
 status: "21,4 °C · 47%",

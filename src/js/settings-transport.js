@@ -1,4 +1,14 @@
-var DZ_SETTINGS_SCHEMA_VERSION = 2;
+var DZ_SETTINGS_SCHEMA_VERSION = 3;
+function dzModeFromStoredBase(base, darkFeatureOn) {
+if (base === "dark" || base === "light") return base;
+return darkFeatureOn === true ? "dark" : "light";
+}
+var DZ_SCHEME_MODES = { light: true, dark: true, auto: true };
+function dzNormaliseSchemeMode(t) {
+if (DZ_SCHEME_MODES[t.scheme_mode] === true) return;
+var f = t.features && t.features.dark_theme;
+t.scheme_mode = dzModeFromStoredBase(t.scheme_base, !!(f && f.enabled === true));
+}
 var DZ_SETTINGS_MIGRATIONS = [
 function (snap) {
 if (!snap.features || !("notification" in snap.features)) return;
@@ -6,10 +16,16 @@ var was = snap.features.notification === true;
 if (!("warn_timeout" in snap.features)) snap.features.warn_timeout = was;
 if (!("warn_battery" in snap.features)) snap.features.warn_battery = was;
 delete snap.features.notification;
+},
+function (snap) {
+if (!snap.values || typeof snap.values !== "object" || Array.isArray(snap.values)) snap.values = {};
+if (DZ_SCHEME_MODES[snap.values.scheme_mode] === true) return;
+snap.values.scheme_mode = dzModeFromStoredBase(snap.values.scheme_base,
+snap.features && snap.features.dark_theme);
 }
 ];
 function dzMigrateSnapshot(snap) {
-if (!snap) return snap;
+if (!snap || typeof snap !== "object" || Array.isArray(snap)) return snap;
 var v = typeof snap.schemaVersion === "number" && snap.schemaVersion >= 1 ? snap.schemaVersion : 1;
 while (v < DZ_SETTINGS_SCHEMA_VERSION) {
 DZ_SETTINGS_MIGRATIONS[v - 1](snap);
@@ -37,7 +53,7 @@ values: {
 standby_after: t.standby_after, button_name: t.button_name,
 custom_url: t.custom_url, logo: t.logo, icons: dzCloneValue(t.icons),
 background_img: t.background_img, background_type: t.background_type,
-scheme: t.scheme, scheme_base: t.scheme_base,
+scheme: t.scheme, scheme_base: t.scheme_base, scheme_mode: t.scheme_mode,
 user_schemes: dzCloneValue(t.user_schemes), color_scheme: dzCloneValue(t.color_scheme),
 card_min_width: t.card_min_width, card_max_width: t.card_max_width,
 dashboard_camera_refresh: t.dashboard_camera_refresh, warn_repeat: t.warn_repeat
@@ -140,6 +156,7 @@ if (dzApiState.instanceSnap) dzMigrateSnapshot(dzApiState.instanceSnap);
 if (dzApiState.userSnap) dzMigrateSnapshot(dzApiState.userSnap);
 if (dzApiState.instanceSnap) dzApplySnapshot(theme, dzApiState.instanceSnap);
 if (dzApiState.userSnap) dzApplySnapshot(theme, dzSnapshotSubset(dzApiState.userSnap, "user"));
+dzNormaliseSchemeMode(theme);
 try {
 cacheThemeSettings();
 } catch (e) {
@@ -382,6 +399,7 @@ resolve(DZ_LOAD_FAILED); return;
 }
 if (data.status != "OK") { resolve(DZ_LOAD_FAILED); return; }
 var had = false, pending = [];
+dzLegacyLoaded = { list: null, watermark: undefined, mode: undefined, custom: false };
 var featuresVarName = "theme-" + themeFolder + "-features";
 var customVarName = "theme-" + themeFolder + "-custom";
 var colorsVarName = "theme-" + themeFolder + "-colors";
@@ -391,7 +409,11 @@ if (value.Name == customVarName) { console.log(themeName + " - found theme custo
 if (value.Name == colorsVarName) { console.log(themeName + " - found theme colors settings in Domoticz database (user variable Idx: " + value.idx + ")"); had = true; theme.usercolorsvariable = value.idx; pending.push(getColorsThemeSettings(value.idx)); }
 });
 if (!had) { resolve(DZ_LOAD_EMPTY); return; }
-Promise.all(pending).then(function() { resolve(DZ_LOAD_LOADED); });
+Promise.all(pending).then(dzApplyLegacyFeatures).then(dzApplyLegacySchemeMode).catch(function(e) {
+if (typeof dzLog === "function") {
+dzLog("settings", "legacy_features_failed", { error: String(e && e.message || e) });
+}
+}).then(function() { resolve(DZ_LOAD_LOADED); });
 },
 error: function() {
 console.warn(themeName + " - could not reach Domoticz to load theme settings (permission, login, or connection); keeping current values");
@@ -412,7 +434,8 @@ theme.standby_after, theme.button_name, theme.custom_url,
 theme.logo, theme.icons, theme.background_img, theme.background_type,
 theme.scheme, theme.scheme_base, theme.user_schemes,
 theme.card_min_width, theme.card_max_width, theme.dashboard_camera_refresh,
-theme.warn_repeat
+theme.warn_repeat, dzLegacyFeatureWatermark(theme.features),
+theme.scheme_mode
 ];
 function saveVariable(varName, value) {
 var body = new URLSearchParams();
@@ -480,13 +503,68 @@ resolve();
 });
 });
 }
+var DZ_LEGACY_UNMARKED_KNOWN_MAX = 48;
+var DZ_LEGACY_NOTIFICATION_ID = 29;
+function dzLegacyWatermarkValid(w) {
+return typeof w === "number" && isFinite(w) && w >= 0 && Math.floor(w) === w;
+}
+function dzLegacyFeatureStates(list, watermark, features, defaults) {
+var marked = dzLegacyWatermarkValid(watermark);
+var known = marked ? watermark : DZ_LEGACY_UNMARKED_KNOWN_MAX;
+var has = function(id) { return list.indexOf(id) > -1; };
+var out = {};
+Object.keys(features).forEach(function(key) {
+var id = features[key].id;
+out[key] = id > known ? defaults[key] === true : has(id);
+});
+if (!marked) {
+var timeout = features.warn_timeout, battery = features.warn_battery;
+if (has(DZ_LEGACY_NOTIFICATION_ID)) {
+if (timeout) out.warn_timeout = true;
+if (battery) out.warn_battery = true;
+if (features.rgbw_popup) out.rgbw_popup = defaults.rgbw_popup === true;
+} else if (timeout && battery && !has(timeout.id) && !has(battery.id)) {
+out.warn_timeout = defaults.warn_timeout === true;
+out.warn_battery = defaults.warn_battery === true;
+}
+}
+return out;
+}
+function dzLegacyFeatureWatermark(features) {
+var max = 0;
+Object.keys(features).forEach(function(key) {
+if (typeof features[key].id === "number" && features[key].id > max) max = features[key].id;
+});
+return max;
+}
+var dzLegacyLoaded = { list: null, watermark: undefined, mode: undefined, custom: false };
 function getFeatureThemeSettings(idx) {
 return getThemeUserVar(idx, "feature", function(enabledFeatureIds) {
-$.each(theme.features, function(key, feature) { feature.enabled = $.inArray(feature.id, enabledFeatureIds) > -1; });
+if (Array.isArray(enabledFeatureIds)) dzLegacyLoaded.list = enabledFeatureIds;
 });
+}
+function dzApplyLegacyFeatures() {
+if (!dzLegacyLoaded.list) return Promise.resolve();
+var list = dzLegacyLoaded.list, watermark = dzLegacyLoaded.watermark;
+return dzEnsureDefaultsSnap().catch(function() { return null; }).then(function(snap) {
+var defaults = {};
+$.each(theme.features, function(key, feature) {
+defaults[key] = snap && snap.features && Object.prototype.hasOwnProperty.call(snap.features, key)
+? snap.features[key] === true : feature.enabled === true;
+});
+var states = dzLegacyFeatureStates(list, watermark, theme.features, defaults);
+$.each(theme.features, function(key, feature) { feature.enabled = states[key]; });
+cacheThemeSettings();
+});
+}
+function dzApplyLegacySchemeMode() {
+if (dzLegacyLoaded.custom) { theme.scheme_mode = dzLegacyLoaded.mode; }
+dzNormaliseSchemeMode(theme);
+cacheThemeSettings();
 }
 function getCustomThemeSettings(idx) {
 return getThemeUserVar(idx, "custom", function(c) {
+dzLegacyLoaded.custom = true;
 theme.standby_after = c[0]; theme.button_name = c[1]; theme.custom_url = c[2];
 theme.logo = c[3]; theme.icons = c[4]; theme.background_img = c[5]; theme.background_type = c[6];
 if (c.length > 8) { theme.scheme = c[7]; theme.scheme_base = c[8]; }
@@ -494,6 +572,8 @@ if (c.length > 9 && Array.isArray(c[9])) { theme.user_schemes = c[9]; }
 if (c.length > 11) { if (c[10] !== undefined) theme.card_min_width = c[10]; if (c[11] !== undefined) theme.card_max_width = c[11]; }
 if (c.length > 12 && c[12] !== undefined) theme.dashboard_camera_refresh = c[12];
 if (c.length > 13 && c[13] !== undefined) theme.warn_repeat = c[13];
+if (c.length > 14) dzLegacyLoaded.watermark = c[14];
+if (c.length > 15) dzLegacyLoaded.mode = c[15];
 });
 }
 function getColorsThemeSettings(idx) {

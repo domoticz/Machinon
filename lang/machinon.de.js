@@ -16,7 +16,9 @@ mainmenu: "Hauptmenü",
 type_to_search: "Zum Suchen tippen",
 search_placeholder: "Name, Beschr., Idx, Status",
 clear_search: "Suchergebnisse löschen",
-search_no_match: "Keine Geräte auf dieser Seite passen zu „{query}“."
+search_no_match: "Keine Geräte auf dieser Seite passen zu „{query}“.",
+mode_to_dark: "Zu Dunkel wechseln",
+mode_to_light: "Zu Hell wechseln"
 },
 hub: {
 tabs_label: "Theme-Einstellungen",
@@ -191,11 +193,15 @@ description: "Blendet das Logobild in der Navigationsleiste vollständig aus und
 },
 scheme: {
 label: "Farbschema",
-description: "Legt das gesamte Farbschema des Designs fest: eine helle oder dunkle Basis mit benannten Farbpaletten."
+description: "Wähle ein Design und dann Hell, Dunkel oder dass es diesem Gerät folgt."
 },
 custom_color_scheme: {
 label: "Eigene Farben",
 description: "Erstellt dein eigenes Farbschema, indem du 7 einzelne Farben wählst."
+},
+color_mode_toggle: {
+label: "Hell/Dunkel-Umschalter",
+description: "Zeigt neben der Suche (auf kleinen Bildschirmen im Menü) eine Sonne/Mond-Taste, die das aktuelle Design nur auf diesem Gerät zwischen seiner hellen und dunklen Version umschaltet. Die Wahl wird nicht in Domoticz gespeichert, und die Taste ist ausgeblendet, solange ein Design mit nur einer Version gewählt ist."
 },
 iconpacks: {
 label: "Symbolbibliothek",
@@ -293,7 +299,7 @@ note: "Jede Aktion fragt zuerst nach einer Bestätigung.",
 reset_theme: "Design auf Standardwerte zurücksetzen",
 reset_theme_confirm: "Alle Design-Einstellungen auf ihre Standardwerte zurücksetzen? Dies löscht die gespeicherten Design-Einstellungen und lädt die Seite neu.",
 clear_cache: "Zwischengespeicherte Einstellungen löschen",
-clear_cache_confirm: "Die in diesem Browser zwischengespeicherten Design-Einstellungen löschen und neu laden? Deine auf dem Server gespeicherten Einstellungen bleiben erhalten.",
+clear_cache_confirm: "Die in diesem Browser zwischengespeicherten Design-Einstellungen löschen und neu laden? Das macht auch einen Wechsel mit dem Hell/Dunkel-Umschalter auf diesem Gerät rückgängig und vergisst die gemerkten Farben. Deine auf dem Server gespeicherten Einstellungen bleiben erhalten.",
 reset_colors: "Farben auf das gewählte Schema zurücksetzen",
 reset_colors_confirm: "Die eigenen Farben auf die Standardpalette des gewählten Schemas zurücksetzen?",
 promote: "Meine aktuellen Einstellungen als Haus-Standard speichern",
@@ -328,12 +334,12 @@ alt_text: "Sekundärtext",
 disabled: "Deaktiviert"
 },
 builtin: {
-light: { name: "Machinon Hell", desc: "Das Standardaussehen: klares Blau auf Weiß" },
-dark: { name: "Machinon Dunkel", desc: "Das Standardaussehen: leuchtendes Blau auf Marineblau" },
+machinon: { name: "Machinon", desc: "Das Standardaussehen: klares Blau auf Weiß oder leuchtend auf Marineblau" },
 custom: { name: "Benutzerdefiniert", desc: "Deine eigenen sieben Farben" }
 },
 delete_preset: "Voreinstellung löschen",
 delete_named: "Voreinstellung {name} löschen",
+delete_pair_named: "Design {name} löschen (beide Versionen)",
 group_label: "Farbschema",
 wheel_aria: "{label} mit einem Farbkreis wählen",
 hex_aria: "Hex-Wert für {label}",
@@ -341,7 +347,15 @@ save_preset: "Als Voreinstellung speichern",
 preset_name_prompt: "Name der Voreinstellung",
 light: "Hell",
 dark: "Dunkel",
-pair_label: "{name} {variant}",
+mode_label: "Farbmodus",
+mode_light: "Hell",
+mode_dark: "Dunkel",
+mode_auto: "Gerät folgen",
+note_auto_dark: "Dieses Gerät ist im dunklen Modus, daher siehst du die dunkle Version.",
+note_auto_light: "Dieses Gerät ist im hellen Modus, daher siehst du die helle Version.",
+note_single: "{name} hat nur eine Version, daher gelten Hell und Dunkel nicht. Wähle ein anderes Design, um sie zu nutzen.",
+note_override: "Auf diesem Gerät hast du mit dem Umschalter zu {variant} gewechselt.",
+clear_override: "Wieder {mode} verwenden",
 wcag_what_preset: "Voreinstellung \"{name}\" gespeichert, aber sie",
 wcag_what_custom: "Das eigene Farbschema",
 wcag_body: "Text auf Hintergrund {ratio}:1 (WCAG AA erfordert 4.5)",
@@ -367,7 +381,7 @@ tint_toggle: "Die Grautöne mit einer anderen Farbe einfärben",
 accent_label: "Hauptfarbe",
 surface_label: "Grauton",
 drift_label: "Deine Farbe wurde angepasst, damit sie lesbar bleibt:",
-saved_lead: "Als zwei Schemata gespeichert, „{name} Hell“ und „{name} Dunkel“.",
+saved_lead: "{name} mit einer hellen und einer dunklen Version gespeichert.",
 preview: {
 device: "Wohnzimmer",
 status: "21,4 °C · 47%",

@@ -4,6 +4,8 @@
     "base": "dark",
     "pair": "paper",
     "variant": "dark",
+    "family_name": "Paper",
+    "family_description": "Monochrome: zero chrome, colour reserved for states",
     "preview": { "bg": "#121212", "surface": "#1E1E1E", "accent": "#D0D0D0", "text": "#EDEDED" },
     "colors": {
         "background": "#121212",
@@ -24,6 +26,7 @@
         "energy_export": "#5b7b5d",
         "energy_gas": "#a9624c",
         "energy_water": "#467991",
-        "energy_price": "#8864b9"
+        "energy_price": "#8864b9",
+        "energy_grid": "#5a787d"
     }
 }
