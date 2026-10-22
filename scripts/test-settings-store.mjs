@@ -289,6 +289,56 @@ test("account: nobody logged in, or an account not known yet, reads and writes n
     }
 });
 
+test("account: an in-page login as another account loads that account's settings, not the old ones", async () => {
+    const store = new Map([["machinon.themeSettings@admin", JSON.stringify(cachedFor("admin"))]]);
+    const { ctx, calls } = accountPage({
+        account: "u:admin", store, auth: { status: "OK", user: "user", rights: 1, canlogout: true },
+        rows: { user: { schemaVersion: 3, features: { fade_off_items: true }, values: { scheme: "gruvbox-light", scheme_base: "light", scheme_mode: "light" } } }
+    });
+    ctx.theme = cachedFor("admin");
+    await ctx.dzAccountMaybeChanged();
+    assert.equal(ctx.dzAccount, "u:user");
+    assert.equal(store.get("dzPaintAccount"), "u:user");
+    assert.equal(ctx.theme.scheme, "gruvbox-light");
+    assert.equal(ctx.theme.scheme_mode, "light");
+    assert.equal(ctx.theme.features.fade_off_items.enabled, true);
+    assert.equal(ctx.theme.user_schemes, undefined, "admin's private themes do not reach user");
+    assert.equal(ctx.theme.card_min_width, SHIPPED.card_min_width, "admin's cached values do not reach user");
+    assert.equal(JSON.parse(store.get("machinon.themeSettings@user")).scheme, "gruvbox-light");
+    assert.deepEqual(JSON.parse(store.get("machinon.themeSettings@admin")), cachedFor("admin"), "admin's cache is left alone");
+    assert.equal(calls.paints.length, 1);
+    assert.equal(calls.paints[0].force, true, "the new account's colours are painted");
+    assert.deepEqual(calls.posts, [], "loading another account's settings writes nothing");
+});
+
+test("account: an account with no row of its own starts from the shipped defaults, so a save cannot copy another account's values", async () => {
+    const { ctx } = accountPage({ account: "u:admin", auth: { status: "OK", user: "viewer", rights: 0, canlogout: true } });
+    ctx.theme = cachedFor("admin");
+    await ctx.dzAccountMaybeChanged();
+    const snap = ctx.dzSnapshotSubset(ctx.dzSettingsSnapshot(ctx.theme), "user");
+    const fresh = ctx.dzSnapshotSubset(ctx.dzSettingsSnapshot(clone(SHIPPED)), "user");
+    assert.deepEqual(clone(snap), clone(fresh));
+});
+
+test("account: the same account answering again changes nothing", async () => {
+    const { ctx, calls } = accountPage({ account: "u:user", auth: { status: "OK", user: "user", rights: 1, canlogout: true } });
+    ctx.theme = cachedFor("user");
+    await ctx.dzAccountMaybeChanged();
+    assert.deepEqual(clone(ctx.theme), cachedFor("user"));
+    assert.equal(calls.paints.length, 0);
+});
+
+test("account: logging out keeps the page as it is and forgets whose browser this was", async () => {
+    const store = new Map([["dzPaintAccount", "u:admin"]]);
+    const { ctx, calls } = accountPage({ account: "u:admin", store, auth: { status: "OK", canlogout: true } });
+    ctx.theme = cachedFor("admin");
+    await ctx.dzAccountMaybeChanged();
+    assert.equal(ctx.dzAccount, null);
+    assert.equal(store.has("dzPaintAccount"), false);
+    assert.equal(ctx.theme.scheme, cachedFor("admin").scheme);
+    assert.equal(calls.paints.length, 0);
+});
+
 test("account: a boot on the shared identity that turns out to be a named login rebuilds before merging", async () => {
     const store = new Map([["dzPaintAccount", "*"], ["machinon.themeSettings", JSON.stringify(cachedFor("shared"))]]);
     const { ctx, calls } = accountPage({ account: "*", store, auth: { status: "OK", user: "user", rights: 1, canlogout: true } });

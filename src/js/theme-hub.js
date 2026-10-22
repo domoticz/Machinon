@@ -935,6 +935,14 @@ function dzAdoptHubInto(hub, routeHost) {
     return hub;
 }
 
+/* The hub is built once for the session's rights and settings (chips,
+   locks, admin-only tabs); after an account change it is dropped so the
+   next open builds it for the new account. */
+function dzHubDiscard() {
+    var hub = document.getElementById(DZ_HUB_ID);
+    if (hub && hub.parentNode) hub.parentNode.removeChild(hub);
+}
+
 /* Routed entry (#/Theme, #/Theme/:tab): build the hub into the routed template's
    host and honour the optional group deep link. Same builder as the fallback
    path, only the parent differs. Called by the route controller in custom.js. */

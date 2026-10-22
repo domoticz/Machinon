@@ -140,8 +140,9 @@ first visit: the default colors for a moment, then your own theme.
 
 When your Domoticz asks people to log in, what is remembered is kept per login in each browser.
 If two people take turns in the same browser, each gets their own colors and settings, and the
-page never opens in the previous person's colors. The first time a login is used in a browser,
-its colors can take a moment to appear, like a first visit.
+page never opens in the previous person's colors. Logging out and in as someone else shows the
+new person's settings straight away, without reloading the page. The first time a login is
+used in a browser, its colors can take a moment to appear, like a first visit.
 
 ## What each scheme looks like
 

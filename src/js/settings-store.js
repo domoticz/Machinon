@@ -307,7 +307,7 @@ function reconcileDomoticzSettingsInPlace() {
     var before = JSON.parse(JSON.stringify(theme));
     /* The page started on the account this browser last confirmed; core
        decides before anything merges (dzConfirmAccount). */
-    return dzConfirmAccount().then(function() {
+    var run = dzConfirmAccount().then(function() {
         /* Forced when the boot left an early paint standing over the
            defaults (custom.js init_theme), because this is then the first
            paint of the real settings. */
@@ -321,6 +321,8 @@ function reconcileDomoticzSettingsInPlace() {
         dzApplyColorMode();
         throw e;
     });
+    dzAccountWork = run.catch(function() {});
+    return run;
 }
 
 /* Merge the stored settings onto theme and apply what changed since before
@@ -345,7 +347,43 @@ function dzMergeStoredSettings(before, forcePaint) {
     });
 }
 
-/* ---- The page's account ---- */
+/* ---- Changing account without a page load ----
+
+   Core's login and logout run inside the page (app/LoginController.js
+   handleLoginSuccess sets the new permissions and routes to the Dashboard,
+   app/LogoutController.js the same for logout; neither reloads), so the
+   theme hears about them only through core's permissionsChanged broadcast.
+   It asks core whose session it is, and when that is another account it
+   loads that account's settings the way a boot does: from the shipped
+   theme.json, never on top of the previous account's values, because a
+   value the new account's rows do not carry (its private wizard themes, for
+   one) would otherwise stay on screen and go into its row on its next save.
+
+   Every change runs on one chain, behind the boot's own settings load, so
+   two quick broadcasts (core's logout sends two) cannot interleave. */
+var dzAccountWork = Promise.resolve();
+
+function dzWatchAccount($rootScope) {
+    $rootScope.$on("permissionsChanged", function() { dzAccountMaybeChanged(); });
+}
+
+/* known: the account a caller already read from core (the save guard),
+   else this asks. Resolves once any change has been applied. */
+function dzAccountMaybeChanged(known) {
+    var run = dzAccountWork.then(function() {
+        return known !== undefined ? known : dzFetchAccount();
+    }).then(function(account) {
+        if (account === undefined || account === dzAccount) return;
+        var before = JSON.parse(JSON.stringify(theme));
+        return dzAdoptAccount(account).then(function(adopted) {
+            if (adopted) return dzMergeStoredSettings(before, true);
+        });
+    });
+    dzAccountWork = run.catch(function(e) {
+        if (typeof dzLog === "function") dzLog("settings", "account_change_failed", { error: String(e && e.message || e) });
+    });
+    return dzAccountWork;
+}
 
 /* Make account the page's account. Nobody (a logout) keeps the page as it
    is: there are no settings to load, and the next login replaces it. Any
@@ -375,7 +413,7 @@ function dzAdoptAccount(account) {
 }
 
 /* What this page knew about the previous account: its stored rows and their
-   tokens, and its light/dark tap. */
+   tokens, its light/dark tap, and the Theme Hub built for its rights. */
 function dzForgetAccountState() {
     dzApiState.perUser = false;
     dzApiState.noIdentity = false;
@@ -383,6 +421,7 @@ function dzForgetAccountState() {
     dzApiState.userSnap = null;
     dzApiState.tokens = { instance: "", user: "" };
     if (typeof dzForgetColorMemory === "function") dzForgetColorMemory();
+    if (typeof dzHubDiscard === "function") dzHubDiscard();
 }
 
 /* The boot's settings start from this browser's cache of the account the page
