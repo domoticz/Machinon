@@ -730,6 +730,8 @@ function init_theme() {
             clearInterval(checkAngular);
             $scope = angular.element(document.body).injector().get('$rootScope');
             initDeviceLiveUpdates($scope);
+            /* Core logs in and out without a page load. */
+            if (typeof dzWatchAccount === "function") dzWatchAccount($scope);
         } else if (++angularPolls >= 600) {
             clearInterval(checkAngular);
             if (typeof dzLog === "function") { dzLog("boot", "angular_absent", { waited_ms: 60000 }); }

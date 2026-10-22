@@ -409,3 +409,48 @@ test("account: the page starts on the account core named to the early block, els
     loadTransport({ window: w });
     assert.equal(w.__dzEarlyClosed, true, "a late getauth answer no longer repaints once the theme runs");
 });
+
+/* A native transport whose fetch answers getauth with `auth` and records
+   every POST. */
+function guarded(auth, account) {
+    const posts = [];
+    const ctx = loadTransport({
+        themeFolder: "machinon", ShowNotify: () => {}, dzT: (k) => k,
+        console: { log() {}, warn() {} },
+        fetch: async (url, opts) => {
+            if (/param=getauth/.test(url)) return { json: async () => auth };
+            if (opts && opts.method === "POST") posts.push(opts.body.get("param"));
+            return { json: async () => ({ status: "OK", lastupdate: "t1" }) };
+        }
+    });
+    ctx.dzAccount = account;
+    return { ctx, posts };
+}
+
+test("account: a write goes out while the session is still the page's account", async () => {
+    const { ctx, posts } = guarded({ status: "OK", user: "user", canlogout: true }, "u:user");
+    const res = await ctx.dzApiWrite("themesettings_set", "user", () => ({ features: {}, values: {} }));
+    assert.equal(res.ok, true);
+    assert.deepEqual(posts, ["themesettings_set"]);
+});
+
+test("account: a write is refused when another account now holds the session", async () => {
+    const { ctx, posts } = guarded({ status: "OK", user: "user", canlogout: true }, "u:admin");
+    let noticed = null;
+    ctx.dzAccountMaybeChanged = (key) => { noticed = key; };
+    const res = await ctx.dzApiWrite("themesettings_set", "user", () => ({ features: {}, values: {} }));
+    assert.equal(res.ok, false);
+    assert.equal(res.error, "account_changed");
+    assert.deepEqual(posts, [], "nothing reached the other account's row");
+    assert.equal(noticed, "u:user", "the page is told whose session it is now");
+    const reset = await ctx.dzApiReset("themesettings_set");
+    assert.equal(reset.ok, false);
+    assert.deepEqual(posts, [], "a reset is refused the same way");
+});
+
+test("account: a write is refused when the session's account cannot be read", async () => {
+    const { ctx, posts } = guarded({ status: "ERR" }, "u:user");
+    const res = await ctx.dzApiWrite("themesettings_set", "user", () => ({ features: {}, values: {} }));
+    assert.equal(res.ok, false);
+    assert.deepEqual(posts, []);
+});

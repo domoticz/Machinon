@@ -503,9 +503,30 @@ function dzMergeConflict(baseSnap, intendedSnap, freshSnap) {
    rebuild afterwards would then send the server its own state back and report
    success: silent edit loss. */
 function dzApiWrite(param, layer, buildFn) {
-    return dzEnqueueWrite(function() { return dzApiWriteNow(param, layer, buildFn); });
+    return dzEnqueueWrite(function() {
+        return dzWithSameAccount(function() { return dzApiWriteNow(param, layer, buildFn); });
+    });
 }
 
+/* A write leaves only while the session is still the page's account. The
+   session cookie is one per browser, so another tab may have logged out and
+   in as someone else; this page would then write its account's values into
+   that account's row, and core's lastupdate check does not stop a write to
+   a row that does not exist yet. The page is told whose session it is now
+   (settings-store.js dzAccountMaybeChanged), which loads that account's
+   settings, so the refused edit is not one the new account made. Unknown
+   (getauth unreachable) is refused too: nothing is written blind. */
+function dzWithSameAccount(job) {
+    return dzFetchAccount().then(function(account) {
+        if (account !== undefined && account !== null && account === dzAccount) return job();
+        if (typeof dzLog === "function") {
+            dzLog("settings", "write_refused", { reason: account === undefined ? "account_unknown" : "account_changed" });
+        }
+        if (account === undefined) return dzApiFail({ error: "unreachable" });
+        if (typeof dzAccountMaybeChanged === "function") dzAccountMaybeChanged(account);
+        return { ok: false, error: "account_changed" };
+    });
+}
 
 function dzApiWriteNow(param, layer, buildFn) {
     var baseSnap = dzApiLayerSnap(layer);
@@ -741,9 +762,11 @@ function dzApiPromote() {
    by) a save that is already in flight for the same layer. */
 function dzApiReset(param) {
     return dzEnqueueWrite(function() {
-        return dzApiPost({ param: param, theme: themeFolder, reset: "true" }).then(function(d) {
-            if (d.status === "OK") return { ok: true };
-            return dzApiFail(d);
+        return dzWithSameAccount(function() {
+            return dzApiPost({ param: param, theme: themeFolder, reset: "true" }).then(function(d) {
+                if (d.status === "OK") return { ok: true };
+                return dzApiFail(d);
+            });
         });
     });
 }
