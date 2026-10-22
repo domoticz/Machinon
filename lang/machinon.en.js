@@ -436,7 +436,8 @@ language = {
     save_failed: "Theme settings could not be saved ({error})",
     save_failed_local: "Theme settings could not be saved to Domoticz; kept in this browser only.",
     save_refused_account: "Not saved: another user has logged in on this browser. The page now shows their settings.",
-    save_refused_logged_out: "Not saved: you are no longer logged in. Log in and make the change again."
+    save_refused_logged_out: "Not saved: you are no longer logged in. Log in and make the change again.",
+    save_refused_unconfirmed: "Not saved: Machinon could not confirm who is logged in. The page now shows the settings of the logged-in user; make the change again."
   },
   problems: {
     badge_title: "Devices with problems",

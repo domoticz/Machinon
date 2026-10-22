@@ -426,7 +426,6 @@ function dzAdoptAccount(account) {
     if (account !== undefined) dzRememberAccount(account);
     if (account === null) {
         dzAccount = null;
-        dzAccountFromUnknown = null;
         dzForgetAccountState();
         return Promise.resolve(false);
     }
@@ -438,7 +437,6 @@ function dzAdoptAccount(account) {
             themeName = theme.name;
             dzDefaultsSnap = dzSettingsSnapshot(shipped);
             dzAccount = account;
-            dzAccountFromUnknown = null;
             dzAccountRights = dzLastAuthRights;
             dzForgetAccountState();
             dzForgetUnkeyedState(account);
@@ -485,13 +483,13 @@ function dzForgetUnkeyedState(account) {
     } catch (e) { /* storage blocked: nothing kept */ }
 }
 
-/* Take core's account as the page's without a rebuild: theme already holds
-   no other account's values (it is that account's own, or, with no account
-   known yet, only the shipped theme.json and the session's rows, because no
-   cache is read without an account). */
+/* Take core's account as the page's without a rebuild. Only the boot does
+   this, before any stored settings merge: theme then holds that account's
+   own cache, or, with no account known, only the shipped theme.json (no cache
+   is read without an account). Never after a merge: the rows merged then
+   cannot be proven to be the named account's. */
 function dzTakeAccount(account) {
     var changed = account !== dzAccount;
-    if (dzAccount === undefined) dzAccountFromUnknown = account;
     dzAccount = account;
     dzRememberAccount(account);
     if (dzAccountRights === undefined || changed) dzAccountRights = dzLastAuthRights;
@@ -506,7 +504,8 @@ function dzTakeAccount(account) {
    after a timeout, so a slow core is not sent a second request while it
    still works on the first. If core never answers, the page leaves the cache
    (it may be another account's) and starts from the shipped theme.json with
-   no account: nothing is cached, and the next save takes core's account then
+   no account: nothing is cached, and the next save is refused with a notice
+   while the page moves to the account core names then
    (settings-transport.js dzWithSameAccount). */
 var DZ_ACCOUNT_BOOT_TRIES = 3;
 var DZ_ACCOUNT_RETRY_MS = 500;

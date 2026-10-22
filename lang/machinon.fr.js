@@ -434,7 +434,8 @@ language = {
     save_failed: "Les réglages du thème n'ont pas pu être enregistrés ({error})",
     save_failed_local: "Les réglages du thème n'ont pas pu être enregistrés dans Domoticz; ils sont conservés uniquement dans ce navigateur.",
     save_refused_account: "Non enregistré : un autre utilisateur s'est connecté dans ce navigateur. La page affiche maintenant ses réglages.",
-    save_refused_logged_out: "Non enregistré : vous n'êtes plus connecté. Connectez-vous et refaites la modification."
+    save_refused_logged_out: "Non enregistré : vous n'êtes plus connecté. Connectez-vous et refaites la modification.",
+    save_refused_unconfirmed: "Non enregistré : Machinon n'a pas pu confirmer qui est connecté. La page affiche maintenant les réglages de l'utilisateur connecté ; refaites la modification."
   },
   problems: {
     badge_title: "Dispositifs ayant des problèmes",

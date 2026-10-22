@@ -434,7 +434,8 @@ language = {
     save_failed: "Temainställningarna kunde inte sparas ({error})",
     save_failed_local: "Temainställningarna kunde inte sparas i Domoticz; de behålls bara i den här webbläsaren.",
     save_refused_account: "Inte sparat: en annan användare har loggat in i den här webbläsaren. Sidan visar nu den användarens inställningar.",
-    save_refused_logged_out: "Inte sparat: du är inte längre inloggad. Logga in och gör ändringen igen."
+    save_refused_logged_out: "Inte sparat: du är inte längre inloggad. Logga in och gör ändringen igen.",
+    save_refused_unconfirmed: "Inte sparat: Machinon kunde inte bekräfta vem som är inloggad. Sidan visar nu den inloggade användarens inställningar; gör ändringen igen."
   },
   problems: {
     badge_title: "Enheter med problem",
