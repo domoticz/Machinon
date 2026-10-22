@@ -454,7 +454,9 @@ function dzWaitForAdminKnown() {
 
 /* API core, no native rows yet: if this session may write the instance
    layer and legacy uservariables exist, migrate them once into the
-   instance defaults. The legacy loader (dzThemeSettingsLoad) already
+   instance defaults. Once, because nothing this theme does leaves the house
+   row absent again: a house reset writes an empty row (dzApiResetHouse).
+   The legacy loader (dzThemeSettingsLoad) already
    applies onto theme, so a full snapshot afterwards IS the migrated
    single-layer state. Legacy variables are left in place, frozen (the
    downgrade story, spec): a core rolled back to a version without the
@@ -618,7 +620,10 @@ function dzRefuseWrite(account, fresh, unconfirmed) {
     return { ok: false, error: reason };
 }
 
-function dzApiWriteNow(param, layer, buildFn) {
+/* overwrite: the conflict retry sends intended as it is instead of merging
+   it into the fresh row (the house reset, which discards the row whoever
+   wrote it last). */
+function dzApiWriteNow(param, layer, buildFn, overwrite) {
     var baseSnap = dzApiLayerSnap(layer);
     var intended = buildFn();
     function send(snap) {
@@ -629,7 +634,7 @@ function dzApiWriteNow(param, layer, buildFn) {
         if (d.status === "OK") { dzApiState.tokens[layer] = d.lastupdate || ""; return { ok: true, snap: intended }; }
         if (d.error !== "conflict") return dzApiFail(d);
         return dzApiFetchLayers().then(function(outcome) {
-            var merged = (outcome === DZ_LOAD_FAILED) ? intended
+            var merged = (outcome === DZ_LOAD_FAILED || overwrite === true) ? intended
                                                       : dzMergeConflict(baseSnap, intended, dzApiLayerSnap(layer));
             return send(merged).then(function(d2) {
                 if (d2.status === "OK") { dzApiState.tokens[layer] = d2.lastupdate || ""; return { ok: true, snap: merged }; }
@@ -777,17 +782,26 @@ function dzEnsureDefaultsSnap() {
         .then(function(localJson) { dzDefaultsSnap = dzSettingsSnapshot(localJson); return dzDefaultsSnap; });
 }
 
+/* True for a row that holds no settings: the one a house reset writes
+   (dzApiResetHouse). */
+function dzSnapIsEmpty(snap) {
+    return !snap || (Object.keys(snap.features || {}).length === 0 && Object.keys(snap.values || {}).length === 0);
+}
+
 /* Base for instance writes: last-read instance row, else factory defaults.
-   Patch only the given scope's keys from the current theme so an instance
-   write never absorbs the admin's personal per-user values (spec: promote
-   is deliberate, house edits patch house keys only). Callers that may need
-   the factory-defaults fallback (dzApiState.instanceSnap null) must resolve
-   dzEnsureDefaultsSnap() first; this stays a plain synchronous function so
-   dzApiWrite's conflict retry can keep calling it as a buildFn, rebuilding
-   the patch on top of whatever dzApiLoad's retry just refreshed. */
+   An empty row (after a reset) counts as no row, so the first house save
+   after a reset stores the same full row a fresh install does, not one
+   carrying only the patched keys. Patch only the given scope's keys from
+   the current theme so an instance write never absorbs the admin's
+   personal per-user values (spec: promote is deliberate, house edits patch
+   house keys only). Callers that may need the factory-defaults fallback
+   (no instance row, or an empty one) must resolve dzEnsureDefaultsSnap()
+   first; this stays a plain synchronous function so dzApiWrite's conflict
+   retry can keep calling it as a buildFn, rebuilding the patch on top of
+   whatever dzApiLoad's retry just refreshed. */
 function dzBuildInstanceWrite(scopeToPatch) {
-    var base = dzApiState.instanceSnap ? JSON.parse(JSON.stringify(dzApiState.instanceSnap))
-                                       : JSON.parse(JSON.stringify(dzDefaultsSnap));
+    var base = !dzSnapIsEmpty(dzApiState.instanceSnap) ? JSON.parse(JSON.stringify(dzApiState.instanceSnap))
+                                                       : JSON.parse(JSON.stringify(dzDefaultsSnap));
     var current = dzSettingsSnapshot(theme);
     ["features", "values"].forEach(function(part) {
         Object.keys(current[part]).forEach(function(k) {
@@ -816,8 +830,8 @@ function dzApiSaveSettings() {
 }
 
 /* House-scope half of an admin save. dzBuildInstanceWrite needs the
-   factory-defaults fallback whenever dzApiState.instanceSnap is null (a
-   theme that has never had an instance row written yet), so this resolves
+   factory-defaults fallback whenever the instance row is absent (never
+   written yet) or empty (reset), so this resolves
    dzEnsureDefaultsSnap() first (a no-op once it is already populated). */
 function dzApiSaveHouseIfChanged(asked) {
     if (arguments.length < 1) asked = dzAccount;
@@ -866,8 +880,36 @@ function dzApiReset(param) {
         });
     });
 }
+/* A personal reset deletes the row: the user then falls back to the house
+   row, and an absent personal row never starts the legacy seed on its own
+   (that needs the house row absent too, see dzApiResetHouse). */
 function dzApiResetUser() { return dzApiReset("themesettings_set").then(function(r) { if (r.ok) { dzApiState.userSnap = null; dzApiState.tokens.user = ""; } return r; }); }
-function dzApiResetHouse() { return dzApiReset("themesettings_setdefault").then(function(r) { if (r.ok) { dzApiState.instanceSnap = null; dzApiState.tokens.instance = ""; } return r; }); }
+
+/* The house reset writes an EMPTY row instead of deleting it (#262). An
+   absent house row is what dzSeedFromLegacyIfPossible reads as "never
+   migrated", and the 2026.1 uservariables it copies from are deliberately
+   kept for a downgrade, so a deleted row was re-seeded with the old
+   settings on the next admin load. A present row is the marker that the
+   install has left the legacy store; carrying no keys, it applies nothing,
+   so every setting follows the shipped theme.json, including defaults a
+   later version changes, which a row of today's defaults would freeze.
+   Absent therefore keeps meaning one thing only: this install has never
+   stored a house row, which is exactly when the seed must run.
+
+   A single upsert rather than a delete followed by a write: there is no
+   moment with the row absent for another tab's boot to seed into, and a
+   failure leaves the old row rather than none. A conflict is retried with
+   the fresh token and the same empty row, never merged: like the delete it
+   replaces, the reset discards whatever the row holds. */
+function dzApiResetHouse() {
+    var asked = dzAccount;
+    var empty = { schemaVersion: DZ_SETTINGS_SCHEMA_VERSION, features: {}, values: {} };
+    return dzEnqueueWrite(function() {
+        return dzWithSameAccount(asked, false, function() {
+            return dzApiWriteNow("themesettings_setdefault", "instance", function() { return empty; }, true);
+        });
+    }).then(function(r) { if (r.ok) dzApiState.instanceSnap = r.snap; return r; });
+}
 
 /* ---- uservariable transport (moved verbatim from settings-store.js, with
    the two documented changes: card widths appended to the custom array, and
