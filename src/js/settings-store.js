@@ -1,11 +1,17 @@
 var dzDefaultsSnap = null;
 function cacheThemeSettings() {
 if (typeof dzDiagRefreshGate === "function") { dzDiagRefreshGate(true); }
-localStorage.setItem(themeFolder + ".themeSettings", JSON.stringify(theme));
+var key = dzSettingsCacheKey();
+if (key) localStorage.setItem(key, JSON.stringify(theme));
+}
+function dzSettingsCacheKey() {
+var suffix = dzAccountSuffix(dzAccount);
+return suffix === null ? null : themeFolder + ".themeSettings" + suffix;
 }
 function readCachedThemeSettings() {
-var value = localStorage.getItem(themeFolder + ".themeSettings");
-return value && JSON.parse(value);
+var key = dzSettingsCacheKey();
+var value = key ? localStorage.getItem(key) : null;
+return value ? JSON.parse(value) : null;
 }
 function isEmptyObject(obj) {
 for (var prop in obj) {
@@ -59,7 +65,8 @@ t.scheme_base = t.features.dark_theme && t.features.dark_theme.enabled ? "dark" 
 var dzSettingsFromDefaults = false;
 function loadSettings() {
 if (typeof Storage !== "undefined") {
-if (localStorage.getItem(themeFolder + ".themeSettings") === null) {
+var cacheKey = dzSettingsCacheKey();
+if (!cacheKey || localStorage.getItem(cacheKey) === null) {
 dzSettingsFromDefaults = true;
 return fetch("styles/" + themeFolder + "/theme.json", { cache: "no-cache", credentials: "include" })
 .then(function(response) { return response.json(); })
@@ -155,16 +162,136 @@ button_name: t.button_name
 }
 function reconcileDomoticzSettingsInPlace() {
 var before = JSON.parse(JSON.stringify(theme));
+var run = dzConfirmAccount().then(function() {
+return dzMergeStoredSettings(before, (dzSettingsFromDefaults && !!window.__dzEarlyPaint) || dzAccountLoading);
+}).then(function() {
+dzAccountLoading = false;
+}).catch(function(e) {
+dzAccountLoading = false;
+dzApplyColorMode();
+throw e;
+});
+dzAccountWork = run.catch(function() {});
+return run;
+}
+function dzMergeStoredSettings(before, forcePaint) {
 return checkUserVariableThemeSettings().then(function() {
 if (typeof migrateRetiredScheme === "function") { return migrateRetiredScheme(); }
 return false;
 }).then(function() {
 applyThemeDeltaInPlace(before);
-dzApplyColorMode(dzPaintInputs(before) !== dzPaintInputs(theme) ||
-(dzSettingsFromDefaults && !!window.__dzEarlyPaint));
-}).catch(function(e) {
-dzApplyColorMode();
+dzApplyColorMode(dzPaintInputs(before) !== dzPaintInputs(theme) || forcePaint === true);
+});
+}
+var dzAccountWork = Promise.resolve();
+function dzWatchAccount($rootScope) {
+$rootScope.$on("permissionsChanged", function() { dzAccountMaybeChanged(); });
+}
+function dzAccountMaybeChanged(known) {
+var run = dzAccountWork.then(function() {
+return known !== undefined ? known : dzFetchAccount();
+}).then(function(account) {
+if (account === undefined) return;
+if (account === dzAccount) {
+if (dzAccountRights !== undefined && dzLastAuthRights !== undefined && dzAccountRights !== dzLastAuthRights &&
+typeof dzHubDiscard === "function") {
+dzHubDiscard();
+if (typeof dzHubRemount === "function") dzHubRemount();
+}
+if (dzLastAuthRights !== undefined) dzAccountRights = dzLastAuthRights;
+return;
+}
+var before = JSON.parse(JSON.stringify(theme));
+return dzAdoptAccount(account).then(function(adopted) {
+if (adopted) return dzMergeStoredSettings(before, true);
+}).then(dzAccountLoaded, function(e) {
+dzAccountLoaded();
 throw e;
+});
+});
+dzAccountWork = run.catch(function(e) {
+if (typeof dzLog === "function") dzLog("settings", "account_change_failed", { error: String(e && e.message || e) });
+});
+return dzAccountWork;
+}
+function dzAccountLoaded() {
+dzAccountLoading = false;
+if (typeof dzHubRemount === "function") dzHubRemount();
+}
+function dzAdoptAccount(account) {
+if (account !== undefined) dzRememberAccount(account);
+if (account === null) {
+dzAccount = null;
+dzForgetAccountState();
+return Promise.resolve(false);
+}
+dzAccountLoading = true;
+return fetch("styles/" + themeFolder + "/theme.json", { cache: "no-cache", credentials: "include" })
+.then(function(r) { return r.json(); })
+.then(function(shipped) {
+theme = JSON.parse(JSON.stringify(shipped));
+themeName = theme.name;
+dzDefaultsSnap = dzSettingsSnapshot(shipped);
+dzAccount = account;
+dzAccountRights = dzLastAuthRights;
+dzForgetAccountState();
+dzForgetUnkeyedState(account);
+return true;
+}, function() {
+location.reload();
+return false;
+});
+}
+function dzForgetAccountState() {
+dzApiState.perUser = false;
+dzApiState.noIdentity = false;
+dzApiState.instanceSnap = null;
+dzApiState.userSnap = null;
+dzApiState.tokens = { instance: "", user: "" };
+if (typeof dzForgetColorMemory === "function") dzForgetColorMemory();
+if (typeof dzHubDiscard === "function") dzHubDiscard();
+}
+var DZ_SHARED_USED_KEY = "dzPaintShared";
+function dzForgetUnkeyedState(account) {
+try {
+if (account === "*") {
+localStorage.setItem(DZ_SHARED_USED_KEY, "1");
+return;
+}
+if (dzAccountSuffix(account) === null || localStorage.getItem(DZ_SHARED_USED_KEY) === "1") return;
+localStorage.removeItem(themeFolder + ".themeSettings");
+localStorage.removeItem("dzPaintRecord");
+localStorage.removeItem(themeFolder + ".colorOverride");
+} catch (e) { }
+}
+function dzTakeAccount(account) {
+var changed = account !== dzAccount;
+dzAccount = account;
+dzRememberAccount(account);
+if (dzAccountRights === undefined || changed) dzAccountRights = dzLastAuthRights;
+dzForgetUnkeyedState(account);
+}
+var DZ_ACCOUNT_BOOT_TRIES = 3;
+var DZ_ACCOUNT_RETRY_MS = 500;
+function dzConfirmAccount() {
+var early = window.__dzEarlyAccount;
+function ask(tries) {
+return dzAskAccount(DZ_ACCOUNT_PATIENT_MS).then(function(result) {
+if (result.outcome !== "error" || tries <= 1) return result.account;
+return new Promise(function(resolve) { setTimeout(resolve, DZ_ACCOUNT_RETRY_MS); }).then(function() {
+return ask(tries - 1);
+});
+});
+}
+var answer = early && typeof early === "object" && early.key !== undefined
+? Promise.resolve(early.key) : ask(DZ_ACCOUNT_BOOT_TRIES);
+return answer.then(function(account) {
+if (account !== undefined && (account === dzAccount || dzAccount === undefined)) {
+dzTakeAccount(account);
+return;
+}
+if (account === undefined && dzAccount === undefined) return;
+return dzAdoptAccount(account);
 });
 }
 function dzPaintInputs(t) {
@@ -208,7 +335,8 @@ dzDiagRefreshGate(true);
 }
 function dzClearThemeCache() {
 try {
-localStorage.removeItem(themeFolder + ".themeSettings");
+var key = dzSettingsCacheKey();
+if (key) localStorage.removeItem(key);
 } catch (e) { }
 if (typeof dzForgetPaint === "function") { dzForgetPaint(); }
 }

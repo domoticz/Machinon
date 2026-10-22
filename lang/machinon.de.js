@@ -430,7 +430,10 @@ icons_installing: "Installation {n}/{total}: {name}",
 icons_summary: "{added} installiert, {updated} aktualisiert, {current} bereits aktuell",
 icons_summary_failed: "{summary}; fehlgeschlagen: {failures}",
 save_failed: "Design-Einstellungen konnten nicht gespeichert werden ({error})",
-save_failed_local: "Design-Einstellungen konnten nicht in Domoticz gespeichert werden; sie bleiben nur in diesem Browser."
+save_failed_local: "Design-Einstellungen konnten nicht in Domoticz gespeichert werden; sie bleiben nur in diesem Browser.",
+save_refused_account: "Nicht gespeichert: In diesem Browser hat sich ein anderer Benutzer angemeldet. Die Seite zeigt jetzt dessen Einstellungen.",
+save_refused_logged_out: "Nicht gespeichert: Sie sind nicht mehr angemeldet. Melden Sie sich an und nehmen Sie die Änderung erneut vor.",
+save_refused_unconfirmed: "Nicht gespeichert: Machinon konnte nicht bestätigen, wer angemeldet ist. Die Seite zeigt jetzt die Einstellungen des angemeldeten Benutzers; nehmen Sie die Änderung erneut vor."
 },
 problems: {
 badge_title: "Geräte mit Problemen",

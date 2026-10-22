@@ -533,6 +533,23 @@ var mainView = document.getElementById("main-view");
 if (mainView && mainView.style.display === "none") mainView.style.display = "";
 return hub;
 }
+var dzHubShownIn = null;
+function dzHubDiscard() {
+var hub = document.getElementById(DZ_HUB_ID);
+if (!hub || !hub.parentNode) return;
+var routed = hub.parentNode.id === "dz-theme-hub-host";
+if (routed || hub.style.display !== "none") dzHubShownIn = routed ? hub.parentNode : { fallback: true, hash: location.hash };
+hub.parentNode.removeChild(hub);
+}
+function dzHubRemount() {
+var shown = dzHubShownIn;
+dzHubShownIn = null;
+if (shown && shown.fallback === true) {
+if (location.hash === shown.hash) dzOpenThemeHub();
+} else if (shown && document.body.contains(shown)) {
+dzMountThemeHubIn(shown, dzHubActiveGroup);
+}
+}
 function dzMountThemeHubIn(host, tab) {
 var hub = dzBuildThemeHub(host);
 if (!hub) return null;

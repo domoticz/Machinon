@@ -134,6 +134,10 @@ return { slug: slug, attr: base === "dark" ? "dark" : "custom",
 colors: Object.assign({}, colors), darkFile: false };
 }
 var DZ_PAINT_RECORD_KEY = "dzPaintRecord";
+function dzPaintRecordKey() {
+var suffix = dzAccountSuffix(dzAccount);
+return suffix === null ? null : DZ_PAINT_RECORD_KEY + suffix;
+}
 var DZ_TOKEN_NAME = /^--dz-[a-z0-9-]+$/;
 var DZ_TOKEN_EXTRA_NAMES = ["--secondary-text-color"];
 var DZ_TOKEN_VALUE = /^(rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(,\s*(0|1|0?\.\d+)\s*)?\)|\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}|#[0-9a-fA-F]{6})$/;
@@ -222,24 +226,33 @@ return false;
 }
 }
 function dzColorOverrideKey() {
-return themeFolder + ".colorOverride";
+var suffix = dzAccountSuffix(dzAccount);
+return suffix === null ? null : themeFolder + ".colorOverride" + suffix;
 }
 function dzColorOverride() {
 if (dzOverrideMemory !== undefined) { return dzOverrideMemory; }
+var key = dzColorOverrideKey();
+if (!key) { return null; }
 try {
-return dzCleanOverride(JSON.parse(localStorage.getItem(dzColorOverrideKey())));
+return dzCleanOverride(JSON.parse(localStorage.getItem(key)));
 } catch (e) {
 return null;
 }
 }
+function dzForgetColorMemory() {
+dzOverrideMemory = undefined;
+dzPaintRecordDue = true;
+}
 function dzSetColorOverride(variant) {
 var clean = dzCleanOverride({ variant: variant, deviceDark: dzDeviceDark() });
 dzOverrideMemory = clean;
+var key = dzColorOverrideKey();
+if (!key) { return; }
 try {
 if (clean) {
-localStorage.setItem(dzColorOverrideKey(), JSON.stringify(clean));
+localStorage.setItem(key, JSON.stringify(clean));
 } else {
-localStorage.removeItem(dzColorOverrideKey());
+localStorage.removeItem(key);
 }
 } catch (e) {
 if (typeof dzLog === "function") { dzLog("colormode", "override_store_failed", { error: String(e) }); }
@@ -247,9 +260,11 @@ if (typeof dzLog === "function") { dzLog("colormode", "override_store_failed", {
 }
 function dzForgetPaint() {
 dzOverrideMemory = undefined;
+var record = dzPaintRecordKey();
+var override = dzColorOverrideKey();
 try {
-localStorage.removeItem(DZ_PAINT_RECORD_KEY);
-localStorage.removeItem(dzColorOverrideKey());
+if (record) { localStorage.removeItem(record); }
+if (override) { localStorage.removeItem(override); }
 } catch (e) {
 if (typeof dzLog === "function") { dzLog("colormode", "forget_paint_failed", { error: String(e) }); }
 }
@@ -265,8 +280,10 @@ if (schemes[slug] && schemes[slug].colors) { out[slug] = schemes[slug].colors; }
 return out;
 }
 function dzLoadAnyPaintRecord() {
+var key = dzPaintRecordKey();
+if (!key) { return null; }
 try {
-return dzParsePaintRecord(localStorage.getItem(DZ_PAINT_RECORD_KEY));
+return dzParsePaintRecord(localStorage.getItem(key));
 } catch (e) {
 return null;
 }
@@ -309,8 +326,10 @@ tokens = state.tokens;
 return { attr: state.attr, darkFile: state.darkFile === true, version: theme.version, tokens: tokens };
 }
 function dzWritePaintRecord(families, keepPainted) {
-dzPaintRecordDue = false;
+var key = dzPaintRecordKey();
+dzPaintRecordDue = !key;
 var state = dzLastPaintState;
+if (!key) { return; }
 if (!state) { return; }
 var fam = dzFamilyOf(state.slug, families);
 var stored = dzLoadAnyPaintRecord();
@@ -341,9 +360,9 @@ rec = dzBuildPaintRecord(input);
 }
 try {
 if (rec) {
-localStorage.setItem(DZ_PAINT_RECORD_KEY, JSON.stringify(rec));
+localStorage.setItem(key, JSON.stringify(rec));
 } else {
-localStorage.removeItem(DZ_PAINT_RECORD_KEY);
+localStorage.removeItem(key);
 }
 } catch (e) {
 if (typeof dzLog === "function") { dzLog("colormode", "paint_record_store_failed", { error: String(e) }); }

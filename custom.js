@@ -1,6 +1,18 @@
 (function() {
+var html = document.documentElement;
+var shown = null;
+function undo() {
+if (!shown) return;
+for (var i = 0; i < shown.names.length; i++) html.style.removeProperty(shown.names[i]);
+if (shown.attr) html.removeAttribute("data-dz-scheme");
+if (shown.link && shown.link.parentNode) shown.link.parentNode.removeChild(shown.link);
+shown = null;
+window.__dzEarlyPaint = undefined;
+}
+function paint(account) {
 try {
-var rec = JSON.parse(localStorage.getItem("dzPaintRecord"));
+var suffix = account === "*" ? "" : "@" + encodeURIComponent(account.substring(2));
+var rec = JSON.parse(localStorage.getItem("dzPaintRecord" + suffix));
 if (!rec || typeof rec !== "object" || rec.v !== 1) return;
 if (typeof rec.folder !== "string" || !/^[A-Za-z0-9_-]+$/.test(rec.folder)) return;
 if (typeof rec.family !== "string") return;
@@ -9,7 +21,7 @@ if (mode !== "light" && mode !== "dark" && mode !== "auto") return;
 var deviceDark = !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
 var variant = mode === "auto" ? (deviceDark ? "dark" : "light") : mode;
 var ov = null;
-try { ov = JSON.parse(localStorage.getItem(rec.folder + ".colorOverride")); } catch (e) { ov = null; }
+try { ov = JSON.parse(localStorage.getItem(rec.folder + ".colorOverride" + suffix)); } catch (e) { ov = null; }
 if (ov && typeof ov === "object" && (ov.variant === "light" || ov.variant === "dark") &&
 typeof ov.deviceDark === "boolean" && (mode !== "auto" || ov.deviceDark === deviceDark)) {
 variant = ov.variant;
@@ -23,18 +35,21 @@ if (!tokens || typeof tokens !== "object" || Array.isArray(tokens)) return;
 var NAME = /^--dz-[a-z0-9-]+$/;
 var EXTRA = ["--secondary-text-color"];
 var VALUE = /^(rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(,\s*(0|1|0?\.\d+)\s*)?\)|\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}|#[0-9a-fA-F]{6})$/;
-var html = document.documentElement;
+shown = { names: [], attr: false, link: null };
 var names = Object.keys(tokens);
 for (var i = 0; i < names.length; i++) {
 var value = tokens[names[i]];
 if ((NAME.test(names[i]) || EXTRA.indexOf(names[i]) !== -1) && typeof value === "string" && VALUE.test(value)) {
 html.style.setProperty(names[i], value);
+shown.names.push(names[i]);
 }
 }
 if (half.attr === "dark") {
 html.setAttribute("data-dz-scheme", "dark");
+shown.attr = true;
 } else if (half.attr === "custom") {
 html.setAttribute("data-dz-scheme", "custom");
+shown.attr = true;
 }
 if (half.dark_file) {
 var query = typeof rec.version === "string" && /^[0-9A-Za-z._-]+$/.test(rec.version) ? "?v=" + rec.version : "";
@@ -43,8 +58,34 @@ link.setAttribute("rel", "stylesheet");
 link.setAttribute("type", "text/css");
 link.setAttribute("href", "styles/" + rec.folder + "/css/dark_theme.css" + query);
 document.getElementsByTagName("head")[0].appendChild(link);
+shown.link = link;
 }
 window.__dzEarlyPaint = { family: rec.family, variant: variant, darkFile: half.dark_file };
+} catch (e) { }
+}
+var last;
+try {
+last = localStorage.getItem("dzPaintAccount");
+} catch (e) { return; }
+if (last === "*") { paint("*"); return; }
+if (typeof last === "string" && last.indexOf("u:") === 0 && last.length > 2) paint(last);
+try {
+var xhr = new XMLHttpRequest();
+xhr.open("GET", "json.htm?type=command&param=getauth", true);
+xhr.timeout = 3000;
+xhr.onload = function() {
+try {
+var auth = xhr.status === 200 ? JSON.parse(xhr.responseText) : null;
+if (!auth || typeof auth !== "object" || auth.status !== "OK") return;
+var account = typeof auth.user !== "string" || auth.user === "" ? null
+: auth.canlogout === true ? "u:" + auth.user : "*";
+window.__dzEarlyAccount = { key: account };
+if (account === last || window.__dzEarlyClosed) return;
+undo();
+if (account !== null) paint(account);
+} catch (e) { }
+};
+xhr.send(null);
 } catch (e) { }
 })();
 var theme = {}, themeName = "", isMobile, lang, themeFolder;
@@ -406,6 +447,7 @@ if (($scope === null) && (typeof angular !== "undefined") && (typeof angular.ele
 clearInterval(checkAngular);
 $scope = angular.element(document.body).injector().get('$rootScope');
 initDeviceLiveUpdates($scope);
+if (typeof dzWatchAccount === "function") dzWatchAccount($scope);
 } else if (++angularPolls >= 600) {
 clearInterval(checkAngular);
 if (typeof dzLog === "function") { dzLog("boot", "angular_absent", { waited_ms: 60000 }); }

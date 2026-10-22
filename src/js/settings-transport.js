@@ -111,6 +111,78 @@ if (dzSettingScope(k) === scope) out.values[k] = dzCloneValue(snap.values[k]);
 });
 return out;
 }
+var DZ_ACCOUNT_POINTER_KEY = "dzPaintAccount";
+function dzAccountKeyOf(auth) {
+if (!auth || typeof auth !== "object" || auth.status !== "OK") return undefined;
+if (typeof auth.user !== "string" || auth.user === "") return null;
+return auth.canlogout === true ? "u:" + auth.user : "*";
+}
+function dzAccountSuffix(account) {
+if (account === "*") return "";
+if (typeof account !== "string" || account.indexOf("u:") !== 0 || account.length < 3) return null;
+try {
+return "@" + encodeURIComponent(account.substring(2));
+} catch (e) {
+return null;
+}
+}
+var dzAccountAtLoad = (function() {
+try {
+var last = typeof localStorage !== "undefined" ? localStorage.getItem(DZ_ACCOUNT_POINTER_KEY) : null;
+if (last === "*" || dzAccountSuffix(last) !== null) return last;
+} catch (e) { }
+return undefined;
+})();
+var dzAccount = (function() {
+window.__dzEarlyClosed = true;
+var early = window.__dzEarlyAccount;
+if (early && typeof early === "object") return early.key;
+return dzAccountAtLoad;
+})();
+var dzAccountRights;
+var dzLastAuthRights;
+var dzAccountLoading = false;
+var DZ_ACCOUNT_TIMEOUT_MS = 5000;
+var DZ_ACCOUNT_PATIENT_MS = 20000;
+function dzAskAccount(timeoutMs) {
+var settled = false;
+var timer = null;
+var abort = typeof AbortController === "function" ? new AbortController() : null;
+var late = new Promise(function(resolve) {
+timer = setTimeout(function() {
+if (abort) abort.abort();
+resolve({ account: undefined, outcome: "timeout" });
+}, typeof timeoutMs === "number" ? timeoutMs : DZ_ACCOUNT_TIMEOUT_MS);
+});
+var init = { credentials: "include" };
+if (abort) init.signal = abort.signal;
+var asked = fetch("json.htm?type=command&param=getauth", init)
+.then(function(r) { return r.json(); })
+.then(function(auth) {
+var account = dzAccountKeyOf(auth);
+if (!settled && account !== undefined) {
+dzLastAuthRights = typeof auth.rights === "number" ? auth.rights : undefined;
+}
+return { account: account, outcome: "answer" };
+})
+.catch(function() { return { account: undefined, outcome: "error" }; });
+return Promise.race([asked, late]).then(function(result) {
+settled = true;
+clearTimeout(timer);
+return result;
+});
+}
+function dzFetchAccount(timeoutMs) {
+return dzAskAccount(timeoutMs).then(function(result) { return result.account; });
+}
+function dzRememberAccount(account) {
+try {
+if (typeof account === "string") localStorage.setItem(DZ_ACCOUNT_POINTER_KEY, account);
+else localStorage.removeItem(DZ_ACCOUNT_POINTER_KEY);
+} catch (e) {
+if (typeof dzLog === "function") dzLog("settings", "account_store_failed", { error: String(e) });
+}
+}
 var dzApiState = { capable: null, perUser: false, tokens: { instance: "", user: "" },
 instanceSnap: null, userSnap: null, noIdentity: false };
 function dzIsAdmin() { return !!(window.my_config && window.my_config.userrights === 2); }
@@ -222,8 +294,37 @@ if (JSON.stringify(intended[k]) !== JSON.stringify(base[k])) out[part][k] = dzCl
 });
 return out;
 }
-function dzApiWrite(param, layer, buildFn) {
-return dzEnqueueWrite(function() { return dzApiWriteNow(param, layer, buildFn); });
+function dzApiWrite(param, layer, buildFn, asked, duringLoad) {
+if (arguments.length < 4) asked = dzAccount;
+return dzEnqueueWrite(function() {
+return dzWithSameAccount(asked, duringLoad === true, function() { return dzApiWriteNow(param, layer, buildFn); });
+});
+}
+function dzWithSameAccount(asked, duringLoad, job) {
+if ((dzAccountLoading && !duringLoad) || asked !== dzAccount) {
+return Promise.resolve(dzRefuseWrite(dzAccount === null ? null : "elsewhere", false));
+}
+return dzFetchAccount(DZ_ACCOUNT_PATIENT_MS).then(function(account) {
+if (account !== undefined && account !== null && account === asked && account === dzAccount &&
+(duringLoad || !dzAccountLoading)) {
+return job();
+}
+return dzRefuseWrite(account, true, asked === undefined);
+});
+}
+var dzLastRefusalAt = 0;
+function dzRefuseWrite(account, fresh, unconfirmed) {
+var reason = account === undefined ? "account_unknown" : account === null ? "logged_out" : "account_changed";
+if (typeof dzLog === "function") dzLog("settings", "write_refused", { reason: reason });
+if (account === undefined) return dzApiFail({ error: "unreachable" });
+var now = Date.now();
+if (now - dzLastRefusalAt > 2000 && typeof ShowNotify === "function") {
+ShowNotify(dzT(account === null ? "toasts.save_refused_logged_out"
+: unconfirmed === true ? "toasts.save_refused_unconfirmed" : "toasts.save_refused_account"), 6000);
+}
+dzLastRefusalAt = now;
+if (fresh && typeof dzAccountMaybeChanged === "function") dzAccountMaybeChanged(account);
+return { ok: false, error: reason };
 }
 function dzApiWriteNow(param, layer, buildFn) {
 var baseSnap = dzApiLayerSnap(layer);
@@ -336,47 +437,53 @@ return base;
 }
 function dzApiSaveSettings() {
 if (dzApiState.noIdentity) return Promise.resolve({ ok: false, error: "no_identity" });
+var asked = dzAccount;
 if (!dzApiState.perUser) {
 return dzApiWrite("themesettings_setdefault", "instance",
-function() { return dzSettingsSnapshot(theme); })
+function() { return dzSettingsSnapshot(theme); }, asked)
 .then(function(res) { if (res.ok) dzApiState.instanceSnap = res.snap; return res; });
 }
 var jobs = [dzApiWrite("themesettings_set", "user",
-function() { return dzSnapshotSubset(dzSettingsSnapshot(theme), "user"); })
+function() { return dzSnapshotSubset(dzSettingsSnapshot(theme), "user"); }, asked)
 .then(function(res) { if (res.ok) dzApiState.userSnap = res.snap; return res; })];
-if (dzIsAdmin()) jobs.push(dzApiSaveHouseIfChanged());
+if (dzIsAdmin()) jobs.push(dzApiSaveHouseIfChanged(asked));
 return Promise.all(jobs).then(function(all) {
 return all.every(function(r) { return r.ok; }) ? { ok: true } : all.find(function(r) { return !r.ok; });
 });
 }
-function dzApiSaveHouseIfChanged() {
+function dzApiSaveHouseIfChanged(asked) {
+if (arguments.length < 1) asked = dzAccount;
 return dzEnsureDefaultsSnap().then(function() {
 var patched = dzBuildInstanceWrite("house");
 if (JSON.stringify(patched) === JSON.stringify(dzApiState.instanceSnap)) return { ok: true };
 return dzApiWrite("themesettings_setdefault", "instance",
-function() { return dzBuildInstanceWrite("house"); })
+function() { return dzBuildInstanceWrite("house"); }, asked)
 .then(function(res) { if (res.ok) dzApiState.instanceSnap = res.snap; return res; });
 }).catch(function() {
 return dzApiFail({ error: "defaults_unreachable", message: "theme.json unreachable for the instance write baseline" });
 });
 }
 function dzApiWriteInstanceFull(snap) {
-return dzApiWrite("themesettings_setdefault", "instance", function() { return snap; })
+return dzApiWrite("themesettings_setdefault", "instance", function() { return snap; }, dzAccount, true)
 .then(function(res) { if (res.ok) dzApiState.instanceSnap = res.snap; return res; });
 }
 function dzApiPromote() {
+var asked = dzAccount;
 return dzEnsureDefaultsSnap().then(function() {
-return dzApiWrite("themesettings_setdefault", "instance", function() { return dzBuildInstanceWrite("user"); })
+return dzApiWrite("themesettings_setdefault", "instance", function() { return dzBuildInstanceWrite("user"); }, asked)
 .then(function(res) { if (res.ok) dzApiState.instanceSnap = res.snap; return res; });
 }).catch(function() {
 return dzApiFail({ error: "defaults_unreachable", message: "theme.json unreachable for the instance write baseline" });
 });
 }
 function dzApiReset(param) {
+var asked = dzAccount;
 return dzEnqueueWrite(function() {
+return dzWithSameAccount(asked, false, function() {
 return dzApiPost({ param: param, theme: themeFolder, reset: "true" }).then(function(d) {
 if (d.status === "OK") return { ok: true };
 return dzApiFail(d);
+});
 });
 });
 }

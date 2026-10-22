@@ -430,7 +430,10 @@ icons_installing: "Installeren {n}/{total}: {name}",
 icons_summary: "{added} geïnstalleerd, {updated} bijgewerkt, {current} al actueel",
 icons_summary_failed: "{summary}; mislukt: {failures}",
 save_failed: "Thema-instellingen konden niet worden opgeslagen ({error})",
-save_failed_local: "Thema-instellingen konden niet in Domoticz worden opgeslagen; ze blijven alleen in deze browser."
+save_failed_local: "Thema-instellingen konden niet in Domoticz worden opgeslagen; ze blijven alleen in deze browser.",
+save_refused_account: "Niet opgeslagen: er is een andere gebruiker ingelogd in deze browser. De pagina toont nu diens instellingen.",
+save_refused_logged_out: "Niet opgeslagen: je bent niet meer ingelogd. Log in en voer de wijziging opnieuw uit.",
+save_refused_unconfirmed: "Niet opgeslagen: Machinon kon niet bevestigen wie er is ingelogd. De pagina toont nu de instellingen van de ingelogde gebruiker; voer de wijziging opnieuw uit."
 },
 problems: {
 badge_title: "Apparaten met problemen",
