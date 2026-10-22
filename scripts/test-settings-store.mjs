@@ -597,24 +597,55 @@ test("busy core: a getauth that times out is not retried and its request is canc
     assert.equal(p.ctx.dzAccount, undefined);
 });
 
-test("busy core: a save from a page with no account yet takes core's account in place and is kept", async () => {
+test("busy core: a save from a page that never learned its account is refused with a notice, and the page moves to core's account", async () => {
+    /* A page core could not name at boot has merged some session's rows; it
+       cannot prove whose, so its first save is refused, not taken in place. */
     const p = busyPage({ authMs: 1, authFails: true, account: "u:alice", auth: { status: "OK", user: "alice", rights: 1, canlogout: true } });
     await p.ctx.reconcileDomoticzSettingsInPlace();
     assert.equal(p.ctx.dzAccount, undefined, "boot could not name the account");
     const fetch1 = p.ctx.fetch;
     p.ctx.fetch = async (url, o) => {
-        if (/param=getauth/.test(url)) { await wait(80); return { json: async () => ({ status: "OK", user: "alice", rights: 1, canlogout: true }) }; }
+        if (/param=getauth/.test(url)) { await wait(20); return { json: async () => ({ status: "OK", user: "alice", rights: 1, canlogout: true }) }; }
         return fetch1(url, o);
     };
-    p.ctx.DZ_ACCOUNT_TIMEOUT_MS = 30;
     p.ctx.theme.features.fade_off_items.enabled = true;
     const res = await vm.runInContext("dzApiSaveSettings()", p.ctx);
-    assert.equal(res.ok, true, JSON.stringify(res));
-    assert.equal(p.ctx.dzAccount, "u:alice");
-    assert.deepEqual(p.toasts, [], "no refusal");
-    const user = p.posts.filter((x) => x.param === "themesettings_set");
-    assert.equal(user.length, 1);
-    assert.equal(JSON.parse(user[0].value).features.fade_off_items, true);
+    assert.equal(res.ok, false);
+    assert.deepEqual(p.posts, []);
+    assert.deepEqual(p.toasts, ["toasts.save_refused_unconfirmed"]);
+    await wait(200);
+    assert.equal(p.ctx.dzAccount, "u:alice", "rebuilt for the account core names");
+});
+
+test("account: a page with no account never writes its merged settings into the account core names later", async () => {
+    /* Review probe take.mjs: getauth hangs at boot while alice's row (with a
+       private theme) merges; then core names bob (another tab logged in). */
+    let who = "slow";
+    const p = busyPage({ authMs: 1, account: undefined });
+    const fetch0 = p.ctx.fetch;
+    p.ctx.fetch = async (url, o) => {
+        if (/param=getauth/.test(url)) {
+            if (who === "slow") return new Promise(() => {});
+            return { json: async () => ({ status: "OK", user: "bob", rights: 1, canlogout: true }) };
+        }
+        if (/param=themesettings_get/.test(url)) {
+            return { json: async () => ({ status: "OK", PerUser: true, instance: { present: false },
+                user: { present: true, value: { schemaVersion: 3, features: {}, values: { scheme: "gruvbox-light",
+                    user_schemes: [{ name: "Alice Private", pair: "p", variant: "dark", base: "dark", colors: {} }] } }, lastupdate: "uA" } }) };
+        }
+        return fetch0(url, o);
+    };
+    vm.runInContext("DZ_ACCOUNT_PATIENT_MS = 50; DZ_ACCOUNT_TIMEOUT_MS = 50;", p.ctx);
+    p.ctx.theme = clone(SHIPPED);
+    await p.ctx.reconcileDomoticzSettingsInPlace();
+    assert.equal(p.ctx.dzAccount, undefined);
+    assert.deepEqual(clone(p.ctx.theme.user_schemes).map((x) => x.name), ["Alice Private"]);
+    who = "bob";
+    const res = await vm.runInContext("theme.card_min_width = 333; Promise.all([dzApiSaveSettings(), dzApiSaveSettings()])", p.ctx);
+    assert.deepEqual(clone(res).map((r) => r.ok), [false, false]);
+    assert.deepEqual(p.posts, [], "nothing reached bob's row");
+    await wait(200);
+    assert.equal(p.ctx.dzAccount, "u:bob", "the page moves to bob");
 });
 
 test("account: a getauth answer after its own timeout changes nothing", async () => {

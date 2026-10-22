@@ -434,7 +434,8 @@ language = {
     save_failed: "Nie udało się zapisać ustawień motywu ({error})",
     save_failed_local: "Nie udało się zapisać ustawień motywu w Domoticzu; zostały zachowane tylko w tej przeglądarce.",
     save_refused_account: "Nie zapisano: w tej przeglądarce zalogował się inny użytkownik. Strona pokazuje teraz jego ustawienia.",
-    save_refused_logged_out: "Nie zapisano: nie jesteś już zalogowany. Zaloguj się i wprowadź zmianę ponownie."
+    save_refused_logged_out: "Nie zapisano: nie jesteś już zalogowany. Zaloguj się i wprowadź zmianę ponownie.",
+    save_refused_unconfirmed: "Nie zapisano: Machinon nie mógł potwierdzić, kto jest zalogowany. Strona pokazuje teraz ustawienia zalogowanego użytkownika; wprowadź zmianę ponownie."
   },
   problems: {
     badge_title: "Urządzenia z problemem",

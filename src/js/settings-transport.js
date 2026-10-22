@@ -581,32 +581,21 @@ function dzApiWrite(param, layer, buildFn, asked, duringLoad) {
    Not airtight: one round trip separates getauth from the write, and core
    has no "write as account X" parameter, so a login landing in exactly that
    window is not caught. */
-/* The account a page with no account took in place (dzTakeAccount), with
-   no rebuild since: a write asked before that, while the account was still
-   unknown, was asked for the same settings. */
-var dzAccountFromUnknown = null;
-
 function dzWithSameAccount(asked, duringLoad, job) {
-    if (asked === undefined && dzAccount !== undefined && dzAccount === dzAccountFromUnknown) asked = dzAccount;
     if ((dzAccountLoading && !duringLoad) || asked !== dzAccount) {
         return Promise.resolve(dzRefuseWrite(dzAccount === null ? null : "elsewhere", false));
     }
+    /* A page core could not name at boot (getauth timed out or failed) has
+       merged some session's rows, and nothing proves whose: the account core
+       names now may be another one (a login in another tab). Such a page is
+       never given an account at save time; the write is refused, and the
+       page is rebuilt for the account core names. */
     return dzFetchAccount(DZ_ACCOUNT_PATIENT_MS).then(function(account) {
-        /* A page with no account yet (core did not answer the boot in time)
-           holds no cache, only the shipped theme.json and the session's own
-           rows, so the account core names now is the one those belong to:
-           take it in place, as the boot does (settings-store.js
-           dzConfirmAccount), and the edit goes out. */
-        if (asked === undefined && dzAccount === undefined && !dzAccountLoading &&
-            typeof account === "string" && typeof dzTakeAccount === "function") {
-            dzTakeAccount(account);
-            asked = account;
-        }
         if (account !== undefined && account !== null && account === asked && account === dzAccount &&
             (duringLoad || !dzAccountLoading)) {
             return job();
         }
-        return dzRefuseWrite(account, true);
+        return dzRefuseWrite(account, true, asked === undefined);
     });
 }
 
@@ -615,13 +604,14 @@ function dzWithSameAccount(asked, duringLoad, job) {
    already moved on); fresh is true when it is a new answer the page must
    follow. */
 var dzLastRefusalAt = 0;
-function dzRefuseWrite(account, fresh) {
+function dzRefuseWrite(account, fresh, unconfirmed) {
     var reason = account === undefined ? "account_unknown" : account === null ? "logged_out" : "account_changed";
     if (typeof dzLog === "function") dzLog("settings", "write_refused", { reason: reason });
     if (account === undefined) return dzApiFail({ error: "unreachable" });
     var now = Date.now();
     if (now - dzLastRefusalAt > 2000 && typeof ShowNotify === "function") {
-        ShowNotify(dzT(account === null ? "toasts.save_refused_logged_out" : "toasts.save_refused_account"), 6000);
+        ShowNotify(dzT(account === null ? "toasts.save_refused_logged_out"
+            : unconfirmed === true ? "toasts.save_refused_unconfirmed" : "toasts.save_refused_account"), 6000);
     }
     dzLastRefusalAt = now;
     if (fresh && typeof dzAccountMaybeChanged === "function") dzAccountMaybeChanged(account);
