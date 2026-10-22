@@ -43,9 +43,9 @@ SCHEME_KEY_TO_TOKENS = {
     "warning": ["--dz-btn-warning-bg"],
     "alt_text": ["--secondary-text-color"],
     "accent_text": ["--dz-accent-text"],
-    # Semantic identity colours. sun and moon are the theme's own tokens; the
-    # five energy roles carry Domoticz core's own token names, which is what
-    # makes core's Dynamic Dashboard follow the scheme. Only Paper overrides
+    # Semantic identity colours. sun, moon and the energy grid are the theme's
+    # own tokens; the other energy roles carry Domoticz core's own token names,
+    # which is what makes core's Dynamic Dashboard follow the scheme. Only Paper overrides
     # any of them, so for every other scheme these resolve from the base.
     "sun": ["--dz-sun-color"],
     "moon": ["--dz-moon-color"],
@@ -54,6 +54,7 @@ SCHEME_KEY_TO_TOKENS = {
     "energy_gas": ["--dz-widget-energy-gas"],
     "energy_water": ["--dz-widget-energy-water"],
     "energy_price": ["--dz-widget-energy-price"],
+    "energy_grid": ["--dz-widget-energy-grid"],
 }
 
 # Emitted in this order, so the generated file diffs cleanly.

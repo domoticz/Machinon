@@ -8,6 +8,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 - On the Energy page, the outside temperature is now readable in the light colour schemes instead of white on a light background
 - On the Energy page, the icons inside the bubbles are now readable in the light colour schemes instead of white on a pale background
 - On a phone, the Energy page now shows its diagram large enough to read; swipe sideways to see all of it
+- On the Energy page in the light colour schemes, the bubble outlines and the lines between them are now clearly visible, each in its own colour (gold for solar, green for the battery, teal for the grid, purple for your home)
 - On the phone dashboard with Domoticz 2026.4 or newer, a switch that is off lights up its Off button again, so every switch shows whether it is on or off (#259)
 - The Theme Hub's Colors and schemes tab now shows each theme as one card with its light and dark version, and you choose Light, Dark or Follow device; Follow device switches along with your phone or computer's own light/dark setting, on each device separately
 - After updating, your colours stay as they were (the mode is set to Light or Dark to match them); new installations start in Follow device

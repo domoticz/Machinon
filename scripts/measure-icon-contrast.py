@@ -35,10 +35,12 @@ STATUS_FLOOR = 3.0
 LIGHT = {
     "import": "#a37300", "export": "#3e8c42", "gas": "#e83700",
     "water": "#0883bb", "price": "#9d55ff", "sun": "#8c730e", "moon": "#567ac6",
+    "grid": "#0b8a98",
 }
 DARK = {
     "import": "#ffb300", "export": "#66bb6a", "gas": "#ff7043",
     "water": "#29b6f6", "price": "#c8a0ff", "sun": "#fad232", "moon": "#8ba4d8",
+    "grid": "#00c6da",
 }
 # Paper is deliberately monochrome and overrides the family (see the plan's
 # Task 3). Same hues at 38% of the base saturation (export ends at 14.5%
@@ -46,10 +48,12 @@ DARK = {
 PAPER_LIGHT = {
     "import": "#9e8447", "export": "#6d926f", "gas": "#b97964",
     "water": "#5390ac", "price": "#9879c3", "sun": "#96884f", "moon": "#7a87a4",
+    "grid": "#6b8e93",
 }
 PAPER_DARK = {
     "import": "#89733e", "export": "#5b7b5d", "gas": "#a9624c",
     "water": "#467991", "price": "#8864b9", "sun": "#80733c", "moon": "#657595",
+    "grid": "#5a787d",
 }
 
 # Device-status glow triplets (dz-tokens.css / dark.css), consumed by

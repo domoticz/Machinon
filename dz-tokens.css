@@ -168,6 +168,14 @@
        core's value and lightness lowered until it clears the floor: worst
        case 3.35:1 across the light schemes' own cards. */
     --dz-moon-color:               #567ac6;
+    /* The power grid on the Energy page (css/energy.css). Core has no token
+       for it: its template hardcodes a cyan #00c6da (ring) and #10d6ea (band)
+       tuned for its own dark page, 1.6-2.0:1 on a light card. Theme-own name in
+       core's energy family, so a plain :root literal wins as for sun and moon.
+       Hue held on core's cyan (OKLCH h 207.6) and lightness lowered until it
+       clears the floor: worst case 3.27:1 (gruvbox-light card). Kept apart from
+       water, the nearest identity, by OKLab distance 6.4 (core's own pair: 7.9). */
+    --dz-widget-energy-grid:       #0b8a98;
 
     /* ---- Typography tokens (scheme-independent; schemes never override) ----
        The ONLY place font sizes/weights/families are defined. Enforced by

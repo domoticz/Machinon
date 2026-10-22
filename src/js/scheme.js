@@ -71,7 +71,7 @@ function setColorScheme() {
 
    Runs for EVERY scheme, not just custom ones, because "is this a built-in"
    is the wrong question - the right one is "does this colour clear its floor
-   on the card in front of us". A shipped scheme answers yes to all ten and
+   on the card in front of us". A shipped scheme answers yes to every one and
    costs one contrast comparison each: measured in Chromium, 0.04ms for the
    whole pass, so there is nothing to gate on.
 
@@ -80,7 +80,7 @@ function setColorScheme() {
 var DZ_REPAIR_STATUS = ['timeout', 'lowbat', 'protected'];
 var DZ_REPAIR_IDENTITY = [
     '--dz-widget-amber', '--dz-widget-energy-export', '--dz-widget-energy-gas',
-    '--dz-widget-energy-water', '--dz-widget-energy-price',
+    '--dz-widget-energy-water', '--dz-widget-energy-price', '--dz-widget-energy-grid',
     '--dz-sun-color', '--dz-moon-color'
 ];
 
@@ -203,7 +203,7 @@ var DZ_CUSTOM_TOKENS = [
     '--dz-btn-success-bg', '--dz-btn-warning-bg', '--secondary-text-color', '--dz-accent-values',
     '--dz-accent-text', '--dz-sun-color', '--dz-moon-color', '--dz-accent-red-values',
     '--dz-widget-amber', '--dz-widget-energy-export', '--dz-widget-energy-gas',
-    '--dz-widget-energy-water', '--dz-widget-energy-price'
+    '--dz-widget-energy-water', '--dz-widget-energy-price', '--dz-widget-energy-grid'
 ];
 
 // Apply the user's custom colours as --dz-* overrides on <html> via setProperty.
@@ -242,6 +242,7 @@ function applyCustomColorScheme(cs, target) {
     set('--dz-widget-energy-gas', cs.energy_gas);
     set('--dz-widget-energy-water', cs.energy_water);
     set('--dz-widget-energy-price', cs.energy_price);
+    set('--dz-widget-energy-grid', cs.energy_grid);
     if (cs.main_color) { s.setProperty('--dz-accent-values', hexToRGB(cs.main_color, true)); }
     /* danger-button tints derive from this triplet; without it schemes kept
        the base red's rgba tints under their own error colour */

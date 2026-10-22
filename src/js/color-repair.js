@@ -1,8 +1,8 @@
 /* Contrast repair for the theme's FIXED colours.
 
-   Ten colours in the theme are not derived from the active scheme: the three
-   device-status colours (timeout, low battery, protected) and the seven
-   identity colours (energy import/export/gas/water/price, sun, moon). Each has
+   The theme's fixed colours are not derived from the active scheme: the
+   device-status colours (timeout, low battery, protected) and the identity
+   colours (energy import/export/gas/water/price/grid, sun, moon). Each has
    one light value and one dark value, chosen by MEASURING them against the
    eight schemes that ship (scripts/measure-icon-contrast.py holds that gate).
 
@@ -10,7 +10,7 @@
    LIGHT set, because src/js/scheme.js sets data-dz-scheme to "custom" rather
    than "dark" when scheme_base is undefined, so nothing in dark.css applies:
    measured 2026-09-01, protected navy on a dark custom card is 1.07:1. A
-   mid-toned palette is worse - all seven identity colours land at 1.01-1.14:1.
+   mid-toned palette is worse - every identity colour lands at 1.01-1.14:1.
    The wizard's generator deliberately does not emit these ("a user does not
    choose what colour water is", src/js/scheme-generator.js), so a generated
    scheme is exposed the same way on a mid-toned card. gruvbox is the proof

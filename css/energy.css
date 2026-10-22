@@ -56,3 +56,63 @@ html #emain {
 #emain svg text {
     fill: var(--dz-body-text);
 }
+
+
+/* Light schemes only: core draws the rings, the flow bands and the moving flow markers in
+   neon hues tuned for its own dark page, which sit at 1.2-2:1 on a light card. Each bubble
+   takes the identity token for what it is (DESIGN.md "Semantic identity colours", solved for
+   3:1 on every light card) and each band its source bubble's tone, as core pairs them.
+   Dark schemes keep core's colours, hence the gate on the dark base.
+   --energy-tone is local to this diagram, so each element names its tone once and the
+   shared rules below paint it. */
+html:not([data-dz-scheme="dark"]) #emain :is(.ecircle-solar, #SolarToBatt, #SolarToGrid, #SolarToHome, ellipse:has(> [id^="Solar"])) {
+    --energy-tone: var(--dz-sun-color);
+}
+html:not([data-dz-scheme="dark"]) #emain :is(.ecircle-batt, #BattNet, #BattHome, ellipse:has(> [id^="Batt"])) {
+    --energy-tone: var(--dz-widget-energy-export);
+}
+html:not([data-dz-scheme="dark"]) #emain :is(.ecircle-grid, #GridToHome, ellipse:has(> [id^="GridToHome"])) {
+    --energy-tone: var(--dz-widget-energy-grid);
+}
+html:not([data-dz-scheme="dark"]) #emain .ecircle-home {
+    --energy-tone: var(--dz-widget-energy-price);
+}
+html:not([data-dz-scheme="dark"]) #emain .ecircle-gas {
+    --energy-tone: var(--dz-widget-energy-gas);
+}
+html:not([data-dz-scheme="dark"]) #emain .ecircle-water {
+    --energy-tone: var(--dz-widget-energy-water);
+}
+/* The custom bubbles carry no identity, so they keep core's own olive: it already clears
+   the floor on every light card (3.67:1 at worst, gruvbox-light) and stays apart from the
+   identity tones. */
+html:not([data-dz-scheme="dark"]) #emain .ecircle-custom {
+    --energy-tone: #668044;
+}
+/* Core's tint and its :hover tint are restated in the bubble's own tone: the id here
+   outranks core's .ecircle-*:hover rule, so leaving the hover out would freeze it. */
+html:not([data-dz-scheme="dark"]) #emain .ecircle {
+    stroke: var(--energy-tone);
+    fill: color-mix(in srgb, var(--energy-tone) 6%, transparent);
+}
+html:not([data-dz-scheme="dark"]) #emain .ecircle:hover {
+    fill: color-mix(in srgb, var(--energy-tone) 25%, transparent);
+}
+html:not([data-dz-scheme="dark"]) #emain :is(#SolarToGrid, #SolarToHome, #BattNet, #BattHome) {
+    stroke: var(--energy-tone);
+}
+/* Two bands and the markers set their colour in an inline style attribute, which only
+   !important outranks. */
+html:not([data-dz-scheme="dark"]) #emain :is(#SolarToBatt, #GridToHome) {
+    stroke: var(--energy-tone) !important;
+}
+html:not([data-dz-scheme="dark"]) #emain ellipse {
+    fill: var(--energy-tone) !important;
+}
+/* The animated dashes run down the middle of a band. Core's red is 1.1-1.3:1 against the
+   identity tones, so on a light card the dashes take the card colour and read as gaps
+   moving along the band, at whatever contrast the band itself has. Two of them carry the
+   red in an inline style. */
+html:not([data-dz-scheme="dark"]) #emain [id$="-flow"] {
+    stroke: var(--dz-body-bg) !important;
+}

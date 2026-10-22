@@ -45,6 +45,10 @@ html[data-dz-scheme="dark"] {
      dark schemes, so there is no reason to move it. See the long note in
      dz-tokens.css for why this lives per base rather than per scheme. */
   --dz-moon-color:           #8ba4d8;
+  /* The Energy page's grid: core's own cyan, unchanged, since the diagram keeps
+     core's colours on the dark schemes (css/energy.css gates on the light base).
+     5.57:1 at worst (gruvbox-dark card). */
+  --dz-widget-energy-grid:   #00c6da;
 
   /* Dynamic Dashboard chrome tokens (dark). panel-bg and skeleton derive in
      dz-tokens.css and track this scheme's widget-bg/body tokens; only the
