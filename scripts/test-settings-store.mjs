@@ -686,8 +686,8 @@ test("account: on a browser that has used the shared identity, a named login kee
 
 /* ---- Reset against the legacy seed (#262) ----
 
-   A core with the ThemeSettings API that still holds the 2026.1 legacy
-   uservariables (left in place so a downgrade keeps working). The legacy
+   A core with the ThemeSettings API that still holds the legacy
+   uservariables of a Domoticz before 2026.4 (Machinon leaves them alone). The legacy
    seed copies them into the house row when a load finds no rows at all, so
    whatever a reset leaves behind decides whether the next boot undoes it.
    The fake keeps core's row semantics (WebServerCmds.cpp
@@ -707,6 +707,8 @@ function legacyCore({ perUser = true, legacy = true } = {}) {
     }
     return core;
 }
+
+const EMPTY_ROW = { schemaVersion: 3, features: {}, values: {} };
 
 function corePage(core, { user = "admin", rights = 2 } = {}) {
     const account = core.perUser ? "u:" + user : "*";
@@ -768,14 +770,14 @@ function corePage(core, { user = "admin", rights = 2 } = {}) {
     return { ctx, posts, boot: () => ctx.checkUserVariableThemeSettings() };
 }
 
-test("legacy seed: the first boot on a core with the API copies the 2026.1 settings into the house row", async () => {
+test("legacy seed: the first boot on a core with the API copies the pre-2026.4 settings into the house row", async () => {
     for (const perUser of [false, true]) {
         const core = legacyCore({ perUser });
         const page = corePage(core);
         await page.boot();
         assert.equal(core.instance && core.instance.value.values.button_name, "Legacy House", "perUser=" + perUser);
         assert.equal(page.ctx.theme.button_name, "Legacy House");
-        assert.equal(core.uservars.length, 3, "the legacy variables stay for a downgrade");
+        assert.equal(core.uservars.length, 3, "the legacy variables are left alone");
     }
 });
 
@@ -787,10 +789,14 @@ test("legacy seed: a reset of the theme is not undone by the next boot (#262)", 
         const jobs = ["dzApiResetHouse()"].concat(perUser ? ["dzApiResetUser()"] : []);
         const res = await vm.runInContext("Promise.all([" + jobs.join(",") + "])", first.ctx);
         assert.deepEqual(clone(res).map((r) => r.ok), jobs.map(() => true));
+        assert.deepEqual(clone(core.instance.value), EMPTY_ROW, "the house row holds no settings");
         const next = corePage(core);
         await next.boot();
         assert.equal(next.ctx.theme.button_name, SHIPPED.button_name, "perUser=" + perUser + ": the reset stands");
-        assert.equal(core.uservars.length, 3, "the legacy variables stay for a downgrade");
+        assert.deepEqual(clone(next.ctx.dzSettingsSnapshot(next.ctx.theme)), clone(next.ctx.dzSettingsSnapshot(clone(SHIPPED))),
+                         "every feature and value is the shipped default");
+        assert.deepEqual(clone(core.instance.value), EMPTY_ROW, "the boot wrote nothing back");
+        assert.equal(core.uservars.length, 3, "the legacy variables are left alone");
     }
 });
 
@@ -854,4 +860,36 @@ test("reset: the first house save after a reset builds on the shipped defaults, 
     assert.deepEqual(shape(reset.instance), shape(fresh.instance));
     assert.equal(reset.instance.value.values.card_min_width, SHIPPED.card_min_width);
     assert.equal(reset.instance.value.values.button_name, "After");
+});
+
+test("reset: a house save that meets a reset builds on the shipped defaults, not on the empty row", async () => {
+    /* Admin A still holds the full row from before admin B's reset, so A's
+       save is a conflict. Merged onto the empty row it would store only A's
+       edit, a row without the defaults every later save builds on. */
+    const core = legacyCore({ perUser: true });
+    const a = corePage(core);
+    await a.boot();
+    const b = corePage(core, { user: "admin2" });
+    await b.boot();
+    assert.equal((await b.ctx.dzApiResetHouse()).ok, true);
+    assert.equal((await vm.runInContext("theme.button_name = 'A edit'; dzApiSaveSettings()", a.ctx)).ok, true);
+    /* Through JSON, as stored: keys theme.json leaves unset drop out. */
+    const defaults = clone(a.ctx.dzSettingsSnapshot(clone(SHIPPED)));
+    const row = core.instance.value;
+    assert.deepEqual(Object.keys(row.features).sort(), Object.keys(defaults.features).sort());
+    assert.deepEqual(Object.keys(row.values).sort(), Object.keys(defaults.values).sort());
+    assert.equal(row.values.button_name, "A edit");
+    assert.equal(row.values.card_min_width, SHIPPED.card_min_width);
+});
+
+test("reset: the empty row passes the migration ladder unchanged", async () => {
+    /* A ladder step that fills an absent key would pin a value into the
+       reset row, which must keep following theme.json. */
+    const core = legacyCore({ perUser: false, legacy: false });
+    const page = corePage(core);
+    await page.boot();
+    assert.equal((await page.ctx.dzApiResetHouse()).ok, true);
+    const stored = clone(core.instance.value);
+    assert.deepEqual(stored, EMPTY_ROW);
+    assert.deepEqual(clone(page.ctx.dzMigrateSnapshot(clone(stored))), EMPTY_ROW);
 });

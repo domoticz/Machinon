@@ -38,7 +38,9 @@ function dzNormaliseSchemeMode(t) {
    cache carries no version stamp, so dzThemeFromCache (settings-store.js) runs
    it through the whole ladder from version 1 on every warm boot. In practice
    that means a step only fills keys that are absent and only removes keys
-   that are retired. */
+   that are retired. A step must also leave an empty row ({features:{},
+   values:{}}, what a house reset stores, dzApiResetHouse) empty: a key filled
+   in there would pin a value the row is meant to leave to theme.json. */
 var DZ_SETTINGS_MIGRATIONS = [
     /* 1 -> 2: the single `notification` toggle became warn_timeout and
        warn_battery (#198). Both are seeded from the old value, so nobody's
@@ -458,9 +460,9 @@ function dzWaitForAdminKnown() {
    row absent again: a house reset writes an empty row (dzApiResetHouse).
    The legacy loader (dzThemeSettingsLoad) already
    applies onto theme, so a full snapshot afterwards IS the migrated
-   single-layer state. Legacy variables are left in place, frozen (the
-   downgrade story, spec): a core rolled back to a version without the
-   native API still finds its uservariables untouched. Fail closed:
+   single-layer state. The legacy variables are left alone: nothing here
+   writes or deletes them, and on a core with the API nothing reads them
+   once the house row exists. Fail closed:
    dzThemeSettingsLoad and dzApiWriteInstanceFull never reject on their own
    (traced: the ajax/fetch
    layers underneath both resolve tri-state/ok-flag outcomes rather than
@@ -528,9 +530,14 @@ function dzApiLayerSnap(layer) {
    Keys the other writer touched and this one did not are therefore kept, and
    the pending edit still wins on its own keys. base null (no row yet) makes
    every intended key count as changed, which is the right reading of "we
-   believed there was nothing there". */
-function dzMergeConflict(baseSnap, intendedSnap, freshSnap) {
+   believed there was nothing there". emptyBase: what an EMPTY fresh row (a
+   house reset, dzApiResetHouse) stands for, the factory defaults for the
+   instance layer, the same base dzBuildInstanceWrite uses. Without it the
+   merge would store only this write's own keys, and every later save builds
+   on that row instead of on the defaults. */
+function dzMergeConflict(baseSnap, intendedSnap, freshSnap, emptyBase) {
     if (!freshSnap) return intendedSnap;
+    if (emptyBase && dzSnapIsEmpty(freshSnap)) freshSnap = emptyBase;
     /* Migrated first: the fresh row may have been written by an older theme in
        another browser, and the result is stamped with the current version, so a
        retired key carried over here would never meet the ladder again. */
@@ -626,6 +633,7 @@ function dzRefuseWrite(account, fresh, unconfirmed) {
 function dzApiWriteNow(param, layer, buildFn, overwrite) {
     var baseSnap = dzApiLayerSnap(layer);
     var intended = buildFn();
+    var outcome = null;
     function send(snap) {
         return dzApiPost({ param: param, theme: themeFolder,
                            value: JSON.stringify(snap), lastupdate: dzApiState.tokens[layer] || "" });
@@ -633,9 +641,15 @@ function dzApiWriteNow(param, layer, buildFn, overwrite) {
     return send(intended).then(function(d) {
         if (d.status === "OK") { dzApiState.tokens[layer] = d.lastupdate || ""; return { ok: true, snap: intended }; }
         if (d.error !== "conflict") return dzApiFail(d);
-        return dzApiFetchLayers().then(function(outcome) {
+        return dzApiFetchLayers().then(function(o) {
+            outcome = o;
+            /* Only the instance layer is ever stored empty (the house reset). */
+            var fresh = dzApiLayerSnap(layer);
+            var needDefaults = o !== DZ_LOAD_FAILED && overwrite !== true && layer === "instance" && dzSnapIsEmpty(fresh) && !!fresh;
+            return needDefaults ? dzEnsureDefaultsSnap().catch(function() { return null; }) : null;
+        }).then(function(emptyBase) {
             var merged = (outcome === DZ_LOAD_FAILED || overwrite === true) ? intended
-                                                      : dzMergeConflict(baseSnap, intended, dzApiLayerSnap(layer));
+                                                      : dzMergeConflict(baseSnap, intended, dzApiLayerSnap(layer), emptyBase);
             return send(merged).then(function(d2) {
                 if (d2.status === "OK") { dzApiState.tokens[layer] = d2.lastupdate || ""; return { ok: true, snap: merged }; }
                 return dzApiFail(d2);
@@ -885,22 +899,20 @@ function dzApiReset(param) {
    (that needs the house row absent too, see dzApiResetHouse). */
 function dzApiResetUser() { return dzApiReset("themesettings_set").then(function(r) { if (r.ok) { dzApiState.userSnap = null; dzApiState.tokens.user = ""; } return r; }); }
 
-/* The house reset writes an EMPTY row instead of deleting it (#262). An
-   absent house row is what dzSeedFromLegacyIfPossible reads as "never
-   migrated", and the 2026.1 uservariables it copies from are deliberately
-   kept for a downgrade, so a deleted row was re-seeded with the old
-   settings on the next admin load. A present row is the marker that the
-   install has left the legacy store; carrying no keys, it applies nothing,
-   so every setting follows the shipped theme.json, including defaults a
-   later version changes, which a row of today's defaults would freeze.
-   Absent therefore keeps meaning one thing only: this install has never
-   stored a house row, which is exactly when the seed must run.
+/* A house reset must never leave the row absent (#262): absent is what
+   dzSeedFromLegacyIfPossible reads as "never migrated", and the legacy
+   uservariables it copies from are still there, so the next admin load
+   would bring the old settings back. The reset therefore stores an empty
+   row. It marks the install as migrated and applies nothing, so the house
+   follows the shipped theme.json until the next house save, which builds a
+   full row on the factory defaults (dzBuildInstanceWrite, dzMergeConflict),
+   as on a fresh install. Absent keeps one meaning only: this install has
+   never stored a house row, exactly when the seed must run.
 
-   A single upsert rather than a delete followed by a write: there is no
-   moment with the row absent for another tab's boot to seed into, and a
-   failure leaves the old row rather than none. A conflict is retried with
-   the fresh token and the same empty row, never merged: like the delete it
-   replaces, the reset discards whatever the row holds. */
+   One upsert, so there is no moment without a row for another tab's boot
+   to seed into, and a failed write leaves the old row. A conflict is
+   retried with the fresh token and the same empty row, never merged: a
+   reset discards whatever the row holds. */
 function dzApiResetHouse() {
     var asked = dzAccount;
     var empty = { schemaVersion: DZ_SETTINGS_SCHEMA_VERSION, features: {}, values: {} };
