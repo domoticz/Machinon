@@ -511,7 +511,7 @@ test("account unknown at boot: no cache is the base, none is written, and getaut
 });
 
 test("account: a getauth that never answers gives up, so the boot and the write chain go on", async () => {
-    const p = stalePage({ authMs: 60000 });
+    const p = stalePage({ authMs: 1500 });
     p.ctx.DZ_ACCOUNT_TIMEOUT_MS = 30;
     const started = Date.now();
     assert.equal(await p.ctx.dzFetchAccount(), undefined);
@@ -551,4 +551,12 @@ test("account: a boot that read no cache takes core's account in place, without 
     assert.equal(p.ctx.theme.marker, "booted from theme.json", "not rebuilt");
     assert.equal(loadingSeen, false, "writes were never held");
     assert.ok(p.store.has("machinon.themeSettings"), "the shared identity's cache is written");
+});
+
+test("account: a write waits for a slow getauth longer than the boot does, instead of failing", async () => {
+    const p = stalePage({ authMs: 120, account: "u:bob", auth: { status: "OK", user: "bob", rights: 2, canlogout: true } });
+    p.ctx.DZ_ACCOUNT_TIMEOUT_MS = 30;
+    const res = await vm.runInContext("dzApiResetUser()", p.ctx);
+    assert.equal(res.ok, true);
+    assert.deepEqual(p.posts.map((x) => x.param), ["themesettings_set"]);
 });

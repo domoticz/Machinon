@@ -262,13 +262,18 @@ var dzLastAuthRights;
 var dzAccountLoading = false;
 
 /* A getauth that never answers must not hold the boot merge or the write
-   chain (every write waits on one). */
+   chain (every write waits on one). A write waits longer than the boot: a
+   busy core was measured answering getauth after 5.9 and 6.6 s to a WebKit
+   page with other pages polling it, and a write refused for that is a lost
+   setting, while the write itself would have waited as long. */
 var DZ_ACCOUNT_TIMEOUT_MS = 5000;
+var DZ_ACCOUNT_WRITE_TIMEOUT_MS = 20000;
 
-function dzFetchAccount() {
+function dzFetchAccount(timeoutMs) {
     var timer = null;
     var late = new Promise(function(resolve) {
-        timer = setTimeout(function() { resolve(undefined); }, DZ_ACCOUNT_TIMEOUT_MS);
+        timer = setTimeout(function() { resolve(undefined); },
+                           typeof timeoutMs === "number" ? timeoutMs : DZ_ACCOUNT_TIMEOUT_MS);
     });
     var asked = fetch("json.htm?type=command&param=getauth", { credentials: "include" })
         .then(function(r) { return r.json(); })
@@ -561,7 +566,7 @@ function dzWithSameAccount(asked, duringLoad, job) {
     if ((dzAccountLoading && !duringLoad) || asked !== dzAccount) {
         return Promise.resolve(dzRefuseWrite(asked === dzAccount ? dzAccount : "elsewhere", false));
     }
-    return dzFetchAccount().then(function(account) {
+    return dzFetchAccount(DZ_ACCOUNT_WRITE_TIMEOUT_MS).then(function(account) {
         if (account !== undefined && account !== null && account === asked && account === dzAccount &&
             (duringLoad || !dzAccountLoading)) {
             return job();
