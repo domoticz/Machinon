@@ -1,9 +1,10 @@
 /*
   energy.css - energy dashboard popup for Machinon.
   One of the feature files split out of custom.css - see the @import block in
-  custom.css. Extracted because its selectors (#emain and its descendants) are unique to
-  this feature and appear nowhere else, so relocating it earlier in the cascade changes no
-  outcome (verified). Keep touched energy rules here.
+  custom.css. Extracted because its selectors (#emain and its descendants, plus the
+  #dashcontent that directly holds #emain, scoped with :has) are unique to this feature and
+  appear nowhere else, so relocating it earlier in the cascade changes no outcome (verified).
+  Keep touched energy rules here.
 */
 /* Energy dashboard. Core styles #emain from a <style> block in its template, which loads
    after the theme; the extra type selector outranks that id rule without !important. */
@@ -13,25 +14,53 @@ html #emain {
     background: var(--dz-body-bg);
     border-color: var(--dz-accent-color);
 }
-/* Phone: core scales the diagram to the card's width (its viewBox is wider than tall), so
-   in a portrait card it fills about a third of the height and its labels render at 4-7px.
-   Here the card keeps its height and takes the width the diagram needs at that height,
-   and the page area scrolls sideways. 74.5 / 63 is the viewBox of the widest layout (core
-   EnergyDashboardController calculateViewport, custom bubbles shown); a narrower layout
-   only leaves margin inside the card. Core positions the weather overlay from #emain's own
-   size, so it stays aligned. The scroll container is scoped to this page because the
-   classic dashboard reuses the #dashcontent id. */
-@media (max-width: 767px) {
+/* Phone, portrait: core scales the diagram to the card's width (its viewBox is wider than
+   tall), so in a portrait card it fills about a third of the height and its labels render at
+   4-7px. Here the card keeps its height and takes the width the diagram needs at that
+   height, and the page area scrolls sideways. In landscape the height is the limit anyway,
+   so the card keeps core's centred full width there.
+   The width follows the viewBox core picks (EnergyDashboardController calculateViewport:
+   63 or 74.5 wide, 63, 58 or 43 high, by which bubbles are configured), read from the
+   attribute with :has. Core positions the weather overlay from #emain's own size after it
+   sets the viewBox, so the overlay stays aligned.
+   The scroll area bleeds to the screen edges by cancelling the two paddings around it:
+   bootstrap-responsive's 20px body padding below 768px (10px under body.dashMobile) and
+   sidemenu.css's 2% on .bannercontent, which is 2% of the container and so 2/96 of this
+   element's containing block. Built from those rather than from 100vw, which would include
+   the stable scrollbar gutter. The bottom padding is room for core's card shadow (0 8px 32px: 40px below the
+   card, 24px above), which a scroll container would otherwise clip; the negative bottom
+   margin gives that room back to the page. The faint top edge stays clipped: room above
+   would need a negative top margin, which pulls this scroll box up beside core's floated
+   #search box, and a scroll box narrows to clear a float.
+   The scroll container is scoped to this page because the classic dashboard reuses the
+   #dashcontent id. */
+@media (max-width: 767px) and (orientation: portrait) {
     html #dashcontent:has(> #emain) {
         overflow-x: auto;
-        margin-left: calc(50% - 50vw);
-        margin-right: calc(50% - 50vw);
-        padding: 0 8px;
+        margin: 0 calc(-20px - 2.0833%) -40px;
+        padding: 0 8px 40px;
         box-sizing: border-box;
     }
+    /* dashboard_mobile.css narrows the body padding to 10px once core has put the phone
+       dashboard's body.dashMobile class on, which outlives the dashboard. */
+    body.dashMobile #dashcontent:has(> #emain) {
+        margin-left: calc(-10px - 2.0833%);
+        margin-right: calc(-10px - 2.0833%);
+    }
     html #emain {
-        width: calc((90vh - 110px) * 74.5 / 63);
+        --energy-vb-w: 74.5;
+        --energy-vb-h: 63;
+        width: calc((90vh - 110px) * var(--energy-vb-w) / var(--energy-vb-h));
         margin: 0;
+    }
+    html #emain:has(> svg:is([viewBox$=" 63 63"], [viewBox$=" 63 58"], [viewBox$=" 63 43"])) {
+        --energy-vb-w: 63;
+    }
+    html #emain:has(> svg[viewBox$=" 58"]) {
+        --energy-vb-h: 58;
+    }
+    html #emain:has(> svg[viewBox$=" 43"]) {
+        --energy-vb-h: 43;
     }
 }
 
@@ -41,10 +70,9 @@ html #emain {
 #emain svg {
     font-family: var(--dz-font-family) !important;
 }
-/* The bubble icons: core fills .eicon near-white for its own dark page, which leaves them
-   invisible on the pale bubble fills of a light scheme. The template marks them with the
-   class, not an id. The id outranks core's class, which loads after the theme, so no
-   !important is needed. */
+/* The bubble icons (core's .eicon): core fills them near-white for its own dark page, which
+   leaves them invisible on the pale bubble fills of a light scheme. The id outranks core's
+   class, which loads after the theme, so no !important is needed. */
 #emain .eicon {
     fill: var(--dz-body-text);
 }
@@ -64,7 +92,12 @@ html #emain {
    3:1 on every light card) and each band its source bubble's tone, as core pairs them.
    Dark schemes keep core's colours, hence the gate on the dark base.
    --energy-tone is local to this diagram, so each element names its tone once and the
-   shared rules below paint it. */
+   shared rules below paint it. It inherits, so the default on #emain is the fallback for
+   any element no tone rule names (a marker or bubble a future core adds): the neutral icon
+   colour, rather than an unset variable, which would paint black over core's own colour. */
+html:not([data-dz-scheme="dark"]) #emain {
+    --energy-tone: var(--dz-icon-off);
+}
 html:not([data-dz-scheme="dark"]) #emain :is(.ecircle-solar, #SolarToBatt, #SolarToGrid, #SolarToHome, ellipse:has(> [id^="Solar"])) {
     --energy-tone: var(--dz-sun-color);
 }

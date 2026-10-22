@@ -1559,3 +1559,20 @@ test("toggle: the buttons stay hidden until the first dz:colormode", () => {
     b.ctx.dzSyncModeToggles();
     assert.deepEqual(Object.values(b.buttons).map((x) => x.hidden), [true, true]);
 });
+
+test("every token a scheme can set inline is one a scheme switch clears", () => {
+    /* A token applyCustomColorScheme sets but DZ_CUSTOM_TOKENS misses stays
+       pinned on <html> after switching away (Paper's muted identity colours
+       onto every later scheme). Feed it every key any built-in scheme carries,
+       plus the identity keys only Paper sets today, and collect what it writes. */
+    const b = browser();
+    const cs = {};
+    for (const slug of INDEX) for (const k of Object.keys(SCHEMES[slug].colors || {})) cs[k] = "#123456";
+    for (const k of ["sun", "moon", "energy_import", "energy_export", "energy_gas",
+                     "energy_water", "energy_price", "energy_grid"]) cs[k] = "#123456";
+    const written = [];
+    b.ctx.applyCustomColorScheme(cs, { style: { setProperty: (name) => written.push(name) } });
+    assert.ok(written.includes("--dz-widget-energy-grid"), "the grid key is applied");
+    const cleared = new Set(b.ctx.DZ_CUSTOM_TOKENS);
+    for (const name of written) assert.ok(cleared.has(name), `${name} is set inline but never cleared`);
+});
