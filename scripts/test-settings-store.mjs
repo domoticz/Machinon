@@ -371,8 +371,12 @@ test("account: a boot the early block already confirmed keeps its cache and reco
    and the next queued write depends on. Nothing is stubbed between the write
    guard and the account change. */
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-function stalePage({ authMs = 20, jsonMs = 1, getMs = 30, auth = { status: "OK", user: "bob", rights: 2, canlogout: true },
-                     authFails = false, account = "u:alice", store = new Map() } = {}) {
+function stalePage(opts = {}) {
+    const { authMs = 20, jsonMs = 1, getMs = 30, auth = { status: "OK", user: "bob", rights: 2, canlogout: true },
+            authFails = false, store = new Map() } = opts;
+    /* "account" in opts, not a default: an explicit undefined (no account
+       known) must stay undefined. */
+    const account = "account" in opts ? opts.account : "u:alice";
     const posts = [];
     const toasts = [];
     const calls = { auth: 0 };
@@ -533,4 +537,18 @@ test("account: 2.10.0's unkeyed keys are dropped once a named login is confirmed
     shared.store.set("dzPaintAccount", "*");
     await shared.ctx.reconcileDomoticzSettingsInPlace();
     assert.ok(shared.store.has("dzPaintRecord") && shared.store.has("machinon.colorOverride"));
+});
+
+test("account: a boot that read no cache takes core's account in place, without a rebuild or a load window", async () => {
+    const p = stalePage({ authMs: 5, account: undefined, auth: { status: "OK", user: "admin", rights: 2, canlogout: false } });
+    p.ctx.theme = clone(SHIPPED);
+    p.ctx.theme.marker = "booted from theme.json";
+    let loadingSeen = false;
+    const timer = setInterval(() => { if (p.ctx.dzAccountLoading) loadingSeen = true; }, 1);
+    await p.ctx.reconcileDomoticzSettingsInPlace();
+    clearInterval(timer);
+    assert.equal(p.ctx.dzAccount, "*");
+    assert.equal(p.ctx.theme.marker, "booted from theme.json", "not rebuilt");
+    assert.equal(loadingSeen, false, "writes were never held");
+    assert.ok(p.store.has("machinon.themeSettings"), "the shared identity's cache is written");
 });

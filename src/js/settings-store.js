@@ -498,12 +498,18 @@ function dzConfirmAccount() {
     var answer = early && typeof early === "object" && early.key !== undefined
         ? Promise.resolve(early.key) : ask(DZ_ACCOUNT_BOOT_TRIES);
     return answer.then(function(account) {
-        if (account !== undefined && account === dzAccount) {
+        /* A page that started with no account read no cache: theme is the
+           shipped theme.json already, so core's account is taken as it is,
+           with no rebuild and no window in which writes are held. */
+        if (account !== undefined && (account === dzAccount || dzAccount === undefined)) {
+            var previous = dzAccount === undefined ? dzAccountAtLoad : dzAccount;
+            dzAccount = account;
             dzRememberAccount(account);
-            if (dzAccountRights === undefined) dzAccountRights = dzLastAuthRights;
+            if (dzAccountRights === undefined || account !== previous) dzAccountRights = dzLastAuthRights;
             dzForgetUnkeyedState(account, dzAccountAtLoad);
             return;
         }
+        if (account === undefined && dzAccount === undefined) return;
         return dzAdoptAccount(account);
     });
 }
