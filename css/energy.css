@@ -5,12 +5,34 @@
   this feature and appear nowhere else, so relocating it earlier in the cascade changes no
   outcome (verified). Keep touched energy rules here.
 */
-/* Energy dashboard */
-#emain {
-	width: calc(90vw - 50px)!important;
-    height: calc(90vh - 110px) !important;
-	background: var(--dz-body-bg)!important;
-	border-color: var(--dz-accent-color) !important;
+/* Energy dashboard. Core styles #emain from a <style> block in its template, which loads
+   after the theme; the extra type selector outranks that id rule without !important. */
+html #emain {
+    width: calc(90vw - 50px);
+    height: calc(90vh - 110px);
+    background: var(--dz-body-bg);
+    border-color: var(--dz-accent-color);
+}
+/* Phone: core scales the diagram to the card's width (its viewBox is wider than tall), so
+   in a portrait card it fills about a third of the height and its labels render at 4-7px.
+   Here the card keeps its height and takes the width the diagram needs at that height,
+   and the page area scrolls sideways. 74.5 / 63 is the viewBox of the widest layout (core
+   EnergyDashboardController calculateViewport, custom bubbles shown); a narrower layout
+   only leaves margin inside the card. Core positions the weather overlay from #emain's own
+   size, so it stays aligned. The scroll container is scoped to this page because the
+   classic dashboard reuses the #dashcontent id. */
+@media (max-width: 767px) {
+    html #dashcontent:has(> #emain) {
+        overflow-x: auto;
+        margin-left: calc(50% - 50vw);
+        margin-right: calc(50% - 50vw);
+        padding: 0 8px;
+        box-sizing: border-box;
+    }
+    html #emain {
+        width: calc((90vh - 110px) * 74.5 / 63);
+        margin: 0;
+    }
 }
 
 /* The energy flow diagram's <svg> root (views/energy_dashboard.html) carries an inline
@@ -34,5 +56,3 @@
 #emain svg text {
     fill: var(--dz-body-text);
 }
-
-
