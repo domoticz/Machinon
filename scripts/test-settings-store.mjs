@@ -683,3 +683,175 @@ test("account: on a browser that has used the shared identity, a named login kee
     await r.ctx.reconcileDomoticzSettingsInPlace();
     assert.equal(shared.get("dzPaintShared"), "1", "a shared-identity boot marks the browser");
 });
+
+/* ---- Reset against the legacy seed (#262) ----
+
+   A core with the ThemeSettings API that still holds the 2026.1 legacy
+   uservariables (left in place so a downgrade keeps working). The legacy
+   seed copies them into the house row when a load finds no rows at all, so
+   whatever a reset leaves behind decides whether the next boot undoes it.
+   The fake keeps core's row semantics (WebServerCmds.cpp
+   Cmd_ThemeSettingsSet/SetDefault, ThemeSettings.cpp Set/Reset): reset=true
+   deletes the row, a write must carry the row's current lastupdate or it is
+   a conflict, and a write to an absent row inserts. */
+function legacyCore({ perUser = true, legacy = true } = {}) {
+    const core = { perUser, instance: null, users: {}, seq: 0, uservars: [] };
+    if (legacy) {
+        const custom = clone(SHIPPED);
+        core.uservars = [
+            { idx: "1", Name: "theme-machinon-features", Value: JSON.stringify([]) },
+            { idx: "2", Name: "theme-machinon-custom", Value: JSON.stringify([custom.standby_after, "Legacy House",
+                custom.custom_url, custom.logo, custom.icons, custom.background_img, custom.background_type]) },
+            { idx: "3", Name: "theme-machinon-colors", Value: JSON.stringify(custom.color_scheme) }
+        ];
+    }
+    return core;
+}
+
+function corePage(core, { user = "admin", rights = 2 } = {}) {
+    const account = core.perUser ? "u:" + user : "*";
+    const posts = [];
+    const reply = (o) => ({ json: async () => o });
+    const row = (r) => (r ? { present: true, value: clone(r.value), lastupdate: r.lastupdate } : { present: false });
+    function write(scope, b) {
+        const get = () => (scope === "instance" ? core.instance : core.users[user]);
+        const put = (r) => { if (scope === "instance") core.instance = r; else core.users[user] = r; };
+        if (b.get("reset") === "true") { put(null); return { status: "OK" }; }
+        const cur = get();
+        if (cur && cur.lastupdate !== b.get("lastupdate")) return { status: "ERR", error: "conflict" };
+        const lastupdate = "t" + (++core.seq);
+        put({ value: JSON.parse(b.get("value")), lastupdate });
+        return { status: "OK", lastupdate };
+    }
+    const ajax = ({ url, success }) => {
+        setTimeout(() => {
+            const m = /param=getuservariable&idx=(\w+)/.exec(url);
+            if (m) {
+                const v = core.uservars.find((x) => x.idx === m[1]);
+                success(v ? { status: "OK", result: [{ Value: v.Value }] } : { status: "ERR" });
+                return;
+            }
+            success({ status: "OK", result: core.uservars.map((v) => ({ idx: v.idx, Name: v.Name })) });
+        }, 0);
+    };
+    const ctx = vm.createContext({
+        console: { log() {}, warn() {} }, JSON, Math, Promise, URLSearchParams, setTimeout, clearTimeout, setInterval, clearInterval,
+        theme: {}, themeFolder: "machinon", themeName: "Machinon",
+        window: { my_config: { userrights: rights, username: user } },
+        localStorage: { getItem: () => null, setItem() {}, removeItem() {} },
+        $: { each: (c, fn) => Object.keys(c).forEach((k) => fn(k, c[k])), ajax, get() {} },
+        document: { getElementById: () => null },
+        ShowNotify() {}, dzT: (k) => k,
+        fetch: async (url, opts) => {
+            if (/param=getauth/.test(url)) return reply({ status: "OK", user, rights, canlogout: core.perUser });
+            if (/param=getversion/.test(url)) return reply({ ThemeSettingsAPI: 1, version: "2026.4" });
+            if (/theme\.json$/.test(url)) return reply(clone(SHIPPED));
+            if (/param=themesettings_get/.test(url)) {
+                return reply({ status: "OK", PerUser: core.perUser, instance: row(core.instance),
+                               user: row(core.perUser ? core.users[user] : null) });
+            }
+            if (opts && opts.method === "POST") {
+                const b = opts.body;
+                posts.push({ param: b.get("param"), reset: b.get("reset") });
+                if (b.get("param") === "themesettings_setdefault") return reply(write("instance", b));
+                if (b.get("param") === "themesettings_set") return reply(write("user", b));
+            }
+            return reply({ status: "OK" });
+        }
+    });
+    ctx.window.window = ctx.window;
+    for (const f of ["src/js/theme-manifest.js", "src/js/settings-transport.js", "src/js/settings-store.js"]) {
+        vm.runInContext(readFileSync(f, "utf8"), ctx, { filename: f });
+    }
+    ctx.dzAccount = account;
+    ctx.theme = clone(SHIPPED);
+    return { ctx, posts, boot: () => ctx.checkUserVariableThemeSettings() };
+}
+
+test("legacy seed: the first boot on a core with the API copies the 2026.1 settings into the house row", async () => {
+    for (const perUser of [false, true]) {
+        const core = legacyCore({ perUser });
+        const page = corePage(core);
+        await page.boot();
+        assert.equal(core.instance && core.instance.value.values.button_name, "Legacy House", "perUser=" + perUser);
+        assert.equal(page.ctx.theme.button_name, "Legacy House");
+        assert.equal(core.uservars.length, 3, "the legacy variables stay for a downgrade");
+    }
+});
+
+test("legacy seed: a reset of the theme is not undone by the next boot (#262)", async () => {
+    for (const perUser of [false, true]) {
+        const core = legacyCore({ perUser });
+        const first = corePage(core);
+        await first.boot();
+        const jobs = ["dzApiResetHouse()"].concat(perUser ? ["dzApiResetUser()"] : []);
+        const res = await vm.runInContext("Promise.all([" + jobs.join(",") + "])", first.ctx);
+        assert.deepEqual(clone(res).map((r) => r.ok), jobs.map(() => true));
+        const next = corePage(core);
+        await next.boot();
+        assert.equal(next.ctx.theme.button_name, SHIPPED.button_name, "perUser=" + perUser + ": the reset stands");
+        assert.equal(core.uservars.length, 3, "the legacy variables stay for a downgrade");
+    }
+});
+
+test("legacy seed: resetting only the house is not undone by an admin with no personal row (#262)", async () => {
+    const core = legacyCore({ perUser: true });
+    const first = corePage(core);
+    await first.boot();
+    assert.equal((await first.ctx.dzApiResetHouse()).ok, true);
+    const other = corePage(core, { user: "admin2" });
+    await other.boot();
+    assert.equal(other.ctx.theme.button_name, SHIPPED.button_name);
+});
+
+test("reset: the house is emptied even when another page wrote it since this one loaded", async () => {
+    const core = legacyCore({ perUser: false });
+    const page = corePage(core);
+    await page.boot();
+    core.instance = { value: { schemaVersion: 3, features: {}, values: { button_name: "Other Tab" } }, lastupdate: "elsewhere" };
+    assert.equal((await page.ctx.dzApiResetHouse()).ok, true);
+    const next = corePage(core);
+    await next.boot();
+    assert.equal(next.ctx.theme.button_name, SHIPPED.button_name);
+});
+
+test("reset: a personal reset falls back to the house, not to the legacy settings or the shipped defaults", async () => {
+    const core = legacyCore({ perUser: true });
+    await corePage(core).boot();
+    core.instance.value.values.button_name = "House Now";
+    const u = corePage(core, { user: "user", rights: 1 });
+    await u.boot();
+    assert.equal(u.ctx.theme.button_name, "House Now");
+    vm.runInContext("theme.card_min_width = 333", u.ctx);
+    assert.equal((await u.ctx.dzApiSaveSettings()).ok, true);
+    assert.equal(core.users.user.value.values.card_min_width, 333);
+    assert.equal((await u.ctx.dzApiResetUser()).ok, true);
+    assert.equal(core.users.user, null, "the personal row is gone");
+    const next = corePage(core, { user: "user", rights: 1 });
+    await next.boot();
+    assert.equal(next.ctx.theme.button_name, "House Now");
+    assert.equal(next.ctx.theme.card_min_width, SHIPPED.card_min_width);
+});
+
+test("reset: the first house save after a reset builds on the shipped defaults, as on a fresh install", async () => {
+    /* The empty row a reset leaves must read like no row to the instance
+       writer: patching only house keys onto it would store a hollow row,
+       where a fresh install stores the full factory set. */
+    const fresh = legacyCore({ perUser: true, legacy: false });
+    const reset = legacyCore({ perUser: true, legacy: false });
+    for (const core of [fresh, reset]) {
+        const page = corePage(core);
+        await page.boot();
+        if (core === reset) {
+            await vm.runInContext("theme.button_name = 'Before'; dzApiSaveSettings()", page.ctx);
+            assert.equal((await page.ctx.dzApiResetHouse()).ok, true);
+        }
+        const next = corePage(core);
+        await next.boot();
+        assert.equal((await vm.runInContext("theme.button_name = 'After'; dzApiSaveSettings()", next.ctx)).ok, true);
+    }
+    const shape = (row) => ({ features: Object.keys(row.value.features).sort(), values: Object.keys(row.value.values).sort() });
+    assert.deepEqual(shape(reset.instance), shape(fresh.instance));
+    assert.equal(reset.instance.value.values.card_min_width, SHIPPED.card_min_width);
+    assert.equal(reset.instance.value.values.button_name, "After");
+});
