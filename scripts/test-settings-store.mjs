@@ -560,3 +560,95 @@ test("account: a write waits for a slow getauth longer than the boot does, inste
     assert.equal(res.ok, true);
     assert.deepEqual(p.posts.map((x) => x.param), ["themesettings_set"]);
 });
+
+/* ---- A busy core (getauth slower than the boot's first try) ---- */
+function busyPage(opts) {
+    const p = stalePage(opts);
+    p.aborts = 0;
+    const fetch0 = p.ctx.fetch;
+    p.ctx.fetch = (url, o) => {
+        if (/param=getauth/.test(url) && o && o.signal) {
+            o.signal.addEventListener("abort", () => { p.aborts++; });
+        }
+        return fetch0(url, o);
+    };
+    p.ctx.AbortController = AbortController;
+    return p;
+}
+
+test("busy core: the boot waits for a slow getauth instead of giving up on the account", async () => {
+    const store = new Map([["machinon.themeSettings@alice", JSON.stringify(cachedFor("alice"))]]);
+    const p = busyPage({ authMs: 120, account: "u:alice", store, auth: { status: "OK", user: "alice", rights: 1, canlogout: true } });
+    p.ctx.DZ_ACCOUNT_TIMEOUT_MS = 30;
+    p.ctx.DZ_ACCOUNT_PATIENT_MS = 1000;
+    p.ctx.theme = cachedFor("alice");
+    await p.ctx.reconcileDomoticzSettingsInPlace();
+    assert.equal(p.ctx.dzAccount, "u:alice");
+    assert.equal(p.calls.auth, 1, "one request, no stacked retries");
+    assert.deepEqual(clone(p.ctx.theme.user_schemes), cachedFor("alice").user_schemes, "alice's own cache stays");
+});
+
+test("busy core: a getauth that times out is not retried and its request is cancelled", async () => {
+    const p = busyPage({ authMs: 400, account: "u:alice", auth: { status: "OK", user: "alice", rights: 1, canlogout: true } });
+    p.ctx.DZ_ACCOUNT_PATIENT_MS = 60;
+    await p.ctx.reconcileDomoticzSettingsInPlace();
+    assert.equal(p.calls.auth, 1);
+    assert.equal(p.aborts, 1);
+    assert.equal(p.ctx.dzAccount, undefined);
+});
+
+test("busy core: a save from a page with no account yet takes core's account in place and is kept", async () => {
+    const p = busyPage({ authMs: 1, authFails: true, account: "u:alice", auth: { status: "OK", user: "alice", rights: 1, canlogout: true } });
+    await p.ctx.reconcileDomoticzSettingsInPlace();
+    assert.equal(p.ctx.dzAccount, undefined, "boot could not name the account");
+    const fetch1 = p.ctx.fetch;
+    p.ctx.fetch = async (url, o) => {
+        if (/param=getauth/.test(url)) { await wait(80); return { json: async () => ({ status: "OK", user: "alice", rights: 1, canlogout: true }) }; }
+        return fetch1(url, o);
+    };
+    p.ctx.DZ_ACCOUNT_TIMEOUT_MS = 30;
+    p.ctx.theme.features.fade_off_items.enabled = true;
+    const res = await vm.runInContext("dzApiSaveSettings()", p.ctx);
+    assert.equal(res.ok, true, JSON.stringify(res));
+    assert.equal(p.ctx.dzAccount, "u:alice");
+    assert.deepEqual(p.toasts, [], "no refusal");
+    const user = p.posts.filter((x) => x.param === "themesettings_set");
+    assert.equal(user.length, 1);
+    assert.equal(JSON.parse(user[0].value).features.fade_off_items, true);
+});
+
+test("account: a getauth answer after its own timeout changes nothing", async () => {
+    const p = busyPage({ authMs: 120, auth: { status: "OK", user: "bob", rights: 1, canlogout: true } });
+    p.ctx.AbortController = undefined;
+    vm.runInContext("dzLastAuthRights = 2", p.ctx);
+    assert.equal(await p.ctx.dzFetchAccount(30), undefined);
+    await wait(200);
+    assert.equal(p.ctx.dzLastAuthRights, 2);
+});
+
+test("account: a write asked before an in-page logout says the user is logged out", async () => {
+    const p = stalePage({ authMs: 1, account: "u:alice" });
+    const pending = vm.runInContext("dzApiResetUser()", p.ctx);
+    vm.runInContext("dzAccount = null", p.ctx);
+    const res = await pending;
+    assert.equal(res.ok, false);
+    assert.deepEqual(p.toasts, ["toasts.save_refused_logged_out"]);
+});
+
+test("account: on a browser that has used the shared identity, a named login keeps its unkeyed keys", async () => {
+    const legacy = () => new Map([["machinon.themeSettings", "{}"], ["dzPaintRecord", "{}"], ["machinon.colorOverride", "{}"],
+                                  ["dzPaintAccount", "u:admin"]]);
+    const mixed = legacy();
+    mixed.set("dzPaintShared", "1");
+    const p = stalePage({ authMs: 1, account: "u:admin", store: mixed, auth: { status: "OK", user: "admin", rights: 2, canlogout: true } });
+    await p.ctx.reconcileDomoticzSettingsInPlace();
+    assert.ok(mixed.has("machinon.themeSettings") && mixed.has("dzPaintRecord") && mixed.has("machinon.colorOverride"));
+    const old = legacy();
+    const q = stalePage({ authMs: 1, account: "u:admin", store: old, auth: { status: "OK", user: "admin", rights: 2, canlogout: true } });
+    await q.ctx.reconcileDomoticzSettingsInPlace();
+    assert.equal(old.has("dzPaintRecord"), false, "never used as the shared identity: 2.10.0 leftovers");
+    const shared = new Map();
+    const r = stalePage({ authMs: 1, account: "*", store: shared, auth: { status: "OK", user: "admin", rights: 2, canlogout: false } });
+    await r.ctx.reconcileDomoticzSettingsInPlace();
+    assert.equal(shared.get("dzPaintShared"), "1", "a shared-identity boot marks the browser");
+});

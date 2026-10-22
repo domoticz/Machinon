@@ -262,31 +262,50 @@ var dzLastAuthRights;
 var dzAccountLoading = false;
 
 /* A getauth that never answers must not hold the boot merge or the write
-   chain (every write waits on one). A write waits longer than the boot: a
+   chain (every write waits on one). The boot and every write wait long: a
    busy core was measured answering getauth after 5.9 and 6.6 s to a WebKit
-   page with other pages polling it, and a write refused for that is a lost
-   setting, while the write itself would have waited as long. */
+   page with other pages polling it, and giving up there left the boot
+   without an account and turned the next save into a lost edit. Core's
+   permissionsChanged broadcasts use the short wait: a missed one is caught
+   by the next save. A request that times out is cancelled where the browser
+   can (AbortController), so a slow core is not handed a pile of them, and
+   its late answer is ignored. */
 var DZ_ACCOUNT_TIMEOUT_MS = 5000;
-var DZ_ACCOUNT_WRITE_TIMEOUT_MS = 20000;
+var DZ_ACCOUNT_PATIENT_MS = 20000;
 
-function dzFetchAccount(timeoutMs) {
+/* Resolves { account, outcome }: outcome "answer" (account as dzAccountKeyOf
+   reads it), "timeout" or "error" (no answer: network, HTTP or parse). */
+function dzAskAccount(timeoutMs) {
+    var settled = false;
     var timer = null;
+    var abort = typeof AbortController === "function" ? new AbortController() : null;
     var late = new Promise(function(resolve) {
-        timer = setTimeout(function() { resolve(undefined); },
-                           typeof timeoutMs === "number" ? timeoutMs : DZ_ACCOUNT_TIMEOUT_MS);
+        timer = setTimeout(function() {
+            if (abort) abort.abort();
+            resolve({ account: undefined, outcome: "timeout" });
+        }, typeof timeoutMs === "number" ? timeoutMs : DZ_ACCOUNT_TIMEOUT_MS);
     });
-    var asked = fetch("json.htm?type=command&param=getauth", { credentials: "include" })
+    var init = { credentials: "include" };
+    if (abort) init.signal = abort.signal;
+    var asked = fetch("json.htm?type=command&param=getauth", init)
         .then(function(r) { return r.json(); })
         .then(function(auth) {
             var account = dzAccountKeyOf(auth);
-            if (account !== undefined) dzLastAuthRights = typeof auth.rights === "number" ? auth.rights : undefined;
-            return account;
+            if (!settled && account !== undefined) {
+                dzLastAuthRights = typeof auth.rights === "number" ? auth.rights : undefined;
+            }
+            return { account: account, outcome: "answer" };
         })
-        .catch(function() { return undefined; });
-    return Promise.race([asked, late]).then(function(account) {
+        .catch(function() { return { account: undefined, outcome: "error" }; });
+    return Promise.race([asked, late]).then(function(result) {
+        settled = true;
         clearTimeout(timer);
-        return account;
+        return result;
     });
+}
+
+function dzFetchAccount(timeoutMs) {
+    return dzAskAccount(timeoutMs).then(function(result) { return result.account; });
 }
 
 /* The account the early block paints for on the next load; removed when
@@ -562,11 +581,27 @@ function dzApiWrite(param, layer, buildFn, asked, duringLoad) {
    Not airtight: one round trip separates getauth from the write, and core
    has no "write as account X" parameter, so a login landing in exactly that
    window is not caught. */
+/* The account a page with no account took in place (dzTakeAccount), with
+   no rebuild since: a write asked before that, while the account was still
+   unknown, was asked for the same settings. */
+var dzAccountFromUnknown = null;
+
 function dzWithSameAccount(asked, duringLoad, job) {
+    if (asked === undefined && dzAccount !== undefined && dzAccount === dzAccountFromUnknown) asked = dzAccount;
     if ((dzAccountLoading && !duringLoad) || asked !== dzAccount) {
-        return Promise.resolve(dzRefuseWrite(asked === dzAccount ? dzAccount : "elsewhere", false));
+        return Promise.resolve(dzRefuseWrite(dzAccount === null ? null : "elsewhere", false));
     }
-    return dzFetchAccount(DZ_ACCOUNT_WRITE_TIMEOUT_MS).then(function(account) {
+    return dzFetchAccount(DZ_ACCOUNT_PATIENT_MS).then(function(account) {
+        /* A page with no account yet (core did not answer the boot in time)
+           holds no cache, only the shipped theme.json and the session's own
+           rows, so the account core names now is the one those belong to:
+           take it in place, as the boot does (settings-store.js
+           dzConfirmAccount), and the edit goes out. */
+        if (asked === undefined && dzAccount === undefined && !dzAccountLoading &&
+            typeof account === "string" && typeof dzTakeAccount === "function") {
+            dzTakeAccount(account);
+            asked = account;
+        }
         if (account !== undefined && account !== null && account === asked && account === dzAccount &&
             (duringLoad || !dzAccountLoading)) {
             return job();

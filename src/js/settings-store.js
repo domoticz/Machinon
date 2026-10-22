@@ -423,10 +423,10 @@ function dzAccountLoaded() {
    reloads, which boots as the new account from the start (the early block
    asks core first). */
 function dzAdoptAccount(account) {
-    var previous = dzAccount;
     if (account !== undefined) dzRememberAccount(account);
     if (account === null) {
         dzAccount = null;
+        dzAccountFromUnknown = null;
         dzForgetAccountState();
         return Promise.resolve(false);
     }
@@ -438,9 +438,10 @@ function dzAdoptAccount(account) {
             themeName = theme.name;
             dzDefaultsSnap = dzSettingsSnapshot(shipped);
             dzAccount = account;
+            dzAccountFromUnknown = null;
             dzAccountRights = dzLastAuthRights;
             dzForgetAccountState();
-            dzForgetUnkeyedState(account, previous);
+            dzForgetUnkeyedState(account);
             return true;
         }, function() {
             location.reload();
@@ -462,34 +463,59 @@ function dzForgetAccountState() {
 
 /* Machinon 2.10.0 kept one settings cache, paint record and tap per browser,
    under the keys the shared identity ("*") still uses. Whose they are is
-   unknown, so a named login never reads them; once a named login is
-   confirmed on a browser whose last account was not the shared one, they are
-   2.10.0 leftovers holding someone's settings (private themes included) and
-   go. A browser that was on the shared identity keeps them: they are its own. */
-function dzForgetUnkeyedState(account, previous) {
-    if (account === "*" || dzAccountSuffix(account) === null || previous === "*") return;
+   unknown, so a named login never reads them. They are provably 2.10.0
+   leftovers only on a browser this Machinon has never run on as the shared
+   identity (DZ_SHARED_USED_KEY, set by every confirmation of "*" and never
+   cleared): only "*" writes those keys now. On such a browser a confirmed
+   named login removes them, since they hold someone's settings (private
+   themes included). A browser that has been on the shared identity (a
+   trusted network beside explicit logins) keeps them: they are its own. */
+var DZ_SHARED_USED_KEY = "dzPaintShared";
+
+function dzForgetUnkeyedState(account) {
     try {
+        if (account === "*") {
+            localStorage.setItem(DZ_SHARED_USED_KEY, "1");
+            return;
+        }
+        if (dzAccountSuffix(account) === null || localStorage.getItem(DZ_SHARED_USED_KEY) === "1") return;
         localStorage.removeItem(themeFolder + ".themeSettings");
         localStorage.removeItem("dzPaintRecord");
         localStorage.removeItem(themeFolder + ".colorOverride");
     } catch (e) { /* storage blocked: nothing kept */ }
 }
 
+/* Take core's account as the page's without a rebuild: theme already holds
+   no other account's values (it is that account's own, or, with no account
+   known yet, only the shipped theme.json and the session's rows, because no
+   cache is read without an account). */
+function dzTakeAccount(account) {
+    var changed = account !== dzAccount;
+    if (dzAccount === undefined) dzAccountFromUnknown = account;
+    dzAccount = account;
+    dzRememberAccount(account);
+    if (dzAccountRights === undefined || changed) dzAccountRights = dzLastAuthRights;
+    dzForgetUnkeyedState(account);
+}
+
 /* The boot's settings start from this browser's cache of the account the page
    started on. Core decides before anything merges: when it names another
    account (someone logged in without a Machinon page seeing it) the page
-   moves to that account first. When core cannot be reached it is asked a
-   few more times; if it never answers, the page leaves the cache (it may be
-   another account's) and starts from the shipped theme.json with no account,
-   so nothing is cached and nothing is written until core answers. */
+   moves to that account first. getauth gets the long wait
+   (DZ_ACCOUNT_PATIENT_MS) and is asked again only after a real failure, not
+   after a timeout, so a slow core is not sent a second request while it
+   still works on the first. If core never answers, the page leaves the cache
+   (it may be another account's) and starts from the shipped theme.json with
+   no account: nothing is cached, and the next save takes core's account then
+   (settings-transport.js dzWithSameAccount). */
 var DZ_ACCOUNT_BOOT_TRIES = 3;
 var DZ_ACCOUNT_RETRY_MS = 500;
 
 function dzConfirmAccount() {
     var early = window.__dzEarlyAccount;
     function ask(tries) {
-        return dzFetchAccount().then(function(account) {
-            if (account !== undefined || tries <= 1) return account;
+        return dzAskAccount(DZ_ACCOUNT_PATIENT_MS).then(function(result) {
+            if (result.outcome !== "error" || tries <= 1) return result.account;
             return new Promise(function(resolve) { setTimeout(resolve, DZ_ACCOUNT_RETRY_MS); }).then(function() {
                 return ask(tries - 1);
             });
@@ -502,11 +528,7 @@ function dzConfirmAccount() {
            shipped theme.json already, so core's account is taken as it is,
            with no rebuild and no window in which writes are held. */
         if (account !== undefined && (account === dzAccount || dzAccount === undefined)) {
-            var previous = dzAccount === undefined ? dzAccountAtLoad : dzAccount;
-            dzAccount = account;
-            dzRememberAccount(account);
-            if (dzAccountRights === undefined || account !== previous) dzAccountRights = dzLastAuthRights;
-            dzForgetUnkeyedState(account, dzAccountAtLoad);
+            dzTakeAccount(account);
             return;
         }
         if (account === undefined && dzAccount === undefined) return;
