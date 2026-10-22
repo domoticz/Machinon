@@ -1,9 +1,9 @@
 /*
   energy.css - energy dashboard popup for Machinon.
   One of the feature files split out of custom.css - see the @import block in
-  custom.css. Extracted because its selectors (#emain / #eicon) are unique to this feature and appear
-  nowhere else, so relocating it earlier in the cascade changes no outcome (verified). Keep
-  touched energy rules here.
+  custom.css. Extracted because its selectors (#emain and its descendants) are unique to
+  this feature and appear nowhere else, so relocating it earlier in the cascade changes no
+  outcome (verified). Keep touched energy rules here.
 */
 /* Energy dashboard */
 #emain {
@@ -19,8 +19,12 @@
 #emain svg {
     font-family: var(--dz-font-family) !important;
 }
-#eicon {
-    fill: var(--dz-body-text)!important;
+/* The bubble icons: core fills .eicon near-white for its own dark page, which leaves them
+   invisible on the pale bubble fills of a light scheme. The template marks them with the
+   class, not an id. The id outranks core's class, which loads after the theme, so no
+   !important is needed. */
+#emain .eicon {
+    fill: var(--dz-body-text);
 }
 /* Core colours the diagram's labels (.etext) white for its own dark page, but #emain above
    takes the theme background, light in the light schemes. Most labels sit inside a <g> and
