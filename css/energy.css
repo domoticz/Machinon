@@ -116,3 +116,17 @@ html:not([data-dz-scheme="dark"]) #emain ellipse {
 html:not([data-dz-scheme="dark"]) #emain [id$="-flow"] {
     stroke: var(--dz-body-bg) !important;
 }
+/* Prices and the self-sufficiency figure: core dims them with opacity="0.55", which also
+   dims the leaf glyph inside the latter below 3:1, on every scheme. The other dim labels
+   (the kWh lines, the flow wattages, the clock and sun times; opacity 0.7 or 0.6) drop to
+   4.2:1 on gruvbox-light's mid-toned card, while the dark schemes clear 4.5:1 with core's
+   dimming, so those are switched on the light schemes only. Secondary text at full
+   opacity clears 4.5:1 and keeps every one of them under the bold value (smaller, regular
+   weight); the leaf keeps core's own identity fill and is no longer dimmed. The fill
+   needs !important only to outrank floorplan.css's global `g text` rule, which carries
+   one. */
+#emain svg text[opacity="0.55"],
+html:not([data-dz-scheme="dark"]) #emain svg text:is([opacity="0.7"], [opacity="0.6"]) {
+    fill: var(--secondary-text-color) !important;
+    opacity: 1;
+}
