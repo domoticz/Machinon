@@ -26,6 +26,7 @@
         "energy_export": "#5b7b5d",
         "energy_gas": "#a9624c",
         "energy_water": "#467991",
-        "energy_price": "#8864b9"
+        "energy_price": "#8864b9",
+        "energy_grid": "#5a787d"
     }
 }

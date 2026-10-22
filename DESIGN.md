@@ -380,20 +380,34 @@ scheme (Label important, Header gradient); others vary by scheme through their o
 than the shared mapping table, so "theme-independent" no longer describes the whole group.
 
 - **On primary** (`{colors.on-primary}`): white text on filled buttons and accent backgrounds - the light value only. Varies by scheme: the real token is `--dz-accent-text`, which `dark.css` overrides because Blue UI Dark's accent is pale (schemes set it via the `accent_text` key; see Colors above)
-- **Sun and moon icons** (`--dz-sun-color`, `--dz-moon-color`): see Semantic identity colours below, which covers both alongside the five energy tokens
+- **Sun and moon icons** (`--dz-sun-color`, `--dz-moon-color`): see Semantic identity colours below, which covers both alongside the energy tokens
 - **Label important** (`{colors.label-important}`): `#b94a48` for critical badges - a deliberate literal, no `--dz-*` token (matched by `scripts/check-tokens.sh` against its `custom.css` declaration instead)
 - **Header gradient**: `{colors.gradient-start}` to `{colors.light-primary}` (light), `{colors.gradient-dark-start}` to `#0073a7` (dark) - the dark end-stop is a deliberate literal, no token (part of the legacy `dark_theme.css` gradient called out as not tokenized above)
 
 ### Semantic identity colours
 
 `--dz-widget-amber`, `--dz-widget-energy-export`, `--dz-widget-energy-gas`,
-`--dz-widget-energy-water`, `--dz-widget-energy-price`, `--dz-sun-color` and
-`--dz-moon-color` name what a thing IS, not what the user picked: gas is orange
-because gas is orange. Five of the names are core's own
-(`www/css/dashboard.css` reads them for the Dynamic Dashboard), so defining
-them here is what makes core's icons follow the theme. The sun and moon pair
-are the theme's own: core hardcodes those two icons rather than tokenising
-them, so `css/dynamic-dashboard.css` overrides them by rule instead.
+`--dz-widget-energy-water`, `--dz-widget-energy-price`, `--dz-widget-energy-grid`,
+`--dz-sun-color` and `--dz-moon-color` name what a thing IS, not what the user
+picked: gas is orange because gas is orange. The amber/export/gas/water/price
+names are core's own (`www/css/dashboard.css` reads them for the Dynamic
+Dashboard), so defining them here is what makes core's icons follow the theme.
+The sun and moon pair are the theme's own: core hardcodes those two icons
+rather than tokenising them, so `css/dynamic-dashboard.css` overrides them by
+rule instead.
+
+`--dz-widget-energy-grid` is the theme's own too: the power grid on the Energy
+page (`#/Energy`), whose ring, grid-to-home band and moving markers core's
+template hardcodes in cyan for its own dark page (1.6-2.0:1 on a light card).
+`css/energy.css` paints the diagram's rings, flow bands and markers from this
+family on the light schemes only (solar from `--dz-sun-color`, battery from
+export, home from price); the dark schemes keep core's own neon colours, so the
+dark value is core's cyan unchanged. The light value holds core's hue and is
+solved like the rest, worst case 3.27:1 (gruvbox-light card), and sits at OKLab
+distance 6.4 from water, its nearest neighbour (core's own grid/water pair: 7.9).
+The Energy page's custom bubbles (the car icons) have no identity, so they keep
+core's olive `#668044` as a scoped literal in `css/energy.css`, 3.67:1 at worst
+on the light schemes.
 
 They are defined once per scheme BASE, in `dz-tokens.css` for light and
 `dark.css` for dark, and NOT as scheme keys or colour-picker swatches. The hue
@@ -478,7 +492,7 @@ value beyond the one `acc` floor and the universal 3.2 disabled floor): the acce
 own colour and must look like itself whichever look they pick, and disabled is a de-emphasis
 colour with one right answer, not a design axis.
 
-**Deliberately NOT generated: `sun`, `moon`, the five `energy_*` keys.** These are device
+**Deliberately NOT generated: `sun`, `moon`, the `energy_*` keys.** These are device
 semantics - gas is orange because gas is orange, not because a user chose it (see [Semantic
 identity colours](#semantic-identity-colours) above) - defined once per scheme BASE in
 `dz-tokens.css`/`dark.css`. A generated scheme sets `theme.scheme_base` like any other custom
@@ -1363,20 +1377,20 @@ alias rather than referencing `--dz-body-text` directly.
 
 ### Fixed Colours and Contrast Repair
 
-Ten colours are chosen per light/dark base rather than derived from the active scheme: the three
-device-status colours (`--dz-status-{timeout,lowbat,protected}-values`) and the seven identity
-colours (`--dz-widget-amber`, `--dz-widget-energy-{export,gas,water,price}`, `--dz-sun-color`,
-`--dz-moon-color`). They are constants on purpose - gas is orange because gas is orange, and a
+The fixed colours are chosen per light/dark base rather than derived from the active scheme: the
+device-status colours (`--dz-status-{timeout,lowbat,protected}-values`) and the identity
+colours (`--dz-widget-amber`, `--dz-widget-energy-{export,gas,water,price,grid}`, `--dz-sun-color`,
+`--dz-moon-color`; the lists live in `src/js/scheme.js` `DZ_REPAIR_STATUS` / `DZ_REPAIR_IDENTITY`). They are constants on purpose - gas is orange because gas is orange, and a
 timed-out card should look the same whichever scheme you use.
 
 That works because every shipped value was measured against every shipped card
 (`scripts/measure-icon-contrast.py`). A theme a user builds is never measured, and no file-walking
-guard can measure it, so `src/js/scheme.js` `repairFixedColors()` checks each of the ten against
+guard can measure it, so `src/js/scheme.js` `repairFixedColors()` checks each of them against
 the card the theme actually resolved to and repairs only the ones that fail
 (`src/js/color-repair.js`).
 
 **Repair, not replace.** A colour that already clears its floor is returned untouched, so every
-shipped scheme is byte-identical with the mechanism on or off. Deriving all ten from scratch would
+shipped scheme is byte-identical with the mechanism on or off. Deriving them all from scratch would
 land each on exactly its target, which is a different theme: protected on a white card would fall
 from navy `#00008B` at 15.30:1 to a mid blue at 4.03:1.
 
@@ -1396,7 +1410,7 @@ single value to clear the card and the tile is impossible in 473 of 1032 card/na
 because the tile background contains 15% of the colour itself. `css/toasts.css` reads
 `--dz-toast-severity-<status>` with the card value as fallback.
 
-**Cost:** measured in Chromium, 0.04ms for the whole ten-token pass on a shipped scheme, since each
+**Cost:** measured in Chromium, 0.04ms for the whole pass on a shipped scheme, since each
 exits on one contrast comparison. A pathological mid-toned hand-built palette is 3.98ms, 76ms at
 20x CPU throttle. `setColorScheme()` is on the boot path, so that is per page load.
 

@@ -144,7 +144,7 @@ test("every scheme defines exactly the 12 keys applyCustomColorScheme consumes",
 test("the energy and sun/moon identities are never generated", () => {
     const cs = dz.dzGenerateScheme({ accent: "#E2703A", surface: null, look: "deep" }, "dark");
     for (const k of ["sun", "moon", "energy_import", "energy_export",
-                     "energy_gas", "energy_water", "energy_price"]) {
+                     "energy_gas", "energy_water", "energy_price", "energy_grid"]) {
         assert.equal(cs[k], undefined, `${k} must inherit from the base underlay, not be generated`);
     }
 });

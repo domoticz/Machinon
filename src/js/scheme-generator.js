@@ -3,7 +3,7 @@
    (src/js/theme-wizard.js) owns all of that; this file only computes.
 
    Output is exactly the 12 keys applyCustomColorScheme() (src/js/scheme.js)
-   consumes. sun/moon and the five energy identities are deliberately NOT
+   consumes. sun/moon and the energy identities are deliberately NOT
    generated: they are device semantics, defined once per base in
    dz-tokens.css / dark.css, and a generated scheme inherits them through its
    scheme_base underlay. A user does not choose what colour water is.
