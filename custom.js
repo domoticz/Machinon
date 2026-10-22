@@ -8,65 +8,120 @@
    chain below with it. First visit of a browser has no record yet and
    paints on the normal path (documented limit).
 
-   The validation repeats dzParsePaintRecord / dzReadPaintRecord, which
-   cannot be loaded this early; scripts/test-scheme-pairs.mjs runs this block
-   and those functions over the same fixtures, so the copies cannot drift.
+   Records and taps are kept per account (src/js/settings-transport.js,
+   "The account the page's settings belong to"), and who is logged in is not
+   known yet. The block paints at once for the account this browser last
+   confirmed (dzPaintAccount) and asks core (getauth) in the background:
+   never synchronously, because a synchronous request cannot time out in a
+   page and would hold the whole page on a slow core. When core names
+   another account before the theme's scripts take over (__dzEarlyClosed),
+   the paint is undone and that account's own record painted instead; after
+   that, the boot moves to the right account. A browser whose last account
+   is the shared one (no login: "*") asks nothing, so a no-login install
+   makes no extra request.
+
+   The validation repeats dzParsePaintRecord / dzReadPaintRecord and the
+   account rule repeats dzAccountKeyOf / dzAccountSuffix, none of which can
+   be loaded this early; scripts/test-scheme-pairs.mjs runs this block and
+   those functions over the same fixtures, so the copies cannot drift.
    Nothing is written until the whole half has validated. The record's theme
    version is not checked here: the boot repaint corrects a record an older
    version wrote, within the same load. */
 (function() {
-    try {
-        var rec = JSON.parse(localStorage.getItem("dzPaintRecord"));
-        if (!rec || typeof rec !== "object" || rec.v !== 1) return;
-        if (typeof rec.folder !== "string" || !/^[A-Za-z0-9_-]+$/.test(rec.folder)) return;
-        if (typeof rec.family !== "string") return;
-        var mode = rec.mode;
-        if (mode !== "light" && mode !== "dark" && mode !== "auto") return;
-        var deviceDark = !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
-        var variant = mode === "auto" ? (deviceDark ? "dark" : "light") : mode;
-        var ov = null;
-        try { ov = JSON.parse(localStorage.getItem(rec.folder + ".colorOverride")); } catch (e) { ov = null; }
-        if (ov && typeof ov === "object" && (ov.variant === "light" || ov.variant === "dark") &&
-            typeof ov.deviceDark === "boolean" && (mode !== "auto" || ov.deviceDark === deviceDark)) {
-            variant = ov.variant;
-        }
-        var half = rec[variant];
-        if (!half || typeof half !== "object" || Array.isArray(half)) return;
-        if (half.attr !== null && half.attr !== "dark" && half.attr !== "custom") return;
-        if (typeof half.dark_file !== "boolean") return;
-        var tokens = half.tokens;
-        if (!tokens || typeof tokens !== "object" || Array.isArray(tokens)) return;
-        var NAME = /^--dz-[a-z0-9-]+$/;
-        var EXTRA = ["--secondary-text-color"];
-        var VALUE = /^(rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(,\s*(0|1|0?\.\d+)\s*)?\)|\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}|#[0-9a-fA-F]{6})$/;
-        var html = document.documentElement;
-        var names = Object.keys(tokens);
-        for (var i = 0; i < names.length; i++) {
-            var value = tokens[names[i]];
-            if ((NAME.test(names[i]) || EXTRA.indexOf(names[i]) !== -1) && typeof value === "string" && VALUE.test(value)) {
-                html.style.setProperty(names[i], value);
+    var html = document.documentElement;
+    var shown = null;
+    function undo() {
+        if (!shown) return;
+        for (var i = 0; i < shown.names.length; i++) html.style.removeProperty(shown.names[i]);
+        if (shown.attr) html.removeAttribute("data-dz-scheme");
+        if (shown.link && shown.link.parentNode) shown.link.parentNode.removeChild(shown.link);
+        shown = null;
+        window.__dzEarlyPaint = undefined;
+    }
+    function paint(account) {
+        try {
+            var suffix = account === "*" ? "" : "@" + encodeURIComponent(account.substring(2));
+            var rec = JSON.parse(localStorage.getItem("dzPaintRecord" + suffix));
+            if (!rec || typeof rec !== "object" || rec.v !== 1) return;
+            if (typeof rec.folder !== "string" || !/^[A-Za-z0-9_-]+$/.test(rec.folder)) return;
+            if (typeof rec.family !== "string") return;
+            var mode = rec.mode;
+            if (mode !== "light" && mode !== "dark" && mode !== "auto") return;
+            var deviceDark = !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+            var variant = mode === "auto" ? (deviceDark ? "dark" : "light") : mode;
+            var ov = null;
+            try { ov = JSON.parse(localStorage.getItem(rec.folder + ".colorOverride" + suffix)); } catch (e) { ov = null; }
+            if (ov && typeof ov === "object" && (ov.variant === "light" || ov.variant === "dark") &&
+                typeof ov.deviceDark === "boolean" && (mode !== "auto" || ov.deviceDark === deviceDark)) {
+                variant = ov.variant;
             }
-        }
-        if (half.attr === "dark") {
-            html.setAttribute("data-dz-scheme", "dark");
-        } else if (half.attr === "custom") {
-            html.setAttribute("data-dz-scheme", "custom");
-        }
-        /* src/js/schemes.js dzSetDarkFile adopts this link at boot. The query
-           is the one src/js/feature-loader.js dzFeatureFileQuery adds, so the
-           file has one cache entry; a version with other characters goes
-           without it rather than being escaped differently. */
-        if (half.dark_file) {
-            var query = typeof rec.version === "string" && /^[0-9A-Za-z._-]+$/.test(rec.version) ? "?v=" + rec.version : "";
-            var link = document.createElement("link");
-            link.setAttribute("rel", "stylesheet");
-            link.setAttribute("type", "text/css");
-            link.setAttribute("href", "styles/" + rec.folder + "/css/dark_theme.css" + query);
-            document.getElementsByTagName("head")[0].appendChild(link);
-        }
-        window.__dzEarlyPaint = { family: rec.family, variant: variant, darkFile: half.dark_file };
-    } catch (e) { /* storage blocked or record corrupt: normal boot paint */ }
+            var half = rec[variant];
+            if (!half || typeof half !== "object" || Array.isArray(half)) return;
+            if (half.attr !== null && half.attr !== "dark" && half.attr !== "custom") return;
+            if (typeof half.dark_file !== "boolean") return;
+            var tokens = half.tokens;
+            if (!tokens || typeof tokens !== "object" || Array.isArray(tokens)) return;
+            var NAME = /^--dz-[a-z0-9-]+$/;
+            var EXTRA = ["--secondary-text-color"];
+            var VALUE = /^(rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(,\s*(0|1|0?\.\d+)\s*)?\)|\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}|#[0-9a-fA-F]{6})$/;
+            shown = { names: [], attr: false, link: null };
+            var names = Object.keys(tokens);
+            for (var i = 0; i < names.length; i++) {
+                var value = tokens[names[i]];
+                if ((NAME.test(names[i]) || EXTRA.indexOf(names[i]) !== -1) && typeof value === "string" && VALUE.test(value)) {
+                    html.style.setProperty(names[i], value);
+                    shown.names.push(names[i]);
+                }
+            }
+            if (half.attr === "dark") {
+                html.setAttribute("data-dz-scheme", "dark");
+                shown.attr = true;
+            } else if (half.attr === "custom") {
+                html.setAttribute("data-dz-scheme", "custom");
+                shown.attr = true;
+            }
+            /* src/js/schemes.js dzSetDarkFile adopts this link at boot. The query
+               is the one src/js/feature-loader.js dzFeatureFileQuery adds, so the
+               file has one cache entry; a version with other characters goes
+               without it rather than being escaped differently. */
+            if (half.dark_file) {
+                var query = typeof rec.version === "string" && /^[0-9A-Za-z._-]+$/.test(rec.version) ? "?v=" + rec.version : "";
+                var link = document.createElement("link");
+                link.setAttribute("rel", "stylesheet");
+                link.setAttribute("type", "text/css");
+                link.setAttribute("href", "styles/" + rec.folder + "/css/dark_theme.css" + query);
+                document.getElementsByTagName("head")[0].appendChild(link);
+                shown.link = link;
+            }
+            window.__dzEarlyPaint = { family: rec.family, variant: variant, darkFile: half.dark_file };
+        } catch (e) { /* storage blocked, record corrupt or a name that cannot be encoded: normal boot paint */ }
+    }
+    var last;
+    try {
+        last = localStorage.getItem("dzPaintAccount");
+    } catch (e) { return; }
+    if (last === "*") { paint("*"); return; }
+    if (typeof last === "string" && last.indexOf("u:") === 0) paint(last);
+    try {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "json.htm?type=command&param=getauth", true);
+        xhr.timeout = 3000;
+        xhr.onload = function() {
+            try {
+                var auth = xhr.status === 200 ? JSON.parse(xhr.responseText) : null;
+                if (!auth || typeof auth !== "object" || auth.status !== "OK") return;
+                var account = typeof auth.user !== "string" || auth.user === "" ? null
+                    : auth.canlogout === true ? "u:" + auth.user : "*";
+                window.__dzEarlyAccount = { key: account };
+                if (account === last || window.__dzEarlyClosed) return;
+                undo();
+                if (account !== null) paint(account);
+            } catch (e) { /* the boot asks again */ }
+        };
+        xhr.send(null);
+    } catch (e) { /* the boot asks again */ }
 })();
+
 
 var theme = {}, themeName = "", isMobile, lang, themeFolder;
 

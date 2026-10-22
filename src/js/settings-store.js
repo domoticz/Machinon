@@ -36,12 +36,23 @@ function cacheThemeSettings() {
        out to be off. diag.js's own load-time call cannot: it runs before the
        settings arrive and would throw away entries recorded before it loaded. */
     if (typeof dzDiagRefreshGate === "function") { dzDiagRefreshGate(true); }
-    localStorage.setItem(themeFolder + ".themeSettings", JSON.stringify(theme));
+    var key = dzSettingsCacheKey();
+    if (key) localStorage.setItem(key, JSON.stringify(theme));
+}
+
+/* The cache is kept per account (settings-transport.js dzAccountSuffix): a
+   cache of one person's settings must never be what the next person's page
+   starts from. Without a known account there is no cache, and the page
+   starts from the shipped theme.json. */
+function dzSettingsCacheKey() {
+    var suffix = dzAccountSuffix(dzAccount);
+    return suffix === null ? null : themeFolder + ".themeSettings" + suffix;
 }
 
 function readCachedThemeSettings() {
-    var value = localStorage.getItem(themeFolder + ".themeSettings");
-    return value && JSON.parse(value);
+    var key = dzSettingsCacheKey();
+    var value = key ? localStorage.getItem(key) : null;
+    return value ? JSON.parse(value) : null;
 }
 
 function isEmptyObject(obj) {
@@ -128,7 +139,8 @@ var dzSettingsFromDefaults = false;
 
 function loadSettings() {
     if (typeof Storage !== "undefined") {
-        if (localStorage.getItem(themeFolder + ".themeSettings") === null) {
+        var cacheKey = dzSettingsCacheKey();
+        if (!cacheKey || localStorage.getItem(cacheKey) === null) {
             dzSettingsFromDefaults = true;
             return fetch("styles/" + themeFolder + "/theme.json", { cache: "no-cache", credentials: "include" })
                 .then(function(response) { return response.json(); })
@@ -293,6 +305,27 @@ function reconcileDomoticzSettingsInPlace() {
     /* Snapshot the state the ready block just applied, before the DB merge
        mutates the theme object in place. */
     var before = JSON.parse(JSON.stringify(theme));
+    /* The page started on the account this browser last confirmed; core
+       decides before anything merges (dzConfirmAccount). */
+    return dzConfirmAccount().then(function() {
+        /* Forced when the boot left an early paint standing over the
+           defaults (custom.js init_theme), because this is then the first
+           paint of the real settings. */
+        return dzMergeStoredSettings(before, dzSettingsFromDefaults && !!window.__dzEarlyPaint);
+    }).catch(function(e) {
+        /* A failed merge must not leave the early paint as the only one: with
+           no resolve there is no dz:colormode (the switch stays hidden) and
+           no repairFixedColors. While only the early block has painted, the
+           resolver treats this call as forced; after a boot paint it paints
+           only a changed slug. The caller logs the failure. */
+        dzApplyColorMode();
+        throw e;
+    });
+}
+
+/* Merge the stored settings onto theme and apply what changed since before
+   (the state on screen). */
+function dzMergeStoredSettings(before, forcePaint) {
     return checkUserVariableThemeSettings().then(function() {
         /* Retired-scheme repair (schemes.js DZ_SCHEME_MIGRATIONS): runs after
            the stored profile has merged, so it sees the real stored pick
@@ -307,19 +340,62 @@ function reconcileDomoticzSettingsInPlace() {
            of the saved member first. Unconditional: the mode or the user's
            presets may have changed even when nothing else did, and an
            unchanged resolve paints nothing; forced when the colours behind an
-           unchanged slug may be new, and when the boot left an early paint
-           standing over the defaults (custom.js init_theme), because this is
-           then the first paint of the real settings. */
-        dzApplyColorMode(dzPaintInputs(before) !== dzPaintInputs(theme) ||
-                         (dzSettingsFromDefaults && !!window.__dzEarlyPaint));
-    }).catch(function(e) {
-        /* A failed merge must not leave the early paint as the only one: with
-           no resolve there is no dz:colormode (the switch stays hidden) and
-           no repairFixedColors. While only the early block has painted, the
-           resolver treats this call as forced; after a boot paint it paints
-           only a changed slug. The caller logs the failure. */
-        dzApplyColorMode();
-        throw e;
+           unchanged slug may be new, or when the caller says so. */
+        dzApplyColorMode(dzPaintInputs(before) !== dzPaintInputs(theme) || forcePaint === true);
+    });
+}
+
+/* ---- The page's account ---- */
+
+/* Make account the page's account. Nobody (a logout) keeps the page as it
+   is: there are no settings to load, and the next login replaces it. Any
+   other account starts from the shipped theme.json; when that cannot be read
+   the page reloads, which boots as the new account from the start (the early
+   block asks core first). */
+function dzAdoptAccount(account) {
+    dzRememberAccount(account);
+    if (account === null) {
+        dzAccount = null;
+        dzForgetAccountState();
+        return Promise.resolve(false);
+    }
+    return fetch("styles/" + themeFolder + "/theme.json", { cache: "no-cache", credentials: "include" })
+        .then(function(r) { return r.json(); })
+        .then(function(shipped) {
+            theme = JSON.parse(JSON.stringify(shipped));
+            themeName = theme.name;
+            dzDefaultsSnap = dzSettingsSnapshot(shipped);
+            dzAccount = account;
+            dzForgetAccountState();
+            return true;
+        }, function() {
+            location.reload();
+            return false;
+        });
+}
+
+/* What this page knew about the previous account: its stored rows and their
+   tokens, and its light/dark tap. */
+function dzForgetAccountState() {
+    dzApiState.perUser = false;
+    dzApiState.noIdentity = false;
+    dzApiState.instanceSnap = null;
+    dzApiState.userSnap = null;
+    dzApiState.tokens = { instance: "", user: "" };
+    if (typeof dzForgetColorMemory === "function") dzForgetColorMemory();
+}
+
+/* The boot's settings start from this browser's cache of the account the page
+   started on. When core names another account (a browser on the shared
+   identity where someone has since logged in without this theme seeing it)
+   the page moves to that account before anything merges. */
+function dzConfirmAccount() {
+    var early = window.__dzEarlyAccount;
+    var asked = early && typeof early === "object" ? Promise.resolve(early.key) : dzFetchAccount();
+    return asked.then(function(account) {
+        if (account === undefined) return;
+        if (account === dzAccount) { dzRememberAccount(account); return; }
+        return dzAdoptAccount(account);
     });
 }
 
@@ -388,13 +464,14 @@ function applyThemeDeltaInPlace(before) {
     dzDiagRefreshGate(true);
 }
 
-/* Everything this browser keeps for the theme: the settings cache and the
-   colour state color-mode.js stores beside it. The settings stored in
-   Domoticz are untouched. Private mode or blocked storage leaves nothing to
-   clear. */
+/* Everything this browser keeps for the theme for this account: the settings
+   cache and the colour state color-mode.js stores beside it. The settings
+   stored in Domoticz are untouched. Private mode or blocked storage leaves
+   nothing to clear. */
 function dzClearThemeCache() {
     try {
-        localStorage.removeItem(themeFolder + ".themeSettings");
+        var key = dzSettingsCacheKey();
+        if (key) localStorage.removeItem(key);
     } catch (e) { /* nothing cached to clear */ }
     if (typeof dzForgetPaint === "function") { dzForgetPaint(); }
 }

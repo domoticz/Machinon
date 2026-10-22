@@ -84,8 +84,10 @@ on the device you tap it on. The half that is filled in shows which version is o
 - **On a phone or a narrow window** it is in the menu: open the menu and it is at the top right,
   on the row with the close button.
 
-A tap changes only what this device shows. Nothing is saved to Domoticz, your mode in the Theme
-Hub stays as it was, and your other devices and other users keep their colors.
+A tap changes only what this device shows, and only for you: when your Domoticz asks people to
+log in, a tap belongs to the login that made it, and someone else logging in on the same device
+sees their own mode. Nothing is saved to Domoticz, your mode in the Theme Hub stays as it was,
+and your other devices and other users keep their colors.
 
 How long a tap lasts depends on your mode:
 
@@ -136,9 +138,10 @@ and **Clear cached settings** in the Theme Hub also make the browser forget thes
 reset the page reloads in the default colors. After clearing cached settings it reloads like a
 first visit: the default colors for a moment, then your own theme.
 
-What is remembered belongs to the browser, not to your Domoticz login. If two people with
-different themes take turns in the same browser, the page can open in the previous person's
-colors for a moment before switching to yours.
+When your Domoticz asks people to log in, what is remembered is kept per login in each browser.
+If two people take turns in the same browser, each gets their own colors and settings, and the
+page never opens in the previous person's colors. The first time a login is used in a browser,
+its colors can take a moment to appear, like a first visit.
 
 ## What each scheme looks like
 
