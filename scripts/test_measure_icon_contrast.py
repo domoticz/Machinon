@@ -64,7 +64,7 @@ def test_every_palette_covers_the_same_roles():
         assert set(palette) == roles
 
 
-def test_dark_values_are_cores_own_for_the_five_energy_roles():
+def test_dark_values_are_cores_own_for_the_energy_roles():
     """The dark column is deliberately unchanged from Domoticz core, which is
     what guarantees this change is invisible to anyone already on a dark
     scheme. If someone 'improves' one of these, this test is the tripwire."""
@@ -73,6 +73,7 @@ def test_dark_values_are_cores_own_for_the_five_energy_roles():
     assert measure.DARK["gas"] == "#ff7043"
     assert measure.DARK["water"] == "#29b6f6"
     assert measure.DARK["price"] == "#c8a0ff"
+    assert measure.DARK["grid"] == "#00c6da"
 
 
 def test_every_shipped_value_clears_the_floor_on_every_card():

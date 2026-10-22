@@ -2750,6 +2750,7 @@ mobile-polish layout rule key off 979px, and dialogs/search key off 767px - see
 - Edit-form tables (`.table-details`, sub-device picker) stack label above field, inputs full-width (releases core's inline 356px/250px widths and the theme's 250px input cap; < 768px)
 - Page-title rows: title owns the flex row (button column content-sized, core split it 50/50); h1 steps `{typography.display}` 26px -> `{typography.md}` 16px
 - Settings grid tiles shrink to `100px` with hidden labels
+- Energy page, portrait only: the diagram's card keeps its height and takes the width the diagram needs at that height (from core's viewBox), and the page area scrolls sideways, so the labels render at 9-12px instead of 4-7px; landscape keeps core's centred full-width card (`css/energy.css`; max-width: 767px and portrait)
 - Compact card button groups become vertical scroll-snap columns
 - Devices, Events, and Timers/HVAC form rows wrap with a deliberate gap instead of squashing; Devices and Floorplans additionally stack/contain their layout so the page fits the viewport - see [Mobile Layout](#mobile-layout) for the full breakpoint story, the viewport-fit pages, and the wrap-with-gap pattern
 

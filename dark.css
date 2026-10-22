@@ -27,7 +27,7 @@ html[data-dz-scheme="dark"] {
      here; the light base keeps white. Keep contrast at 3:1 or better (WCAG SC
      1.4.11 non-text threshold), matching dz-tokens.css. */
   --dz-accent-text:         #0f1620;
-  /* Semantic identity colours (dark). These five are CORE's own values,
+  /* Semantic identity colours (dark). The core-named ones below are CORE's own values,
      unchanged: measured on the dark schemes they run 4.22:1 to 9.56:1 against
      the card, so they already clear the floor and there is no reason to move
      them. Keeping them identical is also what guarantees this change is

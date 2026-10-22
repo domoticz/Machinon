@@ -130,7 +130,8 @@
        resolves them through the data-dz-scheme underlay that already governs
        every token a scheme does not set.
 
-       Five of the names are CORE's (www/css/dashboard.css defines them for the
+       The names below that core also uses (amber and the export/gas/water/price
+       energy tokens) are CORE's (www/css/dashboard.css defines them for the
        Dynamic Dashboard and reads them throughout), so defining them here is all
        that is needed for core's own CSS to follow the scheme. Core's values are
        tuned for its dark stock theme, which is why the light column had to be
@@ -141,12 +142,12 @@
        the lightness until they clear it: worst case 3.23:1 (gruvbox-light
        price), typical 4.2:1.
 
-       This is also why the five are declared twice, once here in :root and
-       again in the html:root block below via their -base privates, while sun
-       and moon further down are single :root literals: core defines the same
-       five names, so Machinon's value needs the html:root override to win the
-       source-order tie, whereas core defines neither sun nor moon, so a plain
-       :root literal already wins outright.
+       This is also why the core-named ones are declared twice, once here in
+       :root and again in the html:root block below via their -base privates,
+       while sun, moon and the energy grid further down are single :root
+       literals: core defines the same names, so Machinon's value needs the
+       html:root override to win the source-order tie, whereas core defines
+       none of the others, so a plain :root literal already wins outright.
 
        A scheme overrides these only when its own identity demands it, which
        today is Paper alone (deliberately monochrome; schemes/paper-*.json).
