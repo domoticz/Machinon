@@ -253,7 +253,12 @@ function checkUserVariableThemeSettingsLegacy(startedAt) {
    running core supports it, falling back to the legacy uservariable writer
    otherwise. action ("add"/"update") is legacy-only -- dzThemeSettingsSave
    still needs it to pick the right uservariable command, but the native API
-   upserts unconditionally, so dzApiSaveSettings ignores it. */
+   upserts unconditionally, so dzApiSaveSettings ignores it.
+
+   Only the native writes pass the account guard (settings-transport.js
+   dzWithSameAccount). The legacy store is one shared set of uservariables
+   that only an admin can write, with no per-account row to protect, so a
+   stale tab's save there is the last writer winning, as it always was. */
 function storeUserVariableThemeSettings(action) {
     var startedAt = dzSettingsClock();
     var transport = (dzApiState.capable === true) ? "native" : "legacy";
@@ -541,10 +546,12 @@ function applyThemeDeltaInPlace(before) {
                 /* The one case that still needs a reload: a JS-backed feature the
                    defaults enable but the stored profile disables. An executed
                    script cannot be unloaded, so only a document boot truly turns
-                   it off. Reached solely on a first visit from a browser with an
-                   empty cache while the account already stored a profile with
-                   such a feature turned off; a warm visit paints from that same
-                   profile, so it does not hit this path. */
+                   it off. Reached on a first visit from a browser with an empty
+                   cache while the account already stored a profile with such a
+                   feature turned off, and when the page moves to another
+                   account whose profile has it off (dzAccountMaybeChanged);
+                   a warm visit paints from that same profile, so it does not
+                   hit this path. */
                 reloadNeeded = true;
             } else if (files.length) {
                 /* CSS-only feature newly disabled: unload its stylesheet in place. */

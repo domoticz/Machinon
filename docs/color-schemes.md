@@ -139,10 +139,22 @@ reset the page reloads in the default colors. After clearing cached settings it 
 first visit: the default colors for a moment, then your own theme.
 
 When your Domoticz asks people to log in, what is remembered is kept per login in each browser.
-If two people take turns in the same browser, each gets their own colors and settings, and the
-page never opens in the previous person's colors. Logging out and in as someone else shows the
-new person's settings straight away, without reloading the page. The first time a login is
-used in a browser, its colors can take a moment to appear, like a first visit.
+If two people take turns in the same browser, each gets their own colors and settings. Logging
+out and in as someone else on the Domoticz login page shows the new person's settings straight
+away, without reloading the page, and the next page opens in their colors. The first time a
+login is used in a browser, its colors can take a moment to appear, like a first visit.
+
+Two limits:
+
+- If someone logs in without a Machinon page seeing it (for example through another program or
+  an address that logs in directly), the next page can show the previous person's background
+  color for a fraction of a second while it loads, before anything else appears. It then
+  switches to the new person's colors.
+- Machinon tells logins apart by user name. If an account is deleted and a new one is later
+  created with the same name, the new account starts with what the browser kept for the old
+  one (its colors, its light/dark switch and its cached settings, including its own themes).
+  Use **Clear cached settings** (Theme Hub, **About** tab) in that browser after recreating an
+  account.
 
 ## What each scheme looks like
 
