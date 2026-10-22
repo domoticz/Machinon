@@ -946,15 +946,17 @@ function dzHubDiscard() {
     var hub = document.getElementById(DZ_HUB_ID);
     if (!hub || !hub.parentNode) return;
     var routed = hub.parentNode.id === "dz-theme-hub-host";
-    if (routed || hub.style.display !== "none") dzHubShownIn = routed ? hub.parentNode : "fallback";
+    if (routed || hub.style.display !== "none") dzHubShownIn = routed ? hub.parentNode : { fallback: true, hash: location.hash };
     hub.parentNode.removeChild(hub);
 }
 
 function dzHubRemount() {
     var shown = dzHubShownIn;
     dzHubShownIn = null;
-    if (shown === "fallback") {
-        dzOpenThemeHub();
+    if (shown && shown.fallback === true) {
+        /* The fallback hub is a pseudo-page over core's view; a user who
+           navigated on while the account loaded has left it. */
+        if (location.hash === shown.hash) dzOpenThemeHub();
     } else if (shown && document.body.contains(shown)) {
         dzMountThemeHubIn(shown, dzHubActiveGroup);
     }
