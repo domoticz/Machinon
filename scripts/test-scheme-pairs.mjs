@@ -1617,8 +1617,9 @@ test("every token a scheme can set inline is one a scheme switch clears", () => 
 
    The early block runs before the theme knows who is logged in. A browser
    whose last confirmed identity is the shared one (no login) paints at once,
-   exactly as before; any other asks core synchronously (getauth) and paints
-   only the record and override stored for the account core names. */
+   exactly as before; any other paints for the browser's last account and
+   asks core (getauth) in the background, repainting for the account core
+   names when that differs. */
 const tr = loadModules(["src/js/settings-transport.js"]);
 const SHARED_AUTH = { status: "OK", user: "admin", rights: 2, canlogout: false };
 const USER_AUTH = { status: "OK", user: "user", rights: 1, canlogout: true };
