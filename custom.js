@@ -101,7 +101,7 @@
         last = localStorage.getItem("dzPaintAccount");
     } catch (e) { return; }
     if (last === "*") { paint("*"); return; }
-    if (typeof last === "string" && last.indexOf("u:") === 0) paint(last);
+    if (typeof last === "string" && last.indexOf("u:") === 0 && last.length > 2) paint(last);
     try {
         var xhr = new XMLHttpRequest();
         xhr.open("GET", "json.htm?type=command&param=getauth", true);

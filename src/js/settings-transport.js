@@ -236,22 +236,52 @@ function dzAccountSuffix(account) {
    with core before any stored settings merge (settings-store.js). From here
    on a late answer no longer repaints in the early block: the boot owns the
    page's colours now. */
+var dzAccountAtLoad = (function() {
+    try {
+        var last = typeof localStorage !== "undefined" ? localStorage.getItem(DZ_ACCOUNT_POINTER_KEY) : null;
+        if (last === "*" || dzAccountSuffix(last) !== null) return last;
+    } catch (e) { /* storage blocked: the account is not known */ }
+    return undefined;
+})();
 var dzAccount = (function() {
     window.__dzEarlyClosed = true;
     var early = window.__dzEarlyAccount;
     if (early && typeof early === "object") return early.key;
-    try {
-        var last = typeof localStorage !== "undefined" ? localStorage.getItem(DZ_ACCOUNT_POINTER_KEY) : null;
-        if (last === "*" || (typeof last === "string" && last.indexOf("u:") === 0)) return last;
-    } catch (e) { /* storage blocked: the account is not known */ }
-    return undefined;
+    return dzAccountAtLoad;
 })();
 
+/* Core's rights for dzAccount as its last getauth answer gave them (a
+   rights change of the same login rebuilds the Theme Hub), and the rights of
+   the latest answer of any account. */
+var dzAccountRights;
+var dzLastAuthRights;
+
+/* True from the moment the page starts moving to another account until that
+   account's settings have merged: theme then holds the shipped defaults, and
+   a write would put them into the new account's rows. */
+var dzAccountLoading = false;
+
+/* A getauth that never answers must not hold the boot merge or the write
+   chain (every write waits on one). */
+var DZ_ACCOUNT_TIMEOUT_MS = 5000;
+
 function dzFetchAccount() {
-    return fetch("json.htm?type=command&param=getauth", { credentials: "include" })
+    var timer = null;
+    var late = new Promise(function(resolve) {
+        timer = setTimeout(function() { resolve(undefined); }, DZ_ACCOUNT_TIMEOUT_MS);
+    });
+    var asked = fetch("json.htm?type=command&param=getauth", { credentials: "include" })
         .then(function(r) { return r.json(); })
-        .then(dzAccountKeyOf)
+        .then(function(auth) {
+            var account = dzAccountKeyOf(auth);
+            if (account !== undefined) dzLastAuthRights = typeof auth.rights === "number" ? auth.rights : undefined;
+            return account;
+        })
         .catch(function() { return undefined; });
+    return Promise.race([asked, late]).then(function(account) {
+        clearTimeout(timer);
+        return account;
+    });
 }
 
 /* The account the early block paints for on the next load; removed when
@@ -502,30 +532,60 @@ function dzMergeConflict(baseSnap, intendedSnap, freshSnap) {
    correctly, at boot) would overwrite the very change being written, and a
    rebuild afterwards would then send the server its own state back and report
    success: silent edit loss. */
-function dzApiWrite(param, layer, buildFn) {
+/* asked: the account the write was asked for (the caller's dzAccount when
+   the user acted; omitted means now). duringLoad: a write the account change
+   itself makes (the legacy seed), allowed while dzAccountLoading. */
+function dzApiWrite(param, layer, buildFn, asked, duringLoad) {
+    if (arguments.length < 4) asked = dzAccount;
     return dzEnqueueWrite(function() {
-        return dzWithSameAccount(function() { return dzApiWriteNow(param, layer, buildFn); });
+        return dzWithSameAccount(asked, duringLoad === true, function() { return dzApiWriteNow(param, layer, buildFn); });
     });
 }
 
-/* A write leaves only while the session is still the page's account. The
-   session cookie is one per browser, so another tab may have logged out and
-   in as someone else; this page would then write its account's values into
-   that account's row, and core's lastupdate check does not stop a write to
-   a row that does not exist yet. The page is told whose session it is now
-   (settings-store.js dzAccountMaybeChanged), which loads that account's
-   settings, so the refused edit is not one the new account made. Unknown
-   (getauth unreachable) is refused too: nothing is written blind. */
-function dzWithSameAccount(job) {
+/* A write leaves only while the session is still the account it was asked
+   for, that account is still the page's, and no account change is loading.
+   The session cookie is one per browser, so another tab may have logged out
+   and in as someone else; this page would then write its account's values
+   into that account's row, and core's lastupdate check does not stop a write
+   to a row that does not exist yet. Checking the account at ask time matters
+   because one action can queue several writes (a save is a user and a house
+   write, Reset theme two resets): once the first is refused the page starts
+   moving to the new account, and the next one must not go out as that
+   account with whatever theme holds by then. Unknown (getauth unreachable)
+   is refused too: nothing is written blind.
+
+   Not airtight: one round trip separates getauth from the write, and core
+   has no "write as account X" parameter, so a login landing in exactly that
+   window is not caught. */
+function dzWithSameAccount(asked, duringLoad, job) {
+    if ((dzAccountLoading && !duringLoad) || asked !== dzAccount) {
+        return Promise.resolve(dzRefuseWrite(asked === dzAccount ? dzAccount : "elsewhere", false));
+    }
     return dzFetchAccount().then(function(account) {
-        if (account !== undefined && account !== null && account === dzAccount) return job();
-        if (typeof dzLog === "function") {
-            dzLog("settings", "write_refused", { reason: account === undefined ? "account_unknown" : "account_changed" });
+        if (account !== undefined && account !== null && account === asked && account === dzAccount &&
+            (duringLoad || !dzAccountLoading)) {
+            return job();
         }
-        if (account === undefined) return dzApiFail({ error: "unreachable" });
-        if (typeof dzAccountMaybeChanged === "function") dzAccountMaybeChanged(account);
-        return { ok: false, error: "account_changed" };
+        return dzRefuseWrite(account, true);
     });
+}
+
+/* The user is told every time; one action's several refused writes give one
+   toast. account is what core answered (or "elsewhere" when the page had
+   already moved on); fresh is true when it is a new answer the page must
+   follow. */
+var dzLastRefusalAt = 0;
+function dzRefuseWrite(account, fresh) {
+    var reason = account === undefined ? "account_unknown" : account === null ? "logged_out" : "account_changed";
+    if (typeof dzLog === "function") dzLog("settings", "write_refused", { reason: reason });
+    if (account === undefined) return dzApiFail({ error: "unreachable" });
+    var now = Date.now();
+    if (now - dzLastRefusalAt > 2000 && typeof ShowNotify === "function") {
+        ShowNotify(dzT(account === null ? "toasts.save_refused_logged_out" : "toasts.save_refused_account"), 6000);
+    }
+    dzLastRefusalAt = now;
+    if (fresh && typeof dzAccountMaybeChanged === "function") dzAccountMaybeChanged(account);
+    return { ok: false, error: reason };
 }
 
 function dzApiWriteNow(param, layer, buildFn) {
@@ -709,16 +769,17 @@ function dzBuildInstanceWrite(scopeToPatch) {
 
 function dzApiSaveSettings() {
     if (dzApiState.noIdentity) return Promise.resolve({ ok: false, error: "no_identity" });
+    var asked = dzAccount;
     if (!dzApiState.perUser) {
         /* Single shared identity (nowwwpwd / trusted network): one layer. */
         return dzApiWrite("themesettings_setdefault", "instance",
-            function() { return dzSettingsSnapshot(theme); })
+            function() { return dzSettingsSnapshot(theme); }, asked)
             .then(function(res) { if (res.ok) dzApiState.instanceSnap = res.snap; return res; });
     }
     var jobs = [dzApiWrite("themesettings_set", "user",
-        function() { return dzSnapshotSubset(dzSettingsSnapshot(theme), "user"); })
+        function() { return dzSnapshotSubset(dzSettingsSnapshot(theme), "user"); }, asked)
         .then(function(res) { if (res.ok) dzApiState.userSnap = res.snap; return res; })];
-    if (dzIsAdmin()) jobs.push(dzApiSaveHouseIfChanged());
+    if (dzIsAdmin()) jobs.push(dzApiSaveHouseIfChanged(asked));
     return Promise.all(jobs).then(function(all) {
         return all.every(function(r) { return r.ok; }) ? { ok: true } : all.find(function(r) { return !r.ok; });
     });
@@ -728,7 +789,8 @@ function dzApiSaveSettings() {
    factory-defaults fallback whenever dzApiState.instanceSnap is null (a
    theme that has never had an instance row written yet), so this resolves
    dzEnsureDefaultsSnap() first (a no-op once it is already populated). */
-function dzApiSaveHouseIfChanged() {
+function dzApiSaveHouseIfChanged(asked) {
+    if (arguments.length < 1) asked = dzAccount;
     return dzEnsureDefaultsSnap().then(function() {
         var patched = dzBuildInstanceWrite("house");
         /* Identity check on same-shaped builds (both sides are produced by
@@ -737,21 +799,24 @@ function dzApiSaveHouseIfChanged() {
            actually changed. */
         if (JSON.stringify(patched) === JSON.stringify(dzApiState.instanceSnap)) return { ok: true };
         return dzApiWrite("themesettings_setdefault", "instance",
-            function() { return dzBuildInstanceWrite("house"); })
+            function() { return dzBuildInstanceWrite("house"); }, asked)
             .then(function(res) { if (res.ok) dzApiState.instanceSnap = res.snap; return res; });
     }).catch(function() {
         return dzApiFail({ error: "defaults_unreachable", message: "theme.json unreachable for the instance write baseline" });
     });
 }
 
+/* The legacy seed, made by the settings load itself: allowed while an
+   account change is loading, because that load is what calls it. */
 function dzApiWriteInstanceFull(snap) {
-    return dzApiWrite("themesettings_setdefault", "instance", function() { return snap; })
+    return dzApiWrite("themesettings_setdefault", "instance", function() { return snap; }, dzAccount, true)
         .then(function(res) { if (res.ok) dzApiState.instanceSnap = res.snap; return res; });
 }
 
 function dzApiPromote() {
+    var asked = dzAccount;
     return dzEnsureDefaultsSnap().then(function() {
-        return dzApiWrite("themesettings_setdefault", "instance", function() { return dzBuildInstanceWrite("user"); })
+        return dzApiWrite("themesettings_setdefault", "instance", function() { return dzBuildInstanceWrite("user"); }, asked)
             .then(function(res) { if (res.ok) dzApiState.instanceSnap = res.snap; return res; });
     }).catch(function() {
         return dzApiFail({ error: "defaults_unreachable", message: "theme.json unreachable for the instance write baseline" });
@@ -761,8 +826,9 @@ function dzApiPromote() {
 /* Also serialized: a reset is a write, and must not overtake (or be overtaken
    by) a save that is already in flight for the same layer. */
 function dzApiReset(param) {
+    var asked = dzAccount;
     return dzEnqueueWrite(function() {
-        return dzWithSameAccount(function() {
+        return dzWithSameAccount(asked, false, function() {
             return dzApiPost({ param: param, theme: themeFolder, reset: "true" }).then(function(d) {
                 if (d.status === "OK") return { ok: true };
                 return dzApiFail(d);

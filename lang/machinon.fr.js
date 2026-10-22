@@ -432,7 +432,9 @@ language = {
     icons_summary: "{added} installées, {updated} mises à jour, {current} déjà à jour",
     icons_summary_failed: "{summary}; échecs: {failures}",
     save_failed: "Les réglages du thème n'ont pas pu être enregistrés ({error})",
-    save_failed_local: "Les réglages du thème n'ont pas pu être enregistrés dans Domoticz; ils sont conservés uniquement dans ce navigateur."
+    save_failed_local: "Les réglages du thème n'ont pas pu être enregistrés dans Domoticz; ils sont conservés uniquement dans ce navigateur.",
+    save_refused_account: "Non enregistré : un autre utilisateur s'est connecté dans ce navigateur. La page affiche maintenant ses réglages.",
+    save_refused_logged_out: "Non enregistré : vous n'êtes plus connecté. Connectez-vous et refaites la modification."
   },
   problems: {
     badge_title: "Dispositifs ayant des problèmes",

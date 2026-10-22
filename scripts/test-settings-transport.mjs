@@ -415,7 +415,7 @@ test("account: the page starts on the account core named to the early block, els
 function guarded(auth, account) {
     const posts = [];
     const ctx = loadTransport({
-        themeFolder: "machinon", ShowNotify: () => {}, dzT: (k) => k,
+        themeFolder: "machinon", ShowNotify: () => {}, dzT: (k) => k, setTimeout, clearTimeout, Date,
         console: { log() {}, warn() {} },
         fetch: async (url, opts) => {
             if (/param=getauth/.test(url)) return { json: async () => auth };

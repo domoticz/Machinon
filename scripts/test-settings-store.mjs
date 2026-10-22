@@ -215,7 +215,7 @@ test("scheme_mode: themes differing only in the mode have different fingerprints
 function accountPage({ account, auth, rows = {}, store = new Map() } = {}) {
     const calls = { paints: [], posts: [] };
     const ctx = vm.createContext({
-        console: { log() {}, warn() {} }, JSON, Math, Promise, URLSearchParams,
+        console: { log() {}, warn() {} }, JSON, Math, Promise, URLSearchParams, setTimeout, clearTimeout,
         theme: {}, themeFolder: "machinon", themeName: "Machinon",
         window: { my_config: { userrights: 1, username: "user" } },
         localStorage: {
@@ -361,4 +361,176 @@ test("account: a boot the early block already confirmed keeps its cache and reco
     assert.equal(store.get("dzPaintAccount"), "u:user");
     assert.deepEqual(clone(ctx.theme.user_schemes), cachedFor("user").user_schemes);
     assert.equal(ctx.theme.card_min_width, 410);
+});
+
+/* ---- Writes across an account change, with real timing ----
+
+   A page of alice (admin) while bob has logged in elsewhere on the browser.
+   getauth answers after authMs, theme.json after jsonMs, themesettings_get
+   after getMs: the order the race between the refusal, the account change
+   and the next queued write depends on. Nothing is stubbed between the write
+   guard and the account change. */
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+function stalePage({ authMs = 20, jsonMs = 1, getMs = 30, auth = { status: "OK", user: "bob", rights: 2, canlogout: true },
+                     authFails = false, account = "u:alice", store = new Map() } = {}) {
+    const posts = [];
+    const toasts = [];
+    const calls = { auth: 0 };
+    const ctx = vm.createContext({
+        console: { log() {}, warn() {} }, JSON, Math, Promise, URLSearchParams, setTimeout, clearTimeout,
+        theme: {}, themeFolder: "machinon", themeName: "Machinon",
+        window: { my_config: { userrights: 2, username: "alice" } },
+        localStorage: {
+            getItem: (k) => (store.has(k) ? store.get(k) : null),
+            setItem: (k, v) => { store.set(k, String(v)); },
+            removeItem: (k) => { store.delete(k); }
+        },
+        $: { each: (c, fn) => Object.keys(c).forEach((k) => fn(k, c[k])) },
+        document: { getElementById: () => null },
+        ShowNotify: (text) => { toasts.push(text); },
+        dzT: (k) => k,
+        fetch: async (url, opts) => {
+            if (/param=getauth/.test(url)) {
+                calls.auth++;
+                await wait(authMs);
+                if (authFails) throw new Error("blip");
+                return { json: async () => auth };
+            }
+            if (/param=getversion/.test(url)) return { json: async () => ({ ThemeSettingsAPI: 1 }) };
+            if (/theme\.json$/.test(url)) { await wait(jsonMs); return { json: async () => clone(SHIPPED) }; }
+            if (/param=themesettings_get/.test(url)) {
+                await wait(getMs);
+                return { json: async () => ({ status: "OK", PerUser: true,
+                    instance: { present: true, value: { schemaVersion: 3, features: {}, values: { button_name: "Bob House" } }, lastupdate: "i1" },
+                    user: { present: true, value: { schemaVersion: 3, features: {}, values: { scheme: "gruvbox-light", scheme_base: "light", scheme_mode: "light" } }, lastupdate: "u1" } }) };
+            }
+            if (opts && opts.method === "POST") {
+                const b = opts.body;
+                posts.push({ param: b.get("param"), reset: b.get("reset"), value: b.get("value") });
+                return { json: async () => ({ status: "OK", lastupdate: "new" }) };
+            }
+            return { json: async () => ({ status: "OK" }) };
+        }
+    });
+    ctx.window.window = ctx.window;
+    for (const f of ["src/js/theme-manifest.js", "src/js/settings-transport.js", "src/js/settings-store.js"]) {
+        vm.runInContext(readFileSync(f, "utf8"), ctx, { filename: f });
+    }
+    for (const name of ["applyCardWidths", "setLogo", "dzApplyCustomPageLabel", "applyBackground",
+                        "applyNavbarIconsText", "dzSyncModeToggles", "dzDiagRefreshGate",
+                        "loadThemeFeatureFiles", "unloadThemeFeatureFiles"]) {
+        ctx[name] = () => {};
+    }
+    ctx.dzApplyColorMode = () => Promise.resolve();
+    vm.runInContext('dzAccount = ' + JSON.stringify(account) + '; dzApiState.capable = true; dzApiState.perUser = true;' +
+                    'dzApiState.tokens = { instance: "iA", user: "uA" };' +
+                    'dzApiState.instanceSnap = { schemaVersion: 3, features: {}, values: { button_name: "Alice House" } };' +
+                    'dzApiState.userSnap = { schemaVersion: 3, features: {}, values: {} };', ctx);
+    ctx.theme = clone(SHIPPED);
+    ctx.theme.button_name = "Alice House";
+    ctx.theme.user_schemes = [{ name: "Alice Private", pair: "p", variant: "dark", base: "dark", colors: {} }];
+    return { ctx, posts, toasts, calls, store };
+}
+
+for (const [label, authMs, jsonMs] of [["theme.json answers first", 20, 1], ["getauth answers first", 1, 20]]) {
+    test(`account race (${label}): a reset of both layers in a stale tab deletes no row of the new account`, async () => {
+        const p = stalePage({ authMs, jsonMs });
+        const res = await vm.runInContext("Promise.all([dzApiResetHouse(), dzApiResetUser()])", p.ctx);
+        await wait(150);
+        assert.deepEqual(p.posts, [], "nothing reached bob's rows or the house");
+        assert.deepEqual(clone(res).map((r) => r.ok), [false, false]);
+        assert.equal(p.ctx.dzAccount, "u:bob");
+    });
+
+    test(`account race (${label}): an admin save in a stale tab writes neither layer`, async () => {
+        const p = stalePage({ authMs, jsonMs });
+        p.ctx.theme.button_name = "Alice edit";
+        const res = await vm.runInContext("dzApiSaveSettings()", p.ctx);
+        await wait(150);
+        assert.deepEqual(p.posts, []);
+        assert.equal(res.ok, false);
+    });
+}
+
+test("account race: refused, then the account changes, then the next save goes to the new account with its own values", async () => {
+    const p = stalePage({ authMs: 5, jsonMs: 1 });
+    const first = await vm.runInContext("dzApiSaveSettings()", p.ctx);
+    assert.equal(first.ok, false);
+    await wait(150);
+    assert.equal(p.ctx.dzAccount, "u:bob");
+    assert.equal(p.ctx.theme.scheme, "gruvbox-light", "bob's own row is loaded");
+    assert.equal(p.ctx.theme.button_name, "Bob House");
+    p.ctx.theme.features.fade_off_items.enabled = true;
+    const second = await vm.runInContext("dzApiSaveSettings()", p.ctx);
+    assert.equal(second.ok, true);
+    const user = p.posts.filter((x) => x.param === "themesettings_set");
+    assert.equal(user.length, 1);
+    const row = JSON.parse(user[0].value);
+    assert.equal(row.values.scheme, "gruvbox-light");
+    assert.equal(row.values.user_schemes, undefined, "alice's private themes are not in bob's row");
+    assert.equal(row.features.fade_off_items, true);
+});
+
+test("account race: a save asked for while the new account's settings load is refused", async () => {
+    const p = stalePage({ authMs: 1, jsonMs: 1, getMs: 80 });
+    vm.runInContext("dzAccountMaybeChanged()", p.ctx);
+    await wait(30);
+    assert.equal(p.ctx.dzAccount, "u:bob", "the change has started");
+    const res = await vm.runInContext("dzApiSaveSettings()", p.ctx);
+    assert.equal(res.ok, false);
+    assert.deepEqual(p.posts, [], "shipped defaults are never written while bob's rows load");
+});
+
+test("account race: a refused write tells the user why", async () => {
+    const p = stalePage({ authMs: 1 });
+    await vm.runInContext("dzApiSaveSettings()", p.ctx);
+    assert.ok(p.toasts.indexOf("toasts.save_refused_account") !== -1, JSON.stringify(p.toasts));
+    const out = stalePage({ authMs: 1, auth: { status: "OK", canlogout: true } });
+    await vm.runInContext("dzApiSaveSettings()", out.ctx);
+    assert.ok(out.toasts.indexOf("toasts.save_refused_logged_out") !== -1, JSON.stringify(out.toasts));
+    assert.deepEqual(out.posts, []);
+});
+
+test("account unknown at boot: no cache is the base, none is written, and getauth is asked a bounded number of times", async () => {
+    const store = new Map([["machinon.themeSettings@alice", "{\"marker\":\"alice\"}"], ["dzPaintAccount", "u:alice"]]);
+    const p = stalePage({ authMs: 1, authFails: true, store });
+    await p.ctx.reconcileDomoticzSettingsInPlace();
+    assert.equal(p.ctx.dzAccount, undefined);
+    assert.equal(p.ctx.theme.user_schemes, undefined, "alice's private themes are not shown to the session");
+    assert.equal(p.ctx.theme.scheme, "gruvbox-light", "the session's own rows are applied");
+    assert.equal(store.get("machinon.themeSettings@alice"), "{\"marker\":\"alice\"}", "alice's cache is untouched");
+    assert.deepEqual([...store.keys()].filter((k) => /themeSettings/.test(k)), ["machinon.themeSettings@alice"]);
+    assert.ok(p.calls.auth >= 2 && p.calls.auth <= 4, "asked " + p.calls.auth + " times");
+    const res = await vm.runInContext("dzApiSaveSettings()", p.ctx);
+    assert.equal(res.ok, false);
+    assert.deepEqual(p.posts, []);
+});
+
+test("account: a getauth that never answers gives up, so the boot and the write chain go on", async () => {
+    const p = stalePage({ authMs: 60000 });
+    p.ctx.DZ_ACCOUNT_TIMEOUT_MS = 30;
+    const started = Date.now();
+    assert.equal(await p.ctx.dzFetchAccount(), undefined);
+    assert.ok(Date.now() - started < 1000);
+});
+
+test("account: the same login with other rights rebuilds the Theme Hub", async () => {
+    const p = stalePage({ authMs: 1, account: "u:bob", auth: { status: "OK", user: "bob", rights: 1, canlogout: true } });
+    p.ctx.dzAccountRights = 2;
+    let discarded = 0;
+    p.ctx.dzHubDiscard = () => { discarded++; };
+    await p.ctx.dzAccountMaybeChanged();
+    assert.equal(discarded, 1);
+    assert.equal(p.ctx.dzAccountRights, 1);
+});
+
+test("account: 2.10.0's unkeyed keys are dropped once a named login is confirmed, and kept for the shared identity", async () => {
+    const legacy = () => new Map([["machinon.themeSettings", "{}"], ["dzPaintRecord", "{}"], ["machinon.colorOverride", "{}"]]);
+    const named = stalePage({ authMs: 1, account: undefined, auth: { status: "OK", user: "bob", rights: 1, canlogout: true }, store: legacy() });
+    await named.ctx.reconcileDomoticzSettingsInPlace();
+    assert.deepEqual([...named.store.keys()].filter((k) => !/@|dzPaintAccount/.test(k)), []);
+    const shared = stalePage({ authMs: 1, account: "*", auth: { status: "OK", user: "admin", rights: 2, canlogout: false }, store: legacy() });
+    shared.store.set("dzPaintAccount", "*");
+    await shared.ctx.reconcileDomoticzSettingsInPlace();
+    assert.ok(shared.store.has("dzPaintRecord") && shared.store.has("machinon.colorOverride"));
 });

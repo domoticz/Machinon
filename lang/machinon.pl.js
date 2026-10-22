@@ -432,7 +432,9 @@ language = {
     icons_summary: "{added} zainstalowanych, {updated} zaktualizowanych, {current} już aktualnych",
     icons_summary_failed: "{summary}; nieudane: {failures}",
     save_failed: "Nie udało się zapisać ustawień motywu ({error})",
-    save_failed_local: "Nie udało się zapisać ustawień motywu w Domoticzu; zostały zachowane tylko w tej przeglądarce."
+    save_failed_local: "Nie udało się zapisać ustawień motywu w Domoticzu; zostały zachowane tylko w tej przeglądarce.",
+    save_refused_account: "Nie zapisano: w tej przeglądarce zalogował się inny użytkownik. Strona pokazuje teraz jego ustawienia.",
+    save_refused_logged_out: "Nie zapisano: nie jesteś już zalogowany. Zaloguj się i wprowadź zmianę ponownie."
   },
   problems: {
     badge_title: "Urządzenia z problemem",

@@ -310,9 +310,13 @@ function reconcileDomoticzSettingsInPlace() {
     var run = dzConfirmAccount().then(function() {
         /* Forced when the boot left an early paint standing over the
            defaults (custom.js init_theme), because this is then the first
-           paint of the real settings. */
-        return dzMergeStoredSettings(before, dzSettingsFromDefaults && !!window.__dzEarlyPaint);
+           paint of the real settings, and when the boot moved to another
+           account. */
+        return dzMergeStoredSettings(before, (dzSettingsFromDefaults && !!window.__dzEarlyPaint) || dzAccountLoading);
+    }).then(function() {
+        dzAccountLoading = false;
     }).catch(function(e) {
+        dzAccountLoading = false;
         /* A failed merge must not leave the early paint as the only one: with
            no resolve there is no dz:colormode (the switch stays hidden) and
            no repairFixedColors. While only the early block has painted, the
@@ -368,15 +372,29 @@ function dzWatchAccount($rootScope) {
 }
 
 /* known: the account a caller already read from core (the save guard),
-   else this asks. Resolves once any change has been applied. */
+   else this asks. Resolves once any change has been applied. The same login
+   with other rights (an admin demoted, or promoted) keeps its settings but
+   gets a Theme Hub built for its new rights. */
 function dzAccountMaybeChanged(known) {
     var run = dzAccountWork.then(function() {
         return known !== undefined ? known : dzFetchAccount();
     }).then(function(account) {
-        if (account === undefined || account === dzAccount) return;
+        if (account === undefined) return;
+        if (account === dzAccount) {
+            if (dzAccountRights !== undefined && dzLastAuthRights !== undefined && dzAccountRights !== dzLastAuthRights &&
+                typeof dzHubDiscard === "function") {
+                dzHubDiscard();
+                if (typeof dzHubRemount === "function") dzHubRemount();
+            }
+            if (dzLastAuthRights !== undefined) dzAccountRights = dzLastAuthRights;
+            return;
+        }
         var before = JSON.parse(JSON.stringify(theme));
         return dzAdoptAccount(account).then(function(adopted) {
             if (adopted) return dzMergeStoredSettings(before, true);
+        }).then(dzAccountLoaded, function(e) {
+            dzAccountLoaded();
+            throw e;
         });
     });
     dzAccountWork = run.catch(function(e) {
@@ -385,18 +403,29 @@ function dzAccountMaybeChanged(known) {
     return dzAccountWork;
 }
 
+/* The new account's settings have merged (or failed to): writes may go out
+   again, and a Theme Hub the change took off the screen is built for it. */
+function dzAccountLoaded() {
+    dzAccountLoading = false;
+    if (typeof dzHubRemount === "function") dzHubRemount();
+}
+
 /* Make account the page's account. Nobody (a logout) keeps the page as it
    is: there are no settings to load, and the next login replaces it. Any
-   other account starts from the shipped theme.json; when that cannot be read
-   the page reloads, which boots as the new account from the start (the early
-   block asks core first). */
+   other account, and an account core could not name (undefined: then no
+   cache is read or written and every write is refused until core answers),
+   starts from the shipped theme.json; when that cannot be read the page
+   reloads, which boots as the new account from the start (the early block
+   asks core first). */
 function dzAdoptAccount(account) {
-    dzRememberAccount(account);
+    var previous = dzAccount;
+    if (account !== undefined) dzRememberAccount(account);
     if (account === null) {
         dzAccount = null;
         dzForgetAccountState();
         return Promise.resolve(false);
     }
+    dzAccountLoading = true;
     return fetch("styles/" + themeFolder + "/theme.json", { cache: "no-cache", credentials: "include" })
         .then(function(r) { return r.json(); })
         .then(function(shipped) {
@@ -404,7 +433,9 @@ function dzAdoptAccount(account) {
             themeName = theme.name;
             dzDefaultsSnap = dzSettingsSnapshot(shipped);
             dzAccount = account;
+            dzAccountRights = dzLastAuthRights;
             dzForgetAccountState();
+            dzForgetUnkeyedState(account, previous);
             return true;
         }, function() {
             location.reload();
@@ -424,16 +455,50 @@ function dzForgetAccountState() {
     if (typeof dzHubDiscard === "function") dzHubDiscard();
 }
 
+/* Machinon 2.10.0 kept one settings cache, paint record and tap per browser,
+   under the keys the shared identity ("*") still uses. Whose they are is
+   unknown, so a named login never reads them; once a named login is
+   confirmed on a browser whose last account was not the shared one, they are
+   2.10.0 leftovers holding someone's settings (private themes included) and
+   go. A browser that was on the shared identity keeps them: they are its own. */
+function dzForgetUnkeyedState(account, previous) {
+    if (account === "*" || dzAccountSuffix(account) === null || previous === "*") return;
+    try {
+        localStorage.removeItem(themeFolder + ".themeSettings");
+        localStorage.removeItem("dzPaintRecord");
+        localStorage.removeItem(themeFolder + ".colorOverride");
+    } catch (e) { /* storage blocked: nothing kept */ }
+}
+
 /* The boot's settings start from this browser's cache of the account the page
-   started on. When core names another account (a browser on the shared
-   identity where someone has since logged in without this theme seeing it)
-   the page moves to that account before anything merges. */
+   started on. Core decides before anything merges: when it names another
+   account (someone logged in without a Machinon page seeing it) the page
+   moves to that account first. When core cannot be reached it is asked a
+   few more times; if it never answers, the page leaves the cache (it may be
+   another account's) and starts from the shipped theme.json with no account,
+   so nothing is cached and nothing is written until core answers. */
+var DZ_ACCOUNT_BOOT_TRIES = 3;
+var DZ_ACCOUNT_RETRY_MS = 500;
+
 function dzConfirmAccount() {
     var early = window.__dzEarlyAccount;
-    var asked = early && typeof early === "object" ? Promise.resolve(early.key) : dzFetchAccount();
-    return asked.then(function(account) {
-        if (account === undefined) return;
-        if (account === dzAccount) { dzRememberAccount(account); return; }
+    function ask(tries) {
+        return dzFetchAccount().then(function(account) {
+            if (account !== undefined || tries <= 1) return account;
+            return new Promise(function(resolve) { setTimeout(resolve, DZ_ACCOUNT_RETRY_MS); }).then(function() {
+                return ask(tries - 1);
+            });
+        });
+    }
+    var answer = early && typeof early === "object" && early.key !== undefined
+        ? Promise.resolve(early.key) : ask(DZ_ACCOUNT_BOOT_TRIES);
+    return answer.then(function(account) {
+        if (account !== undefined && account === dzAccount) {
+            dzRememberAccount(account);
+            if (dzAccountRights === undefined) dzAccountRights = dzLastAuthRights;
+            dzForgetUnkeyedState(account, dzAccountAtLoad);
+            return;
+        }
         return dzAdoptAccount(account);
     });
 }

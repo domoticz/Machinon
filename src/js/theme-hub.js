@@ -936,11 +936,28 @@ function dzAdoptHubInto(hub, routeHost) {
 }
 
 /* The hub is built once for the session's rights and settings (chips,
-   locks, admin-only tabs); after an account change it is dropped so the
-   next open builds it for the new account. */
+   locks, admin-only tabs); after an account change it is dropped so it is
+   built for the new account. When it was on screen, dzHubRemount builds it
+   again in the same place once that account's settings have loaded, so the
+   page is never left blank. */
+var dzHubShownIn = null;
+
 function dzHubDiscard() {
     var hub = document.getElementById(DZ_HUB_ID);
-    if (hub && hub.parentNode) hub.parentNode.removeChild(hub);
+    if (!hub || !hub.parentNode) return;
+    var routed = hub.parentNode.id === "dz-theme-hub-host";
+    if (routed || hub.style.display !== "none") dzHubShownIn = routed ? hub.parentNode : "fallback";
+    hub.parentNode.removeChild(hub);
+}
+
+function dzHubRemount() {
+    var shown = dzHubShownIn;
+    dzHubShownIn = null;
+    if (shown === "fallback") {
+        dzOpenThemeHub();
+    } else if (shown && document.body.contains(shown)) {
+        dzMountThemeHubIn(shown, dzHubActiveGroup);
+    }
 }
 
 /* Routed entry (#/Theme, #/Theme/:tab): build the hub into the routed template's
