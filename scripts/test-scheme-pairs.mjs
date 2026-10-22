@@ -314,7 +314,7 @@ function browser(opts = {}) {
     const fetches = [];
     const persists = [];
     const ctx = vm.createContext({
-        console, JSON, Math, Promise, Object, Array, String, Date,
+        console, JSON, Math, Promise, Object, Array, String, Date, setTimeout, clearTimeout,
         theme: {}, themeFolder: "machinon", themeName: "Machinon",
         CustomEvent: class { constructor(type, init) { this.type = type; this.detail = init && init.detail; } },
         localStorage: {
@@ -325,6 +325,14 @@ function browser(opts = {}) {
         matchMedia: (q) => { assert.equal(q, "(prefers-color-scheme: dark)"); return media; },
         getComputedStyle: () => ({ getPropertyValue: (k) => props.get(k) || "" }),
         fetch: (url) => {
+            if (/param=getauth/.test(url)) {
+                /* Core's answer for the account the page booted on. */
+                const named = typeof account === "string" && account.indexOf("u:") === 0;
+                const auth = account === "*" ? { status: "OK", user: "admin", rights: 2, canlogout: false }
+                    : named ? { status: "OK", user: account.substring(2), rights: 1, canlogout: true }
+                    : account === null ? { status: "OK", canlogout: true } : { status: "ERR" };
+                return Promise.resolve({ json: () => Promise.resolve(auth) });
+            }
             fetches.push(url);
             if (failFetch) return Promise.reject(new Error("offline"));
             const path = url.replace(/^styles\/machinon\//, "");
@@ -1769,5 +1777,13 @@ test("account runtime: no record is written while the account is unknown or nobo
         b.ctx.dzSetColorOverride("light");
         assert.deepEqual([...b.store.keys()].filter((k) => /colorOverride/.test(k)), []);
         assert.equal(b.ctx.dzColorOverride().variant, "light", "the tap still works for this page");
+    }
+});
+
+test("account early paint: a stored account the runtime rule refuses paints nothing, as in dzAccountSuffix", () => {
+    for (const pointer of ["u:", "user", "*x"]) {
+        const page = earlyPage({ account: pointer, auth: NOBODY_AUTH, store: { "dzPaintRecord@": DARK, dzPaintRecord: DARK } });
+        assert.equal(page.props.size, 0, pointer);
+        assert.equal(tr.dzAccountSuffix(pointer), null, pointer);
     }
 });

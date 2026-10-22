@@ -5,7 +5,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 ## [Unreleased]
 
 - When people take turns logging in on the same browser, each now gets their own colours and settings as a page opens: no moment of the previous person's light or dark colours, a light/dark switch made by one person no longer carries over to the next, and one person's own themes no longer show up for, or get saved by, the next
-- Logging in as another user on the same browser now shows that user's colours and settings straight away, without reloading the page, and a change made in another tab still open from before can no longer be saved into the new user's settings
+- Logging in as another user on the same browser now shows that user's colours and settings straight away, without reloading the page; a change made in another tab still open from before is no longer saved into the new user's settings, and that tab says so
 
 ## [2.10.0] - 2026-10-22
 
