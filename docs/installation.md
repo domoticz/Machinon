@@ -153,13 +153,13 @@ What stays behind:
   devices keep using them under any theme. Remove them from the Icon Library before step 1 (each
   installed icon has a Remove button), or later under **Setup** > **More options** > **Custom
   Icons**.
-- **An empty entry for the house-wide defaults** (Domoticz 2026.4 or newer). It holds no settings.
-  It stays so that the settings from before Domoticz 2026.4 are not copied back in.
-- **The settings from Domoticz 2026.1**, if you used Machinon on Domoticz 2026.1 before upgrading:
-  three user variables named `theme-machinon-features`, `theme-machinon-custom` and
-  `theme-machinon-colors`. Machinon leaves them alone so that going back to Domoticz 2026.1 keeps
-  your settings. To remove them, delete them under **Setup** > **More options** > **User
-  variables**.
+- **An empty entry for the house-wide defaults** (Domoticz 2026.4 or newer). It holds no settings
+  and does nothing once Machinon is gone. If you install Machinon again, it keeps your settings
+  from before Domoticz 2026.4 from coming back. Domoticz has no screen to delete it.
+- **Your settings from before Domoticz 2026.4**, if you used Machinon on an older Domoticz before
+  upgrading: three user variables named `theme-machinon-features`, `theme-machinon-custom` and
+  `theme-machinon-colors`. Machinon leaves them in place. They do nothing on Domoticz 2026.4 or
+  newer; to remove them, delete them under **Setup** > **More options** > **User variables**.
 - **Other users' personal theme settings.** On an installation with separate logins, step 1 only
   resets the settings of the login that runs it. They do nothing once Machinon is gone.
 - **Small entries in each browser's storage** for your Domoticz address: the cached settings, the

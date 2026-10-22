@@ -4,7 +4,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
-- On Domoticz 2026.4 or newer, Reset theme to defaults now sticks: the settings you had on Domoticz 2026.1 no longer come back the next time an admin opens Domoticz (#262)
+- On Domoticz 2026.4 or newer, Reset theme to defaults no longer brings back the settings you had on an older Domoticz the next time an admin opens Domoticz; another browser you used before the reset still shows your old settings, and saving a change there stores them again, until you use Clear cached settings in that browser (Theme Hub, About tab) (#262)
 
 ## [2.10.1] - 2026-10-22
 
