@@ -364,3 +364,48 @@ test("legacy: the shipped light/dark toggle is on for a list saved before it exi
     assert.equal(tr.dzLegacyFeatureStates([16, 46, 47], 48, shipped, defaults).color_mode_toggle, true);
     assert.equal(tr.dzLegacyFeatureStates([16, 46, 47], 49, shipped, defaults).color_mode_toggle, false);
 });
+
+/* ---- The account the page's settings belong to ----
+
+   Core's getauth answer decides it: a named login is its own account, a
+   session core shares between every client (-nowwwpwd, a trusted network:
+   canlogout false, the same test core uses for PerUser) is the one shared
+   identity "*", and no user means nobody is logged in. */
+test("account: getauth answers map to a named account, the shared identity, nobody, or unknown", () => {
+    const tr = loadTransport();
+    assert.equal(tr.dzAccountKeyOf({ status: "OK", user: "user", rights: 1, canlogout: true }), "u:user");
+    assert.equal(tr.dzAccountKeyOf({ status: "OK", user: "admin", rights: 2, canlogout: false }), "*");
+    assert.equal(tr.dzAccountKeyOf({ status: "OK", canlogout: true }), null);
+    assert.equal(tr.dzAccountKeyOf({ status: "OK", user: "", canlogout: true }), null);
+    assert.equal(tr.dzAccountKeyOf({ status: "ERR" }), undefined);
+    assert.equal(tr.dzAccountKeyOf(null), undefined);
+    assert.equal(tr.dzAccountKeyOf("OK"), undefined);
+    assert.equal(tr.dzAccountKeyOf({ status: "OK", user: 7, canlogout: true }), null);
+});
+
+test("account: the shared identity keeps the unsuffixed keys, a named one gets its own", () => {
+    const tr = loadTransport();
+    assert.equal(tr.dzAccountSuffix("*"), "");
+    assert.equal(tr.dzAccountSuffix("u:user"), "@user");
+    assert.equal(tr.dzAccountSuffix("u:a b/\u00e9@x"), "@a%20b%2F%C3%A9%40x");
+    for (const nobody of [null, undefined, "", "user", "u:", 7]) {
+        assert.equal(tr.dzAccountSuffix(nobody), null, JSON.stringify(nobody));
+    }
+    assert.equal(tr.dzAccountSuffix("u:\ud800"), null, "a name encodeURIComponent refuses has no keys");
+});
+
+test("account: the page starts on the account core named to the early block, else on the browser's last one", () => {
+    const store = (v) => ({ getItem: (k) => (k === "dzPaintAccount" ? v : null) });
+    assert.equal(loadTransport({ window: { __dzEarlyAccount: { key: "u:user" } }, localStorage: store("u:admin") }).dzAccount, "u:user");
+    assert.equal(loadTransport({ window: { __dzEarlyAccount: { key: null } } }).dzAccount, null);
+    assert.equal(loadTransport({ window: {}, localStorage: store("*") }).dzAccount, "*");
+    assert.equal(loadTransport({ window: {}, localStorage: store("u:admin") }).dzAccount, "u:admin",
+                 "provisional: the boot confirms it before any settings merge");
+    assert.equal(loadTransport({ window: {}, localStorage: store("admin") }).dzAccount, undefined, "not an account key");
+    assert.equal(loadTransport({ window: {}, localStorage: { getItem: () => { throw new Error("blocked"); } } }).dzAccount,
+                 undefined);
+    assert.equal(loadTransport().dzAccount, undefined);
+    const w = {};
+    loadTransport({ window: w });
+    assert.equal(w.__dzEarlyClosed, true, "a late getauth answer no longer repaints once the theme runs");
+});

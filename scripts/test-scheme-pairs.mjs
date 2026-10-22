@@ -296,7 +296,11 @@ function fakeElement(tag, owner) {
     };
 }
 
-function browser({ dark = false, failFetch = false } = {}) {
+/* account: the identity the page boots on; the default is the shared one
+   (-nowwwpwd, a trusted network), whose keys are the unsuffixed 2.10.0 ones. */
+function browser(opts = {}) {
+    const { dark = false, failFetch = false } = opts;
+    const account = "account" in opts ? opts.account : "*";
     const props = new Map();
     const owner = { nodes: [] };
     const html = fakeElement("html", owner);
@@ -306,6 +310,7 @@ function browser({ dark = false, failFetch = false } = {}) {
     const media = { matches: dark, listeners: [],
         addEventListener(type, fn) { if (type === "change") this.listeners.push(fn); } };
     const store = new Map();
+    if (account === "*") store.set("dzPaintAccount", "*");
     const fetches = [];
     const persists = [];
     const ctx = vm.createContext({
@@ -334,6 +339,7 @@ function browser({ dark = false, failFetch = false } = {}) {
         }
     });
     ctx.window = ctx;
+    if (account !== "*") ctx.__dzEarlyAccount = { key: account };
     for (const f of RUNTIME) vm.runInContext(readFileSync(f, "utf8"), ctx, { filename: f });
     ctx.dzHubPersist = () => { persists.push(JSON.stringify(ctx.dzSettingsSnapshot(ctx.theme))); return Promise.resolve(); };
     const paints = [];
@@ -524,7 +530,8 @@ test("a reset and a cache clear drop the settings cache, the paint record and a 
     b.store.set("dzOtherKey", "kept");
     for (const k of ["machinon.themeSettings", "dzPaintRecord", "machinon.colorOverride"]) assert.ok(b.store.has(k), k);
     b.ctx.dzClearThemeCache();
-    assert.deepEqual([...b.store.keys()], ["dzOtherKey"]);
+    /* Whose browser this is stays: it is not a setting. */
+    assert.deepEqual([...b.store.keys()].sort(), ["dzOtherKey", "dzPaintAccount"]);
     assert.equal(b.ctx.dzColorOverride(), null, "the page's own copy of the tap is gone too");
     /* The legacy transport's reset finishes through the same clear. */
     const c = browser();
@@ -537,7 +544,7 @@ test("a reset and a cache clear drop the settings cache, the paint record and a 
     c.ctx.location = { reload() { reloads++; } };
     c.ctx.resetTheme();
     await tick();
-    assert.equal(c.store.size, 0);
+    assert.deepEqual([...c.store.keys()], ["dzPaintAccount"]);
     assert.equal(reloads, 1);
     /* Blocked storage neither throws nor stops the reload. */
     c.ctx.localStorage.removeItem = () => { throw new Error("blocked"); };
@@ -768,19 +775,31 @@ function runEarlyIn(ctx) {
     vm.runInContext(EARLY_SRC, ctx, { filename: "custom.js#early" });
 }
 
-/* A page as the early block finds it: an empty <html>, a head, storage and
-   the device's light/dark state; nothing else exists yet. */
-function earlyPage({ store = {}, deviceDark = false, storageThrows = false } = {}) {
+/* A page as the early block finds it: an empty <html>, a head, storage, the
+   device's light/dark state and an XMLHttpRequest whose getauth answer the
+   test delivers with respond(): auth is the JSON answer, a number the HTTP
+   status of an empty one, a function a network error. account is the stored
+   pointer: "*" by default, the shared identity every fixture without an
+   account models; null leaves it out. */
+function earlyPage({ store = {}, deviceDark = false, storageThrows = false, account = "*", auth = null } = {}) {
     const props = new Map();
     const owner = { nodes: [] };
     const html = fakeElement("html", owner);
     html.style = fakeStyle(props);
     const head = fakeElement("head", owner);
+    head.removeChild = (n) => { owner.nodes.splice(owner.nodes.indexOf(n), 1); n.parentNode = null; return n; };
+    const all = Object.assign(account === null ? {} : { dzPaintAccount: account }, store);
+    const requests = [];
+    class XMLHttpRequest {
+        open(method, url, async) { this.req = { method, url, async }; requests.push(this.req); }
+        send() { this.req.timeout = this.timeout; this.req.xhr = this; }
+    }
     const ctx = vm.createContext({
+        XMLHttpRequest,
         localStorage: {
             getItem: (k) => {
                 if (storageThrows) throw new Error("SecurityError");
-                return Object.prototype.hasOwnProperty.call(store, k) ? store[k] : null;
+                return Object.prototype.hasOwnProperty.call(all, k) ? all[k] : null;
             }
         },
         matchMedia: () => ({ matches: deviceDark }),
@@ -792,7 +811,16 @@ function earlyPage({ store = {}, deviceDark = false, storageThrows = false } = {
     });
     ctx.window = ctx;
     runEarlyIn(ctx);
-    return { ctx, props, html, links: owner.nodes.filter((n) => n.tagName === "LINK") };
+    const page = { ctx, props, html, requests, get links() { return owner.nodes.filter((n) => n.tagName === "LINK"); } };
+    page.respond = () => {
+        const x = requests[0] && requests[0].xhr;
+        if (!x) return;
+        if (typeof auth === "function") { if (x.onerror) x.onerror(); return; }
+        x.status = typeof auth === "number" ? auth : 200;
+        x.responseText = typeof auth === "number" ? "" : JSON.stringify(auth);
+        if (x.onload) x.onload();
+    };
+    return page;
 }
 
 const GOOD_RECORD = {
@@ -1575,4 +1603,171 @@ test("every token a scheme can set inline is one a scheme switch clears", () => 
     assert.ok(written.includes("--dz-widget-energy-grid"), "the grid key is applied");
     const cleared = new Set(b.ctx.DZ_CUSTOM_TOKENS);
     for (const name of written) assert.ok(cleared.has(name), `${name} is set inline but never cleared`);
+});
+
+/* ---- One account's light/dark state never paints for another ----
+
+   The early block runs before the theme knows who is logged in. A browser
+   whose last confirmed identity is the shared one (no login) paints at once,
+   exactly as before; any other asks core synchronously (getauth) and paints
+   only the record and override stored for the account core names. */
+const tr = loadModules(["src/js/settings-transport.js"]);
+const SHARED_AUTH = { status: "OK", user: "admin", rights: 2, canlogout: false };
+const USER_AUTH = { status: "OK", user: "user", rights: 1, canlogout: true };
+const NOBODY_AUTH = { status: "OK", canlogout: true };
+const DARK = JSON.stringify(rec({ mode: "dark" }));
+const LIGHT = JSON.stringify(rec({ mode: "light" }));
+const OVERRIDE_DARK = JSON.stringify({ variant: "dark", deviceDark: false });
+
+test("account early paint: the shared identity paints the unkeyed record without asking core", () => {
+    const page = earlyPage({ store: { dzPaintRecord: DARK } });
+    assert.equal(page.requests.length, 0, "no request on a no-login install");
+    assert.equal(page.html.getAttribute("data-dz-scheme"), "dark");
+    assert.equal(page.ctx.__dzEarlyAccount, undefined);
+});
+
+test("account early paint: a browser with no identity yet asks core without waiting, and the shared answer paints the unkeyed record", () => {
+    const page = earlyPage({ account: null, auth: SHARED_AUTH, store: { dzPaintRecord: DARK } });
+    assert.deepEqual(page.requests.map((r) => [r.method, r.url, r.async, r.timeout]),
+                     [["GET", "json.htm?type=command&param=getauth", true, 3000]]);
+    assert.equal(page.html.getAttribute("data-dz-scheme"), null, "nothing is painted before core answers");
+    page.respond();
+    assert.equal(page.html.getAttribute("data-dz-scheme"), "dark");
+    assert.deepEqual(clone(page.ctx.__dzEarlyAccount), { key: "*" });
+});
+
+test("account early paint: a record and override without an account key are never painted for a named login", () => {
+    const page = earlyPage({ account: null, auth: USER_AUTH,
+                             store: { dzPaintRecord: DARK, "machinon.colorOverride": OVERRIDE_DARK } });
+    page.respond();
+    assert.equal(page.props.size, 0);
+    assert.equal(page.html.getAttribute("data-dz-scheme"), null);
+    assert.equal(page.ctx.__dzEarlyPaint, undefined);
+    assert.deepEqual(clone(page.ctx.__dzEarlyAccount), { key: "u:user" });
+});
+
+test("account early paint: a named login paints its own record and override at once, and core's answer is checked", () => {
+    const own = earlyPage({ account: "u:user", auth: USER_AUTH,
+                            store: { "dzPaintRecord@user": LIGHT, "machinon.colorOverride@user": OVERRIDE_DARK,
+                                     dzPaintRecord: LIGHT } });
+    assert.equal(own.requests.length, 1);
+    assert.equal(own.ctx.__dzEarlyPaint.variant, "dark", "user's own tap applies to user, before the answer");
+    own.respond();
+    assert.equal(own.ctx.__dzEarlyPaint.variant, "dark", "the same account answering changes nothing");
+    assert.deepEqual(clone(own.ctx.__dzEarlyAccount), { key: "u:user" });
+});
+
+test("account early paint: when core names another account, the previous account's paint is undone and the new one's painted", () => {
+    const admin = JSON.stringify(machinonRecord("dark"));
+    const store = { "dzPaintRecord@user": LIGHT, "dzPaintRecord@admin": admin };
+    const page = earlyPage({ account: "u:admin", auth: USER_AUTH, store });
+    assert.equal(page.html.getAttribute("data-dz-scheme"), "dark", "admin's record, on trust");
+    assert.equal(page.links.length, 1);
+    page.respond();
+    assert.equal(page.html.getAttribute("data-dz-scheme"), "custom", "user's light half");
+    assert.equal(page.links.length, 0, "admin's dark_theme.css link is gone");
+    assert.deepEqual(Object.fromEntries(page.props), GOOD_RECORD.light.tokens, "only user's tokens remain");
+    assert.equal(page.ctx.__dzEarlyPaint.variant, "light");
+    const none = earlyPage({ account: "u:admin", auth: USER_AUTH, store: { "dzPaintRecord@admin": DARK } });
+    none.respond();
+    assert.equal(none.props.size, 0, "user has no record: nothing of admin's stays");
+    assert.equal(none.html.getAttribute("data-dz-scheme"), null);
+    assert.equal(none.ctx.__dzEarlyPaint, undefined);
+});
+
+test("account early paint: nobody logged in undoes the paint", () => {
+    const page = earlyPage({ account: "u:admin", auth: NOBODY_AUTH, store: { "dzPaintRecord@admin": DARK } });
+    page.respond();
+    assert.equal(page.props.size, 0);
+    assert.equal(page.ctx.__dzEarlyPaint, undefined);
+    assert.deepEqual(clone(page.ctx.__dzEarlyAccount), { key: null });
+});
+
+test("account early paint: an answer that arrives after the theme took over only records the account", () => {
+    const page = earlyPage({ account: "u:admin", auth: USER_AUTH, store: { "dzPaintRecord@admin": DARK, "dzPaintRecord@user": LIGHT } });
+    page.ctx.__dzEarlyClosed = true;
+    page.respond();
+    assert.equal(page.html.getAttribute("data-dz-scheme"), "dark", "the boot repaints, not the early block");
+    assert.deepEqual(clone(page.ctx.__dzEarlyAccount), { key: "u:user" });
+});
+
+test("account early paint: an identity check that fails changes nothing and claims no account", () => {
+    for (const auth of [() => { throw new Error("NetworkError"); }, 401, { status: "ERR" }, "not json"]) {
+        const page = earlyPage({ account: null, auth, store: { dzPaintRecord: DARK } });
+        page.respond();
+        assert.equal(page.props.size, 0, JSON.stringify(String(auth)));
+        assert.equal(page.ctx.__dzEarlyPaint, undefined);
+        assert.equal(page.ctx.__dzEarlyAccount, undefined);
+        const trusted = earlyPage({ account: "u:admin", auth, store: { "dzPaintRecord@admin": DARK } });
+        trusted.respond();
+        assert.equal(trusted.html.getAttribute("data-dz-scheme"), "dark", "the boot confirms instead");
+    }
+});
+
+test("account early paint: a name encodeURIComponent refuses paints nothing", () => {
+    const page = earlyPage({ account: null, auth: { status: "OK", user: "\ud800", canlogout: true }, store: { dzPaintRecord: DARK } });
+    page.respond();
+    assert.equal(page.props.size, 0);
+    assert.equal(page.ctx.__dzEarlyPaint, undefined);
+});
+
+test("account early paint: the early copy of the identity rule agrees with dzAccountKeyOf", () => {
+    const answers = [SHARED_AUTH, USER_AUTH, NOBODY_AUTH, { status: "OK", user: "", canlogout: false },
+                     { status: "OK", user: "x y", canlogout: true }, { status: "OK", user: 5, canlogout: true },
+                     { status: "ERR" }, { status: "OK", user: "user", canlogout: "true" }];
+    for (const auth of answers) {
+        const page = earlyPage({ account: null, auth });
+        page.respond();
+        const want = tr.dzAccountKeyOf(auth);
+        assert.deepEqual(page.ctx.__dzEarlyAccount === undefined ? undefined : page.ctx.__dzEarlyAccount.key,
+                         want, JSON.stringify(auth));
+    }
+});
+
+test("account runtime: a named account writes its own record and override, never the unkeyed ones", async () => {
+    const b = browser({ account: "u:user" });
+    savedTheme(b, "gruvbox-light", "light");
+    b.ctx.dzSeedPaintedSlug();
+    await b.ctx.dzApplyColorMode();
+    assert.ok(b.store.has("dzPaintRecord@user"), "user's record");
+    assert.equal(b.store.has("dzPaintRecord"), false);
+    b.ctx.dzSetColorOverride("dark");
+    assert.equal(b.store.get("machinon.colorOverride@user"), OVERRIDE_DARK);
+    assert.equal(b.store.has("machinon.colorOverride"), false);
+    b.ctx.dzForgetPaint();
+    assert.equal(b.store.has("dzPaintRecord@user"), false);
+    assert.equal(b.store.has("machinon.colorOverride@user"), false);
+});
+
+test("account runtime: another account's tap is not this account's override", async () => {
+    const b = browser({ account: "u:admin" });
+    savedTheme(b, "gruvbox-light", "light");
+    b.ctx.dzSeedPaintedSlug();
+    b.ctx.dzSetColorOverride("dark");
+    await b.ctx.dzApplyColorMode();
+    assert.equal(b.ctx.dzPaintedVariant(), "dark");
+    b.ctx.dzAccount = "u:user";
+    b.ctx.dzForgetColorMemory();
+    assert.equal(b.ctx.dzColorOverride(), null);
+    await b.ctx.dzApplyColorMode();
+    assert.equal(b.ctx.dzPaintedVariant(), "light");
+    assert.equal(b.store.get("machinon.colorOverride@admin"), OVERRIDE_DARK, "admin's tap is kept for admin");
+    b.ctx.dzAccount = "u:admin";
+    b.ctx.dzForgetColorMemory();
+    await b.ctx.dzApplyColorMode();
+    assert.equal(b.ctx.dzPaintedVariant(), "dark", "and applies again when admin is back");
+});
+
+test("account runtime: no record is written while the account is unknown or nobody is logged in", async () => {
+    for (const account of [undefined, null]) {
+        const b = browser({ account });
+        savedTheme(b, "gruvbox-dark", "dark");
+        b.ctx.dzSeedPaintedSlug();
+        await b.ctx.dzApplyColorMode(true);
+        assert.deepEqual([...b.store.keys()].filter((k) => /dzPaintRecord/.test(k)), [], String(account));
+        assert.equal(b.ctx.dzPaintRecordDue, true, "the record is still owed once the account is known");
+        b.ctx.dzSetColorOverride("light");
+        assert.deepEqual([...b.store.keys()].filter((k) => /colorOverride/.test(k)), []);
+        assert.equal(b.ctx.dzColorOverride().variant, "light", "the tap still works for this page");
+    }
 });

@@ -191,6 +191,80 @@ function dzSnapshotSubset(snap, scope) {
     return out;
 }
 
+/* ---- The account the page's settings belong to ----
+
+   The settings cache, the paint record and the light/dark override are kept
+   per account on a browser (settings-store.js, color-mode.js), so one
+   person's settings never show for, or get saved by, the next person who
+   logs in on the same browser. An account is what core's getauth answers:
+
+     "u:<name>"  a login of its own (canlogout true: core gives the session
+                 its own id, and themesettings_get reports PerUser for it)
+     "*"         the one identity core shares between every client
+                 (-nowwwpwd, or a trusted network without a login): one set
+                 of settings, kept under the unsuffixed keys Machinon 2.10.0
+                 used, so nothing changes for such an install
+     null        nobody is logged in (the login page)
+     undefined   not known (getauth unreachable, or not asked yet)
+
+   custom.js's early block repeats dzAccountKeyOf and dzAccountSuffix, which
+   cannot be loaded that early; scripts/test-scheme-pairs.mjs runs both over
+   the same answers. */
+var DZ_ACCOUNT_POINTER_KEY = "dzPaintAccount";
+
+function dzAccountKeyOf(auth) {
+    if (!auth || typeof auth !== "object" || auth.status !== "OK") return undefined;
+    if (typeof auth.user !== "string" || auth.user === "") return null;
+    return auth.canlogout === true ? "u:" + auth.user : "*";
+}
+
+/* The suffix of an account's storage keys, or null when it has none (nobody,
+   unknown, or a name encodeURIComponent refuses). */
+function dzAccountSuffix(account) {
+    if (account === "*") return "";
+    if (typeof account !== "string" || account.indexOf("u:") !== 0 || account.length < 3) return null;
+    try {
+        return "@" + encodeURIComponent(account.substring(2));
+    } catch (e) {
+        return null;
+    }
+}
+
+/* The account whose settings `theme` holds. Starts on the one core named to
+   custom.js's early block when that answer is already in, else on the one
+   this browser last confirmed; reconcileDomoticzSettingsInPlace confirms it
+   with core before any stored settings merge (settings-store.js). From here
+   on a late answer no longer repaints in the early block: the boot owns the
+   page's colours now. */
+var dzAccount = (function() {
+    window.__dzEarlyClosed = true;
+    var early = window.__dzEarlyAccount;
+    if (early && typeof early === "object") return early.key;
+    try {
+        var last = typeof localStorage !== "undefined" ? localStorage.getItem(DZ_ACCOUNT_POINTER_KEY) : null;
+        if (last === "*" || (typeof last === "string" && last.indexOf("u:") === 0)) return last;
+    } catch (e) { /* storage blocked: the account is not known */ }
+    return undefined;
+})();
+
+function dzFetchAccount() {
+    return fetch("json.htm?type=command&param=getauth", { credentials: "include" })
+        .then(function(r) { return r.json(); })
+        .then(dzAccountKeyOf)
+        .catch(function() { return undefined; });
+}
+
+/* The account the early block paints for on the next load; removed when
+   nobody is logged in. Best effort: storage may be blocked. */
+function dzRememberAccount(account) {
+    try {
+        if (typeof account === "string") localStorage.setItem(DZ_ACCOUNT_POINTER_KEY, account);
+        else localStorage.removeItem(DZ_ACCOUNT_POINTER_KEY);
+    } catch (e) {
+        if (typeof dzLog === "function") dzLog("settings", "account_store_failed", { error: String(e) });
+    }
+}
+
 /* ---- Native ThemeSettings transport (core ThemeSettingsAPI: 1). Wiki:
    core docs/Theming.wiki "Theme settings storage". Legacy uservariable
    transport below remains the store for cores without the API. ---- */
@@ -431,6 +505,7 @@ function dzMergeConflict(baseSnap, intendedSnap, freshSnap) {
 function dzApiWrite(param, layer, buildFn) {
     return dzEnqueueWrite(function() { return dzApiWriteNow(param, layer, buildFn); });
 }
+
 
 function dzApiWriteNow(param, layer, buildFn) {
     var baseSnap = dzApiLayerSnap(layer);

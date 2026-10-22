@@ -205,3 +205,110 @@ test("scheme_mode: themes differing only in the mode have different fingerprints
     a.scheme_mode = "light"; b.scheme_mode = "dark";
     assert.notEqual(dz.themeSettingsFingerprint(a), dz.themeSettingsFingerprint(b));
 });
+
+/* ---- Settings that belong to an account ----
+
+   A page boots with the settings cache, the paint record and the light/dark
+   override of ONE account. These run the shipping settings files with a
+   storage map, and a fetch that answers getauth, theme.json and the native
+   ThemeSettings API the way core does. */
+function accountPage({ account, auth, rows = {}, store = new Map() } = {}) {
+    const calls = { paints: [], posts: [] };
+    const ctx = vm.createContext({
+        console: { log() {}, warn() {} }, JSON, Math, Promise, URLSearchParams,
+        theme: {}, themeFolder: "machinon", themeName: "Machinon",
+        window: { my_config: { userrights: 1, username: "user" } },
+        localStorage: {
+            getItem: (k) => (store.has(k) ? store.get(k) : null),
+            setItem: (k, v) => { store.set(k, String(v)); },
+            removeItem: (k) => { store.delete(k); }
+        },
+        $: { each: (c, fn) => Object.keys(c).forEach((k) => fn(k, c[k])) },
+        document: { getElementById: () => null },
+        fetch: async (url, opts) => {
+            if (/param=getauth/.test(url)) return { json: async () => auth };
+            if (/param=getversion/.test(url)) return { json: async () => ({ ThemeSettingsAPI: 1, version: "2026.4" }) };
+            if (/theme\.json$/.test(url)) return { json: async () => clone(SHIPPED) };
+            if (/param=themesettings_get/.test(url)) {
+                return { json: async () => ({ status: "OK", PerUser: true,
+                    instance: rows.instance ? { present: true, value: clone(rows.instance), lastupdate: "i1" } : { present: false },
+                    user: rows.user ? { present: true, value: clone(rows.user), lastupdate: "u1" } : { present: false } }) };
+            }
+            if (opts && opts.method === "POST") calls.posts.push(opts.body.get("param"));
+            return { json: async () => ({ status: "OK" }) };
+        }
+    });
+    ctx.window.window = ctx.window;
+    for (const f of ["src/js/theme-manifest.js", "src/js/settings-transport.js", "src/js/settings-store.js"]) {
+        vm.runInContext(readFileSync(f, "utf8"), ctx, { filename: f });
+    }
+    for (const name of ["applyCardWidths", "setLogo", "dzApplyCustomPageLabel", "applyBackground",
+                        "applyNavbarIconsText", "dzSyncModeToggles", "dzDiagRefreshGate",
+                        "loadThemeFeatureFiles", "unloadThemeFeatureFiles"]) {
+        ctx[name] = () => {};
+    }
+    ctx.dzApplyColorMode = (force) => { calls.paints.push({ force, scheme: ctx.theme.scheme }); return Promise.resolve(); };
+    ctx.dzAccount = account;
+    return { ctx, store, calls };
+}
+
+/* An account's settings as the browser cached them: a private wizard theme
+   and a scheme picked from it, both user-scope. */
+function cachedFor(name) {
+    const t = clone(SHIPPED);
+    t.scheme = "user:" + name + " Sunset|dark";
+    t.scheme_base = "dark";
+    t.scheme_mode = "dark";
+    t.user_schemes = [{ name: name + " Sunset", pair: "p-" + name, variant: "dark", base: "dark", colors: { background: "#110000" } }];
+    t.card_min_width = 410;
+    return t;
+}
+
+test("account: the settings cache is kept per account, the shared identity keeps its 2.10.0 key", () => {
+    const { ctx, store } = accountPage({ account: "u:user" });
+    ctx.theme = { marker: "user" };
+    ctx.cacheThemeSettings();
+    assert.equal(store.get("machinon.themeSettings@user"), JSON.stringify({ marker: "user" }));
+    assert.equal(store.has("machinon.themeSettings"), false);
+    assert.deepEqual(clone(ctx.readCachedThemeSettings()), { marker: "user" });
+    ctx.dzAccount = "*";
+    assert.equal(ctx.readCachedThemeSettings(), null, "another account's cache is never read");
+    ctx.theme = { marker: "shared" };
+    ctx.cacheThemeSettings();
+    assert.equal(store.get("machinon.themeSettings"), JSON.stringify({ marker: "shared" }));
+});
+
+test("account: nobody logged in, or an account not known yet, reads and writes no cache", () => {
+    for (const account of [null, undefined]) {
+        const store = new Map([["machinon.themeSettings", "{\"marker\":\"shared\"}"], ["machinon.themeSettings@admin", "{}"]]);
+        const { ctx } = accountPage({ account, store });
+        assert.equal(ctx.readCachedThemeSettings(), null);
+        ctx.theme = { marker: "x" };
+        ctx.cacheThemeSettings();
+        assert.equal(store.size, 2, "nothing written for " + account);
+    }
+});
+
+test("account: a boot on the shared identity that turns out to be a named login rebuilds before merging", async () => {
+    const store = new Map([["dzPaintAccount", "*"], ["machinon.themeSettings", JSON.stringify(cachedFor("shared"))]]);
+    const { ctx, calls } = accountPage({ account: "*", store, auth: { status: "OK", user: "user", rights: 1, canlogout: true } });
+    ctx.theme = cachedFor("shared");
+    await ctx.reconcileDomoticzSettingsInPlace();
+    assert.equal(ctx.dzAccount, "u:user");
+    assert.equal(store.get("dzPaintAccount"), "u:user");
+    assert.equal(ctx.theme.user_schemes, undefined);
+    assert.equal(calls.paints.length, 1);
+    assert.equal(calls.paints[0].force, true);
+});
+
+test("account: a boot the early block already confirmed keeps its cache and records the account", async () => {
+    const store = new Map();
+    const { ctx, calls } = accountPage({ account: "u:user", store, auth: { status: "OK", user: "user", rights: 1, canlogout: true },
+                                         rows: { user: { schemaVersion: 3, features: {}, values: { scheme: "user:user Sunset|dark" } } } });
+    ctx.theme = cachedFor("user");
+    await ctx.reconcileDomoticzSettingsInPlace();
+    assert.equal(ctx.dzAccount, "u:user");
+    assert.equal(store.get("dzPaintAccount"), "u:user");
+    assert.deepEqual(clone(ctx.theme.user_schemes), cachedFor("user").user_schemes);
+    assert.equal(ctx.theme.card_min_width, 410);
+});

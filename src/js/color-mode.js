@@ -191,9 +191,12 @@ function dzStateForSlug(slug, families, sources) {
 
    The page's colours are painted by scripts that load well after the first
    frame. To show the right variant from the start, every paint leaves a
-   record in localStorage (key dzPaintRecord, one per browser, because the
-   theme folder is not known when the record is read) holding the final token
-   values of both members of the painted family:
+   record in localStorage holding the final token values of both members of
+   the painted family. The key is dzPaintRecord plus the account's suffix
+   (settings-transport.js dzAccountSuffix: none for the shared no-login
+   identity, so such an install keeps the one key it always had; "@<name>"
+   for a login), and not per theme folder, because the folder is not known
+   when the record is read:
 
      { v: 1, folder, family, saved, mode, version,
        light: { attr: null|"custom"|"dark", dark_file: bool, version, tokens: { name: value } },
@@ -218,6 +221,14 @@ function dzStateForSlug(slug, families, sources) {
    url() or a second declaration reaches setProperty. Anything else is
    dropped; a malformed half is no half. */
 var DZ_PAINT_RECORD_KEY = "dzPaintRecord";
+
+/* This account's record key, or null when no account is known or nobody is
+   logged in: then nothing is stored, so no record is ever read or written
+   for an account it does not belong to. */
+function dzPaintRecordKey() {
+    var suffix = dzAccountSuffix(dzAccount);
+    return suffix === null ? null : DZ_PAINT_RECORD_KEY + suffix;
+}
 var DZ_TOKEN_NAME = /^--dz-[a-z0-9-]+$/;
 /* Exactly the entries of scheme.js DZ_CUSTOM_TOKENS outside the --dz-
    namespace (a unit test pins it); custom.js's early block has a copy. */
@@ -340,18 +351,30 @@ function dzDeviceDark() {
     }
 }
 
-/* The override is per browser and per theme folder, never part of theme. */
+/* The override is per account on this browser and per theme folder, never
+   part of theme: one person's tap is not the next person's. Null when no
+   account is known: the tap then lives in this page only. */
 function dzColorOverrideKey() {
-    return themeFolder + ".colorOverride";
+    var suffix = dzAccountSuffix(dzAccount);
+    return suffix === null ? null : themeFolder + ".colorOverride" + suffix;
 }
 
 function dzColorOverride() {
     if (dzOverrideMemory !== undefined) { return dzOverrideMemory; }
+    var key = dzColorOverrideKey();
+    if (!key) { return null; }
     try {
-        return dzCleanOverride(JSON.parse(localStorage.getItem(dzColorOverrideKey())));
+        return dzCleanOverride(JSON.parse(localStorage.getItem(key)));
     } catch (e) {
         return null;
     }
+}
+
+/* The page now belongs to another account: its tap is that account's to
+   read, and its record is owed under that account's key. */
+function dzForgetColorMemory() {
+    dzOverrideMemory = undefined;
+    dzPaintRecordDue = true;
 }
 
 /* "light" or "dark" stores an override made under the device's current
@@ -359,25 +382,29 @@ function dzColorOverride() {
 function dzSetColorOverride(variant) {
     var clean = dzCleanOverride({ variant: variant, deviceDark: dzDeviceDark() });
     dzOverrideMemory = clean;
+    var key = dzColorOverrideKey();
+    if (!key) { return; }
     try {
         if (clean) {
-            localStorage.setItem(dzColorOverrideKey(), JSON.stringify(clean));
+            localStorage.setItem(key, JSON.stringify(clean));
         } else {
-            localStorage.removeItem(dzColorOverrideKey());
+            localStorage.removeItem(key);
         }
     } catch (e) {
         if (typeof dzLog === "function") { dzLog("colormode", "override_store_failed", { error: String(e) }); }
     }
 }
 
-/* Drop the paint record and the override, for a reset or a cache clear:
+/* Drop this account's paint record and override, for a reset or a cache clear:
    the reload must show what the settings say, not a frame of the previous
    look and not a tap that outlives the reset. */
 function dzForgetPaint() {
     dzOverrideMemory = undefined;
+    var record = dzPaintRecordKey();
+    var override = dzColorOverrideKey();
     try {
-        localStorage.removeItem(DZ_PAINT_RECORD_KEY);
-        localStorage.removeItem(dzColorOverrideKey());
+        if (record) { localStorage.removeItem(record); }
+        if (override) { localStorage.removeItem(override); }
     } catch (e) {
         if (typeof dzLog === "function") { dzLog("colormode", "forget_paint_failed", { error: String(e) }); }
     }
@@ -398,8 +425,10 @@ function dzBuiltinColorsOf(schemes) {
 
 /* The stored record whichever theme version wrote it, or null. */
 function dzLoadAnyPaintRecord() {
+    var key = dzPaintRecordKey();
+    if (!key) { return null; }
     try {
-        return dzParsePaintRecord(localStorage.getItem(DZ_PAINT_RECORD_KEY));
+        return dzParsePaintRecord(localStorage.getItem(key));
     } catch (e) {
         return null;
     }
@@ -464,8 +493,12 @@ function dzRecordHalf(state) {
    paints it as final, and dzRefreshPaintRecord replaces it once the scheme
    files load. Best effort: storage may be blocked or full. */
 function dzWritePaintRecord(families, keepPainted) {
-    dzPaintRecordDue = false;
+    var key = dzPaintRecordKey();
+    /* Owed until an account is known (settings-store.js dzForgetAccountState
+       repaints then). */
+    dzPaintRecordDue = !key;
     var state = dzLastPaintState;
+    if (!key) { return; }
     if (!state) { return; }
     var fam = dzFamilyOf(state.slug, families);
     var stored = dzLoadAnyPaintRecord();
@@ -496,9 +529,9 @@ function dzWritePaintRecord(families, keepPainted) {
     }
     try {
         if (rec) {
-            localStorage.setItem(DZ_PAINT_RECORD_KEY, JSON.stringify(rec));
+            localStorage.setItem(key, JSON.stringify(rec));
         } else {
-            localStorage.removeItem(DZ_PAINT_RECORD_KEY);
+            localStorage.removeItem(key);
         }
     } catch (e) {
         if (typeof dzLog === "function") { dzLog("colormode", "paint_record_store_failed", { error: String(e) }); }

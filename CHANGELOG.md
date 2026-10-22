@@ -4,6 +4,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+- When people take turns logging in on the same browser, each now gets their own colours and settings as a page opens: no moment of the previous person's light or dark colours, a light/dark switch made by one person no longer carries over to the next, and one person's own themes no longer show up for, or get saved by, the next
+
 ## [2.10.0] - 2026-10-22
 
 - On Domoticz 2026.1, the sensor timeout and low battery warnings and the RGBW colour popup are back on after updating Machinon: settings added in a newer version no longer switch themselves off when your saved settings predate them
