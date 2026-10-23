@@ -413,6 +413,7 @@ language = {
     devices: "{count} Geräte",
     and_more: "und {count} weitere",
     show_devices: "Diese Geräte anzeigen",
+    notification: "Benachrichtigung",
     update_available: "Machinon-Version {version} ist verfügbar!",
     update_action: "Zum Herunterladen hier klicken",
     wcag_fails: "{what} besteht die WCAG-Kontrastprüfung nicht: {failures}",

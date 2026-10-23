@@ -415,6 +415,7 @@ language = {
     devices: "{count} devices",
     and_more: "and {count} more",
     show_devices: "Show these devices",
+    notification: "Notification",
     update_available: "Machinon version {version} is available!",
     update_action: "Click here to download",
     wcag_fails: "{what} fails WCAG contrast: {failures}",

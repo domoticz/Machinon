@@ -468,9 +468,6 @@ function dzRegisterThemeRoutes(routesModule) {
     }]);
 }
 
-/* Wrap angular.module so the theme's config block is appended the moment core
-   DEFINES 'app.routes' (a definition passes a dependency array; a plain
-   angular.module('x') is a getter call and must pass straight through). */
 /* Core's pushState mode (app.js dzHashNavViaPushState: Apple touch devices on
    plain http, where iOS 27 reloads the page on a fragment navigation) moves
    every route with history.pushState, and Angular intercepts plain #links too,
@@ -515,18 +512,43 @@ function dzThemeNavigate(hash) {
    alertarea is hidden by css/toasts.css only while the class set below and the
    one toast-hooks.js sets are both present; without either it is moved below
    the header instead, so a message is never lost. */
+/* "pending" until core's service is wrapped, then "hooked"; "failed" once a
+   failure event is logged. Read by the hook_absent timer in
+   dzInstallRouteShim, which reports the one case no event covers: core never
+   defined or never injected the service. */
+var dzNotifyState = "pending";
+
+/* Returns true when the message was buffered rather than shown: the toast
+   modules have not loaded yet, so the alertarea is not hidden, and the caller
+   takes the message out of core's queue to keep it from showing twice. */
 function dzNotifyToast(title, body) {
     if (typeof dzToastFromBrowserNotify === "function") {
         dzToastFromBrowserNotify(title, body);
-        return;
+        return false;
     }
     // Same buffer as generate_noty/ShowNotify above; drained by toast-hooks.js.
     if (window.__dzToastBuffer) {
         window.__dzToastBuffer.push({ fn: "notify", args: [title, body], cancelled: false, handle: null });
+        return true;
+    }
+    return false;
+}
+
+/* Core's notify pushes the message onto the array messages() returns, as its
+   first statement, and its own 2 s timer removes it by indexOf, so popping it
+   here is safe for that timer. A core without that array keeps the message
+   in the alertarea as well, which errs toward showing it twice, never zero. */
+function dzNotifyDropQueued(service) {
+    try {
+        var queue = typeof service.messages === "function" ? service.messages() : null;
+        if (queue && typeof queue.pop === "function") queue.pop();
+    } catch (e) {
+        if (typeof dzLog === "function") dzLog("notify", "drop_failed", { error: String(e) });
     }
 }
 
 function dzNotifyFallback(event, e) {
+    dzNotifyState = "failed";
     document.documentElement.classList.remove("dz-notify-hooked");
     if (typeof dzLog === "function") dzLog("notify", event, { error: String(e) });
 }
@@ -534,6 +556,7 @@ function dzNotifyFallback(event, e) {
 function dzWrapNotify(service) {
     var coreNotify = service && service.notify;
     if (typeof coreNotify !== "function") {
+        dzNotifyState = "failed";
         if (typeof dzLog === "function") dzLog("notify", "hook_absent", { reason: "no_notify" });
         return;
     }
@@ -541,17 +564,23 @@ function dzWrapNotify(service) {
         /* Toast first: core's notify can throw on its own (the Notification
            constructor is illegal in some mobile browsers), and that must not
            cost the user the toast. */
+        var buffered = false;
         try {
-            dzNotifyToast(arguments[0], arguments[1]);
+            buffered = dzNotifyToast(arguments[0], arguments[1]);
         } catch (e) {
             dzNotifyFallback("toast_failed", e);
         }
-        return coreNotify.apply(this, arguments);
+        try {
+            return coreNotify.apply(this, arguments);
+        } finally {
+            if (buffered) dzNotifyDropQueued(service);
+        }
     };
+    dzNotifyState = "hooked";
     document.documentElement.classList.add("dz-notify-hooked");
-    /* The one line that answers "browser messages still show behind the
-       header": the hook either reached core's service or one of the
-       failure events above says why not. */
+    /* With Diagnostic logging on, this line, a failure event above, or the
+       hook_absent timer in dzInstallRouteShim says which way the hook went.
+       __dzForceNoRoutes logs none of them; its own console warning says so. */
     if (typeof dzLog === "function") dzLog("notify", "hooked", {});
 }
 
@@ -580,6 +609,10 @@ function dzDecorateNotifyBrowser(notificationsModule) {
     }]);
 }
 
+/* Wrap angular.module so the theme's blocks are appended the moment core
+   DEFINES one of the modules matched below (a definition passes a dependency
+   array; a plain angular.module('x') is a getter call and must pass straight
+   through). */
 function dzWrapAngularModule(ng, realModule) {
     var wrapped = function (name, deps) {
         var m = realModule.apply(this, arguments);
@@ -654,7 +687,7 @@ var DZ_ROUTE_HOOK_WAIT_MS = 15000; // Angular boots in ~1-2s; this only catches 
        pre-route behaviour so the fallback path stays covered by the harness. It
        warns for itself, so no hook_absent timer is armed below. */
     if (window.__dzForceNoRoutes) {
-        console.warn("machinon_routes", "forced_off", "__dzForceNoRoutes set; theme routes not registered (test hook)");
+        console.warn("machinon_routes", "forced_off", "__dzForceNoRoutes set; theme routes and the browser notification hook not installed (test hook)");
         return;
     }
     try {
@@ -678,6 +711,12 @@ var DZ_ROUTE_HOOK_WAIT_MS = 15000; // Angular boots in ~1-2s; this only catches 
     }
 
     setTimeout(function () {
+        /* Structured and silent unless Diagnostic logging is on: core's
+           alertarea stays visible without the hook, so the user loses
+           nothing and needs no console line. */
+        if (dzNotifyState === "pending" && typeof dzLog === "function") {
+            dzLog("notify", "hook_absent", { reason: "not_reached" });
+        }
         if (window.dzRoutesActive) return;
         console.warn("machinon_routes", "hook_absent",
             "no app.routes definition reached the hook within " + DZ_ROUTE_HOOK_WAIT_MS + "ms; theme pages stay on the legacy path");

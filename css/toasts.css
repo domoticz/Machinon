@@ -291,7 +291,10 @@ html.dz-notify-hooked.dz-notify-toasts [alertarea] { display: none; }
        (pill bottom 91, 10px clear, toast top 101 and bottom 155), and
        elementFromPoint() at the pill's centre returns the INPUT in Chromium
        and Firefox alike - never the toast. */
-    body:has(#search:focus-within) #dz-toast-stack { top: 101px; }
+    /* The fallback [alertarea] (top of this file) shares the stack's corner,
+       so it moves out of the pill's way with it. */
+    body:has(#search:focus-within) #dz-toast-stack,
+    body:has(#search:focus-within) [alertarea] { top: 101px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

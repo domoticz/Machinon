@@ -2119,6 +2119,11 @@ behind the fixed header. It is hidden while the theme's toast route for them is 
 otherwise (the Angular hook off or failed) lifted to the stack's corner at `--dz-toast-top`, one
 z-index above the stack, so the message is never lost or covered.
 
+**Merging.** Device warnings merge per group by device (the title becomes a count). Browser
+notifications merge by content instead: the group key is the subject and text, so the same message
+again within the coalescing window (`DZ_TOAST_COALESCE_MS`, 1.2 s) is dropped as a repeat, while a
+different message, or the same one later, gets its own toast.
+
 **Surface.** Same floating-surface language as the card options flyout, setpoint popup and RGBW
 popup: `background: var(--dz-menu-bg)`, `color: var(--dz-menu-text)`, `border-radius: 6px`,
 `box-shadow: var(--dz-elev-overlay)`, no scrim. Title/body text stays on this one surface token

@@ -508,13 +508,15 @@ function dzToastAdoptIdx(rec, member, ev) {
     if (rec.idxs.indexOf(idx) === -1) rec.idxs.push(idx);
 }
 
-/* A group whose leader names no device is keyed by its content (a browser
-   notification's group carries its subject and text, toast-hooks.js), so a
-   same-group arrival that names no device either is the same message again.
-   Without this the device path below would count it and retitle the toast
-   "2 devices". */
+/* A browser notification's group key carries its subject and text
+   (toast-hooks.js dzToastFromBrowserNotify), so a same-group arrival is the
+   same message again. Without this the device path below would count it and
+   retitle the toast "2 devices". Scoped to that groupKind: every other group
+   keeps the device rules, including a device warning that names no device. */
+var DZ_TOAST_CONTENT_KIND = "browser-notify";
+
 function dzToastIsContentRepeat(rec, ev) {
-    return !(rec.members && rec.members.length) && !dzToastMembers(ev).length;
+    return ev.groupKind === DZ_TOAST_CONTENT_KIND && !!rec.ev && rec.ev.groupKind === DZ_TOAST_CONTENT_KIND;
 }
 
 /* Returns true when the arrival was already in the group, i.e. nothing was
