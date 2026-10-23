@@ -4,6 +4,7 @@
  *   generate_noty(ntype, ntext, ntimeout)   ntext is HTML, ntimeout false = sticky
  *   ShowNotify(txt, timeout, iserror)       ARG 3 is the error flag, arg 2 a number
  *   HideNotify()                            hides the shared surface
+ *   notifyBrowser.notify(title, body)       plain text, decorated in custom.js
  *
  * Nightglass hooks ShowNotify as (txt, ntype) and tests /error/i on arg 2, which
  * is the timeout NUMBER, so all 516 of core's error call sites render as info
@@ -76,6 +77,34 @@ function dzToastHideNotify() {
     dzToastLastShowNotify = null;
 }
 
+/* A browser notification (core's notifyBrowser service, fed by the websocket
+   "notification" event that SendNotification(..., subsystem="browser") raises)
+   is plain text: core renders it with {{ }} interpolation, so it is not run
+   through dzToastHtmlToText, and markup a plugin sends shows as typed. The
+   switch-chatter filter does not apply: that silences core's own "Switching"
+   progress lines, and a plugin's subject can begin with the same word. The
+   group key is the message itself, so the same message twice in quick
+   succession merges into one toast (dzToastIsContentRepeat in toasts.js);
+   groupKind keeps that text out of diagnostics. */
+function dzToastFromBrowserNotify(title, body) {
+    var t = title === null || title === undefined ? "" : String(title);
+    var b = body === null || body === undefined ? "" : String(body);
+    return dzToast({
+        type: "info",
+        title: t || ((typeof $ !== "undefined" && $.t) ? $.t("Notification") : "Notification"),
+        body: b,
+        group: "browser-notify:" + t + "\n" + b,
+        groupKind: "browser-notify",
+        source: "browser-notify"
+    });
+}
+
+function dzToastFromBuffered(e) {
+    if (e.fn === "noty") return dzToastFromNoty.apply(null, e.args);
+    if (e.fn === "notify") return dzToastFromBrowserNotify.apply(null, e.args);
+    return dzToastFromShowNotify.apply(null, e.args);
+}
+
 function dzToastInstallHooks() {
     window.generate_noty = dzToastFromNoty;
     window.ShowNotify = dzToastFromShowNotify;
@@ -88,10 +117,15 @@ function dzToastInstallHooks() {
     for (var i = 0; i < buf.length; i++) {
         var e = buf[i];
         if (e.cancelled) continue;
-        e.handle = e.fn === "noty" ? dzToastFromNoty.apply(null, e.args)
-                                   : dzToastFromShowNotify.apply(null, e.args);
+        e.handle = dzToastFromBuffered(e);
     }
     window.__dzToastBuffer = null;
+    /* Half of the gate that hides core's alertarea (css/toasts.css): the
+       other half is custom.js's notifyBrowser decorator. Both have to be live,
+       or a browser notification would have nowhere visible to go. */
+    if (typeof document !== "undefined" && document.documentElement) {
+        document.documentElement.classList.add("dz-notify-toasts");
+    }
 }
 
 if (typeof window !== "undefined") dzToastInstallHooks();

@@ -135,6 +135,9 @@ function makeFakeDom() {
         createElement,
         createTextNode(data) { return { nodeType: 3, data }; },
         body: createElement(),
+        /* toast-hooks.js marks the root once the toast hooks are live; see
+           the browser-notification tests at the end of this file. */
+        documentElement: createElement(),
         /* dzToastInstallKeyboard binds the Escape handler here at load time
            (guarded only by `typeof document !== "undefined"`, which this
            fake satisfies); it is never exercised by these tests. */
@@ -175,10 +178,17 @@ function loadToastRuntime(overrides) {
         dzLogOn: true,
         dzLog: function(seam, event, fields) { diagCalls.push({ seam, event, fields }); }
     });
-    ["src/js/i18n.js", "lang/machinon.en.js", "src/js/url-guards.js", "src/js/toasts.js"].forEach(function (f) {
+    /* toast-hooks.js is opt-in: it replaces window.generate_noty and drains
+       window.__dzToastBuffer at load, which only the adapter tests want. */
+    const files = ["src/js/i18n.js", "lang/machinon.en.js", "src/js/url-guards.js", "src/js/toasts.js"];
+    if (overrides && overrides.withHooks) {
+        ctx.window.__dzToastBuffer = overrides.buffer || [];
+        files.push("src/js/toast-hooks.js");
+    }
+    files.forEach(function (f) {
         vm.runInContext(readFileSync(f, "utf8"), ctx, { filename: f });
     });
-    return { dz: ctx, clock, location, diagCalls };
+    return { dz: ctx, clock, location, diagCalls, dom };
 }
 
 test("a key warns once, then is suppressed until it is cleared", () => {
@@ -769,4 +779,245 @@ test("a suppressed toast is recorded as suppressed, not as silence", () => {
     const outcomes = rt.diagCalls.filter((c) => c.seam === "toast").map((c) => c.fields.outcome);
     assert.deepEqual(outcomes, ["shown", "suppressed"],
         "the second arrival is a fact about the dedupe, not a missing line");
+});
+
+/* ---- Browser notifications (core's notifyBrowser service) ----
+
+   A plugin's Domoticz.SendNotification(..., subsystem="browser") reaches the
+   page as the websocket "notification" event, which core hands to the Angular
+   service notifyBrowser. Core renders it in its own alertarea, under the fixed
+   header; the theme decorates the service (custom.js) and routes it through
+   the adapter in toast-hooks.js instead. */
+
+const NOTIFY_TEXT = "<b>bold</b><script>alert(1)</script><img src=x onerror=alert(2)>";
+
+test("a browser notification is an info toast: subject as title, text as body, the normal timeout", () => {
+    const rt = loadToastRuntime({ withHooks: true });
+    const d = rt.dz;
+    d.dzToastFromBrowserNotify("Test", "Hello");
+    assert.equal(d.dzToastVisible.length, 1);
+    const rec = d.dzToastVisible[0];
+    assert.ok(rec.el.classList.contains("dz-toast--info"));
+    assert.equal(rec.el.querySelector(".dz-toast-title").textContent, "Test");
+    assert.equal(rec.el.querySelector(".dz-toast-body").textContent, "Hello");
+    assert.equal(rec.base, d.DZ_TOAST_BASE_MS);
+});
+
+test("browser notification text reaches the DOM as text, markup and all", () => {
+    // The fake DOM keeps only text nodes as text: a body that went through
+    // innerHTML or an HTML-to-text pass would not read back verbatim.
+    const rt = loadToastRuntime({ withHooks: true });
+    const d = rt.dz;
+    d.dzToastFromBrowserNotify(NOTIFY_TEXT, NOTIFY_TEXT);
+    const rec = d.dzToastVisible[0];
+    assert.equal(rec.el.querySelector(".dz-toast-title").textContent, NOTIFY_TEXT);
+    assert.equal(rec.el.querySelector(".dz-toast-body").textContent, NOTIFY_TEXT);
+});
+
+test("a browser notification without a subject still gets a title", () => {
+    const rt = loadToastRuntime({ withHooks: true });
+    const d = rt.dz;
+    d.dzToastFromBrowserNotify("", "Hello");
+    d.dzToastFromBrowserNotify(undefined, undefined);
+    assert.equal(d.dzToastVisible[0].el.querySelector(".dz-toast-title").textContent, "Notification");
+    assert.equal(d.dzToastVisible[0].el.querySelector(".dz-toast-body").textContent, "Hello");
+    assert.equal(d.dzToastVisible[1].el.querySelector(".dz-toast-title").textContent, "Notification");
+});
+
+test("the switch-chatter filter does not apply to browser notifications", () => {
+    // ShowNotify drops core's own "Switching ..." progress lines; a plugin
+    // message that happens to start with the same word is not that chatter.
+    const rt = loadToastRuntime({ withHooks: true });
+    rt.dz.dzToastFromBrowserNotify("Switching heater", "Switching heater to eco");
+    assert.equal(rt.dz.dzToastVisible.length, 1);
+});
+
+test("two identical browser notifications in quick succession show one toast", () => {
+    const rt = loadToastRuntime({ withHooks: true });
+    const d = rt.dz;
+    d.dzToastFromBrowserNotify("Test", "Hello");
+    const second = d.dzToastFromBrowserNotify("Test", "Hello");
+    assert.equal(d.dzToastVisible.length, 1, "merged, not stacked");
+    assert.equal(second.duplicate, true);
+    const rec = d.dzToastVisible[0];
+    assert.equal(rec.el.querySelector(".dz-toast-title").textContent, "Test",
+        "a repeat must not turn the title into a device count");
+    assert.equal(rec.el.querySelector(".dz-toast-body").textContent, "Hello");
+    assert.equal(rec.extended, undefined, "a repeat carries no new information, so it does not hold the toast open");
+});
+
+test("different browser notifications, or a repeat after the window, each get a toast", () => {
+    const rt = loadToastRuntime({ withHooks: true });
+    const d = rt.dz;
+    d.dzToastFromBrowserNotify("Test", "Hello");
+    d.dzToastFromBrowserNotify("Test", "Hello again");
+    d.dzToastFromBrowserNotify("Other", "Hello");
+    assert.equal(d.dzToastVisible.length, 3);
+    rt.clock.advance(d.DZ_TOAST_COALESCE_MS + 1);
+    d.dzToastFromBrowserNotify("Test", "Hello");
+    assert.equal(d.dzToastVisible.length, 4, "the same message later is a new event");
+});
+
+test("two identical browser notifications that both have to queue still queue once", () => {
+    const rt = loadToastRuntime({ withHooks: true });
+    const d = rt.dz;
+    for (let i = 0; i < 4; i++) d.dzToast({ type: "info", title: "core message " + i, timeout: 4000 });
+    d.dzToastFromBrowserNotify("Test", "Hello");
+    d.dzToastFromBrowserNotify("Test", "Hello");
+    assert.equal(d.dzToastQueue.length, 1);
+    assert.equal(d.dzToastQueue[0].ev.title, "Test");
+    assert.equal(d.dzToastQueue[0].ev.body, "Hello");
+    assert.equal(d.dzToastQueue[0].extended, false);
+});
+
+test("a browser notification's text never reaches the diagnostics seam", () => {
+    const rt = loadToastRuntime({ withHooks: true });
+    rt.dz.dzToastFromBrowserNotify("Secret subject", "Secret body");
+    rt.dz.dzToastFromBrowserNotify("Secret subject", "Secret body");
+    const calls = rt.diagCalls.filter((c) => c.seam === "toast");
+    assert.deepEqual(calls.map((c) => c.fields.outcome), ["shown", "duplicate"]);
+    assert.equal(calls[0].fields.group, "browser-notify");
+    assert.ok(!JSON.stringify(rt.diagCalls).includes("Secret"));
+});
+
+test("a browser notification raised before the toast modules loaded is drained from the buffer", () => {
+    const buffer = [{ fn: "notify", args: ["Test", "Hello"], cancelled: false, handle: null }];
+    const rt = loadToastRuntime({ withHooks: true, buffer });
+    assert.equal(rt.dz.dzToastVisible.length, 1);
+    assert.equal(rt.dz.dzToastVisible[0].el.querySelector(".dz-toast-body").textContent, "Hello");
+    assert.ok(buffer[0].handle, "the drained entry keeps its handle");
+});
+
+test("the toast hooks mark the root so CSS knows the toast surface is live", () => {
+    const rt = loadToastRuntime({ withHooks: true });
+    assert.ok(rt.dom.documentElement.classList.contains("dz-notify-toasts"));
+});
+
+/* ---- The notifyBrowser decorator (custom.js) ----
+
+   custom.js is not loadable whole in a vm (it boots the theme at top level),
+   so the hook functions are lifted out of the shipping file by name, the way
+   test-scheme-pairs.mjs lifts the early-paint block. */
+function liftFunctions(src, names) {
+    return names.map(function (name) {
+        const start = src.indexOf("\nfunction " + name + "(");
+        assert.ok(start !== -1, name + " exists in custom.js");
+        const end = src.indexOf("\n}\n", start);
+        return src.slice(start, end + 3);
+    }).join("\n");
+}
+
+function loadNotifyHook(opts) {
+    const o = opts || {};
+    const sinkCalls = [];
+    const coreCalls = [];
+    const diag = [];
+    const configs = [];
+    const decorators = {};
+    const root = makeFakeDom().documentElement;
+    const win = { __dzToastBuffer: o.buffer === undefined ? [] : o.buffer };
+    if (o.throwInHook) win.__dzThrowInNotifyHook = true;
+    const ctx = vm.createContext({
+        window: win,
+        document: { documentElement: root },
+        console,
+        dzLog: function (seam, event, fields) { diag.push({ seam, event, fields }); }
+    });
+    if (o.sink) ctx.dzToastFromBrowserNotify = o.sink;
+    vm.runInContext(liftFunctions(readFileSync("custom.js", "utf8"),
+        ["dzNotifyToast", "dzNotifyFallback", "dzWrapNotify", "dzDecorateNotifyBrowser", "dzWrapAngularModule"]),
+        ctx, { filename: "custom.js#notify" });
+    const ng = {};
+    function realModule(name, deps) {
+        return {
+            name,
+            config(block) { if (o.configThrows) throw new Error("config"); configs.push(block); return this; },
+            run() { return this; }
+        };
+    }
+    ctx.dzWrapAngularModule(ng, realModule);
+    const $provide = {
+        decorator(name, def) {
+            if (o.unknownService) throw new Error("Unknown provider: " + name + "Provider");
+            decorators[name] = def;
+        }
+    };
+    /* Angular's own order: config blocks run during injector creation, the
+       decorator when the service is first injected. */
+    function boot(delegate) {
+        configs.forEach(function (block) { block[block.length - 1].apply(null, [$provide]); });
+        const def = decorators.notifyBrowser;
+        if (!def) return delegate;
+        return def[def.length - 1].apply(null, [delegate]);
+    }
+    const delegate = {
+        notify: function (title, body) { coreCalls.push([title, body]); return "core-result"; },
+        messages: function () { return []; }
+    };
+    return { ng, ctx, win, root, sinkCalls, coreCalls, diag, configs, boot, delegate };
+}
+
+test("the decorator registers on core's notifications module definition only", () => {
+    const h = loadNotifyHook();
+    h.ng.module("domoticz.notifications"); // a getter call, no deps
+    assert.equal(h.configs.length, 0, "a getter call passes straight through");
+    h.ng.module("domoticz.notifications", []);
+    assert.equal(h.configs.length, 1);
+});
+
+test("the decorated notify raises the toast and still runs core's notify", () => {
+    const calls = [];
+    const h = loadNotifyHook({ sink: function (t, b) { calls.push([t, b]); } });
+    h.ng.module("domoticz.notifications", []);
+    const svc = h.boot(h.delegate);
+    assert.equal(svc, h.delegate, "the decorator hands back core's own service object");
+    assert.equal(svc.notify("Test", "Hello"), "core-result");
+    assert.deepEqual(calls, [["Test", "Hello"]]);
+    assert.deepEqual(h.coreCalls, [["Test", "Hello"]], "core's desktop Notification path is kept");
+    assert.ok(h.root.classList.contains("dz-notify-hooked"));
+    assert.ok(h.diag.some((c) => c.seam === "notify" && c.event === "hooked"));
+});
+
+test("a notification arriving before the toast modules load is buffered for toast-hooks.js", () => {
+    const buffer = [];
+    const h = loadNotifyHook({ buffer });
+    h.ng.module("domoticz.notifications", []);
+    h.boot(h.delegate).notify("Test", "Hello");
+    assert.equal(buffer.length, 1);
+    assert.equal(buffer[0].fn, "notify");
+    assert.deepEqual(Array.from(buffer[0].args), ["Test", "Hello"]);
+    assert.deepEqual(h.coreCalls, [["Test", "Hello"]]);
+});
+
+test("a toast that throws gives the message back to core's alertarea", () => {
+    const h = loadNotifyHook({ sink: function () { throw new Error("boom"); } });
+    h.ng.module("domoticz.notifications", []);
+    const svc = h.boot(h.delegate);
+    assert.ok(h.root.classList.contains("dz-notify-hooked"));
+    assert.equal(svc.notify("Test", "Hello"), "core-result");
+    assert.deepEqual(h.coreCalls, [["Test", "Hello"]], "core's notify still ran");
+    assert.ok(!h.root.classList.contains("dz-notify-hooked"), "the alertarea is shown again");
+    assert.ok(h.diag.some((c) => c.seam === "notify" && c.event === "toast_failed"));
+});
+
+test("a throw anywhere in the hook never escapes into core's module or injector", () => {
+    for (const opts of [{ throwInHook: true }, { configThrows: true }, { unknownService: true }]) {
+        const h = loadNotifyHook(opts);
+        let m;
+        assert.doesNotThrow(() => { m = h.ng.module("domoticz.notifications", []); }, JSON.stringify(opts));
+        assert.equal(m.name, "domoticz.notifications", "core still gets its module back");
+        let svc;
+        assert.doesNotThrow(() => { svc = h.boot(h.delegate); }, JSON.stringify(opts));
+        assert.equal(svc, h.delegate);
+        assert.ok(!h.root.classList.contains("dz-notify-hooked"), "the alertarea stays visible: " + JSON.stringify(opts));
+    }
+});
+
+test("a service without a notify function is left alone", () => {
+    const h = loadNotifyHook({ sink: function () {} });
+    h.ng.module("domoticz.notifications", []);
+    const odd = { messages: function () { return []; } };
+    assert.doesNotThrow(() => h.boot(odd));
+    assert.equal(odd.notify, undefined);
+    assert.ok(!h.root.classList.contains("dz-notify-hooked"));
 });
