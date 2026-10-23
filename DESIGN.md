@@ -2111,7 +2111,13 @@ contract.
 `#dz-toast-stack` / `.dz-toast` (`css/toasts.css`, `src/js/toasts.js`), the theme's own
 notification surface: intercepts core's two toast globals (`generate_noty`, `ShowNotify`, see
 `src/js/toast-hooks.js`) and is the single entry point (`dzToast()`) every mechanism in the app
-funnels through, including device warnings.
+funnels through, including device warnings and core's browser notifications (the `notifyBrowser`
+Angular service, decorated from `custom.js`).
+
+**Core's alertarea.** Browser notifications also render in core's own `[alertarea]`, which sits
+behind the fixed header. It is hidden while the theme's toast route for them is live, and
+otherwise (the Angular hook off or failed) lifted to the stack's corner at `--dz-toast-top`, one
+z-index above the stack, so the message is never lost or covered.
 
 **Surface.** Same floating-surface language as the card options flyout, setpoint popup and RGBW
 popup: `background: var(--dz-menu-bg)`, `color: var(--dz-menu-text)`, `border-radius: 6px`,

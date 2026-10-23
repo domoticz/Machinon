@@ -507,6 +507,79 @@ function dzThemeNavigate(hash) {
     else location.hash = hash;
 }
 
+/* Core's browser notifications (websocket "notification" event -> the Angular
+   service notifyBrowser, app.notifications.js) render in core's alertarea,
+   which sits in the page flow under the fixed header and is covered by it.
+   Decorating the service hands each message to a theme toast and then still
+   runs core's own notify, which keeps the desktop Notification. Core's
+   alertarea is hidden by css/toasts.css only while the class set below and the
+   one toast-hooks.js sets are both present; without either it is moved below
+   the header instead, so a message is never lost. */
+function dzNotifyToast(title, body) {
+    if (typeof dzToastFromBrowserNotify === "function") {
+        dzToastFromBrowserNotify(title, body);
+        return;
+    }
+    // Same buffer as generate_noty/ShowNotify above; drained by toast-hooks.js.
+    if (window.__dzToastBuffer) {
+        window.__dzToastBuffer.push({ fn: "notify", args: [title, body], cancelled: false, handle: null });
+    }
+}
+
+function dzNotifyFallback(event, e) {
+    document.documentElement.classList.remove("dz-notify-hooked");
+    if (typeof dzLog === "function") dzLog("notify", event, { error: String(e) });
+}
+
+function dzWrapNotify(service) {
+    var coreNotify = service && service.notify;
+    if (typeof coreNotify !== "function") {
+        if (typeof dzLog === "function") dzLog("notify", "hook_absent", { reason: "no_notify" });
+        return;
+    }
+    service.notify = function () {
+        /* Toast first: core's notify can throw on its own (the Notification
+           constructor is illegal in some mobile browsers), and that must not
+           cost the user the toast. */
+        try {
+            dzNotifyToast(arguments[0], arguments[1]);
+        } catch (e) {
+            dzNotifyFallback("toast_failed", e);
+        }
+        return coreNotify.apply(this, arguments);
+    };
+    document.documentElement.classList.add("dz-notify-hooked");
+    /* The one line that answers "browser messages still show behind the
+       header": the hook either reached core's service or one of the
+       failure events above says why not. */
+    if (typeof dzLog === "function") dzLog("notify", "hooked", {});
+}
+
+/* Every block below runs inside core's Angular bootstrap: the config block
+   during injector creation and the decorator when livesocket or the
+   alertarea first injects the service. A throw in either is a blank
+   Domoticz, so both are contained and the decorator always hands core its
+   service back. */
+function dzDecorateNotifyBrowser(notificationsModule) {
+    // Test hook: the containment counterpart of __dzThrowInRouteHook.
+    if (window.__dzThrowInNotifyHook) { throw new Error("__dzThrowInNotifyHook (test hook)"); }
+    notificationsModule.config(["$provide", function ($provide) {
+        try {
+            $provide.decorator("notifyBrowser", ["$delegate", function ($delegate) {
+                try {
+                    dzWrapNotify($delegate);
+                } catch (e) {
+                    dzNotifyFallback("hook_error", e);
+                }
+                return $delegate;
+            }]);
+        } catch (e) {
+            // e.g. core renamed the service: "Unknown provider".
+            dzNotifyFallback("hook_error", e);
+        }
+    }]);
+}
+
 function dzWrapAngularModule(ng, realModule) {
     var wrapped = function (name, deps) {
         var m = realModule.apply(this, arguments);
@@ -517,7 +590,18 @@ function dzWrapAngularModule(ng, realModule) {
             try {
                 m.run(["$rootScope", dzBridgeHashChange]);
             } catch (e) {
-                dzLog("routes", "bridge_failed", { error: String(e) });
+                if (typeof dzLog === "function") dzLog("routes", "bridge_failed", { error: String(e) });
+            }
+        }
+        /* Registered on the module's own definition: core's service
+           registration runs before this config block, which runs before
+           anything can inject the service, so the decorator is always in
+           place for the first notification. */
+        if (name === "domoticz.notifications" && deps) {
+            try {
+                dzDecorateNotifyBrowser(m);
+            } catch (e) {
+                if (typeof dzLog === "function") dzLog("notify", "hook_error", { error: String(e) });
             }
         }
         if (name === "app.routes" && deps) {

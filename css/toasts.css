@@ -35,6 +35,28 @@
     max-width: calc(100vw - (2 * var(--dz-card-space-xl)));
 }
 
+/* Core's alertarea (browser notifications, index.html) sits in the page flow
+   behind the fixed header. Hidden only while both halves of the theme's route
+   for those messages are live: custom.js's notifyBrowser decorator
+   (dz-notify-hooked) and toast-hooks.js (dz-notify-toasts). Without either,
+   which includes __dzForceNoRoutes and a hook that threw, the message still
+   only exists here, so the area is lifted to the toast stack's position
+   instead and stays readable. The width gives core's absolutely positioned
+   .alerts box room to shrink-to-fit; without it every word wraps. */
+[alertarea] {
+    position: fixed;
+    /* One above the stack (see #dz-toast-stack): the two share this corner,
+       and core drops its alert after 2 s while a toast stays open longer
+       and can be hovered, so the alert is the one that must not be covered. */
+    z-index: 1036;
+    top: var(--dz-toast-top);
+    right: var(--dz-card-space-xl);
+    width: 325px;
+    max-width: calc(100vw - (2 * var(--dz-card-space-xl)));
+}
+
+html.dz-notify-hooked.dz-notify-toasts [alertarea] { display: none; }
+
 .dz-toast {
     position: relative;
     pointer-events: auto;
@@ -224,7 +246,8 @@
    adaptations put a fixed bottom bar on Settings, and core's fixed Apply bar
    painting over content is already logged as defect S8. */
 @media (max-width: 767px) {
-    #dz-toast-stack {
+    #dz-toast-stack,
+    [alertarea] {
         left: var(--dz-card-space-xl);
         right: var(--dz-card-space-xl);
         width: auto;

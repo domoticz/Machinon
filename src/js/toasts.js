@@ -508,11 +508,21 @@ function dzToastAdoptIdx(rec, member, ev) {
     if (rec.idxs.indexOf(idx) === -1) rec.idxs.push(idx);
 }
 
+/* A group whose leader names no device is keyed by its content (a browser
+   notification's group carries its subject and text, toast-hooks.js), so a
+   same-group arrival that names no device either is the same message again.
+   Without this the device path below would count it and retitle the toast
+   "2 devices". */
+function dzToastIsContentRepeat(rec, ev) {
+    return !(rec.members && rec.members.length) && !dzToastMembers(ev).length;
+}
+
 /* Returns true when the arrival was already in the group, i.e. nothing was
    rendered. The caller needs that: dzWarnPass gates its persisted "last shown"
    stamp on the result, and a warning the user never saw must not burn the
    quiet period. */
 function dzToastMerge(rec, ev) {
+    if (dzToastIsContentRepeat(rec, ev)) return true;
     var at = dzToastMemberIndex(rec, ev);
     if (at !== -1) {
         dzToastAdoptIdx(rec, rec.members[at], ev);
@@ -559,6 +569,7 @@ function dzToastMerge(rec, ev) {
    what lets a group survive queueing instead of fanning out into one queued
    event per arrival. */
 function dzToastQueueMerge(entry, ev) {
+    if (dzToastIsContentRepeat(entry, ev)) return true;
     var at = dzToastMemberIndex(entry, ev);
     if (at !== -1) {
         dzToastAdoptIdx(entry, entry.members[at], ev);
@@ -642,7 +653,9 @@ function dzToastDrain() {
 }
 
 /* The single entry point. Everything in the app - core's ~600 call sites, the
-   theme's own, and the device warnings - arrives here. */
+   theme's own, and the device warnings - arrives here. ev.groupKind, when set,
+   is what diagnostics record in place of ev.group, for a group key that carries
+   message text (see dzToastIsContentRepeat). */
 function dzToast(ev) {
     if (!ev || typeof ev !== "object") return { close: function() {}, shown: false };
     if (ev.timeout === undefined) {
@@ -700,7 +713,7 @@ function dzToastLogDecision(ev, outcome, total) {
     try {
         dzLog("toast", "decision", {
             outcome: outcome,
-            group: ev.group || "none",
+            group: ev.groupKind || ev.group || "none",
             source: ev.source || "core",
             type: ev.type || "info",
             total: total || 0
@@ -752,7 +765,7 @@ if (typeof dzDiagRegister === "function") {
         var out = {
             visible: dzToastVisible.length,
             queued: dzToastQueue.length,
-            groups: dzToastVisible.map(function(r) { return r.group || "none"; })
+            groups: dzToastVisible.map(function(r) { return r.ev.groupKind || r.group || "none"; })
         };
         if (opts && opts.names) {
             out.names = dzToastVisible.map(function(r) { return (r.names || []).join(", "); });

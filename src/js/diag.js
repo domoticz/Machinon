@@ -79,6 +79,9 @@ var DZ_DIAG_IDENTITY = {
     set_filter: ["event", "members", "cards_matched", "route"],
     settings: ["event", "outcome", "transport", "layer"],
     routes: ["event", "routes", "active", "reason"],
+    /* custom.js's notifyBrowser decorator. `error` stays out: it is free
+       text, and the event plus reason already say which way the hook went. */
+    notify: ["event", "reason"],
     filter: ["event", "query_len", "cards_in", "cards_out", "route"],
     problems: ["event", "rows", "badge", "outcome"]
 };
