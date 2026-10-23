@@ -291,6 +291,72 @@ function dzThemeNavigate(hash) {
 if (typeof dzNavigateHash === "function") dzNavigateHash(hash);
 else location.hash = hash;
 }
+var dzNotifyState = "pending";
+function dzNotifyToast(title, body) {
+if (typeof dzToastFromBrowserNotify === "function") {
+dzToastFromBrowserNotify(title, body);
+return false;
+}
+if (window.__dzToastBuffer) {
+window.__dzToastBuffer.push({ fn: "notify", args: [title, body], cancelled: false, handle: null });
+return true;
+}
+return false;
+}
+function dzNotifyDropQueued(service) {
+try {
+var queue = typeof service.messages === "function" ? service.messages() : null;
+if (queue && typeof queue.pop === "function") queue.pop();
+} catch (e) {
+if (typeof dzLog === "function") dzLog("notify", "drop_failed", { error: String(e) });
+}
+}
+function dzNotifyFallback(event, e) {
+dzNotifyState = "failed";
+document.documentElement.classList.remove("dz-notify-hooked");
+if (typeof dzLog === "function") dzLog("notify", event, { error: String(e) });
+}
+function dzWrapNotify(service) {
+var coreNotify = service && service.notify;
+if (typeof coreNotify !== "function") {
+dzNotifyState = "failed";
+if (typeof dzLog === "function") dzLog("notify", "hook_absent", { reason: "no_notify" });
+return;
+}
+service.notify = function () {
+var buffered = false;
+try {
+buffered = dzNotifyToast(arguments[0], arguments[1]);
+} catch (e) {
+dzNotifyFallback("toast_failed", e);
+}
+try {
+return coreNotify.apply(this, arguments);
+} finally {
+if (buffered) dzNotifyDropQueued(service);
+}
+};
+dzNotifyState = "hooked";
+document.documentElement.classList.add("dz-notify-hooked");
+if (typeof dzLog === "function") dzLog("notify", "hooked", {});
+}
+function dzDecorateNotifyBrowser(notificationsModule) {
+if (window.__dzThrowInNotifyHook) { throw new Error("__dzThrowInNotifyHook (test hook)"); }
+notificationsModule.config(["$provide", function ($provide) {
+try {
+$provide.decorator("notifyBrowser", ["$delegate", function ($delegate) {
+try {
+dzWrapNotify($delegate);
+} catch (e) {
+dzNotifyFallback("hook_error", e);
+}
+return $delegate;
+}]);
+} catch (e) {
+dzNotifyFallback("hook_error", e);
+}
+}]);
+}
 function dzWrapAngularModule(ng, realModule) {
 var wrapped = function (name, deps) {
 var m = realModule.apply(this, arguments);
@@ -298,7 +364,14 @@ if (name === "domoticz" && deps) {
 try {
 m.run(["$rootScope", dzBridgeHashChange]);
 } catch (e) {
-dzLog("routes", "bridge_failed", { error: String(e) });
+if (typeof dzLog === "function") dzLog("routes", "bridge_failed", { error: String(e) });
+}
+}
+if (name === "domoticz.notifications" && deps) {
+try {
+dzDecorateNotifyBrowser(m);
+} catch (e) {
+if (typeof dzLog === "function") dzLog("notify", "hook_error", { error: String(e) });
 }
 }
 if (name === "app.routes" && deps) {
@@ -336,7 +409,7 @@ console.warn("machinon_routes", "hook_error", "cannot hook angular.module; theme
 var DZ_ROUTE_HOOK_WAIT_MS = 15000;
 (function dzInstallRouteShim() {
 if (window.__dzForceNoRoutes) {
-console.warn("machinon_routes", "forced_off", "__dzForceNoRoutes set; theme routes not registered (test hook)");
+console.warn("machinon_routes", "forced_off", "__dzForceNoRoutes set; theme routes and the browser notification hook not installed (test hook)");
 return;
 }
 try {
@@ -357,6 +430,9 @@ dzHookAngular(ng);
 console.warn("machinon_routes", "hook_error", "window.angular is not interceptable; theme routes not registered", String(e));
 }
 setTimeout(function () {
+if (dzNotifyState === "pending" && typeof dzLog === "function") {
+dzLog("notify", "hook_absent", { reason: "not_reached" });
+}
 if (window.dzRoutesActive) return;
 console.warn("machinon_routes", "hook_absent",
 "no app.routes definition reached the hook within " + DZ_ROUTE_HOOK_WAIT_MS + "ms; theme pages stay on the legacy path");

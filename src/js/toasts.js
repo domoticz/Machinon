@@ -292,7 +292,12 @@ var idx = String(ev.deviceIdx);
 if (member && !member.idx) member.idx = idx;
 if (rec.idxs.indexOf(idx) === -1) rec.idxs.push(idx);
 }
+var DZ_TOAST_CONTENT_KIND = "browser-notify";
+function dzToastIsContentRepeat(rec, ev) {
+return ev.groupKind === DZ_TOAST_CONTENT_KIND && !!rec.ev && rec.ev.groupKind === DZ_TOAST_CONTENT_KIND;
+}
 function dzToastMerge(rec, ev) {
+if (dzToastIsContentRepeat(rec, ev)) return true;
 var at = dzToastMemberIndex(rec, ev);
 if (at !== -1) {
 dzToastAdoptIdx(rec, rec.members[at], ev);
@@ -323,6 +328,7 @@ dzToastStartTimer(rec);
 return false;
 }
 function dzToastQueueMerge(entry, ev) {
+if (dzToastIsContentRepeat(entry, ev)) return true;
 var at = dzToastMemberIndex(entry, ev);
 if (at !== -1) {
 dzToastAdoptIdx(entry, entry.members[at], ev);
@@ -417,7 +423,7 @@ if (typeof dzLogOn === "undefined" || !dzLogOn) return;
 try {
 dzLog("toast", "decision", {
 outcome: outcome,
-group: ev.group || "none",
+group: ev.groupKind || ev.group || "none",
 source: ev.source || "core",
 type: ev.type || "info",
 total: total || 0
@@ -444,7 +450,7 @@ dzDiagRegister("toasts", function(opts) {
 var out = {
 visible: dzToastVisible.length,
 queued: dzToastQueue.length,
-groups: dzToastVisible.map(function(r) { return r.group || "none"; })
+groups: dzToastVisible.map(function(r) { return r.ev.groupKind || r.group || "none"; })
 };
 if (opts && opts.names) {
 out.names = dzToastVisible.map(function(r) { return (r.names || []).join(", "); });

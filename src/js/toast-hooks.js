@@ -41,6 +41,23 @@ function dzToastHideNotify() {
 if (dzToastLastShowNotify) dzToastLastShowNotify.close();
 dzToastLastShowNotify = null;
 }
+function dzToastFromBrowserNotify(title, body) {
+var t = title === null || title === undefined ? "" : String(title);
+var b = body === null || body === undefined ? "" : String(body);
+return dzToast({
+type: "info",
+title: t || dzT("toasts.notification"),
+body: b,
+group: "browser-notify:" + t + "\n" + b,
+groupKind: "browser-notify",
+source: "browser-notify"
+});
+}
+function dzToastFromBuffered(e) {
+if (e.fn === "noty") return dzToastFromNoty.apply(null, e.args);
+if (e.fn === "notify") return dzToastFromBrowserNotify.apply(null, e.args);
+return dzToastFromShowNotify.apply(null, e.args);
+}
 function dzToastInstallHooks() {
 window.generate_noty = dzToastFromNoty;
 window.ShowNotify = dzToastFromShowNotify;
@@ -49,9 +66,11 @@ var buf = window.__dzToastBuffer || [];
 for (var i = 0; i < buf.length; i++) {
 var e = buf[i];
 if (e.cancelled) continue;
-e.handle = e.fn === "noty" ? dzToastFromNoty.apply(null, e.args)
-: dzToastFromShowNotify.apply(null, e.args);
+e.handle = dzToastFromBuffered(e);
 }
 window.__dzToastBuffer = null;
+if (typeof document !== "undefined" && document.documentElement) {
+document.documentElement.classList.add("dz-notify-toasts");
+}
 }
 if (typeof window !== "undefined") dzToastInstallHooks();

@@ -280,8 +280,9 @@ return run;
 function dzApiLayerSnap(layer) {
 return layer === "user" ? dzApiState.userSnap : dzApiState.instanceSnap;
 }
-function dzMergeConflict(baseSnap, intendedSnap, freshSnap) {
+function dzMergeConflict(baseSnap, intendedSnap, freshSnap, emptyBase) {
 if (!freshSnap) return intendedSnap;
+if (emptyBase && dzSnapIsEmpty(freshSnap)) freshSnap = emptyBase;
 var out = dzMigrateSnapshot(JSON.parse(JSON.stringify(freshSnap)));
 out.schemaVersion = intendedSnap.schemaVersion || DZ_SETTINGS_SCHEMA_VERSION;
 ["features", "values"].forEach(function(part) {
@@ -326,9 +327,10 @@ dzLastRefusalAt = now;
 if (fresh && typeof dzAccountMaybeChanged === "function") dzAccountMaybeChanged(account);
 return { ok: false, error: reason };
 }
-function dzApiWriteNow(param, layer, buildFn) {
+function dzApiWriteNow(param, layer, buildFn, overwrite) {
 var baseSnap = dzApiLayerSnap(layer);
 var intended = buildFn();
+var outcome = null;
 function send(snap) {
 return dzApiPost({ param: param, theme: themeFolder,
 value: JSON.stringify(snap), lastupdate: dzApiState.tokens[layer] || "" });
@@ -336,9 +338,14 @@ value: JSON.stringify(snap), lastupdate: dzApiState.tokens[layer] || "" });
 return send(intended).then(function(d) {
 if (d.status === "OK") { dzApiState.tokens[layer] = d.lastupdate || ""; return { ok: true, snap: intended }; }
 if (d.error !== "conflict") return dzApiFail(d);
-return dzApiFetchLayers().then(function(outcome) {
-var merged = (outcome === DZ_LOAD_FAILED) ? intended
-: dzMergeConflict(baseSnap, intended, dzApiLayerSnap(layer));
+return dzApiFetchLayers().then(function(o) {
+outcome = o;
+var fresh = dzApiLayerSnap(layer);
+var needDefaults = o !== DZ_LOAD_FAILED && overwrite !== true && layer === "instance" && dzSnapIsEmpty(fresh) && !!fresh;
+return needDefaults ? dzEnsureDefaultsSnap().catch(function() { return null; }) : null;
+}).then(function(emptyBase) {
+var merged = (outcome === DZ_LOAD_FAILED || overwrite === true) ? intended
+: dzMergeConflict(baseSnap, intended, dzApiLayerSnap(layer), emptyBase);
 return send(merged).then(function(d2) {
 if (d2.status === "OK") { dzApiState.tokens[layer] = d2.lastupdate || ""; return { ok: true, snap: merged }; }
 return dzApiFail(d2);
@@ -424,8 +431,11 @@ return fetch("styles/" + themeFolder + "/theme.json", { cache: "no-cache", crede
 .then(function(r) { return r.json(); })
 .then(function(localJson) { dzDefaultsSnap = dzSettingsSnapshot(localJson); return dzDefaultsSnap; });
 }
+function dzSnapIsEmpty(snap) {
+return !snap || (Object.keys(snap.features || {}).length === 0 && Object.keys(snap.values || {}).length === 0);
+}
 function dzBuildInstanceWrite(scopeToPatch) {
-var base = dzApiState.instanceSnap ? JSON.parse(JSON.stringify(dzApiState.instanceSnap))
+var base = !dzSnapIsEmpty(dzApiState.instanceSnap) ? JSON.parse(JSON.stringify(dzApiState.instanceSnap))
 : JSON.parse(JSON.stringify(dzDefaultsSnap));
 var current = dzSettingsSnapshot(theme);
 ["features", "values"].forEach(function(part) {
@@ -488,7 +498,15 @@ return dzApiFail(d);
 });
 }
 function dzApiResetUser() { return dzApiReset("themesettings_set").then(function(r) { if (r.ok) { dzApiState.userSnap = null; dzApiState.tokens.user = ""; } return r; }); }
-function dzApiResetHouse() { return dzApiReset("themesettings_setdefault").then(function(r) { if (r.ok) { dzApiState.instanceSnap = null; dzApiState.tokens.instance = ""; } return r; }); }
+function dzApiResetHouse() {
+var asked = dzAccount;
+var empty = { schemaVersion: DZ_SETTINGS_SCHEMA_VERSION, features: {}, values: {} };
+return dzEnqueueWrite(function() {
+return dzWithSameAccount(asked, false, function() {
+return dzApiWriteNow("themesettings_setdefault", "instance", function() { return empty; }, true);
+});
+}).then(function(r) { if (r.ok) dzApiState.instanceSnap = r.snap; return r; });
+}
 var unableCreateUserVariable = false;
 function dzUnableToCreateUserVariable() { return unableCreateUserVariable; }
 var DZ_LOAD_LOADED = "loaded";

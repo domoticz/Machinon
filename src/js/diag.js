@@ -22,6 +22,7 @@ toast: ["event", "outcome", "group", "source"],
 set_filter: ["event", "members", "cards_matched", "route"],
 settings: ["event", "outcome", "transport", "layer"],
 routes: ["event", "routes", "active", "reason"],
+notify: ["event", "reason"],
 filter: ["event", "query_len", "cards_in", "cards_out", "route"],
 problems: ["event", "rows", "badge", "outcome"]
 };
