@@ -133,6 +133,31 @@ body.dashMobile table.mobileitem td {
     border-color: var(--dz-body-bg);
 }
 
+/* Switch and scene rows: the buttons keep their width, the name gives way.
+   Both cells above start from their max-content width, so a name that has to
+   wrap overflows the row and flex-shrink takes the deficit from both cells in
+   proportion to that width. The button cell may shrink down to its min-content,
+   which is ONE button (the buttons are inline-blocks under white-space:normal),
+   so an On|Off pair stacked into a column beside a wrapping name. Not shrinking
+   the button cell leaves it at its content width, still capped by the
+   max-width on td#status below (a selector with many levels wraps exactly as
+   before), and the name absorbs the whole deficit. Rows that fit grow instead
+   of shrink, so their split is unchanged.
+   overflow-wrap:anywhere lowers the name's min-content to one character, so a
+   single word longer than the remaining space breaks inside the name instead of
+   pushing the row past the card. Scoped by core's row ids (scene_ and light_,
+   views/dashboard_mobile.html) so the text values of the sensor sections keep
+   their current split. */
+body.dashMobile table.mobileitem tr[id^="scene_"] > td#status,
+body.dashMobile table.mobileitem tr[id^="light_"] > td#status {
+    flex-shrink: 0;
+}
+
+body.dashMobile table.mobileitem tr[id^="scene_"] > td#name,
+body.dashMobile table.mobileitem tr[id^="light_"] > td#name {
+    overflow-wrap: anywhere;
+}
+
 body.dashMobile table.mobileitem td:last-child {
     font-weight: var(--dz-weight-semibold);
     min-height: var(--dz-mobile-card-value-min-height);
