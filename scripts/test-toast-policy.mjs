@@ -180,7 +180,8 @@ function loadToastRuntime(overrides) {
     });
     /* toast-hooks.js is opt-in: it replaces window.generate_noty and drains
        window.__dzToastBuffer at load, which only the adapter tests want. */
-    const files = ["src/js/i18n.js", "lang/machinon.en.js", "src/js/url-guards.js", "src/js/toasts.js"];
+    const lang = (overrides && overrides.lang) || "en";
+    const files = ["src/js/i18n.js", "lang/machinon." + lang + ".js", "src/js/url-guards.js", "src/js/toasts.js"];
     if (overrides && overrides.withHooks) {
         ctx.window.__dzToastBuffer = overrides.buffer || [];
         files.push("src/js/toast-hooks.js");
@@ -824,6 +825,32 @@ test("a browser notification without a subject still gets a title", () => {
     assert.equal(d.dzToastVisible[1].el.querySelector(".dz-toast-title").textContent, "Notification");
 });
 
+test("the fallback title is translated, from the theme's own lang file", () => {
+    /* Core's $.t has no "Notification" key and would return the English word,
+       so a $.t stub that echoes its key must not be what supplies the title. */
+    const expected = { de: "Benachrichtigung", nl: "Melding", pl: "Powiadomienie", sv: "Avisering", fr: "Notification" };
+    for (const [lang, title] of Object.entries(expected)) {
+        const rt = loadToastRuntime({ withHooks: true, lang });
+        rt.dz.$ = { t: (k) => k };
+        rt.dz.dzToastFromBrowserNotify("", "Hallo");
+        assert.equal(rt.dz.dzToastVisible[0].el.querySelector(".dz-toast-title").textContent, title, lang);
+    }
+});
+
+test("a device warning that names no device still counts repeats the old way", () => {
+    // The content-repeat rule is scoped to browser notifications only.
+    const rt = loadToastRuntime();
+    const d = rt.dz;
+    const ev = {
+        type: "warning", title: "timed out", source: "device-warning",
+        group: "device-warning-timeout", groupTitle: groupTitleTimeout, timeout: 6000
+    };
+    d.dzToast({ ...ev });
+    const second = d.dzToast({ ...ev });
+    assert.equal(second.duplicate, false);
+    assert.equal(d.dzToastVisible[0].total, 1);
+});
+
 test("the switch-chatter filter does not apply to browser notifications", () => {
     // ShowNotify drops core's own "Switching ..." progress lines; a plugin
     // message that happens to start with the same word is not that chatter.
@@ -925,7 +952,7 @@ function loadNotifyHook(opts) {
     });
     if (o.sink) ctx.dzToastFromBrowserNotify = o.sink;
     vm.runInContext(liftFunctions(readFileSync("custom.js", "utf8"),
-        ["dzNotifyToast", "dzNotifyFallback", "dzWrapNotify", "dzDecorateNotifyBrowser", "dzWrapAngularModule"]),
+        ["dzNotifyToast", "dzNotifyDropQueued", "dzNotifyFallback", "dzWrapNotify", "dzDecorateNotifyBrowser", "dzWrapAngularModule"]),
         ctx, { filename: "custom.js#notify" });
     const ng = {};
     function realModule(name, deps) {
@@ -950,11 +977,14 @@ function loadNotifyHook(opts) {
         if (!def) return delegate;
         return def[def.length - 1].apply(null, [delegate]);
     }
+    /* Shaped like core's service: notify pushes onto the array messages()
+       returns, which is what the alertarea renders. */
+    const queue = [];
     const delegate = {
-        notify: function (title, body) { coreCalls.push([title, body]); return "core-result"; },
-        messages: function () { return []; }
+        notify: function (title, body) { queue.push({ title, body }); coreCalls.push([title, body]); return "core-result"; },
+        messages: function () { return queue; }
     };
-    return { ng, ctx, win, root, sinkCalls, coreCalls, diag, configs, boot, delegate };
+    return { ng, ctx, win, root, sinkCalls, coreCalls, diag, configs, boot, delegate, queue };
 }
 
 test("the decorator registers on core's notifications module definition only", () => {
@@ -987,6 +1017,22 @@ test("a notification arriving before the toast modules load is buffered for toas
     assert.equal(buffer[0].fn, "notify");
     assert.deepEqual(Array.from(buffer[0].args), ["Test", "Hello"]);
     assert.deepEqual(h.coreCalls, [["Test", "Hello"]]);
+    assert.equal(h.queue.length, 0,
+        "taken out of core's queue: the alertarea is not hidden yet, and the drained toast shows it");
+});
+
+test("a message that reached a toast stays in core's queue, behind the hidden alertarea", () => {
+    const h = loadNotifyHook({ sink: function () {} });
+    h.ng.module("domoticz.notifications", []);
+    h.boot(h.delegate).notify("Test", "Hello");
+    assert.equal(h.queue.length, 1);
+});
+
+test("with neither the toast modules nor a buffer, core's alertarea keeps the message", () => {
+    const h = loadNotifyHook({ buffer: null });
+    h.ng.module("domoticz.notifications", []);
+    h.boot(h.delegate).notify("Test", "Hello");
+    assert.equal(h.queue.length, 1);
 });
 
 test("a toast that throws gives the message back to core's alertarea", () => {

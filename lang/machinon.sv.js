@@ -413,6 +413,7 @@ language = {
     devices: "{count} enheter",
     and_more: "och {count} till",
     show_devices: "Visa dessa enheter",
+    notification: "Avisering",
     update_available: "Machinon version {version} är tillgänglig!",
     update_action: "Klicka här för att ladda ner",
     wcag_fails: "{what} klarar inte WCAG-kontrasten: {failures}",

@@ -413,6 +413,7 @@ language = {
     devices: "{count} urządzeń",
     and_more: "i jeszcze {count}",
     show_devices: "Pokaż te urządzenia",
+    notification: "Powiadomienie",
     update_available: "Dostępna jest wersja {version} motywu Machinon!",
     update_action: "Kliknij tutaj, aby pobrać",
     wcag_fails: "{what} nie spełnia wymagań kontrastu WCAG: {failures}",

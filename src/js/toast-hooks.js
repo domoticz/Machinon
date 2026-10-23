@@ -83,15 +83,18 @@ function dzToastHideNotify() {
    through dzToastHtmlToText, and markup a plugin sends shows as typed. The
    switch-chatter filter does not apply: that silences core's own "Switching"
    progress lines, and a plugin's subject can begin with the same word. The
-   group key is the message itself, so the same message twice in quick
-   succession merges into one toast (dzToastIsContentRepeat in toasts.js);
-   groupKind keeps that text out of diagnostics. */
+   group key is the message itself, so the same message twice within the
+   coalescing window merges into one toast (dzToastIsContentRepeat in
+   toasts.js, which keys on this groupKind); groupKind also keeps that text out
+   of diagnostics. */
 function dzToastFromBrowserNotify(title, body) {
     var t = title === null || title === undefined ? "" : String(title);
     var b = body === null || body === undefined ? "" : String(body);
     return dzToast({
         type: "info",
-        title: t || ((typeof $ !== "undefined" && $.t) ? $.t("Notification") : "Notification"),
+        /* A theme key, not $.t: core's i18n has no "Notification" key, and
+           i18next would hand the English word back in every language. */
+        title: t || dzT("toasts.notification"),
         body: b,
         group: "browser-notify:" + t + "\n" + b,
         groupKind: "browser-notify",

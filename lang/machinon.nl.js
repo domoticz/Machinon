@@ -416,6 +416,7 @@ language = {
     devices: "{count} apparaten",
     and_more: "en nog {count}",
     show_devices: "Deze apparaten tonen",
+    notification: "Melding",
     update_available: "Machinon versie {version} is beschikbaar!",
     update_action: "Klik hier om te downloaden",
     wcag_fails: "{what} haalt het WCAG-contrast niet: {failures}",

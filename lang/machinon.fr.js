@@ -413,6 +413,7 @@ language = {
     devices: "{count} dispositifs",
     and_more: "et {count} de plus",
     show_devices: "Afficher ces dispositifs",
+    notification: "Notification",
     update_available: "La version {version} de Machinon est disponible !",
     update_action: "Cliquez ici pour télécharger",
     wcag_fails: "{what} échoue au contraste WCAG: {failures}",
