@@ -5,6 +5,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 ## [Unreleased]
 
 - On Domoticz 2026.4 or newer, Reset theme to defaults no longer brings back the settings you had on an older Domoticz the next time an admin opens Domoticz; another browser you used before the reset still shows your old settings, and saving a change there stores them again, until you use Clear cached settings in that browser (Theme Hub, About tab) (#262)
+- On the phone dashboard, the On and Off buttons of a switch or dimmer with a long name now stay side by side instead of stacking, and the name wraps beside them
 
 ## [2.10.1] - 2026-10-22
 
