@@ -39,3 +39,47 @@ test("one real change among clock ticks still needs a pass", () => {
 test("an empty batch needs no pass", () => {
     assert.equal(dz.dzRecordsNeedPass([]), false);
 });
+
+/* dzLiveUpdateQueue: a hidden tab keeps only each device's latest update and
+   applies them once, without the live flag, when the tab shows again. */
+function queueWith(hidden) {
+    const calls = [];
+    const state = { hidden };
+    const q = dz.dzLiveUpdateQueue(() => state.hidden, (data, live) => calls.push([data.idx, data.v, live]));
+    return { q, calls, state };
+}
+
+test("a visible update is applied at once, as live", () => {
+    const { q, calls } = queueWith(false);
+    q.push({ idx: "7", v: 1 });
+    assert.deepEqual(calls, [["7", 1, true]]);
+    assert.equal(q.flush(), 0);
+});
+
+test("hidden updates are held until flush", () => {
+    const { q, calls } = queueWith(true);
+    q.push({ idx: "7", v: 1 });
+    q.push({ idx: "8", v: 1 });
+    assert.deepEqual(calls, []);
+    assert.equal(q.flush(), 2);
+    assert.deepEqual(calls, [["7", 1, false], ["8", 1, false]]);
+});
+
+test("a device updated several times while hidden is applied once, with its latest data", () => {
+    const { q, calls } = queueWith(true);
+    q.push({ idx: "7", v: 1 });
+    q.push({ idx: "7", v: 2 });
+    q.push({ idx: "7", v: 3 });
+    q.flush();
+    assert.deepEqual(calls, [["7", 3, false]]);
+});
+
+test("flush empties the queue, and later visible updates are live again", () => {
+    const { q, calls, state } = queueWith(true);
+    q.push({ idx: "7", v: 1 });
+    q.flush();
+    assert.equal(q.flush(), 0);
+    state.hidden = false;
+    q.push({ idx: "7", v: 2 });
+    assert.deepEqual(calls, [["7", 1, false], ["7", 2, true]]);
+});
