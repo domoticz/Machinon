@@ -1043,15 +1043,46 @@ function setDeviceOpacity(idx, status, $trs) {
     }
 }
 
+/* Holds live updates while the tab is hidden. A background tab's timers are
+   throttled harder the longer it stays hidden (Firefox delayed them by minutes),
+   so the per-update work below would run late and then replay card by card,
+   pulse included, once the tab shows again. While hidden only each device's
+   latest update is kept; flush() applies those once, quietly. Core's own pages
+   likewise skip their update highlight while document.hidden. */
+function dzLiveUpdateQueue(isHidden, apply) {
+    var held = {};
+    return {
+        push: function (data) {
+            if (isHidden()) {
+                held[data.idx] = data;
+                return;
+            }
+            apply(data, true);
+        },
+        flush: function () {
+            var pending = held;
+            held = {};
+            var keys = Object.keys(pending);
+            keys.forEach(function (idx) { apply(pending[idx], false); });
+            return keys.length;
+        }
+    };
+}
+
 /* Live device/scene updates pushed by core through $rootScope (websocket).
    Registered once by the bootstrap (custom.js) as soon as Angular is up. */
 function initDeviceLiveUpdates($scope) {
-    $scope.$on('device_update', function (event, data) {
-        /* Core reapplies its own filter on the pages it owns (its controllers
-           call RefreshLiveSearch after each re-render). Only the Dynamic
-           Dashboard needs the theme to do it, and this is a no-op when no
-           dashboard filter is active. */
-        dzReapplyDeviceFilter();
+    /* live: the update arrived while the page was on screen. A held update
+       applied on return gets no pulse, and the page-wide passes (filter, status
+       icons) run once after the whole batch instead of once per device. */
+    function applyDeviceUpdate(data, live) {
+        if (live) {
+            /* Core reapplies its own filter on the pages it owns (its controllers
+               call RefreshLiveSearch after each re-render). Only the Dynamic
+               Dashboard needs the theme to do it, and this is a no-op when no
+               dashboard filter is active. */
+            dzReapplyDeviceFilter();
+        }
         if (data.Type === "Light/Switch") {
             setDeviceOpacity(data.idx, data.Status);
             if (theme.features.icon_image.enabled === true) {
@@ -1092,6 +1123,7 @@ function initDeviceLiveUpdates($scope) {
         setTimeout(function() {
             let lastupd = moment(data.LastUpdate, ["YYYY-MM-DD HH:mm:ss", "L LT"]).format();
             setDeviceLastUpdate(data.idx, lastupd);
+            if (!live) return;
             setAllDevicesIconsStatus();
             /* Blue border pulse on updated card (if Domoticz flash setting enabled) */
             if ($scope.config && $scope.config.ShowUpdatedEffect === true) {
@@ -1100,6 +1132,17 @@ function initDeviceLiveUpdates($scope) {
                 setTimeout(function() { tr.removeClass("update-pulse"); }, 800);
             }
         }, 10);
+    }
+
+    var queue = dzLiveUpdateQueue(function () { return document.hidden; }, applyDeviceUpdate);
+    $scope.$on('device_update', function (event, data) {
+        queue.push(data);
+    });
+    document.addEventListener("visibilitychange", function () {
+        if (document.hidden || queue.flush() === 0) return;
+        dzReapplyDeviceFilter();
+        /* Queued after every held update's own 10 ms timer, so it sees their result. */
+        setTimeout(setAllDevicesIconsStatus, 10);
     });
 
     $scope.$on('scene_update', function (event, data) {

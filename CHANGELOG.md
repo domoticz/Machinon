@@ -4,6 +4,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+- Coming back to a Domoticz tab that was in the background no longer makes the device cards flash and catch up one by one; the page now catches up at once (#274)
+
 ## [2.10.2] - 2026-10-23
 
 - On Domoticz 2026.4 or newer, Reset theme to defaults now sticks instead of bringing back the settings from an older Domoticz; on any other browser you used before the reset, use Clear cached settings (Theme Hub, About tab) once (#262)
