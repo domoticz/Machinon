@@ -5,6 +5,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 ## [Unreleased]
 
 - Coming back to a Domoticz tab that was in the background no longer makes the device cards flash and catch up one by one; the page now catches up at once (#274)
+- On the Events page, the menu of open scripts (Close, Close Others, Close All) and the new-script menu are now readable in dark colour schemes and match the other menus
 
 ## [2.10.2] - 2026-10-23
 

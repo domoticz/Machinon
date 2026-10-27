@@ -116,6 +116,32 @@
     color: var(--dz-events-chrome-text);
 }
 
+/* ---- dropdown menus ---------------------------------------------------- */
+
+/* The open-tabs menu (Close / Close Others / Close All) and the "+" new-script
+   menu. Bootstrap 2 paints .dropdown-menu white while the items take the
+   scheme's text colour (css/links.css `color: inherit`), so on a dark scheme
+   they read light-on-white. They take the surface every other floating menu
+   uses (css/nav.css `.navbar .nav .dropdown-menu`), hover included: Bootstrap's
+   own hover is a fixed blue gradient. */
+.events-editor__menu {
+    background: var(--dz-menu-bg);
+    border-color: var(--dz-events-chrome-border);
+    border-radius: var(--dz-menu-radius);
+    box-shadow: var(--dz-menu-shadow);
+}
+
+.events-editor__menu > li > a {
+    color: var(--dz-menu-text);
+}
+
+.events-editor__menu > li > a:hover,
+.events-editor__menu > li > a:focus,
+.events-editor__menu > .dropdown-submenu:hover > a {
+    background: var(--dz-menu-item-hover-bg);
+    color: var(--dz-menu-text);
+}
+
 /* ---- Ace status bar ---------------------------------------------------- */
 
 /* Ace's ext-statusbar element, but styled entirely by core's Events.css:443, so
