@@ -1054,7 +1054,7 @@ anywhere: every menu surface uses the unified accent-edge language, no radius in
 ### Menu Surface
 
 `--dz-menu-bg` aliases `--dz-nav-bg`: the top menu bar and every floating
-menu (navbar dropdown, card 3-dot flyout) share ONE color concept, the scheme's "navbar" color, which
+menu (navbar dropdown, card 3-dot flyout, the Events editor's script menus) share ONE color concept, the scheme's "navbar" color, which
 the settings UI labels "Menu". Floating menus consume `--dz-menu-bg`, never `--dz-nav-bg` directly, so
 the mapping stays a single-line decision if a future scheme ever wants the two surfaces to diverge. The
 scheme JSON key itself stays `navbar` (not renamed to `menu`), since renaming it would be a scheme
