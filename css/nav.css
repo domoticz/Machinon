@@ -49,8 +49,53 @@
        on-accent token, so the logo themes with the active scheme. */
     color: var(--dz-accent-text);
 }
+/* A click on the logo goes to the Dashboard (page.js armLogoLink). */
+.header__icon {
+    cursor: pointer;
+}
 .header__icon .lg-mark { fill: var(--dz-accent-text); }
 .header__icon .lg-ring { stroke: var(--dz-accent-color); }
+
+/* Easter egg: while core's "everything is fine" banner is up (double-click the
+   logo, page.js armLogoLink), the logo's O turns into HAL 9000's eye. The joke
+   is the calm banner under a red eye, so these colours deliberately ignore the
+   scheme: the eye has to look the same everywhere. The lens gradient is added
+   to the inline logo by page.js dzAddHalLens; a custom uploaded logo has no O
+   and shows only the banner. Keyed to the banner element itself, so the eye
+   opens and closes with it however it was triggered. */
+body:has(> #dz-panic) .header__icon .lg-mark {
+    fill: #0b0b0d;
+}
+body:has(> #dz-panic) .header__icon .lg-ring {
+    fill: url(#dz-hal-lens);
+    stroke: #3b3b40;
+    animation: dz-hal-glow 2.4s ease-in-out infinite;
+}
+@keyframes dz-hal-glow {
+    0%, 100% { filter: drop-shadow(0 0 2px #ff2a1a); }
+    50%      { filter: drop-shadow(0 0 5px #ff2a1a); }
+}
+@media (prefers-reduced-motion: reduce) {
+    body:has(> #dz-panic) .header__icon .lg-ring {
+        animation: none;
+        filter: drop-shadow(0 0 3px #ff2a1a);
+    }
+}
+/* Core pins the banner to top:0, over the logo bar, which would hide the eye;
+   it goes just below the header instead (the navbar is 92px tall from 980px,
+   the logo bar alone 40px below that). Core's fixed green gradient starts at
+   3.3:1 under its white text, so the banner takes the success button pair. */
+body > #dz-panic {
+    top: 92px;
+    background: var(--dz-btn-success-bg);
+    color: var(--dz-btn-primary-text);
+    font-size: var(--dz-text-sm);
+}
+@media (max-width: 979px) {
+    body > #dz-panic {
+        top: 40px;
+    }
+}
 
 button.menu-toggle {
     display: none;

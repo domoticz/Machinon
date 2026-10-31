@@ -6,6 +6,7 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 - Coming back to a Domoticz tab that was in the background no longer makes the device cards flash and catch up one by one; the page now catches up at once (#274)
 - On the Events page, the menu of open scripts (Close, Close Others, Close All) and the new-script menu are now readable in dark colour schemes and match the other menus
+- The Machinon logo now works like the Domoticz logo it replaces: clicking it goes to the Dashboard, and double-clicking it shows the hidden "everything is fine" easter egg, with a little extra in the logo, which follows the Easter eggs switch in My Profile
 
 ## [2.10.2] - 2026-10-23
 
