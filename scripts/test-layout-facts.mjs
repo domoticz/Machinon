@@ -9,8 +9,8 @@ import vm from "node:vm";
    real browser would be tedious to coax into producing. */
 function loadPage() {
     const ctx = vm.createContext({
-        Math, console, JSON,
-        document: { readyState: "complete", addEventListener() {} },
+        Math, console, JSON, String,
+        document: { readyState: "complete", addEventListener() {}, getElementById: () => null },
         window: {}
     });
     vm.runInContext(readFileSync("src/js/page.js", "utf8"), ctx, { filename: "src/js/page.js" });
@@ -156,4 +156,34 @@ test("unrecognised Setup markup is left alone", () => {
     const page = setupPage({ markup: false });
     dz.dzPlaceSetupApply(page.doc, true);
     assert.equal(page.content.children.length, 0);
+});
+
+function eggs(enabled) {
+    const calls = [];
+    return { calls, ee: { isEnabled: () => enabled, test: (name) => calls.push(name) } };
+}
+
+test("a logo double-click shows core's everything-is-fine egg", () => {
+    const { calls, ee } = eggs(true);
+    assert.equal(dz.dzTriggerLogoEasterEgg(ee), true);
+    assert.deepEqual(calls, ["panic"]);
+});
+
+test("eggs switched off in My Profile since boot stay off", () => {
+    /* Core keeps its listeners until a reload, so the setting is read per click. */
+    const { calls, ee } = eggs(false);
+    assert.equal(dz.dzTriggerLogoEasterEgg(ee), false);
+    assert.deepEqual(calls, []);
+});
+
+test("a core without easter eggs is a no-op", () => {
+    assert.equal(dz.dzTriggerLogoEasterEgg(undefined), false);
+    assert.equal(dz.dzTriggerLogoEasterEgg({}), false);
+});
+
+test("the egg banner reads without an em dash", () => {
+    assert.equal(
+        dz.dzCalmBannerText("\u2705 System Status: EVERYTHING IS FINE \u2014 No issues detected. All devices nominal. Humans calm."),
+        "\u2705 System Status: EVERYTHING IS FINE. No issues detected. All devices nominal. Humans calm.");
+    assert.equal(dz.dzCalmBannerText("No dash here."), "No dash here.");
 });

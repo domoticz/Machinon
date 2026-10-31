@@ -148,12 +148,70 @@ function setLogo() {
         var svg = document.importNode(
             new DOMParser().parseFromString(markup, "image/svg+xml").documentElement, true);
         svg.setAttribute("class", "header__icon");
+        dzAddHalLens(svg);
         if (hide) svg.style.display = "none";
         container.prepend(svg);
     };
     if (setLogo._svg) { mount(setLogo._svg); return; }
     setLogo._pending = setLogo._pending || fetch("images/machinon/brand/logo.svg").then(function (r) { return r.text(); });
     setLogo._pending.then(function (t) { setLogo._svg = t; mount(t); });
+}
+
+/* The lens css/nav.css paints into the logo's O while the easter egg banner is
+   up: a yellow-white centre through red to near-black, HAL 9000's eye. A
+   gradient has to live inside the SVG it fills, and the brand logo is generated
+   (images-machinon), so it is added here rather than in the file. */
+function dzAddHalLens(svg) {
+    var ns = "http://www.w3.org/2000/svg";
+    var grad = document.createElementNS(ns, "radialGradient");
+    grad.setAttribute("id", "dz-hal-lens");
+    [["0", "#fff3b0"], ["0.12", "#ffcc33"], ["0.35", "#ff2a10"], ["0.8", "#8a0000"], ["1", "#2a0000"]]
+        .forEach(function (stop) {
+            var el = document.createElementNS(ns, "stop");
+            el.setAttribute("offset", stop[0]);
+            el.setAttribute("stop-color", stop[1]);
+            grad.appendChild(el);
+        });
+    var defs = document.createElementNS(ns, "defs");
+    defs.appendChild(grad);
+    svg.insertBefore(defs, svg.firstChild);
+}
+
+/* Core's "everything is fine" easter egg (www/app/EasterEggs.js) opens on a
+   double-click on a.brand, the header block css/nav.css hides, so in Machinon
+   the logo takes over that gesture. Core binds its own handlers only when eggs
+   are on at boot, and switching them off in My Profile takes effect at the next
+   reload, so the setting is read again on every double-click. window.dzEasterEggs
+   does not exist on a core without eggs, or when they were off at boot: nothing
+   happens then. */
+function dzTriggerLogoEasterEgg(ee) {
+    if (!ee || typeof ee.test !== "function") return false;
+    if (typeof ee.isEnabled === "function" && !ee.isEnabled()) return false;
+    ee.test("panic");
+    // Core appends the banner synchronously, so its text can be tidied here.
+    var banner = document.getElementById("dz-panic");
+    if (banner) banner.textContent = dzCalmBannerText(banner.textContent);
+    return true;
+}
+
+/* Core's banner text is English-only and joins its two sentences with a dash;
+   the theme writes no em dashes, so a full stop takes its place. */
+function dzCalmBannerText(text) {
+    return String(text).replace(/\s*\u2014\s*/g, ". ");
+}
+
+/* Core's header logo is a link to the Dashboard (www/index.html, a.brand), hidden
+   by css/nav.css, so a click on the Machinon logo does the same. Delegated,
+   because setLogo replaces the logo node on every re-apply. */
+function armLogoLink() {
+    if (armLogoLink._armed) return;
+    armLogoLink._armed = true;
+    $(document).on("click", "header.logo .header__icon", function () {
+        dzThemeNavigate("#/Dashboard");
+    });
+    $(document).on("dblclick", "header.logo .header__icon", function () {
+        dzTriggerLogoEasterEgg(window.dzEasterEggs);
+    });
 }
 
 /* Apply the user's dashboard background image (settings -> theme.background_img).

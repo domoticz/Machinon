@@ -888,6 +888,7 @@ function init_theme() {
         armFlyoutContainment();
         armSelectorWrapCornerRetag();
         setLogo();
+        armLogoLink();
         setSearch();
         setModeToggles();
         dzWireDashboardSearch();
