@@ -547,6 +547,7 @@ clampCorePopups();
 armFlyoutContainment();
 armSelectorWrapCornerRetag();
 setLogo();
+armLogoLink();
 setSearch();
 setModeToggles();
 dzWireDashboardSearch();

@@ -531,9 +531,30 @@ rows.parents(".item").removeClass("fadeOff");
 }
 }
 }
+function dzLiveUpdateQueue(isHidden, apply) {
+var held = {};
+return {
+push: function (data) {
+if (isHidden()) {
+held[data.idx] = data;
+return;
+}
+apply(data, true);
+},
+flush: function () {
+var pending = held;
+held = {};
+var keys = Object.keys(pending);
+keys.forEach(function (idx) { apply(pending[idx], false); });
+return keys.length;
+}
+};
+}
 function initDeviceLiveUpdates($scope) {
-$scope.$on('device_update', function (event, data) {
+function applyDeviceUpdate(data, live) {
+if (live) {
 dzReapplyDeviceFilter();
+}
 if (data.Type === "Light/Switch") {
 setDeviceOpacity(data.idx, data.Status);
 if (theme.features.icon_image.enabled === true) {
@@ -565,6 +586,7 @@ setTimeout(setDeviceWindDirectionIcon, 10, data.idx, data.DirectionStr);
 setTimeout(function() {
 let lastupd = moment(data.LastUpdate, ["YYYY-MM-DD HH:mm:ss", "L LT"]).format();
 setDeviceLastUpdate(data.idx, lastupd);
+if (!live) return;
 setAllDevicesIconsStatus();
 if ($scope.config && $scope.config.ShowUpdatedEffect === true) {
 var tr = $("tr[data-idx='" + data.idx + "']");
@@ -572,6 +594,15 @@ tr.addClass("update-pulse");
 setTimeout(function() { tr.removeClass("update-pulse"); }, 800);
 }
 }, 10);
+}
+var queue = dzLiveUpdateQueue(function () { return document.hidden; }, applyDeviceUpdate);
+$scope.$on('device_update', function (event, data) {
+queue.push(data);
+});
+document.addEventListener("visibilitychange", function () {
+if (document.hidden || queue.flush() === 0) return;
+dzReapplyDeviceFilter();
+setTimeout(setAllDevicesIconsStatus, 10);
 });
 $scope.$on('scene_update', function (event, data) {
 if (theme.features.switch_instead_of_bigtext_scenes.enabled === true) {
