@@ -69,16 +69,36 @@ body:has(> #dz-panic) .header__icon .lg-mark {
 body:has(> #dz-panic) .header__icon .lg-ring {
     fill: url(#dz-hal-lens);
     stroke: #3b3b40;
-    animation: dz-hal-glow 4s ease-in-out infinite;
+    animation: dz-hal-bezel 4s ease-in-out infinite;
 }
-@keyframes dz-hal-glow {
-    0%, 100% { filter: drop-shadow(0 0 2px #ff2a1a); }
-    50%      { filter: drop-shadow(0 0 5px #ff2a1a); }
+/* The pulse: the lens's hot centre cools to red and flares back to
+   yellow-white, and the bezel warms at the peak. Paint properties only: the
+   logo is a viewBox scaled down about 65 times, and a drop-shadow on an
+   element inside it painted nothing measurable in either engine. The stops
+   are page.js dzAddHalLens's classed ones. Reduced motion keeps the flare. */
+body:has(> #dz-panic) .header__icon .dz-hal-core {
+    animation: dz-hal-core 4s ease-in-out infinite;
+}
+body:has(> #dz-panic) .header__icon .dz-hal-hot {
+    animation: dz-hal-hot 4s ease-in-out infinite;
+}
+@keyframes dz-hal-bezel {
+    0%, 100% { stroke: #3b3b40; }
+    50%      { stroke: #6e1a12; }
+}
+@keyframes dz-hal-core {
+    0%, 100% { stop-color: #e0321a; }
+    50%      { stop-color: #fff3b0; }
+}
+@keyframes dz-hal-hot {
+    0%, 100% { stop-color: #c81e0c; }
+    50%      { stop-color: #ffcc33; }
 }
 @media (prefers-reduced-motion: reduce) {
-    body:has(> #dz-panic) .header__icon .lg-ring {
+    body:has(> #dz-panic) .header__icon .lg-ring,
+    body:has(> #dz-panic) .header__icon .dz-hal-core,
+    body:has(> #dz-panic) .header__icon .dz-hal-hot {
         animation: none;
-        filter: drop-shadow(0 0 3px #ff2a1a);
     }
 }
 /* Core pins the banner to top:0, over the logo bar, which would hide the eye;

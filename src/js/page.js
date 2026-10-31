@@ -165,11 +165,14 @@ function dzAddHalLens(svg) {
     var ns = "http://www.w3.org/2000/svg";
     var grad = document.createElementNS(ns, "radialGradient");
     grad.setAttribute("id", "dz-hal-lens");
-    [["0", "#fff3b0"], ["0.12", "#ffcc33"], ["0.35", "#ff2a10"], ["0.8", "#8a0000"], ["1", "#2a0000"]]
+    // The classed stops are the ones css/nav.css animates for the pulse.
+    [["0", "#fff3b0", "dz-hal-core"], ["0.12", "#ffcc33", "dz-hal-hot"], ["0.35", "#ff2a10"],
+     ["0.8", "#8a0000"], ["1", "#2a0000"]]
         .forEach(function (stop) {
             var el = document.createElementNS(ns, "stop");
             el.setAttribute("offset", stop[0]);
             el.setAttribute("stop-color", stop[1]);
+            if (stop[2]) el.setAttribute("class", stop[2]);
             grad.appendChild(el);
         });
     var defs = document.createElementNS(ns, "defs");
