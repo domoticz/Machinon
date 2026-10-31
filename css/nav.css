@@ -69,7 +69,7 @@ body:has(> #dz-panic) .header__icon .lg-mark {
 body:has(> #dz-panic) .header__icon .lg-ring {
     fill: url(#dz-hal-lens);
     stroke: #3b3b40;
-    animation: dz-hal-glow 2.4s ease-in-out infinite;
+    animation: dz-hal-glow 4s ease-in-out infinite;
 }
 @keyframes dz-hal-glow {
     0%, 100% { filter: drop-shadow(0 0 2px #ff2a1a); }
@@ -84,17 +84,29 @@ body:has(> #dz-panic) .header__icon .lg-ring {
 /* Core pins the banner to top:0, over the logo bar, which would hide the eye;
    it goes just below the header instead (the navbar is 92px tall from 980px,
    the logo bar alone 40px below that). Core's fixed green gradient starts at
-   3.3:1 under its white text, so the banner takes the success button pair. */
+   3.3:1 under its white text, so the banner takes the success button pair.
+   Core slides it down from its own height above, which at this position
+   passes over the logo strip; under the fixed navbar (Bootstrap's
+   .navbar-fixed-top, z-index 1030) it slides out from behind the header. */
 body > #dz-panic {
     top: 92px;
+    z-index: 1029;
     background: var(--dz-btn-success-bg);
     color: var(--dz-btn-primary-text);
     font-size: var(--dz-text-sm);
 }
+/* Below 980px the navbar scrolls with the page (position static), so a
+   z-index cannot put the banner behind it: the banner fades in where it sits
+   instead of sliding over the logo. Core's .fading exit still outranks this. */
 @media (max-width: 979px) {
     body > #dz-panic {
         top: 40px;
+        animation-name: dz-panic-appear;
     }
+}
+@keyframes dz-panic-appear {
+    from { opacity: 0; }
+    to   { opacity: 1; }
 }
 
 button.menu-toggle {
