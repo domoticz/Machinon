@@ -193,8 +193,23 @@ function dzTriggerLogoEasterEgg(ee) {
     ee.test("panic");
     // Core appends the banner synchronously, so its text can be tidied here.
     var banner = document.getElementById("dz-panic");
-    if (banner) banner.textContent = dzCalmBannerText(banner.textContent);
+    if (banner) {
+        banner.textContent = dzCalmBannerText(banner.textContent);
+        var header = document.querySelector(".navbar-fixed-top");
+        if (header) {
+            banner.style.top = dzPanicBannerTop(header.getBoundingClientRect().bottom,
+                getComputedStyle(header).position);
+        }
+    }
     return true;
+}
+
+/* The banner belongs just below the fixed header, whose height depends on the
+   theme settings (menu-bar icons make it taller), so it is read live, as
+   set-filter.js's chip does. Where the header scrolls with the page, its bottom
+   edge says nothing about the viewport: "" leaves css/nav.css's top in charge. */
+function dzPanicBannerTop(headerBottom, headerPosition) {
+    return headerPosition === "fixed" ? headerBottom + "px" : "";
 }
 
 /* Core's banner text is English-only and joins its two sentences with a dash;

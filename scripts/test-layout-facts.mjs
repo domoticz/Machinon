@@ -187,3 +187,15 @@ test("the egg banner reads without an em dash", () => {
         "\u2705 System Status: EVERYTHING IS FINE. No issues detected. All devices nominal. Humans calm.");
     assert.equal(dz.dzCalmBannerText("No dash here."), "No dash here.");
 });
+
+test("the egg banner sits on the fixed header's live bottom edge", () => {
+    /* Menu-bar icons (navbar_icons) grow the desktop header from 92px to 118px. */
+    assert.equal(dz.dzPanicBannerTop(92, "fixed"), "92px");
+    assert.equal(dz.dzPanicBannerTop(118, "fixed"), "118px");
+});
+
+test("below 980px the egg banner keeps css/nav.css's own top", () => {
+    /* The navbar scrolls with the page there, so its bottom edge can be off-screen. */
+    assert.equal(dz.dzPanicBannerTop(-300, "static"), "");
+    assert.equal(dz.dzPanicBannerTop(40, "static"), "");
+});
