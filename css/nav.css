@@ -103,7 +103,8 @@ body:has(> #dz-panic) .header__icon .dz-hal-hot {
 }
 /* Core pins the banner to top:0, over the logo bar, which would hide the eye;
    it goes just below the header instead (the navbar is 92px tall from 980px,
-   the logo bar alone 40px below that). Core's fixed green gradient starts at
+   the logo bar alone 40px below that; page.js dzTriggerLogoEasterEgg moves it
+   to the live edge when the theme settings make the fixed header taller). Core's fixed green gradient starts at
    3.3:1 under its white text, so the banner takes the success button pair.
    Core slides it down from its own height above, which at this position
    passes over the logo strip; under the fixed navbar (Bootstrap's

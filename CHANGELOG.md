@@ -4,6 +4,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+- The "everything is fine" banner no longer hides behind the menu bar when menu-bar icons are on.
+
 ## [2.11.0] - 2026-10-31
 
 - Coming back to a Domoticz tab that was in the background no longer makes the device cards flash and catch up one by one; the page now catches up at once (#274)
