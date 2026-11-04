@@ -86,10 +86,13 @@ function locationHashChanged() {
     }
 }
 
+/* sessionStorage.title is core's copy of the Location name from Setup: index.html fills it
+   at boot and Setup rewrites it on Apply. Reading it on every call lets a rename show up
+   on the next request. An empty name is a stored value core does not default. */
 function setPageTitle() {
     var pagedetect = window.location.href.split("#/")[1];
     var title = (typeof $.t !== "undefined" ? $.t(pagedetect) : pagedetect );
-    document.title = 'Domoticz - ' + title;
+    document.title = (sessionStorage.title || 'Domoticz') + ' - ' + title;
 }
 
 function removeRowDivider() {
