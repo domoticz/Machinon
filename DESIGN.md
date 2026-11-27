@@ -2098,6 +2098,7 @@ contract.
 | Export menu | card surface, `{rounded.container}` radius, `--dz-elev-card` shadow |
 | Zoom buttons | outlined style, `{rounded.interactive}` radius |
 | Zoom reset | outlined with `var(--dz-accent-red)` border |
+| Downloads (PNG/JPEG/PDF/SVG) | Same tokens as on screen, read at download time: `--dz-widget-bg` background, `--secondary-text-color` labels, legend and data labels, `--dz-body-bg` grid and legend box, `--dz-body-text` title at `--dz-text-md` 600, no point borders; series colours stay core's (`src/js/chart-export.js`) |
 
 ### Dialogs (jQuery UI)
 
