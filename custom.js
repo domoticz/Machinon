@@ -213,6 +213,7 @@ var THEME_MODULES = [
     "src/js/devices.js",
     "src/js/card-drag-handle.js",
     "src/js/floorplan-stage.js",
+    "src/js/chart-export.js",
     "src/js/menu-icons.js"
 ];
 
