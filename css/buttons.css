@@ -495,17 +495,18 @@ a.btnstyle {
     color: var(--dz-btn-primary-text);
 }
 
-/* Ensure btnstyle3 link color overrides page-content-container a color */
-.page-content-container a.btnstyle3,
-.page-content-container a.btnstyle3:link,
-.page-content-container a.btnstyle3:visited {
+/* A .btnstyle3 that is a real link keeps the button's text colour.
+   links.css sets `html a:link { color: inherit }` at (0,1,2) to neutralise
+   core's white `a:link`, and that outranks the plain .btnstyle3 colour at
+   (0,1,0): a button with an href (core's Report button on a device's Log
+   page, app/log/DeviceLog.html) took the surrounding text colour, while the
+   href-less Back button beside it kept the button colour. :any-link brings
+   this to (0,2,0), above links.css and still under any scoped button rule.
+   .btnstyle3-dis needs no entry: its colour comes from the !important
+   disabled rule at the top of this file. */
+.btnstyle3:any-link,
+.btnstyle3-sel:any-link {
     color: var(--dz-btn-primary-text);
-}
-
-.page-content-container a.btnstyle3-dis,
-.page-content-container a.btnstyle3-dis:link,
-.page-content-container a.btnstyle3-dis:visited {
-    color: var(--dz-btn-disabled-text);
 }
 
 /* Back link on core's page headers (.page-header-with-button, e.g.
