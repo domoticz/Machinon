@@ -46,7 +46,7 @@ dzPlaceSetupApply(document, !!window.matchMedia && window.matchMedia(DZ_PHONE_QU
 function setPageTitle() {
 var pagedetect = window.location.href.split("#/")[1];
 var title = (typeof $.t !== "undefined" ? $.t(pagedetect) : pagedetect );
-document.title = 'Domoticz - ' + title;
+document.title = (sessionStorage.title || 'Domoticz') + ' - ' + title;
 }
 function removeRowDivider() {
 if ($("#dashcontent").length) {
@@ -115,8 +115,18 @@ if (!ee || typeof ee.test !== "function") return false;
 if (typeof ee.isEnabled === "function" && !ee.isEnabled()) return false;
 ee.test("panic");
 var banner = document.getElementById("dz-panic");
-if (banner) banner.textContent = dzCalmBannerText(banner.textContent);
+if (banner) {
+banner.textContent = dzCalmBannerText(banner.textContent);
+var header = document.querySelector(".navbar-fixed-top");
+if (header) {
+banner.style.top = dzPanicBannerTop(header.getBoundingClientRect().bottom,
+getComputedStyle(header).position);
+}
+}
 return true;
+}
+function dzPanicBannerTop(headerBottom, headerPosition) {
+return headerPosition === "fixed" ? headerBottom + "px" : "";
 }
 function dzCalmBannerText(text) {
 return String(text).replace(/\s*\u2014\s*/g, ". ");
