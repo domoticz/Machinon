@@ -4,6 +4,8 @@ User-visible changes to the Machinon theme. New entries go under Unreleased as o
 
 ## [Unreleased]
 
+## [2.12.0] - 2026-11-27
+
 - The "everything is fine" banner no longer hides behind the menu bar when menu-bar icons are on.
 - The browser tab now keeps the Location name from Setup, for example "Domoticz PROD - Theme", instead of always saying "Domoticz" (#281)
 - On a device's Log page, the Report button's text is readable again and matches the Back button beside it (#289)
